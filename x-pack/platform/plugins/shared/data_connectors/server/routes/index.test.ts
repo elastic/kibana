@@ -821,7 +821,7 @@ describe('registerRoutes', () => {
   });
 
   describe('DELETE /api/data_connectors/:id', () => {
-    it('should delete a single data connector and related resources', async () => {
+    it('should fully delete a single data connector when all resources succeed', async () => {
       const mockConnector = {
         id: 'connector-1',
         type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -868,14 +868,123 @@ describe('registerRoutes', () => {
         DATA_CONNECTOR_SAVED_OBJECT_TYPE,
         'connector-1'
       );
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           success: true,
+          fullyDeleted: true,
         },
       });
     });
 
-    it('should handle errors when deleting a connector fails', async () => {
+    it('should partially delete a connector when some resources fail', async () => {
+      const mockConnector = {
+        id: 'connector-1',
+        type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'Test Connector',
+          type: 'notion',
+          workflowIds: ['workflow-1'],
+          toolIds: ['tool-1'],
+          kscIds: ['ksc-1'],
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+        references: [],
+      };
+
+      mockSavedObjectsClient.get.mockResolvedValue(mockConnector);
+      mockActionsClient.delete.mockRejectedValue(new Error('KSC deletion failed'));
+      mockToolRegistry.delete.mockResolvedValue(undefined);
+      mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue(undefined);
+      mockSavedObjectsClient.update.mockResolvedValue({} as any);
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'connector-1' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
+        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        'connector-1'
+      );
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        'connector-1',
+        expect.objectContaining({
+          kscIds: ['ksc-1'],
+          toolIds: [],
+          workflowIds: [],
+        })
+      );
+      expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          success: true,
+          fullyDeleted: false,
+          remaining: {
+            kscIds: ['ksc-1'],
+            toolIds: [],
+            workflowIds: [],
+          },
+        },
+      });
+    });
+
+    it('should handle idempotency when resource is already deleted', async () => {
+      const mockConnector = {
+        id: 'connector-1',
+        type: DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'Test Connector',
+          type: 'notion',
+          workflowIds: ['workflow-1'],
+          toolIds: ['tool-1'],
+          kscIds: ['ksc-1'],
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+        references: [],
+      };
+
+      mockSavedObjectsClient.get.mockResolvedValue(mockConnector);
+      mockActionsClient.delete.mockRejectedValue(new Error('404 Not Found'));
+      mockToolRegistry.delete.mockRejectedValue(new Error('Tool not found'));
+      mockWorkflowManagement.management.deleteWorkflows.mockRejectedValue(
+        new Error('Workflow does not exist')
+      );
+      mockSavedObjectsClient.delete.mockResolvedValue({});
+
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'connector-1' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      // All "not found" errors should be treated as success
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+        'connector-1'
+      );
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          success: true,
+          fullyDeleted: true,
+        },
+      });
+    });
+
+    it('should handle errors when getting a connector fails', async () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Connector not found'));
 
       registerRoutes(dependencies);

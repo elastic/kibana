@@ -172,13 +172,10 @@ async function deleteSingleResource<T>(
     await deleteFunc();
     return { success: true, id: resourceId };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    // Check if it's a 404 or "not found" error - these are OK for idempotency
-    const isNotFoundError =
-      errorMessage.includes('404') ||
-      errorMessage.includes('Not Found') ||
-      errorMessage.includes('not found') ||
-      errorMessage.includes('does not exist');
+    const errorMessage =
+      error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    const notFoundErrorMsgs: string[] = ['404', 'not found', 'does not exist'];
+    const isNotFoundError = notFoundErrorMsgs.some((msg) => errorMessage.includes(msg));
 
     if (isNotFoundError) {
       logger.debug(
@@ -323,6 +320,104 @@ async function deleteRelatedResources(
   }
 
   return result;
+}
+
+interface DeleteConnectorAndRelatedResourcesParams {
+  connector: SavedObject<DataConnectorAttributes>;
+  savedObjectsClient: SavedObjectsClientContract;
+  actionsClient: Awaited<
+    ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
+  >;
+  toolRegistry: Awaited<
+    ReturnType<DataConnectorsServerStartDependencies['onechat']['tools']['getRegistry']>
+  >;
+  workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
+  request: KibanaRequest;
+  logger: Logger;
+}
+
+interface DeleteConnectorAndRelatedResourcesResult {
+  success: boolean;
+  fullyDeleted: boolean;
+  remaining?: {
+    kscIds: string[];
+    toolIds: string[];
+    workflowIds: string[];
+  };
+}
+
+/**
+ * Deletes a data connector and all its related resources (stack connectors, tools, workflows)
+ * This function is idempotent and handles partial failures by updating the saved object with remaining resources
+ */
+async function deleteConnectorAndRelatedResources(
+  params: DeleteConnectorAndRelatedResourcesParams
+): Promise<DeleteConnectorAndRelatedResourcesResult> {
+  const {
+    connector,
+    savedObjectsClient,
+    actionsClient,
+    toolRegistry,
+    workflowManagement,
+    request,
+    logger,
+  } = params;
+
+  const { kscIds, toolIds, workflowIds } = connector.attributes;
+  const spaceId = getSpaceId(savedObjectsClient);
+
+  // Delete all related resources
+  const deletionResult = await deleteRelatedResources({
+    kscIds,
+    toolIds,
+    workflowIds,
+    spaceId,
+    request,
+    logger,
+    workflowManagement,
+    actionsClient,
+    toolRegistry,
+  });
+
+  // Check if all deletions succeeded
+  if (deletionResult.allSucceeded) {
+    // All resources deleted successfully - delete the saved object
+    await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id);
+    logger.info(`Fully deleted data connector ${connector.id}`);
+
+    return {
+      success: true,
+      fullyDeleted: true,
+    };
+  } else {
+    // Some resources failed to delete - update SO with remaining (failed) resources
+    const remainingResources = {
+      kscIds: deletionResult.failedKscIds,
+      toolIds: deletionResult.failedToolIds,
+      workflowIds: deletionResult.failedWorkflowIds,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await savedObjectsClient.update(
+      DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+      connector.id,
+      remainingResources
+    );
+
+    logger.warn(
+      `Partially deleted data connector ${connector.id}. Remaining resources: ${deletionResult.failedKscIds.length} KSCs, ${deletionResult.failedToolIds.length} tools, ${deletionResult.failedWorkflowIds.length} workflows`
+    );
+
+    return {
+      success: true,
+      fullyDeleted: false,
+      remaining: {
+        kscIds: deletionResult.failedKscIds,
+        toolIds: deletionResult.failedToolIds,
+        workflowIds: deletionResult.failedWorkflowIds,
+      },
+    };
+  }
 }
 
 /**
@@ -568,51 +663,26 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const [, { actions, onechat }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await onechat.tools.getRegistry({ request });
-        const spaceId = getSpaceId(savedObjectsClient);
 
         let fullyDeletedCount = 0;
         let partiallyDeletedCount = 0;
 
         // Process each connector individually to handle partial failures
         for (const connector of connectors) {
-          const { kscIds, toolIds, workflowIds } = connector.attributes;
-
-          const deletionResult = await deleteRelatedResources({
-            kscIds,
-            toolIds,
-            workflowIds,
-            spaceId,
-            request,
-            logger,
-            workflowManagement,
+          const result = await deleteConnectorAndRelatedResources({
+            connector,
+            savedObjectsClient,
             actionsClient,
             toolRegistry,
+            workflowManagement,
+            request,
+            logger,
           });
 
-          // Option 2: Check if all deletions succeeded for this connector
-          if (deletionResult.allSucceeded) {
-            // All resources deleted successfully - delete the saved object
-            await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id);
+          if (result.fullyDeleted) {
             fullyDeletedCount++;
-            logger.info(`Fully deleted data connector ${connector.id}`);
           } else {
-            // Some resources failed to delete - update SO with remaining resources
-            const remainingResources = {
-              kscIds: deletionResult.failedKscIds,
-              toolIds: deletionResult.failedToolIds,
-              workflowIds: deletionResult.failedWorkflowIds,
-              updatedAt: new Date().toISOString(),
-            };
-
-            await savedObjectsClient.update(
-              DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-              connector.id,
-              remainingResources
-            );
             partiallyDeletedCount++;
-            logger.warn(
-              `Partially deleted data connector ${connector.id}. Remaining resources: ${deletionResult.failedKscIds.length} KSCs, ${deletionResult.failedToolIds.length} tools, ${deletionResult.failedWorkflowIds.length} workflows`
-            );
           }
         }
 
@@ -653,70 +723,24 @@ export function registerRoutes(dependencies: RouteDependencies) {
           request.params.id
         );
 
-        // Get resource IDs from the saved object
-        const { kscIds, toolIds, workflowIds } = savedObject.attributes;
-
-        // Delete all related resources
+        // Delete the connector and all related resources
         const [, { actions, onechat }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const toolRegistry = await onechat.tools.getRegistry({ request });
-        const spaceId = getSpaceId(savedObjectsClient);
 
-        const deletionResult = await deleteRelatedResources({
-          kscIds,
-          toolIds,
-          workflowIds,
-          spaceId,
-          request,
-          logger,
-          workflowManagement,
+        const result = await deleteConnectorAndRelatedResources({
+          connector: savedObject,
+          savedObjectsClient,
           actionsClient,
           toolRegistry,
+          workflowManagement,
+          request,
+          logger,
         });
 
-        // Option 2: Check if all deletions succeeded
-        if (deletionResult.allSucceeded) {
-          // All resources deleted successfully - delete the saved object
-          await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
-          logger.info(`Fully deleted data connector ${savedObject.id}`);
-
-          return response.ok({
-            body: {
-              success: true,
-              fullyDeleted: true,
-            },
-          });
-        } else {
-          // Some resources failed to delete - update SO with only the remaining (failed) resources
-          const remainingResources = {
-            kscIds: deletionResult.failedKscIds,
-            toolIds: deletionResult.failedToolIds,
-            workflowIds: deletionResult.failedWorkflowIds,
-            updatedAt: new Date().toISOString(),
-          };
-
-          await savedObjectsClient.update(
-            DATA_CONNECTOR_SAVED_OBJECT_TYPE,
-            savedObject.id,
-            remainingResources
-          );
-
-          logger.warn(
-            `Partially deleted data connector ${savedObject.id}. Remaining resources: ${deletionResult.failedKscIds.length} KSCs, ${deletionResult.failedToolIds.length} tools, ${deletionResult.failedWorkflowIds.length} workflows`
-          );
-
-          return response.ok({
-            body: {
-              success: true,
-              fullyDeleted: false,
-              remaining: {
-                kscIds: deletionResult.failedKscIds,
-                toolIds: deletionResult.failedToolIds,
-                workflowIds: deletionResult.failedWorkflowIds,
-              },
-            },
-          });
-        }
+        return response.ok({
+          body: result,
+        });
       } catch (error) {
         logger.error(`Failed to delete connector: ${(error as Error).message}`);
         return createErrorResponse(response, 'Failed to delete connector', error as Error);
