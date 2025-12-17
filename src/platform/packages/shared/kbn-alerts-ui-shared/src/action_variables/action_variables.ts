@@ -214,6 +214,16 @@ export const AlertProvidedActionVariableDescriptions: Record<
       defaultMessage: 'The number of consecutive runs that meet the rule conditions.',
     }),
   },
+  rule: {
+    description: i18n.translate('alertsUIShared.actionVariables.ruleLabel', {
+      defaultMessage: 'The rule object.',
+    }),
+  },
+  status: {
+    description: i18n.translate('alertsUIShared.actionVariables.statusLabel', {
+      defaultMessage: 'The status of the alert.',
+    }),
+  },
 });
 
 export const SummarizedAlertProvidedActionVariableDescriptions: Record<
