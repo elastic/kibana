@@ -43,6 +43,7 @@ export const useToolHealth = ({ toolId }: UseToolHealthOptions) => {
     queryKey: queryKeys.tools.health.byId(toolId),
     queryFn: () => toolsService.getToolHealth({ toolId }),
     enabled: !!toolId,
+    retry: false,
   });
 
   return {
@@ -61,6 +62,7 @@ export const useMcpToolsHealth = ({ enabled = true }: { enabled?: boolean } = {}
     queryKey: queryKeys.tools.health.mcp(),
     queryFn: () => toolsService.listMcpToolsHealth(),
     enabled,
+    retry: false,
   });
 
   return {

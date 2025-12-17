@@ -34,7 +34,7 @@ export const McpReadOnlyFields = ({
     name: ['connectorId', 'mcpToolName', 'toolId'],
   });
 
-  const { toolHealth } = useToolHealth({ toolId });
+  const { toolHealth, isLoading: isLoadingToolHealth } = useToolHealth({ toolId });
 
   const {
     connector,
@@ -57,7 +57,7 @@ export const McpReadOnlyFields = ({
   } = useListMcpTools({ connectorId });
 
   useEffect(() => {
-    if (isLoadingConnector || isLoadingMcpTools) {
+    if (isLoadingConnector || isLoadingMcpTools || isLoadingToolHealth) {
       return;
     }
 
@@ -107,6 +107,7 @@ export const McpReadOnlyFields = ({
     isLoadingMcpToolsError,
     isLoadingConnector,
     isLoadingMcpTools,
+    isLoadingToolHealth,
     setMcpHealthStatus,
     setError,
     clearErrors,
