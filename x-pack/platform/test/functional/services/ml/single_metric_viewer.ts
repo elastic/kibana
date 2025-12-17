@@ -11,13 +11,12 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningSingleMetricViewerProvider(
-  { getService, getPageObjects }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
 
   return {
     async assertSingleMetricViewerEmptyListMessageExsist() {
@@ -125,6 +124,7 @@ export function MachineLearningSingleMetricViewerProvider(
     async openAnomalyExplorer() {
       await testSubjects.click('~mlMainTab & ~anomalyExplorer');
       await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('~mlMainTab & ~anomalyExplorer & ~selected');
         await testSubjects.existOrFail('mlPageAnomalyExplorer');
       });
     },
