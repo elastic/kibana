@@ -21,7 +21,8 @@
     "@kbn/test",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-http-common",
-    "@kbn/ml-plugin"
+    "@kbn/ml-plugin",
+    "@kbn/onechat-server"
   ]
 }
 
