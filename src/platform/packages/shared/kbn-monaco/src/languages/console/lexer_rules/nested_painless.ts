@@ -34,7 +34,6 @@ export const buildPainlessStartRule = (painlessRoot: string = 'painless_root') =
  * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
  */
 export const buildPainlessRules = (painlessRoot: string = 'painless_root') => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { root, comment, string_dq, string_sq } = painlessLexerRules.tokenizer;
   return {
     [painlessRoot]: [
