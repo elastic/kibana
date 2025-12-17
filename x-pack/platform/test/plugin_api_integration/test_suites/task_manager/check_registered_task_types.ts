@@ -224,6 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
         'session_cleanup',
         'slo:bulk-delete-task',
         'slo:temp-summary-cleanup-task',
+        'streams_feature_identification',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
@@ -231,7 +232,6 @@ export default function ({ getService }: FtrProviderContext) {
         'workflow:resume',
         'workflow:run',
         'workflow:scheduled',
-        'streams_feature_identification',
       ]);
     });
   });
