@@ -68,6 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.perPage).to.eql(20);
           expect(response.total).to.be.greaterThan(0);
           expect(response.results).to.be.an('array');
+          expect(response.results.every((t) => t.templateId)).to.be(true);
         });
 
         it('returns templates with custom page and perPage', async () => {
@@ -77,6 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.perPage).to.eql(2);
           expect(response.total).to.be.greaterThan(0);
           expect(response.results.length).to.eql(2);
+          expect(response.results.every((t) => t.templateId)).to.be(true);
         });
 
         it('returns second page of results', async () => {
@@ -148,14 +150,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await sloApi.findTemplates({ search: 'Alpha' }, adminRoleAuthc);
 
           expect(response.total).to.eql(1);
-          const names = response.results.map((t) => t.name);
-          expect(names.some((name) => name?.includes('Alpha'))).to.be(true);
+          expect(response.results[0].templateId).to.eql(TEMPLATE_IDS[0]);
+          expect(response.results[0].name).to.eql('Alpha Service Availability');
         });
 
         it('finds templates with partial name match', async () => {
           const response = await sloApi.findTemplates({ search: 'Service' }, adminRoleAuthc);
 
           expect(response.total).to.eql(3);
+          const templateIds = response.results.map((t) => t.templateId);
+          expect(TEMPLATE_IDS.every((id) => templateIds.includes(id))).to.be(true);
           const names = response.results.map((t) => t.name);
           expect(names.every((name) => name?.includes('Service'))).to.be(true);
         });
@@ -219,6 +223,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await sloApi.findTemplates({ tags: ['production'] }, adminRoleAuthc);
 
           expect(response.total).to.eql(2);
+          const templateIds = response.results.map((t) => t.templateId);
+          expect(templateIds).to.contain(TEMPLATE_IDS[0]);
+          expect(templateIds).to.contain(TEMPLATE_IDS[2]);
           const allHaveTag = response.results.every((t) => t.tags?.includes('production'));
           expect(allHaveTag).to.be(true);
         });
@@ -298,10 +305,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           expect(response.total).to.eql(1);
-          const allMatch = response.results.every(
-            (t) => t.name?.includes('API') && t.tags?.includes('production')
-          );
-          expect(allMatch).to.be(true);
+          expect(response.results[0].templateId).to.eql(TEMPLATE_IDS[0]);
+          expect(response.results[0].name).to.eql('API Gateway Production');
+          expect(response.results[0].tags).to.contain('production');
         });
       });
 

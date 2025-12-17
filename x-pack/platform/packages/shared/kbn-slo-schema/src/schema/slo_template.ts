@@ -10,16 +10,21 @@ import { budgetingMethodSchema, objectiveSchema, optionalSettingsSchema, tagsSch
 import { timeWindowSchema } from './time_window';
 import { indicatorSchema } from './indicators';
 
-const sloTemplateSchema = t.partial({
-  name: t.string,
-  description: t.string,
-  indicator: indicatorSchema,
-  budgetingMethod: budgetingMethodSchema,
-  objective: objectiveSchema,
-  timeWindow: timeWindowSchema,
-  tags: tagsSchema,
-  settings: optionalSettingsSchema,
-});
+const sloTemplateSchema = t.intersection([
+  t.type({
+    templateId: t.string,
+  }),
+  t.partial({
+    name: t.string,
+    description: t.string,
+    indicator: indicatorSchema,
+    budgetingMethod: budgetingMethodSchema,
+    objective: objectiveSchema,
+    timeWindow: timeWindowSchema,
+    tags: tagsSchema,
+    settings: optionalSettingsSchema,
+  }),
+]);
 
 // We really can't control what the integration are pushing into the saved object...
 const storedSloTemplateSchema = t.record(t.string, t.unknown);

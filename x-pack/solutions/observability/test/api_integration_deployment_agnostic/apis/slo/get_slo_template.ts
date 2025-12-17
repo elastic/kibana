@@ -76,6 +76,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('returns all valid fields', async () => {
           const template = await sloApi.getTemplate(TEMPLATE_ID, adminRoleAuthc);
 
+          expect(template.templateId).to.eql(TEMPLATE_ID);
           expect(template.name).to.eql('Full Template');
           expect(template.description).to.eql('A complete SLO template');
           expect(template.budgetingMethod).to.eql('occurrences');
@@ -145,6 +146,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('returns template with timeslices objective fields', async () => {
           const template = await sloApi.getTemplate(TEMPLATE_ID, adminRoleAuthc);
 
+          expect(template.templateId).to.eql(TEMPLATE_ID);
           expect(template.name).to.eql('Timeslices Template');
           expect(template.budgetingMethod).to.eql('timeslices');
           expect(template.objective).to.eql({
@@ -181,6 +183,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('returns only the name field', async () => {
           const template = await sloApi.getTemplate(TEMPLATE_ID, adminRoleAuthc);
 
+          expect(template.templateId).to.eql(TEMPLATE_ID);
           expect(template.name).to.eql('Name Only Template');
           expect(template.description).to.be(undefined);
           expect(template.indicator).to.be(undefined);
@@ -226,6 +229,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('returns name and indicator fields', async () => {
           const template = await sloApi.getTemplate(TEMPLATE_ID, adminRoleAuthc);
 
+          expect(template.templateId).to.eql(TEMPLATE_ID);
           expect(template.name).to.eql('Name and Indicator Template');
           expect(template.indicator).to.eql({
             type: 'sli.kql.custom',
@@ -287,11 +291,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('returns only valid fields, filtering out invalid ones', async () => {
           const template = await sloApi.getTemplate(TEMPLATE_ID, adminRoleAuthc);
 
-          // Valid fields should be present
+          expect(template.templateId).to.eql(TEMPLATE_ID);
           expect(template.name).to.eql('Valid Name');
           expect(template.description).to.eql('Valid description');
 
-          // Invalid fields should be filtered out
           expect(template.indicator).to.be(undefined);
           expect(template.budgetingMethod).to.be(undefined);
           expect(template.objective).to.be(undefined);
@@ -323,8 +326,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
         });
 
-        it('returns an empty object when no fields are valid', async () => {
+        it('returns only templateId when no other fields are valid', async () => {
           const template = await sloApi.getTemplate(TEMPLATE_ID, adminRoleAuthc);
+
+          expect(template.templateId).to.eql(TEMPLATE_ID);
 
           expect(template.name).to.be(undefined);
           expect(template.description).to.be(undefined);
@@ -334,7 +339,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(template.timeWindow).to.be(undefined);
           expect(template.tags).to.be(undefined);
           expect(template.settings).to.be(undefined);
-          expect(Object.keys(template).length).to.eql(0);
+          expect(Object.keys(template).length).to.eql(1);
         });
       });
 

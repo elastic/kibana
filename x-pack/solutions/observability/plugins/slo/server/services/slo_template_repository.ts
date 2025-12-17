@@ -39,7 +39,7 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
     try {
       const response = await this.soClient.get<StoredSLOTemplate>(SO_SLO_TEMPLATE_TYPE, templateId);
 
-      return this.toSloTemplate(response.attributes) ?? {};
+      return this.toSloTemplate(response.id, response.attributes) ?? { templateId };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw new SLOTemplateNotFound(`SLO Template with id [${templateId}] not found`);
@@ -68,16 +68,16 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
       perPage: response.per_page,
       page: response.page,
       results: response.saved_objects
-        .map((so) => this.toSloTemplate(so.attributes))
+        .map((so) => this.toSloTemplate(so.id, so.attributes))
         .filter((template) => this.isSLOTemplate(template)),
     };
   }
 
   // We use .decode() instead of .is() when objects contains durationType fields
   // stored as "1h", decoded as { unit: "h", value: 1 }
-  private toSloTemplate(stored: StoredSLOTemplate): SLOTemplate | undefined {
+  private toSloTemplate(id: string, stored: StoredSLOTemplate): SLOTemplate | undefined {
     try {
-      const template: SLOTemplate = {};
+      const template: SLOTemplate = { templateId: id };
       if (stored.name && typeof stored.name === 'string') {
         template.name = stored.name;
       }
