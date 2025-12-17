@@ -294,10 +294,21 @@ export function registerRoutes(
           `Found ${connectors.length} data connectors and ${kscIds.length} stack connectors to delete.`
         );
 
-        const [, { actions }] = await getStartServices();
+        const [, { actions, onechat }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
         const deleteKscPromises = kscIds.map((kscId) => actionsClient.delete({ id: kscId }));
         await Promise.all(deleteKscPromises);
+
+        const toolIds: string[] = connectors.flatMap((connector) => connector.attributes.toolIds);
+        const toolRegistry = await onechat.tools.getRegistry({ request });
+        const deleteToolPromises = toolIds.map((toolId) => toolRegistry.delete(toolId));
+        await Promise.all(deleteToolPromises);
+
+        const workflowIds: string[] = connectors.flatMap(
+          (connector) => connector.attributes.workflowIds
+        );
+        const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+        await workflowManagement.management.deleteWorkflows(workflowIds, spaceId, request);
 
         const deletePromises = connectors.map((connector) =>
           savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, connector.id)
@@ -336,6 +347,7 @@ export function registerRoutes(
     },
     async (context, request, response) => {
       const coreContext = await context.core;
+      const [, { onechat }] = await getStartServices();
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
@@ -349,6 +361,16 @@ export function registerRoutes(
         const actionsClient = await actions.getActionsClientWithRequest(request);
         kscIds.forEach((kscId) => actionsClient.delete({ id: kscId }));
         logger.info(`Successfully deleted Kibana stack connectors: ${kscIds.join(', ')}`);
+
+        const toolIds: string[] = savedObject.attributes.toolIds;
+        const toolRegistry = await onechat.tools.getRegistry({ request });
+        toolIds.forEach((toolId) => toolRegistry.delete(toolId));
+        logger.info(`Successfully deleted tools: ${toolIds.join(', ')}`);
+
+        const workflowIds: string[] = savedObject.attributes.workflowIds;
+        const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+        await workflowManagement.management.deleteWorkflows(workflowIds, spaceId, request);
+        logger.info(`Successfully deleted workflows: ${workflowIds.join(', ')}`);
 
         await savedObjectsClient.delete(DATA_CONNECTOR_SAVED_OBJECT_TYPE, savedObject.id);
         logger.info(`Successfully deleted data connector ${savedObject.id}`);
