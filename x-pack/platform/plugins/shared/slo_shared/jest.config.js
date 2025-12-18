@@ -12,4 +12,3 @@ module.exports = {
   rootDir: path.resolve(__dirname, '../../../../..'),
   roots: ['<rootDir>/x-pack/platform/plugins/shared/slo_shared'],
 };
-
