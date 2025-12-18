@@ -91,7 +91,8 @@ async function inferenceEndpointSuggestionResolver(
         return endpoint.task_type === hint.constraints?.task_type;
       }) ?? [];
 
-    return inferenceEnpoints.map(createInferenceEndpointToCompletionItem).map((item) => {
+    return inferenceEnpoints.map((inferenceEndpoint) => {
+      const item = createInferenceEndpointToCompletionItem(inferenceEndpoint);
       return {
         ...item,
         detail: '',
