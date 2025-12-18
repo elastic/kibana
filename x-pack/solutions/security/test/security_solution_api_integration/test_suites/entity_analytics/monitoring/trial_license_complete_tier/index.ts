@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Privilege Monitoring', function () {
+    loadTestFile(require.resolve('./monitoring_entity_source_crud'));
     // Split engine tests into separate files for better isolation and reduced flakiness
     loadTestFile(require.resolve('./engine_health'));
     loadTestFile(require.resolve('./engine_init'));
@@ -24,6 +25,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./privileged_users/task'));
     loadTestFile(require.resolve('./privileged_users/migrations'));
     loadTestFile(require.resolve('./privileged_users/cross_source_sync'));
-    loadTestFile(require.resolve('./monitoring_entity_source_crud'));
   });
 }
