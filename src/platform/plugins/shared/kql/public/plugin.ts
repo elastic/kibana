@@ -17,12 +17,12 @@ import { createQueryStringInput } from './components/query_string_input/get_quer
 import type { QueryStringInputProps } from './components/query_string_input/query_string_input';
 import { AutocompleteService, type AutocompleteStart } from './autocomplete/autocomplete_service';
 
-interface KqlPluginSetupDependencies {
+export interface KqlPluginSetupDependencies {
   data: DataPublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
-interface KqlPluginStartDependencies {
+export interface KqlPluginStartDependencies {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
 }
@@ -45,7 +45,10 @@ export class KqlPlugin implements Plugin<{}, KqlPluginStart> {
     this.storage = new Storage(window.localStorage);
   }
 
-  public setup(core: CoreSetup, { data, usageCollection }: KqlPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<KqlPluginSetupDependencies, KqlPluginStart>,
+    { data, usageCollection }: KqlPluginSetupDependencies
+  ) {
     const { query } = data;
     return {
       autocomplete: this.autocomplete.setup(core, {

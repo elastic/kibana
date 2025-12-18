@@ -24,6 +24,7 @@ import {
   KUERY_LANGUAGE_NAME,
   setupKqlQuerySuggestionProvider,
 } from './providers/kql_query_suggestion';
+import type { KqlPluginStart, KqlPluginSetupDependencies } from '../plugin';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];
@@ -50,7 +51,7 @@ export class AutocompleteService {
 
   /** @public **/
   public setup(
-    core: CoreSetup<object, { autocomplete: AutocompleteStart }>,
+    core: CoreSetup<KqlPluginSetupDependencies, KqlPluginStart>,
     {
       timefilter,
       usageCollection,
