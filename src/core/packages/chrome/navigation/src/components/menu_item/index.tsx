@@ -156,7 +156,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       ${textStyles}
       overflow: hidden;
       max-width: 100%;
-      padding: 0 ${euiTheme.size.s};
+      padding: 0 6px;
     `;
 
     const content = (
