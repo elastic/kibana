@@ -261,76 +261,6 @@ function buildRowsAPI(column: ColumnState): APIRowProps {
 const isMetricColumn = (col: ColumnState) =>
   ('isMetric' in col && col.isMetric) || (!('isMetric' in col) && !col.isTransposed);
 
-function parseColumnIndex(columnId: string, prefix: string): number | undefined {
-  if (!columnId.startsWith(prefix)) {
-    return undefined;
-  }
-  const index = parseInt(columnId.slice(prefix.length), 10);
-  return isNaN(index) ? undefined : index;
-}
-
-function parseSplitMetricsBySorting(
-  columnId: string,
-  metricColumnIds: (string | undefined)[]
-): { values: string[]; metricIndex: number } | undefined {
-  // Format: value1---value2---...---metricColumnId
-  const parts = columnId.split('---');
-  if (parts.length < 2) {
-    return undefined;
-  }
-
-  const metricColumnId = parts[parts.length - 1];
-  const metricIndex = metricColumnIds.indexOf(metricColumnId);
-  if (metricIndex === -1) {
-    return undefined;
-  }
-
-  return {
-    values: parts.slice(0, -1),
-    metricIndex,
-  };
-}
-
-function parseSortingToAPI(
-  sorting: DatatableVisualizationState['sorting'],
-  columns: ColumnState[]
-): DatatableState['sorting'] | {} {
-  if (!sorting?.columnId || sorting.direction === 'none') {
-    return {};
-  }
-
-  const { columnId, direction } = sorting;
-
-  // Split_metrics_by sorting (contains ---)
-  if (columnId.includes('---')) {
-    const metricColumnIds = columns.filter((col) => isMetricColumn(col)).map((col) => col.columnId);
-
-    const parsed = parseSplitMetricsBySorting(columnId, metricColumnIds);
-    return parsed
-      ? {
-          by: 'split_metrics_by',
-          metric_index: parsed.metricIndex,
-          values: parsed.values,
-          direction,
-        }
-      : {};
-  }
-
-  // Metric column sorting
-  const metricIndex = parseColumnIndex(columnId, `${getAccessorName(METRIC_ACCESSOR_PREFIX)}_`);
-  if (metricIndex !== undefined) {
-    return { by: 'metric', index: metricIndex, direction };
-  }
-
-  // Row column sorting
-  const rowIndex = parseColumnIndex(columnId, `${getAccessorName(ROW_ACCESSOR_PREFIX)}_`);
-  if (rowIndex !== undefined) {
-    return { by: 'row', index: rowIndex, direction };
-  }
-
-  return {};
-}
-
 type DatatableColumnsNoESQL = Pick<
   DatatableStateNoESQL,
   'metrics' | 'rows' | 'split_metrics_by' | 'sorting'
@@ -423,6 +353,76 @@ function convertDatatableColumnsToAPI(
   };
 }
 
+function parseColumnIndex(columnId: string, prefix: string): number | undefined {
+  if (!columnId.startsWith(prefix)) {
+    return undefined;
+  }
+  const index = parseInt(columnId.slice(prefix.length), 10);
+  return isNaN(index) ? undefined : index;
+}
+
+function parseSplitMetricsBySorting(
+  columnId: string,
+  metricColumnIds: (string | undefined)[]
+): { values: string[]; metricIndex: number } | undefined {
+  // Format: value1---value2---...---metricColumnId
+  const parts = columnId.split('---');
+  if (parts.length < 2) {
+    return undefined;
+  }
+
+  const metricColumnId = parts[parts.length - 1];
+  const metricIndex = metricColumnIds.indexOf(metricColumnId);
+  if (metricIndex === -1) {
+    return undefined;
+  }
+
+  return {
+    values: parts.slice(0, -1),
+    metricIndex,
+  };
+}
+
+function parseSortingToAPI(
+  sorting: DatatableVisualizationState['sorting'],
+  columns: ColumnState[]
+): DatatableState['sorting'] | undefined {
+  if (!sorting?.columnId || sorting.direction === 'none') {
+    return;
+  }
+
+  const { columnId, direction } = sorting;
+
+  // Split_metrics_by sorting (contains ---)
+  if (columnId.includes('---')) {
+    const metricColumnIds = columns.filter((col) => isMetricColumn(col)).map((col) => col.columnId);
+
+    const parsed = parseSplitMetricsBySorting(columnId, metricColumnIds);
+    return parsed
+      ? {
+          by: 'split_metrics_by',
+          metric_index: parsed.metricIndex,
+          values: parsed.values,
+          direction,
+        }
+      : undefined;
+  }
+
+  // Metric column sorting
+  const metricIndex = parseColumnIndex(columnId, `${getAccessorName(METRIC_ACCESSOR_PREFIX)}_`);
+  if (metricIndex !== undefined) {
+    return { by: 'metric', index: metricIndex, direction };
+  }
+
+  // Row column sorting
+  const rowIndex = parseColumnIndex(columnId, `${getAccessorName(ROW_ACCESSOR_PREFIX)}_`);
+  if (rowIndex !== undefined) {
+    return { by: 'row', index: rowIndex, direction };
+  }
+
+  return;
+}
+
 function convertAppearanceToAPIFormat(
   visualization: DatatableVisualizationState
 ): Pick<DatatableState, 'density' | 'paging'> | {} {
@@ -457,6 +457,8 @@ function convertAppearanceToAPIFormat(
     };
   }
 
+  const sortingAPI = parseSortingToAPI(sorting, columns);
+
   return {
     ...(rowHeight || headerRowHeight || density
       ? {
@@ -471,7 +473,7 @@ function convertAppearanceToAPIFormat(
         }
       : {}),
     ...(paging && paging.enabled && paging.size ? { paging: paging.size } : {}),
-    ...parseSortingToAPI(sorting, columns),
+    ...(sortingAPI ? { sorting: sortingAPI } : {}),
   };
 }
 
