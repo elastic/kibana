@@ -119,23 +119,23 @@ describe('WiredAdvancedView', () => {
   const createMockDefinition = (
     streamName: string = 'logs.test'
   ): Streams.WiredStream.GetResponse =>
-  ({
-    stream: {
-      name: streamName,
-      description: '',
-      ingest: {
-        processing: { steps: [] },
-        routing: [],
-        lifecycle: { dsl: { data_retention: '7d' } },
-        settings: {},
+    ({
+      stream: {
+        name: streamName,
+        description: '',
+        ingest: {
+          processing: { steps: [] },
+          routing: [],
+          lifecycle: { dsl: { data_retention: '7d' } },
+          settings: {},
+        },
       },
-    },
-    effective_lifecycle: { dsl: { data_retention: '7d' } },
-    effective_settings: {
-      'index.refresh_interval': { value: '1s' },
-    },
-    privileges: { manage: true, simulate: true, read: true },
-  } as unknown as Streams.WiredStream.GetResponse);
+      effective_lifecycle: { dsl: { data_retention: '7d' } },
+      effective_settings: {
+        'index.refresh_interval': { value: '1s' },
+      },
+      privileges: { manage: true, simulate: true, read: true },
+    } as unknown as Streams.WiredStream.GetResponse);
 
   const mockRefreshDefinition = jest.fn();
 

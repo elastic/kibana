@@ -154,23 +154,23 @@ describe('ClassicAdvancedView', () => {
   const createMockDefinition = (
     streamName: string = 'logs-test-default'
   ): Streams.ClassicStream.GetResponse =>
-  ({
-    stream: {
-      name: streamName,
-      description: '',
-      ingest: {
-        processing: { steps: [] },
-        lifecycle: { dsl: { data_retention: '7d' } },
-        settings: {},
+    ({
+      stream: {
+        name: streamName,
+        description: '',
+        ingest: {
+          processing: { steps: [] },
+          lifecycle: { dsl: { data_retention: '7d' } },
+          settings: {},
+        },
       },
-    },
-    effective_lifecycle: { dsl: { data_retention: '7d' } },
-    effective_settings: {
-      'index.refresh_interval': { value: '1s' },
-    },
-    privileges: { manage: true, simulate: true, read: true },
-    data_stream_exists: true,
-  } as unknown as Streams.ClassicStream.GetResponse);
+      effective_lifecycle: { dsl: { data_retention: '7d' } },
+      effective_settings: {
+        'index.refresh_interval': { value: '1s' },
+      },
+      privileges: { manage: true, simulate: true, read: true },
+      data_stream_exists: true,
+    } as unknown as Streams.ClassicStream.GetResponse);
 
   const mockRefreshDefinition = jest.fn();
 
