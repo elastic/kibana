@@ -7,10 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLParams } from '@kbn/response-ops-rule-params/esql';
-import { wrapAsyncSearchClient } from '../lib/wrap_async_search_client';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { catchError, filter, lastValueFrom, map, throwError } from 'rxjs';
 import { parseDuration } from '../lib';
 
 export async function executeEsqlRule({
@@ -30,43 +31,54 @@ export async function executeEsqlRule({
   const dateEnd = new Date().toISOString();
   const dateStart = new Date(Date.now() - windowMs).toISOString();
 
-  const asyncSearchClient = wrapAsyncSearchClient<ESQLSearchParams>({
-    strategy: ESQL_ASYNC_SEARCH_STRATEGY,
-    client: searchClient,
-    abortController,
-    logger,
-    rule: {
-      name: rule.name ?? '',
-      id: rule.id,
-      alertTypeId: rule.alertTypeId,
-      spaceId: rule.spaceId,
-    },
-  });
-
-  return await asyncSearchClient.search({
-    request: {
-      params: {
-        query: params.esqlQuery.esql,
-        // Keep the async search around briefly; we may add paging/cursoring later.
-        keep_alive: '10m',
-        wait_for_completion_timeout: '10m',
-        filter: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  [params.timeField]: {
-                    lte: dateEnd,
-                    gt: dateStart,
-                    format: 'strict_date_optional_time',
-                  },
+  const request: IKibanaSearchRequest<ESQLSearchParams> = {
+    params: {
+      query: params.esqlQuery.esql,
+      filter: {
+        bool: {
+          filter: [
+            {
+              range: {
+                [params.timeField]: {
+                  lte: dateEnd,
+                  gt: dateStart,
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
-          },
+            },
+          ],
         },
-      } as unknown as ESQLSearchParams,
-    } as unknown as { params: ESQLSearchParams },
-    options: {},
-  });
+      },
+    } as unknown as ESQLSearchParams,
+  };
+
+  logger.debug(
+    () =>
+      `executing ES|QL query for rule ${rule.alertTypeId}:${rule.id} in space ${
+        rule.spaceId
+      } - ${JSON.stringify(request)}`
+  );
+
+  return await lastValueFrom(
+    searchClient
+      .search<IKibanaSearchRequest<ESQLSearchParams>, IKibanaSearchResponse<ESQLSearchResponse>>(
+        request,
+        {
+          strategy: ESQL_SEARCH_STRATEGY,
+          abortSignal: abortController.signal,
+        }
+      )
+      .pipe(
+        catchError((error) => {
+          if (abortController.signal.aborted) {
+            return throwError(
+              () => new Error('Search has been aborted due to cancelled execution')
+            );
+          }
+          return throwError(() => error);
+        }),
+        filter((response) => !isRunningResponse(response)),
+        map((response) => response.rawResponse)
+      )
+  );
 }
