@@ -38,8 +38,6 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
   const router = useStreamsAppRouter();
 
-  const isIlmAvailable = !!indexLifecycleManagement;
-
   const templatesListFetch = useStreamsAppFetch(async () => {
     const response = await indexManagement.apiService.getIndexTemplates({ signal });
 
@@ -194,7 +192,6 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       onValidate={handleValidate}
       getIlmPolicy={getIlmPolicy}
       getSimulatedTemplate={getSimulatedTemplate}
-      showDataRetention={isIlmAvailable}
     />
   );
 }

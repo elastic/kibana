@@ -89,13 +89,6 @@ interface CreateClassicStreamFlyoutProps {
    * If provided, the resolved template data will be used in the template details section.
    */
   getSimulatedTemplate?: SimulatedTemplateFetcher;
-  /**
-   * Whether to show data retention information.
-   * If false, data retention details (ILM policies and retention periods) will be hidden
-   * in both the template selection step and the confirmation step.
-   * @default true
-   */
-  showDataRetention?: boolean;
 }
 
 export const CreateClassicStreamFlyout = ({
@@ -109,7 +102,6 @@ export const CreateClassicStreamFlyout = ({
   onValidate,
   getIlmPolicy,
   getSimulatedTemplate,
-  showDataRetention = true,
 }: CreateClassicStreamFlyoutProps) => {
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
     ClassicStreamStep.SELECT_TEMPLATE
@@ -233,7 +225,6 @@ export const CreateClassicStreamFlyout = ({
             onCreateTemplate={onCreateTemplate}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
             onRetryLoadTemplates={onRetryLoadTemplates}
-            showDataRetention={showDataRetention}
           />
         );
 
@@ -252,7 +243,6 @@ export const CreateClassicStreamFlyout = ({
             conflictingIndexPattern={conflictingIndexPattern}
             getIlmPolicy={getIlmPolicy}
             getSimulatedTemplate={getSimulatedTemplate}
-            showDataRetention={showDataRetention}
           />
         );
       }

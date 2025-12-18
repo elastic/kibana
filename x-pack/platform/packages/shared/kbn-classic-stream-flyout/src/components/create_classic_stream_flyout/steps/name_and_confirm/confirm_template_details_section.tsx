@@ -123,7 +123,6 @@ interface ConfirmTemplateDetailsSectionProps {
   template: IndexTemplate;
   getIlmPolicy?: IlmPolicyFetcher;
   getSimulatedTemplate?: SimulatedTemplateFetcher;
-  showDataRetention?: boolean;
 }
 
 const useStyles = () => {
@@ -155,7 +154,6 @@ export const ConfirmTemplateDetailsSection = ({
   template,
   getIlmPolicy,
   getSimulatedTemplate,
-  showDataRetention = true,
 }: ConfirmTemplateDetailsSectionProps) => {
   const styles = useStyles();
   const { euiTheme } = useEuiTheme();
@@ -217,9 +215,9 @@ export const ConfirmTemplateDetailsSection = ({
     };
   }, [getSimulatedTemplate, template.name]);
 
-  // Fetch ILM policy details when policy name is available and showDataRetention is enabled
+  // Fetch ILM policy details when policy name is available
   useEffect(() => {
-    if (!showDataRetention || !ilmPolicyName || !getIlmPolicy) {
+    if (!ilmPolicyName || !getIlmPolicy) {
       setIlmPolicy(null);
       return;
     }
@@ -248,7 +246,7 @@ export const ConfirmTemplateDetailsSection = ({
     return () => {
       abortController.abort();
     };
-  }, [showDataRetention, ilmPolicyName, getIlmPolicy]);
+  }, [ilmPolicyName, getIlmPolicy]);
 
   const ilmPhases = useMemo(() => {
     if (!ilmPolicy) {
@@ -298,9 +296,29 @@ export const ConfirmTemplateDetailsSection = ({
       });
 
       // Retention - ILM policy or data stream lifecycle from original template
-      if (showDataRetention) {
-        if (ilmPolicyName) {
-          // Show ILM policy retention with phases
+      if (ilmPolicyName) {
+        // Show ILM policy retention with phases
+        items.push({
+          title: i18n.translate(
+            'xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel',
+            {
+              defaultMessage: 'Retention',
+            }
+          ),
+          description: (
+            <RetentionDetails ilmPolicyName={ilmPolicyName}>
+              <PhasesInfo
+                ilmPhases={ilmPhases}
+                isLoadingIlmPolicy={isLoadingIlmPolicy}
+                hasErrorLoadingIlmPolicy={hasErrorLoadingIlmPolicy}
+              />
+            </RetentionDetails>
+          ),
+        });
+      } else {
+        // Fall back to data stream lifecycle from original template
+        const dataRetention = formatDataRetention(template);
+        if (dataRetention) {
           items.push({
             title: i18n.translate(
               'xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel',
@@ -308,30 +326,8 @@ export const ConfirmTemplateDetailsSection = ({
                 defaultMessage: 'Retention',
               }
             ),
-            description: (
-              <RetentionDetails ilmPolicyName={ilmPolicyName}>
-                <PhasesInfo
-                  ilmPhases={ilmPhases}
-                  isLoadingIlmPolicy={isLoadingIlmPolicy}
-                  hasErrorLoadingIlmPolicy={hasErrorLoadingIlmPolicy}
-                />
-              </RetentionDetails>
-            ),
+            description: dataRetention,
           });
-        } else {
-          // Fall back to data stream lifecycle from original template
-          const dataRetention = formatDataRetention(template);
-          if (dataRetention) {
-            items.push({
-              title: i18n.translate(
-                'xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel',
-                {
-                  defaultMessage: 'Retention',
-                }
-              ),
-              description: dataRetention,
-            });
-          }
         }
       }
     }
@@ -362,7 +358,6 @@ export const ConfirmTemplateDetailsSection = ({
     ilmPhases,
     isLoadingIlmPolicy,
     hasErrorLoadingIlmPolicy,
-    showDataRetention,
   ]);
 
   return (
