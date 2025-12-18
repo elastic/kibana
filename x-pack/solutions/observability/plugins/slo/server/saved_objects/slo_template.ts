@@ -10,7 +10,7 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
-import type { StoredSLODefinitionTemplate } from '../domain/models/template';
+import type { StoredSLOTemplate } from '../domain/models/slo_template';
 
 export const SO_SLO_TEMPLATE_TYPE = 'slo_template';
 
@@ -61,10 +61,17 @@ export const sloTemplate: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
-    getTitle(template: SavedObject<StoredSLODefinitionTemplate>) {
+    getTitle(template: SavedObject<StoredSLOTemplate>) {
+      const templateName =
+        'name' in template.attributes && typeof template.attributes.name === 'string'
+          ? template.attributes.name
+          : 'Unnamed';
+
       return i18n.translate('xpack.slo.sloTemplateSaveObject.title', {
         defaultMessage: 'SLO Template: {name}',
-        values: { name: template.attributes.name ?? 'Unnamed' },
+        values: {
+          name: templateName,
+        },
       });
     },
   },

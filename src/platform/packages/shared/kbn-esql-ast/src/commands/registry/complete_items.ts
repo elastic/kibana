@@ -323,15 +323,15 @@ export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggesti
     for (const type of types) {
       let detail = type.description || commandDefinition.metadata.description;
       if (commandDefinition.metadata.preview) {
-        detail = `[${techPreviewLabel}] ${detail}`;
+        detail = `**[${techPreviewLabel}]** ${detail}`;
       }
       const suggestion: ISuggestionItem = withAutoSuggest({
         label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
         text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
         kind: 'Method',
-        detail,
         documentation: {
           value: buildDocumentation(
+            detail,
             commandDefinition.metadata.declaration,
             commandDefinition.metadata.examples
           ),

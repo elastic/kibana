@@ -29,7 +29,7 @@ export function EmptyState({
       title={
         <h2>
           {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
-            defaultMessage: 'Generate significant events',
+            defaultMessage: 'Significant events',
           })}
         </h2>
       }
@@ -39,7 +39,7 @@ export function EmptyState({
             <EuiText size="s" textAlign="center" color="subdued">
               {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
                 defaultMessage:
-                  "A Significant Event is a single, ‘interesting’ log event identified by an automated rule as being important for understanding a system's behaviour.",
+                  "Single, ‘interesting’ log event identified by an automated rule as being important for understanding a system's behaviour.",
               })}
             </EuiText>
           </EuiFlexItem>
@@ -52,7 +52,8 @@ export function EmptyState({
               onGenerateSuggestionsClick={onGenerateSuggestionsClick}
               onFeatureIdentificationClick={onFeatureIdentificationClick}
               onManualEntryClick={onManualEntryClick}
-              isLoadingGeneration={false}
+              isGeneratingQueries={false}
+              isSavingManualEntry={false}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
