@@ -437,6 +437,20 @@ export const lowercaseProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<LowercaseProcessor>;
 
+export interface TrimProcessor extends ProcessorBaseWithWhere {
+  action: 'trim';
+  from: string;
+  to?: string;
+  ignore_missing?: boolean;
+}
+
+export const trimProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('trim'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<TrimProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -452,6 +466,7 @@ export type StreamlangProcessorDefinition =
   | ReplaceProcessor
   | UppercaseProcessor
   | LowercaseProcessor
+  | TrimProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -468,6 +483,7 @@ export const streamlangProcessorSchema = z.union([
   replaceProcessorSchema,
   uppercaseProcessorSchema,
   lowercaseProcessorSchema,
+  trimProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
