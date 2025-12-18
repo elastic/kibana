@@ -44,7 +44,7 @@ const mockUseKibana = (overrides?: Partial<any>) => {
 
 describe('EisCloudConnectPromoTour', () => {
   const promoId = 'cloudConnectPromo';
-  const dataId = `${promoId}-cloud-connect-promo-tour`;
+  const dataId = `${promoId}-cloud-connect-tour`;
   const childTestId = 'tourChild';
 
   const renderComponent = (

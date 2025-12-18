@@ -78,7 +78,7 @@ export const EisCloudConnectPromoTour = ({
     promoId: `${promoId}CloudConnectTour`,
   });
 
-  const dataId = `${promoId}-cloud-connect-promo-tour`;
+  const dataId = `${promoId}-cloud-connect-tour`;
 
   const hasCloudConnectPermission = Boolean(
     application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
@@ -96,7 +96,6 @@ export const EisCloudConnectPromoTour = ({
 
   return (
     <EuiTourStep
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE}
       maxWidth={`${euiTheme.base * 25}px`}
@@ -112,12 +111,17 @@ export const EisCloudConnectPromoTour = ({
       stepsTotal={1}
       onFinish={onDismissTour}
       footerAction={[
-        <EuiButtonEmpty data-test-subj="eisCloudConnectPromoTourCloseBtn" onClick={onDismissTour}>
+        <EuiButtonEmpty
+          data-test-subj="eisCloudConnectPromoTourCloseBtn"
+          data-telemetry-id={`${dataId}-dismiss-btn`}
+          onClick={onDismissTour}
+        >
           {EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,
         <EuiButton
           onClick={navigateToApp}
           data-test-subj="eisCloudConnectPromoTourCtaBtn"
+          data-telemetry-id={`${dataId}-connectYourCluster-btn`}
           iconSide="right"
           iconType="popout"
         >

@@ -53,7 +53,6 @@ export const EisPromotionalCallout = ({
   return (
     <EuiPanel
       grow={false}
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       css={({ euiTheme }) => ({
         color: euiTheme.colors.primaryText,
@@ -89,6 +88,7 @@ export const EisPromotionalCallout = ({
             size="s"
             href={ctaLink}
             data-test-subj="eisPromoCalloutCtaBtn"
+            data-telemetry-id={`${dataId}-viewEisDocs-link`}
             target="_blank"
             iconSide="right"
             iconType="popout"

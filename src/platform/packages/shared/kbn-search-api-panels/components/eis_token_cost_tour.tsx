@@ -66,7 +66,6 @@ export const EisTokenCostTour = ({
 
   return (
     <EuiTourStep
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={i18n.EIS_COSTS_TOUR_TITLE}
       maxWidth={`${euiTheme.base * 25}px`}
@@ -83,6 +82,7 @@ export const EisTokenCostTour = ({
       footerAction={[
         <EuiButtonEmpty
           data-test-subj="tokenConsumptionCostTourCloseBtn"
+          data-telemetry-id={`${dataId}-dismiss-btn`}
           onClick={onDismissTour}
           aria-label={i18n.EIS_COSTS_TOUR_DISMISS_ARIA}
         >
@@ -96,6 +96,7 @@ export const EisTokenCostTour = ({
                 size="s"
                 href={ctaLink}
                 data-test-subj="eisCostsTourCtaBtn"
+                data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
                 iconType="popout"

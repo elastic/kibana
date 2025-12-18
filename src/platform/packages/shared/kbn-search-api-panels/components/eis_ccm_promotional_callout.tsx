@@ -83,7 +83,7 @@ export const EisCloudConnectPromoCallout = ({
               size="s"
               onClick={navigateToApp}
               data-test-subj="eisUpdateCalloutCtaBtn"
-              data-telemetry-id={`${dataId}-cta-btn`}
+              data-telemetry-id={`${dataId}-connectYourCluster-btn`}
               iconSide="right"
               iconType="popout"
             >
