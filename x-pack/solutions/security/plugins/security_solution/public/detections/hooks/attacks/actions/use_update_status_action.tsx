@@ -18,7 +18,7 @@ import * as i18n from './translations';
 interface Props {
   attackDiscoveryIds: string[];
   alertIds: string[];
-  currentWorkflowStatus: WorkflowStatus;
+  currentWorkflowStatus?: string | null;
 }
 
 export const useUpdateWorkflowStatusAction = ({
@@ -59,7 +59,7 @@ export const useUpdateWorkflowStatusAction = ({
   );
 
   const onUpdateWorkflowStatus = useCallback(
-    async (workflowStatus: 'open' | 'acknowledged' | 'closed') => {
+    async (workflowStatus: WorkflowStatus) => {
       setPendingAction(workflowStatus);
 
       if (hasSearchAILakeConfigurations) {
