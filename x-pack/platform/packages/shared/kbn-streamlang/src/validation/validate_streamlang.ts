@@ -10,6 +10,8 @@ import type { StreamlangDSL } from '../../types/streamlang';
 import type { StreamlangProcessorDefinition } from '../../types/processors';
 import { flattenSteps } from '../transpilers/shared/flatten_steps';
 import { isAlwaysCondition } from '../../types/conditions';
+import type { Condition } from '../../types/conditions';
+import { isConditionComplete } from '../conditions/helpers';
 import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
 import {
   inferMathExpressionReturnType,
@@ -728,13 +730,42 @@ function validateProcessorValues(
   return errors;
 }
 
+function validateCondition(
+  condition: Condition | undefined,
+  processorNumber: number,
+  processorId: string
+): StreamlangValidationError[] {
+  const errors: StreamlangValidationError[] = [];
+
+  // Skip if no condition or if it's 'always'
+  if (!condition || isAlwaysCondition(condition)) {
+    return errors;
+  }
+
+  if (!isConditionComplete(condition)) {
+    errors.push({
+      type: 'invalid_value',
+      message: i18n.translate('xpack.streamlang.validation.incompleteCondition', {
+        defaultMessage:
+          'Processor #{processorNumber} has an incomplete condition: all required values must be filled',
+        values: { processorNumber },
+      }),
+      processorId,
+      field: 'where',
+    });
+  }
+
+  return errors;
+}
+
 /**
- * Validates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.
+ * Validates a Streamlang DSL for wired stream requirements, reserved field usage, type safety, and condition completeness.
  *
  * This validates that:
  * - All generated fields are properly namespaced (contain at least one dot)
  * - Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes
  * - Processors don't modify reserved/system fields
+ * - Conditions are complete (all required values filled, range conditions have both bounds)
  * - Fields are used with compatible types
  * - Processor-specific values are valid (expressions, patterns, date formats etc.)
  *
@@ -773,6 +804,11 @@ export function validateStreamlang(
     // Validate processor-specific values (expressions, patterns, formats, etc.)
     const valueErrors = validateProcessorValues(step, i + 1, processorId);
     errors.push(...valueErrors);
+
+    if ('where' in step && step.where) {
+      const conditionErrors = validateCondition(step.where, i + 1, processorId);
+      errors.push(...conditionErrors);
+    }
 
     // Extract fields that this processor modifies
     const modifiedFields = extractModifiedFields(step);

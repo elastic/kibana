@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
+import { isConditionComplete } from '@kbn/streamlang';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
@@ -32,7 +33,6 @@ import {
 import { discardChangesPromptOptions, deleteConditionPromptOptions } from './prompt_options';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
-import { isFilterConditionComplete } from '../../../../../../util/condition';
 
 interface WhereBlockConfigurationProps {
   stepRef: StepActorRef;
@@ -169,7 +169,7 @@ export const WhereBlockConditionEditor = () => {
   const { field } = useController<ConditionBlockFormState, 'condition'>({
     name: 'condition',
     rules: {
-      validate: isFilterConditionComplete,
+      validate: (value) => isConditionComplete(value as Condition | undefined),
     },
   });
 

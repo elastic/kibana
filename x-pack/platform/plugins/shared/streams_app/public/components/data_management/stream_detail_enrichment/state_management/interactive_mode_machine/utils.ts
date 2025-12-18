@@ -16,7 +16,6 @@ import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_ma
 import { isStepUnderEdit } from '../steps_state_machine';
 import type { InteractiveModeContext } from './types';
 import { collectDescendantStepIds } from '../utils';
-import { isFilterConditionComplete } from '../../../../../util/condition';
 
 export type StepSpawner = (
   src: 'stepMachine',
@@ -120,15 +119,4 @@ export function getActiveDataSourceSamplesFromParent(
     dataSourceId: activeDataSourceSnapshot.context.dataSource.id,
     document: doc,
   }));
-}
-
-export function filterStepsWithIncompleteConditions(
-  steps: StreamlangStepWithUIAttributes[]
-): StreamlangStepWithUIAttributes[] {
-  return steps.filter((step) => {
-    if (isActionBlock(step) && 'where' in step) {
-      return isFilterConditionComplete(step.where);
-    }
-    return true;
-  });
 }
