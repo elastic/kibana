@@ -22,6 +22,17 @@ export const MonitoringEntitySourceType = z.enum(['index', 'integration']);
 export type MonitoringEntitySourceTypeEnum = typeof MonitoringEntitySourceType.enum;
 export const MonitoringEntitySourceTypeEnum = MonitoringEntitySourceType.enum;
 
+export type Matcher = z.infer<typeof Matcher>;
+export const Matcher = z.object({
+  fields: z.array(z.string()),
+  values: z.array(z.string()),
+});
+
+export type Filter = z.infer<typeof Filter>;
+export const Filter = z.object({
+  kuery: z.union([z.string(), z.object({})]).optional(),
+});
+
 export type Integrations = z.infer<typeof Integrations>;
 export const Integrations = z.object({
   /**
@@ -45,37 +56,6 @@ export const Integrations = z.object({
     .optional(),
 });
 
-export type CreateMonitoringEntitySource = z.infer<typeof CreateMonitoringEntitySource>;
-export const CreateMonitoringEntitySource = z.object({
-  type: MonitoringEntitySourceType,
-  name: z.string(),
-  managed: z.boolean().optional(),
-  indexPattern: z.string().optional(),
-  enabled: z.boolean().optional(),
-  error: z.string().optional(),
-  integrationName: z.string().optional(),
-  matchers: z
-    .array(
-      z.object({
-        fields: z.array(z.string()),
-        values: z.array(z.string()),
-      })
-    )
-    .optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
-  integrations: Integrations.optional(),
-});
-
-export type Matcher = z.infer<typeof Matcher>;
-export const Matcher = z.object({
-  fields: z.array(z.string()),
-  values: z.array(z.string()),
-});
-
 export type UpdateableMonitoringEntitySourceProperties = z.infer<
   typeof UpdateableMonitoringEntitySourceProperties
 >;
@@ -85,11 +65,7 @@ export const UpdateableMonitoringEntitySourceProperties = z.object({
   integrationName: z.string().optional(),
   enabled: z.boolean().optional(),
   matchers: z.array(Matcher).optional(),
-  filter: z
-    .object({
-      kuery: z.union([z.string(), z.object({})]).optional(),
-    })
-    .optional(),
+  filter: Filter.optional(),
   integrations: Integrations.optional(),
 });
 
@@ -119,7 +95,14 @@ export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
 );
 
 export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
-export const CreateEntitySourceRequestBody = CreateMonitoringEntitySource;
+export const CreateEntitySourceRequestBody = z.object({
+  type: MonitoringEntitySourceType,
+  name: z.string(),
+  indexPattern: z.string().optional(),
+  enabled: z.boolean().optional(),
+  matchers: z.array(Matcher).optional(),
+  filter: Filter.optional(),
+});
 export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
 
 export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;

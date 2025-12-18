@@ -15,7 +15,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateMonitoringEntitySource"
+              type: object
+              required: [type, name]
+              properties:
+                type:
+                  $ref: "#/components/schemas/MonitoringEntitySourceType"
+                name:
+                  type: string
+                indexPattern:
+                  type: string
+                enabled:
+                  type: boolean
+                matchers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Matcher'
+                filter:
+                  $ref: '#/components/schemas/Filter' 
       responses:
         "200":
           description: Entity source created successfully
@@ -116,42 +132,6 @@ components:
       enum:
         - index
         - integration
-    CreateMonitoringEntitySource:
-      type: object
-      required: [type, name]
-      properties:
-        type:
-          $ref: "#/components/schemas/MonitoringEntitySourceType"
-        name:
-          type: string
-        indexPattern:
-          type: string
-        enabled:
-          type: boolean
-        matchers:
-          type: array
-          items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                  
-              values:
-                type: array
-                items:
-                  type: string                
-        filter:
-          type: object
-          properties:
-            kuery:
-              oneOf:
-                - type: string
-                - type: object        
-
     UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:
@@ -168,12 +148,7 @@ components:
           items:
             $ref: '#/components/schemas/Matcher'
         filter:
-          type: object
-          properties:
-            kuery:
-              oneOf:
-              - type: string
-              - type: object
+          $ref: '#/components/schemas/Filter'
         integrations: 
           $ref: '#/components/schemas/Integrations'
 
@@ -207,6 +182,13 @@ components:
           type: array
           items:
             type: string
+    Filter:
+      type: object
+      properties:
+        kuery:
+          oneOf:
+            - type: string
+            - type: object
 
     MonitoringEntitySourceNoId:
       allOf:
