@@ -12,9 +12,9 @@ import { EuiIcon, euiFontSize } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import type { EmotionStyles } from '../use_memo_css';
-import { useMemoCss } from '../use_memo_css';
-import type { QuerySuggestion } from '../autocomplete';
+import type { EmotionStyles } from '../utils/use_memo_css';
+import { useMemoCss } from '../utils/use_memo_css';
+import type { QuerySuggestion } from '../../autocomplete';
 import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 
 function getEuiIconType(type: string) {

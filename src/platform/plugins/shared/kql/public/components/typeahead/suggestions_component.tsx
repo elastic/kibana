@@ -16,9 +16,9 @@ import useRafState from 'react-use/lib/useRafState';
 import type { UseEuiTheme } from '@elastic/eui';
 import { euiShadow, euiShadowFlat } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EmotionStyles } from '../use_memo_css';
-import { useMemoCss } from '../use_memo_css';
-import type { QuerySuggestion } from '../autocomplete';
+import type { EmotionStyles } from '../utils/use_memo_css';
+import { useMemoCss } from '../utils/use_memo_css';
+import type { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,

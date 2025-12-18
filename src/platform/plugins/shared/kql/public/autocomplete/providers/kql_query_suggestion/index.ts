@@ -10,13 +10,13 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { $Keys } from 'utility-types';
 import { flatten, uniqBy } from 'lodash';
-import type { UnifiedSearchPublicPluginStart } from '../../../types';
 
 import type {
   QuerySuggestion,
   QuerySuggestionGetFnArgs,
   QuerySuggestionGetFn,
 } from '../query_suggestion_provider';
+import type { AutocompleteStart } from '../..';
 
 const cursorSymbol = '@kuery-cursor@';
 
@@ -26,7 +26,7 @@ const dedup = (suggestions: QuerySuggestion[]): QuerySuggestion[] =>
 export const KUERY_LANGUAGE_NAME = 'kuery';
 
 export const setupKqlQuerySuggestionProvider = (
-  core: CoreSetup<object, UnifiedSearchPublicPluginStart>
+  core: CoreSetup<object, { autocomplete: AutocompleteStart }>
 ): QuerySuggestionGetFn => {
   let getSuggestionsByType:
     | ((

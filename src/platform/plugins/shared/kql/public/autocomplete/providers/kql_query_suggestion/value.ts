@@ -12,7 +12,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { escapeQuotes } from '@kbn/es-query';
 import type { KqlQuerySuggestionProvider } from './types';
-import type { UnifiedSearchPublicPluginStart } from '../../../types';
+import type { AutocompleteStart } from '../../autocomplete_service';
 import type { QuerySuggestion } from '../query_suggestion_provider';
 import { QuerySuggestionTypes } from '../query_suggestion_provider';
 
@@ -27,7 +27,7 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
     }));
 
 export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
-  core: CoreSetup<object, UnifiedSearchPublicPluginStart>
+  core: CoreSetup<object, { autocomplete: AutocompleteStart }>
 ) => {
   const autoCompleteServicePromise = core
     .getStartServices()
