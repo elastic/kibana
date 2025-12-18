@@ -14,7 +14,7 @@ import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { StreamFeaturesFlyout } from './stream_features/stream_features_flyout';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import { useKibana } from '../../hooks/use_kibana';
 
 interface StreamConfigurationProps {
@@ -63,7 +63,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
             right={
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <ConnectorListButton
+                  <ConnectorListButtonBase
                     buttonProps={{
                       size: 'm',
                       iconType: 'sparkles',
@@ -97,6 +97,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                         }
                       ),
                     }}
+                    aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

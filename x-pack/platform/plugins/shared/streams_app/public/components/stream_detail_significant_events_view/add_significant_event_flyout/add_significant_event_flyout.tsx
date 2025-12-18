@@ -94,7 +94,7 @@ export function AddSignificantEventFlyout({
   }, [data.dataViews, definition.stream.name]);
 
   const { onGenerateDescription: generateDescription, onSaveDescription: saveDescription } =
-    useStreamDescriptionApi({ definition, refreshDefinition });
+    useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures });
 
   const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name, start, end });
 
@@ -308,6 +308,7 @@ export function AddSignificantEventFlyout({
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
+                  aiFeatures={aiFeatures}
                 />
               </EuiPanel>
             </EuiFlexItem>

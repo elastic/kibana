@@ -19,7 +19,7 @@ import {
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,

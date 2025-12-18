@@ -17,9 +17,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 
 export interface AISummaryProps {
   definition: Streams.all.GetResponse;
@@ -84,6 +85,7 @@ const CANCEL_LABEL = i18n.translate(
 );
 
 export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refreshDefinition }) => {
+  const aiFeatures = useAIFeatures();
   const {
     isGenerating,
     description,
@@ -95,7 +97,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
     onSaveDescription,
     onStartEditing,
     areButtonsDisabled,
-  } = useStreamDescriptionApi({ definition, refreshDefinition });
+  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures });
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -139,7 +141,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                       </EuiFlexItem>
                     )}
                     <EuiFlexItem grow={false}>
-                      <ConnectorListButton
+                      <ConnectorListButtonBase
                         buttonProps={{
                           size: 's',
                           iconType: 'sparkles',
@@ -149,6 +151,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                           isLoading: isGenerating,
                           'data-test-subj': 'stream_description_generate_button',
                         }}
+                        aiFeatures={aiFeatures}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -202,7 +205,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ConnectorListButton
+                  <ConnectorListButtonBase
                     buttonProps={{
                       size: 'm',
                       iconType: 'sparkles',
@@ -212,6 +215,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                       isLoading: isGenerating,
                       'data-test-subj': 'stream_description_generate_button',
                     }}
+                    aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
