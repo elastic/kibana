@@ -46,7 +46,13 @@ describe('read_manifest', () => {
     });
 
     it(`should throw an error if 'scout' is not in the path`, () => {
-      const configPath = path.join(path.sep, 'plugins', 'my_plugin', 'tests', 'playwright.config.ts');
+      const configPath = path.join(
+        path.sep,
+        'plugins',
+        'my_plugin',
+        'tests',
+        'playwright.config.ts'
+      );
       expect(() => getKibanaModulePath(configPath)).toThrow(
         /Invalid path: "scout" directory not found/
       );
