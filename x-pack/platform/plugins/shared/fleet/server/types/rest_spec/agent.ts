@@ -892,3 +892,20 @@ export const PostBulkAgentRollbackRequestSchema = {
 export const PostBulkAgentRollbackResponseSchema = schema.object({
   actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
+
+export const PostGenerateAgentsReportRequestSchema = {
+  body: schema.object({
+    agentIds: schema.arrayOf(schema.string()),
+    fields: schema.arrayOf(schema.string()),
+    sort: schema.maybe(
+      schema.object({
+        field: schema.string(),
+        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+      })
+    ),
+  }),
+};
+
+export const PostGenerateAgentsReportResponseSchema = schema.object({
+  url: schema.string(),
+});
