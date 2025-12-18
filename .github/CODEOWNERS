@@ -2727,21 +2727,22 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 
 ## Generative AI owner connectors
 # OpenAI
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/src/platform/packages/shared/kbn-connector-schemas/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-connector-schemas/openai @elastic/security-generative-ai
+
 # Bedrock
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/src/platform/packages/shared/kbn-connector-schemas/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-connector-schemas/bedrock @elastic/security-generative-ai
 
 # Gemini
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai
 
 # Inference API
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
