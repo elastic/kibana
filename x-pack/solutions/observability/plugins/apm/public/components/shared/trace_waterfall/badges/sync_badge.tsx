@@ -27,15 +27,15 @@ export interface SyncBadgeProps {
   agentName?: AgentName;
 }
 
-const BLOCKING_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeBlocking', {
+const BLOCKING_LABEL = i18n.translate('xpack.apm.traceWaterfall.syncBadgeBlocking', {
   defaultMessage: 'blocking',
 });
 
-const ASYNC_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeAsync', {
+const ASYNC_LABEL = i18n.translate('xpack.apm.traceWaterfall.syncBadgeAsync', {
   defaultMessage: 'async',
 });
 
-const TOOLTIP_CONTENT = i18n.translate('xpack.apm.transactionDetails.syncBadgeTooltip', {
+const TOOLTIP_CONTENT = i18n.translate('xpack.apm.traceWaterfall.syncBadgeTooltip', {
   defaultMessage: 'Indicates whether the span was executed synchronously or asynchronously.',
 });
 
