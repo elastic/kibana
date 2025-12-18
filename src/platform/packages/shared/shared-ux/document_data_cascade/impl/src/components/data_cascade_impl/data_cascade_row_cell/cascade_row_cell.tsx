@@ -27,6 +27,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   children,
   getVirtualizer,
   onCascadeLeafNodeExpanded,
+  onCascadeLeafNodeCollapsed,
   row,
   size,
 }: CascadeRowCellPrimitiveProps<G, L>) {
@@ -96,6 +97,17 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       fetchCascadeRowGroupLeafData();
     }
   }, [fetchCascadeRowGroupLeafData, leafData, isPendingRowLeafDataFetch]);
+
+  useEffect(
+    () => () => {
+      onCascadeLeafNodeCollapsed?.({
+        row: row.original,
+        nodePath,
+        nodePathMap,
+      });
+    },
+    [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
+  );
 
   const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
   const virtualRow = useMemo(

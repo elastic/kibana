@@ -21,9 +21,10 @@ const renderComponent = ({
   row,
   getVirtualizer,
   onCascadeLeafNodeExpanded = jest.fn(),
+  onCascadeLeafNodeCollapsed,
 }: Pick<
   React.ComponentProps<typeof CascadeRowCellPrimitive>,
-  'onCascadeLeafNodeExpanded' | 'row' | 'children' | 'getVirtualizer'
+  'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'row' | 'children' | 'getVirtualizer'
 > &
   Pick<
     React.ComponentProps<typeof DataCascadeProvider>,
@@ -35,6 +36,7 @@ const renderComponent = ({
       <CascadeRowCellPrimitive
         size="m"
         onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
+        onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
         row={row}
         getVirtualizer={getVirtualizer}
       >
@@ -45,29 +47,29 @@ const renderComponent = ({
 };
 
 describe('CascadeRowCellPrimitive', () => {
+  const onCascadeLeafNodeExpanded = jest.fn();
+
+  const mockVirtualizerGetter = jest.fn(
+    () =>
+      ({
+        getVirtualItems: jest.fn(() => []),
+        getTotalSize: jest.fn(() => 0),
+        isScrolling: false,
+        measureElement: jest.fn(),
+        scrollOffset: 0,
+        scrollElement: null,
+        activeStickyIndex: null,
+        virtualizedRowComputedTranslateValue: new Map(),
+      } as unknown as CascadeVirtualizerReturnValue)
+  );
+
   it('will invoke the passed onCascadeLeafNodeExpanded if the leafNode has no data', () => {
     const cascadeGroups = ['group1', 'group2'];
-
-    const onCascadeLeafNodeExpanded = jest.fn();
 
     const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
       id: '1',
       randomField: 'randomValue',
     });
-
-    const mockVirtualizerGetter = jest.fn(
-      () =>
-        ({
-          getVirtualItems: jest.fn(() => []),
-          getTotalSize: jest.fn(() => 0),
-          isScrolling: false,
-          measureElement: jest.fn(),
-          scrollOffset: 0,
-          scrollElement: null,
-          activeStickyIndex: null,
-          virtualizedRowComputedTranslateValue: new Map(),
-        } as unknown as CascadeVirtualizerReturnValue)
-    );
 
     renderComponent({
       cascadeGroups,
@@ -85,6 +87,41 @@ describe('CascadeRowCellPrimitive', () => {
     });
 
     expect(onCascadeLeafNodeExpanded).toHaveBeenCalledWith({
+      nodePath: [cascadeGroups[0]],
+      nodePathMap: { group1: 0 },
+      row: rowData,
+    });
+  });
+
+  it('will invoke the passed onCascadeLeafNodeCollapsed if the leafNode has data when the component unmounts', () => {
+    const cascadeGroups = ['group1', 'group2'];
+
+    const onCascadeLeafNodeCollapsed = jest.fn();
+
+    const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {
+      id: '1',
+      randomField: 'randomValue2',
+    });
+
+    const { unmount } = renderComponent({
+      cascadeGroups,
+      initialGroupColumn: [cascadeGroups[0]],
+      row: {
+        id: '1',
+        depth: 0,
+        original: rowData,
+        getToggleSelectedHandler: jest.fn(),
+        getToggleExpandedHandler: jest.fn(),
+      } as unknown as Row<any>,
+      children: () => <div>Test Child</div>,
+      onCascadeLeafNodeExpanded,
+      onCascadeLeafNodeCollapsed,
+      getVirtualizer: mockVirtualizerGetter,
+    });
+
+    unmount();
+
+    expect(onCascadeLeafNodeCollapsed).toHaveBeenCalledWith({
       nodePath: [cascadeGroups[0]],
       nodePathMap: { group1: 0 },
       row: rowData,

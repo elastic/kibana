@@ -32,6 +32,18 @@ interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
   nodePathMap: Record<string, string>;
 }
 
+interface OnCascadeLeafNodeCollapsedArgs<G extends GroupNode> {
+  row: G;
+  /**
+   * The path of the row that was collapsed in the group by hierarchy.
+   */
+  nodePath: string[];
+  /**
+   * KV record of the path values for the row node.
+   */
+  nodePathMap: Record<string, string>;
+}
+
 /**
  * Provides the props required to anchor another virtualized list
  * within our already virtualized row, and have it controlled by the same scrollable parent, if we wish so.
@@ -52,9 +64,12 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
    */
   onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
+  /**
+   * Callback invoked when a leaf node gets collapsed, possibly to clean up any data associated with the leaf node or cancel any pending requests if necessary.
+   */
+  onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
   getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
-  /*
-   *
+  /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
   children: (
@@ -74,6 +89,18 @@ interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
   nodePath: string[];
   /**
    * @description KV record of the path values for the row node.
+   */
+  nodePathMap: Record<string, string>;
+}
+
+interface OnCascadeGroupNodeCollapsedArgs<G extends GroupNode> {
+  row: G;
+  /**
+   * The path of the row that was collapsed in the group by hierarchy.
+   */
+  nodePath: string[];
+  /**
+   * KV record of the path values for the row node.
    */
   nodePathMap: Record<string, string>;
 }
@@ -112,6 +139,10 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
    * @description Callback function that is called when a cascade node is expanded.
    */
   onCascadeGroupNodeExpanded: (args: OnCascadeGroupNodeExpandedArgs<G>) => Promise<G[]>;
+  /**
+   * Callback function that is called when a cascade node is collapsed.
+   */
+  onCascadeGroupNodeCollapsed?: (args: OnCascadeGroupNodeCollapsedArgs<G>) => void;
   /**
    * @description The row instance for the cascade row.
    */
@@ -165,12 +196,13 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowCellPrimitiveProps<G, L>,
-  'onCascadeLeafNodeExpanded' | 'children'
+  'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'children'
 >;
 
 export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowPrimitiveProps<G, L>,
   | 'onCascadeGroupNodeExpanded'
+  | 'onCascadeGroupNodeCollapsed'
   | 'rowHeaderMetaSlots'
   | 'rowHeaderTitleSlot'
   | 'rowHeaderActions'
