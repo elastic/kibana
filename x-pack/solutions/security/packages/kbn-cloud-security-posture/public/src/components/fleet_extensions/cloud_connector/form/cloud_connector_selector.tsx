@@ -146,7 +146,7 @@ export const CloudConnectorSelector = ({
             <EuiFlexItem grow={false}>
               <IntegrationCountBadge
                 cloudConnectorId={connector.id}
-                count={connector.packagePolicyCount}
+                count={connector.packagePolicyCount ?? 0}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
