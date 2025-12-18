@@ -68,7 +68,15 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
       type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
       data: {
         alertId,
-        ...(alertTitle && { attachmentLabel: alertTitle }),
+        ...(alertTitle && {
+          attachmentLabel: i18n.translate(
+            'xpack.observabilityAgentBuilder.alertAiInsight.alertAttachmentLabel',
+            {
+              defaultMessage: '{alertTitle} alert',
+              values: { alertTitle },
+            }
+          ),
+        }),
       },
     },
   ];

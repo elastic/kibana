@@ -193,7 +193,15 @@ export function AlertDetails() {
           type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
           data: {
             alertId: alertUuid,
-            ...(alertTitle && { attachmentLabel: alertTitle }),
+            ...(alertTitle && {
+              attachmentLabel: i18n.translate(
+                'xpack.observability.alertDetails.alertAttachmentLabel',
+                {
+                  defaultMessage: '{alertTitle} alert',
+                  values: { alertTitle },
+                }
+              ),
+            }),
           },
         },
       ],
