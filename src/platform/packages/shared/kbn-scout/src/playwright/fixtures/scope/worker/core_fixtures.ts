@@ -51,45 +51,36 @@ export interface SamlAuth {
   setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
 
   /**
-   * Generates a SAML session cookie for an interactive user with the specified built-in role.
+   * Generates a SAML session cookie for an interactive user with the specified role.
    *
    * This method is ideal for testing internal APIs that are typically accessed via the UI.
    * It authenticates as an interactive user and returns session credentials including cookie
    * headers that can be used in API requests.
    *
-   * @param role - The name of a built-in Kibana role (e.g., 'admin', 'editor', 'viewer')
+   * @param role - Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or
+   *               a custom role descriptor with specific permissions (Kibana or Elasticsearch)
    * @returns Promise resolving to credentials with cookieValue and cookieHeader properties
    *
    * @example
+   * // Using a built-in role
    * const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
    * const response = await apiClient.get('internal/endpoint', {
    *   headers: { ...cookieHeader }
    * });
-   */
-  asInteractiveUser(role: string): Promise<RoleSessionCredentials>;
-
-  /**
-   * Generates a SAML session cookie for an interactive user with a custom role definition.
-   *
-   * This method is ideal for testing internal APIs with specific permission requirements.
-   * It creates or reuses a custom role, authenticates as an interactive user with that role,
-   * and returns session credentials including cookie headers for API requests.
-   *
-   * @param role - A custom Kibana or Elasticsearch role descriptor with specific permissions
-   * @returns Promise resolving to credentials with cookieValue and cookieHeader properties
    *
    * @example
+   * // Using a custom role descriptor
    * const customRole = {
    *   kibana: [{ base: ['read'], spaces: ['*'] }],
    *   elasticsearch: { indices: [{ names: ['logs-*'], privileges: ['read'] }] }
    * };
-   * const { cookieHeader } = await samlAuth.asInteractiveUserWithCustomRole(customRole);
+   * const { cookieHeader } = await samlAuth.asInteractiveUser(customRole);
    * const response = await apiClient.get('internal/endpoint', {
    *   headers: { ...cookieHeader }
    * });
    */
-  asInteractiveUserWithCustomRole(
-    role: KibanaRole | ElasticsearchRoleDescriptor
+  asInteractiveUser(
+    role: string | KibanaRole | ElasticsearchRoleDescriptor
   ): Promise<RoleSessionCredentials>;
 }
 
@@ -243,17 +234,23 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         customRoleHash = newRoleHash;
       };
 
-      const asInteractiveUser = async (role: string): Promise<RoleSessionCredentials> => {
-        const cookieValue = await session.getInteractiveUserSessionCookieWithRoleScope(role);
+      const asInteractiveUser = async (
+        role: string | KibanaRole | ElasticsearchRoleDescriptor
+      ): Promise<RoleSessionCredentials> => {
+        let roleName: string;
+
+        if (typeof role === 'string') {
+          // Built-in role name
+          roleName = role;
+        } else {
+          // Custom role descriptor - create/update the role first
+          await setCustomRole(role);
+          roleName = customRoleName;
+        }
+
+        const cookieValue = await session.getInteractiveUserSessionCookieWithRoleScope(roleName);
         const cookieHeader = { Cookie: `sid=${cookieValue}` };
         return { cookieValue, cookieHeader };
-      };
-
-      const asInteractiveUserWithCustomRole = async (
-        role: KibanaRole | ElasticsearchRoleDescriptor
-      ): Promise<RoleSessionCredentials> => {
-        await setCustomRole(role);
-        return await asInteractiveUser(customRoleName);
       };
 
       // Hide the announcements (including the sidenav tour) in the default space
@@ -264,7 +261,6 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         customRoleName,
         setCustomRole,
         asInteractiveUser,
-        asInteractiveUserWithCustomRole,
       });
 
       // Delete custom role when worker completes (if it was created)

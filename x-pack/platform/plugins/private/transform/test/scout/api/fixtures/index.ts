@@ -26,7 +26,6 @@ export interface TransformSamlAuthFixture extends SamlAuth {
 export interface TransformRequestAuthFixture extends RequestAuthFixture {
   loginAsTransformPowerUser: () => Promise<RoleApiCredentials>;
   loginAsTransformViewerUser: () => Promise<RoleApiCredentials>;
-  loginAsTransformUnauthorizedUser: () => Promise<RoleApiCredentials>;
 }
 
 export interface TransformApiServicesFixture extends ApiServicesFixture {
@@ -45,27 +44,23 @@ export const transformApiTest = apiTest.extend<{
     const loginAsTransformViewerUser = async () =>
       requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformViewerUser);
 
-    const loginAsTransformUnauthorizedUser = async () =>
-      requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformUnauthorizedUser);
-
     const extendedRequestAuth: TransformRequestAuthFixture = {
       ...requestAuth,
       loginAsTransformPowerUser,
       loginAsTransformViewerUser,
-      loginAsTransformUnauthorizedUser,
     };
     await use(extendedRequestAuth);
   },
 
   samlAuth: async ({ samlAuth }, use) => {
     const asTransformPowerUser = async () =>
-      samlAuth.asInteractiveUserWithCustomRole(TRANSFORM_USERS.transformPowerUser);
+      samlAuth.asInteractiveUser(TRANSFORM_USERS.transformPowerUser);
 
     const asTransformViewer = async () =>
-      samlAuth.asInteractiveUserWithCustomRole(TRANSFORM_USERS.transformViewerUser);
+      samlAuth.asInteractiveUser(TRANSFORM_USERS.transformViewerUser);
 
     const asTransformUnauthorizedUser = async () =>
-      samlAuth.asInteractiveUserWithCustomRole(TRANSFORM_USERS.transformUnauthorizedUser);
+      samlAuth.asInteractiveUser(TRANSFORM_USERS.transformUnauthorizedUser);
 
     const extendedSamlAuth: TransformSamlAuthFixture = {
       ...samlAuth,
