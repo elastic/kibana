@@ -26,26 +26,26 @@ const knownOtelAgents: Set<string> = new Set([...OPEN_TELEMETRY_AGENT_NAMES, ...
  * true: Language natively operates synchronously (e.g., Node.js, browser JS)
  * false: Language natively operates asynchronously (e.g., Python, PHP, Go)
  */
-export const agentsSyncMap = {
-  nodejs: true,
-  'js-base': true,
-  'rum-js': true,
-  php: false,
-  python: false,
-  dotnet: false,
-  'iOS/swift': false,
-  ruby: false,
-  java: false,
-  go: false,
-  'android/java': false,
+export const agentsSyncMap = new Map<SyncBadgeAgentName, boolean>([
+  ['nodejs', true],
+  ['js-base', true],
+  ['rum-js', true],
+  ['php', false],
+  ['python', false],
+  ['dotnet', false],
+  ['iOS/swift', false],
+  ['ruby', false],
+  ['java', false],
+  ['go', false],
+  ['android/java', false],
   // OTEL-specific language names
-  webjs: true,
-  cpp: false,
-  erlang: false,
-  rust: false,
-  swift: false,
-  android: false,
-} as const satisfies Record<SyncBadgeAgentName, boolean>;
+  ['webjs', true],
+  ['cpp', false],
+  ['erlang', false],
+  ['rust', false],
+  ['swift', false],
+  ['android', false],
+]);
 
 /**
  * Gets the sync behavior value for any agent (Elastic, OTEL, or EDOT).
@@ -55,13 +55,16 @@ export const agentsSyncMap = {
  * @returns true for sync agents, false for async agents, undefined if unknown
  */
 export function getAgentSyncValue(agentName: string): boolean | undefined {
-  if (agentName in agentsSyncMap) {
-    return agentsSyncMap[agentName as keyof typeof agentsSyncMap];
+  const agentNameKey = agentName as SyncBadgeAgentName;
+  if (agentsSyncMap.has(agentNameKey)) {
+    return agentsSyncMap.get(agentNameKey);
   }
 
   if (knownOtelAgents.has(agentName)) {
     const lang = agentName.split('/')[1];
-    return agentsSyncMap[lang as keyof typeof agentsSyncMap];
+    if (lang) {
+      return agentsSyncMap.get(lang as SyncBadgeAgentName);
+    }
   }
 
   return undefined;

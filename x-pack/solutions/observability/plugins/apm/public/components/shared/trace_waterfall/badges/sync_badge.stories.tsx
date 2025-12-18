@@ -29,7 +29,7 @@ const meta = {
     },
     agentName: {
       control: { type: 'select' },
-      options: Object.keys(agentsSyncMap),
+      options: Array.from(agentsSyncMap.keys()),
       description: 'The APM agent name',
     },
   },
