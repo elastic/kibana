@@ -127,7 +127,7 @@ dependsOn:
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
-  - '@kbn/controls-schemas',
+  - '@kbn/controls-schemas'
   - '@kbn/zod'
 tags:
   - plugin
