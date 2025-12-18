@@ -97,7 +97,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
     // Setting the rule schedule to 5 seconds so that the alert will be created quickly
     await page.getByTestId('ruleScheduleNumberInput').fill('5');
-    await page.getByTestId('ruleScheduleUnitInput').selectOption('second');
+    await page.getByTestId('ruleScheduleUnitInput').selectOption('seconds');
     await page.getByTestId('ruleFormStep-details').click();
     await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
     await page.fill('[data-test-subj="ruleDetailsNameInput"]', tlsRuleName);
