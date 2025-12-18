@@ -10,34 +10,45 @@
 import { datatableStateSchema } from '../../schema';
 import { validateConverter } from '../validate';
 import {
-  singleMetricAttributesDatatable,
-  singleMetricRowSplitAttributesDatatable,
-  multiMetricRowSplitAttributesDatatable,
-  fullConfigAttributesDatatable,
+  singleMetricDatatableAttributes,
+  singleMetricRowSplitDatatableAttributes,
+  multiMetricRowSplitDatatableAttributes,
+  fullConfigDatatableAttributes,
+  sortedByTransposedMetricColumnDatatableAttributes,
+  sortedByRowDatatableAttributes,
 } from './lens_state_config_dsl.mock';
 import {
   singleMetricESQLDatatableAttributes,
   singleMetricRowSplitESQLDatatableAttributes,
   multipleMetricRowSplitESQLDatatableAttributes,
   fullConfigESQLDatatableAttributes,
+  sortedByTransposedMetricColumnESQLDatatableAttributes,
 } from './lens_state_config_esql.mock';
 
 describe('Datatable', () => {
   describe('validateConverter', () => {
     it('should convert a datatable chart with single metric column', () => {
-      validateConverter(singleMetricAttributesDatatable, datatableStateSchema);
+      validateConverter(singleMetricDatatableAttributes, datatableStateSchema);
     });
 
     it('should convert a datatable chart with single metric, row, split by columns', () => {
-      validateConverter(singleMetricRowSplitAttributesDatatable, datatableStateSchema);
+      validateConverter(singleMetricRowSplitDatatableAttributes, datatableStateSchema);
     });
 
     it('should convert a datatable chart with multiple metrics, rows, split by columns', () => {
-      validateConverter(multiMetricRowSplitAttributesDatatable, datatableStateSchema);
+      validateConverter(multiMetricRowSplitDatatableAttributes, datatableStateSchema);
     });
 
     it('should convert a datatable chart with multiple metrics, rows, split by with full config', () => {
-      validateConverter(fullConfigAttributesDatatable, datatableStateSchema);
+      validateConverter(fullConfigDatatableAttributes, datatableStateSchema);
+    });
+
+    it('should convert a datatable chart sorted by a transposed metric column', () => {
+      validateConverter(sortedByTransposedMetricColumnDatatableAttributes, datatableStateSchema);
+    });
+
+    it('should convert a datatable chart sorted by a row', () => {
+      validateConverter(sortedByRowDatatableAttributes, datatableStateSchema);
     });
 
     it('should convert an ESQL datatable chart with single metric column', () => {
@@ -54,6 +65,13 @@ describe('Datatable', () => {
 
     it('should convert an ESQL datatable chart with multiple metrics, rows, split by with full config', () => {
       validateConverter(fullConfigESQLDatatableAttributes, datatableStateSchema);
+    });
+
+    it('should convert an ESQL datatable chart sorted by a transposed metric column', () => {
+      validateConverter(
+        sortedByTransposedMetricColumnESQLDatatableAttributes,
+        datatableStateSchema
+      );
     });
   });
 });

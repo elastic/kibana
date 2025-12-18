@@ -16,7 +16,7 @@ import type {
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 
-export const singleMetricAttributesDatatable: LensAttributes = {
+export const singleMetricDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
   title: 'Single metric',
   state: {
@@ -80,7 +80,7 @@ export const singleMetricAttributesDatatable: LensAttributes = {
   ],
 };
 
-export const singleMetricRowSplitAttributesDatatable: LensAttributes = {
+export const singleMetricRowSplitDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
   title: 'Single metric row split',
   state: {
@@ -206,7 +206,7 @@ export const singleMetricRowSplitAttributesDatatable: LensAttributes = {
   ],
 };
 
-export const multiMetricRowSplitAttributesDatatable: LensAttributes = {
+export const multiMetricRowSplitDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
   title: 'Multiple metrics, rows, split by',
   state: {
@@ -396,7 +396,7 @@ export const multiMetricRowSplitAttributesDatatable: LensAttributes = {
   ],
 };
 
-export const fullConfigAttributesDatatable: LensAttributes = {
+export const fullConfigDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
   title: 'Multiple metrics, rows, split by with full config',
   state: {
@@ -703,6 +703,320 @@ export const fullConfigAttributesDatatable: LensAttributes = {
       type: 'index-pattern',
       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       name: 'indexpattern-datasource-layer-562ae4ff-c81a-4cd9-8206-87b13e94def0',
+    },
+  ],
+};
+
+export const sortedByTransposedMetricColumnDatatableAttributes: LensAttributes = {
+  visualizationType: 'lnsDatatable',
+  title: 'Sorted datatable by transposed metric column',
+  state: {
+    visualization: {
+      layerId: 'a08718f8-c67e-42d1-bbe3-ee1e6a457983',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+        },
+        {
+          columnId: '2a498d57-f600-4720-9fad-9fb9ec7fd72b',
+          isTransposed: false,
+          isMetric: false,
+        },
+        {
+          columnId: 'db2eaa28-845f-4678-ae34-87de5fc99208',
+          isTransposed: true,
+          isMetric: false,
+        },
+        {
+          columnId: 'fe6434d9-db87-4e46-beb9-17413a21beb9',
+          isTransposed: true,
+          isMetric: false,
+        },
+      ],
+      sorting: {
+        columnId: 'US---ZM---c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+        direction: 'desc',
+      },
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          'a08718f8-c67e-42d1-bbe3-ee1e6a457983': {
+            columns: {
+              'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35': {
+                label: 'Median of bytes',
+                dataType: 'number',
+                operationType: 'median',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: true,
+                },
+              } as MedianIndexPatternColumn,
+              '2a498d57-f600-4720-9fad-9fb9ec7fd72b': {
+                label: 'Top 5 values of agent.keyword',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'agent.keyword',
+                isBucketed: true,
+                params: {
+                  size: 5,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+              'db2eaa28-845f-4678-ae34-87de5fc99208': {
+                label: 'Top 3 values of geo.dest',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'geo.dest',
+                isBucketed: true,
+                params: {
+                  size: 3,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+              'fe6434d9-db87-4e46-beb9-17413a21beb9': {
+                label: 'Top 3 values of geo.src',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'geo.src',
+                isBucketed: true,
+                params: {
+                  size: 3,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+            },
+            columnOrder: [
+              'fe6434d9-db87-4e46-beb9-17413a21beb9',
+              'db2eaa28-845f-4678-ae34-87de5fc99208',
+              '2a498d57-f600-4720-9fad-9fb9ec7fd72b',
+              'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+            ],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      // @ts-expect-error
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: 1,
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-a08718f8-c67e-42d1-bbe3-ee1e6a457983',
+    },
+  ],
+};
+
+export const sortedByRowDatatableAttributes: LensAttributes = {
+  visualizationType: 'lnsDatatable',
+  title: 'Sorted datatable by transposed metric column',
+  state: {
+    visualization: {
+      layerId: 'a08718f8-c67e-42d1-bbe3-ee1e6a457983',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+        },
+        {
+          columnId: '2a498d57-f600-4720-9fad-9fb9ec7fd72b',
+          isTransposed: false,
+          isMetric: false,
+        },
+        {
+          columnId: 'db2eaa28-845f-4678-ae34-87de5fc99208',
+          isTransposed: true,
+          isMetric: false,
+        },
+        {
+          columnId: 'fe6434d9-db87-4e46-beb9-17413a21beb9',
+          isTransposed: true,
+          isMetric: false,
+        },
+      ],
+      sorting: {
+        columnId: '2a498d57-f600-4720-9fad-9fb9ec7fd72b',
+        direction: 'asc',
+      },
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          'a08718f8-c67e-42d1-bbe3-ee1e6a457983': {
+            columns: {
+              'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35': {
+                label: 'Median of bytes',
+                dataType: 'number',
+                operationType: 'median',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: true,
+                },
+              } as MedianIndexPatternColumn,
+              '2a498d57-f600-4720-9fad-9fb9ec7fd72b': {
+                label: 'Top 5 values of agent.keyword',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'agent.keyword',
+                isBucketed: true,
+                params: {
+                  size: 5,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+              'db2eaa28-845f-4678-ae34-87de5fc99208': {
+                label: 'Top 3 values of geo.dest',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'geo.dest',
+                isBucketed: true,
+                params: {
+                  size: 3,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+              'fe6434d9-db87-4e46-beb9-17413a21beb9': {
+                label: 'Top 3 values of geo.src',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'geo.src',
+                isBucketed: true,
+                params: {
+                  size: 3,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+            },
+            columnOrder: [
+              'fe6434d9-db87-4e46-beb9-17413a21beb9',
+              'db2eaa28-845f-4678-ae34-87de5fc99208',
+              '2a498d57-f600-4720-9fad-9fb9ec7fd72b',
+              'c3db85ad-ecfd-4b4d-b5bb-3b67684dbb35',
+            ],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      // @ts-expect-error
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: 1,
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-a08718f8-c67e-42d1-bbe3-ee1e6a457983',
     },
   ],
 };

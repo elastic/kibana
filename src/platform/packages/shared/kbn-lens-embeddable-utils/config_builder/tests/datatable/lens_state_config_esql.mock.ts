@@ -534,3 +534,154 @@ export const fullConfigESQLDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
   version: 1,
 };
+
+export const sortedByTransposedMetricColumnESQLDatatableAttributes: LensAttributes = {
+  visualizationType: 'lnsDatatable',
+  title: 'ESQL datatable sorted by transposed metric column',
+  references: [],
+  state: {
+    visualization: {
+      layerId: '1260255a-f8d8-4b9a-b36a-6dda4b978803',
+      layerType: 'data',
+      columns: [
+        {
+          columnId: 'bytes',
+        },
+        {
+          columnId: 'bytes_counter',
+        },
+        {
+          columnId: '7afdd0a5-a3b7-44b2-8a33-9ade7f7586af',
+          isTransposed: false,
+          isMetric: false,
+        },
+        {
+          columnId: '4617d21a-3a89-403b-b952-68eb79739028',
+          isTransposed: true,
+          isMetric: false,
+        },
+        {
+          columnId: 'bb07e1b7-2768-42e2-bad4-17abadb8b40b',
+          isTransposed: true,
+          isMetric: false,
+        },
+      ],
+      sorting: {
+        columnId: 'US---VN---bytes_counter',
+        direction: 'desc',
+      },
+    },
+    query: {
+      esql: 'FROM kibana_sample_data_logs | LIMIT 10',
+    },
+    filters: [],
+    datasourceStates: {
+      textBased: {
+        layers: {
+          '1260255a-f8d8-4b9a-b36a-6dda4b978803': {
+            index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+            query: {
+              esql: 'FROM kibana_sample_data_logs | LIMIT 10',
+            },
+            columns: [
+              {
+                columnId: 'bytes',
+                fieldName: 'bytes',
+                label: 'bytes',
+                customLabel: false,
+                meta: {
+                  type: 'number',
+                  esType: 'long',
+                },
+                inMetricDimension: true,
+              },
+              {
+                columnId: 'bytes_counter',
+                fieldName: 'bytes_counter',
+                label: 'bytes_counter',
+                customLabel: false,
+                meta: {
+                  type: 'number',
+                  esType: 'long',
+                },
+                inMetricDimension: true,
+              },
+              {
+                columnId: '7afdd0a5-a3b7-44b2-8a33-9ade7f7586af',
+                fieldName: 'agent.keyword',
+                meta: {
+                  type: 'string',
+                  esType: 'keyword',
+                  sourceParams: {
+                    indexPattern: 'kibana_sample_data_logs',
+                    sourceField: 'agent.keyword',
+                  },
+                  params: {
+                    id: 'string',
+                  },
+                },
+                label: 'agent.keyword',
+              },
+              {
+                columnId: '4617d21a-3a89-403b-b952-68eb79739028',
+                fieldName: 'geo.src',
+                meta: {
+                  type: 'string',
+                  esType: 'keyword',
+                  sourceParams: {
+                    indexPattern: 'kibana_sample_data_logs',
+                    sourceField: 'geo.src',
+                  },
+                  params: {
+                    id: 'string',
+                  },
+                },
+                label: 'geo.src',
+              },
+              {
+                columnId: 'bb07e1b7-2768-42e2-bad4-17abadb8b40b',
+                fieldName: 'geo.dest',
+                meta: {
+                  type: 'string',
+                  esType: 'keyword',
+                  sourceParams: {
+                    indexPattern: 'kibana_sample_data_logs',
+                    sourceField: 'geo.dest',
+                  },
+                  params: {
+                    id: 'string',
+                  },
+                },
+                label: 'geo.dest',
+              },
+            ],
+            timeField: '@timestamp',
+          },
+        },
+      },
+    },
+    internalReferences: [
+      {
+        type: 'index-pattern',
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        name: 'textBasedLanguages-datasource-layer-1260255a-f8d8-4b9a-b36a-6dda4b978803',
+      },
+    ],
+    adHocDataViews: {
+      e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a: {
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        title: 'kibana_sample_data_logs',
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        type: 'esql',
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        allowNoIndex: false,
+        name: 'kibana_sample_data_logs',
+        allowHidden: false,
+        managed: false,
+      },
+    },
+  },
+  version: 1,
+};
