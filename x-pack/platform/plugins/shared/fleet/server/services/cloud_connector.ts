@@ -110,12 +110,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       });
 
       const countMap = new Map<string, number>();
-      const buckets =
-        (
-          result.aggregations?.packagePolicyCounts as {
-            buckets?: Array<{ key: string; doc_count: number }>;
+      const aggregations = result.aggregations as
+        | {
+            packagePolicyCounts?: {
+              buckets?: Array<{ key: string; doc_count: number }>;
+            };
           }
-        )?.buckets || [];
+        | undefined;
+      const buckets = aggregations?.packagePolicyCounts?.buckets || [];
 
       for (const bucket of buckets) {
         countMap.set(bucket.key, bucket.doc_count);
