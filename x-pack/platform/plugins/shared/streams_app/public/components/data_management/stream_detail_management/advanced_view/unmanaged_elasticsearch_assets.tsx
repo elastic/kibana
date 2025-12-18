@@ -7,21 +7,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { StreamFeatureConfiguration } from '../../stream_detail_features/stream_feature_configuration';
-import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../../hooks/use_kibana';
-import { ComponentTemplatePanel } from './component_template_panel';
-import { IndexTemplateDetails } from './index_template_details';
-import { IngestPipelineDetails } from './ingest_pipeline_details';
-import { DataStreamDetails } from './data_stream_details';
-import { IndexConfiguration } from './advanced_view/index_configuration';
-import { DeleteStreamPanel } from './advanced_view/delete_stream';
-import { Row, RowMetadata } from './advanced_view/row';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { ComponentTemplatePanel } from '../component_template_panel';
+import { IndexTemplateDetails } from '../index_template_details';
+import { IngestPipelineDetails } from '../ingest_pipeline_details';
+import { DataStreamDetails } from '../data_stream_details';
+import { IndexConfiguration } from './index_configuration';
+import { Row, RowMetadata } from './row';
 
 export function UnmanagedElasticsearchAssets({
   definition,
@@ -43,10 +40,6 @@ export function UnmanagedElasticsearchAssets({
   } = useKibana();
 
   const { onPageReady } = usePerformanceContext();
-
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
 
   const unmanagedAssetsDetailsFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -130,11 +123,6 @@ export function UnmanagedElasticsearchAssets({
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem>
-          {significantEvents?.enabled && (
-            <StreamFeatureConfiguration definition={definition.stream} />
-          )}
-        </EuiFlexItem>
         <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
           <Row
             left={
@@ -222,9 +210,6 @@ export function UnmanagedElasticsearchAssets({
             onFlyoutOpen={(name) => setCurrentFlyout({ type: 'component_template', name })}
           />
         </EuiFlexItem>
-
-        <DeleteStreamPanel definition={definition} />
-        <EuiSpacer size="s" />
       </EuiFlexGroup>
       {currentFlyout && currentFlyout.type === 'component_template' && (
         <ComponentTemplateFlyout
