@@ -299,19 +299,53 @@ export function LensEditConfigurationFlyout({
       : [];
   }, [activeVisualization, visualization.state]);
 
-  const isSingleLayerVisualization = layerIds.length === 1;
-
   const showConvertToEsqlButton = useMemo(() => {
     const isDevMode = process.env.NODE_ENV === 'development';
-    return isDevMode && !textBasedMode && isSingleLayerVisualization;
-  }, [textBasedMode, isSingleLayerVisualization]);
+    return isDevMode && !textBasedMode;
+  }, [textBasedMode]);
 
-  // The button is disabled when the visualization cannot be converted to ES|QL
-  const { isConvertToEsqlButtonDisbaled } = useMemo(() => {
+  const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip } = useMemo(() => {
+    if (!showConvertToEsqlButton || !activeVisualization || !visualization.state) {
+      return {
+        isConvertToEsqlButtonDisabled: true,
+        convertToEsqlButtonTooltip: '',
+      };
+    }
+
+    const { state } = visualization;
+
+    if (
+      state &&
+      typeof state === 'object' &&
+      'trendlineLayerId' in state &&
+      'trendlineMetricAccessor' in state &&
+      'trendlineTimeAccessor' in state &&
+      state.trendlineLayerId &&
+      state.trendlineMetricAccessor &&
+      state.trendlineTimeAccessor
+    ) {
+      return {
+        isConvertToEsqlButtonDisabled: true,
+        convertToEsqlButtonTooltip: 'Metric visualization with trend lines',
+      };
+    }
+
+    if (layerIds.length > 1) {
+      return {
+        isConvertToEsqlButtonDisabled: true,
+        convertToEsqlButtonTooltip: 'The visualization has more than one layer',
+      };
+    }
+
+    // One layer
+
     const datasourceState = datasourceStates[datasourceId].state;
 
-    if (!isSingleLayerVisualization || textBasedMode || !datasourceState) {
-      return { isConvertToEsqlButtonDisabled: true };
+    if (textBasedMode || !datasourceState) {
+      return {
+        isConvertToEsqlButtonDisabled: true,
+        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
+      };
     }
 
     // Validate datasourceState structure
@@ -321,7 +355,10 @@ export function LensEditConfigurationFlyout({
       !('layers' in datasourceState) ||
       !datasourceState.layers
     ) {
-      return { isConvertToEsqlButtonDisabled: true };
+      return {
+        isConvertToEsqlButtonDisabled: true,
+        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
+      };
     }
 
     // Access the single layer safely
@@ -329,12 +366,18 @@ export function LensEditConfigurationFlyout({
     const layerId = layerIds[0];
 
     if (!layerId || !(layerId in layers)) {
-      return { isConvertToEsqlButtonDisabled: true };
+      return {
+        isConvertToEsqlButtonDisabled: true,
+        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
+      };
     }
 
     const singleLayer = layers[layerId];
     if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
-      return { isConvertToEsqlButtonDisabled: true };
+      return {
+        isConvertToEsqlButtonDisabled: true,
+        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
+      };
     }
 
     // Get the esAggEntries
@@ -357,17 +400,22 @@ export function LensEditConfigurationFlyout({
       startDependencies.data.nowProvider.get()
     );
 
-    return { isConvertToEsqlButtonDisbaled: !esqlLayer };
+    return {
+      isConvertToEsqlButtonDisabled: !esqlLayer,
+      convertToEsqlButtonTooltip: 'Switch to query mode',
+    };
   }, [
     coreStart.uiSettings,
     datasourceId,
     datasourceStates,
     framePublicAPI.dataViews.indexPatterns,
     framePublicAPI.dateRange,
-    isSingleLayerVisualization,
     layerIds,
     startDependencies.data.nowProvider,
     textBasedMode,
+    activeVisualization,
+    showConvertToEsqlButton,
+    visualization.state,
   ]);
 
   if (isLoading) return null;
@@ -379,24 +427,7 @@ export function LensEditConfigurationFlyout({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
       {showConvertToEsqlButton ? (
-        <EuiToolTip
-          position="top"
-          content={
-            isConvertToEsqlButtonDisbaled ? (
-              <p>
-                {i18n.translate('xpack.lens.config.cannotConvertToEsqlDescription', {
-                  defaultMessage: 'This visualization cannot be converted to ES|QL',
-                })}
-              </p>
-            ) : (
-              <p>
-                {i18n.translate('xpack.lens.config.convertToEsqlDescription', {
-                  defaultMessage: 'Convert visualization to ES|QL',
-                })}
-              </p>
-            )
-          }
-        >
+        <EuiToolTip position="top" content={convertToEsqlButtonTooltip}>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               color="success"
@@ -406,7 +437,7 @@ export function LensEditConfigurationFlyout({
               aria-label={i18n.translate('xpack.lens.config.convertToEsqlLabel', {
                 defaultMessage: 'Convert to ES|QL',
               })}
-              isDisabled={isConvertToEsqlButtonDisbaled}
+              isDisabled={isConvertToEsqlButtonDisabled}
             />
           </EuiFlexItem>
         </EuiToolTip>
