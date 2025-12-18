@@ -182,6 +182,10 @@ spaceTest.describe(
         await pageObjects.cspmIntegrationPage.selectAccountType('aws', 'organization');
         await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
 
+        // Wait for form to be ready before selecting existing connector
+        const saveButton = page.getByTestId('createPackagePolicySaveButton');
+        await saveButton.waitFor({ state: 'visible' });
+
         // Select the existing connector (UI should show "Existing Connections" tab with mock data)
         await pageObjects.cspmIntegrationPage.selectExistingCloudConnector(
           'aws',
@@ -189,6 +193,10 @@ spaceTest.describe(
         );
 
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+
+        // Wait for the save button to be enabled before clicking
+        await expect(saveButton).toBeEnabled({ timeout: 10000 });
+
         await pageObjects.cspmIntegrationPage.saveIntegration();
 
         // Wait for the request to be captured by polling
@@ -279,6 +287,10 @@ spaceTest.describe(
         await pageObjects.cspmIntegrationPage.selectAccountType('azure', 'organization');
         await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
 
+        // Wait for form to be ready before selecting existing connector
+        const saveButton = page.getByTestId('createPackagePolicySaveButton');
+        await saveButton.waitFor({ state: 'visible' });
+
         // Select the existing connector (UI should show "Existing Connections" tab with mock data)
         await pageObjects.cspmIntegrationPage.selectExistingCloudConnector(
           'azure',
@@ -286,6 +298,10 @@ spaceTest.describe(
         );
 
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+
+        // Wait for the save button to be enabled before clicking
+        await expect(saveButton).toBeEnabled({ timeout: 10000 });
+
         await pageObjects.cspmIntegrationPage.saveIntegration();
 
         // Wait for the request to be captured by polling

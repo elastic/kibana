@@ -105,12 +105,21 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
       await pageObjects.cspmIntegrationPage.selectProvider('aws');
       await pageObjects.cspmIntegrationPage.selectAccountType('aws', 'organization');
       await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
+
+      // Wait for cloud connector form to be ready after selecting agentless
+      const saveButton = page.getByTestId('createPackagePolicySaveButton');
+      await saveButton.waitFor({ state: 'visible' });
+
       // Cloud connectors is selected by default when agentless + cloud connectors are enabled
       await pageObjects.cspmIntegrationPage.fillCloudConnectorName(connectorName);
       await pageObjects.cspmIntegrationPage.fillCloudConnectorRoleArn(roleArn);
       // External ID is optional - fill if field is present
       await pageObjects.cspmIntegrationPage.fillAwsCloudConnectorExternalId(externalId);
       await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+
+      // Wait for the save button to be enabled before clicking
+      await expect(saveButton).toBeEnabled({ timeout: 10000 });
+
       await pageObjects.cspmIntegrationPage.saveIntegration();
 
       // Wait for the request to be captured by polling
@@ -183,6 +192,11 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
       await pageObjects.cspmIntegrationPage.selectProvider('azure');
       await pageObjects.cspmIntegrationPage.selectAccountType('azure', 'organization');
       await pageObjects.cspmIntegrationPage.selectSetupTechnology('agentless');
+
+      // Wait for cloud connector form to be ready after selecting agentless
+      const saveButton = page.getByTestId('createPackagePolicySaveButton');
+      await saveButton.waitFor({ state: 'visible' });
+
       // Cloud connectors is selected by default when agentless + cloud connectors are enabled
       await pageObjects.cspmIntegrationPage.fillCloudConnectorName(connectorName);
       await pageObjects.cspmIntegrationPage.fillAzureCloudConnectorDetails(
@@ -191,6 +205,10 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
         credentialsId
       );
       await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+
+      // Wait for the save button to be enabled before clicking
+      await expect(saveButton).toBeEnabled({ timeout: 10000 });
+
       await pageObjects.cspmIntegrationPage.saveIntegration();
 
       // Wait for the request to be captured by polling
