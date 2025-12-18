@@ -53,26 +53,20 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
   const getIlmPolicy = useCallback(
     async (policyName: string) => {
-      try {
-        const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
-        return policies.find((policy) => policy.name === policyName) ?? null;
-      } catch (error) {
-        return null;
-      }
+      // Errors are handled in the flyout component
+      const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
+      return policies.find((policy) => policy.name === policyName) ?? null;
     },
     [indexLifecycleManagement.apiService, signal]
   );
 
   const getSimulatedTemplate = useCallback(
     async (templateName: string, templateSignal?: AbortSignal) => {
-      try {
-        return await indexManagement.apiService.simulateIndexTemplate({
-          templateName,
-          signal: templateSignal ?? signal,
-        });
-      } catch (error) {
-        return null;
-      }
+      // Errors are handled in the flyout component
+      return await indexManagement.apiService.simulateIndexTemplate({
+        templateName,
+        signal: templateSignal ?? signal,
+      });
     },
     [indexManagement.apiService, signal]
   );
