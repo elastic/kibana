@@ -51,6 +51,7 @@ export interface ReportRoundCompleteParams {
   model?: string;
   model_provider?: string;
   output_tokens: number;
+  round_id: string;
   response_length: number;
   round_number: number;
   started_at: string;
@@ -65,6 +66,7 @@ export interface ReportRoundErrorParams {
   model_provider?: string;
   conversation_id?: string;
   agent_id: string;
+  round_id?: string;
 }
 
 export interface AgentBuilderTelemetryEventsMap {
@@ -203,6 +205,13 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    round_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique ID of the conversation round',
+        optional: false,
+      },
+    },
     message_length: {
       type: 'integer',
       _meta: {
@@ -290,6 +299,13 @@ const ROUND_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
     _meta: {
       description: 'The error message describing what went wrong',
       optional: false,
+    },
+  },
+  round_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'Unique ID of the conversation round (when available)',
+      optional: true,
     },
   },
   model_provider: {

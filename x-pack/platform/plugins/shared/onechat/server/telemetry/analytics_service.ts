@@ -70,6 +70,7 @@ export class AnalyticsService {
         model: round.model_usage.model,
         model_provider: modelProvider,
         output_tokens: round.model_usage.output_tokens,
+        round_id: round.id,
         response_length: round.response.message.length,
         round_number: roundCount,
         started_at: round.started_at,
@@ -88,11 +89,13 @@ export class AnalyticsService {
     conversationId,
     error,
     modelProvider,
+    roundId,
   }: {
     agentId: string;
     conversationId?: string;
     error: unknown;
     modelProvider: ModelProvider;
+    roundId?: string;
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -104,6 +107,7 @@ export class AnalyticsService {
         model_provider: modelProvider,
         error_message: errorMessage,
         error_type: errorType,
+        ...(roundId ? { round_id: roundId } : {}),
       });
     } catch (err) {
       // Do not fail the request if telemetry fails
