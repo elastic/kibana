@@ -13,6 +13,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { getEditRuleRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -102,7 +103,7 @@ export const RulesPage = () => {
 
   const renderLogsList = useCallback(() => {
     return (
-      <KibanaPageTemplate.Section grow={false} paddingSize="none">
+      <KibanaPageTemplate.Section grow={false} paddingSize="l">
         {suspendedComponentWithProps(
           LogsList,
           'xl'
@@ -121,9 +122,7 @@ export const RulesPage = () => {
   }, [docTitle, setBreadcrumbs, currentSection]);
 
   return (
-    <KibanaPageTemplate
-      restrictWidth={false}
-      panelled
+    <RulesPageTemplate
       pageHeader={{
         paddingSize: 'xl',
         bottomBorder: true,
@@ -157,6 +156,6 @@ export const RulesPage = () => {
         <Route exact path="/rules" component={renderRulesList} />
         <Route exact path="/" component={renderRulesList} />
       </Routes>
-    </KibanaPageTemplate>
+    </RulesPageTemplate>
   );
 };

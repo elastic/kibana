@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { RulesPageTemplate } from '../../rules_page/rules_page_template';
 import RuleDetailsRouteWithApi from './rule_details_route';
 
 type RuleDetailsRouteWrapperProps = RouteComponentProps<{
@@ -21,16 +21,9 @@ type RuleDetailsRouteWrapperProps = RouteComponentProps<{
  */
 const RuleDetailsRouteWrapper: React.FunctionComponent<RuleDetailsRouteWrapperProps> = (props) => {
   return (
-    <KibanaPageTemplate
-      restrictWidth={false}
-      panelled
-      // @ts-expect-error Technically `paddingSize` isn't supported but it is passed through,
-      // this is a stop-gap for Stack management specifically until page components can be converted to template components
-      // this is required for rules detail page to have proper padding, see https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/management/public/components/management_app/management_app.tsx#L125
-      mainProps={{ paddingSize: 'l' }}
-    >
+    <RulesPageTemplate>
       <RuleDetailsRouteWithApi {...props} />
-    </KibanaPageTemplate>
+    </RulesPageTemplate>
   );
 };
 
