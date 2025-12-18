@@ -12,17 +12,13 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import type { ParameterHint, ParameterHintEntityType } from '../../..';
 import type { ICommandContext, ISuggestionItem } from '../../../registry/types';
-import type { ExpressionContext } from './expressions/types';
 import { createInferenceEndpointToCompletionItem } from './helpers';
 
-type SuggestionResolver = (
-  hint: ParameterHint,
-  ctx: ExpressionContext
-) => Promise<ISuggestionItem[]>;
+type SuggestionResolver = (hint: ParameterHint, ctx?: ICommandContext) => ISuggestionItem[];
 
 type ContextResolver = (
   hint: ParameterHint,
-  context: Partial<ICommandContext>,
+  ctx: Partial<ICommandContext>,
   callbacks: ESQLCallbacks
 ) => Promise<Record<string, unknown>>;
 
@@ -53,14 +49,36 @@ export const parametersFromHintsResolvers: Partial<
   },
 };
 
-// -------- INFERENCE ENDPOINT -------- //
+// -------- INFERENCE ENDPOINT HINT -------- //
+function inferenceEndpointSuggestionResolver(
+  hint: ParameterHint,
+  ctx?: ICommandContext
+): ISuggestionItem[] {
+  if (hint.constraints?.task_type) {
+    const inferenceEnpoints =
+      ctx?.inferenceEndpoints?.filter((endpoint) => {
+        return endpoint.task_type === hint.constraints?.task_type;
+      }) ?? [];
+
+    return inferenceEnpoints.map((inferenceEndpoint) => {
+      const item = createInferenceEndpointToCompletionItem(inferenceEndpoint);
+      return {
+        ...item,
+        detail: '',
+        text: `"${item.text}"`,
+      };
+    });
+  }
+  return [];
+}
+
 async function inferenceEndpointContextResolver(
   hint: ParameterHint,
-  context: Partial<ICommandContext>,
+  ctx: Partial<ICommandContext>,
   callbacks: ESQLCallbacks
 ): Promise<Record<string, unknown>> {
   if (hint.constraints?.task_type) {
-    const inferenceEndpointsFromContext = context.inferenceEndpoints ?? [];
+    const inferenceEndpointsFromContext = ctx.inferenceEndpoints ?? [];
 
     // If the context already has an endpoint for the task type, we don't need to fetch them again
     if (
@@ -76,29 +94,11 @@ async function inferenceEndpointContextResolver(
         ?.inferenceEndpoints || [];
 
     return {
-      inferenceEndpoints: uniqBy([...inferenceEndpointsFromContext, ...inferenceEnpoints], 'id'),
+      inferenceEndpoints: uniqBy(
+        [...inferenceEndpointsFromContext, ...inferenceEnpoints],
+        'inference_id'
+      ),
     };
   }
   return {};
-}
-async function inferenceEndpointSuggestionResolver(
-  hint: ParameterHint,
-  ctx: ExpressionContext
-): Promise<ISuggestionItem[]> {
-  if (hint.constraints?.task_type) {
-    const inferenceEnpoints =
-      ctx.context?.inferenceEndpoints?.filter((endpoint) => {
-        return endpoint.task_type === hint.constraints?.task_type;
-      }) ?? [];
-
-    return inferenceEnpoints.map((inferenceEndpoint) => {
-      const item = createInferenceEndpointToCompletionItem(inferenceEndpoint);
-      return {
-        ...item,
-        detail: '',
-        text: `"${item.text}"`,
-      };
-    });
-  }
-  return [];
 }

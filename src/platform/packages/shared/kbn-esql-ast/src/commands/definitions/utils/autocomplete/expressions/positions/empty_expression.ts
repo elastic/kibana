@@ -391,10 +391,9 @@ async function buildSuggestionsFromHints(
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 
-  const results = await Promise.all(
-    hints.map(
-      (hint) => parametersFromHintsResolvers[hint.entityType].suggestionResolver?.(hint, ctx) ?? []
-    )
+  const results = hints.map(
+    (hint) =>
+      parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
   );
 
   return results.flat();
