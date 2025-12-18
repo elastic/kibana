@@ -153,7 +153,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsContextMock.mockReturnValue({
       metricFields: [],
       dimensions: [],
-      sampleRowByMetric: new Map(),
+      getSampleRow: jest.fn(() => undefined),
     });
 
     useMetricFieldsMock.mockReturnValue({
@@ -172,7 +172,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsContextMock.mockReturnValue({
       metricFields: [],
       dimensions: [],
-      sampleRowByMetric: new Map(),
+      getSampleRow: jest.fn(() => undefined),
     });
 
     useMetricFieldsMock.mockReturnValue({
@@ -192,7 +192,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsContextMock.mockReturnValue({
       metricFields: [],
       dimensions: [],
-      sampleRowByMetric: new Map(),
+      getSampleRow: jest.fn(() => undefined),
     });
 
     useMetricFieldsMock.mockReturnValue({
