@@ -14,17 +14,38 @@ type DependencyDetailsPageTabName = 'overview' | 'operations';
 
 export class DependencyDetailsPage {
   readonly DEPENDENCY_NAME = 'postgresql';
+  readonly SPAN_NAME = 'SELECT * FROM product';
 
-  readonly latencyChart;
-  readonly throughputChart;
-  readonly failedTransactionRateChart;
-  readonly upstreamServicesTable;
+  readonly overviewTabLatencyChart;
+  readonly overviewTabThroughputChart;
+  readonly overviewTabFailedTransactionRateChart;
+  readonly overviewTabUpstreamServicesTable;
+
+  readonly operationsTabOperationsTable;
+
+  readonly operationDetailLatencyChart;
+  readonly operationDetailThroughputChart;
+  readonly operationDetailFailedTransactionRateChart;
+  readonly operationDetailCorrelationsChart;
+  readonly operationDetailWaterfallInvestigateButton;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.latencyChart = this.page.getByTestId('latencyChart');
-    this.throughputChart = this.page.getByTestId('throughputChart');
-    this.failedTransactionRateChart = this.page.getByTestId('errorRateChart');
-    this.upstreamServicesTable = this.page.getByTestId('dependenciesTable');
+    this.overviewTabLatencyChart = this.page.getByTestId('latencyChart');
+    this.overviewTabThroughputChart = this.page.getByTestId('throughputChart');
+    this.overviewTabFailedTransactionRateChart = this.page.getByTestId('errorRateChart');
+    this.overviewTabUpstreamServicesTable = this.page.getByTestId('dependenciesTable');
+
+    this.operationsTabOperationsTable = this.page.getByTestId(
+      'apmDependencyDetailOperationsListTable'
+    );
+
+    this.operationDetailLatencyChart = this.page.getByTestId('latencyChart');
+    this.operationDetailThroughputChart = this.page.getByTestId('throughputChart');
+    this.operationDetailFailedTransactionRateChart = this.page.getByTestId('errorRateChart');
+    this.operationDetailCorrelationsChart = this.page.getByTestId('apmCorrelationsChart');
+    this.operationDetailWaterfallInvestigateButton = this.page.getByTestId(
+      'apmActionMenuButtonInvestigateButton'
+    );
   }
 
   async goToPage(overrides?: { dependencyName?: string; rangeFrom?: string; rangeTo?: string }) {
@@ -115,40 +136,28 @@ export class DependencyDetailsPage {
   // #endregion
 
   // #region Overview Tab
-  getServiceInUpstreamServicesTable(serviceName: string) {
-    return this.upstreamServicesTable.getByRole('link', { name: serviceName });
+  getServiceInOverviewTabUpstreamServicesTable(serviceName: string) {
+    return this.overviewTabUpstreamServicesTable.getByRole('link', { name: serviceName });
   }
 
-  async clickServiceInUpstreamServicesTable(serviceName: string) {
-    await this.getServiceInUpstreamServicesTable(serviceName).click();
+  async clickServiceInOverviewTabUpstreamServicesTable(serviceName: string) {
+    await this.getServiceInOverviewTabUpstreamServicesTable(serviceName).click();
   }
   // #endregion
 
   // #region Operations Tab
-  async expectOperationsTableVisible() {
-    await expect(this.page.getByTestId('apmDependencyDetailOperationsListTable')).toBeVisible();
-  }
-
-  async expectOperationInOperationsTable(operationName: string) {
-    await expect(
-      this.page
-        .getByTestId(`apmDependencyDetailOperationsListTable`)
-        .getByRole('link', { name: operationName })
-    ).toBeVisible();
+  getOperationInOperationsTabOperationsTable(operationName: string) {
+    return this.operationsTabOperationsTable.getByRole('link', { name: operationName });
   }
 
   async clickOperationInOperationsTable(operationName: string) {
-    await this.page
-      .getByTestId(`apmDependencyDetailOperationsListTable`)
-      .getByRole('link', { name: operationName })
-      .click();
+    await this.getOperationInOperationsTabOperationsTable(operationName).click();
   }
   // #endregion
 
   // #region Operation Detail
   private async waitForWaterfallToLoad() {
-    this.page
-      .getByTestId('apmActionMenuButtonInvestigateButton')
+    this.operationDetailWaterfallInvestigateButton
       .getByRole('progressbar')
       .waitFor({ state: 'hidden' });
   }
@@ -163,32 +172,24 @@ export class DependencyDetailsPage {
     ]);
   }
 
-  async gotoOperationDetail(params: {
-    dependencyName: string;
-    spanName: string;
-    start: string;
-    end: string;
-  }) {
-    const { dependencyName, spanName, start, end } = params;
-
+  async gotoOperationDetail(
+    overrides: {
+      dependencyName?: string;
+      spanName?: string;
+      rangeFrom?: string;
+      rangeTo?: string;
+    } = {}
+  ) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies/operation?${new URLSearchParams({
-        dependencyName,
-        spanName,
-        rangeFrom: start,
-        rangeTo: end,
+        dependencyName: this.DEPENDENCY_NAME,
+        spanName: this.SPAN_NAME,
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+        ...overrides,
       })}`
     );
     await this.waitForOperationDetailToLoad();
-  }
-
-  async expectCorrelationsChartVisible() {
-    await expect(this.page.getByTestId('apmCorrelationsChart')).toBeVisible();
-  }
-
-  async expectWaterfallVisible() {
-    await expect(this.page.getByTestId('apmActionMenuButtonInvestigateButton')).toBeVisible();
-    await expect(this.page.getByTestId('apmFullTraceButtonViewFullTraceButton')).toBeVisible();
   }
   // #endregion
 }

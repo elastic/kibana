@@ -6,17 +6,9 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import qs from 'query-string';
-import { test, testData } from '../../fixtures';
+import { test } from '../../fixtures';
 
-const DEPENDENCY_NAME = 'postgresql';
 const SPAN_NAME = 'SELECT * FROM product';
-
-const gotoParams = {
-  dependencyName: DEPENDENCY_NAME,
-  start: testData.OPBEANS_START_DATE,
-  end: testData.OPBEANS_END_DATE,
-};
 
 test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -28,30 +20,33 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on dependency details page', async () => {
-      await dependencyDetailsPage.gotoPage(gotoParams);
+      await dependencyDetailsPage.goToPage();
     });
 
     await test.step('Navigate to operations tab', async () => {
-      await dependencyDetailsPage.expectOperationsTabVisible();
+      await expect(dependencyDetailsPage.getOperationsTab()).toBeVisible();
       await dependencyDetailsPage.clickOperationsTab();
     });
 
     await test.step('Land on operations tab', async () => {
       expect(page.url()).toContain(`/dependencies`);
-      await dependencyDetailsPage.expectOperationsTabSelected();
+      await expect(dependencyDetailsPage.getOperationsTab()).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
     });
   });
 
-  // Assertions are done within the page object
-  // eslint-disable-next-line playwright/expect-expect
   test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
     await test.step('Land on operations tab', async () => {
-      await dependencyDetailsPage.gotoOperationsTab(gotoParams);
+      await dependencyDetailsPage.goToOperationsTab();
     });
 
     await test.step('Renders operations content', async () => {
-      await dependencyDetailsPage.expectOperationsTableVisible();
-      await dependencyDetailsPage.expectOperationInOperationsTable('SELECT * FROM product');
+      await expect(dependencyDetailsPage.operationsTabOperationsTable).toBeVisible();
+      await expect(
+        dependencyDetailsPage.getOperationInOperationsTabOperationsTable(SPAN_NAME)
+      ).toBeVisible();
     });
   });
 
@@ -60,7 +55,7 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on operations tab', async () => {
-      await dependencyDetailsPage.gotoOperationsTab(gotoParams);
+      await dependencyDetailsPage.goToOperationsTab();
     });
 
     await test.step('Click on operation in operations table', async () => {
@@ -68,9 +63,9 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     });
 
     await test.step('Land on dependency operation page', async () => {
-      const url = page.url();
-      expect(url).toContain(`/dependencies/operation`);
-      expect(url).toContain(qs.stringify({ spanName: SPAN_NAME }, { encode: true }));
+      const url = new URL(page.url());
+      expect(url.pathname).toContain(`/dependencies/operation`);
+      expect(url.searchParams.get('spanName')).toBe(SPAN_NAME);
     });
   });
 
@@ -79,7 +74,7 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on operations tab', async () => {
-      await dependencyDetailsPage.gotoOperationsTab(gotoParams);
+      await dependencyDetailsPage.goToOperationsTab();
     });
 
     await test.step('Check a11y', async () => {

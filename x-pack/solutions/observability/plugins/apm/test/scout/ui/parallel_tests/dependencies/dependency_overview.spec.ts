@@ -38,17 +38,17 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('Renders overview content', async () => {
-      await expect(dependencyDetailsPage.latencyChart).toBeVisible();
-      await expect(dependencyDetailsPage.throughputChart).toBeVisible();
-      await expect(dependencyDetailsPage.failedTransactionRateChart).toBeVisible();
-      await expect(dependencyDetailsPage.upstreamServicesTable).toBeVisible();
+      await expect(dependencyDetailsPage.overviewTabLatencyChart).toBeVisible();
+      await expect(dependencyDetailsPage.overviewTabThroughputChart).toBeVisible();
+      await expect(dependencyDetailsPage.overviewTabFailedTransactionRateChart).toBeVisible();
+      await expect(dependencyDetailsPage.overviewTabUpstreamServicesTable).toBeVisible();
       await expect(
-        dependencyDetailsPage.upstreamServicesTable.getByRole('heading', {
+        dependencyDetailsPage.overviewTabUpstreamServicesTable.getByRole('heading', {
           name: 'Upstream services',
         })
       ).toBeVisible();
       await expect(
-        dependencyDetailsPage.getServiceInUpstreamServicesTable(SERVICE_NAME)
+        dependencyDetailsPage.getServiceInOverviewTabUpstreamServicesTable(SERVICE_NAME)
       ).toBeVisible();
     });
   });
@@ -62,7 +62,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('Click on a service in upstream services table', async () => {
-      await dependencyDetailsPage.clickServiceInUpstreamServicesTable(SERVICE_NAME);
+      await dependencyDetailsPage.clickServiceInOverviewTabUpstreamServicesTable(SERVICE_NAME);
     });
 
     await test.step('Lands on the service overview page', async () => {
