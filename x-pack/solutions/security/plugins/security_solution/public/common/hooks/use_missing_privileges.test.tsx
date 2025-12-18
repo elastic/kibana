@@ -117,7 +117,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: false, read: true },
           exceptions: { edit: false, read: true },
         },
-        alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: false } },
+        alertsPrivileges: { alerts: { edit: true, read: true } },
       })
     );
 
@@ -135,9 +135,9 @@ describe('useMissingPrivileges', () => {
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           rules: { edit: true, read: true },
-          exceptions: { edit: true, read: true },
+          exceptions: { crud: true, read: true },
         },
-        alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
+        alertsPrivileges: { alerts: { edit: false, read: true } },
       })
     );
 
@@ -172,9 +172,9 @@ describe('useMissingPrivileges', () => {
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           rules: { edit: false, read: true },
-          exceptions: { edit: false, read: true },
+          exceptions: { crud: false, read: true },
         },
-        alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
+        alertsPrivileges: { alerts: { edit: false, read: true } },
       })
     );
 
@@ -195,7 +195,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: true, read: true },
           exceptions: { edit: true, read: true },
         },
-        alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
+        alertsPrivileges: { alerts: { edit: true, read: true } },
       })
     );
 
@@ -209,9 +209,9 @@ describe('useMissingPrivileges', () => {
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           rules: { edit: false, read: true },
-          exceptions: { edit: false, read: true },
+          exceptions: { crud: false, read: true },
         },
-        alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
+        alertsPrivileges: { alerts: { edit: false, read: true } },
       })
     );
 
