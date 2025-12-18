@@ -3,12 +3,6 @@ steps:
     key: esql-evaluations
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     steps:
       - label: 'ES|QL Generation Evaluations'
         command: bash .buildkite/scripts/steps/evals/esql_evals.sh
