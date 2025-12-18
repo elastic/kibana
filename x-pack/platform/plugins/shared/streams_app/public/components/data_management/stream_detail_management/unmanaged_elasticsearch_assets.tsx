@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { StreamFeatureConfiguration } from '../../stream_detail_features/stream_feature_configuration';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -40,6 +42,8 @@ export function UnmanagedElasticsearchAssets({
     },
   } = useKibana();
 
+  const { onPageReady } = usePerformanceContext();
+
   const {
     features: { significantEvents },
   } = useStreamsPrivileges();
@@ -57,6 +61,22 @@ export function UnmanagedElasticsearchAssets({
     },
     [definition.stream.name, streamsRepositoryClient]
   );
+
+  useEffect(() => {
+    if (unmanagedAssetsDetailsFetch.value && !unmanagedAssetsDetailsFetch.loading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+      });
+    }
+  }, [
+    definition.stream,
+    unmanagedAssetsDetailsFetch.value,
+    unmanagedAssetsDetailsFetch.loading,
+    onPageReady,
+  ]);
 
   const indexManagementLocator = share.url.locators.get<IndexManagementLocatorParams>(
     'INDEX_MANAGEMENT_LOCATOR_ID'

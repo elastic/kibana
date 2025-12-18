@@ -795,19 +795,42 @@ describe('Handle request to schedule', () => {
     });
 
     test('disallows invalid browser timezone', async () => {
-      expect(
-        await requestHandler.handleRequest({
-          exportTypeId: 'csv_searchsource',
-          jobParams: {
-            ...mockJobParams,
-            browserTimezone: 'America/Amsterdam',
+      const handler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: { username: 'testymcgee' },
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: {
+          ...mockRequest,
+          query: {},
+          params: { exportType: 'printablePdfV2' },
+          body: {
+            schedule: { rrule: { freq: 1, interval: 2, tzid: 'America/Amsterdam' } },
+            jobParams: rison.encode({
+              ...mockJobParams,
+              browserTimezone: 'America/Amsterdam',
+            }),
           },
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "body": "Invalid timezone \\"America/Amsterdam\\".",
-        }
-      `);
+        },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      try {
+        await handler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+        expect(err.body).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `);
+      }
     });
 
     test('disallows scheduling when user is "false"', async () => {

@@ -16,6 +16,7 @@ import type {
 } from '@kbn/onechat-server/runner';
 import { createErrorResult } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
+import { isToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { ToolCallSource } from '../../telemetry';
@@ -63,7 +64,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const manager = parentManager.createChild(context);
   const { resultStore } = manager.deps;
 
-  const { results } = await withExecuteToolSpan(
+  const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
     async (): Promise<ToolHandlerReturn> => {
@@ -91,21 +92,27 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   );
 
-  const resultsWithIds = results.map<ToolResult>(
-    (result) =>
-      ({
-        ...result,
-        tool_result_id: result.tool_result_id ?? getToolResultId(),
-      } as ToolResult)
-  );
+  if (isToolHandlerStandardReturn(toolReturn)) {
+    const resultsWithIds = toolReturn.results.map<ToolResult>(
+      (result) =>
+        ({
+          ...result,
+          tool_result_id: result.tool_result_id ?? getToolResultId(),
+        } as ToolResult)
+    );
 
-  resultsWithIds.forEach((result) => {
-    resultStore.add(result);
-  });
+    resultsWithIds.forEach((result) => {
+      resultStore.add(result);
+    });
 
-  return {
-    results: resultsWithIds,
-  };
+    return {
+      results: resultsWithIds,
+    };
+  } else {
+    return {
+      prompt: toolReturn.prompt,
+    };
+  }
 };
 
 export const createToolHandlerContext = async <TParams = Record<string, unknown>>({
@@ -115,9 +122,18 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent } = toolExecutionParams;
-  const { request, elasticsearch, spaces, modelProvider, toolsService, resultStore, logger } =
-    manager.deps;
+  const { onEvent, toolId, toolCallId, toolParams } = toolExecutionParams;
+  const {
+    request,
+    elasticsearch,
+    spaces,
+    modelProvider,
+    toolsService,
+    resultStore,
+    logger,
+    promptManager,
+    stateManager,
+  } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
     request,
@@ -130,6 +146,12 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       registry: await toolsService.getRegistry({ request }),
       runner: manager.getRunner(),
       request,
+    }),
+    stateManager: stateManager.getToolStateManager({ toolId, toolCallId }),
+    prompts: promptManager.forTool({
+      toolId,
+      toolCallId,
+      toolParams: toolParams as Record<string, unknown>,
     }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
