@@ -32,6 +32,10 @@ export interface EntityAnalyticsApiService {
   deleteRiskEngineConfiguration: () => Promise<void>;
   getRiskEngineStatus: () => Promise<RiskEngineStatusResponse>;
   getEntityStoreStatus: () => Promise<GetEntityStoreStatusResponse>;
+  waitForEntityStoreStatus: (
+    expectedStatus: 'running',
+    timeoutMs?: number
+  ) => Promise<GetEntityStoreStatusResponse>;
 }
 
 export const getEntityAnalyticsApiService = ({
@@ -45,7 +49,7 @@ export const getEntityAnalyticsApiService = ({
 }): EntityAnalyticsApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
-  return {
+  const service: EntityAnalyticsApiService = {
     deleteEntityStoreEngines: async () => {
       await measurePerformanceAsync(
         log,
@@ -124,5 +128,39 @@ export const getEntityAnalyticsApiService = ({
         }
       );
     },
+
+    waitForEntityStoreStatus: async (expectedStatus: 'running', timeoutMs: number = 60000) => {
+      return measurePerformanceAsync(
+        log,
+        `security.entityAnalytics.waitForEntityStoreStatus [${expectedStatus}]`,
+        async () => {
+          const startTime = Date.now();
+          let lastStatus: GetEntityStoreStatusResponse | undefined;
+
+          while (Date.now() - startTime < timeoutMs) {
+            try {
+              const status = await service.getEntityStoreStatus();
+              lastStatus = status;
+
+              if (status.status === expectedStatus) {
+                return status;
+              }
+            } catch (error) {
+              log.debug(`Error checking entity store status: ${error}`);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          throw new Error(
+            `Timeout waiting for entity store status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
+              lastStatus
+            )}`
+          );
+        }
+      );
+    },
   };
+
+  return service;
 };

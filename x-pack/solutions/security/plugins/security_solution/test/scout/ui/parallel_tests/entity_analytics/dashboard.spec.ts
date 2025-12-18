@@ -54,8 +54,9 @@ spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess', '@svlSecur
 
         expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
 
-        const entityStoreStatus = await apiServices.entityAnalytics.getEntityStoreStatus();
-
+        const entityStoreStatus = await apiServices.entityAnalytics.waitForEntityStoreStatus(
+          'running'
+        );
         expect(entityStoreStatus.status).toBe('running');
       }
     );
