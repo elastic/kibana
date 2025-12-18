@@ -157,10 +157,11 @@ router.get({
 }, handler);
 ```
 
-**Flag if:** `reason` is generic without specific context:
+**Flag if:** `reason` is:
   -`"Opt out from authorization"` (too generic, no context)
   - `"This route does not need authorization"` (no explanation why)
   - `"Authorization not required"` (no context provided)
+  - `Authorization is delegated to SO Client` (semantically equivalent to the already predefined reason `AuthzOptOutReason.DelegateToSOClient`)
 
 ## Summary
 
@@ -176,7 +177,7 @@ router.get({
      - `delete_entity_a`
      - `manage_entity`
 2. **Routes with privilege-based branching MUST use `request.authzResult`**
-3. **Opt-out routes must have clear, specific reasons with context (not just "Opt out from authorization")**
+3. **Opt-out routes must have clear, specific reasons with context (not just "Opt out from authorization")*
 
 ## References
 
