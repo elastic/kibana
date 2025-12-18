@@ -239,12 +239,44 @@ spaceTest.describe(
           await route.continue();
         });
 
-        // Intercept package policy API - this IS the agent-based endpoint
+        // Mock agent policy creation (required for agent-based flow)
+        await page.route(/\/api\/fleet\/agent_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            const requestBody = request.postDataJSON() as Record<string, unknown>;
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                item: {
+                  id: `mock-agent-policy-${Date.now()}`,
+                  name: requestBody.name || 'Agent policy',
+                  namespace: requestBody.namespace || 'default',
+                  monitoring_enabled: [],
+                },
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        // Intercept package policy API - capture and mock response
         await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
           if (request.method() === 'POST') {
             packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                item: {
+                  id: `mock-package-policy-${Date.now()}`,
+                  ...packagePolicyRequestBody,
+                },
+              }),
+            });
+          } else {
+            await route.continue();
           }
-          await route.continue();
         });
 
         await pageObjects.cspmIntegrationPage.navigate();
@@ -254,7 +286,15 @@ spaceTest.describe(
         // Switch setup technology to agent-based (default is agentless with cloud connectors)
         await pageObjects.cspmIntegrationPage.selectSetupTechnology('agent-based');
 
+        // Wait for form state to stabilize after setup technology change
+        const saveButton = page.getByTestId('createPackagePolicySaveButton');
+        await saveButton.waitFor({ state: 'visible' });
+
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+
+        // Wait for the save button to be enabled before clicking
+        await expect(saveButton).toBeEnabled({ timeout: 10000 });
+
         await pageObjects.cspmIntegrationPage.saveIntegration();
 
         // Wait for the package policy request to be captured
@@ -307,12 +347,44 @@ spaceTest.describe(
           await route.continue();
         });
 
-        // Intercept package policy API - this IS the agent-based endpoint
+        // Mock agent policy creation (required for agent-based flow)
+        await page.route(/\/api\/fleet\/agent_policies/, async (route, request) => {
+          if (request.method() === 'POST') {
+            const requestBody = request.postDataJSON() as Record<string, unknown>;
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                item: {
+                  id: `mock-agent-policy-${Date.now()}`,
+                  name: requestBody.name || 'Agent policy',
+                  namespace: requestBody.namespace || 'default',
+                  monitoring_enabled: [],
+                },
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
+        // Intercept package policy API - capture and mock response
         await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
           if (request.method() === 'POST') {
             packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                item: {
+                  id: `mock-package-policy-${Date.now()}`,
+                  ...packagePolicyRequestBody,
+                },
+              }),
+            });
+          } else {
+            await route.continue();
           }
-          await route.continue();
         });
 
         await pageObjects.cspmIntegrationPage.navigate();
@@ -322,7 +394,15 @@ spaceTest.describe(
         // Switch setup technology to agent-based (default is agentless with cloud connectors)
         await pageObjects.cspmIntegrationPage.selectSetupTechnology('agent-based');
 
+        // Wait for form state to stabilize after setup technology change
+        const saveButton = page.getByTestId('createPackagePolicySaveButton');
+        await saveButton.waitFor({ state: 'visible' });
+
         await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
+
+        // Wait for the save button to be enabled before clicking
+        await expect(saveButton).toBeEnabled({ timeout: 10000 });
+
         await pageObjects.cspmIntegrationPage.saveIntegration();
 
         // Wait for the package policy request to be captured
