@@ -170,7 +170,10 @@ export async function rollbackAvailableCheck(
   }
 
   if (currentUserPolicyIds.length < policyIds.length) {
-    throw new PackageRollbackError(`Not authorized to rollback integration policies in all spaces`);
+    return {
+      isAvailable: false,
+      reason: `Not authorized to rollback integration policies in all spaces`,
+    };
   }
 
   return {
