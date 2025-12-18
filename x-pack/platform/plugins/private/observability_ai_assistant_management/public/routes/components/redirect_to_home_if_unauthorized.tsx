@@ -9,12 +9,15 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { aiAssistantCapabilities } from '@kbn/observability-ai-assistant-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 export function RedirectToHomeIfUnauthorized({
   coreStart,
+  cloud,
   children,
 }: {
   coreStart: CoreStart;
+  cloud: CloudStart | undefined;
   children: ReactNode;
 }) {
   const {
@@ -22,8 +25,9 @@ export function RedirectToHomeIfUnauthorized({
   } = coreStart;
 
   const allowed = capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false;
-
-  if (!allowed) {
+  const isServerlessSearchSolution =
+    cloud?.isServerlessEnabled && cloud?.serverless?.projectType === 'search';
+  if (!isServerlessSearchSolution && !allowed) {
     navigateToApp('home');
     return null;
   }
