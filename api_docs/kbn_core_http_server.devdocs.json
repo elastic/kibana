@@ -3409,6 +3409,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/get/get_rule_template_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
               },
@@ -3871,6 +3875,34 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_stats.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
               },
               {
                 "plugin": "onechat",
@@ -4443,6 +4475,10 @@
               {
                 "plugin": "searchHomepage",
                 "path": "x-pack/solutions/search/plugins/search_homepage/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "searchHomepage",
+                "path": "x-pack/solutions/search/plugins/search_homepage/server/routes/size_stats.ts"
               },
               {
                 "plugin": "searchIndices",
@@ -5383,6 +5419,38 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/tags/get_rule_tags.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -6778,6 +6846,10 @@
               },
               {
                 "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/conversations.ts"
               },
               {
@@ -6883,10 +6955,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/valid_slack_api_channels.ts"
               },
               {
                 "plugin": "grokdebugger",
@@ -16624,10 +16692,6 @@
                 "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
               },
               {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/field_histograms/register_route.ts"
               },
@@ -17801,6 +17865,10 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/list/patch_list_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/update_script.ts"
               },
               {
                 "plugin": "securitySolution",
