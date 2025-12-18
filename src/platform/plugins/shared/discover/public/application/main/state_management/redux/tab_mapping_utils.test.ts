@@ -267,6 +267,7 @@ describe('tab mapping utils', () => {
             "serialize": [MockFunction],
             "setField": [MockFunction],
             "setOverwriteDataViewType": [MockFunction],
+            "setOverwriteTimezone": [MockFunction],
             "setParent": [MockFunction],
             "toExpressionAst": [MockFunction],
           },
