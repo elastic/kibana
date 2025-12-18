@@ -59,6 +59,22 @@ export const createMonitoringEntitySourceRoute = (
             ENABLE_PRIVILEGED_USER_MONITORING_SETTING
           );
 
+          if (request.body.managed === true) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: 'Cannot create managed entity source',
+            });
+          }
+
+          if (request.body.type !== 'index') {
+            // currently we own the integration sources so we don't allow creation of other types
+            // we might allow this in the future if we have a way to manage the integration sources
+            return siemResponse.error({
+              statusCode: 400,
+              body: 'Cannot currently create entity source of type other than index',
+            });
+          }
+
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
 
