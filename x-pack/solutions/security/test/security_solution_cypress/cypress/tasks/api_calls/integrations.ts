@@ -109,10 +109,10 @@ export const waitForPackageInstalled = (
   const startTime = Date.now();
 
   const checkStatus = (): Cypress.Chainable<void> => {
-    return checkPackageInstalled(packageName).then((isInstalled) => {
+    return checkPackageInstalled(packageName).then<void>((isInstalled) => {
       if (isInstalled) {
         cy.log(`Package ${packageName} is now installed`);
-        return cy.then(() => {
+        return cy.then<void>(() => {
           // Return void explicitly
         });
       }
@@ -124,7 +124,7 @@ export const waitForPackageInstalled = (
           method: 'GET',
           url: `/api/fleet/epm/packages/${packageName}`,
           failOnStatusCode: false,
-        }).then((response) => {
+        }).then<void>((response) => {
           const currentStatus = response.body?.item?.status || 'unknown';
           throw new Error(
             `Package ${packageName} installation timeout after ${timeout}ms. Current status: ${currentStatus}`
@@ -137,7 +137,7 @@ export const waitForPackageInstalled = (
           elapsed / 1000
         )}s elapsed)`
       );
-      return cy.wait(interval).then(() => checkStatus());
+      return cy.wait(interval).then<void>(() => checkStatus());
     });
   };
 
