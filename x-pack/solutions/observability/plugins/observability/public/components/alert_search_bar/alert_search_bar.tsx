@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { getEsQueryConfig, getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { DEFAULT_QUERY_STRING, EMPTY_FILTERS } from './constants';
 import type { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';

@@ -19,60 +19,47 @@ const examplesLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.examplesLab
 
 /** @internal */
 export const buildFunctionDocumentation = (
+  detail: string,
   signatures: Array<{
     declaration: string;
     license?: string;
   }>,
   examples: string[] | undefined
 ) => `
----
-\
-***${declarationLabel}***
-${signatures
-  .map(
-    ({ declaration, license }) => `
-\
-  - \`\`${declaration}\`\`${license || ''}\
-\
-`
-  )
-  .join('\n\n')}
-  ${
-    examples?.length
-      ? `\
----
-***${examplesLabel}***
-\
-  ${examples
-    .map(
-      (i) => `
-  - \`\`${i}\`\`
-`
-    )
-    .join('')}
+${detail}
 
+# ${declarationLabel}
+\`\`\`typescript
+${signatures.map(({ declaration, license }) => `${declaration}${license || ''}`).join('\n')}
+\`\`\`
+
+${
+  examples?.length
+    ? `\
+# ${examplesLabel}
+\`\`\`esql
+${examples.join('\n')}
+\`\`\`
 `
-      : ''
-  }`;
+    : ''
+}`;
 
 /** @internal **/
-export const buildDocumentation = (declaration: string, examples?: string[]) => `
----
-\
-***${declarationLabel}***
-\
-  - \`\`${declaration}\`\`
-\
----
+export const buildDocumentation = (detail: string, declaration: string, examples?: string[]) => `
+${detail}
+
+# ${declarationLabel}
+\`\`\`esql
+${declaration}
+\`\`\`
+
 ${
-  examples
+  examples?.length
     ? `\
-***${examplesLabel}***
-\
-${examples.map(
-  (i) => `
-  - \`\`${i}\`\`
+# ${examplesLabel}
+\`\`\`esql
+${examples.map((ex) => ex.replace(/^…/gm, '...')).join('\n')}
+\`\`\`
 `
-)}`
     : ''
 }`;
