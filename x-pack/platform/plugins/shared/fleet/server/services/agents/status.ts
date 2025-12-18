@@ -42,7 +42,7 @@ export async function getAgentStatusById(
 ): Promise<AgentStatus> {
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
-const AGENT_STATUS_TIMEOUT = 3000;
+const AGENT_STATUS_TIMEOUT = '3s';
 
 /**
  * getAgentStatusForAgentPolicy
@@ -132,25 +132,23 @@ export async function getAgentStatusForAgentPolicy(
         esClient.search<
           null,
           { status: AggregationsTermsAggregateBase<AggregationsStatusTermsBucketKeys> }
-        >(
-          {
-            index: AGENTS_INDEX,
-            size: 0,
-            query,
-            fields: Object.keys(runtimeFields),
-            runtime_mappings: runtimeFields,
-            aggregations: {
-              status: {
-                terms: {
-                  field: 'status',
-                  size: Object.keys(statuses).length,
-                },
+        >({
+          index: AGENTS_INDEX,
+          size: 0,
+          query,
+          fields: Object.keys(runtimeFields),
+          runtime_mappings: runtimeFields,
+          aggregations: {
+            status: {
+              terms: {
+                field: 'status',
+                size: Object.keys(statuses).length,
               },
             },
-            ignore_unavailable: true,
           },
-          { signal: AbortSignal.timeout(AGENT_STATUS_TIMEOUT) }
-        ),
+          ignore_unavailable: true,
+          timeout: AGENT_STATUS_TIMEOUT,
+        }),
       { logger }
     );
   } catch (error) {

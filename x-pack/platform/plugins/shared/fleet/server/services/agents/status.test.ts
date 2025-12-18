@@ -16,15 +16,6 @@ import { appContextService } from '../app_context';
 
 import { getAgentStatusForAgentPolicy, getIncomingDataByAgentsId } from './status';
 
-// Polyfill for AbortSignal.timeout https://github.com/whatwg/dom/issues/951#issuecomment-922833719
-if (!AbortSignal.timeout) {
-  AbortSignal.timeout = (ms) => {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(new DOMException('TimeoutError')), ms);
-    return controller.signal;
-  };
-}
-
 describe('getAgentStatusForAgentPolicy', () => {
   beforeEach(async () => {
     const soClient = {
@@ -240,8 +231,8 @@ describe('getAgentStatusForAgentPolicy', () => {
             }),
           }),
         }),
-      }),
-      expect.anything()
+        timeout: expect.any(String),
+      })
     );
   });
 });
