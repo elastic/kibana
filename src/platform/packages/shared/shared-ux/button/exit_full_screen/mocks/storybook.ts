@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ArgTypes } from '@storybook/react';
+import type { ArgTypes } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
