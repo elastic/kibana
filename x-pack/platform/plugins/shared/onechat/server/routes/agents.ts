@@ -54,7 +54,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -89,7 +88,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -133,7 +131,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -219,7 +216,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -311,7 +307,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
