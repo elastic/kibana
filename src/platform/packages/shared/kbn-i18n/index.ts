@@ -8,13 +8,14 @@
  */
 
 import {
-  getTranslation,
+  formatList,
+  getIsInitialized,
   getLocale,
-  translate,
+  getTranslation,
+  handleIntlError,
   init,
   load,
-  handleIntlError,
-  getIsInitialized,
+  translate,
 } from './src/core';
 
 import {
