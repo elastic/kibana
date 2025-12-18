@@ -209,6 +209,7 @@ const TAB_COMPARATORS: TabComparators = {
   refreshInterval: fieldComparator('refreshInterval', { pause: true, value: 0 }),
   rowsPerPage: fieldComparator('rowsPerPage', 0),
   sampleSize: fieldComparator('sampleSize', 0),
+  chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,

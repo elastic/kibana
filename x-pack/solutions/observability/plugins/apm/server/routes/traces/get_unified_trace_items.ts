@@ -13,6 +13,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { APMConfig } from '../..';
 import {
+  AGENT_NAME,
   AT_TIMESTAMP,
   DURATION,
   EVENT_OUTCOME,
@@ -42,6 +43,7 @@ import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
 import { compactMap } from '../../utils/compact_map';
+import { isRumAgentName } from '../../../common/agent_name';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -64,6 +66,7 @@ const optionalFields = asMutableArray([
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
+  AGENT_NAME,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -204,10 +207,35 @@ export async function getUnifiedTraceItems({
           outgoing:
             event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
         },
+        icon: getTraceItemIcon({
+          spanType: event[SPAN_TYPE],
+          agentName: event[AGENT_NAME],
+          processorEvent: event[PROCESSOR_EVENT],
+        }),
       } satisfies TraceItem;
     }),
     unifiedTraceErrors,
   };
+}
+
+export function getTraceItemIcon({
+  spanType,
+  agentName,
+  processorEvent,
+}: {
+  spanType?: string;
+  agentName?: string;
+  processorEvent?: ProcessorEvent;
+}) {
+  if (spanType?.startsWith('db')) {
+    return 'database';
+  }
+
+  if (processorEvent !== ProcessorEvent.transaction) {
+    return undefined;
+  }
+
+  return isRumAgentName(agentName) ? 'globe' : 'merge';
 }
 
 /**
