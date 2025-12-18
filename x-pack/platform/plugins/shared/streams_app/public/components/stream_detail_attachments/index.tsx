@@ -32,6 +32,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
 import { AttachmentDetailsFlyout } from './attachment_details_flyout';
 import {
@@ -99,9 +100,20 @@ export function StreamDetailAttachments({
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (definition && !attachmentsFetch.loading) {
-      onPageReady();
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'attachment_count',
+          value1: attachmentsFetch.value?.attachments?.length ?? 0,
+          key2: 'processing_steps_count',
+          value2: definition.stream.ingest.processing.steps.length,
+        },
+      });
     }
-  }, [definition, attachmentsFetch.loading, onPageReady]);
+  }, [definition, attachmentsFetch.loading, attachmentsFetch.value, onPageReady]);
 
   const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {

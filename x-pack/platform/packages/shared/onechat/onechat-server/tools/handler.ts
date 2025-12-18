@@ -21,13 +21,16 @@ import type {
 /**
  * Tool result as returned by the tool handler.
  */
-export type ToolHandlerResult = Omit<ToolResult, 'tool_result_id'> & { tool_result_id?: string };
+export type ToolHandlerResult<TResult extends ToolResult = ToolResult> = Omit<
+  TResult,
+  'tool_result_id'
+> & { tool_result_id?: string };
 
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
-export interface ToolHandlerReturn {
-  results: ToolHandlerResult[];
+export interface ToolHandlerReturn<TResult extends ToolResult = ToolResult> {
+  results: Array<ToolHandlerResult<TResult>>;
 }
 
 /**
