@@ -611,9 +611,7 @@ const expectAssetsInstalled = ({
             ? null
             : res.attributes.verification_key_id,
         installed_kibana: sortBy(res.attributes.installed_kibana, (o: AssetReference) => o.type),
-        installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type).filter(
-          (item) => item.type !== 'knowledge_base'
-        ),
+        installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
         package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
       };
 
