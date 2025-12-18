@@ -69,13 +69,10 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
       data: {
         alertId,
         ...(alertTitle && {
-          attachmentLabel: i18n.translate(
-            'xpack.observabilityAgentBuilder.alertAiInsight.alertAttachmentLabel',
-            {
-              defaultMessage: '{alertTitle} alert',
-              values: { alertTitle },
-            }
-          ),
+          attachmentLabel: i18n.translate('xpack.observabilityAgentBuilder.alert.attachmentLabel', {
+            defaultMessage: '{alertTitle} alert',
+            values: { alertTitle },
+          }),
         }),
       },
     },
