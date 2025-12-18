@@ -457,15 +457,16 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: alertDetail?.formatted ? (
-          <>
-            {alertTitle}
-            <EuiSpacer size="xs" />
-            <AlertSubtitle alert={alertDetail.formatted} />
-          </>
-        ) : (
-          <EuiLoadingSpinner />
-        ),
+        pageTitle:
+          alertDetail?.formatted && alertTitle ? (
+            <>
+              {alertTitle}
+              <EuiSpacer size="xs" />
+              <AlertSubtitle alert={alertDetail.formatted} />
+            </>
+          ) : (
+            <EuiLoadingSpinner />
+          ),
         rightSideItems: [
           <HeaderActions
             alert={alertDetail?.formatted ?? null}
