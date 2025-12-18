@@ -9,6 +9,7 @@ export type TaskStatus =
   | 'not_started'
   | 'in_progress'
   | 'completed'
+  | 'acknowledged'
   | 'failed'
   | 'being_canceled'
   | 'canceled';
@@ -44,6 +45,13 @@ interface CompletedTask<TParams extends {} = {}, TPayload extends {} = {}>
     payload: TPayload;
   };
 }
+interface AcknowledgedTask<TParams extends {} = {}, TPayload extends {} = {}>
+  extends PersistedTaskBase<TParams> {
+  status: 'acknowledged';
+  task: PersistedTaskBase<TParams>['task'] & {
+    payload: TPayload;
+  };
+}
 interface FailedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
   status: 'failed';
   task: PersistedTaskBase<TParams>['task'] & {
@@ -55,6 +63,7 @@ export type PersistedTask<TParams extends {} = {}, TPayload extends {} = {}> =
   | NotStartedTask<TParams>
   | InProgressTask<TParams>
   | CompletedTask<TParams, TPayload>
+  | AcknowledgedTask<TParams, TPayload>
   | FailedTask<TParams>
   | BeingCanceledTask<TParams>
   | CanceledTask<TParams>;

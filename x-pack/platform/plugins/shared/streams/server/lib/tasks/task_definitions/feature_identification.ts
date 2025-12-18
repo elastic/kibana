@@ -48,9 +48,6 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                 request: runContext.fakeRequest,
               });
 
-              // Get connector info for error enrichment
-              const connector = await inferenceClient.getConnectorById(connectorId);
-
               try {
                 const [{ hits }, stream] = await Promise.all([
                   featureClient.getFeatures(name),
@@ -112,13 +109,23 @@ export function createStreamsFeatureIdentificationTask(taskContext: TaskContext)
                   },
                 });
               } catch (error) {
+                // Get connector info for error enrichment
+                const connector = await inferenceClient.getConnectorById(connectorId);
+
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
                   : error.message;
 
-                if (errorMessage === 'Request was aborted') {
+                if (
+                  errorMessage.includes('ERR_CANCELED') ||
+                  errorMessage.includes('Request was aborted')
+                ) {
                   return;
                 }
+
+                taskContext.logger.error(
+                  `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
+                );
 
                 await taskClient.update<FeatureIdentificationTaskParams>({
                   ..._task,

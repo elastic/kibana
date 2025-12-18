@@ -23,29 +23,54 @@ export function cancellableTask(
       request: runContext.fakeRequest,
     });
 
-    let intervalId: NodeJS.Timeout;
-    const cancellationPromise = new Promise<'canceled'>((resolve) => {
-      intervalId = setInterval(async () => {
-        const task = await taskClient.get(runContext.taskInstance.id);
-        if (task.status === 'being_canceled') {
-          runContext.abortController.abort();
-          await taskClient.update({
-            ...task,
-            status: 'canceled',
-          });
-          resolve('canceled' as const);
-        }
-      }, 5000);
-    });
+    try {
+      let intervalId: NodeJS.Timeout;
+      const cancellationPromise = new Promise<'canceled'>((resolve) => {
+        intervalId = setInterval(async () => {
+          const task = await taskClient.get(runContext.taskInstance.id);
+          if (task.status === 'being_canceled') {
+            runContext.abortController.abort();
+            await taskClient.update({
+              ...task,
+              status: 'canceled',
+            });
+            resolve('canceled' as const);
+          }
+        }, 5000);
+      });
 
-    const result = await Promise.race([run(), cancellationPromise]).finally(() => {
-      clearInterval(intervalId);
-    });
+      const result = await Promise.race([run(), cancellationPromise]).finally(() => {
+        clearInterval(intervalId);
+      });
 
-    if (result === 'canceled') {
-      return undefined;
+      if (result === 'canceled') {
+        return undefined;
+      }
+
+      return result;
+    } catch (error) {
+      taskContext.logger.error(`Task ${runContext.taskInstance.id} failed unexpectedly`, { error });
+
+      try {
+        await taskClient.update({
+          id: runContext.taskInstance.id,
+          status: 'failed',
+          task: {
+            params: {},
+            error: error.message,
+          },
+          created_at: new Date().toISOString(),
+          space: '',
+          type: '',
+          stream: '',
+        });
+      } catch (updateError) {
+        taskContext.logger.error('Failed to update task status after error', {
+          error: updateError,
+        });
+      }
+
+      throw error;
     }
-
-    return result;
   };
 }

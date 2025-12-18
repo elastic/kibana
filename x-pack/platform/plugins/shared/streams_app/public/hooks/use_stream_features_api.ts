@@ -8,18 +8,20 @@
 import { useAbortController } from '@kbn/react-hooks';
 import type { Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
-import type { IdentifyFeaturesResult } from '@kbn/streams-plugin/server/lib/streams/feature/feature_type_registry';
+import type { FeatureIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/features/route';
 import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
-  upsertFeature: (feature: Feature) => Promise<void>;
-  identifyFeatures: (connectorId: string) => Promise<IdentifyFeaturesResult>;
+  getFeatureIdentificationTask: () => Promise<FeatureIdentificationTaskResult>;
+  scheduleFeatureIdentificationTask: (connectorId: string) => Promise<void>;
+  cancelFeatureIdentificationTask: () => Promise<void>;
+  acknowledgeFeatureIdentificationTask: () => Promise<void>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (
     features: Pick<Feature, 'type' | 'name'>[]
   ) => Promise<StorageClientBulkResponse>;
-  cancelFeatureIdentification: () => Promise<void>;
+  upsertFeature: (feature: Feature) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
@@ -35,51 +37,64 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal } = useAbortController();
 
   return {
-    identifyFeatures: async (connectorId: string) => {
-      // Timeout after 5 minutes
-      const pollInterval = 5_000;
-      const maxAttempts = 60;
-
-      let attempts = 0;
-
-      while (attempts < maxAttempts) {
-        if (signal.aborted) {
-          throw new Error('Request aborted');
-        }
-
-        const now = Date.now();
-        const taskResult = await streamsRepositoryClient.fetch(
-          'POST /internal/streams/{name}/features/_identify',
-          {
-            signal,
-            params: {
-              path: { name: definition.name },
-              query: {
-                connectorId,
-                to: new Date(now).toISOString(),
-                from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-                schedule: attempts === 0 ? true : false,
-              },
+    getFeatureIdentificationTask: async () => {
+      return await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/features/_identify',
+        {
+          signal,
+          params: {
+            path: { name: definition.name },
+            query: {
+              connectorId: '',
+              to: '',
+              from: '',
             },
-          }
-        );
-
-        // Check if task is complete
-        // Adjust these status checks based on your actual response structure
-        if (taskResult.status === 'completed') {
-          return taskResult;
-        } else if (taskResult.status === 'failed') {
-          throw new Error(`Feature identification failed: ${taskResult.error}`);
-        } else if (taskResult.status === 'stale') {
-          throw new Error('Feature identification task is stale');
+          },
         }
-
-        // Task still in progress, wait before polling again
-        attempts++;
-        await new Promise((resolve) => setTimeout(resolve, pollInterval));
-      }
-
-      throw new Error('Failed to load identified features within the expected time frame');
+      );
+    },
+    scheduleFeatureIdentificationTask: async (connectorId: string) => {
+      const now = Date.now();
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          query: {
+            schedule: true,
+            connectorId,
+            to: new Date(now).toISOString(),
+            from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+          },
+        },
+      });
+    },
+    cancelFeatureIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          query: {
+            cancel: true,
+            connectorId: '',
+            to: '',
+            from: '',
+          },
+        },
+      });
+    },
+    acknowledgeFeatureIdentificationTask: async () => {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
+        signal,
+        params: {
+          path: { name: definition.name },
+          query: {
+            acknowledge: true,
+            connectorId: '',
+            to: '',
+            from: '',
+          },
+        },
+      });
     },
     addFeaturesToStream: async (features: Feature[]) => {
       telemetryClient.trackFeaturesSaved({
@@ -163,20 +178,6 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           },
         }
       );
-    },
-    cancelFeatureIdentification: async () => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_identify', {
-        signal,
-        params: {
-          path: { name: definition.name },
-          query: {
-            connectorId: '',
-            to: '',
-            from: '',
-            cancel: true,
-          },
-        },
-      });
     },
   };
 }

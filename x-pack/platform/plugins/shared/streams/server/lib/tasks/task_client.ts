@@ -11,6 +11,7 @@ import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
 import { CancellationInProgressError } from './cancellation_in_progress_error';
+import { AcknowledgingIncompleteError } from './acknowledging_incomplete_error';
 
 interface TaskRequest<TaskType, TParams extends {}> {
   task: Omit<PersistedTask & { type: TaskType }, 'status' | 'created_at' | 'task'>;
@@ -122,6 +123,25 @@ export class TaskClient<TaskType extends string> {
       ...task,
       status: 'being_canceled',
     });
+  }
+
+  public async acknowledge<TParams extends {} = {}, TPayload extends {} = {}>(id: string) {
+    const task = await this.get<TParams, TPayload>(id);
+
+    if (task.status !== 'completed') {
+      throw new AcknowledgingIncompleteError('Only completed tasks can be acknowledged');
+    }
+
+    this.logger.debug(`Acknowledging task ${id}`);
+
+    const taskDoc = {
+      ...task,
+      status: 'acknowledged' as const,
+    };
+
+    await this.update(taskDoc);
+
+    return taskDoc;
   }
 
   public async update<TParams extends {} = {}, TPayload extends {} = {}>(

@@ -22,6 +22,7 @@ import type { Observable } from 'rxjs';
 import { catchError, from, map } from 'rxjs';
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { conflict } from '@hapi/boom';
+import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
 import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
 import { isStale } from '../../../../lib/tasks/is_stale';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
@@ -298,6 +299,9 @@ export type FeatureIdentificationTaskResult =
     }
   | ({
       status: 'completed';
+    } & IdentifyFeaturesResult)
+  | ({
+      status: 'acknowledged';
     } & IdentifyFeaturesResult);
 
 export const identifyFeaturesRoute = createServerRoute({
@@ -320,6 +324,7 @@ export const identifyFeaturesRoute = createServerRoute({
       to: dateFromString,
       schedule: BooleanFromString.optional(),
       cancel: BooleanFromString.optional(),
+      acknowledge: BooleanFromString.optional(),
     }),
   }),
   handler: async ({
@@ -380,6 +385,24 @@ export const identifyFeaturesRoute = createServerRoute({
       return {
         status: 'being_canceled',
       };
+    } else if (params.query.acknowledge) {
+      try {
+        const task = await taskClient.acknowledge<
+          FeatureIdentificationTaskParams,
+          IdentifyFeaturesResult
+        >(`streams_feature_identification_${name}`);
+
+        return {
+          status: 'acknowledged',
+          ...task.task.payload,
+        };
+      } catch (error) {
+        if (error instanceof AcknowledgingIncompleteError) {
+          throw conflict(error.message);
+        }
+
+        throw error;
+      }
     }
 
     const task = await taskClient.get<FeatureIdentificationTaskParams, IdentifyFeaturesResult>(
@@ -401,9 +424,9 @@ export const identifyFeaturesRoute = createServerRoute({
         status: 'failed',
         error: task.task.error,
       };
-    } else if (task.status === 'completed') {
+    } else if (task.status === 'completed' || task.status === 'acknowledged') {
       return {
-        status: 'completed',
+        status: task.status,
         ...task.task.payload,
       };
     }
