@@ -84,12 +84,16 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         <RoundInput input={input.message} attachments={input.attachments} />
       </EuiFlexItem>
 
-      {/* Thinking */}
+      {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
       <EuiFlexItem grow={false}>
         {isErrorCurrentRound ? (
           <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
         ) : (
-          <RoundThinking steps={steps} isLoading={isLoadingCurrentRound} rawRound={rawRound} />
+          <RoundThinking
+            steps={steps}
+            isLoading={isLoadingCurrentRound || Boolean(isAwaitingPrompt)}
+            rawRound={rawRound}
+          />
         )}
       </EuiFlexItem>
 
