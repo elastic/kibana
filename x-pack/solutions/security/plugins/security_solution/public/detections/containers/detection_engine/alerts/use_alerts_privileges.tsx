@@ -32,7 +32,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
     alertsPrivileges: {
-      alerts: { edit: hasAlertsAll, read: hasAlertsRead, legacyUpdate: hasLegacyAlertsUpdate },
+      alerts: { edit: hasAlertsAll, read: hasAlertsRead },
     },
   } = useUserPrivileges();
 
