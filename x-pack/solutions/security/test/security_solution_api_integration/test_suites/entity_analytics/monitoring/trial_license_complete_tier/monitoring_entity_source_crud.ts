@@ -13,6 +13,7 @@ export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const privMonUtils = PrivMonUtils(getService);
 
   const getOktaSource = async () => {
@@ -33,6 +34,8 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await api.deleteMonitoringEngine({ query: { data: true } });
     });
+
+    describe('Create Entity Source', () => {});
 
     describe('Update Entity Source', () => {
       it('should not allow the managed field to be updated ', async () => {
@@ -86,8 +89,50 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
 
-        console.log(JSON.stringify(deletedSource, null, 2));
         expect(deletedSource.status).toBe(400);
+      });
+
+      it('should allow non-managed sources to be deleted', async () => {
+        const indexName = `test-monitoring-entity-source-${Date.now()}`;
+        // Create a non-managed entity source
+        const entitySource = {
+          type: 'index',
+          name: `Test non-managed entity source ${indexName}`,
+          managed: false,
+          indexPattern: indexName,
+          enabled: true,
+          matchers: [
+            {
+              fields: ['user.role'],
+              values: ['admin'],
+            },
+          ],
+          filter: {},
+        };
+
+        const createResponse = await api.createEntitySource({ body: entitySource });
+        expect(createResponse.status).toBe(200);
+        expect(createResponse.body.id).toBeDefined();
+
+        const sourceId = createResponse.body.id;
+
+        // Delete the non-managed source
+        const deleteResponse = await api.deleteEntitySource({
+          params: {
+            id: sourceId,
+          },
+        });
+
+        expect(deleteResponse.status).toBe(200);
+        expect(deleteResponse.body.acknowledged).toBe(true);
+
+        // Verify the source was deleted by trying to get it
+        const listResponse = await api.listEntitySources({
+          query: {
+            name: entitySource.name,
+          },
+        });
+        expect(listResponse.body.length).toBe(0);
       });
     });
   });
