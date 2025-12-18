@@ -28,6 +28,10 @@ export class ConnectionDetailsService {
       ?.hasPermission()
       .then((hasAccess) => {
         this.apiKeyHasAccess$.next(hasAccess);
+        // If user doesn't have permission and is on the apiKeys tab, switch to endpoints
+        if (!hasAccess && this.tabId$.getValue() === 'apiKeys') {
+          this.tabId$.next('endpoints');
+        }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console

@@ -67,7 +67,33 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => true,
+      hasPermission: async () => {
+        try {
+          // Use native fetch to bypass Kibana's HTTP interceptors which would show error modals
+          // This is a background permission check - we don't want to show errors to users
+          const basePath = http?.basePath.get() ?? '';
+          const response = await fetch(`${basePath}/internal/security/api_key/_query`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'kbn-xsrf': 'true',
+              'x-elastic-internal-origin': 'kibana',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({}),
+          });
+
+          if (!response.ok) {
+            return false;
+          }
+
+          const data = await response.json();
+          return data.canManageOwnApiKeys ?? false;
+        } catch {
+          // If the request fails (e.g., API keys disabled, no license), assume no permission
+          return false;
+        }
+      },
       ...options?.apiKeys,
     },
     onTelemetryEvent: (event) => {
