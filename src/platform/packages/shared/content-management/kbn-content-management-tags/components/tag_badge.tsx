@@ -34,9 +34,11 @@ interface NavigatorWithUserAgentData extends Navigator {
 
 /**
  * Platform detection IIFE - runs once at module load.
- * Note: The `typeof navigator === 'undefined'` check (defensive code) is for
- * non-browser environments (SSR, Node.js) where navigator doesn't exist.
- * This line is intentionally difficult to test in Jest without breaking dependencies.
+ * Note: The `typeof navigator === 'undefined'` check is defensive code for
+ * non-browser environments (SSR/Node.js) where `navigator` is not available.
+ * In Jest's jsdom environment `navigator` is always defined, so exercising this
+ * branch would require mutating or deleting `global.navigator`, which can interfere
+ * with other tests that rely on the default navigator setup.
  */
 const isMac = (() => {
   if (typeof navigator === 'undefined') {
