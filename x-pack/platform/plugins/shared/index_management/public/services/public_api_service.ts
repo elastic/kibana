@@ -6,7 +6,8 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { INTERNAL_API_BASE_PATH } from '../../common';
+import type { GetIndexTemplatesResponse } from '@kbn/index-management-shared-types';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../common';
 import { sendRequest } from '../shared_imports';
 
 /**
@@ -30,6 +31,15 @@ export class PublicApiService {
     return sendRequest(this.http, {
       path: `${INTERNAL_API_BASE_PATH}/enrich_policies`,
       method: 'get',
+    });
+  }
+
+  /**
+   * Fetches all index templates (composable and legacy) available in Index Management.
+   */
+  getIndexTemplates(options?: { signal?: AbortSignal }) {
+    return this.http.get<GetIndexTemplatesResponse>(`${API_BASE_PATH}/index_templates`, {
+      signal: options?.signal,
     });
   }
 }
