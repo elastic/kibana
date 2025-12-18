@@ -50,24 +50,16 @@ const ConnectorPopoverButton: React.FC<{
   selectedConnectorName?: string;
   isUsingNonDefaultConnector: boolean;
 }> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName, isUsingNonDefaultConnector }) => {
-  const showCustomConnector = isUsingNonDefaultConnector && selectedConnectorName;
-
   return (
     <InputPopoverButton
       open={isPopoverOpen}
       disabled={disabled}
-      iconType={
-        showCustomConnector
-          ? () => <ConnectorIcon connectorName={selectedConnectorName} />
-          : 'compute'
-      }
+      iconType={() => <ConnectorIcon connectorName={selectedConnectorName} />}
       onClick={onClick}
       aria-labelledby={connectorSelectId}
       data-test-subj="agentBuilderConnectorSelectorButton"
     >
-      {showCustomConnector ? (
-        selectedConnectorName
-      ) : (
+      {selectedConnectorName ?? (
         <FormattedMessage
           id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
           defaultMessage="LLM"
