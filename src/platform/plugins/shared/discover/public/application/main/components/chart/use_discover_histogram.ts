@@ -79,12 +79,13 @@ export const useDiscoverHistogram = (
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
+
+  const query = useAppStateSelector((state) => state.query);
   const isChartLoading = useMemo(() => {
-    const query = stateContainer.getCurrentTab().appState.query;
     if (!isOfAggregateQueryType(query)) return false;
     if (!hasTransformationalCommand(query.esql)) return false;
     return documentsState?.fetchStatus === FetchStatus.LOADING;
-  }, [documentsState?.fetchStatus, stateContainer]);
+  }, [documentsState?.fetchStatus, query]);
 
   /**
    * API initialization
@@ -208,7 +209,6 @@ export const useDiscoverHistogram = (
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
-  const query = useAppStateSelector((state) => state.query);
   const appFilters = useAppStateSelector((state) => state.filters);
   const { filters: globalFilters } = useCurrentTabSelector((state) => state.globalState);
 
