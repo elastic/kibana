@@ -14,7 +14,13 @@ import {
   singleMetricRowSplitAttributesDatatable,
   multiMetricRowSplitAttributesDatatable,
   fullConfigAttributesDatatable,
-} from './lens_state_config.mock';
+} from './lens_state_config_dsl.mock';
+import {
+  singleMetricESQLDatatableAttributes,
+  singleMetricRowSplitESQLDatatableAttributes,
+  multipleMetricRowSplitESQLDatatableAttributes,
+  fullConfigESQLDatatableAttributes,
+} from './lens_state_config_esql.mock';
 
 describe('Datatable', () => {
   describe('validateConverter', () => {
@@ -22,16 +28,32 @@ describe('Datatable', () => {
       validateConverter(singleMetricAttributesDatatable, datatableStateSchema);
     });
 
-    it('should convert a datatable chart with full config', () => {
+    it('should convert a datatable chart with single metric, row, split by columns', () => {
       validateConverter(singleMetricRowSplitAttributesDatatable, datatableStateSchema);
     });
 
-    it('should convert a datatable chart with multiple metrics, rows, split by', () => {
+    it('should convert a datatable chart with multiple metrics, rows, split by columns', () => {
       validateConverter(multiMetricRowSplitAttributesDatatable, datatableStateSchema);
     });
 
     it('should convert a datatable chart with multiple metrics, rows, split by with full config', () => {
       validateConverter(fullConfigAttributesDatatable, datatableStateSchema);
+    });
+
+    it('should convert an ESQL datatable chart with single metric column', () => {
+      validateConverter(singleMetricESQLDatatableAttributes, datatableStateSchema);
+    });
+
+    it('should convert an ESQL datatable chart with single metric, row, split by columns', () => {
+      validateConverter(singleMetricRowSplitESQLDatatableAttributes, datatableStateSchema);
+    });
+
+    it('should convert an ESQL datatable chart with multiple metrics, rows, split by columns', () => {
+      validateConverter(multipleMetricRowSplitESQLDatatableAttributes, datatableStateSchema);
+    });
+
+    it('should convert an ESQL datatable chart with multiple metrics, rows, split by with full config', () => {
+      validateConverter(fullConfigESQLDatatableAttributes, datatableStateSchema);
     });
   });
 });

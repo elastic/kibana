@@ -264,7 +264,7 @@ function convertDatatableColumnsToAPI(
   visualization: DatatableVisualizationState
 ): DatatableColumnsNoESQL | DatatableColumnsESQL {
   const { columns, sorting } = visualization;
-  if (columns.length === 0 || !columns.some((col) => col.isMetric)) {
+  if (columns.length === 0) {
     throw new Error('Datatable must have at least one metric column');
   }
 
@@ -315,12 +315,16 @@ function convertDatatableColumnsToAPI(
   const rows: NonNullable<DatatableStateESQL['rows']> = [];
   const splitMetricsBy: NonNullable<DatatableStateESQL['split_metrics_by']> = [];
 
+  // In ESQL columns the isMetric is not set in all cases
+  const isESQLMetricColumn = (col: ColumnState) =>
+    ('isMetric' in col && col.isMetric) || (!('isMetric' in col) && !col.isTransposed);
+
   for (const column of columns) {
     const { columnId } = column;
     const apiOperation = columnId ? getValueApiColumn(columnId, layer) : undefined;
     if (!apiOperation) throw new Error('Column not found');
 
-    if (column.isMetric) {
+    if (isESQLMetricColumn(column)) {
       metrics.push({
         ...apiOperation,
         ...buildMetricsAPI(column),
