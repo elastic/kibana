@@ -49,20 +49,11 @@ export const MetricsExperienceFieldsProvider = ({
       return { metricFields: [], dimensions: [] };
     }
 
-    const result = categorizeFields({
+    return categorizeFields({
       index: dataView.getIndexPattern(),
       dataViewFieldMap: dataView.fields.toSpec(),
       columns: table?.columns,
     });
-
-    return {
-      metricFields: result.metricFields.sort((a, b) =>
-        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-      ),
-      dimensions: result.dimensions.sort((a, b) =>
-        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-      ),
-    };
   }, [dataView, table?.columns]);
 
   const rows = useMemo(() => table?.rows ?? [], [table?.rows]);

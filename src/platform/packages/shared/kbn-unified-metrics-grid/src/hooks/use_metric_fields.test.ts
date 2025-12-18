@@ -158,32 +158,6 @@ describe('useMetricFields', () => {
       const cpuField = result.current.allMetricFields[0];
       expect(cpuField?.dimensions).toEqual([{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]);
     });
-
-    it('sorts fields alphabetically by name', () => {
-      const sampleRows = new Map([
-        ['zebra.metric', { 'zebra.metric': 1 }],
-        ['alpha.metric', { 'alpha.metric': 2 }],
-        ['middle.metric', { 'middle.metric': 3 }],
-      ]);
-
-      useMetricsExperienceFieldsContextMock.mockReturnValue({
-        ...defaultFieldsContext,
-        metricFields: [
-          { name: 'zebra.metric', index: 'metrics-*', type: 'long', dimensions: [] },
-          { name: 'alpha.metric', index: 'metrics-*', type: 'long', dimensions: [] },
-          { name: 'middle.metric', index: 'metrics-*', type: 'long', dimensions: [] },
-        ],
-        getSampleRow: (name: string) => sampleRows.get(name),
-      });
-
-      const { result } = renderHook(() => useMetricFields());
-
-      expect(result.current.allMetricFields.map((f) => f.name)).toEqual([
-        'alpha.metric',
-        'middle.metric',
-        'zebra.metric',
-      ]);
-    });
   });
 
   describe('dimensions', () => {
@@ -220,29 +194,6 @@ describe('useMetricFields', () => {
       // dimensions come directly from context
       expect(result.current.dimensions).toHaveLength(3);
       expect(result.current.dimensions).toEqual(dimensions);
-    });
-
-    it('sorts dimensions alphabetically', () => {
-      const dimensions: Dimension[] = [
-        { name: 'Zebra', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'alpha', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'Middle', type: ES_FIELD_TYPES.KEYWORD },
-      ];
-
-      const sampleRows = new Map([
-        ['metric1', { Zebra: 'z', alpha: 'a', Middle: 'm', metric1: 1 }],
-      ]);
-
-      useMetricsExperienceFieldsContextMock.mockReturnValue({
-        ...defaultFieldsContext,
-        metricFields: [{ name: 'metric1', index: 'metrics-*', type: 'long', dimensions: [] }],
-        dimensions,
-        getSampleRow: (name: string) => sampleRows.get(name),
-      });
-
-      const { result } = renderHook(() => useMetricFields());
-
-      expect(result.current.dimensions.map((d) => d.name)).toEqual(['alpha', 'Middle', 'Zebra']);
     });
 
     it('removes invalid dimensions from selection when context data changes', async () => {

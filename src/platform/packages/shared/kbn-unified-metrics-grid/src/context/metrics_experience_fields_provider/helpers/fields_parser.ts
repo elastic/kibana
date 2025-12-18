@@ -33,10 +33,11 @@ const shouldSkipField = (fieldName: string) => FILTER_OUT_FIELDS.has(fieldName);
 /**
  * Categorizes fields from ES|QL result columns into metric fields and dimensions
  * based on data view metadata. Only considers fields that are not null in the ES|QL result.
+ * Results are sorted alphabetically by name.
  * @param index - The index pattern to use for the metric fields.
  * @param dataViewFieldMap - The data view field map to use for the metric fields.
  * @param columns - The columns to use for the metric fields.
- * @returns The metric fields and dimensions.
+ * @returns The metric fields and dimensions, sorted alphabetically by name.
  */
 export const categorizeFields = ({
   index,
@@ -86,8 +87,8 @@ export const categorizeFields = ({
   }
 
   return {
-    metricFields,
-    dimensions,
+    metricFields: metricFields.sort((a, b) => a.name.localeCompare(b.name)),
+    dimensions: dimensions.sort((a, b) => a.name.localeCompare(b.name)),
   };
 };
 

@@ -149,6 +149,106 @@ describe('fields_parser', () => {
       expect(result.metricFields[0].name).toBe('valid.field');
       expect(result.dimensions).toHaveLength(0);
     });
+
+    describe('sorting', () => {
+      it('sorts metric fields alphabetically by name (case-insensitive)', () => {
+        const dataViewFieldMap: DataViewFieldMap = {
+          'zebra.metric': {
+            name: 'zebra.metric',
+            type: 'number',
+            esTypes: ['double'],
+            searchable: true,
+            aggregatable: true,
+            timeSeriesMetric: 'gauge',
+          },
+          'Alpha.metric': {
+            name: 'Alpha.metric',
+            type: 'number',
+            esTypes: ['double'],
+            searchable: true,
+            aggregatable: true,
+            timeSeriesMetric: 'gauge',
+          },
+          'middle.metric': {
+            name: 'middle.metric',
+            type: 'number',
+            esTypes: ['long'],
+            searchable: true,
+            aggregatable: true,
+            timeSeriesMetric: 'counter',
+          },
+        };
+
+        const columns: DatatableColumn[] = [
+          { id: 'zebra.metric', name: 'zebra.metric', meta: { type: 'number', esType: 'double' } },
+          { id: 'Alpha.metric', name: 'Alpha.metric', meta: { type: 'number', esType: 'double' } },
+          { id: 'middle.metric', name: 'middle.metric', meta: { type: 'number', esType: 'long' } },
+        ];
+
+        const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
+
+        expect(result.metricFields.map((f) => f.name)).toEqual([
+          'Alpha.metric',
+          'middle.metric',
+          'zebra.metric',
+        ]);
+      });
+
+      it('sorts dimensions alphabetically by name (case-insensitive)', () => {
+        const dataViewFieldMap: DataViewFieldMap = {
+          'Zebra.dimension': {
+            name: 'Zebra.dimension',
+            type: 'string',
+            esTypes: [ES_FIELD_TYPES.KEYWORD],
+            searchable: true,
+            aggregatable: true,
+            timeSeriesDimension: true,
+          },
+          'alpha.dimension': {
+            name: 'alpha.dimension',
+            type: 'string',
+            esTypes: [ES_FIELD_TYPES.KEYWORD],
+            searchable: true,
+            aggregatable: true,
+            timeSeriesDimension: true,
+          },
+          'Middle.dimension': {
+            name: 'Middle.dimension',
+            type: 'string',
+            esTypes: [ES_FIELD_TYPES.KEYWORD],
+            searchable: true,
+            aggregatable: true,
+            timeSeriesDimension: true,
+          },
+        };
+
+        const columns: DatatableColumn[] = [
+          {
+            id: 'Zebra.dimension',
+            name: 'Zebra.dimension',
+            meta: { type: 'string', esType: ES_FIELD_TYPES.KEYWORD },
+          },
+          {
+            id: 'alpha.dimension',
+            name: 'alpha.dimension',
+            meta: { type: 'string', esType: ES_FIELD_TYPES.KEYWORD },
+          },
+          {
+            id: 'Middle.dimension',
+            name: 'Middle.dimension',
+            meta: { type: 'string', esType: ES_FIELD_TYPES.KEYWORD },
+          },
+        ];
+
+        const result = categorizeFields({ ...baseParams, dataViewFieldMap, columns });
+
+        expect(result.dimensions.map((d) => d.name)).toEqual([
+          'alpha.dimension',
+          'Middle.dimension',
+          'Zebra.dimension',
+        ]);
+      });
+    });
   });
 
   describe('createSampleRowByField', () => {
