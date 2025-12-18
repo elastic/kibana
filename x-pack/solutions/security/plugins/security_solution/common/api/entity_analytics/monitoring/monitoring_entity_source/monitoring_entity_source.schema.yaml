@@ -17,6 +17,7 @@ paths:
             schema:
               type: object
               required: [type, name]
+              additionalProperties: false
               properties:
                 type:
                   $ref: "#/components/schemas/MonitoringEntitySourceType"

@@ -97,14 +97,16 @@ export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
 );
 
 export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
-export const CreateEntitySourceRequestBody = z.object({
-  type: MonitoringEntitySourceType,
-  name: z.string(),
-  indexPattern: z.string().optional(),
-  enabled: z.boolean().optional(),
-  matchers: z.array(Matcher).optional(),
-  filter: Filter.optional(),
-});
+export const CreateEntitySourceRequestBody = z
+  .object({
+    type: MonitoringEntitySourceType,
+    name: z.string(),
+    indexPattern: z.string().optional(),
+    enabled: z.boolean().optional(),
+    matchers: z.array(Matcher).optional(),
+    filter: Filter.optional(),
+  })
+  .strict();
 export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
 
 export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;
