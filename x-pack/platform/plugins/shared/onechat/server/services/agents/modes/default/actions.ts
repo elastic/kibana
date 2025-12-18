@@ -6,12 +6,14 @@
  */
 
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
+import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
 import type { ToolCall } from '@kbn/onechat-genai-utils/langchain';
 
 export enum AgentActionType {
   Error = 'error',
   ToolCall = 'tool_call',
   ExecuteTool = 'execute_tool',
+  ToolPrompt = 'tool_prompt',
   HandOver = 'hand_over',
   Answer = 'answer',
   StructuredAnswer = 'structured_answer',
@@ -41,6 +43,12 @@ export interface ExecuteToolAction {
   tool_results: ToolCallResult[];
 }
 
+export interface ToolPromptAction {
+  type: AgentActionType.ToolPrompt;
+  tool_call_id: string;
+  prompt: PromptRequest;
+}
+
 export interface HandoverAction {
   type: AgentActionType.HandOver;
   /** message of the agent for the handover */
@@ -52,6 +60,7 @@ export interface HandoverAction {
 export type ResearchAgentAction =
   | ToolCallAction
   | ExecuteToolAction
+  | ToolPromptAction
   | HandoverAction
   | AgentErrorAction;
 
@@ -87,6 +96,10 @@ export function isExecuteToolAction(action: AgentAction): action is ExecuteToolA
   return action.type === AgentActionType.ExecuteTool;
 }
 
+export function isToolPromptAction(action: AgentAction): action is ToolPromptAction {
+  return action.type === AgentActionType.ToolPrompt;
+}
+
 export function isHandoverAction(action: AgentAction): action is HandoverAction {
   return action.type === AgentActionType.HandOver;
 }
@@ -120,6 +133,14 @@ export function executeToolAction(toolResults: ToolCallResult[]): ExecuteToolAct
   return {
     type: AgentActionType.ExecuteTool,
     tool_results: toolResults,
+  };
+}
+
+export function toolPromptAction(toolCallId: string, prompt: PromptRequest): ToolPromptAction {
+  return {
+    type: AgentActionType.ToolPrompt,
+    tool_call_id: toolCallId,
+    prompt,
   };
 }
 

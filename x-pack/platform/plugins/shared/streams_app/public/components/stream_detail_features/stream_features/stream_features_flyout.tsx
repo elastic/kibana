@@ -87,7 +87,7 @@ export const StreamFeaturesFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              isLoading={isUpdating}
+              isDisabled={isUpdating}
               onClick={closeFlyout}
               flush="left"
               aria-label={i18n.translate(
