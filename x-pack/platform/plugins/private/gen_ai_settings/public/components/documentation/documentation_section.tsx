@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
@@ -23,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { ResourceTypes } from '@kbn/product-doc-common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useProductDocStatus,
   useInstallProductDoc,
@@ -40,7 +42,7 @@ interface DocumentationSectionProps {
 
 export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ productDocBase }) => {
   const { services } = useKibana();
-  const { notifications, application } = services;
+  const { notifications, application, rendering, docLinks } = services;
 
   // Check if user has Agent Builder 'All' privileges (manageAgents capability)
   const hasManagePrivilege = application.capabilities.agentBuilder?.manageAgents === true;
@@ -72,8 +74,21 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       notifications.toasts.addSuccess({ title: i18n.INSTALL_SUCCESS });
     },
     onError: (error) => {
-      notifications.toasts.addError(new Error(error.body?.message ?? error.message), {
+      const message = error.body?.message ?? error.message;
+      notifications.toasts.addDanger({
         title: i18n.INSTALL_ERROR,
+        text: toMountPoint(
+          <EuiText size="s">
+            <p>{message}</p>
+            <p>{i18n.AIR_GAPPED_HINT}</p>
+            <p>
+              <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+                {i18n.LEARN_MORE}
+              </EuiLink>
+            </p>
+          </EuiText>,
+          rendering
+        ),
       });
     },
   });
@@ -418,7 +433,10 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiText size="s" color="subdued">
-          {i18n.DOCUMENTATION_DESCRIPTION}
+          {i18n.DOCUMENTATION_DESCRIPTION}{' '}
+          <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+            {i18n.LEARN_MORE}
+          </EuiLink>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiText size="xs" color="subdued">

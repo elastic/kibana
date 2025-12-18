@@ -21,6 +21,7 @@ import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
 import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
@@ -40,6 +41,7 @@ export interface ApmPluginContextValue {
   uiActions: UiActionsStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   onechat?: OnechatPluginStart;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   share: SharePluginSetup;
   kibanaEnvironment: KibanaEnvContext;
   lens: LensPublicStart;
