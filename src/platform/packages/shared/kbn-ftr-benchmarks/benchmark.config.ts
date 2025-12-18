@@ -32,7 +32,7 @@ const config: InitialBenchConfig = {
     createBenchmark('discover', 'src/platform/test/functional/apps/discover/group1/config.ts'),
     createBenchmark('security-saml', 'x-pack/platform/test/security_functional/saml.config.ts'),
   ],
-  runs: 5,
+  runs: 1,
   timeout: 10 * 300_000,
 };
 
