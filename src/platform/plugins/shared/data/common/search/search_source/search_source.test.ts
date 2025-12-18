@@ -1126,17 +1126,11 @@ describe('SearchSource', () => {
       expect(JSON.parse(searchSourceJSON).projectRouting).toBe('_alias:_origin');
     });
 
-    test('should include project_routing in ES request body when projectRouting is set to _alias:_origin', () => {
+    test('should not include project_routing in ES request body (it is passed as an option)', () => {
       searchSource.setField('index', indexPattern);
       searchSource.setField('projectRouting', '_alias:_origin');
       const request = searchSource.getSearchRequestBody();
-      expect(request.project_routing).toBe('_alias:_origin');
-    });
-
-    test('should not include project_routing in ES request body when projectRouting is undefined', () => {
-      searchSource.setField('index', indexPattern);
-      searchSource.setField('projectRouting', undefined);
-      const request = searchSource.getSearchRequestBody();
+      // projectRouting is now passed as an option, not in the request body
       expect(request.project_routing).toBeUndefined();
     });
   });

@@ -9,11 +9,15 @@
 
 import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import type { ProjectRouting } from '@kbn/es-query';
 import { sanitizeProjectRoutingForES } from '@kbn/es-query';
 import type { ISearchOptions } from '@kbn/search-types';
 
-export function getProjectRouting(cpsManager?: ICPSManager): ISearchOptions['projectRouting'] {
+export function getProjectRouting(
+  overrideValue: ProjectRouting,
+  cpsManager?: ICPSManager
+): ISearchOptions['projectRouting'] {
   return cpsManager && cpsManager.getProjectPickerAccess() !== ProjectRoutingAccess.DISABLED
-    ? sanitizeProjectRoutingForES(cpsManager.getProjectRouting())
+    ? sanitizeProjectRoutingForES(overrideValue ?? cpsManager.getProjectRouting())
     : undefined;
 }

@@ -272,7 +272,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY, sessionId: getSearchSessionId() }
+            {
+              abortSignal,
+              strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+              sessionId: getSearchSessionId(),
+              projectRouting: input?.projectRouting,
+            }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {

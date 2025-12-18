@@ -184,10 +184,11 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId } = options;
+    const { sessionId, projectRouting } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
+      projectRouting,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
@@ -309,11 +310,12 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
+      const projectRouting = getProjectRouting(options.projectRouting, this.deps.getCPSManager?.());
       return this.runSearch(
         { id, ...request },
         {
-          projectRouting: getProjectRouting(this.deps.getCPSManager?.()),
           ...options,
+          projectRouting,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,

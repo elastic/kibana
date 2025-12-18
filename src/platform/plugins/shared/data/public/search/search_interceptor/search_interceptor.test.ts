@@ -32,6 +32,8 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
+import type { ICPSManager } from '@kbn/cps-utils';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
@@ -2281,8 +2283,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { project_routing: '_alias:*' } },
-            { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { params: {} },
+            { projectRouting: '_alias:*', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2290,7 +2292,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBeUndefined();
+        expect(requestBody.projectRouting).toBeUndefined();
       });
 
       test('User passes "_alias:*" with global "_alias:*" - does not send to ES', async () => {
@@ -2300,8 +2302,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { project_routing: '_alias:*' } },
-            { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { params: {} },
+            { projectRouting: '_alias:*', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2309,7 +2311,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBeUndefined();
+        expect(requestBody.projectRouting).toBeUndefined();
       });
 
       test('User passes "_alias:_origin" with global "_alias:_origin" - sends to ES', async () => {
@@ -2319,8 +2321,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { project_routing: '_alias:_origin' } },
-            { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { params: {} },
+            { projectRouting: '_alias:_origin', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2328,7 +2330,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBe('_alias:_origin');
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
       });
 
       test('User passes "_alias:_origin" with global "_alias:*" - sends to ES', async () => {
@@ -2338,8 +2340,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { project_routing: '_alias:_origin' } },
-            { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { params: {} },
+            { projectRouting: '_alias:_origin', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2347,7 +2349,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBe('_alias:_origin');
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
       });
 
       test('User passes nothing with global "_alias:_origin" - sends global to ES', async () => {
@@ -2363,7 +2365,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBe('_alias:_origin');
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
       });
 
       test('User passes nothing with global "_alias:*" - does not send to ES', async () => {
@@ -2379,7 +2381,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBeUndefined();
+        expect(requestBody.projectRouting).toBeUndefined();
       });
 
       test('User passes nothing with global undefined - does not send to ES', async () => {
@@ -2395,7 +2397,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBeUndefined();
+        expect(requestBody.projectRouting).toBeUndefined();
       });
 
       test('CPS unavailable - does not send to ES', async () => {
@@ -2403,8 +2405,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { project_routing: '_alias:_origin' } },
-            { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { params: {} },
+            { projectRouting: '_alias:_origin', strategy: ESQL_ASYNC_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2412,7 +2414,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.project_routing).toBeUndefined();
+        expect(requestBody.projectRouting).toBeUndefined();
       });
     });
 
@@ -2424,8 +2426,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { body: { project_routing: '_alias:*' } } },
-            { strategy: ENHANCED_ES_SEARCH_STRATEGY }
+            { params: { body: {} } },
+            { projectRouting: '_alias:*', strategy: ENHANCED_ES_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2433,7 +2435,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.body.project_routing).toBeUndefined();
+        expect(requestBody.projectRouting).toBeUndefined();
       });
 
       test('User passes "_alias:_origin" with global "_alias:*" - sends to ES', async () => {
@@ -2443,8 +2445,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { body: { project_routing: '_alias:_origin' } } },
-            { strategy: ENHANCED_ES_SEARCH_STRATEGY }
+            { params: { body: {} } },
+            { projectRouting: '_alias:_origin', strategy: ENHANCED_ES_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2452,7 +2454,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.body.project_routing).toBe('_alias:_origin');
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
       });
 
       test('User passes nothing with global "_alias:_origin" - sends global to ES', async () => {
@@ -2468,7 +2470,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.body.project_routing).toBe('_alias:_origin');
+        expect(requestBody.projectRouting).toBe('_alias:_origin');
       });
 
       test('CPS unavailable - does not send to ES', async () => {
@@ -2476,8 +2478,8 @@ describe('SearchInterceptor', () => {
 
         await searchInterceptor
           .search(
-            { params: { body: { project_routing: '_alias:_origin' } } },
-            { strategy: ENHANCED_ES_SEARCH_STRATEGY }
+            { params: { body: {} } },
+            { projectRouting: '_alias:_origin', strategy: ENHANCED_ES_SEARCH_STRATEGY }
           )
           .toPromise();
 
@@ -2485,7 +2487,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.params.body.project_routing).toBeUndefined();
+        expect(requestBody.projectRouting).toBeUndefined();
       });
     });
   });
