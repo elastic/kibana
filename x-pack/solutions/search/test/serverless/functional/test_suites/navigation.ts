@@ -75,11 +75,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'dashboardLandingPage',
         },
         {
-          link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Playground'],
-          pageTestSubject: 'playgroundsListPage',
-        },
-        {
           link: { deepLinkId: 'searchGettingStarted' },
           breadcrumbs: ['Getting started'],
           pageTestSubject: 'gettingStartedHeader',
@@ -161,7 +156,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'agent_builder',
           'discover',
           'dashboards',
-          'searchPlayground',
           'machine_learning',
           // footer:
           'search_getting_started',
@@ -171,6 +165,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         ],
         { checkOrder: false }
       );
+    });
+
+    it('does not show cloud connect in sidebar navigation', async () => {
+      // Cloud Connect should NOT appear in serverless deployments
+      expect(await testSubjects.missingOrFail('cloud_connect'));
     });
 
     it('renders a feedback callout', async function () {
