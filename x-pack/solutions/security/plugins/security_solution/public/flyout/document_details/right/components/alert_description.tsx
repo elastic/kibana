@@ -24,20 +24,21 @@ import {
 } from './test_ids';
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
  * Displays the rule description of a signal document.
  */
 export const AlertDescription: FC = () => {
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, scopeId, isRulePreview } = useDocumentDetailsContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
-  const { rulesPrivileges } = useUserPrivileges();
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const ruleSummaryDisabled =
-    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !rulesPrivileges?.rules.read;
+    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !canReadRules;
 
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
