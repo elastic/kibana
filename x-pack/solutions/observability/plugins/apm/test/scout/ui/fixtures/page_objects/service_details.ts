@@ -6,7 +6,6 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
 import { waitForChartToLoad, waitForTableToLoad } from './utils';
 import { testData } from '..';
 
@@ -25,9 +24,17 @@ type ServiceDetailsPageTabName =
 export class ServiceDetailsPage {
   readonly SERVICE_NAME = 'opbeans-java';
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  readonly dependenciesTabDependenciesTable;
+  readonly dependenciesTabDependenciesBreakdownChart;
 
-  async gotoPage(overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}) {
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.dependenciesTabDependenciesTable = this.page.getByTestId('dependenciesTable');
+    this.dependenciesTabDependenciesBreakdownChart = this.page.getByTestId(
+      'serviceDependenciesBreakdownChart'
+    );
+  }
+
+  async goToPage(overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}) {
     const urlServiceName = encodeURIComponent(overrides.serviceName ?? this.SERVICE_NAME);
 
     await this.page.goto(
@@ -40,7 +47,7 @@ export class ServiceDetailsPage {
   }
 
   // #region Go to Tabs
-  private async gotoTab(
+  private async goToTab(
     tabName: ServiceDetailsPageTabName,
     overrides: {
       serviceName?: string;
@@ -58,16 +65,16 @@ export class ServiceDetailsPage {
     );
   }
 
-  async gotoOverviewTab(
+  async goToOverviewTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('overview', overrides);
+    await this.goToTab('overview', overrides);
   }
 
-  async gotoTransactionsTab(
+  async goToTransactionsTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('transactions', overrides);
+    await this.goToTab('transactions', overrides);
   }
 
   private async waitForDependenciesTabToLoad() {
@@ -77,59 +84,105 @@ export class ServiceDetailsPage {
     ]);
   }
 
-  async gotoDependenciesTab(
+  async goToDependenciesTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('dependencies', overrides);
+    await this.goToTab('dependencies', overrides);
     await this.waitForDependenciesTabToLoad();
   }
 
-  async gotoErrorsTab(
+  async goToErrorsTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('errors', overrides);
+    await this.goToTab('errors', overrides);
   }
 
-  async gotoMetricsTab(
+  async goToMetricsTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('metrics', overrides);
+    await this.goToTab('metrics', overrides);
   }
 
-  async gotoInfrastructureTab(
+  async goToInfrastructureTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('infrastructure', overrides);
+    await this.goToTab('infrastructure', overrides);
   }
 
-  async gotoServiceMapTab(
+  async goToServiceMapTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('service-map', overrides);
+    await this.goToTab('service-map', overrides);
   }
 
-  async gotoLogsTab(
+  async goToLogsTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('logs', overrides);
+    await this.goToTab('logs', overrides);
   }
 
-  async gotoAlertsTab(
+  async goToAlertsTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('alerts', overrides);
+    await this.goToTab('alerts', overrides);
   }
 
-  async gotoDashboardsTab(
+  async goToDashboardsTab(
     overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.gotoTab('dashboards', overrides);
+    await this.goToTab('dashboards', overrides);
+  }
+  // #endregion
+
+  // #region Get Tabs
+  private getTab(tabName: ServiceDetailsPageTabName) {
+    return this.page.getByTestId(`${tabName}Tab`);
+  }
+
+  getOverviewTab() {
+    return this.getTab('overview');
+  }
+
+  getTransactionsTab() {
+    return this.getTab('transactions');
+  }
+
+  getDependenciesTab() {
+    return this.getTab('dependencies');
+  }
+
+  getErrorsTab() {
+    return this.getTab('errors');
+  }
+
+  getMetricsTab() {
+    return this.getTab('metrics');
+  }
+
+  getInfrastructureTab() {
+    return this.getTab('infrastructure');
+  }
+
+  getServiceMapTab() {
+    return this.getTab('service-map');
+  }
+
+  getLogsTab() {
+    return this.getTab('logs');
+  }
+
+  getAlertsTab() {
+    return this.getTab('alerts');
+  }
+
+  getDashboardsTab() {
+    return this.getTab('dashboards');
   }
   // #endregion
 
   // #region Click Tabs
   private async clickTab(tabName: ServiceDetailsPageTabName) {
-    await this.page.getByTestId(`${tabName}Tab`).click();
+    await this.getTab(tabName).click();
   }
 
   async clickOverviewTab() {
@@ -173,113 +226,13 @@ export class ServiceDetailsPage {
   }
   // #endregion
 
-  // #region Expect Tabs Visible
-  private async expectTabVisible(tabName: ServiceDetailsPageTabName) {
-    await expect(this.page.getByTestId(`${tabName}Tab`)).toBeVisible();
-  }
-
-  async expectOverviewTabVisible() {
-    await this.expectTabVisible('overview');
-  }
-
-  async expectTransactionsTabVisible() {
-    await this.expectTabVisible('transactions');
-  }
-
-  async expectDependenciesTabVisible() {
-    await this.expectTabVisible('dependencies');
-  }
-
-  async expectErrorsTabVisible() {
-    await this.expectTabVisible('errors');
-  }
-
-  async expectMetricsTabVisible() {
-    await this.expectTabVisible('metrics');
-  }
-
-  async expectInfrastructureTabVisible() {
-    await this.expectTabVisible('infrastructure');
-  }
-
-  async expectServiceMapTabVisible() {
-    await this.expectTabVisible('service-map');
-  }
-
-  async expectLogsTabVisible() {
-    await this.expectTabVisible('logs');
-  }
-
-  async expectAlertsTabVisible() {
-    await this.expectTabVisible('alerts');
-  }
-
-  async expectDashboardsTabVisible() {
-    await this.expectTabVisible('dashboards');
-  }
-  // #endregion
-
-  // #region Expect Tabs Selected
-  private async expectTabSelected(tabName: ServiceDetailsPageTabName) {
-    await expect(this.page.getByTestId(`${tabName}Tab`)).toHaveAttribute('aria-selected', 'true');
-  }
-
-  async expectOverviewTabSelected() {
-    await this.expectTabSelected('overview');
-  }
-
-  async expectTransactionsTabSelected() {
-    await this.expectTabSelected('transactions');
-  }
-
-  async expectDependenciesTabSelected() {
-    await this.expectTabSelected('dependencies');
-  }
-
-  async expectErrorsTabSelected() {
-    await this.expectTabSelected('errors');
-  }
-
-  async expectMetricsTabSelected() {
-    await this.expectTabSelected('metrics');
-  }
-
-  async expectInfrastructureTabSelected() {
-    await this.expectTabSelected('infrastructure');
-  }
-
-  async expectServiceMapTabSelected() {
-    await this.expectTabSelected('service-map');
-  }
-
-  async expectLogsTabSelected() {
-    await this.expectTabSelected('logs');
-  }
-
-  async expectAlertsTabSelected() {
-    await this.expectTabSelected('alerts');
-  }
-
-  async expectDashboardsTabSelected() {
-    await this.expectTabSelected('dashboards');
-  }
-  // #endregion
-
   // #region Dependencies Tab
-  async expectDependenciesTableVisible() {
-    await expect(this.page.getByTestId('dependenciesTable')).toBeVisible();
-  }
-
-  async expectDependencyInDependenciesTable(dependencyName: string) {
-    await expect(this.page.getByRole('link', { name: dependencyName })).toBeVisible();
+  getDependencyInDependenciesTable(dependencyName: string) {
+    return this.dependenciesTabDependenciesTable.getByRole('link', { name: dependencyName });
   }
 
   async clickDependencyInDependenciesTable(dependencyName: string) {
-    await this.page.getByRole('link', { name: dependencyName }).click();
-  }
-
-  async expectDependenciesBreakdownChartVisible() {
-    await expect(this.page.getByTestId('serviceDependenciesBreakdownChart')).toBeVisible();
+    await this.getDependencyInDependenciesTable(dependencyName).click();
   }
   // #endregion
 }

@@ -5,14 +5,23 @@
  * 2.0.
  */
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
 import { waitForTableToLoad } from './utils';
 import { testData } from '..';
 
 export class DependenciesInventoryPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly header;
+  public readonly dependenciesTable;
 
-  async gotoPage(overrides?: { rangeFrom?: string; rangeTo?: string }) {
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.header = this.page.getByRole('heading', { name: 'Dependencies' });
+    this.dependenciesTable = this.page.getByTestId('dependenciesTable');
+  }
+
+  private async waitForDependenciesToLoad() {
+    await waitForTableToLoad(this.page, 'dependenciesTable');
+  }
+
+  async goToPage(overrides?: { rangeFrom?: string; rangeTo?: string }) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies/inventory?${new URLSearchParams({
         rangeFrom: testData.OPBEANS_START_DATE,
@@ -23,23 +32,11 @@ export class DependenciesInventoryPage {
     await this.waitForDependenciesToLoad();
   }
 
-  async expectPageHeaderVisible() {
-    await expect(this.page.getByRole('heading', { name: 'Dependencies' })).toBeVisible();
-  }
-
-  async expectDependenciesTableVisible() {
-    await expect(this.page.getByTestId('dependenciesTable')).toBeVisible();
-  }
-
-  async expectDependencyInDependenciesTable(dependencyName: string) {
-    await expect(this.page.getByRole('link', { name: dependencyName })).toBeVisible();
+  getDependencyInDependenciesTable(dependencyName: string) {
+    return this.page.getByTestId('dependenciesTable').getByRole('link', { name: dependencyName });
   }
 
   async clickDependencyInDependenciesTable(dependencyName: string) {
-    await this.page.getByRole('link', { name: dependencyName }).click();
-  }
-
-  async waitForDependenciesToLoad() {
-    await waitForTableToLoad(this.page, 'dependenciesTable');
+    await this.getDependencyInDependenciesTable(dependencyName).click();
   }
 }

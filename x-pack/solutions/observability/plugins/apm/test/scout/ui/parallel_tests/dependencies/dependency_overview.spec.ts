@@ -20,31 +20,39 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on dependency details page', async () => {
-      await dependencyDetailsPage.gotoPage();
+      await dependencyDetailsPage.goToPage();
     });
 
     await test.step('Verify overview tab is selected', async () => {
-      await dependencyDetailsPage.expectOverviewTabVisible();
-      await dependencyDetailsPage.expectOverviewTabSelected();
+      await expect(dependencyDetailsPage.getOverviewTab()).toBeVisible();
+      await expect(dependencyDetailsPage.getOperationsTab()).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
 
-      const url = page.url();
-      expect(url).toContain(`/dependencies/overview`);
+      const url = new URL(page.url());
+      expect(url.pathname).toContain(`/dependencies/overview`);
     });
   });
 
-  // Assertions are done within the page object
-  // eslint-disable-next-line playwright/expect-expect
   test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
     await test.step('Land on overview tab', async () => {
-      await dependencyDetailsPage.gotoOverviewTab();
+      await dependencyDetailsPage.goToOverviewTab();
     });
 
     await test.step('Renders overview content', async () => {
-      await dependencyDetailsPage.expectLatencyChartVisible();
-      await dependencyDetailsPage.expectThroughputChartVisible();
-      await dependencyDetailsPage.expectFailedTransactionRateChartVisible();
-      await dependencyDetailsPage.expectUpstreamServicesTableVisible();
-      await dependencyDetailsPage.expectServiceInUpstreamServicesTable(SERVICE_NAME);
+      await expect(dependencyDetailsPage.latencyChart).toBeVisible();
+      await expect(dependencyDetailsPage.throughputChart).toBeVisible();
+      await expect(dependencyDetailsPage.failedTransactionRateChart).toBeVisible();
+      await expect(dependencyDetailsPage.upstreamServicesTable).toBeVisible();
+      await expect(
+        dependencyDetailsPage.upstreamServicesTable.getByRole('heading', {
+          name: 'Upstream services',
+        })
+      ).toBeVisible();
+      await expect(
+        dependencyDetailsPage.getServiceInUpstreamServicesTable(SERVICE_NAME)
+      ).toBeVisible();
     });
   });
 
@@ -53,7 +61,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on overview tab', async () => {
-      await dependencyDetailsPage.gotoOverviewTab();
+      await dependencyDetailsPage.goToOverviewTab();
     });
 
     await test.step('Click on a service in upstream services table', async () => {
@@ -61,8 +69,8 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('Lands on the service overview page', async () => {
-      const url = page.url();
-      expect(url).toContain(`/services/${SERVICE_NAME}/overview`);
+      const url = new URL(page.url());
+      expect(url.pathname).toContain(`/services/${SERVICE_NAME}/overview`);
     });
   });
 
@@ -71,7 +79,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on dependencies tab', async () => {
-      await dependencyDetailsPage.gotoOverviewTab();
+      await dependencyDetailsPage.goToOverviewTab();
     });
 
     await test.step('Check a11y', async () => {

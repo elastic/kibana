@@ -13,15 +13,15 @@ const DEPENDENCY_NAME = 'postgresql';
 test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.dependenciesInventoryPage.gotoPage();
+    await pageObjects.dependenciesInventoryPage.goToPage();
   });
 
-  // Assertions are done within the page object
-  // eslint-disable-next-line playwright/expect-expect
   test('Renders expected content', async ({ pageObjects: { dependenciesInventoryPage } }) => {
-    await dependenciesInventoryPage.expectPageHeaderVisible();
-    await dependenciesInventoryPage.expectDependenciesTableVisible();
-    await dependenciesInventoryPage.expectDependencyInDependenciesTable(DEPENDENCY_NAME);
+    await expect(dependenciesInventoryPage.header).toBeVisible();
+    await expect(dependenciesInventoryPage.dependenciesTable).toBeVisible();
+    await expect(
+      dependenciesInventoryPage.getDependencyInDependenciesTable(DEPENDENCY_NAME)
+    ).toBeVisible();
   });
 
   test('Links to dependency overview when clicking on a dependency in dependencies table', async ({
@@ -30,9 +30,9 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     await dependenciesInventoryPage.clickDependencyInDependenciesTable(DEPENDENCY_NAME);
 
-    const url = page.url();
-    expect(url).toContain(`/dependencies/overview`);
-    expect(url).toContain(`dependencyName=${DEPENDENCY_NAME}`);
+    const url = new URL(page.url());
+    expect(url.pathname).toContain(`/dependencies/overview`);
+    expect(url.searchParams.get('dependencyName')).toBe(DEPENDENCY_NAME);
   });
 
   test('Has no detectable a11y violations on load', async ({ page }) => {
