@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
 import path from 'path';
@@ -20,8 +20,8 @@ function createBenchmark(name: string, config: string) {
   return {
     kind: 'script' as const,
     name,
-    run: `node scripts/functional_tests --config ${config} --kibana-install-dir ${path.join(
-      REPO_ROOT,
+    run: `node scripts/functional_tests --config ${config} --kibana-install-dir ${path.resolve(
+      '.',
       'build',
       'default',
       KIBANA_BUILD_VERSION
