@@ -9,7 +9,7 @@
 
 import { ESQL_CONTROL, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
+import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 
 import { addControlMenuTrigger } from './actions/control_panel_actions';
 import { registerActions } from './actions/register_actions';
@@ -46,13 +46,13 @@ export class ControlsPlugin
     setKibanaServices(coreStart, startPlugins);
     registerActions(startPlugins.uiActions);
 
-    startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
+    startPlugins.presentationUtil.registerPanelPlacementSettings(OPTIONS_LIST_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
     });
-    startPlugins.dashboard.registerDashboardPanelSettings(RANGE_SLIDER_CONTROL, () => {
+    startPlugins.presentationUtil.registerPanelPlacementSettings(RANGE_SLIDER_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
     });
-    startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
+    startPlugins.presentationUtil.registerPanelPlacementSettings(ESQL_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
     });
   }
