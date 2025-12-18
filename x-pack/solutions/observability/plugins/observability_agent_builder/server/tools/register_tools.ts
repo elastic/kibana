@@ -35,6 +35,7 @@ import {
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   createGetCorrelatedLogsTool,
 } from './get_correlated_logs/get_correlated_logs';
+import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/get_hosts';
 import {
   createGetServicesTool,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
@@ -61,6 +62,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+  OBSERVABILITY_GET_HOSTS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -88,6 +90,7 @@ export async function registerTools({
     createGetServicesTool({ core, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
+    createGetHostsTool({ core, logger, dataRegistry }),
   ];
 
   for (const tool of observabilityTools) {
