@@ -26,7 +26,8 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { TabItem } from '../../types';
+import { TabStatus, type TabItem } from '../../types';
+import { TabPreview } from '../tab_preview';
 
 interface OptionData {
   closedAt?: moment.Moment;
@@ -91,6 +92,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     );
 
     const [isPopoverOpen, setPopover] = useState(false);
+    const [previewTabId, setPreviewTabId] = useState<string | null>(null);
     const contextMenuPopoverId = useGeneratedHtmlId();
 
     const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
@@ -108,21 +110,34 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       },
     } as Partial<EuiSelectableOptionsListProps>;
 
-    const renderRecentlyClosedOption = useCallback((option: EuiSelectableOption<OptionData>) => {
-      const closedAt = option?.closedAt;
-      const formattedTime = closedAt?.isValid() ? closedAt.fromNow() : '';
+    const renderRecentlyClosedOption = useCallback(
+      (option: EuiSelectableOption<OptionData>) => {
+        const closedAt = option?.closedAt;
+        const formattedTime = closedAt?.isValid() ? closedAt.fromNow() : '';
 
-      return (
-        <>
-          {option.label}
-          {formattedTime && (
-            <EuiText size="xs" color="subdued" className="eui-displayBlock">
-              {formattedTime}
-            </EuiText>
-          )}
-        </>
-      );
-    }, []);
+        return (
+          <TabPreview
+            showPreview={previewTabId === option.key}
+            setShowPreview={() =>
+              setPreviewTabId((prev) => (prev === option.key ? null : (option.key as string)))
+            }
+            tabItem={{ id: option.key as string, label: option.label }}
+            previewData={{ status: TabStatus.DEFAULT, query: { language: 'kuery', query: 'lolz' } }}
+            previewDelay={0}
+          >
+            <div>
+              {option.label}
+              {formattedTime && (
+                <EuiText size="xs" color="subdued" className="eui-displayBlock">
+                  {formattedTime}
+                </EuiText>
+              )}
+            </div>
+          </TabPreview>
+        );
+      },
+      [previewTabId]
+    );
 
     return (
       <EuiPopover
