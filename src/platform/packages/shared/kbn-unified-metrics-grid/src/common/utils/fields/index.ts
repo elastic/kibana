@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MetricsExperienceClientProvider } from './metrics_experience_client_provider';
-export { useMetricsExperienceClient } from './use_metrics_experience_client';
+export const hasValue = (value: unknown): boolean => {
+  if (value == null || value === '' || Number.isNaN(value)) {
+    return false;
+  }
+  if (Array.isArray(value)) {
+    return value.some((v) => v != null && v !== '' && !Number.isNaN(v));
+  }
+  return true;
+};
