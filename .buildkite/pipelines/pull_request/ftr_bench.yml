@@ -9,7 +9,7 @@ steps:
     timeout_in_minutes: 300
     soft_fail: true
     depends_on:
-      - build
+      # - build
       # - quick_checks
       # - checks
       # - linting
