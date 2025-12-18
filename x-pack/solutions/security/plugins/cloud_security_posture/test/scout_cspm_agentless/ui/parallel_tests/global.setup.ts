@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-security';
+import { globalSetupHook } from '@kbn/scout-security';
 
-export default createPlaywrightConfig({
-  testDir: './parallel_tests/',
-  workers: 2,
-  runGlobalSetup: true,
+globalSetupHook('Agentless CSPM setup', async ({ log }) => {
+  log.debug('[setup] Setting up Agentless CSPM');
 });
