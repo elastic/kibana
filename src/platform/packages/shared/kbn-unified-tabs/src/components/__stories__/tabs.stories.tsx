@@ -43,7 +43,7 @@ const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
       {...args}
       items={managedItems}
       selectedItemId={managedSelectedItemId}
-      recentlyClosedItems={[]}
+      recentlyClosedItems={args.recentlyClosedItems}
       createItem={getNewTabDefaultProps}
       getPreviewData={getPreviewDataMock}
       services={servicesMock}
@@ -94,5 +94,13 @@ export const WithMultipleTabs: StoryObj<TabbedContentProps> = {
       },
     ],
     selectedItemId: '3',
+    recentlyClosedItems: [
+      {
+        id: '1',
+        label: 'Closed Tab',
+        closedAt: 123456789,
+        query: { query: 'extension.keyword : css', language: 'kuery' },
+      },
+    ],
   },
 };

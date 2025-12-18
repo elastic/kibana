@@ -26,7 +26,13 @@ export const selectRecentlyClosedTabs = createSelector(
     (state: DiscoverInternalState) => state.tabs.recentlyClosedTabIds,
     (state: DiscoverInternalState) => state.tabs.recentlyClosedTabsById,
   ],
-  (recentlyClosedTabIds, byId) => recentlyClosedTabIds.map((id) => byId[id])
+  (recentlyClosedTabIds, byId) =>
+    recentlyClosedTabIds
+      .map((id) => byId[id])
+      .map((tab) => ({
+        ...tab,
+        query: tab.appState.query,
+      }))
 );
 
 export const selectIsTabsBarHidden = createSelector(

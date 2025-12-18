@@ -170,6 +170,7 @@ export interface TabState extends TabItem {
 
 export interface RecentlyClosedTabState extends TabState {
   closedAt: number;
+  query: AggregateQuery | Query;
 }
 
 export enum TabsBarVisibility {

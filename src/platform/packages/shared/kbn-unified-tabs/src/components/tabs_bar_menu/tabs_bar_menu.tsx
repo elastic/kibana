@@ -26,11 +26,14 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { RecentlyClosedTabItem } from '../../types';
 import { TabStatus, type TabItem } from '../../types';
 import { TabPreview } from '../tab_preview';
 
 interface OptionData {
-  closedAt?: moment.Moment;
+  closedAt: moment.Moment;
+  query: AggregateQuery | Query | undefined;
 }
 
 type RecentlyClosedTabOption = EuiSelectableOption<OptionData>;
@@ -46,16 +49,21 @@ const getOpenedTabsList = (
   }));
 };
 
-const getRecentlyClosedTabsList = (tabItems: TabItem[]): RecentlyClosedTabOption[] => {
+const getRecentlyClosedTabsList = (
+  tabItems: RecentlyClosedTabItem[]
+): RecentlyClosedTabOption[] => {
   return tabItems.map((tab) => {
-    const closedAt = 'closedAt' in tab && tab.closedAt ? moment(tab.closedAt) : undefined;
+    const momentClosedAt = moment(tab.closedAt);
     const option = {
       label: tab.label,
-      title: `${tab.label}${closedAt?.isValid() ? ` (${closedAt.format('LL LT')})` : ''}`,
+      title: `${tab.label}${
+        momentClosedAt.isValid() ? ` (${momentClosedAt.format('LL LT')})` : ''
+      }`,
       key: tab.id,
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
       data: {
-        closedAt,
+        closedAt: momentClosedAt,
+        query: tab.query,
       },
     };
     return option;
@@ -65,7 +73,7 @@ const getRecentlyClosedTabsList = (tabItems: TabItem[]): RecentlyClosedTabOption
 export interface TabsBarMenuProps {
   items: TabItem[];
   selectedItem: TabItem | null;
-  recentlyClosedItems: TabItem[];
+  recentlyClosedItems: RecentlyClosedTabItem[];
   onSelect: (item: TabItem) => Promise<void>;
   onSelectRecentlyClosed: (item: TabItem) => Promise<void>;
   onClearRecentlyClosed: () => void;
@@ -124,7 +132,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             tabItem={{ id: option.key as string, label: option.label }}
             previewData={{
               status: TabStatus.DEFAULT,
-              query: { language: 'esql', query: 'FROM kibana_sample_data_logs | LIMIT 1000' },
+              query: option?.query,
             }}
             previewDelay={0}
             position="left"
