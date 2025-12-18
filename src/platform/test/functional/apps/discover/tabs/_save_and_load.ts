@@ -73,8 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('multi-tab Discover sessions', () => {
       const sessionName = 'Multi-tab Discover session';
-      const nonAutoChartIntervalTitle = 'Hour';
-      let persistedTabChartIntervalValue: string;
 
       const persistedTabLabel = 'Persisted data view';
       const persistedTabQuery = 'test';
@@ -86,6 +84,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const persistedTabColumn1 = 'referer';
       const persistedTabColumn2 = 'bytes';
       const persistedTabHitCount = '9';
+      const persistedTabChartIntervalTitle = 'Hour';
+      const persistedTabChartIntervalValue = 'h';
 
       const adHocTabLabel = 'Ad hoc data view';
       const adHocTabQuery = 'extension : jpg';
@@ -115,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.clickFieldListItemAdd(persistedTabColumn1);
         await unifiedTabs.editTabLabel(0, persistedTabLabel);
+        await discover.setChartInterval(persistedTabChartIntervalTitle);
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
 
         // Ad hoc data view tab
@@ -151,12 +152,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await discover.waitUntilTabIsLoaded();
 
-        await discover.setChartInterval(nonAutoChartIntervalTitle);
-        const selectedInterval = await discover.getChartInterval();
-        expect(selectedInterval).to.not.be(null);
-        persistedTabChartIntervalValue = selectedInterval!;
-        expect(persistedTabChartIntervalValue).to.not.be('auto');
-
         // Validate tab labels
         expect(await unifiedTabs.getTabLabels()).to.eql([
           persistedTabLabel,
@@ -167,6 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
         expect(await queryBar.getQueryString()).to.be(persistedTabQuery);
+        expect(await discover.getChartInterval()).to.be(persistedTabChartIntervalValue);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
           persistedTabColumn1,
         ]);
