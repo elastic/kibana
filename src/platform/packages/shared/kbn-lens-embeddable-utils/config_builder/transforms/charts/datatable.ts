@@ -68,8 +68,7 @@ function getAccessorName(
 }
 
 function buildCommonMetricRowState(
-  config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number],
-  columnId: string
+  config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
 ): Pick<ColumnState, 'hidden' | 'alignment' | 'colorMode' | 'isTransposed'> {
   return {
     ...(config.visible !== undefined ? { hidden: !config.visible } : {}),
@@ -79,7 +78,6 @@ function buildCommonMetricRowState(
         ? { colorMode: 'text' }
         : { colorMode: 'cell' }
       : {}),
-    ...(config.sorted ? { sorting: { columnId, direction: config.sorted.direction } } : {}),
     isTransposed: false,
   };
 }
@@ -90,7 +88,7 @@ function buildMetricsState(metrics: DatatableState['metrics']): ColumnState[] {
 
     return {
       columnId,
-      ...buildCommonMetricRowState(metric, columnId),
+      ...buildCommonMetricRowState(metric),
       ...(metric.color && metric.apply_color_to
         ? { palette: fromColorByValueAPIToLensState(metric.color) }
         : {}),
@@ -112,7 +110,7 @@ function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
     const columnId = getAccessorName(ROW_ACCESSOR_PREFIX, index);
     return {
       columnId,
-      ...buildCommonMetricRowState(row, columnId),
+      ...buildCommonMetricRowState(row),
       ...(row.color && row.apply_color_to
         ? { colorMapping: fromColorMappingAPIToLensState(row.color) }
         : {}),
@@ -126,24 +124,47 @@ function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
 function buildSplitMetricsByState(splitMetrics: DatatableState['split_metrics_by']): ColumnState[] {
   if (!splitMetrics) return [];
 
-  return splitMetrics.map(
-    (splitMetricBy: NonNullable<DatatableState['split_metrics_by']>[number], index: number) => {
-      const columnId = getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index);
-      return {
-        columnId,
-        ...('sorted' in splitMetricBy && splitMetricBy.sorted
-          ? {
-              sorting: {
-                columnId: `${splitMetricBy.sorted.value} --- ${columnId}`,
-                direction: splitMetricBy.sorted.direction,
-              },
-            }
-          : {}),
-        isMetric: false,
-        isTransposed: true,
-      };
+  return splitMetrics.map((_splitMetricBy, index) => {
+    const columnId = getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index);
+    return {
+      columnId,
+      isMetric: false,
+      isTransposed: true,
+    };
+  });
+}
+
+function getSortingColumnId(sorting: NonNullable<DatatableState['sorting']>): string | undefined {
+  switch (sorting.by) {
+    case 'metric':
+      return getAccessorName(METRIC_ACCESSOR_PREFIX, sorting.index);
+    case 'row':
+      return getAccessorName(ROW_ACCESSOR_PREFIX, sorting.index);
+    case 'split_metrics_by': {
+      const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sorting.metric_index);
+      return `${sorting.values.join('---')}---${metricColumnId}`;
     }
-  );
+    default:
+      return undefined;
+  }
+}
+
+function buildSortingState(config: DatatableState): Pick<DatatableVisualizationState, 'sorting'> {
+  if (!config.sorting) {
+    return {};
+  }
+
+  const columnId = getSortingColumnId(config.sorting);
+  if (!columnId) {
+    return {};
+  }
+
+  return {
+    sorting: {
+      columnId,
+      direction: config.sorting.direction,
+    },
+  };
 }
 
 function buildVisualizationState(config: DatatableState): DatatableVisualizationState {
@@ -178,6 +199,7 @@ function buildVisualizationState(config: DatatableState): DatatableVisualization
         : { density: LENS_DATAGRID_DENSITY.NORMAL }
       : {}),
     ...(config.paging ? { paging: { size: config.paging, enabled: true } } : {}),
+    ...buildSortingState(config),
     columns: metrics.concat(rows, splitMetrics),
   };
 }
@@ -235,21 +257,88 @@ function buildRowsAPI(column: ColumnState): APIRowProps {
   };
 }
 
-const getSorting = (sorting: DatatableVisualizationState['sorting'], columnId: string) =>
-  sorting?.columnId === columnId && sorting?.direction !== 'none'
-    ? { sorted: { direction: sorting.direction } }
-    : {};
+// In metric columns the isMetric is not set in all cases
+const isMetricColumn = (col: ColumnState) =>
+  ('isMetric' in col && col.isMetric) || (!('isMetric' in col) && !col.isTransposed);
 
-const getSplitMetricBySorting = (
+function parseColumnIndex(columnId: string, prefix: string): number | undefined {
+  if (!columnId.startsWith(prefix)) {
+    return undefined;
+  }
+  const index = parseInt(columnId.slice(prefix.length), 10);
+  return isNaN(index) ? undefined : index;
+}
+
+function parseSplitMetricsBySorting(
+  columnId: string,
+  metricColumnIds: (string | undefined)[]
+): { values: string[]; metricIndex: number } | undefined {
+  // Format: value1---value2---...---metricColumnId
+  const parts = columnId.split('---');
+  if (parts.length < 2) {
+    return undefined;
+  }
+
+  const metricColumnId = parts[parts.length - 1];
+  const metricIndex = metricColumnIds.indexOf(metricColumnId);
+  if (metricIndex === -1) {
+    return undefined;
+  }
+
+  return {
+    values: parts.slice(0, -1),
+    metricIndex,
+  };
+}
+
+function parseSortingToAPI(
   sorting: DatatableVisualizationState['sorting'],
-  columnId: string
-) =>
-  sorting?.columnId === columnId && sorting?.direction !== 'none'
-    ? { sorted: { direction: sorting.direction, value: columnId } }
-    : {};
+  columns: ColumnState[]
+): DatatableState['sorting'] | {} {
+  if (!sorting?.columnId || sorting.direction === 'none') {
+    return {};
+  }
 
-type DatatableColumnsNoESQL = Pick<DatatableStateNoESQL, 'metrics' | 'rows' | 'split_metrics_by'>;
-type DatatableColumnsESQL = Pick<DatatableStateESQL, 'metrics' | 'rows' | 'split_metrics_by'>;
+  const { columnId, direction } = sorting;
+
+  // Split_metrics_by sorting (contains ---)
+  if (columnId.includes('---')) {
+    const metricColumnIds = columns.filter((col) => isMetricColumn(col)).map((col) => col.columnId);
+
+    const parsed = parseSplitMetricsBySorting(columnId, metricColumnIds);
+    return parsed
+      ? {
+          by: 'split_metrics_by',
+          metric_index: parsed.metricIndex,
+          values: parsed.values,
+          direction,
+        }
+      : {};
+  }
+
+  // Metric column sorting
+  const metricIndex = parseColumnIndex(columnId, `${getAccessorName(METRIC_ACCESSOR_PREFIX)}_`);
+  if (metricIndex !== undefined) {
+    return { by: 'metric', index: metricIndex, direction };
+  }
+
+  // Row column sorting
+  const rowIndex = parseColumnIndex(columnId, `${getAccessorName(ROW_ACCESSOR_PREFIX)}_`);
+  if (rowIndex !== undefined) {
+    return { by: 'row', index: rowIndex, direction };
+  }
+
+  return {};
+}
+
+type DatatableColumnsNoESQL = Pick<
+  DatatableStateNoESQL,
+  'metrics' | 'rows' | 'split_metrics_by' | 'sorting'
+>;
+type DatatableColumnsESQL = Pick<
+  DatatableStateESQL,
+  'metrics' | 'rows' | 'split_metrics_by' | 'sorting'
+>;
 
 function convertDatatableColumnsToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'>,
@@ -263,7 +352,7 @@ function convertDatatableColumnsToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: DatatableVisualizationState
 ): DatatableColumnsNoESQL | DatatableColumnsESQL {
-  const { columns, sorting } = visualization;
+  const { columns } = visualization;
   if (columns.length === 0) {
     throw new Error('Datatable must have at least one metric column');
   }
@@ -278,28 +367,23 @@ function convertDatatableColumnsToAPI(
       const apiOperation = columnId ? operationFromColumn(columnId, layer) : undefined;
       if (!apiOperation) throw new Error('Column not found');
 
-      if (column.isMetric) {
+      if (isMetricColumn(column)) {
         if (!isAPIColumnOfMetricType(apiOperation))
           throw new Error('Metric column must be a metric operation');
         metrics.push({
           ...apiOperation,
           ...buildMetricsAPI(column),
-          ...getSorting(sorting, columnId),
         });
       } else if (column.isTransposed) {
         if (!isAPIColumnOfBucketType(apiOperation))
           throw new Error('Split metric column must be a bucket operation');
-        splitMetricsBy.push({
-          ...apiOperation,
-          ...getSplitMetricBySorting(sorting, columnId),
-        });
+        splitMetricsBy.push(apiOperation);
       } else {
         if (!isAPIColumnOfBucketType(apiOperation))
           throw new Error('Row column must be a bucket operation');
         rows.push({
           ...apiOperation,
           ...buildRowsAPI(column),
-          ...getSorting(sorting, columnId),
         });
       }
     }
@@ -315,25 +399,20 @@ function convertDatatableColumnsToAPI(
   const rows: NonNullable<DatatableStateESQL['rows']> = [];
   const splitMetricsBy: NonNullable<DatatableStateESQL['split_metrics_by']> = [];
 
-  // In ESQL columns the isMetric is not set in all cases
-  const isESQLMetricColumn = (col: ColumnState) =>
-    ('isMetric' in col && col.isMetric) || (!('isMetric' in col) && !col.isTransposed);
-
   for (const column of columns) {
     const { columnId } = column;
     const apiOperation = columnId ? getValueApiColumn(columnId, layer) : undefined;
     if (!apiOperation) throw new Error('Column not found');
 
-    if (isESQLMetricColumn(column)) {
+    if (isMetricColumn(column)) {
       metrics.push({
         ...apiOperation,
         ...buildMetricsAPI(column),
-        ...getSorting(sorting, columnId),
       });
     } else if (column.isTransposed) {
-      splitMetricsBy.push({ ...apiOperation, ...getSplitMetricBySorting(sorting, columnId) });
+      splitMetricsBy.push(apiOperation);
     } else {
-      rows.push({ ...apiOperation, ...buildRowsAPI(column), ...getSorting(sorting, columnId) });
+      rows.push({ ...apiOperation, ...buildRowsAPI(column) });
     }
   }
 
@@ -347,8 +426,16 @@ function convertDatatableColumnsToAPI(
 function convertAppearanceToAPIFormat(
   visualization: DatatableVisualizationState
 ): Pick<DatatableState, 'density' | 'paging'> | {} {
-  const { rowHeight, headerRowHeight, density, rowHeightLines, headerRowHeightLines, paging } =
-    visualization;
+  const {
+    rowHeight,
+    headerRowHeight,
+    density,
+    rowHeightLines,
+    headerRowHeightLines,
+    paging,
+    sorting,
+    columns,
+  } = visualization;
 
   const height: Record<string, unknown> = {};
 
@@ -369,6 +456,7 @@ function convertAppearanceToAPIFormat(
         : {}),
     };
   }
+
   return {
     ...(rowHeight || headerRowHeight || density
       ? {
@@ -383,6 +471,7 @@ function convertAppearanceToAPIFormat(
         }
       : {}),
     ...(paging && paging.enabled && paging.size ? { paging: paging.size } : {}),
+    ...parseSortingToAPI(sorting, columns),
   };
 }
 
