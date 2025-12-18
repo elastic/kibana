@@ -14,14 +14,12 @@ function createBenchmark(name: string, config: string) {
   return {
     kind: 'script' as const,
     name,
-    beforeAll: `node scripts/build_kibana_platform_plugins --no-cache`,
     run: `node scripts/functional_tests --config ${config}`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
     },
     ensure: {
-      bootstrap: true,
       build: true,
     },
   } satisfies ScriptBenchmark;
