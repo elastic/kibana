@@ -48,14 +48,11 @@ jest.mock('../../../stream_detail_features/stream_features/hooks/use_stream_feat
   }),
 }));
 
-jest.mock(
-  '../../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features',
-  () => ({
-    useAIFeatures: () => ({
-      genAiConnectors: { selectedConnector: null },
-    }),
-  })
-);
+jest.mock('../../../../hooks/use_ai_features', () => ({
+  useAIFeatures: () => ({
+    genAiConnectors: { selectedConnector: null },
+  }),
+}));
 
 jest.mock('../../../../hooks/use_stream_features_api', () => ({
   useStreamFeaturesApi: () => ({

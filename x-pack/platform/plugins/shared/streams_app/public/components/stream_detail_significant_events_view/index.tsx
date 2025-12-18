@@ -167,6 +167,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       features={features}
       onFeatureIdentificationClick={identifyFeaturesCallback}
       generateOnMount={generateOnMount}
+      aiFeatures={aiFeatures}
     />
   );
 
