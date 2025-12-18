@@ -83,8 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/227730
-  describe.skip('Serverless Query Rules Overview', function () {
+  describe('Serverless Query Rules Overview', function () {
     before(async () => {
       try {
         await deleteTestRuleset('my-test-ruleset');
