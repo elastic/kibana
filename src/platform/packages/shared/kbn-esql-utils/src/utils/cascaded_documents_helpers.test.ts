@@ -847,6 +847,21 @@ describe('cascaded documents helpers utils', () => {
       });
 
       describe('function field group', () => {
+        it('it correctly handles scenarios where a grouping function has whitespace between the function name and the opening parenthesis', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE (message) | SORT average ASC',
+              [],
+              dataViewMock,
+              'CATEGORIZE (message)',
+              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+              '+'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message) | WHERE `CATEGORIZE(message)` == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
+          );
+        });
+
         it("appends filter operation for a param field declared in the stats command function field group using it's param definition value before the driving stats command", () => {
           expect(
             appendFilteringWhereClauseForCascadeLayout(

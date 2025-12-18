@@ -665,12 +665,17 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   let fieldDeclarationCommandSummary = getStatsCommandToOperateOn(ESQLQuery)!;
 
   // when the grouping option is an unnamed function, it's wrapped in backticks in the generated AST so we test for that first, else we assume this does not apply
-  let normalizedFieldName = fieldDeclarationCommandSummary.grouping[`\`${fieldName}\``]
+  const rawFieldName = fieldDeclarationCommandSummary.grouping[`\`${fieldName}\``]
     ? `\`${fieldName}\``
     : fieldName;
 
-  const isFieldUsedInOperatingStatsCommand =
-    fieldDeclarationCommandSummary.grouping[normalizedFieldName];
+  // This is a placeholder for the normalized field name returned by the parser,
+  // and in the case where we received a field name that maps to a variable, it's value will be the field's variable value
+  let normalizedFieldName = rawFieldName;
+
+  const isFieldUsedInOperatingStatsCommand = Boolean(
+    fieldDeclarationCommandSummary.grouping[rawFieldName]
+  );
 
   // create placeholder for the insertion anchor command which is the command that is most suited to accept the user's requested filtering operation
   let insertionAnchorCommand: ESQLCommand;
@@ -684,7 +689,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   if (isFieldUsedInOperatingStatsCommand) {
     // if the field name is marked as a new field then we know it was declared by the stats command driving the cascade experience,
     // so we set the flag to true and use the stats command as the insertion anchor command
-    if (fieldDeclarationCommandSummary.newFields.has(normalizedFieldName)) {
+    if (fieldDeclarationCommandSummary.newFields.has(rawFieldName)) {
       isFieldRuntimeDeclared = true;
     } else {
       // otherwise, we need to ascertain that the field was not created by a preceding stats command
@@ -693,7 +698,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
       // attempt to find the index of the stats command that declared the field
       const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-        field.has(normalizedFieldName)
+        field.has(rawFieldName)
       );
 
       // if the field was declared in a stats command, then we set the flag to true
@@ -715,11 +720,12 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     insertionAnchorCommand = fieldDeclarationCommandSummary.command;
 
     let fieldNameParamValue;
+    const fieldDeclaration = fieldDeclarationCommandSummary.grouping[rawFieldName];
 
     if (
       (fieldNameParamValue = getFieldParamDefinition(
         fieldName,
-        fieldDeclarationCommandSummary.grouping[normalizedFieldName].terminals,
+        fieldDeclaration.terminals,
         esqlVariables
       ))
     ) {
@@ -727,6 +733,15 @@ export const appendFilteringWhereClauseForCascadeLayout = <
         // we expect the field name parameter value to be a string, so we check for that and update the normalized field name to the param value if it is
         normalizedFieldName = fieldNameParamValue;
       }
+    } else {
+      // This corrects for scenarios in the initial query where the user doesn't adhere to the expected syntax for calling a function,
+      // especially when the function is unnamed for example if the user inputs "CATEGORIZE (message)" elasticsearch is able to understand this because the parser fixes it, and precisely because of that is why
+      // we can't use this as-is when constructing the filtering query, so we appropriately extract correct value from the parsed AST
+      normalizedFieldName =
+        isFunctionExpression(fieldDeclaration.arg) &&
+        fieldDeclaration.arg.subtype === 'variadic-call'
+          ? fieldDeclaration.definition.text
+          : fieldDeclaration.column.name;
     }
   } else {
     // if the requested field doesn't exist on the stats command that's driving the cascade experience,
