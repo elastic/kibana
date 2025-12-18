@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import _ from 'lodash';
 import type {
   MonitoringEntitySourceAttributes,
   ListEntitySourcesRequestQuery,
@@ -129,7 +130,8 @@ export class MonitoringEntitySourceDescriptorClient {
   }
 
   private getQueryFilters = (query?: ListEntitySourcesRequestQuery) => {
-    return Object.entries(query ?? {})
+    const queryParts = _.pick(query ?? {}, ['type', 'managed', 'name']);
+    return Object.entries(queryParts)
       .map(([key, value]) => `${monitoringEntitySourceTypeName}.attributes.${key}: ${value}`)
       .join(' and ');
   };
