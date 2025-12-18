@@ -99,8 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.setEsqlEditorQuery(updatedQuery);
       await esql.submitEsqlEditorQuery();
       await discover.waitUntilTabIsLoaded();
-      const fromTime = 'Apr 10, 2000 @ 00:00:00.000';
-      const toTime = 'Nov 15, 2025 @ 00:00:00.000';
+      const fromTime = 'Jan 10, 2000 @ 00:00:00.000';
+      const toTime = 'Dec 10, 2025 @ 00:00:00.000';
       await timePicker.setAbsoluteRange(fromTime, toTime);
       await discover.waitUntilTabIsLoaded();
 
