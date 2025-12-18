@@ -178,7 +178,7 @@ export function getDataStateContainer({
   const getInitialFetchStatus = () => {
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      internalState.getState().persistedDiscoverSession !== undefined ||
+      internalState.getState().persistedDiscoverSession?.id !== undefined ||
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
