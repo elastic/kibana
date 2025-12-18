@@ -25,6 +25,10 @@ export const sampleCommand = {
         'Samples a percentage of the results, optionally with a seed for reproducibility.',
     }),
     declaration: `SAMPLE <percentage>`,
-    examples: [],
+    examples: [
+      `FROM employees
+| KEEP emp_no
+| SAMPLE 0.05,`,
+    ],
   },
 };
