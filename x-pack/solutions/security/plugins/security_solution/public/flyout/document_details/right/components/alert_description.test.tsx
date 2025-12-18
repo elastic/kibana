@@ -22,6 +22,8 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -35,6 +37,9 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../common/components/user_privileges');
+
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 const ruleUuid = {
   category: 'kibana',
@@ -89,6 +94,16 @@ const NO_DATA_MESSAGE = "There's no description for this rule.";
 describe('<AlertDescription />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
+  beforeEach(() => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
+      },
+    });
   });
 
   it('should render the component', () => {
@@ -157,6 +172,24 @@ describe('<AlertDescription />', () => {
           isPreviewMode: true,
         },
       });
+    });
+
+    it('should not render rule summary button when user cannot read rules', () => {
+      mockUseUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: {
+          ...initialUserPrivilegesState().rulesPrivileges,
+          rules: { read: false, edit: false },
+        },
+      });
+
+      const { queryByTestId, getByTestId } = renderDescription(
+        panelContextValue([ruleUuid, ruleDescription, ruleName])
+      );
+
+      expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent('Rule description');
+      expect(queryByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });
