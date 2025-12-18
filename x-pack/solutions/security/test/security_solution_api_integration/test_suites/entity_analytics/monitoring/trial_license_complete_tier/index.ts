@@ -24,5 +24,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./privileged_users/task'));
     loadTestFile(require.resolve('./privileged_users/migrations'));
     loadTestFile(require.resolve('./privileged_users/cross_source_sync'));
+    loadTestFile(require.resolve('./monitoring_entity_source_crud'));
   });
 }
