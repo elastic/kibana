@@ -68,7 +68,7 @@ export const PresentationPanelHeader = <
         height: ${euiTheme.size.l};
         overflow: hidden;
         line-height: ${euiTheme.size.l};
-        padding: 0px ${euiTheme.size.s};
+        padding: ${euiTheme.size.s} ${euiTheme.size.s} 0px ${euiTheme.size.s};
 
         display: flex;
         flex-wrap: nowrap;

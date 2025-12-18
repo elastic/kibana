@@ -334,4 +334,10 @@ export const getLegacyMetricVisualization = ({
       ],
     };
   },
+
+  getDisplayOptions() {
+    return {
+      noPadding: true,
+    };
+  },
 });

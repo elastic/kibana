@@ -33,7 +33,7 @@ import {
   Placement,
   Direction,
   Tooltip,
-  LEGACY_LIGHT_THEME,
+  LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import type { IconType } from '@elastic/eui';
@@ -865,17 +865,33 @@ export function XYChart({
                     labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
-                  chartMargins: {
-                    // Temporary margin defaults
-                    ...LEGACY_LIGHT_THEME.chartMargins,
-                    ...computeChartMargins(
+                  chartMargins: (() => {
+                    const computed = computeChartMargins(
                       linesPaddings,
                       { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
                       { ...axisTitlesVisibilitySettings, x: xAxisConfig?.showTitle },
                       yAxesMap,
                       shouldRotate
-                    ),
-                  },
+                    );
+                    const marginValues = {
+                      ...LIGHT_THEME.chartMargins,
+                      ...computed,
+                    };
+
+                    // Left margin adjustment for dashboard panel title alignment
+                    const shouldAdjustLeft =
+                      // Vertical: no left Y-axis title, but has tick labels
+                      (!shouldRotate &&
+                        !axisTitlesVisibilitySettings.yLeft &&
+                        tickLabelsVisibilitySettings.yLeft) ||
+                      // Horizontal: no X-axis title, but has tick labels
+                      (shouldRotate && !xAxisConfig?.showTitle && xAxisConfig?.showLabels);
+
+                    return {
+                      ...marginValues,
+                      left: shouldAdjustLeft ? marginValues.left - 8 : marginValues.left,
+                    };
+                  })(),
                   markSizeRatio: args.markSizeRatio,
                 },
                 ...(Array.isArray(settingsThemeOverrides)
