@@ -106,7 +106,7 @@ export const MetricsExplorerToolbar = ({
               chartOptions={chartOptions}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
+          <EuiFlexItem grow={false} style={{ marginRight: 5, maxWidth: '100%' }}>
             <EuiSuperDatePicker
               start={timeRange.from}
               end={timeRange.to}
