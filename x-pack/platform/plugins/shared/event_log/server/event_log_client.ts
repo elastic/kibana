@@ -100,7 +100,11 @@ interface EventLogServiceCtorParams {
   savedObjectGetter: SavedObjectBulkGetterResult;
   spacesService?: SpacesServiceStart;
   request: KibanaRequest;
-  spaceId?: string;
+  /**
+   * If true, forces all internal space-aware operations to run in the default space instead of
+   * the space derived from the request.
+   */
+  useDefaultSpace?: boolean;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -109,20 +113,20 @@ export class EventLogClient implements IEventLogClient {
   private savedObjectGetter: SavedObjectBulkGetterResult;
   private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
-  private spaceId?: string;
+  private useDefaultSpace?: boolean;
 
   constructor({
     esContext,
     savedObjectGetter,
     spacesService,
     request,
-    spaceId,
+    useDefaultSpace,
   }: EventLogServiceCtorParams) {
     this.esContext = esContext;
     this.savedObjectGetter = savedObjectGetter;
     this.spacesService = spacesService;
     this.request = request;
-    this.spaceId = spaceId;
+    this.useDefaultSpace = useDefaultSpace;
   }
 
   public async findEventsBySavedObjectIds(
@@ -264,11 +268,8 @@ export class EventLogClient implements IEventLogClient {
   }
 
   private async getNamespace() {
-    if (this.spaceId != null) {
-      if (this.spaceId === 'default') {
-        return undefined;
-      }
-      return this.spacesService?.spaceIdToNamespace(this.spaceId);
+    if (this.useDefaultSpace === true) {
+      return undefined;
     }
 
     const space = await this.spacesService?.getActiveSpace(this.request);

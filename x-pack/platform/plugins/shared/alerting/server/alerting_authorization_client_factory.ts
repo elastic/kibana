@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
 import type { RuleTypeRegistry } from './types';
 
@@ -16,7 +17,7 @@ export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginStart?: SecurityPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
-  getSpaceById: (request: KibanaRequest, spaceId: string) => Promise<Space | undefined>;
+  getDefaultSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   getSpaceId: (request: KibanaRequest) => string;
   features: FeaturesPluginStart;
 }
@@ -49,17 +50,14 @@ export class AlertingAuthorizationClientFactory {
     });
   }
 
-  public async createForSpace(
-    request: KibanaRequest,
-    spaceId: string
-  ): Promise<AlertingAuthorization> {
+  public async createForDefaultSpace(request: KibanaRequest): Promise<AlertingAuthorization> {
     this.validateInitialization();
 
     return AlertingAuthorization.create({
       authorization: this.options.securityPluginStart?.authz,
       request,
-      getSpace: async () => await this.options.getSpaceById(request, spaceId),
-      getSpaceId: () => spaceId,
+      getSpace: async () => await this.options.getDefaultSpace(request),
+      getSpaceId: () => DEFAULT_SPACE_ID,
       ruleTypeRegistry: this.options.ruleTypeRegistry,
       features: this.options.features,
     });

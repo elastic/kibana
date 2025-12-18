@@ -20,7 +20,7 @@ describe('AlertingAuthorizationClientFactory', () => {
     {
       ruleTypeRegistry: ruleTypeRegistryMock.create(),
       getSpace: jest.fn(),
-      getSpaceById: jest.fn(),
+      getDefaultSpace: jest.fn(),
       getSpaceId: jest.fn(),
       features,
     };

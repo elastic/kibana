@@ -22,7 +22,11 @@ export type SavedObjectBulkGetter = (
 export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promise<unknown>;
 
 export interface SavedObjectProviderOptions {
-  spaceId?: string;
+  /**
+   * If true, forces Saved Objects lookups to be scoped to the default space instead of
+   * the space derived from the request.
+   */
+  useDefaultSpace?: boolean;
 }
 
 export type SavedObjectProvider = (

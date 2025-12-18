@@ -21,6 +21,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorization } from './authorization/alerting_authorization';
@@ -38,12 +39,12 @@ import {
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 interface AlertingAuthorizationClientFactoryContract {
   create(request: KibanaRequest): Promise<AlertingAuthorization>;
-  createForSpace?: (request: KibanaRequest, spaceId: string) => Promise<AlertingAuthorization>;
+  createForDefaultSpace?: (request: KibanaRequest) => Promise<AlertingAuthorization>;
 }
 
 interface EventLogClientServiceContract {
   getClient: (request: KibanaRequest) => IEventLogClient;
-  getClientForSpace?: (request: KibanaRequest, spaceId: string) => IEventLogClient;
+  getClientForDefaultSpace?: (request: KibanaRequest) => IEventLogClient;
 }
 export interface RulesClientFactoryOpts {
   logger: Logger;
@@ -127,10 +128,10 @@ export class RulesClientFactory {
   public async create(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart,
-    options?: { spaceId?: string }
+    options?: { useDefaultSpace?: boolean }
   ): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
-    const spaceId = options?.spaceId ?? this.getSpaceId(request);
+    const spaceId = options?.useDefaultSpace === true ? DEFAULT_SPACE_ID : this.getSpaceId(request);
     const namespaceId = this.spaceIdToNamespace(spaceId);
     const namespaceString = SavedObjectsUtils.namespaceIdToString(namespaceId);
 
@@ -139,9 +140,9 @@ export class RulesClientFactory {
     }
 
     const authorization =
-      options?.spaceId == null || this.authorization.createForSpace == null
+      options?.useDefaultSpace !== true || this.authorization.createForDefaultSpace == null
         ? await this.authorization.create(request)
-        : await this.authorization.createForSpace(request, options.spaceId);
+        : await this.authorization.createForDefaultSpace(request);
 
     return new RulesClient({
       spaceId,
@@ -204,14 +205,14 @@ export class RulesClientFactory {
         };
       },
       async getActionsClient() {
-        return options?.spaceId == null
+        return options?.useDefaultSpace !== true
           ? actions.getActionsClientWithRequest(request)
-          : actions.getActionsClientWithRequestForSpace(request, options.spaceId);
+          : actions.getActionsClientWithRequestForDefaultSpace(request);
       },
       async getEventLogClient() {
-        return options?.spaceId == null || eventLog.getClientForSpace == null
+        return options?.useDefaultSpace !== true || eventLog.getClientForDefaultSpace == null
           ? eventLog.getClient(request)
-          : eventLog.getClientForSpace(request, options.spaceId);
+          : eventLog.getClientForDefaultSpace(request);
       },
       eventLogger: this.eventLogger,
       isAuthenticationTypeAPIKey() {

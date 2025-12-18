@@ -12,7 +12,7 @@ const creatAlertingAuthorizationClientFactoryMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<AlertingAuthorizationClientFactory>> = {
     create: jest.fn(),
     initialize: jest.fn(),
-    createForSpace: jest.fn(),
+    createForDefaultSpace: jest.fn(),
   };
   return mocked;
 };

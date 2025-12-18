@@ -7,7 +7,6 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import type { AssetClient } from '../asset_client';
 import { QueryClient } from './query_client';
@@ -32,10 +31,7 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const rulesClient = await pluginStart.alerting.getRulesClientForSpace(
-      request,
-      DEFAULT_SPACE_ID
-    );
+    const rulesClient = await pluginStart.alerting.getRulesClientForDefaultSpace(request);
 
     return new QueryClient(
       {

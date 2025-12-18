@@ -45,6 +45,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ActionsConfig, EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -159,9 +160,8 @@ export interface PluginStartContract {
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
-  getActionsClientWithRequestForSpace(
-    request: KibanaRequest,
-    spaceId: string
+  getActionsClientWithRequestForDefaultSpace(
+    request: KibanaRequest
   ): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
@@ -478,7 +478,7 @@ export class ActionsPlugin
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
       authorizationContext?: ActionExecutionSource<unknown>,
-      spaceId?: string
+      useDefaultSpace?: boolean
     ) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
@@ -491,9 +491,11 @@ export class ActionsPlugin
         request
       );
       const namespaceString =
-        spaceId == null
+        useDefaultSpace !== true
           ? undefined
-          : SavedObjectsUtils.namespaceIdToString(spaceIdToNamespace(plugins.spaces, spaceId));
+          : SavedObjectsUtils.namespaceIdToString(
+              spaceIdToNamespace(plugins.spaces, DEFAULT_SPACE_ID)
+            );
       const unsecuredSavedObjectsClient =
         namespaceString == null
           ? baseUnsecuredSavedObjectsClient
@@ -507,7 +509,7 @@ export class ActionsPlugin
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
-        spaceId,
+        useDefaultSpace,
         authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
@@ -561,14 +563,14 @@ export class ActionsPlugin
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
-    const secureGetActionsClientWithRequestForSpace = (request: KibanaRequest, spaceId: string) =>
-      getActionsClientWithRequest(request, undefined, spaceId);
+    const secureGetActionsClientWithRequestForDefaultSpace = (request: KibanaRequest) =>
+      getActionsClientWithRequest(request, undefined, true);
 
     this.eventLogService!.registerSavedObjectProvider('action', (request, options) => {
       const client =
-        options?.spaceId == null
+        options?.useDefaultSpace !== true
           ? secureGetActionsClientWithRequest(request)
-          : secureGetActionsClientWithRequestForSpace(request, options.spaceId);
+          : secureGetActionsClientWithRequestForDefaultSpace(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
           ? Promise.all(
@@ -662,7 +664,7 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
-      getActionsClientWithRequestForSpace: secureGetActionsClientWithRequestForSpace,
+      getActionsClientWithRequestForDefaultSpace: secureGetActionsClientWithRequestForDefaultSpace,
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>

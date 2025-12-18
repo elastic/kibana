@@ -67,7 +67,7 @@ const createStartMock = () => {
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
-    getRulesClientForSpace: jest.fn().mockResolvedValue(rulesClientMock.create()),
+    getRulesClientForDefaultSpace: jest.fn().mockResolvedValue(rulesClientMock.create()),
   });
   return mock;
 };

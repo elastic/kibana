@@ -41,8 +41,8 @@ describe('EventLogClientService', () => {
     });
   });
 
-  describe('getClientForSpace', () => {
-    test('creates a client with explicit spaceId override', () => {
+  describe('getClientForDefaultSpace', () => {
+    test('creates a client with default-space override', () => {
       const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
       const request = fakeRequest();
 
@@ -51,21 +51,21 @@ describe('EventLogClientService', () => {
         savedObjectProviderRegistry,
       });
 
-      eventLogStartService.getClientForSpace(request, 'default');
+      eventLogStartService.getClientForDefaultSpace(request);
 
       const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request, {
-        spaceId: 'default',
+        useDefaultSpace: true,
       });
       expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
         esContext,
         request,
         savedObjectGetter,
         spacesService: undefined,
-        spaceId: 'default',
+        useDefaultSpace: true,
       });
 
       expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request, {
-        spaceId: 'default',
+        useDefaultSpace: true,
       });
     });
   });
