@@ -30,8 +30,16 @@ function createBenchmark(name: string, config: string) {
 const config: InitialBenchConfig = {
   name: 'ftr',
   benchmarks: [
-    createBenchmark('discover', 'src/platform/test/functional/apps/discover/group1/config.ts'),
+    createBenchmark(
+      'discover',
+      'src/platform/test/functional/apps/discover/observability/config.ts'
+    ),
+    createBenchmark('fleet', 'x-pack/platform/test/fleet_functional/config.ts'),
     createBenchmark('security-saml', 'x-pack/platform/test/security_functional/saml.config.ts'),
+    createBenchmark(
+      'lens',
+      'x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts'
+    ),
   ],
   runs: 1,
   timeout: 10 * 300_000,
