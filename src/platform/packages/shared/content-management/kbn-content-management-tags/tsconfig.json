@@ -19,6 +19,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/saved-objects-tagging-oss-plugin"
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/core-notifications-browser"
   ]
 }
