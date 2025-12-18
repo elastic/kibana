@@ -49,7 +49,7 @@ export interface OnechatSetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
-  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface OnechatStartDependencies {
