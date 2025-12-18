@@ -122,8 +122,12 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               setPreviewTabId((prev) => (prev === option.key ? null : (option.key as string)))
             }
             tabItem={{ id: option.key as string, label: option.label }}
-            previewData={{ status: TabStatus.DEFAULT, query: { language: 'kuery', query: 'lolz' } }}
+            previewData={{
+              status: TabStatus.DEFAULT,
+              query: { language: 'esql', query: 'FROM kibana_sample_data_logs | LIMIT 1000' },
+            }}
             previewDelay={0}
+            position="left"
           >
             <div>
               {option.label}
