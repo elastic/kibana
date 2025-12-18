@@ -18,6 +18,16 @@ export const ERROR_MESSAGE = '[MockError] Foo';
 export const ERROR_GROUPING_KEY = generateLongIdWithSeed(ERROR_MESSAGE);
 export const ERROR_GROUPING_KEY_SHORT = ERROR_GROUPING_KEY.slice(0, 5);
 
+// Span links test data dates
+export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
+export const SPAN_LINKS_END_DATE = '2022-01-01T00:15:00.000Z';
+
+// Large trace test data dates
+export const LARGE_TRACE_START_DATE = '2021-10-10T00:00:00.000Z';
+export const LARGE_TRACE_END_DATE = '2021-10-10T00:01:00.000Z';
+export const LARGE_TRACE_TRANSACTION_NAME = 'Large trace';
+export const LARGE_TRACE_ENVIRONMENT = 'large_trace';
+
 // APM-specific role definitions matching authentication.ts
 export const APM_ROLES = {
   apmAllPrivilegesWithoutWriteSettings: {

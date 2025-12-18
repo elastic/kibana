@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 import { apm, timerange, DistributedTrace } from '@kbn/synthtrace-client';
-import { synthtrace } from '../../../../synthtrace';
 
 const RATE_PER_MINUTE = 1;
 
@@ -27,26 +26,26 @@ export function generateLargeTrace({
   const range = timerange(start, end);
 
   const synthRum = apm
-    .service({ name: 'synth-rum', environment, agentName: 'rum-js' })
+    .service({ name: 'zzz-synth-rum', environment, agentName: 'rum-js' })
     .instance('my-instance');
 
   const synthNode = apm
-    .service({ name: 'synth-node', environment, agentName: 'nodejs' })
+    .service({ name: 'zzz-synth-node', environment, agentName: 'nodejs' })
     .instance('my-instance');
 
   const synthGo = apm
-    .service({ name: 'synth-go', environment, agentName: 'go' })
+    .service({ name: 'zzz-synth-go', environment, agentName: 'go' })
     .instance('my-instance');
 
   const synthDotnet = apm
-    .service({ name: 'synth-dotnet', environment, agentName: 'dotnet' })
+    .service({ name: 'zzz-synth-dotnet', environment, agentName: 'dotnet' })
     .instance('my-instance');
 
   const synthJava = apm
-    .service({ name: 'synth-java', environment, agentName: 'java' })
+    .service({ name: 'zzz-synth-java', environment, agentName: 'java' })
     .instance('my-instance');
 
-  const traces = range.ratePerMinute(RATE_PER_MINUTE).generator((timestamp) => {
+  return range.ratePerMinute(RATE_PER_MINUTE).generator((timestamp) => {
     return new DistributedTrace({
       serviceInstance: synthRum,
       transactionName: rootTransactionName,
@@ -133,6 +132,4 @@ export function generateLargeTrace({
       },
     }).getTransaction();
   });
-
-  return synthtrace.index(traces);
 }
