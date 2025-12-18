@@ -35,14 +35,14 @@ export interface UseRuleDetailsTabsProps {
   rule: Rule | null;
   ruleId: string;
   isExistingRule: boolean;
-  hasIndexRead: boolean | null;
+  canReadAlerts: boolean;
 }
 
 export const useRuleDetailsTabs = ({
   rule,
   ruleId,
   isExistingRule,
-  hasIndexRead,
+  canReadAlerts,
 }: UseRuleDetailsTabsProps) => {
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
@@ -89,7 +89,7 @@ export const useRuleDetailsTabs = ({
   useEffect(() => {
     const hiddenTabs = [];
 
-    if (!hasIndexRead) {
+    if (!canReadAlerts) {
       hiddenTabs.push(RuleDetailTabs.alerts);
     }
     if (!ruleExecutionSettings.extendedLogging.isEnabled) {
@@ -116,7 +116,7 @@ export const useRuleDetailsTabs = ({
   }, [
     canReadEndpointExceptions,
     canReadExceptions,
-    hasIndexRead,
+    canReadAlerts,
     rule,
     ruleDetailTabs,
     ruleExecutionSettings,

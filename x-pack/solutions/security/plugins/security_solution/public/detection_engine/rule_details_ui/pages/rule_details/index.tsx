@@ -155,6 +155,7 @@ import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -258,13 +259,13 @@ export const RuleDetailsPage = connector(
         isSignalIndexExists,
         isAuthenticated,
         hasEncryptionKey,
-        hasIndexRead,
         signalIndexName,
         hasIndexWrite,
         hasIndexMaintenance,
       },
     ] = useUserData();
     const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+    const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
@@ -300,7 +301,7 @@ export const RuleDetailsPage = connector(
       }
     }, [rule, startMlJobs]);
 
-    const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
+    const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, canReadAlerts });
 
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
@@ -794,47 +795,49 @@ export const RuleDetailsPage = connector(
                 </Display>
                 <StyledMinHeightTabContainer>
                   <Routes>
-                    <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
-                      <>
-                        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                          <EuiFlexItem grow={false}>
-                            <AlertsTableFilterGroup
-                              status={filterGroup}
-                              onFilterGroupChanged={onFilterGroupChangedCallback}
+                    {canReadAlerts && (
+                      <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
+                        <>
+                          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                            <EuiFlexItem grow={false}>
+                              <AlertsTableFilterGroup
+                                status={filterGroup}
+                                onFilterGroupChanged={onFilterGroupChangedCallback}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer size="l" />
+                          <Display show={!globalFullScreen}>
+                            <AlertsHistogramPanel
+                              filters={alertMergedFilters}
+                              signalIndexName={signalIndexName}
+                              defaultStackByOption={defaultRuleStackByOption}
+                              updateDateRange={updateDateRangeCallback}
                             />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer size="l" />
-                        <Display show={!globalFullScreen}>
-                          <AlertsHistogramPanel
-                            filters={alertMergedFilters}
-                            signalIndexName={signalIndexName}
-                            defaultStackByOption={defaultRuleStackByOption}
-                            updateDateRange={updateDateRangeCallback}
-                          />
-                          <EuiSpacer />
-                        </Display>
-                        {ruleId != null && (
-                          <GroupedAlertsTable
-                            accordionButtonContent={defaultGroupTitleRenderers}
-                            accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                            dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
-                            dataView={experimentalDataView}
-                            defaultFilters={alertMergedFilters}
-                            defaultGroupingOptions={defaultGroupingOptions}
-                            from={from}
-                            globalFilters={filters}
-                            globalQuery={query}
-                            groupTakeActionItems={groupTakeActionItems}
-                            loading={loading}
-                            renderChildComponent={renderGroupedAlertTable}
-                            tableId={TableId.alertsOnRuleDetailsPage}
-                            to={to}
-                          />
-                        )}
-                      </>
-                    </Route>
+                            <EuiSpacer />
+                          </Display>
+                          {ruleId != null && (
+                            <GroupedAlertsTable
+                              accordionButtonContent={defaultGroupTitleRenderers}
+                              accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+                              dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
+                              dataView={experimentalDataView}
+                              defaultFilters={alertMergedFilters}
+                              defaultGroupingOptions={defaultGroupingOptions}
+                              from={from}
+                              globalFilters={filters}
+                              globalQuery={query}
+                              groupTakeActionItems={groupTakeActionItems}
+                              loading={loading}
+                              renderChildComponent={renderGroupedAlertTable}
+                              tableId={TableId.alertsOnRuleDetailsPage}
+                              to={to}
+                            />
+                          )}
+                        </>
+                      </Route>
+                    )}
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                       <ExceptionsViewer
                         rule={rule}
