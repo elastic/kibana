@@ -84,13 +84,10 @@ export function Settings({
     [definition]
   );
   const [settings, setSettings] = useState<Record<string, Setting>>({});
-  const countChanges = useMemo(() => {
-    const allKeys = [...new Set([...Object.keys(originalSettings), ...Object.keys(settings)])];
-
-    return allKeys.filter((key) => originalSettings[key]?.value !== settings[key]?.value).length;
+  const hasChanges = useMemo(() => {
+    const keys = [...new Set([...Object.keys(originalSettings), ...Object.keys(settings)])];
+    return keys.some((key) => originalSettings[key]?.value !== settings[key]?.value);
   }, [originalSettings, settings]);
-
-  const hasChanges = countChanges > 0;
 
   const updateSetting = useCallback(
     (name: string, value: string, invalid: boolean) => {
@@ -279,12 +276,13 @@ export function Settings({
 
       {hasChanges && (
         <SaveChangesBottomBar
-          countChanges={countChanges}
           setSettings={setSettings}
           updateSettings={updateSettings}
           isUpdating={isUpdating}
           isLoadingDefinition={isLoadingDefinition}
           definition={definition}
+          hasChanges={hasChanges}
+          settings={settings}
         />
       )}
     </>
@@ -413,33 +411,25 @@ function LinkToStream({ name }: { name: string }) {
 }
 
 const SaveChangesBottomBar = ({
-  countChanges,
   setSettings,
   updateSettings,
   isUpdating,
   isLoadingDefinition,
   definition,
+  hasChanges,
+  settings,
 }: {
-  countChanges: number;
   setSettings: (settings: Record<string, Setting>) => void;
   updateSettings: () => void;
   isUpdating: boolean;
   isLoadingDefinition: boolean;
   definition: Streams.ingest.all.GetResponse;
+  hasChanges: boolean;
+  settings: Record<string, Setting>;
 }) => {
   return (
     <EuiBottomBar data-test-subj="streamsAppSettingsBottomBar">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText data-test-subj="streamsAppSettingsUnsavedChangesCount">
-            {i18n.translate('xpack.streams.settings.unsavedChangesMessage', {
-              defaultMessage: `{countChanges, plural, one {# unsaved change} other {# unsaved changes}}`,
-              values: {
-                countChanges,
-              },
-            })}
-          </EuiText>
-        </EuiFlexItem>
+      <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -466,6 +456,11 @@ const SaveChangesBottomBar = ({
                 size="s"
                 isLoading={isUpdating || isLoadingDefinition}
                 onClick={updateSettings}
+                isDisabled={
+                  !hasChanges ||
+                  isLoadingDefinition ||
+                  Object.values(settings).some(({ invalid }) => invalid)
+                }
               >
                 {i18n.translate('xpack.streams.settings.saveChangesButton', {
                   defaultMessage: 'Save changes',

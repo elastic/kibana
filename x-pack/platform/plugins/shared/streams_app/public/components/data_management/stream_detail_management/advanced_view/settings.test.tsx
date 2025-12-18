@@ -222,31 +222,5 @@ describe('Settings', () => {
         expect(screen.queryByTestId('streamsAppSettingsBottomBar')).not.toBeInTheDocument();
       });
     });
-
-    it('displays the correct number of changed fields', async () => {
-      renderWithI18n(
-        <Settings definition={defaultDefinition} refreshDefinition={mockRefreshDefinition} />
-      );
-
-      // Change shards from 1 to 2
-      const shardsInput = screen.getByTestId('streamsAppSettingsInput-Shards');
-      fireEvent.change(shardsInput, { target: { value: '2' } });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('streamsAppSettingsUnsavedChangesCount')).toHaveTextContent(
-          '1 unsaved change'
-        );
-      });
-
-      // Change replicas from 1 to 3
-      const replicasInput = screen.getByTestId('streamsAppSettingsInput-Replicas');
-      fireEvent.change(replicasInput, { target: { value: '3' } });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('streamsAppSettingsUnsavedChangesCount')).toHaveTextContent(
-          '2 unsaved changes'
-        );
-      });
-    });
   });
 });
