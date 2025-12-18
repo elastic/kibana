@@ -154,6 +154,9 @@ function getDefaultAppState({
   if (persistedTab?.breakdownField) {
     defaultState.breakdownField = persistedTab.breakdownField;
   }
+  if (persistedTab?.chartInterval) {
+    defaultState.interval = persistedTab.chartInterval;
+  }
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
   }
