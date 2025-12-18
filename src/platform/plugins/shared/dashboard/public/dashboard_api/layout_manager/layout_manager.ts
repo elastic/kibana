@@ -44,6 +44,8 @@ import { asyncForEach } from '@kbn/std';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { StickyControlLayoutState } from '@kbn/controls-schemas';
+import type { PanelResizeSettings } from '@kbn/presentation-util-plugin/public';
+import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import type { DashboardPanel } from '../../../server';
@@ -52,8 +54,6 @@ import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_s
 import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
 import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
-import type { PanelResizeSettings } from '../../panel_placement/types';
-import { DEFAULT_PANEL_PLACEMENT_SETTINGS, PanelPlacementStrategy } from '../../plugin_constants';
 import { coreServices, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
@@ -67,6 +67,7 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnableControl,
 } from './types';
+import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
 
 export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
