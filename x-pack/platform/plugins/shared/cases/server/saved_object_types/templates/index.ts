@@ -30,9 +30,8 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
       name: {
         type: 'keyword',
       },
-      // this is used as template version, as every change results in a new snapshot.
-      createdAt: {
-        type: 'date',
+      templateVersion: {
+        type: 'integer',
       },
       owner: {
         type: 'keyword',

@@ -22,9 +22,9 @@ export interface Template {
   definition: string;
 
   /**
-   * Creation date, effectively a version of the template
+   * Template version
    */
-  createdAt: Date;
+  templateVersion: number;
 
   /**
    * Deletion date, used to indicate soft-deletion
@@ -32,4 +32,7 @@ export interface Template {
   deletedAt: Date | null;
 }
 
-export type CreateTemplateInput = Omit<Template, 'id' | 'templateId' | 'createdAt' | 'deletedAt'>;
+export type CreateTemplateInput = Omit<
+  Template,
+  'id' | 'templateId' | 'templateVersion' | 'deletedAt'
+>;

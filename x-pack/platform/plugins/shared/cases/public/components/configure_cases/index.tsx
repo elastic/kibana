@@ -753,16 +753,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
             </>
           )}
 
+          <EuiSpacer size="xl" />
           <div css={sectionWrapperCss}>
             <EuiFlexItem grow={false}>
-              <Templates
-                templates={templates}
-                isLoading={isLoadingCaseConfiguration}
-                disabled={isLoadingCaseConfiguration}
-                onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
-                onEditTemplate={onEditTemplate}
-                onDeleteTemplate={onDeleteTemplate}
-              />
               <TemplatesSection
                 onAddTemplate={() => setFlyOutVisibility({ type: 'templatesV2', visible: true })}
               />

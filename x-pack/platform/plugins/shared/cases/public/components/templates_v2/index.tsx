@@ -17,6 +17,8 @@ import {
   useEuiTheme,
   EuiFieldText,
   EuiFormRow,
+  EuiText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
@@ -29,6 +31,7 @@ import type { CreateTemplateInput, Template } from '../../../common/templates';
 import { CommonFlyout, CommonFlyoutFooter } from '../configure_cases/flyout';
 import { TitleExperimentalBadge } from '../header_page/title';
 import { KibanaServices } from '../../common/lib/kibana';
+import { TruncatedText } from '../truncated_text';
 
 const i18n = {
   TEMPLATE_TITLE: 'Templates V2',
@@ -48,7 +51,6 @@ const fetchTemplate = async (templateId: string) => {
 };
 
 const createTemplate = async (templateInput: CreateTemplateInput) => {
-  console.log('createTemplate', templateInput);
   return KibanaServices.get().http.post<Template>(`${CASES_INTERNAL_URL}/templates`, {
     body: JSON.stringify(templateInput),
   });
@@ -127,6 +129,50 @@ interface TemplatesSectionProps {
   onAddTemplate: VoidFunction;
 }
 
+export const TemplateListItem = ({ template }: { template: Template }) => {
+  return (
+    <EuiPanel paddingSize="s" data-test-subj={`template-${template.templateId}`} hasShadow={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h4>
+                  <TruncatedText text={template.name} />
+                </h4>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj={`${template.templateId}-template-edit`}
+                aria-label={`${template.templateId}-template-edit`}
+                iconType="pencil"
+                color="primary"
+                onClick={() => {}}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj={`${template.templateId}-template-delete`}
+                aria-label={`${template.templateId}-template-delete`}
+                iconType="minusInCircle"
+                color="danger"
+                onClick={() => {}}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+TemplateListItem.displayName = 'TemplateListItem';
+
 export const TemplatesSection = ({ onAddTemplate }: TemplatesSectionProps) => {
   const disabled = false;
   const error = undefined;
@@ -150,7 +196,13 @@ export const TemplatesSection = ({ onAddTemplate }: TemplatesSectionProps) => {
       css={{ alignItems: 'flex-start' }}
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
-        {templates?.length ? <></> : null}
+        {templates?.length ? (
+          <EuiFlexGroup>
+            {templates.map((template) => (
+              <TemplateListItem template={template} />
+            ))}
+          </EuiFlexGroup>
+        ) : null}
         <EuiSpacer size="s" />
         {!templates?.length ? (
           <EuiFlexGroup justifyContent="center">

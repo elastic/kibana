@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { v4 } from 'uuid';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { CreateTemplateInput, Template } from '../../../../common/templates';
 import { CASE_TEMPLATE_SAVED_OBJECT, CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -33,11 +34,30 @@ export class TemplatesService {
   async getAllTemplates() {
     const findResult = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
       type: CASE_TEMPLATE_SAVED_OBJECT,
+      filter: fromKueryExpression(`NOT ${CASE_TEMPLATE_SAVED_OBJECT}.attributes.deletedAt: *`),
+      aggs: {
+        by_template: {
+          terms: {
+            field: `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateId`,
+            size: 10000,
+          },
+          aggregations: {
+            latest_template: {
+              top_hits: {
+                size: 1,
+                sort: [
+                  {
+                    [`${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateVersion`]: { order: 'desc' },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     });
-    // eslint-disable-next-line no-console
-    console.log('world', findResult.saved_objects);
 
-    return findResult.saved_objects;
+    return findResult.saved_objects.map(({ attributes }) => attributes);
   }
 
   async getTemplate(templateId: string) {}
@@ -46,7 +66,7 @@ export class TemplatesService {
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
       CASE_TEMPLATE_SAVED_OBJECT,
       {
-        createdAt: new Date(),
+        templateVersion: 1,
         deletedAt: null,
         definition: input.definition,
         name: input.name,
@@ -131,7 +151,7 @@ export const getTemplateRoute = createCasesRoute({
     access: 'public',
   },
   handler: async ({ context, request, response }) => {
-    const templates: Template[] = [{ name: 'Template 1', definition: `` }];
+    const templates: Template[] = [];
 
     try {
       const caseContext = await context.cases;
