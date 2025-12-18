@@ -13,7 +13,7 @@ import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../common/types';
 
 jest.mock('../../../common/hooks/use_app_toasts');
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsAll: true }),
 }));
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
