@@ -37,7 +37,8 @@
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared"
+      "discoverShared",
+      "observabilityAgentBuilder"
     ],
     "optionalPlugins": [
       "actions",
@@ -59,7 +60,7 @@
       "licenseManagement",
       "profilingDataAccess",
       "observabilityAIAssistant",
-      "observabilityAgent",
+      "observabilityAgentBuilder",
       "share",
       "onechat"
     ],

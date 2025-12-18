@@ -7,13 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type {
-  StreamQueryKql,
-  Streams,
-  Feature,
-  GeneratedSignificantEventQuery,
-  FeatureType,
-} from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
@@ -22,6 +16,7 @@ import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 
 export const EditSignificantEventFlyout = ({
+  refreshDefinition,
   queryToEdit,
   definition,
   isEditFlyoutOpen,
@@ -32,7 +27,10 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   features,
   refresh,
+  onFeatureIdentificationClick,
+  generateOnMount,
 }: {
+  refreshDefinition: () => void;
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
@@ -43,6 +41,8 @@ export const EditSignificantEventFlyout = ({
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onFeatureIdentificationClick: () => void;
+  generateOnMount: boolean;
 }) => {
   const {
     core: { notifications },
@@ -60,22 +60,17 @@ export const EditSignificantEventFlyout = ({
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
-      definition={definition.stream}
+      generateOnMount={generateOnMount}
+      refreshDefinition={refreshDefinition}
+      onFeatureIdentificationClick={onFeatureIdentificationClick}
+      definition={definition}
       query={queryToEdit}
       onSave={async (data: SaveData) => {
         const streamType = getStreamTypeFromDefinition(definition.stream);
 
         switch (data.type) {
           case 'single':
-            await upsertQuery({
-              ...data.query,
-              feature: data.query.feature
-                ? {
-                    name: data.query.feature.name,
-                    filter: data.query.feature.filter,
-                  }
-                : undefined,
-            }).then(
+            await upsertQuery(data.query).then(
               () => {
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
@@ -89,12 +84,13 @@ export const EditSignificantEventFlyout = ({
 
                 telemetryClient.trackSignificantEventsCreated({
                   count: 1,
-                  count_by_feature_type: {
-                    system: 0,
-                    ...(data.query.feature && {
-                      [(data.query.feature as GeneratedSignificantEventQuery['feature'])!.type]: 1,
-                    }),
-                  },
+                  count_by_feature_type: !data.query.feature
+                    ? {
+                        system: 0,
+                      }
+                    : {
+                        [data.query.feature.type]: 1,
+                      },
                   stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
@@ -113,15 +109,7 @@ export const EditSignificantEventFlyout = ({
           case 'multiple':
             await bulk(
               data.queries.map((query) => ({
-                index: {
-                  ...query,
-                  feature: query.feature
-                    ? {
-                        name: query.feature.name,
-                        filter: query.feature.filter,
-                      }
-                    : undefined,
-                },
+                index: query,
               }))
             ).then(
               () => {
@@ -137,8 +125,7 @@ export const EditSignificantEventFlyout = ({
                   count_by_feature_type: data.queries.reduce(
                     (acc, query) => {
                       if (query.feature) {
-                        const type = (query.feature as GeneratedSignificantEventQuery['feature'])!
-                          .type as FeatureType;
+                        const type = query.feature.type;
                         acc[type] = acc[type] + 1;
                       }
                       return acc;

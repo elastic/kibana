@@ -99,7 +99,7 @@ export const GenerateSuggestionButton = ({
                     onClick={togglePopover}
                     display="base"
                     size="s"
-                    iconType="boxesVertical"
+                    iconType="controlsHorizontal"
                     isDisabled={rest.isDisabled || rest.isLoading}
                     aria-label={i18n.translate(
                       'xpack.streams.refreshButton.euiButtonIcon.moreLabel',
