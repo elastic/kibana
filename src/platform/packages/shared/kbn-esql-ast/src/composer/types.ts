@@ -182,13 +182,29 @@ export type FromSourcesAndMetadataQueryStarter = (
   metadataFields?: ComposerColumnShorthand[]
 ) => ComposerQuery;
 
-export type ComposerSourceShorthand = string | ESQLSource;
+/**
+ * A shorthand for specifying a source with an optional alias.
+ *
+ * ```
+ * { index: 'my_index', alias: 'i' }
+ * // Result: my_index AS i
+ * ```
+ */
+export interface ComposerSourceWithAlias {
+  index: string;
+  alias: string;
+}
+
+export type ComposerSourceShorthand = string | ESQLSource | ComposerSourceWithAlias;
 
 /**
  * A shorthand for specifying a column in the query.
  * It can be a string a simple column or an array of strings for a nested column.
  */
-export type ComposerColumnShorthand = string | synth.SynthColumnShorthand;
+export type ComposerColumnShorthand =
+  | string
+  | synth.SynthColumnShorthand
+  | synth.SynthQualifiedColumnShorthand;
 
 /**
  * A shorthand for specifying a rename expression in the `RENAME` command.
