@@ -15,8 +15,19 @@ import type { ICommandContext, ISuggestionItem } from '../../../registry/types';
 import type { ExpressionContext } from './expressions/types';
 import { createInferenceEndpointToCompletionItem } from './helpers';
 
+type SuggestionResolver = (
+  hint: ParameterHint,
+  ctx: ExpressionContext
+) => Promise<ISuggestionItem[]>;
+
+type ContextResolver = (
+  hint: ParameterHint,
+  context: Partial<ICommandContext>,
+  callbacks: ESQLCallbacks
+) => Promise<Record<string, unknown>>;
+
 /**
- * For some parameters, ES gives as hints about the nature of it, that we use to provide
+ * For some parameters, ES gives us hints about the nature of it, that we use to provide
  * custom autocompletion handlers.
  *
  * For each hint we need to provide:
@@ -27,19 +38,12 @@ import { createInferenceEndpointToCompletionItem } from './helpers';
  * Be mindful while implementing context resolvers, context is shared by the command and all functions used within it.
  * If the data you need is already present, don't overwrite it, preffer merging it.
  */
-export const parametersFromHintsMap: Partial<
+export const parametersFromHintsResolvers: Partial<
   Record<
     ParameterHintEntityType,
     {
-      suggestionResolver: (
-        hint: ParameterHint,
-        ctx: ExpressionContext
-      ) => Promise<ISuggestionItem[]>;
-      contextResolver?: (
-        hint: ParameterHint,
-        context: Partial<ICommandContext>,
-        callbacks: ESQLCallbacks
-      ) => Promise<Record<string, unknown>>;
+      suggestionResolver: SuggestionResolver;
+      contextResolver?: ContextResolver;
     }
   >
 > = {

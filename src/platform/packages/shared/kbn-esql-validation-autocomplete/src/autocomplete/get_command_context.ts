@@ -13,7 +13,7 @@ import { walk } from '@kbn/esql-ast';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getFunctionDefinition } from '@kbn/esql-ast/src/commands/definitions/utils';
 import { isEqual, uniqWith } from 'lodash';
-import { parametersFromHintsMap } from '@kbn/esql-ast/src/commands/definitions/utils/autocomplete/parameters_from_hints';
+import { parametersFromHintsResolvers } from '@kbn/esql-ast/src/commands/definitions/utils/autocomplete/parameters_from_hints';
 import type { ICommandContext } from '@kbn/esql-ast/src/commands/registry/types';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
@@ -132,7 +132,7 @@ export const enhanceWithFunctionsContext = async (
 
   // If the hint needs new data to build the suggestions, we add that data to the context
   for (const hint of uniqueHints) {
-    const parameterHandler = parametersFromHintsMap[hint.entityType];
+    const parameterHandler = parametersFromHintsResolvers[hint.entityType];
     if (parameterHandler?.contextResolver) {
       const resolvedContext = await parameterHandler.contextResolver(
         hint,

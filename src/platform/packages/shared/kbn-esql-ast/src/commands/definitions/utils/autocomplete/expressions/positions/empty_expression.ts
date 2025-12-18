@@ -30,7 +30,7 @@ import {
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
-import { parametersFromHintsMap } from '../../parameters_from_hints';
+import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
@@ -393,7 +393,7 @@ async function buildSuggestionsFromHints(
 
   const results = await Promise.all(
     hints.map(
-      (hint) => parametersFromHintsMap[hint.entityType].suggestionResolver?.(hint, ctx) ?? []
+      (hint) => parametersFromHintsResolvers[hint.entityType].suggestionResolver?.(hint, ctx) ?? []
     )
   );
 
