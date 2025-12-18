@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export { SO_SLO_TEMPLATE_TYPE } from '@kbn/slo-shared-plugin/server';
-export { slo, SO_SLO_TYPE } from './slo';
-export { sloSettings, SO_SLO_SETTINGS_TYPE } from './slo_settings';
+const path = require('path');
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: path.resolve(__dirname, '../../../../..'),
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/slo_shared'],
+};
+
