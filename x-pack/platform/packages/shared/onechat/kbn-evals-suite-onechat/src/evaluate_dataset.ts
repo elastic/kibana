@@ -48,6 +48,102 @@ export type EvaluateDataset = ({
   };
 }) => Promise<void>;
 
+export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
+
+function configureExperiment({
+  evaluators,
+  chatClient,
+  traceEsClient,
+  log,
+}: {
+  evaluators: DefaultEvaluators;
+  chatClient: OnechatEvaluationChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
+}): {
+  task: ExperimentTask<DatasetExample, TaskOutput>;
+  evaluators: ReturnType<typeof selectEvaluators>;
+} {
+  const task: ExperimentTask<DatasetExample, TaskOutput> = async ({ input, output, metadata }) => {
+    const response = await chatClient.converse({
+      messages: [{ message: input.question }],
+    });
+
+    // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+    // Wrap LLM judge calls @kbn/evals spans and assign root context to prevent them from contributing to latency, token use and other metrics of the EvaluateExample span
+    const [correctnessResult, groundednessResult] = await Promise.all([
+      withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+        evaluators.correctnessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: response,
+          metadata,
+        })
+      ),
+      withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+        evaluators.groundednessAnalysis().evaluate({
+          input,
+          expected: output,
+          output: response,
+          metadata,
+        })
+      ),
+    ]);
+
+    return {
+      errors: response.errors,
+      messages: response.messages,
+      steps: response.steps,
+      traceId: response.traceId,
+      correctnessAnalysis: correctnessResult?.metadata,
+      groundednessAnalysis: groundednessResult?.metadata,
+    };
+  };
+
+  const ragEvaluators = createRagEvaluators({
+    k: 10,
+    relevanceThreshold: 1,
+    extractRetrievedDocs: (output: TaskOutput) => {
+      const steps =
+        (
+          output as {
+            steps?: Array<{
+              type: string;
+              tool_id?: string;
+              results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
+            }>;
+          }
+        )?.steps ?? [];
+      return steps
+        .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
+        .flatMap((step) => step.results ?? [])
+        .map((result) => ({
+          index: result.data?.reference?.index,
+          id: result.data?.reference?.id,
+        }))
+        .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
+    },
+    extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
+      referenceOutput?.groundTruth ?? {},
+  });
+
+  const selectedEvaluators = selectEvaluators([
+    ...createQuantitativeCorrectnessEvaluators(),
+    createQuantitativeGroundednessEvaluator(),
+    ...ragEvaluators,
+    ...Object.values({
+      ...evaluators.traceBasedEvaluators,
+      latency: createSpanLatencyEvaluator({
+        traceEsClient,
+        log,
+        spanName: 'Converse',
+      }),
+    }),
+  ]);
+
+  return { task, evaluators: selectedEvaluators };
+}
+
 export function createEvaluateDataset({
   evaluators,
   phoenixClient,
@@ -76,91 +172,55 @@ export function createEvaluateDataset({
       examples,
     } satisfies EvaluationDataset;
 
-    const callConverseAndEvaluate: ExperimentTask<DatasetExample, TaskOutput> = async ({
-      input,
-      output,
-      metadata,
-    }) => {
-      const response = await chatClient.converse({
-        messages: [{ message: input.question }],
-      });
-
-      // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
-      // Wrap LLM judge calls @kbn/evals spans and assign root context to prevent them from contributing to latency, token use and other metrics of the EvaluateExample span
-      const [correctnessResult, groundednessResult] = await Promise.all([
-        withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-          evaluators.correctnessAnalysis().evaluate({
-            input,
-            expected: output,
-            output: response,
-            metadata,
-          })
-        ),
-        withEvaluatorSpan('GroundednessAnalysis', {}, () =>
-          evaluators.groundednessAnalysis().evaluate({
-            input,
-            expected: output,
-            output: response,
-            metadata,
-          })
-        ),
-      ]);
-
-      return {
-        errors: response.errors,
-        messages: response.messages,
-        steps: response.steps,
-        traceId: response.traceId,
-        correctnessAnalysis: correctnessResult?.metadata,
-        groundednessAnalysis: groundednessResult?.metadata,
-      };
-    };
-
-    const ragEvaluators = createRagEvaluators({
-      k: 10,
-      relevanceThreshold: 1,
-      extractRetrievedDocs: (output: TaskOutput) => {
-        const steps =
-          (
-            output as {
-              steps?: Array<{
-                type: string;
-                tool_id?: string;
-                results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
-              }>;
-            }
-          )?.steps ?? [];
-        return steps
-          .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
-          .flatMap((step) => step.results ?? [])
-          .map((result) => ({
-            index: result.data?.reference?.index,
-            id: result.data?.reference?.id,
-          }))
-          .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
-      },
-      extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
-        referenceOutput?.groundTruth ?? {},
+    const { task, evaluators: selectedEvaluators } = configureExperiment({
+      evaluators,
+      chatClient,
+      traceEsClient,
+      log,
     });
 
     await phoenixClient.runExperiment(
       {
         dataset,
-        task: callConverseAndEvaluate,
+        task,
       },
-      selectEvaluators([
-        ...createQuantitativeCorrectnessEvaluators(),
-        createQuantitativeGroundednessEvaluator(),
-        ...ragEvaluators,
-        ...Object.values({
-          ...evaluators.traceBasedEvaluators,
-          latency: createSpanLatencyEvaluator({
-            traceEsClient,
-            log,
-            spanName: 'Converse',
-          }),
-        }),
-      ])
+      selectedEvaluators
+    );
+  };
+}
+
+export function createEvaluateExternalDataset({
+  evaluators,
+  phoenixClient,
+  chatClient,
+  traceEsClient,
+  log,
+}: {
+  evaluators: DefaultEvaluators;
+  phoenixClient: KibanaPhoenixClient;
+  chatClient: OnechatEvaluationChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
+}): EvaluateExternalDataset {
+  return async function evaluateExternalDataset(datasetName: string) {
+    const { task, evaluators: selectedEvaluators } = configureExperiment({
+      evaluators,
+      chatClient,
+      traceEsClient,
+      log,
+    });
+
+    await phoenixClient.runExperiment(
+      {
+        dataset: {
+          name: datasetName,
+          description: 'External dataset resolved from Phoenix by name',
+          examples: [],
+        },
+        task,
+        trustUpstreamDataset: true,
+      },
+      selectedEvaluators
     );
   };
 }

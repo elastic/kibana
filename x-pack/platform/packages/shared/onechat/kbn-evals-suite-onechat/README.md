@@ -120,6 +120,20 @@ TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=ll
 
 ```
 
+### External Phoenix dataset evaluations
+
+If you want to run evaluations against a dataset that exists in Phoenix and not in the code (for ad-hoc testing), set `DATASET_NAME` environment variable to match the name of your Phoenix dataset and run evals with the command:
+
+```bash
+DATASET_NAME="my-phoenix-dataset" \
+node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts evals/external/external_dataset.spec.ts
+```
+
+Notes:
+
+- The external dataset **must already exist in Phoenix**. If it doesn't, the run will fail with a clear error.
+- In this mode, the suite **does not** create or upsert datasets/examples- Phoenix dataset is the source of truth.
+- Dataset examples must match the example schema already using in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
 
 ### Run Evaluation Comparisons
 
