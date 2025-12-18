@@ -109,16 +109,18 @@ export class AccessControlService {
   enforceAccessControl<A extends string>({
     authorizationResult,
     typesRequiringAccessControl,
+    typesRequiringRbac,
     currentSpace,
     addAuditEventFn,
   }: {
     authorizationResult: CheckAuthorizationResult<A>;
     typesRequiringAccessControl: Set<string>;
+    typesRequiringRbac: Set<string>;
     currentSpace: string;
     addAuditEventFn?: (types: string[]) => void;
   }) {
     if (authorizationResult.status === 'unauthorized') {
-      const typeList = [...typesRequiringAccessControl].sort();
+      const typeList = [...new Set([...typesRequiringAccessControl, ...typesRequiringRbac])].sort();
       addAuditEventFn?.(typeList);
       throw SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(`Access denied: Unable to manage access control for ${typeList}`)
@@ -137,7 +139,7 @@ export class AccessControlService {
       if (!accessControlAuth) {
         unauthorizedTypes.add(type);
       } else {
-        // Check if user has global authorization or authorization in at least one space
+        // Check if user has global authorization or authorization in the current space
         if (
           !accessControlAuth.isGloballyAuthorized &&
           (!accessControlAuth.authorizedSpaces ||
@@ -147,6 +149,23 @@ export class AccessControlService {
         }
       }
     }
+
+    for (const type of typesRequiringRbac) {
+      const typeAuth = typeMap.get(type);
+      const rbacAuth = typeAuth?.['update' as A];
+      if (!rbacAuth) {
+        unauthorizedTypes.add(type);
+      } else {
+        // Check if user has global authorization or authorization in the current space
+        if (
+          !rbacAuth.isGloballyAuthorized &&
+          (!rbacAuth.authorizedSpaces || !rbacAuth.authorizedSpaces.includes(currentSpace))
+        ) {
+          unauthorizedTypes.add(type);
+        }
+      }
+    }
+
     // If we found unauthorized types, throw an error
     if (unauthorizedTypes.size > 0) {
       const typeList = [...unauthorizedTypes].sort();

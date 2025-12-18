@@ -1266,6 +1266,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
        */
       this.accessControlService.enforceAccessControl({
         typesRequiringAccessControl,
+        typesRequiringRbac,
         authorizationResult,
         currentSpace: namespaceString,
         addAuditEventFn: (types: string[]) => {
@@ -1274,7 +1275,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           this.addAuditEvent({
             action: auditAction!,
             error: err,
-            unauthorizedTypes: [...typesRequiringAccessControl],
+            unauthorizedTypes: types,
             unauthorizedSpaces: [...spacesToAuthorize],
           });
         },
