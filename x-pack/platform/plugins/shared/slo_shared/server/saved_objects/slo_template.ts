@@ -9,10 +9,12 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import type { storedSloTemplateSchema } from '@kbn/slo-schema';
+import type * as t from 'io-ts';
 import { pick } from 'lodash';
-import type { StoredSLOTemplate } from '../domain/models/slo_template';
+import { SO_SLO_TEMPLATE_TYPE } from '../../common';
 
-export const SO_SLO_TEMPLATE_TYPE = 'slo_template';
+type StoredSLOTemplate = t.TypeOf<typeof storedSloTemplateSchema>;
 
 /**
  * We will use the savedObject.id as the template identifier when
@@ -67,7 +69,7 @@ export const sloTemplate: SavedObjectsType = {
           ? template.attributes.name
           : 'Unnamed';
 
-      return i18n.translate('xpack.slo.sloTemplateSaveObject.title', {
+      return i18n.translate('xpack.sloShared.sloTemplateSaveObject.title', {
         defaultMessage: 'SLO Template: {name}',
         values: {
           name: templateName,
