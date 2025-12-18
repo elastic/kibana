@@ -30,9 +30,8 @@ export interface AlertsPrivelegesState {
 export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
-    // Rules privileges implicitly contain alerts privileges. Until we separate them out into dedicated privileges, we are using rules privileges to determine alerts privileges.
-    rulesPrivileges: {
-      rules: { read: hasAlertsRead, edit: hasAlertsAll },
+    alertsPrivileges: {
+      alerts: { edit: hasAlertsAll, read: hasAlertsRead },
     },
   } = useUserPrivileges();
 
