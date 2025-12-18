@@ -178,7 +178,7 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
 -   Impact:
 
     -   The error affects the entire payment flow, causing transaction failures in checkout and frontend services.
-    -   Multiple services in the trace report errors: \`payment\` (1), \`checkout\` (2), \`frontend\` (4), and \`frontend-proxy\` (2), indicating broad user-facing impact for payment attempts.
+    -   Multiple services in the trace report errors: \`payment\`, \`checkout\`, \`frontend\`, and \`frontend-proxy\`, indicating broad user-facing impact for payment attempts.
 -   Immediate actions:
 
     1.  Review the payment service's token validation logic in \`charge.js\` (line 37) for possible causes of invalid token rejection.
