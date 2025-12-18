@@ -63,7 +63,6 @@ export const PlainIndexSyncUtils = (
     const entitySource = {
       type: 'index',
       name: `Entity source for index ${indexName}`,
-      managed: true,
       indexPattern: indexName,
       enabled: true,
       matchers: [
