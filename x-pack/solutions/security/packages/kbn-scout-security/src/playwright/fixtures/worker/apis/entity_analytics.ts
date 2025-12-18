@@ -16,7 +16,7 @@ const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
 const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
-const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status' as const;
+const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
 
 const API_VERSIONS = {
   public: {
@@ -76,7 +76,7 @@ export const getEntityAnalyticsApiService = ({
             query: {
               type: RISK_ENGINE_CONFIGURATION_TYPE,
             },
-            ignoreErrors: [404, 500],
+            ignoreErrors: [404],
           });
 
           const savedObjectId = findResponse?.data?.saved_objects?.[0]?.id;
@@ -84,7 +84,7 @@ export const getEntityAnalyticsApiService = ({
             await kbnClient.request({
               method: 'DELETE',
               path: `${basePath}/api/saved_objects/${RISK_ENGINE_CONFIGURATION_TYPE}/${savedObjectId}`,
-              ignoreErrors: [404, 500],
+              ignoreErrors: [404],
             });
           }
         }

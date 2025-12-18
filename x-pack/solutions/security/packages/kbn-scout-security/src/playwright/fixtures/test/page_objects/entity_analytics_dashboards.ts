@@ -43,7 +43,7 @@ export class EntityAnalyticsDashboardsPage {
   }
 
   async waitForEntitiesListToAppear() {
-    await this.entitiesListPanel.waitFor({ state: 'visible', timeout: 120000 });
+    await this.entitiesListPanel.waitFor({ state: 'visible' });
     await this.entitiesListPanel.scrollIntoViewIfNeeded();
   }
 }
