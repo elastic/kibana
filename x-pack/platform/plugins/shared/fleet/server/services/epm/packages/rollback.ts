@@ -69,9 +69,9 @@ export async function rollbackAvailableCheck(
     };
   }
   const packageSO = packageSORes.saved_objects[0];
-  const packageVersion = packageSO?.attributes.version;
+  const previousVersion = packageSO.attributes.previous_version;
 
-  if (!packageSO.attributes.previous_version) {
+  if (!previousVersion) {
     return {
       isAvailable: false,
       reason: `No previous version found for package ${pkgName}`,
@@ -83,7 +83,7 @@ export async function rollbackAvailableCheck(
       reason: `Rollback not allowed as TTL expired`,
     };
   }
-  const previousVersion = packageSO.attributes.previous_version;
+
   if (packageSO.attributes.install_source !== 'registry') {
     return {
       isAvailable: false,
@@ -123,6 +123,7 @@ export async function rollbackAvailableCheck(
     };
   }
 
+  const packageVersion = packageSO?.attributes.version;
   if (
     packagePolicySOs
       .filter((so) => !so.id.endsWith(':prev'))
