@@ -285,4 +285,91 @@ describe('processFilters', () => {
       },
     });
   });
+
+  test('should exclude filters with empty or unpopulated query objects', () => {
+    expect(
+      processFilters([
+        {
+          meta: {
+            index: 'test-index',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'custom',
+            key: 'field1',
+          },
+          query: {
+            match: {
+              field1: 'value1',
+            },
+          },
+          $state: {
+            // @ts-ignore
+            store: 'appState',
+          },
+        },
+        {
+          meta: {
+            index: 'test-index',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'custom',
+            key: 'field2',
+          },
+          query: {}, // Empty object - should be excluded
+          $state: {
+            // @ts-ignore
+            store: 'appState',
+          },
+        },
+        {
+          meta: {
+            index: 'test-index',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'custom',
+            key: 'field3',
+          },
+          // No query property - should be excluded
+          $state: {
+            // @ts-ignore
+            store: 'appState',
+          },
+        },
+        {
+          meta: {
+            index: 'test-index',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'exists',
+            key: 'field4',
+          },
+          // No query property but type is 'exists' - should be included
+          $state: {
+            // @ts-ignore
+            store: 'appState',
+          },
+        },
+      ])
+    ).toEqual({
+      bool: {
+        must: [
+          {
+            match: {
+              field1: 'value1',
+            },
+          },
+          {
+            exists: {
+              field: 'field4',
+            },
+          },
+        ],
+        must_not: [],
+      },
+    });
+  });
 });
