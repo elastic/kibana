@@ -12,7 +12,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { AggregateQuery, Query, TimeRange, Filter } from '@kbn/es-query';
 import { disableFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useHistory } from 'react-router-dom';
 import { isObject } from 'lodash';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -87,7 +86,7 @@ export const useNavigationProps = ({
   savedSearchId,
   filters,
 }: UseNavigationProps) => {
-  const isEmbeddableView = !useHistory();
+  const isEmbeddableView = !!filters;
   const services = useDiscoverServices();
   const [singleDocHref, setSingleDocHref] = useState('');
   const [contextViewHref, setContextViewHref] = useState('');
