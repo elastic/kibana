@@ -1108,6 +1108,7 @@
     }
   },
   "data_connector": {
+    "dynamic": false,
     "properties": {
       "kscIds": {
         "type": "keyword"

@@ -7,18 +7,12 @@
 
 import { lazy } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
 
 const LazyIconAgents = lazy(() =>
   import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
-
-const LazyIconPlayground = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
-    default: m.iconPlayground,
-  }))
 );
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
@@ -79,15 +73,6 @@ export function createNavigationTree({
         badgeType: 'techPreview' as const,
       },
       {
-        id: 'searchPlayground',
-        title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
-          defaultMessage: 'Playground',
-        }),
-        link: 'searchPlayground' as AppDeepLinkId,
-        breadcrumbStatus: 'hidden' as 'hidden',
-        icon: LazyIconPlayground, // Temp svg until we have icon in EUI
-      },
-      {
         children: [
           {
             id: 'ml_overview',
@@ -127,24 +112,6 @@ export function createNavigationTree({
         id: 'machine_learning',
         renderAs: 'panelOpener',
         title: MACHINE_LEARNING_TITLE,
-      },
-    ],
-    footer: [
-      {
-        id: 'search_getting_started',
-        icon: 'launch',
-        link: 'searchGettingStarted',
-      },
-      {
-        id: 'dev_tools',
-        title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
-          defaultMessage: 'Developer Tools',
-        }),
-        icon: 'code',
-        link: 'dev_tools:console',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-        },
       },
       {
         children: [
@@ -186,6 +153,7 @@ export function createNavigationTree({
             children: [
               { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
               { link: 'searchQueryRules' },
+              { link: 'searchPlayground' },
             ],
             id: 'search_relevance',
             breadcrumbStatus: 'hidden',
@@ -200,6 +168,24 @@ export function createNavigationTree({
         title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
           defaultMessage: 'Data management',
         }),
+      },
+    ],
+    footer: [
+      {
+        id: 'search_getting_started',
+        icon: 'launch',
+        link: 'searchGettingStarted',
+      },
+      {
+        id: 'dev_tools',
+        title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
+          defaultMessage: 'Developer Tools',
+        }),
+        icon: 'code',
+        link: 'dev_tools:console',
+        getIsActive: ({ pathNameSerialized, prepend }) => {
+          return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+        },
       },
       {
         id: 'admin_and_settings',
