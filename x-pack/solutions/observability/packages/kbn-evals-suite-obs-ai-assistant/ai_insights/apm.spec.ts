@@ -14,13 +14,19 @@ import {
   type EvaluationDataset,
   type KibanaPhoenixClient,
 } from '@kbn/evals';
-import { replaySnapshot } from '@kbn/es-snapshot-loader';
 import { AiInsightClient, type ErrorInsightParams } from '../src/clients/ai_insight_client';
+import { OTEL_DEMO_SNAPSHOT_NAME, replayObservabilitySignals } from '../src/data_generators/replay';
 
 const INDEX_REFRESH_WAIT_MS = 2500;
 
 interface ErrorAiInsightExample extends Example {
-  input: ErrorInsightParams;
+  input: {
+    errorId: string;
+    serviceName: string;
+    start: string;
+    end: string;
+    environment?: string;
+  };
   output: {
     expected: string;
   };
@@ -56,7 +62,7 @@ function createEvaluateErrorAiInsightsDataset({
       {
         dataset,
         task: async ({ input, output, metadata }) => {
-          const response = await aiInsightClient.getErrorInsight(input);
+          const response = await aiInsightClient.getErrorInsight(input as ErrorInsightParams);
 
           const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
             input,
@@ -106,16 +112,9 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
     end = moment().toISOString();
     start = moment().subtract(15, 'minutes').toISOString();
 
-    log.info('Replaying OTel Demo snapshot: payment-service-failures');
-    await replaySnapshot({
-      esClient,
-      log,
-      snapshotUrl: 'file:///tmp/repo',
-      snapshotName: 'payment-service-failures',
-      patterns: ['logs-*', 'metrics-*', 'traces-*'],
-    });
+    await replayObservabilitySignals(esClient, log, OTEL_DEMO_SNAPSHOT_NAME);
 
-    log.debug('Waiting 2.5s to make sure all indices are refreshed');
+    log.debug('Waiting to make sure all indices are refreshed');
     await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
 
     log.info('Querying for APM error ID');
