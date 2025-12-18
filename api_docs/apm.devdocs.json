@@ -6483,6 +6483,14 @@
           "APMRouteHandlerResources",
           ", { traceItems: ",
           "TraceItem",
+          "[]; errors: ",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Error",
+            "text": "Error"
+          },
           "[]; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}\": ",
