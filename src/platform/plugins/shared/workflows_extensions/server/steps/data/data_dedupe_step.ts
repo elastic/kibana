@@ -53,7 +53,9 @@ export const dataDedupeStepDefinition = createServerStepDefinition({
   ...dataDedupeStepCommonDefinition,
   handler: async (context) => {
     try {
-      const { items, keys, strategy = 'keep_first' } = context.input;
+      const items = context.contextManager.renderInputTemplate(context.config.items);
+      const strategy = context.config.strategy || 'keep_first';
+      const { keys } = context.input;
 
       if (!Array.isArray(items)) {
         context.logger.error('Input items is not an array');

@@ -12,21 +12,18 @@ import { dataDedupeStepDefinition } from './data_dedupe_step';
 import type { StepHandlerContext } from '../../step_registry/types';
 
 describe('dataDedupeStepDefinition', () => {
-  const createMockContext = (input: {
-    items: unknown[];
-    keys: string[];
-    strategy?: 'keep_first' | 'keep_last';
-  }): StepHandlerContext<{
-    items: unknown[];
-    keys: string[];
-    strategy: 'keep_first' | 'keep_last';
-  }> => ({
-    input: { ...input, strategy: input.strategy || 'keep_first' },
-    rawInput: input as OrStringRecursive<{
+  const createMockContext = (
+    config: {
       items: unknown[];
+      strategy?: 'keep_first' | 'keep_last';
+    },
+    input: {
       keys: string[];
-      strategy: 'keep_first' | 'keep_last';
-    }>,
+    }
+  ): StepHandlerContext<any, any> => ({
+    config: { ...config, strategy: config.strategy || 'keep_first' },
+    input,
+    rawInput: input as OrStringRecursive<{ keys: string[] }>,
     contextManager: {
       getContext: jest.fn(),
       getFakeRequest: jest.fn(),
@@ -46,17 +43,19 @@ describe('dataDedupeStepDefinition', () => {
 
   describe('single key deduplication', () => {
     it('should remove duplicates based on a single key with keep_first strategy', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, email: 'user@example.com', name: 'Alice' },
           { id: 2, email: 'admin@example.com', name: 'Bob' },
           { id: 3, email: 'user@example.com', name: 'Charlie' },
         ],
-        keys: ['email'],
         strategy: 'keep_first' as const,
       };
+      const input = {
+        keys: ['email'],
+      };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.output).toEqual([
@@ -66,17 +65,19 @@ describe('dataDedupeStepDefinition', () => {
     });
 
     it('should remove duplicates based on a single key with keep_last strategy', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, email: 'user@example.com', name: 'Alice' },
           { id: 2, email: 'admin@example.com', name: 'Bob' },
           { id: 3, email: 'user@example.com', name: 'Charlie' },
         ],
-        keys: ['email'],
         strategy: 'keep_last' as const,
       };
+      const input = {
+        keys: ['email'],
+      };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.output).toEqual([
@@ -88,17 +89,19 @@ describe('dataDedupeStepDefinition', () => {
 
   describe('multiple key deduplication', () => {
     it('should remove duplicates based on multiple keys', async () => {
-      const input = {
+      const config = {
         items: [
           { user_id: 1, event_type: 'login', timestamp: '2024-01-01' },
           { user_id: 1, event_type: 'logout', timestamp: '2024-01-02' },
           { user_id: 1, event_type: 'login', timestamp: '2024-01-03' },
           { user_id: 2, event_type: 'login', timestamp: '2024-01-04' },
         ],
+      };
+      const input = {
         keys: ['user_id', 'event_type'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.output).toHaveLength(3);
@@ -112,12 +115,14 @@ describe('dataDedupeStepDefinition', () => {
 
   describe('edge cases', () => {
     it('should handle empty array', async () => {
-      const input = {
+      const config = {
         items: [],
+      };
+      const input = {
         keys: ['email'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.output).toEqual([]);
@@ -127,34 +132,38 @@ describe('dataDedupeStepDefinition', () => {
     });
 
     it('should handle array with no duplicates', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, email: 'alice@example.com' },
           { id: 2, email: 'bob@example.com' },
           { id: 3, email: 'charlie@example.com' },
         ],
+      };
+      const input = {
         keys: ['email'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.output).toHaveLength(3);
-      expect(result.output).toEqual(input.items);
+      expect(result.output).toEqual(config.items);
     });
 
     it('should handle items with missing keys', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, email: 'user@example.com' },
           { id: 2 },
           { id: 3, email: 'user@example.com' },
           { id: 4 },
         ],
+      };
+      const input = {
         keys: ['email'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       // Items with missing keys (undefined) are treated as duplicates
@@ -164,33 +173,37 @@ describe('dataDedupeStepDefinition', () => {
     });
 
     it('should handle null and undefined values in keys', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, status: null },
           { id: 2, status: undefined },
           { id: 3, status: null },
           { id: 4, status: 'active' },
         ],
+      };
+      const input = {
         keys: ['status'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.output).toHaveLength(3);
     });
 
     it('should handle complex nested objects in values', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, user: { name: 'Alice', age: 30 } },
           { id: 2, user: { name: 'Bob', age: 25 } },
           { id: 3, user: { name: 'Alice', age: 30 } },
         ],
+      };
+      const input = {
         keys: ['user'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.output).toHaveLength(2);
@@ -201,12 +214,14 @@ describe('dataDedupeStepDefinition', () => {
 
   describe('error handling', () => {
     it('should return error when items is not an array', async () => {
-      const input = {
+      const config = {
         items: 'not-an-array' as unknown as unknown[],
+      };
+      const input = {
         keys: ['email'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
@@ -215,12 +230,14 @@ describe('dataDedupeStepDefinition', () => {
     });
 
     it('should return error when keys is empty', async () => {
-      const input = {
+      const config = {
         items: [{ id: 1 }],
+      };
+      const input = {
         keys: [],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
@@ -228,12 +245,14 @@ describe('dataDedupeStepDefinition', () => {
     });
 
     it('should return error when keys is not an array', async () => {
-      const input = {
+      const config = {
         items: [{ id: 1 }],
+      };
+      const input = {
         keys: 'email' as unknown as string[],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataDedupeStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
@@ -243,17 +262,19 @@ describe('dataDedupeStepDefinition', () => {
 
   describe('logging', () => {
     it('should log deduplication statistics', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, email: 'user@example.com' },
           { id: 2, email: 'admin@example.com' },
           { id: 3, email: 'user@example.com' },
           { id: 4, email: 'user@example.com' },
         ],
+      };
+      const input = {
         keys: ['email'],
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       await dataDedupeStepDefinition.handler(context);
 
       expect(context.logger.debug).toHaveBeenCalledWith(

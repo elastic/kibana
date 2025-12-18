@@ -10,10 +10,11 @@
 import { dataMapStepDefinition } from './data_map_step';
 import type { StepHandlerContext } from '../../step_registry/types';
 
-const createMockContext = (input: {
-  items: unknown;
-  fields: Record<string, unknown>;
-}): StepHandlerContext<{ items: unknown; fields: Record<string, unknown> }> => ({
+const createMockContext = (
+  config: { items: unknown },
+  input: { fields: Record<string, unknown> }
+): StepHandlerContext<any, any> => ({
+  config,
   input,
   rawInput: input,
   contextManager: {
@@ -72,18 +73,20 @@ const createMockContext = (input: {
 describe('dataMapStepDefinition', () => {
   describe('handler', () => {
     it('should map array items with field projections', async () => {
-      const input = {
+      const config = {
         items: [
           { id: 1, name: 'Alice', age: 30 },
           { id: 2, name: 'Bob', age: 25 },
         ],
+      };
+      const input = {
         fields: {
           userId: '{{ item.id }}',
           userName: '{{ item.name }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual([
@@ -93,15 +96,17 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should provide index to template context', async () => {
-      const input = {
+      const config = {
         items: ['a', 'b', 'c'],
+      };
+      const input = {
         fields: {
           position: '{{ index }}',
           value: '{{ item }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual([
@@ -112,8 +117,10 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should handle static field values', async () => {
-      const input = {
+      const config = {
         items: [{ id: 1 }, { id: 2 }],
+      };
+      const input = {
         fields: {
           id: '{{ item.id }}',
           source: 'api',
@@ -121,7 +128,7 @@ describe('dataMapStepDefinition', () => {
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual([
@@ -131,14 +138,16 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should handle empty array', async () => {
-      const input = {
+      const config = {
         items: [],
+      };
+      const input = {
         fields: {
           id: '{{ item.id }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual([]);
@@ -148,15 +157,17 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should handle object input and return mapped object', async () => {
-      const input = {
+      const config = {
         items: { id: 1, name: 'Alice' },
+      };
+      const input = {
         fields: {
           userId: '{{ item.id }}',
           userName: '{{ item.name }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual({ userId: 1, userName: 'Alice' });
@@ -164,14 +175,16 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should error when items is null', async () => {
-      const input = {
+      const config = {
         items: null,
+      };
+      const input = {
         fields: {
           id: '{{ item.id }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
@@ -179,14 +192,16 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should error when items is undefined', async () => {
-      const input = {
+      const config = {
         items: undefined,
+      };
+      const input = {
         fields: {
           id: '{{ item.id }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
@@ -194,13 +209,15 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should handle complex nested objects', async () => {
-      const input = {
+      const config = {
         items: [
           {
             user: { id: 1, profile: { name: 'Alice', email: 'alice@example.com' } },
             metadata: { created: '2024-01-01' },
           },
         ],
+      };
+      const input = {
         fields: {
           userId: '{{ item.user.id }}',
           name: '{{ item.user.profile.name }}',
@@ -208,21 +225,23 @@ describe('dataMapStepDefinition', () => {
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toHaveLength(1);
     });
 
     it('should log mapping progress', async () => {
-      const input = {
+      const config = {
         items: [{ id: 1 }, { id: 2 }, { id: 3 }],
+      };
+      const input = {
         fields: {
           userId: '{{ item.id }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       await dataMapStepDefinition.handler(context);
 
       expect(context.logger.debug).toHaveBeenCalledWith('Mapping 3 item(s) with 1 fields');
@@ -230,8 +249,10 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should handle multiple field mappings', async () => {
-      const input = {
+      const config = {
         items: [{ firstName: 'John', lastName: 'Doe', age: 30, city: 'NYC' }],
+      };
+      const input = {
         fields: {
           name: '{{ item.firstName }}',
           surname: '{{ item.lastName }}',
@@ -241,7 +262,7 @@ describe('dataMapStepDefinition', () => {
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual([
@@ -250,11 +271,13 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should handle arrays with different item structures', async () => {
-      const input = {
+      const config = {
         items: [
           { type: 'user', id: 1, name: 'Alice' },
           { type: 'admin', id: 2, name: 'Bob', role: 'superuser' },
         ],
+      };
+      const input = {
         fields: {
           id: '{{ item.id }}',
           name: '{{ item.name }}',
@@ -262,18 +285,20 @@ describe('dataMapStepDefinition', () => {
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toHaveLength(2);
     });
 
     it('should handle object with nested properties', async () => {
-      const input = {
+      const config = {
         items: {
           user: { id: 1, profile: { name: 'Alice', email: 'alice@example.com' } },
           metadata: { created: '2024-01-01' },
         },
+      };
+      const input = {
         fields: {
           userId: '{{ item.user.id }}',
           name: '{{ item.user.profile.name }}',
@@ -281,7 +306,7 @@ describe('dataMapStepDefinition', () => {
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual({
@@ -292,8 +317,10 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should handle object with static field values', async () => {
-      const input = {
+      const config = {
         items: { id: 1, name: 'Product' },
+      };
+      const input = {
         fields: {
           productId: '{{ item.id }}',
           productName: '{{ item.name }}',
@@ -302,7 +329,7 @@ describe('dataMapStepDefinition', () => {
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.output).toEqual({
@@ -314,14 +341,16 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should error when items is a primitive string', async () => {
-      const input = {
+      const config = {
         items: 'not an object or array',
+      };
+      const input = {
         fields: {
           value: '{{ item }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
@@ -329,14 +358,16 @@ describe('dataMapStepDefinition', () => {
     });
 
     it('should error when items is a primitive number', async () => {
-      const input = {
+      const config = {
         items: 42,
+      };
+      const input = {
         fields: {
           value: '{{ item }}',
         },
       };
 
-      const context = createMockContext(input);
+      const context = createMockContext(config, input);
       const result = await dataMapStepDefinition.handler(context);
 
       expect(result.error).toBeDefined();
@@ -349,9 +380,17 @@ describe('dataMapStepDefinition', () => {
       expect(dataMapStepDefinition.id).toBe('data.map');
     });
 
+    it('should validate config schema structure', () => {
+      const validConfig = {
+        items: [{ id: 1 }],
+      };
+
+      const parseResult = dataMapStepDefinition.configSchema!.safeParse(validConfig);
+      expect(parseResult.success).toBe(true);
+    });
+
     it('should validate input schema structure', () => {
       const validInput = {
-        items: [{ id: 1 }],
         fields: { userId: '{{ item.id }}' },
       };
 

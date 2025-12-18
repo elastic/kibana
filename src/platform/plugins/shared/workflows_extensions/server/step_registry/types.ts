@@ -118,7 +118,7 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
    * The raw input configuration before template rendering.
    * Has the same shape as input, but values may contain template strings.
    */
-  rawInput: OrStringRecursive<TInput>;
+  rawInput: OrStringRecursive<z.infer<TInput>>;
 
   /**
    * Runtime context manager for accessing workflow state, context, and template evaluation

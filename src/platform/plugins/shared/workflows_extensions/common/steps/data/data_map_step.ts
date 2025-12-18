@@ -12,8 +12,11 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataMapStepTypeId = 'data.map';
 
-export const InputSchema = z.object({
+export const ConfigSchema = z.object({
   items: z.unknown(),
+});
+
+export const InputSchema = z.object({
   fields: z.record(z.string(), z.unknown()),
 });
 
@@ -22,14 +25,17 @@ export const OutputSchema = z.union([
   z.record(z.string(), z.unknown()),
 ]);
 
+export type DataMapStepConfigSchema = typeof ConfigSchema;
 export type DataMapStepInputSchema = typeof InputSchema;
 export type DataMapStepOutputSchema = typeof OutputSchema;
 
 export const dataMapStepCommonDefinition: CommonStepDefinition<
   DataMapStepInputSchema,
-  DataMapStepOutputSchema
+  DataMapStepOutputSchema,
+  DataMapStepConfigSchema
 > = {
   id: DataMapStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  configSchema: ConfigSchema,
 };

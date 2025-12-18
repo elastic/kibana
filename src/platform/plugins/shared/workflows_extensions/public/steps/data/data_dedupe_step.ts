@@ -27,11 +27,11 @@ Remove duplicate items from an array based on one or more unique key fields.
 \`\`\`yaml
 - name: unique-users
   type: data.dedupe
+  items: "\${{ steps.fetch_users.output }}"
+  strategy: "keep_first"
   with:
-    items: "\${{ steps.fetch_users.output }}"
     keys: 
       - "email"
-    strategy: "keep_first"
 \`\`\`
 
 ## Examples
@@ -43,8 +43,8 @@ Remove duplicates based on a single field:
 \`\`\`yaml
 - name: unique-emails
   type: data.dedupe
+  items: "\${{ steps.get_recipients.output }}"
   with:
-    items: "\${{ steps.get_recipients.output }}"
     keys: 
       - "email"
 \`\`\`
@@ -56,12 +56,12 @@ Remove duplicates based on a combination of fields:
 \`\`\`yaml
 - name: unique-user-events
   type: data.dedupe
+  items: "\${{ steps.fetch_events.output }}"
+  strategy: "keep_first"
   with:
-    items: "\${{ steps.fetch_events.output }}"
     keys:
       - "user_id"
       - "event_type"
-    strategy: "keep_first"
 \`\`\`
 
 ### Keep Last Strategy
@@ -71,11 +71,11 @@ Keep the last occurrence instead of the first:
 \`\`\`yaml
 - name: latest-status-per-user
   type: data.dedupe
+  items: "\${{ steps.fetch_status_updates.output }}"
+  strategy: "keep_last"
   with:
-    items: "\${{ steps.fetch_status_updates.output }}"
     keys:
       - "user_id"
-    strategy: "keep_last"
 \`\`\`
 
 ## Configuration

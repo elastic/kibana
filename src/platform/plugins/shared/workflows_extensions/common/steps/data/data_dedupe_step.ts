@@ -12,22 +12,28 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataDedupeStepTypeId = 'data.dedupe' as const;
 
-export const InputSchema = z.object({
+export const ConfigSchema = z.object({
   items: z.array(z.unknown()),
-  keys: z.array(z.string()),
   strategy: z.enum(['keep_first', 'keep_last']).optional().default('keep_first'),
+});
+
+export const InputSchema = z.object({
+  keys: z.array(z.string()),
 });
 
 export const OutputSchema = z.array(z.unknown());
 
+export type DataDedupeStepConfigSchema = typeof ConfigSchema;
 export type DataDedupeStepInputSchema = typeof InputSchema;
 export type DataDedupeStepOutputSchema = typeof OutputSchema;
 
 export const dataDedupeStepCommonDefinition: CommonStepDefinition<
   DataDedupeStepInputSchema,
-  DataDedupeStepOutputSchema
+  DataDedupeStepOutputSchema,
+  DataDedupeStepConfigSchema
 > = {
   id: DataDedupeStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  configSchema: ConfigSchema,
 };

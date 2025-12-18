@@ -37,8 +37,8 @@ export const dataMapStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: normalize-users
   type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_users.output }}"
   with:
-    items: "\${{ steps.fetch_users.output }}"
     fields:
       id: "\${{ item.objectId }}"
       email: "\${{ item.mail }}"
@@ -49,8 +49,8 @@ export const dataMapStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: enrich-orders
   type: ${DataMapStepTypeId}
+  items: "\${{ steps.get_orders.output.value }}"
   with:
-    items: "\${{ steps.get_orders.output.value }}"
     fields:
       order_id: "\${{ item.id }}"
       total: "\${{ item.price * item.quantity }}"
@@ -63,8 +63,8 @@ export const dataMapStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: tag-items
   type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_data.output.items }}"
   with:
-    items: "\${{ steps.fetch_data.output.items }}"
     fields:
       position: "\${{ index }}"
       name: "\${{ item.name }}"
@@ -76,8 +76,8 @@ export const dataMapStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: normalize-ad-users
   type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_ad_users.output.value }}"
   with:
-    items: "\${{ steps.fetch_ad_users.output.value }}"
     fields:
       id: "\${{ item.objectId }}"
       email: "\${{ item.mail }}"
@@ -98,8 +98,8 @@ export const dataMapStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: reshape-github-issues
   type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_issues.output }}"
   with:
-    items: "\${{ steps.fetch_issues.output }}"
     fields:
       issue_id: "\${{ item.id }}"
       title: "\${{ item.title }}"
@@ -113,8 +113,8 @@ export const dataMapStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: reshape-user-profile
   type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_user.output }}"
   with:
-    items: "\${{ steps.fetch_user.output }}"
     fields:
       user_id: "\${{ item.id }}"
       full_name: "\${{ item.firstName }} \${{ item.lastName }}"
