@@ -22,9 +22,7 @@ import {
 import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';
 
-export const getRoutes = (
-  isServerless?: boolean
-): {
+export const getRoutes = (): {
   [key: string]: {
     handler: () => React.ReactElement;
     params: Record<string, string>;
@@ -60,17 +58,13 @@ export const getRoutes = (
       params: {},
       exact: true,
     },
-    ...(!isServerless
-      ? {
-          [SLO_SETTINGS_PATH]: {
-            handler: () => {
-              return <SloSettingsPage />;
-            },
-            params: {},
-            exact: true,
-          },
-        }
-      : {}),
+    [SLO_SETTINGS_PATH]: {
+      handler: () => {
+        return <SloSettingsPage />;
+      },
+      params: {},
+      exact: true,
+    },
     [SLOS_MANAGEMENT_PATH]: {
       handler: () => {
         return <SloManagementPage />;

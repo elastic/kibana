@@ -8,6 +8,7 @@
 import type { OnechatEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
+import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -18,6 +19,7 @@ export enum ChatEventType {
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
   thinkingComplete = 'thinking_complete',
+  promptRequest = 'prompt_request',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -87,6 +89,21 @@ export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResult
 
 export const isToolResultEvent = (event: OnechatEvent<string, any>): event is ToolResultEvent => {
   return event.type === ChatEventType.toolResult;
+};
+
+// Prompt request
+
+export interface PromptRequestEventData {
+  prompt: PromptRequest;
+  source: PromptRequestSource;
+}
+
+export type PromptRequestEvent = ChatEventBase<ChatEventType.promptRequest, PromptRequestEventData>;
+
+export const isPromptRequestEvent = (
+  event: OnechatEvent<string, any>
+): event is PromptRequestEvent => {
+  return event.type === ChatEventType.promptRequest;
 };
 
 // reasoning
@@ -166,6 +183,8 @@ export const isThinkingCompleteEvent = (
 export interface RoundCompleteEventData {
   /** round that was completed */
   round: ConversationRound;
+  /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
+  resumed?: boolean;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -237,6 +256,7 @@ export type ChatAgentEvent =
   | BrowserToolCallEvent
   | ToolProgressEvent
   | ToolResultEvent
+  | PromptRequestEvent
   | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
