@@ -58,7 +58,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MonitoringEntitySourceNoId"
+              $ref: "#/components/schemas/UpdateEntitySourceNoadditionalProps"
       responses:
         "200":
           description: Entity source updated successfully
@@ -155,58 +155,11 @@ components:
         integrations:
             $ref: '#/components/schemas/Integrations'          
 
-    UpdatedMonitoringEntitySource:
-      type: object
-      properties:
-        type:
-          type: string
-        name:
-          type: string
-        managed:
-          type: boolean
-        indexPattern:
-          type: string
-        enabled:
-          type: boolean
-        error:
-          type: string
-        integrationName:
-          type: string
-        matchers:
-          type: array
-          items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                  
-              values:
-                type: array
-                items:
-                  type: string                
-        filter:
-          type: object
-          properties:
-            kuery:
-              oneOf:
-                - type: string
-                - type: object
-        integrations: 
-            $ref: '#/components/schemas/Integrations'
-
-    MonitoringEntitySourceProperties:
+    UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:
         name:
           type: string
-        type:
-          type: string
-        managed:
-          type: boolean
         indexPattern:
           type: string
         integrationName:
@@ -226,6 +179,22 @@ components:
               - type: object
         integrations: 
           $ref: '#/components/schemas/Integrations'
+
+    UpdateEntitySourceNoadditionalProps:
+      allOf:
+      - $ref: '#/components/schemas/UpdateableMonitoringEntitySourceProperties'
+      - type: object
+        additionalProperties: false
+
+    MonitoringEntitySourceProperties:
+      allOf:
+      - $ref: '#/components/schemas/UpdateableMonitoringEntitySourceProperties'
+      - type: object
+        properties:
+          type:
+            type: string
+          managed:
+            type: boolean
 
     Matcher:
       type: object
