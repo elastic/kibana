@@ -67,13 +67,11 @@ const ESQLDataCascade = React.memo(
     registerCascadeRequestsInspectorAdapter,
     ...props
   }: ESQLDataCascadeProps) => {
-    const [query, defaultFilters] = useAppStateSelector((state) => [state.query, state.filters]);
-    const [globalState, esqlVariables] = useCurrentTabSelector((state) => [
-      state.globalState,
+    const query = useAppStateSelector((state) => state.query);
+    const [esqlVariables, dataRequestParams] = useCurrentTabSelector((state) => [
       state.esqlVariables,
+      state.dataRequestParams,
     ]);
-    const globalFilters = globalState?.filters;
-    const globalTimeRange = globalState?.timeRange;
     const { scopedProfilesManager } = useScopedServices();
     const { expressions } = useDiscoverServices();
 
@@ -96,22 +94,17 @@ const ESQLDataCascade = React.memo(
       data: props.services.data,
       esqlVariables,
       expressions,
-      filters: [
-        ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
-        ...(defaultFilters ?? []),
-      ],
-      ...(globalTimeRange && {
-        timeRange: {
-          to: globalTimeRange.to,
-          from: globalTimeRange.from,
-        },
-      }),
+      timeRange: dataRequestParams.timeRangeAbsolute,
       scopedProfilesManager,
       inspectorAdapters: { requests: cascadeRequestsInspectorAdapter.current },
     });
 
-    const { onCascadeGroupNodeExpanded, onCascadeLeafNodeExpanded } =
-      useDataCascadeRowExpansionHandlers({ cascadeFetchClient: fetchCascadeData });
+    const {
+      onCascadeGroupNodeExpanded,
+      onCascadeGroupNodeCollapsed,
+      onCascadeLeafNodeExpanded,
+      onCascadeLeafNodeCollapsed,
+    } = useDataCascadeRowExpansionHandlers({ cascadeFetchClient: fetchCascadeData });
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({
       viewModeToggle,
@@ -155,8 +148,12 @@ const ESQLDataCascade = React.memo(
           rowHeaderMetaSlots={rowHeaderMeta}
           rowHeaderActions={rowActions}
           onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
+          onCascadeGroupNodeCollapsed={onCascadeGroupNodeCollapsed}
         >
-          <DataCascadeRowCell onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}>
+          <DataCascadeRowCell
+            onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
+            onCascadeLeafNodeCollapsed={onCascadeLeafNodeCollapsed}
+          >
             {cascadeLeafRowRenderer}
           </DataCascadeRowCell>
         </DataCascadeRow>

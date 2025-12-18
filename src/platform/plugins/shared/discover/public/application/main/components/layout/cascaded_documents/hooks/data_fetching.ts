@@ -135,14 +135,9 @@ export function useScopedESQLQueryFetchClient({
 }: UseScopedESQLQueryFetchClientProps) {
   const abortController = useRef<AbortController | null>(null);
 
-  useEffect(
-    // handle cleanup for when the component unmounts
-    () => () => {
-      // cancel any pending requests
-      abortController.current?.abort('unmount cleanup');
-    },
-    []
-  );
+  const cancelRequest = useCallback((reason?: string) => {
+    abortController.current?.abort(reason);
+  }, []);
 
   const scopedESQLQueryFetch = useCallback(
     (esqlQuery: AggregateQuery, abortSignal: AbortSignal) =>
@@ -179,7 +174,7 @@ export function useScopedESQLQueryFetchClient({
     ]
   );
 
-  return useCallback(
+  const baseFetch = useCallback(
     async ({
       nodeType,
       nodePath,
@@ -195,14 +190,13 @@ export function useScopedESQLQueryFetchClient({
       });
 
       if (!newQuery) {
-        // maybe track the inputed query, to learn about the kind of queries that bug
+        // maybe track the inputted query, to learn about the kind of queries that bug
         apm.captureError(new Error('Failed to construct cascade query'));
         return [];
       }
 
       if (!abortController.current?.signal?.aborted) {
-        // cancel pending requests, if any
-        abortController.current?.abort();
+        cancelRequest('starting new request');
       }
 
       abortController.current = new AbortController();
@@ -221,7 +215,27 @@ export function useScopedESQLQueryFetchClient({
 
       return records;
     },
-    [scopedESQLQueryFetch, esqlVariables, dataView, query]
+    [scopedESQLQueryFetch, esqlVariables, dataView, query, cancelRequest]
+  );
+
+  useEffect(
+    // handle cleanup for when the component unmounts
+    () => () => {
+      // cancel any pending requests
+      cancelRequest('unmount cleanup');
+    },
+    [cancelRequest]
+  );
+
+  return useMemo(
+    () =>
+      Object.assign(baseFetch, {
+        /**
+         * Cancels any pending requests for the cascade fetch client.
+         */
+        cancel: cancelRequest.bind(null, 'request cancellation'),
+      }),
+    [baseFetch, cancelRequest]
   );
 }
 
@@ -233,9 +247,15 @@ export function useDataCascadeRowExpansionHandlers({
   cascadeFetchClient,
 }: UseDataCascadePropsProps): Pick<
   DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>,
-  'onCascadeGroupNodeExpanded'
+  'onCascadeGroupNodeExpanded' | 'onCascadeGroupNodeCollapsed'
 > &
-  Pick<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>, 'onCascadeLeafNodeExpanded'> {
+  Pick<
+    DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>,
+    'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed'
+  > {
+  /**
+   * Callback invoked when a group node gets expanded, used to fetch data for group nodes.
+   */
   const onCascadeGroupNodeExpanded = useCallback<
     NonNullable<
       DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeExpanded']
@@ -251,6 +271,20 @@ export function useDataCascadeRowExpansionHandlers({
     [cascadeFetchClient]
   );
 
+  /**
+   * Callback invoked when a group node gets collapsed, cancels any pending requests for the group node if necessary.
+   */
+  const onCascadeGroupNodeCollapsed = useCallback<
+    NonNullable<
+      DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeCollapsed']
+    >
+  >(() => {
+    return cascadeFetchClient.cancel();
+  }, [cascadeFetchClient]);
+
+  /**
+   * Callback invoked when a leaf node gets expanded, used to fetch data for leaf nodes.
+   */
   const onCascadeLeafNodeExpanded = useCallback<
     NonNullable<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>
@@ -266,8 +300,21 @@ export function useDataCascadeRowExpansionHandlers({
     [cascadeFetchClient]
   );
 
+  /**
+   * Callback invoked when a leaf node gets collapsed, cancels any pending requests for the leaf node if necessary.
+   */
+  const onCascadeLeafNodeCollapsed = useCallback<
+    NonNullable<
+      DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['onCascadeLeafNodeCollapsed']
+    >
+  >(() => {
+    return cascadeFetchClient.cancel();
+  }, [cascadeFetchClient]);
+
   return {
     onCascadeGroupNodeExpanded,
+    onCascadeGroupNodeCollapsed,
     onCascadeLeafNodeExpanded,
+    onCascadeLeafNodeCollapsed,
   };
 }
