@@ -35,7 +35,88 @@ export default ({ getService }: FtrProviderContext) => {
       await api.deleteMonitoringEngine({ query: { data: true } });
     });
 
-    describe('Create Entity Source', () => {});
+    describe('Create Entity Source', () => {
+      it('should not allow managed sources to be created', async () => {
+        const indexName = `test-managed-entity-source-${Date.now()}`;
+        const entitySource = {
+          type: 'index',
+          name: `Test managed entity source ${indexName}`,
+          managed: true,
+          indexPattern: indexName,
+          enabled: true,
+          matchers: [
+            {
+              fields: ['user.role'],
+              values: ['admin'],
+            },
+          ],
+          filter: {},
+        };
+
+        const createResponse = await api.createEntitySource({ body: entitySource });
+        expect(createResponse.status).toBe(400);
+        expect(createResponse.body.message).toBe('Cannot create managed entity source');
+      });
+
+      it('should allow non-managed sources to be created', async () => {
+        const indexName = `test-non-managed-entity-source-${Date.now()}`;
+        const entitySource = {
+          type: 'index',
+          name: `Test non-managed entity source ${indexName}`,
+          managed: false,
+          indexPattern: indexName,
+          enabled: true,
+          matchers: [
+            {
+              fields: ['user.role'],
+              values: ['admin'],
+            },
+          ],
+          filter: {},
+        };
+
+        const createResponse = await api.createEntitySource({ body: entitySource });
+        expect(createResponse.status).toBe(200);
+        expect(createResponse.body.id).toBeDefined();
+        expect(createResponse.body.managed).toBe(false);
+
+        // Clean up
+        await api.deleteEntitySource({
+          params: {
+            id: createResponse.body.id,
+          },
+        });
+      });
+
+      it('should default managed to false when not provided', async () => {
+        const indexName = `test-default-managed-entity-source-${Date.now()}`;
+        const entitySource = {
+          type: 'index',
+          name: `Test default managed entity source ${indexName}`,
+          indexPattern: indexName,
+          enabled: true,
+          matchers: [
+            {
+              fields: ['user.role'],
+              values: ['admin'],
+            },
+          ],
+          filter: {},
+        };
+
+        const createResponse = await api.createEntitySource({ body: entitySource });
+        expect(createResponse.status).toBe(200);
+        expect(createResponse.body.id).toBeDefined();
+        expect(createResponse.body.managed).toBe(false);
+
+        // Clean up
+        await api.deleteEntitySource({
+          params: {
+            id: createResponse.body.id,
+          },
+        });
+      });
+    });
 
     describe('Update Entity Source', () => {
       it('should not allow the managed field to be updated ', async () => {
@@ -80,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('Delete Entity Source', () => {
+    describe('Delete Entity Source', () => {
       it('should not allow managed sources to be deleted ', async () => {
         const source = await getOktaSource();
         const deletedSource = await api.deleteEntitySource({
@@ -132,6 +213,148 @@ export default ({ getService }: FtrProviderContext) => {
             name: entitySource.name,
           },
         });
+        expect(listResponse.body.length).toBe(0);
+      });
+    });
+
+    describe('Get Entity Source', () => {
+      it('should get a managed source by ID', async () => {
+        const source = await getOktaSource();
+        const getResponse = await api.getEntitySource({
+          params: {
+            id: source.id,
+          },
+        });
+
+        expect(getResponse.status).toBe(200);
+        expect(getResponse.body.id).toBe(source.id);
+        expect(getResponse.body.name).toBe(source.name);
+        expect(getResponse.body.managed).toBe(true);
+      });
+
+      it('should get a non-managed source by ID', async () => {
+        const indexName = `test-get-entity-source-${Date.now()}`;
+        const entitySource = {
+          type: 'index',
+          name: `Test get entity source ${indexName}`,
+          managed: false,
+          indexPattern: indexName,
+          enabled: true,
+          matchers: [
+            {
+              fields: ['user.role'],
+              values: ['admin'],
+            },
+          ],
+          filter: {},
+        };
+
+        const createResponse = await api.createEntitySource({ body: entitySource });
+        expect(createResponse.status).toBe(200);
+
+        const getResponse = await api.getEntitySource({
+          params: {
+            id: createResponse.body.id,
+          },
+        });
+
+        expect(getResponse.status).toBe(200);
+        expect(getResponse.body.id).toBe(createResponse.body.id);
+        expect(getResponse.body.name).toBe(entitySource.name);
+        expect(getResponse.body.managed).toBe(false);
+
+        // Clean up
+        await api.deleteEntitySource({
+          params: {
+            id: createResponse.body.id,
+          },
+        });
+      });
+
+      it('should return 404 for non-existent source', async () => {
+        const getResponse = await api.getEntitySource({
+          params: {
+            id: 'non-existent-id',
+          },
+        });
+
+        expect(getResponse.status).toBe(404);
+      });
+    });
+
+    describe('List Entity Sources', () => {
+      it('should list all entity sources', async () => {
+        const listResponse = await api.listEntitySources({
+          query: {},
+        });
+
+        expect(listResponse.status).toBe(200);
+        expect(Array.isArray(listResponse.body)).toBe(true);
+        expect(listResponse.body.length).toBeGreaterThan(0);
+      });
+
+      it('should filter sources by name', async () => {
+        const source = await getOktaSource();
+        const listResponse = await api.listEntitySources({
+          query: {
+            name: source.name,
+          },
+        });
+
+        expect(listResponse.status).toBe(200);
+        expect(listResponse.body.length).toBe(1);
+        expect(listResponse.body[0].id).toBe(source.id);
+        expect(listResponse.body[0].name).toBe(source.name);
+      });
+
+      it('should filter sources by type', async () => {
+        const listResponse = await api.listEntitySources({
+          query: {
+            type: 'index',
+          },
+        });
+
+        expect(listResponse.status).toBe(200);
+        expect(Array.isArray(listResponse.body)).toBe(true);
+        listResponse.body.forEach((source) => {
+          expect(source.type).toBe('index');
+        });
+      });
+
+      it('should filter sources by managed status', async () => {
+        const managedListResponse = await api.listEntitySources({
+          query: {
+            managed: true,
+          },
+        });
+
+        expect(managedListResponse.status).toBe(200);
+        expect(Array.isArray(managedListResponse.body)).toBe(true);
+        managedListResponse.body.forEach((source) => {
+          expect(source.managed).toBe(true);
+        });
+
+        const nonManagedListResponse = await api.listEntitySources({
+          query: {
+            managed: false,
+          },
+        });
+
+        expect(nonManagedListResponse.status).toBe(200);
+        expect(Array.isArray(nonManagedListResponse.body)).toBe(true);
+        nonManagedListResponse.body.forEach((source) => {
+          expect(source.managed).toBe(false);
+        });
+      });
+
+      it('should return empty array when no sources match filter', async () => {
+        const listResponse = await api.listEntitySources({
+          query: {
+            name: 'non-existent-source-name-12345',
+          },
+        });
+
+        expect(listResponse.status).toBe(200);
         expect(listResponse.body.length).toBe(0);
       });
     });
