@@ -27,4 +27,5 @@ export interface TraceItem {
     incoming: number;
     outgoing: number;
   };
+  icon?: string;
 }
