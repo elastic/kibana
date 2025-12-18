@@ -11,7 +11,7 @@ import { buildSignatureTypes } from '../errors';
 import { buildFunctionLookup } from '../functions';
 
 // used for testing... eventually should be moved to the __tests__ directory once
-// kbn-esql-validation-autocomplete is merged into this package and this no longer
+// kbn-esql-ast is merged into this package and this no longer
 // has to be exported from this package
 export const getNoValidCallSignatureError = (fnName: string, givenTypes: string[]) => {
   const definition = buildFunctionLookup().get(fnName)!;
