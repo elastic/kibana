@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +25,7 @@ import {
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+import type { ILicense } from '@kbn/licensing-types';
 
 import { documentationService } from '../../../../../services';
 import { useAppContext } from '../../../../../app_context';
@@ -47,20 +48,33 @@ export const MappingsInformationPanels = ({
   refetchMapping,
 }: MappingsInformationPanelsProps) => {
   const {
-    plugins: { cloud },
+    plugins: { cloud, licensing },
     core: { application },
   } = useAppContext();
   const state = useMappingsState();
+
+  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
+  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const showAboutMappingsStyles = css`
     ${useEuiBreakpoint(['xl'])} {
       max-width: 480px;
     }
   `;
+
   const hasSemanticText = hasSemanticTextField(state.mappingViewFields);
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
+  const shouldShowEisUpdateCallout =
+    (cloud?.isCloudEnabled && (isEnterpriseLicense || cloud?.isServerlessEnabled)) ?? false;
 
-  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
+
   return (
     <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -70,7 +84,7 @@ export const MappingsInformationPanels = ({
               <EisUpdateCallout
                 ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
                 promoId="indexDetailsMappings"
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
+                shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
                 handleOnClick={() => setIsUpdatingElserMappings(true)}
                 direction="column"
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
@@ -89,6 +103,7 @@ export const MappingsInformationPanels = ({
                 refetchMapping={refetchMapping}
                 setIsModalOpen={setIsUpdatingElserMappings}
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
+                modalId="indexDetailsMappings"
               />
             )}
           </>

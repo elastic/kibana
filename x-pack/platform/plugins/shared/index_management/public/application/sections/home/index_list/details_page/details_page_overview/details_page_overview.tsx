@@ -31,6 +31,7 @@ import {
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+import type { ILicense } from '@kbn/licensing-types';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
@@ -67,7 +68,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   } = indexDetails;
   const {
     core,
-    plugins: { cloud, share },
+    plugins: { cloud, share, licensing },
     services: { extensionsService },
   } = useAppContext();
   const state = useMappingsState();
@@ -77,6 +78,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
+  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
 
   // Setting undefined here because we don't have user privileges data in index management
   // If the user doesn't have update mappings privileges we let the api handle the error
@@ -91,6 +93,9 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   const isLarge = useIsWithinBreakpoints(['xl']);
 
+  const shouldShowEisUpdateCallout =
+    (cloud?.isCloudEnabled && (isEnterpriseLicense || cloud?.isServerlessEnabled)) ?? false;
+
   const { parsedDefaultValue } = useMemo(
     () => parseMappings(mappingsData ?? undefined),
     [mappingsData]
@@ -103,6 +108,14 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
       setElasticsearchUrl(config.elasticsearchUrl || 'https://your_deployment_url');
     });
   }, [cloud]);
+
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
 
   return (
     <>
@@ -117,7 +130,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
         <EisUpdateCallout
           ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
           promoId="indexDetailsOverview"
-          isCloudEnabled={cloud?.isCloudEnabled ?? false}
+          shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
           handleOnClick={() => setIsUpdatingElserMappings(true)}
           direction="row"
           hasUpdatePrivileges={hasUpdateMappingsPrivileges}
@@ -130,6 +143,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           refetchMapping={resendRequest}
           setIsModalOpen={setIsUpdatingElserMappings}
           hasUpdatePrivileges={hasUpdateMappingsPrivileges}
+          modalId="indexDetailsOverview"
         />
       )}
 

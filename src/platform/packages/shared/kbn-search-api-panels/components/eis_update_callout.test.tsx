@@ -37,7 +37,7 @@ describe('EisUpdateCallout', () => {
         <EisUpdateCallout
           promoId={promoId}
           ctaLink={ctaLink}
-          isCloudEnabled={true}
+          shouldShowEisUpdateCallout={true}
           direction={direction}
           hasUpdatePrivileges={true}
           handleOnClick={mockHandleOnClick}
@@ -102,8 +102,8 @@ describe('EisUpdateCallout', () => {
     expect(panel).not.toBeInTheDocument();
   });
 
-  it('does not render callout when user is not on cloud', () => {
-    renderEisUpdateCallout({ isCloudEnabled: false });
+  it('does not render callout when user does not have the necessary environment/licensing', () => {
+    renderEisUpdateCallout({ shouldShowEisUpdateCallout: false });
 
     const panel = screen.queryByTestId(dataId);
     expect(panel).not.toBeInTheDocument();
