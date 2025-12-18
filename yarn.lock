@@ -7631,6 +7631,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-alerts-table@link:x-pack/solutions/observability/packages/kbn-observability-alerts-table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-fixtures-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/observability":
   version "0.0.0"
   uid ""
@@ -7648,6 +7652,10 @@
   uid ""
 
 "@kbn/observability-onboarding-plugin@link:x-pack/solutions/observability/plugins/observability_onboarding":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-overview-plugin@link:x-pack/solutions/observability/plugins/observability_overview":
   version "0.0.0"
   uid ""
 

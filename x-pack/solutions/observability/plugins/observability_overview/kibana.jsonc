@@ -1,0 +1,30 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-overview-plugin",
+  "owner": ["@elastic/observability-ui"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "observabilityOverview",
+    "browser": true,
+    "server": false,
+    "configPath": ["xpack", "observabilityOverview"],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "dataViews",
+      "logsDataAccess",
+      "observabilityShared",
+      "share",
+      "triggersActionsUi"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "home",
+      "observabilityAIAssistant",
+      "serverless",
+      "usageCollection"
+    ],
+    "requiredBundles": ["cases", "kibanaReact", "kibanaUtils", "logsShared"]
+  }
+}

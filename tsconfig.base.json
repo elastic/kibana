@@ -1568,6 +1568,8 @@
       "@kbn/observability-nav-icons/*": ["x-pack/solutions/observability/packages/nav-icons/*"],
       "@kbn/observability-onboarding-plugin": ["x-pack/solutions/observability/plugins/observability_onboarding"],
       "@kbn/observability-onboarding-plugin/*": ["x-pack/solutions/observability/plugins/observability_onboarding/*"],
+      "@kbn/observability-overview-plugin": ["x-pack/solutions/observability/plugins/observability_overview"],
+      "@kbn/observability-overview-plugin/*": ["x-pack/solutions/observability/plugins/observability_overview/*"],
       "@kbn/observability-plugin": ["x-pack/solutions/observability/plugins/observability"],
       "@kbn/observability-plugin/*": ["x-pack/solutions/observability/plugins/observability/*"],
       "@kbn/observability-schema": ["x-pack/solutions/observability/packages/kbn-observability-schema"],
