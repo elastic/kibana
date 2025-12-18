@@ -203,11 +203,11 @@ export async function bulkRollbackAvailableCheck(
   await pMap(
     installedPackageNames,
     async (pkgName) => {
-      const { isAvailable } = await rollbackAvailableCheck(
+      const { isAvailable, reason } = await rollbackAvailableCheck(
         pkgName,
         packagePolicyIdsForCurrentUser[pkgName]
       );
-      items[pkgName] = { isAvailable };
+      items[pkgName] = { isAvailable, reason };
     },
     {
       concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
