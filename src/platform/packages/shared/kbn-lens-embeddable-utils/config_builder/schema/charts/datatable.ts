@@ -10,8 +10,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
-import { omit } from 'lodash';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -25,6 +25,72 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
 } from './shared';
 import { horizontalAlignmentSchema } from '../alignments';
+
+/**
+ * Sorting configuration for the datatable. Only one column can be sorted at a time.
+ */
+const sortingSchema = schema.oneOf(
+  [
+    // Sorting for metric columns
+    schema.object(
+      {
+        by: schema.literal('metric'),
+        index: schema.number({
+          min: 0,
+          meta: { description: 'Index of the metric column to sort by (0-based)' },
+        }),
+        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+          meta: { description: 'Sort direction' },
+        }),
+      },
+      { meta: { description: 'Sort by a metric column' } }
+    ),
+    // Sorting for row columns
+    schema.object(
+      {
+        by: schema.literal('row'),
+        index: schema.number({
+          min: 0,
+          meta: { description: 'Index of the row column to sort by (0-based)' },
+        }),
+        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+          meta: { description: 'Sort direction' },
+        }),
+      },
+      { meta: { description: 'Sort by a row column' } }
+    ),
+    // Sorting for split_metrics_by (transposed) columns
+    schema.object(
+      {
+        by: schema.literal('split_metrics_by'),
+        metric_index: schema.number({
+          min: 0,
+          meta: {
+            description: 'Index of the metric column to sort by (0-based)',
+          },
+        }),
+        values: schema.arrayOf(schema.string(), {
+          minSize: 1,
+          maxSize: 20,
+          meta: {
+            description:
+              'Array of transposed column values, one for each split_metrics_by column in order',
+          },
+        }),
+        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+          meta: { description: 'Sort direction' },
+        }),
+      },
+      { meta: { description: 'Sort by a transposed split_metrics_by column' } }
+    ),
+  ],
+  {
+    meta: {
+      description:
+        'Sorting configuration. Only one column can be sorted at a time. Use "by" to specify the column type.',
+    },
+  }
+);
 
 const datatableStateSharedOptionsSchema = {
   /**
@@ -119,28 +185,11 @@ const datatableStateSharedOptionsSchema = {
       }
     )
   ),
+  /**
+   * Sorting configuration
+   */
+  sorting: schema.maybe(sortingSchema),
 };
-
-/**
- * Sorting configuration split_metrics_by
- */
-const splitMetricsBySortingSchema = {
-  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-    defaultValue: 'asc',
-    meta: { description: 'Direction to sort by' },
-  }),
-  value: schema.string({
-    meta: {
-      description:
-        'The transposed column value to sort by (e.g., if split_metrics_by uses "status" field, this could be "success" or "error")',
-    },
-  }),
-};
-
-/**
- * Sorting configuration for rows and metrics
- */
-const rowsMetricsSortingSchema = omit(splitMetricsBySortingSchema, ['value']);
 
 const datatableStateCommonOptionsSchema = {
   /**
@@ -148,20 +197,9 @@ const datatableStateCommonOptionsSchema = {
    */
   apply_color_to: schema.maybe(applyColorToSchema),
   /**
-   * Whether to show the row
+   * Whether to show the column
    */
   visible: schema.maybe(schema.boolean({ defaultValue: true })),
-  /**
-   * Whether to sort by this column
-   */
-  sorted: schema.maybe(
-    schema.object(rowsMetricsSortingSchema, {
-      meta: {
-        description:
-          'Sorting configuration. Only one column across metrics, rows, and split_metrics_by can be sorted at a time.',
-      },
-    })
-  ),
 };
 
 const datatableStateRowsOptionsSchema = schema.object({
@@ -234,32 +272,61 @@ const datatableStateMetricsOptionsSchema = schema.object({
   ),
 });
 
-const datatableStateSplitMetricsByOptionsSchema = schema.object({
-  /**
-   * Sorting configuration for the split metrics by
-   */
-  sorted: schema.maybe(
-    schema.object(splitMetricsBySortingSchema, {
-      meta: {
-        description:
-          'Sorting configuration for the split metrics by. Only one column across metrics, rows, and split_metrics_by can be sorted at a time.',
-      },
-    })
-  ),
-});
+interface SortingValidationInput {
+  metrics: Array<{}>;
+  rows?: Array<{}>;
+  split_metrics_by?: Array<{}>;
+  sorting?: {
+    by: 'metric' | 'row' | 'split_metrics_by';
+    index?: number;
+    metric_index?: number;
+    values?: string[];
+  };
+}
 
 function validateSorting({
   metrics,
   rows,
   split_metrics_by,
-}: {
-  metrics: Array<{}>;
-  rows?: Array<{}>;
-  split_metrics_by?: Array<{}>;
-}) {
-  const allColumns = metrics.concat(rows ?? [], split_metrics_by ?? []);
-  if (allColumns.filter((column) => 'sorted' in column && column.sorted).length > 1) {
-    return 'Only one column across metrics, rows, and split_metrics_by can be sorted at a time.';
+  sorting,
+}: SortingValidationInput): string | undefined {
+  if (!sorting) {
+    return;
+  }
+
+  const { by } = sorting;
+
+  if (by === 'metric') {
+    const index = sorting.index;
+    if (index == null || index >= metrics.length) {
+      return `The 'sorting.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    }
+  }
+
+  if (by === 'row') {
+    if (!rows || rows.length === 0) {
+      return `Cannot sort by 'row' when no rows are defined.`;
+    }
+    const index = sorting.index;
+    if (index == null || index >= rows.length) {
+      return `The 'sorting.index' (${index}) is out of bounds. The 'rows' array has ${rows.length} item(s).`;
+    }
+  }
+
+  if (by === 'split_metrics_by') {
+    if (!split_metrics_by || split_metrics_by.length === 0) {
+      return `Cannot sort by 'split_metrics_by' when no split_metrics_by columns are defined.`;
+    }
+
+    const metricIndex = sorting.metric_index;
+    if (metricIndex == null || metricIndex >= metrics.length) {
+      return `The 'sorting.metric_index' (${metricIndex}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+    }
+
+    const values = sorting.values;
+    if (values == null || values.length !== split_metrics_by.length) {
+      return `The 'sorting.values' length (${values?.length}) must match the 'split_metrics_by' length (${split_metrics_by.length}).`;
+    }
   }
 }
 
@@ -296,14 +363,11 @@ export const datatableStateSchemaNoESQL = schema.object(
      * Split metrics by configuration, optional bucket operations.
      */
     split_metrics_by: schema.maybe(
-      schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(datatableStateSplitMetricsByOptionsSchema),
-        {
-          minSize: 1,
-          maxSize: 20,
-          meta: { description: 'Array of operations to split the metric columns by' },
-        }
-      )
+      schema.arrayOf(bucketOperationDefinitionSchema, {
+        minSize: 1,
+        maxSize: 20,
+        meta: { description: 'Array of operations to split the metric columns by' },
+      })
     ),
   },
   {
