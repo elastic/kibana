@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { SO_SLO_TEMPLATE_TYPE } from '@kbn/slo-shared-plugin/common';
-export { slo, SO_SLO_TYPE } from './slo';
-export { sloSettings, SO_SLO_SETTINGS_TYPE } from './slo_settings';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SloSharedPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SloSharedPluginStart {}
