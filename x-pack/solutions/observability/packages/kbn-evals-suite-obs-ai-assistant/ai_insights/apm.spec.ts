@@ -167,15 +167,29 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
               end,
             },
             output: {
-              expected: `The error analysis shows a failure in the payment service.
-Key observations:
-- Service affected: payment
-- Error type and message indicate a payment processing failure
-- The error is linked to a specific transaction or span in the distributed trace
-Immediate actions:
-- Check downstream dependencies for connectivity issues
-- Review error stack traces for root cause
-- Verify payment gateway or external service availability`,
+              expected: `-   Error summary:
+    The payment service failed a charge request due to an "Invalid token" error, as indicated by the handled exception in the payment service and corroborated by error propagation through checkout and frontend services.
+
+-   Failure pinpoint:
+
+    -   The failure originates in the application code of the \`payment\` service, specifically in the \`charge\` function (\`/usr/src/app/charge.js:37:13\`), as shown in the stack trace and error message.
+    -   The error message "Payment request failed. Invalid token. app.loyalty.level=gold" is consistent across the payment, checkout, and frontend services, confirming the root cause is within the payment service logic.
+    -   Downstream dependency calls (e.g., to \`flagd\`) succeeded, ruling out dependency failure.
+-   Impact:
+
+    -   The error affects the entire payment flow, causing transaction failures in checkout and frontend services.
+    -   Multiple services in the trace report errors: \`payment\` (1), \`checkout\` (2), \`frontend\` (4), and \`frontend-proxy\` (2), indicating broad user-facing impact for payment attempts.
+-   Immediate actions:
+
+    1.  Review the payment service's token validation logic in \`charge.js\` (line 37) for possible causes of invalid token rejection.
+    2.  Check recent changes to authentication/token generation and propagation between frontend, checkout, and payment services.
+    3.  Enable targeted debug logging around token handling in the payment service to capture token values and validation failures.
+    4.  Validate that upstream services (checkout, frontend) are passing the expected token format and values.
+-   Open questions:
+
+    -   What is the source and expected format of the token being validated?
+    -   Are there recent deployments or configuration changes in the payment or authentication services?
+    -   Is the invalid token issue affecting all users or only those with specific attributes (e.g., \`app.loyalty.level=gold\`)?`,
             },
           },
         ],

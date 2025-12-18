@@ -166,14 +166,21 @@ evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
               alertId,
             },
             output: {
-              expected: `The alert indicates elevated error rates for the payment service. 
-The error count threshold has been exceeded, with PaymentError type errors occurring. 
-The alert was triggered because the number of errors exceeded the configured threshold of 1 error within a 5-minute window.
-Key observations:
-- Service affected: payment
-- Error type: PaymentError
-- Error message: Payment processing failed
-- The errors are occurring on the POST /api/payment transaction`,
+              expected: `-   Summary: A single handled error was detected in the payment service, specifically related to an invalid token during a payment request. The error appears isolated, with no evidence of broader anomalies or downstream impact.
+
+-   Assessment: The most plausible explanation is a user or client-side issue (invalid token) causing a handled error in the payment service. This is supported by a matching error log and absence of service anomalies or deployment changes. Support is limited to a single error group and no corroborating change points or anomalies.
+
+-   Related signals:
+
+    -   Errors: "Payment request failed. Invalid token. app.loyalty.level=gold" (apmErrors, last seen within alert window, Direct)---handled error, likely user input or session issue.
+    -   Anomalies: None detected (apmServiceSummary, alert window, Unrelated)---no evidence of systemic or performance issues.
+    -   Change points: None observed (apmServiceSummary, alert window, Unrelated)---no throughput or latency shifts.
+    -   Downstream: Only checkout:5050 referenced in error trace; no evidence of propagation to flagd or other services (apmDownstreamDependencies, Indirect).
+-   Immediate actions:
+
+    -   Review recent traces for the affected error group to confirm scope and verify if the error is isolated to specific users or requests.
+    -   Validate that the error is properly handled and does not impact payment processing for valid tokens.
+    -   If no further errors occur, monitor for recurrence but no urgent action is required. If errors increase, investigate token validation logic and upstream authentication flows.`,
             },
           },
         ],
@@ -181,7 +188,7 @@ Key observations:
     });
   });
 
-  evaluate.afterAll(async ({ kbnClient, apmSynthtraceEsClient, esClient, log }) => {
+  evaluate.afterAll(async ({ kbnClient, esClient, log }) => {
     log.debug('Cleaning up indices');
     await Promise.all([
       esClient.deleteByQuery({
