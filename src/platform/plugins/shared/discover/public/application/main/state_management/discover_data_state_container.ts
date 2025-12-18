@@ -438,7 +438,7 @@ export function getDataStateContainer({
         subscription.unsubscribe();
       } else {
         // to let the initial fetch to execute properly before unsubscribing
-        setTimeout(() => subscription.unsubscribe(), 100);
+        setTimeout(() => subscription.unsubscribe(), 200);
       }
     };
   }
