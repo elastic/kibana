@@ -54,8 +54,8 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current).not.toBeNull();
-      expect(result.current.getTagList).toBeDefined();
+      expect(result.current).toBeDefined();
+      expect(result.current!.getTagList).toBeDefined();
     });
 
     it('provides getTagList function', () => {
@@ -63,7 +63,7 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper(),
       });
 
-      const tags = result.current.getTagList();
+      const tags = result.current!.getTagList();
       expect(tags).toEqual(mockTags);
       expect(mockGetTagList).toHaveBeenCalled();
     });
@@ -73,8 +73,8 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper({ parseSearchQuery: mockParseSearchQuery }),
       });
 
-      expect(result.current.parseSearchQuery).toBeDefined();
-      const parsed = result.current.parseSearchQuery?.('test query');
+      expect(result.current!.parseSearchQuery).toBeDefined();
+      const parsed = result.current!.parseSearchQuery?.('test query');
       expect(parsed).toEqual({
         searchQuery: 'test query',
         tagIds: undefined,
@@ -88,7 +88,7 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.parseSearchQuery).toBeUndefined();
+      expect(result.current!.parseSearchQuery).toBeUndefined();
     });
   });
 
@@ -98,8 +98,8 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current).not.toBeNull();
-      expect(result.current.getTagList).toBeDefined();
+      expect(result.current).toBeDefined();
+      expect(result.current!.getTagList).toBeDefined();
     });
 
     it('returns undefined when used outside provider', () => {
@@ -115,11 +115,11 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper(),
       });
 
-      const firstValue = result.current;
+      const firstValue = result.current!;
       rerender();
-      const secondValue = result.current;
+      const secondValue = result.current!;
 
-      // Context values have the same structure
+      // Context values have the same structure.
       expect(firstValue).toEqual(secondValue);
       expect(Object.keys(firstValue)).toEqual(Object.keys(secondValue));
     });
@@ -133,9 +133,9 @@ describe('ContentManagementTagsContextProvider', () => {
 
       rerender();
 
-      // Structure should remain consistent
+      // Structure should remain consistent.
       expect(result.current).toEqual(firstValue);
-      expect(typeof result.current.getTagList).toBe('function');
+      expect(typeof result.current!.getTagList).toBe('function');
     });
   });
 
@@ -155,7 +155,7 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: Wrapper,
       });
 
-      const tags = result.current.getTagList();
+      const tags = result.current!.getTagList();
       expect(tags).toEqual([]);
       expect(emptyGetTagList).toHaveBeenCalled();
     });
@@ -165,7 +165,7 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper({ parseSearchQuery: mockParseSearchQuery }),
       });
 
-      const parsed = result.current.parseSearchQuery?.('');
+      const parsed = result.current!.parseSearchQuery?.('');
       expect(parsed).toBeDefined();
       expect(mockParseSearchQuery).toHaveBeenCalledWith('');
     });
@@ -175,13 +175,13 @@ describe('ContentManagementTagsContextProvider', () => {
         wrapper: createWrapper({ parseSearchQuery: mockParseSearchQuery }),
       });
 
-      const firstGetTagList = result.current.getTagList;
-      const firstParseSearchQuery = result.current.parseSearchQuery;
+      const firstGetTagList = result.current!.getTagList;
+      const firstParseSearchQuery = result.current!.parseSearchQuery;
 
       rerender();
 
-      expect(result.current.getTagList).toBe(firstGetTagList);
-      expect(result.current.parseSearchQuery).toBe(firstParseSearchQuery);
+      expect(result.current!.getTagList).toBe(firstGetTagList);
+      expect(result.current!.parseSearchQuery).toBe(firstParseSearchQuery);
     });
   });
 });
