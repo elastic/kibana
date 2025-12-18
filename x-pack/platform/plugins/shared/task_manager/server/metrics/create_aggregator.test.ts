@@ -43,6 +43,10 @@ const config: TaskManagerConfig = {
     interval: 10000,
   },
   kibanas_per_partition: 2,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   allow_reading_invalid_state: false,
   event_loop_delay: {
     monitor: true,
