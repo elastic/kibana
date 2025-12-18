@@ -8,15 +8,9 @@
  */
 
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-
-export interface MetricsExperienceService {
-  client: MetricsExperienceClient;
-}
-
 interface ChartSectionActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
