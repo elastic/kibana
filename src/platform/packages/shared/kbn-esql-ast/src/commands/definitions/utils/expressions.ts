@@ -27,7 +27,6 @@ import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
-import { Walker } from '../../../ast/walker';
 import { isMarkerNode } from './ast';
 
 // #region type detection
@@ -433,45 +432,17 @@ export function getBinaryExpressionOperand(
 }
 
 /**
- * Extracts a valid expression root from an assignment RHS, handling arrays and marker nodes.
+ * Extracts a valid expression root from an assignment, handling arrays and marker nodes.
  */
-export function extractValidExpressionRoot(
-  assignmentRhs: ESQLSingleAstItem | ESQLSingleAstItem[] | undefined
+export function getAssignmentExpressionRoot(
+  assignment: ESQLFunction
 ): ESQLSingleAstItem | undefined {
-  let root: ESQLSingleAstItem | undefined;
-
-  if (Array.isArray(assignmentRhs)) {
-    root = assignmentRhs[0] || undefined;
-  } else {
-    root = assignmentRhs;
-  }
+  const rhs = getBinaryExpressionOperand(assignment, 'right');
+  const root = Array.isArray(rhs) ? rhs[0] : rhs;
 
   if (!root || isMarkerNode(root)) {
     return undefined;
   }
 
-  return getRightmostNonVariadicOperator(root);
-}
-
-/**
- * Finds the rightmost non-variadic operator in an expression tree.
- * Useful for locating the most specific node near the cursor.
- */
-export function getRightmostNonVariadicOperator(root: ESQLSingleAstItem): ESQLSingleAstItem {
-  if (root?.type !== 'function') {
-    return root;
-  }
-
-  let rightmostFn = root;
-  const walker = new Walker({
-    visitFunction: (fn) => {
-      if (fn.subtype !== 'variadic-call' && fn.location.min > rightmostFn.location.min) {
-        rightmostFn = fn;
-      }
-    },
-  });
-
-  walker.walkFunction(root);
-
-  return rightmostFn;
+  return root;
 }

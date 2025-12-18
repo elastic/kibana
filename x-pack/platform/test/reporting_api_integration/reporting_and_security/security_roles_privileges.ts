@@ -228,9 +228,15 @@ export default function ({ getService }: FtrProviderContext) {
           layout: 'preserve_layout',
           objectType: 'dashboard',
         });
-        expect(soResult.body._source.scheduled_report.payload).to.eql(
-          '{"browserTimezone":"UTC","layout":{"id":"preserve_layout"},"objectType":"dashboard","title":"test PDF allowed","version":"7.14.0","locatorParams":[{"id":"canvas","params":{},"version":"7.14.0"}],"isDeprecated":false}'
-        );
+        expect(JSON.parse(soResult.body._source.scheduled_report.payload)).to.eql({
+          browserTimezone: 'UTC',
+          layout: { id: 'preserve_layout' },
+          objectType: 'dashboard',
+          title: 'test PDF allowed',
+          version: '7.14.0',
+          locatorParams: [{ id: 'canvas', params: {}, version: '7.14.0' }],
+          isDeprecated: false,
+        });
         expect(soResult.body._source.scheduled_report.schedule).to.eql({
           rrule: {
             dtstart: '2025-06-01T13:00:00.000Z',
@@ -291,9 +297,15 @@ export default function ({ getService }: FtrProviderContext) {
           layout: 'preserve_layout',
           objectType: 'visualization',
         });
-        expect(soResult.body._source.scheduled_report.payload).to.eql(
-          '{"browserTimezone":"UTC","layout":{"id":"preserve_layout"},"objectType":"visualization","title":"test PDF allowed","version":"7.14.0","locatorParams":[{"id":"canvas","params":{},"version":"7.14.0"}],"isDeprecated":false}'
-        );
+        expect(JSON.parse(soResult.body._source.scheduled_report.payload)).to.eql({
+          browserTimezone: 'UTC',
+          layout: { id: 'preserve_layout' },
+          objectType: 'visualization',
+          title: 'test PDF allowed',
+          version: '7.14.0',
+          locatorParams: [{ id: 'canvas', params: {}, version: '7.14.0' }],
+          isDeprecated: false,
+        });
         expect(soResult.body._source.scheduled_report.schedule).to.eql({
           rrule: {
             freq: 1,

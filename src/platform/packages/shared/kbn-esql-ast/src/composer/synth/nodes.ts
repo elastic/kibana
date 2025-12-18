@@ -11,6 +11,7 @@ import { Builder } from '../../ast/builder';
 import type {
   ESQLColumn,
   ESQLDecimalLiteral,
+  ESQLFunction,
   ESQLIntegerLiteral,
   ESQLParamLiteral,
   ESQLSource,
@@ -33,6 +34,20 @@ export const src = (index: string, prefix?: string, selector?: string): ESQLSour
   return SynthNode.from(node);
 };
 
+/**
+ * Creates an ES|QL source node with an alias (e.g., `index AS alias`).
+ *
+ * @param index Elasticsearch index name to create a source node for.
+ * @param alias The alias name for the source.
+ * @returns ES|QL binary expression node representing `source AS alias`.
+ */
+export const srcAs = (index: string, alias: string): ESQLFunction<'binary-expression', 'as'> => {
+  const source = src(index);
+  const aliasNode = Builder.identifier({ name: alias });
+  const node = Builder.expression.func.binary('as', [source, aliasNode]);
+
+  return SynthNode.from(node);
+};
 /**
  * Crates an ES|QL integer literal node.
  *
