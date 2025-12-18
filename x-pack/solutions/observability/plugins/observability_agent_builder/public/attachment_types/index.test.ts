@@ -40,7 +40,7 @@ describe('registerAttachmentUiDefinitions', () => {
 
     const config = aiInsightCall![1];
     expect(config.getIcon()).toBe('sparkles');
-    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('AI Insight');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Summary');
   });
 
   it('registers alert attachment type with correct config', () => {
@@ -52,7 +52,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(alertCall).toBeDefined();
 
     const config = alertCall![1];
-    expect(config.getIcon()).toBe('bell');
+    expect(config.getIcon()).toBe('warning');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Observability Alert');
   });
 
@@ -78,7 +78,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(logCall).toBeDefined();
 
     const config = logCall![1];
-    expect(config.getIcon()).toBe('logstashQueue');
+    expect(config.getIcon()).toBe('logPatternAnalysis');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Log Entry');
   });
 
