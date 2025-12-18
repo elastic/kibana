@@ -9,10 +9,14 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { RuleDetailsRedirect, RuleDetailsTabGuard } from './routes';
+import { useRuleDetailsUrlPathWithLandingTab } from '../detection_engine/rule_management_ui/components/rules_table/use_rule_details_url_with_landing_tab';
 import { useUserPrivileges } from '../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../exceptions/hooks/use_endpoint_exceptions_capability';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 
+jest.mock(
+  '../detection_engine/rule_management_ui/components/rules_table/use_rule_details_url_with_landing_tab'
+);
 jest.mock('../common/components/user_privileges');
 jest.mock('../exceptions/hooks/use_endpoint_exceptions_capability');
 // Mock RuleDetailsPage to display the current tab from route params
@@ -27,6 +31,10 @@ jest.mock('../detection_engine/rule_details_ui/pages/rule_details', () => {
   };
 });
 
+const mockUseRuleDetailsUrlPathWithLandingTab =
+  useRuleDetailsUrlPathWithLandingTab as jest.MockedFunction<
+    typeof useRuleDetailsUrlPathWithLandingTab
+  >;
 const mockUseUserPrivileges = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
 const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.MockedFunction<
   typeof useEndpointExceptionsCapability
@@ -61,17 +69,29 @@ describe('RuleDetailsRedirect', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseRuleDetailsUrlPathWithLandingTab.mockReturnValue({
+      ruleDetailsUrlPathWithLandingTab: `/id/${ruleId}/${RuleDetailTabs.alerts}`,
+    });
   });
 
-  it('redirects to the correct path with default landing tab', () => {
+  it('redirects to the correct path with landing tab', () => {
     const { pathname } = doRender(`/rules/id/${ruleId}`);
-    expect(pathname).toBe(`/rules/id/${ruleId}/${RuleDetailTabs.overview}`);
+    expect(pathname).toBe(`/rules/id/${ruleId}/${RuleDetailTabs.alerts}`);
   });
 
   it('preserves query parameters during redirect', () => {
     const { pathname, search } = doRender(`/rules/id/${ruleId}?foo=bar&baz=qux`);
-    expect(pathname).toBe(`/rules/id/${ruleId}/${RuleDetailTabs.overview}`);
+    expect(pathname).toBe(`/rules/id/${ruleId}/${RuleDetailTabs.alerts}`);
     expect(search).toBe('?foo=bar&baz=qux');
+  });
+
+  it('uses the landing tab from useRuleDetailsUrlPathWithLandingTab hook', () => {
+    mockUseRuleDetailsUrlPathWithLandingTab.mockReturnValue({
+      ruleDetailsUrlPathWithLandingTab: `/id/${ruleId}/${RuleDetailTabs.exceptions}`,
+    });
+
+    const { pathname } = doRender(`/rules/id/${ruleId}?foo=bar&baz=qux`);
+    expect(pathname).toBe(`/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`);
   });
 });
 
@@ -102,6 +122,9 @@ describe('RuleDetailsTabGuard', () => {
       defaultPrivileges as ReturnType<typeof useUserPrivileges>
     );
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
+    mockUseRuleDetailsUrlPathWithLandingTab.mockReturnValue({
+      ruleDetailsUrlPathWithLandingTab: `/id/${ruleId}/${RuleDetailTabs.alerts}`,
+    });
   });
 
   describe('when user has access to a tab', () => {
@@ -140,8 +163,11 @@ describe('RuleDetailsTabGuard', () => {
   });
 
   describe('when user does not have access to a tab', () => {
-    const defaultLandingTab = RuleDetailTabs.overview;
+    const defaultLandingTab = RuleDetailTabs.executionResults;
     beforeEach(() => {
+      mockUseRuleDetailsUrlPathWithLandingTab.mockReturnValue({
+        ruleDetailsUrlPathWithLandingTab: `/id/${ruleId}/${defaultLandingTab}`,
+      });
       mockUseUserPrivileges.mockReturnValue({
         alertsPrivileges: { alerts: { read: false } },
         rulesPrivileges: { exceptions: { read: false } },

@@ -46,10 +46,70 @@ import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pag
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { hasCapabilities } from '../common/lib/capabilities';
-import { useKibana, useUiSetting$ } from '../common/lib/kibana/kibana_react';
+import { useKibana } from '../common/lib/kibana/kibana_react';
+import { useRuleDetailsUrlPathWithLandingTab } from '../detection_engine/rule_management_ui/components/rules_table/use_rule_details_url_with_landing_tab';
 import { useUserPrivileges } from '../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../exceptions/hooks/use_endpoint_exceptions_capability';
-import { getRuleDetailsTabUrl } from '../common/components/link_to/redirect_to_detection_engine';
+
+/**
+ * Component to redirect to rule details with the appropriate landing tab.
+ * This is a separate component because hooks can only be called at the top level of a React component.
+ */
+export const RuleDetailsRedirect: React.FC = () => {
+  const { detailName } = useParams<{ detailName: string }>();
+  const location = useLocation();
+  const { ruleDetailsUrlPathWithLandingTab } = useRuleDetailsUrlPathWithLandingTab(detailName);
+
+  return (
+    <Redirect
+      to={{
+        ...location,
+        pathname: `/rules${ruleDetailsUrlPathWithLandingTab}`,
+        search: location.search,
+      }}
+    />
+  );
+};
+
+export const RuleDetailsTabGuard: React.FC = () => {
+  const { detailName, tabName } = useParams<{ detailName: string; tabName: string }>();
+  const location = useLocation();
+  const { alertsPrivileges, rulesPrivileges } = useUserPrivileges();
+  const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const { ruleDetailsUrlPathWithLandingTab: defaultLandingPageWithTab } =
+    useRuleDetailsUrlPathWithLandingTab(detailName);
+
+  const canReadAlerts = alertsPrivileges.alerts.read;
+  const canReadExceptions = rulesPrivileges.exceptions.read;
+
+  const canAccessTab = (() => {
+    switch (tabName) {
+      case RuleDetailTabs.alerts:
+        return canReadAlerts;
+      case RuleDetailTabs.exceptions:
+        return canReadExceptions;
+      case RuleDetailTabs.endpointExceptions:
+        return canReadEndpointExceptions;
+      default:
+        return true;
+    }
+  })();
+
+  // Redirect if no access to the requested tab
+  if (!canAccessTab) {
+    return (
+      <Redirect
+        to={{
+          ...location,
+          pathname: `/rules${defaultLandingPageWithTab}`,
+          search: location.search,
+        }}
+      />
+    );
+  }
+
+  return <RuleDetailsPage />;
+};
 
 /**
  * Component to redirect to rule details with the appropriate landing tab.
@@ -113,9 +173,7 @@ const getRulesSubRoutes = (
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
         {
-          path: endpointExceptionsTabEnabled
-            ? `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`
-            : `/rules/id/:detailName/:tabName(${RuleDetailTabs.overview}|${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
           main: RuleDetailsTabGuard,
           exact: true,
         },
