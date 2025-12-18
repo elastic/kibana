@@ -130,7 +130,7 @@ export const EditorWidgetsCustomizations: FC<
 
   return (
     <React.Fragment>
-      {enableSuggestWidgetRepositioning && <Global styles={globalStyleModifierClassNamesRecord} />}
+      <Global styles={globalStyleModifierClassNamesRecord} />
       <React.Fragment key="children">{children}</React.Fragment>
     </React.Fragment>
   );
