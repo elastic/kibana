@@ -46,7 +46,6 @@ import { ALL_DATA_OPTION } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { getFormattedError } from '../../../util/errors';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 import { useStreamDescriptionApi } from '../../stream_detail_features/stream_description/use_stream_description_api';
 
