@@ -8,7 +8,7 @@
  */
 
 import type { AppMountParameters, ScopedHistory } from '@kbn/core-application-browser';
-import type { DashboardListingViewRegistry } from '../plugin';
+import type { DashboardListingViewRegistry } from '../dashboard_listing/types';
 
 export interface DashboardEmbedSettings {
   forceHideFilterBar?: boolean;

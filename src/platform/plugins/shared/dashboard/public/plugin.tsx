@@ -65,10 +65,9 @@ import type {
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { EventAnnotationService } from '@kbn/event-annotation-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
-import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
-
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
+import type { DashboardListingViewRegistry, DashboardListingTab } from './dashboard_listing/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
@@ -123,8 +122,6 @@ export interface DashboardStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   cps?: CPSPluginStart;
 }
-
-export type DashboardListingViewRegistry = Pick<Set<TableListTab>, 'add'>;
 
 export interface DashboardSetup {
   listingViewRegistry: DashboardListingViewRegistry;
@@ -312,7 +309,7 @@ export class DashboardPlugin
     const deepLinks: AppDeepLink[] = [];
 
     // Iterate through registered tabs and auto-register their deep links
-    for (const tab of this.listingViewRegistry as Set<TableListTab>) {
+    for (const tab of this.listingViewRegistry as Set<DashboardListingTab>) {
       if (tab.deepLink) {
         deepLinks.push({
           id: tab.id,
