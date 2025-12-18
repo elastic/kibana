@@ -199,6 +199,7 @@ import {
 } from './spaces/policy_namespaces';
 import {
   getSpaceForPackagePolicy,
+  getSpaceForPackagePolicySO,
   isSpaceAwarenessEnabled,
   isSpaceAwarenessMigrationPending,
 } from './spaces/helpers';
@@ -2834,7 +2835,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Create temporary SOs with id `id:copy` to allow cancellation in case rollback fails.
     const policiesToCreate: Record<
       string,
-      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes> & { initialNamespaces?: string[] }>
     > = {};
     const policiesToUpdate: Record<
       string,
@@ -2846,7 +2847,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     > = {};
 
     packagePolicies.forEach((policy) => {
-      const namespace = policy.namespaces?.[0] || policy.attributes.namespace;
+      const namespace = getSpaceForPackagePolicySO(policy);
       if (namespace) {
         if (!policy.id.endsWith(':prev')) {
           const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
@@ -2857,6 +2858,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             policiesToCreate[namespace].push({
               ...policy,
               id: `${policy.id}:copy`,
+              initialNamespaces: policy.namespaces,
             });
             if (!policiesToUpdate[namespace]) {
               policiesToUpdate[namespace] = [];
@@ -2884,6 +2886,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await soClient
         .bulkCreate<PackagePolicySOAttributes>(policies, { namespace })
         .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
+
       for (const policy of policies) {
         auditLoggingService.writeCustomSoAuditLog({
           action: 'create',
