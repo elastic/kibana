@@ -9,6 +9,8 @@ import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseRuleDetailsLinkParams } from './use_rule_details_link';
 import { useRuleDetailsLink } from './use_rule_details_link';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../../common/components/link_to', () => ({
   useGetSecuritySolutionUrl: jest
@@ -23,12 +25,46 @@ jest.mock('../../../../common/components/link_to', () => ({
   getRuleDetailsUrl: jest.fn().mockReturnValue(''),
 }));
 
+jest.mock('../../../../common/components/user_privileges');
+
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+
 describe('useRuleDetailsLink', () => {
   let hookResult: RenderHookResult<string | null, UseRuleDetailsLinkParams>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
+      },
+    });
+  });
 
   it('should return null if the ruleId prop is null', () => {
     const initialProps: UseRuleDetailsLinkParams = {
       ruleId: null,
+    };
+    hookResult = renderHook((props: UseRuleDetailsLinkParams) => useRuleDetailsLink(props), {
+      initialProps,
+    });
+
+    expect(hookResult.result.current).toBe(null);
+  });
+
+  it('should return null if the user cannot read rules', () => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: false, edit: false },
+      },
+    });
+
+    const initialProps: UseRuleDetailsLinkParams = {
+      ruleId: 'ruleId',
     };
     hookResult = renderHook((props: UseRuleDetailsLinkParams) => useRuleDetailsLink(props), {
       initialProps,
