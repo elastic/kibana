@@ -53,7 +53,7 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
 
   const targetExpression = determineTargetExpression(functionExpression, innerText);
 
-  return suggestForExpression({
+  const { suggestions } = await suggestForExpression({
     query,
     command,
     cursorPosition,
@@ -66,6 +66,8 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
       functionParameterContext: paramContext,
     },
   });
+
+  return suggestions;
 }
 
 /** Builds function parameter context, adding current function to ignore list */

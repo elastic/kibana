@@ -182,6 +182,7 @@ export function ClassicStreamDetailManagement({
               <EuiSpacer />
             </>
           ) : null}
+
           <UnmanagedElasticsearchAssets
             definition={definition}
             refreshDefinition={refreshDefinition}
