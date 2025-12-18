@@ -26,11 +26,8 @@ export interface UseRuleDetailsLinkParams {
  * Hook that returns the url to navigate to the rule details page.
  * If the timeline is open from where the hook is being called, set the state to closed.
  */
-export const useRuleDetailsLink = (
-  { ruleId }: UseRuleDetailsLinkParams,
-  override?: Record<string, unknown>
-): string | null => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl(override);
+export const useRuleDetailsLink = ({ ruleId }: UseRuleDetailsLinkParams): string | null => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
 
   if (!ruleId || !canReadRules) return null;
