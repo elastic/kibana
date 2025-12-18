@@ -6,104 +6,18 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import {
-  evaluate as base,
-  createQuantitativeCorrectnessEvaluators,
-  type DefaultEvaluators,
-  type EvaluationDataset,
-  type KibanaPhoenixClient,
-} from '@kbn/evals';
-import { AiInsightClient } from '../src/clients/ai_insight_client';
+import type { AlertInsightParams } from '../src/clients/ai_insight_client';
 import { apmErrorCountAIInsight } from '../src/alert_templates/alerts';
 import {
   OTEL_DEMO_SNAPSHOT_NAME,
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
 } from '../src/data_generators/replay';
+import { evaluate } from './evaluate_ai_insights';
 
 const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 const ALERT_CREATION_WAIT_MS = 3000;
 const INDEX_REFRESH_WAIT_MS = 2500;
-
-interface AlertAiInsightExample extends Example {
-  input: {
-    alertId: string;
-  };
-  output: {
-    expected: string;
-  };
-}
-
-type EvaluateAlertAiInsightsDataset = (params: {
-  dataset: {
-    name: string;
-    description: string;
-    examples: AlertAiInsightExample[];
-  };
-}) => Promise<void>;
-
-function createEvaluateAlertAiInsightsDataset({
-  aiInsightClient,
-  evaluators,
-  phoenixClient,
-}: {
-  aiInsightClient: AiInsightClient;
-  evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
-}): EvaluateAlertAiInsightsDataset {
-  return async function evaluateAlertAiInsightsDataset({
-    dataset: { name, description, examples },
-  }) {
-    const dataset = {
-      name,
-      description,
-      examples,
-    } satisfies EvaluationDataset;
-
-    await phoenixClient.runExperiment(
-      {
-        dataset,
-        task: async ({ input, output, metadata }) => {
-          const response = await aiInsightClient.getAlertInsight(input.alertId);
-
-          const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
-            input,
-            expected: { expected: output.expected },
-            output: {
-              messages: [{ message: response.summary }],
-            },
-            metadata,
-          });
-
-          return {
-            summary: response.summary,
-            context: response.context,
-            correctnessAnalysis: correctnessResult?.metadata,
-          };
-        },
-      },
-      createQuantitativeCorrectnessEvaluators()
-    );
-  };
-}
-
-const evaluate = base.extend<{}, { evaluateDataset: EvaluateAlertAiInsightsDataset }>({
-  evaluateDataset: [
-    ({ fetch, evaluators, phoenixClient }, use) => {
-      const aiInsightClient = new AiInsightClient(fetch);
-
-      use(
-        createEvaluateAlertAiInsightsDataset({
-          aiInsightClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'worker' },
-  ],
-});
 
 evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
   let ruleId: string;
@@ -155,15 +69,20 @@ evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
     log.info(`Found alert with ID: ${alertId}`);
   });
 
-  evaluate('alert analysis correctness', async ({ evaluateDataset }) => {
-    await evaluateDataset({
+  evaluate('alert analysis correctness', async ({ aiInsightClient, evaluateDataset }) => {
+    await evaluateDataset<AlertInsightParams>({
+      getInsight: (params) => aiInsightClient.getAlertInsight(params),
       dataset: {
         name: 'ai insights: alert analysis',
         description: 'Evaluates correctness of alert AI insight summaries against ground truth',
         examples: [
           {
             input: {
-              alertId,
+              requestPayload: {
+                alertId,
+              },
+              question:
+                'Analyze this alert and provide a summary of the likely cause and impact, an assessment, related signals with their relevance, and 2-3 immediate actions an SRE can take.',
             },
             output: {
               expected: `-   Summary: A single handled error was detected in the payment service, specifically related to an invalid token during a payment request. The error appears isolated, with no evidence of broader anomalies or downstream impact.

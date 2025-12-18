@@ -12,6 +12,9 @@ export interface AiInsightResponse {
   context: string;
 }
 
+export interface AlertInsightParams {
+  alertId: string;
+}
 export interface ErrorInsightParams {
   errorId: string;
   serviceName: string;
@@ -23,10 +26,10 @@ export interface ErrorInsightParams {
 export class AiInsightClient {
   constructor(private readonly fetch: HttpHandler) {}
 
-  async getAlertInsight(alertId: string): Promise<AiInsightResponse> {
+  async getAlertInsight(params: AlertInsightParams): Promise<AiInsightResponse> {
     return this.fetch('/internal/observability_agent_builder/ai_insights/alert', {
       method: 'POST',
-      body: JSON.stringify({ alertId }),
+      body: JSON.stringify(params),
     }) as Promise<AiInsightResponse>;
   }
 

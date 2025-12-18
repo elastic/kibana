@@ -5,106 +5,16 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import moment from 'moment';
-import {
-  evaluate as base,
-  createQuantitativeCorrectnessEvaluators,
-  type DefaultEvaluators,
-  type EvaluationDataset,
-  type KibanaPhoenixClient,
-} from '@kbn/evals';
-import { AiInsightClient, type ErrorInsightParams } from '../src/clients/ai_insight_client';
+import type { ErrorInsightParams } from '../src/clients/ai_insight_client';
 import {
   OTEL_DEMO_SNAPSHOT_NAME,
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
 } from '../src/data_generators/replay';
+import { evaluate } from './evaluate_ai_insights';
 
 const INDEX_REFRESH_WAIT_MS = 2500;
-
-interface ErrorAiInsightExample extends Example {
-  input: {
-    errorId: string;
-    serviceName: string;
-    start: string;
-    end: string;
-    environment?: string;
-  };
-  output: {
-    expected: string;
-  };
-}
-
-type EvaluateErrorAiInsightsDataset = (params: {
-  dataset: {
-    name: string;
-    description: string;
-    examples: ErrorAiInsightExample[];
-  };
-}) => Promise<void>;
-
-function createEvaluateErrorAiInsightsDataset({
-  aiInsightClient,
-  evaluators,
-  phoenixClient,
-}: {
-  aiInsightClient: AiInsightClient;
-  evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
-}): EvaluateErrorAiInsightsDataset {
-  return async function evaluateErrorAiInsightsDataset({
-    dataset: { name, description, examples },
-  }) {
-    const dataset = {
-      name,
-      description,
-      examples,
-    } satisfies EvaluationDataset;
-
-    await phoenixClient.runExperiment(
-      {
-        dataset,
-        task: async ({ input, output, metadata }) => {
-          const response = await aiInsightClient.getErrorInsight(input as ErrorInsightParams);
-
-          const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
-            input,
-            expected: { expected: output.expected },
-            output: {
-              messages: [{ message: response.summary }],
-            },
-            metadata,
-          });
-
-          return {
-            summary: response.summary,
-            context: response.context,
-            correctnessAnalysis: correctnessResult?.metadata,
-          };
-        },
-      },
-      createQuantitativeCorrectnessEvaluators()
-    );
-  };
-}
-
-const evaluate = base.extend<{}, { evaluateDataset: EvaluateErrorAiInsightsDataset }>({
-  evaluateDataset: [
-    ({ fetch, evaluators, phoenixClient }, use) => {
-      const aiInsightClient = new AiInsightClient(fetch);
-
-      use(
-        createEvaluateErrorAiInsightsDataset({
-          aiInsightClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'worker' },
-  ],
-});
 
 evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
   let errorId: string;
@@ -153,18 +63,23 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
     log.info(`Found APM error with ID: ${errorId}`);
   });
 
-  evaluate('error analysis correctness', async ({ evaluateDataset }) => {
-    await evaluateDataset({
+  evaluate('APM error analysis correctness', async ({ aiInsightClient, evaluateDataset }) => {
+    await evaluateDataset<ErrorInsightParams>({
+      getInsight: (params) => aiInsightClient.getErrorInsight(params),
       dataset: {
         name: 'ai insights: APM error analysis',
         description: 'Evaluates correctness of APM error AI insight summaries against ground truth',
         examples: [
           {
             input: {
-              errorId,
-              serviceName,
-              start,
-              end,
+              requestPayload: {
+                errorId,
+                serviceName,
+                start,
+                end,
+              },
+              question:
+                'Analyze this APM error and provide an error summary, identify where the failure occurred (application code vs dependency), assess the impact and scope, and recommend 2-4 immediate actions.',
             },
             output: {
               expected: `-   Error summary:
@@ -172,7 +87,7 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
 
 -   Failure pinpoint:
 
-    -   The failure originates in the application code of the \`payment\` service, specifically in the \`charge\` function (\`/usr/src/app/charge.js:37:13\`), as shown in the stack trace and error message.
+    -   The failure originates in the application code of the \`payment\` service, specifically in the \`charge\` function (\`/usr/src/app/charge.js:37:13\`), as shown in the stack trace and error message.
     -   The error message "Payment request failed. Invalid token. app.loyalty.level=gold" is consistent across the payment, checkout, and frontend services, confirming the root cause is within the payment service logic.
     -   Downstream dependency calls (e.g., to \`flagd\`) succeeded, ruling out dependency failure.
 -   Impact:
