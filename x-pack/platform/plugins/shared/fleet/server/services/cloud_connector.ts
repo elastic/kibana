@@ -85,7 +85,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   /**
    * Queries package policies to get a map of cloud connector IDs to their package policy counts.
-   * This is used to compute packagePolicyCount dynamically instead of storing it.
+   * Uses ES aggregations for efficient counting instead of fetching all documents.
    * @param soClient - Saved objects client
    * @returns Map of cloud connector ID to package policy count
    */
@@ -95,20 +95,31 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const logger = this.getLogger('getPackagePolicyCountsMap');
 
     try {
-      const packagePolicies = await soClient.find<{ cloud_connector_id?: string }>({
+      const result = await soClient.find<{ cloud_connector_id?: string }>({
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`,
-        perPage: SO_SEARCH_LIMIT,
-        fields: ['cloud_connector_id'],
+        perPage: 0, // We don't need the actual documents, only aggregation results
+        aggs: {
+          packagePolicyCounts: {
+            terms: {
+              field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+              size: SO_SEARCH_LIMIT,
+            },
+          },
+        },
       });
 
       const countMap = new Map<string, number>();
-      packagePolicies.saved_objects.forEach((policy) => {
-        const connectorId = policy.attributes.cloud_connector_id;
-        if (connectorId) {
-          countMap.set(connectorId, (countMap.get(connectorId) || 0) + 1);
-        }
-      });
+      const buckets =
+        (
+          result.aggregations?.packagePolicyCounts as {
+            buckets?: Array<{ key: string; doc_count: number }>;
+          }
+        )?.buckets || [];
+
+      for (const bucket of buckets) {
+        countMap.set(bucket.key, bucket.doc_count);
+      }
 
       return countMap;
     } catch (error) {

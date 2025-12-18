@@ -854,7 +854,7 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 2, // Computed from mockPackagePolicies
+        packagePolicyCount: 2,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T01:00:00.000Z',
       });
@@ -922,7 +922,7 @@ describe('CloudConnectorService', () => {
         namespace: 'default',
         cloudProvider: 'aws',
         vars: {},
-        packagePolicyCount: 0, // Computed from empty package policies
+        packagePolicyCount: 0,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       });

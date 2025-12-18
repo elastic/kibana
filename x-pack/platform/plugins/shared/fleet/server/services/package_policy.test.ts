@@ -899,7 +899,7 @@ describe('Package policy service', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 2, // Computed dynamically by service
+        packagePolicyCount: 2,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T02:00:00.000Z',
       };
