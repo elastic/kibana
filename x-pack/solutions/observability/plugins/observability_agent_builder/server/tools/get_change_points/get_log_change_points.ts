@@ -138,7 +138,11 @@ const getLogChangePointsSchema = z.object({
   logs: z
     .array(
       z.object({
-        name: z.string().describe('The name of the set of logs'),
+        name: z
+          .string()
+          .describe(
+            'A descriptive label for the log change point analysis, e.g. "Error Logs" or "API Requests". Used to identify results in the output.'
+          ),
         index: z.string().describe('The index or index pattern to find the logs').optional(),
         kqlFilter: z
           .string()

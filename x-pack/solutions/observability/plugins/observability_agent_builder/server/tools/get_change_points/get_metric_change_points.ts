@@ -206,7 +206,11 @@ const getMetricChangePointsSchema = z.object({
   metrics: z
     .array(
       z.object({
-        name: z.string().describe('A descriptive label for the metric, e.g. 'Error Rate' or 'Latency P95'. Used to identify results in the output.'),
+        name: z
+          .string()
+          .describe(
+            'A descriptive label for the metric change point analysis, e.g. "Error Rate" or "Latency P95". Used to identify results in the output.'
+          ),
         index: z.string().describe('The index or index pattern to find the metrics').optional(),
         kqlFilter: z
           .string()
