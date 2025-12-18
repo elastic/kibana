@@ -23,7 +23,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
   const log = getService('log');
   const oneChatApiClient = createOneChatApiClient(supertest);
 
-  describe('FOO POST /api/agent_builder/converse: simple conversation', function () {
+  describe('POST /api/agent_builder/converse: simple conversation', function () {
     let llmProxy: LlmProxy;
     let connectorId: string;
 
