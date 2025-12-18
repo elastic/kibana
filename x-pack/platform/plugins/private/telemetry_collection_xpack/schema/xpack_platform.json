@@ -6262,6 +6262,12 @@
                       }
                     }
                   }
+                },
+                "count_with_kql_filter": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of alerting rules with a KQL filter defined"
+                  }
                 }
               }
             },

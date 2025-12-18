@@ -19,6 +19,7 @@ export interface MlUsageData {
         bucket: number;
         influencer: number;
       };
+      count_with_kql_filter: number;
     };
     'xpack.ml.anomaly_detection_jobs_health': {
       count_by_check_type: {
@@ -53,6 +54,10 @@ export function registerCollector(
               type: 'long',
               _meta: { description: 'total number of alerting rules using bucket result type' },
             },
+          },
+          count_with_kql_filter: {
+            type: 'long',
+            _meta: { description: 'total number of alerting rules with a KQL filter defined' },
           },
         },
         'xpack.ml.anomaly_detection_jobs_health': {
@@ -115,6 +120,13 @@ export function registerCollector(
                 size: 3,
               },
             },
+            count_with_kql_filter: {
+              filter: {
+                exists: {
+                  field: 'alert.params.kqlQueryString',
+                },
+              },
+            },
           },
         },
         { maxRetries: 0 }
@@ -127,11 +139,15 @@ export function registerCollector(
             doc_count: number;
           }>;
         };
+        count_with_kql_filter: {
+          doc_count: number;
+        };
       };
       const countByResultType = aggResponse.count_by_result_type.buckets.reduce((acc, curr) => {
         acc[curr.key] = curr.doc_count;
         return acc;
       }, {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_by_result_type']);
+      const countWithKqlFilter = aggResponse.count_with_kql_filter.doc_count;
 
       const jobsHealthRuleInstances = await esClient.search<{
         alert: {
@@ -189,6 +205,7 @@ export function registerCollector(
         alertRules: {
           [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
             count_by_result_type: countByResultType,
+            count_with_kql_filter: countWithKqlFilter,
           },
           [ML_ALERT_TYPES.AD_JOBS_HEALTH]: {
             count_by_check_type: resultsByCheckType,
