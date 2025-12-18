@@ -27,7 +27,14 @@ export class DiscoverApp {
     await this.page.testSubj.click('*dataView-switch-link');
     await this.page.testSubj.waitForSelector('indexPattern-switcher');
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    await this.page.testSubj.locator('indexPattern-switcher').locator(`[title="${name}"]`).click();
+    const matchingDataViewLocator = this.page.testSubj
+      .locator('indexPattern-switcher')
+      .locator(`[title="${name}"]`);
+    if (await matchingDataViewLocator.isVisible()) {
+      await matchingDataViewLocator.click();
+    } else {
+      await this.page.testSubj.locator('explore-matching-indices-button').click();
+    }
     await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
     await this.page.waitForLoadingIndicatorHidden();
   }
@@ -98,6 +105,14 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
       state: 'hidden',
       timeout: 30000,
+    });
+  }
+
+  async waitForDocTableRendered() {
+    const table = this.page.testSubj.locator('discoverDocTable');
+    await expect(table).toBeVisible();
+    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+      timeout: 30_000,
     });
   }
 
@@ -228,5 +243,12 @@ export class DiscoverApp {
     await this.page.testSubj.hover(`dataGridHeaderCell-${fieldName}`);
     await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
     await this.page.getByText(`Move ${direction}`).click();
+  }
+
+  async selectTextBaseLang() {
+    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
+      await this.page.testSubj.click('select-text-based-language-btn');
+      await this.waitForDocTableRendered();
+    }
   }
 }
