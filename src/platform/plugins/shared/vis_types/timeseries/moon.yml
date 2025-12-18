@@ -59,6 +59,9 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/expression-xy-plugin'
   - '@kbn/event-annotation-common'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/presentation-publishing'
+  - '@kbn/presentation-containers'
 tags:
   - plugin
   - prod
