@@ -7,11 +7,13 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { getPreviewPanelParams } from '../utils/link_utils';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 interface PreviewLinkProps {
   /**
@@ -60,6 +62,8 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
+  const shouldShowLink = field === ALERT_RULE_NAME ? canReadRules : true;
 
   const previewParams = useMemo(
     () =>
@@ -86,7 +90,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
     }
   }, [scopeId, telemetry, openPreviewPanel, previewParams]);
 
-  return previewParams ? (
+  return shouldShowLink && previewParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
       {children ?? value}
     </EuiLink>
