@@ -152,7 +152,6 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       });
