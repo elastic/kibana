@@ -166,13 +166,13 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [additionalFilters, showExternalAlerts]
   );
 
-  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+  const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: composedPageFilters,
     tableId,
     from: startDate,
     to: endDate,
     scopeId: PageScope.default,
-  }) as CustomBulkAction;
+  }) as CustomBulkAction[];
 
   const caseEventsBulkActions = useBulkAddEventsToCaseActions({
     clearSelection: () => dispatch(dataTableActions.clearSelected({ id: tableId })),
@@ -181,9 +181,9 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
       alertStatusActions: false,
-      customBulkActions: [addBulkToTimelineAction, ...caseEventsBulkActions],
+      customBulkActions: [...addBulkToTimelineActions, ...caseEventsBulkActions],
     };
-  }, [addBulkToTimelineAction, caseEventsBulkActions]);
+  }, [addBulkToTimelineActions, caseEventsBulkActions]);
 
   return (
     <>

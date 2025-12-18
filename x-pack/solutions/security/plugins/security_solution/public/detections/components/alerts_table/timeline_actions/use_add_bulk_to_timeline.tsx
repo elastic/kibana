@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
@@ -30,18 +29,14 @@ import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import type { State } from '../../../../common/store/types';
-import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
-import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { sendBulkEventsToTimelineAction } from '../actions';
-import type { CreateTimelineProps } from '../types';
 import type { Direction } from '../../../../../common/search_strategy';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { globalFiltersQuerySelector } from '../../../../common/store/inputs/selectors';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSendBulkToTimeline } from './use_send_bulk_to_timeline';
 
-const { setEventsLoading, setSelected } = dataTableActions;
+const { setEventsLoading } = dataTableActions;
 
 export interface UseAddBulkToTimelineActionProps {
   /* filters being passed to the Alert/events table */
@@ -77,6 +72,10 @@ export const useAddBulkToTimelineAction = ({
   const { dataView: experimentalDataView } = useDataView(scopeId);
   const experimentalBrowserFields = useBrowserFields(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
+
+  const {
+    timelinePrivileges: { read: canReadTimelines },
+  } = useUserPrivileges();
 
   const {
     browserFields: oldBrowserFields,
@@ -181,53 +180,7 @@ export const useAddBulkToTimelineAction = ({
     }
   }, [selectAll, totalCount]);
 
-  const clearActiveTimeline = useCreateTimeline({
-    timelineId: TimelineId.active,
-    timelineType: TimelineTypeEnum.default,
-  });
-
-  const updateTimeline = useUpdateTimeline();
-
-  const createTimeline = useCallback(
-    async ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
-      await clearActiveTimeline();
-      updateTimeline({
-        duplicate: true,
-        from,
-        id: TimelineId.active,
-        notes: [],
-        timeline: {
-          ...timeline,
-          indexNames: timeline.indexNames ?? [],
-          show: true,
-          filters: eventIdFilters,
-        },
-        to,
-        ruleNote,
-      });
-    },
-    [updateTimeline, clearActiveTimeline, from, to]
-  );
-
-  const sendBulkEventsToTimelineHandler = useCallback(
-    (items: TimelineItem[]) => {
-      sendBulkEventsToTimelineAction(
-        createTimeline,
-        items.map((item) => item.ecs),
-        'KqlFilter'
-      );
-
-      dispatch(
-        setSelected({
-          id: tableId,
-          isSelectAllChecked: false,
-          isSelected: false,
-          eventIds: selectedEventIds,
-        })
-      );
-    },
-    [dispatch, createTimeline, selectedEventIds, tableId]
-  );
+  const { sendBulkEventsToTimelineHandler } = useSendBulkToTimeline({ tableId, from, to });
 
   const onActionClick = useCallback<
     NonNullable<BulkActionsConfig['onClick'] | CustomBulkAction['onClick']>
@@ -283,14 +236,19 @@ export const useAddBulkToTimelineAction = ({
   }, [disableActionOnSelectAll]);
 
   const memoized = useMemo(
-    () => ({
-      label: investigateInTimelineTitle,
-      key: 'add-bulk-to-timeline',
-      'data-test-subj': 'investigate-bulk-in-timeline',
-      disableOnQuery: disableActionOnSelectAll,
-      onClick: onActionClick,
-    }),
-    [disableActionOnSelectAll, investigateInTimelineTitle, onActionClick]
+    () =>
+      canReadTimelines
+        ? [
+            {
+              label: investigateInTimelineTitle,
+              key: 'add-bulk-to-timeline',
+              'data-test-subj': 'investigate-bulk-in-timeline',
+              disableOnQuery: disableActionOnSelectAll,
+              onClick: onActionClick,
+            },
+          ]
+        : [],
+    [canReadTimelines, disableActionOnSelectAll, investigateInTimelineTitle, onActionClick]
   );
   return memoized;
 };
