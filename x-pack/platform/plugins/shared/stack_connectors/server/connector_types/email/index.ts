@@ -44,6 +44,7 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { emailSchema } from '@kbn/connector-schemas/email/schemas/latest';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
@@ -174,8 +175,6 @@ function validateConfig(
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
-  const emailValidator = z.array(z.string().max(512)).max(100);
-
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
@@ -187,9 +186,9 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   }
 
   try {
-    emailValidator.parse(to);
-    emailValidator.parse(cc);
-    emailValidator.parse(bcc);
+    emailSchema.parse(to);
+    emailSchema.parse(cc);
+    emailSchema.parse(bcc);
   } catch (error) {
     throw new Error(`Invalid email addresses: ${error}`);
   }
