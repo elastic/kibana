@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiPopover,
   EuiText,
@@ -15,34 +15,41 @@ import {
   EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { docLinks } from '../../../../../common/doc_links';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { MCP_SERVER_PATH } from '../../../../../common/mcp';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 
 export const McpConnectionButton = () => {
-  const [isContextOpen, setIsContextOpen] = useState(false);
-
+  const mcpEnabled = useUiSetting(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false);
+  const { createOnechatUrl } = useNavigation();
   const { kibanaUrl } = useKibanaUrl();
 
-  const mcpServerUrl = `${kibanaUrl}${MCP_SERVER_PATH}`;
+  const [isContextOpen, toggleContextOpen] = useToggle(false);
 
+  const mcpServerUrl = `${kibanaUrl}${MCP_SERVER_PATH}`;
   return (
     <EuiPopover
       button={
         <EuiButtonEmpty
           key="mcp-server-connection-button"
           iconType="arrowDown"
-          onClick={() => setIsContextOpen(true)}
+          iconSide="right"
+          onClick={toggleContextOpen}
         >
           <EuiText size="s">
             {i18n.translate('xpack.onechat.tools.mcpServerConnectionButton', {
-              defaultMessage: 'MCP Server',
+              defaultMessage: 'Manage MCP',
             })}
           </EuiText>
         </EuiButtonEmpty>
       }
       isOpen={isContextOpen}
-      closePopover={() => setIsContextOpen(false)}
+      closePopover={() => toggleContextOpen(false)}
       anchorPosition="downLeft"
       panelPaddingSize="none"
     >
@@ -61,8 +68,25 @@ export const McpConnectionButton = () => {
               </EuiContextMenuItem>
             )}
           </EuiCopy>,
-
-          <EuiContextMenuItem key="documentation" href={docLinks.mcpServer} target="_blank">
+          ...(mcpEnabled
+            ? [
+                <EuiContextMenuItem
+                  key="bulkImportMcpTools"
+                  icon="plus"
+                  href={createOnechatUrl(appPaths.tools.bulkImportMcp)}
+                >
+                  {i18n.translate('xpack.onechat.tools.bulkImportMcpToolsButton', {
+                    defaultMessage: 'Bulk import MCP tools',
+                  })}
+                </EuiContextMenuItem>,
+              ]
+            : []),
+          <EuiContextMenuItem
+            key="documentation"
+            icon="documentation"
+            href={docLinks.mcpServer}
+            target="_blank"
+          >
             {i18n.translate('xpack.onechat.tools.aboutMcpServerDocumentationButton', {
               defaultMessage: 'Documentation',
             })}
