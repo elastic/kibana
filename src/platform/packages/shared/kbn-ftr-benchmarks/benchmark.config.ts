@@ -14,6 +14,7 @@ function createBenchmark(name: string, config: string, focus: string) {
   return {
     kind: 'script' as const,
     name,
+    // We want each workspace to use it's own build rather than the dist from the build itself (like normal FTR does)
     beforeAll: `node scripts/build_kibana_platform_plugins.js --focus ${focus}`,
     run: `node scripts/functional_tests --config ${config}`,
     compare: {
