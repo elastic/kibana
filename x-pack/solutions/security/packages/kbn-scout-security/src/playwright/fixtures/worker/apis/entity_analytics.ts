@@ -36,6 +36,9 @@ export interface EntityAnalyticsApiService {
     expectedStatus: 'running',
     timeoutMs?: number
   ) => Promise<GetEntityStoreStatusResponse>;
+  waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
+  waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
+  waitForRiskEngineCleanup: (timeoutMs?: number) => Promise<RiskEngineStatusResponse>;
 }
 
 export const getEntityAnalyticsApiService = ({
@@ -63,6 +66,8 @@ export const getEntityAnalyticsApiService = ({
             },
             ignoreErrors: [404, 500],
           });
+          // Wait for cleanup to complete - ensure server state is fully cleaned up
+          await service.waitForEntityStoreCleanup();
         }
       );
     },
@@ -90,6 +95,15 @@ export const getEntityAnalyticsApiService = ({
               path: `${basePath}/api/saved_objects/${RISK_ENGINE_CONFIGURATION_TYPE}/${savedObjectId}`,
               ignoreErrors: [404],
             });
+            // Wait for cleanup to complete - ensure server state is fully cleaned up
+            await service.waitForRiskEngineCleanup();
+          } else {
+            // No saved object to delete, check if already cleaned up
+            const status = await service.getRiskEngineStatus();
+            if (status.risk_engine_status !== 'NOT_INSTALLED') {
+              // Status is not clean, wait for it to become clean (might be in transition)
+              await service.waitForRiskEngineCleanup();
+            }
           }
         }
       );
@@ -154,6 +168,117 @@ export const getEntityAnalyticsApiService = ({
 
           throw new Error(
             `Timeout waiting for entity store status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
+              lastStatus
+            )}`
+          );
+        }
+      );
+    },
+
+    waitForEntityStoreStatusToChange: async (timeoutMs: number = 60000) => {
+      return measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.waitForEntityStoreStatusToChange',
+        async () => {
+          const startTime = Date.now();
+          let lastStatus: GetEntityStoreStatusResponse | undefined;
+
+          while (Date.now() - startTime < timeoutMs) {
+            try {
+              const status = await service.getEntityStoreStatus();
+              lastStatus = status;
+
+              // Wait for status to change from 'not_installed' to any other state
+              // This confirms the backend has processed the enable request
+              if (status.status !== 'not_installed') {
+                return status;
+              }
+            } catch (error) {
+              log.debug(`Error checking entity store status: ${error}`);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          throw new Error(
+            `Timeout waiting for entity store status to change from 'not_installed' after ${timeoutMs}ms. Last status: ${JSON.stringify(
+              lastStatus
+            )}`
+          );
+        }
+      );
+    },
+
+    waitForEntityStoreCleanup: async (timeoutMs: number = 60000) => {
+      return measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.waitForEntityStoreCleanup',
+        async () => {
+          // Check status first - if already clean, return immediately
+          try {
+            const currentStatus = await service.getEntityStoreStatus();
+            if (currentStatus.status === 'not_installed') {
+              return currentStatus;
+            }
+          } catch (error) {
+            log.debug(`Error checking initial entity store status: ${error}`);
+          }
+
+          // Status is not clean, wait for cleanup to complete
+          const startTime = Date.now();
+          let lastStatus: GetEntityStoreStatusResponse | undefined;
+
+          while (Date.now() - startTime < timeoutMs) {
+            try {
+              const status = await service.getEntityStoreStatus();
+              lastStatus = status;
+
+              // Wait for status to be 'not_installed' - confirms cleanup is complete
+              if (status.status === 'not_installed') {
+                return status;
+              }
+            } catch (error) {
+              log.debug(`Error checking entity store status during cleanup: ${error}`);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          throw new Error(
+            `Timeout waiting for entity store cleanup (status 'not_installed') after ${timeoutMs}ms. Last status: ${JSON.stringify(
+              lastStatus
+            )}`
+          );
+        }
+      );
+    },
+
+    waitForRiskEngineCleanup: async (timeoutMs: number = 60000) => {
+      return measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.waitForRiskEngineCleanup',
+        async () => {
+          const startTime = Date.now();
+          let lastStatus: RiskEngineStatusResponse | undefined;
+
+          while (Date.now() - startTime < timeoutMs) {
+            try {
+              const status = await service.getRiskEngineStatus();
+              lastStatus = status;
+
+              // Wait for status to be 'NOT_INSTALLED' - confirms cleanup is complete
+              if (status.risk_engine_status === 'NOT_INSTALLED') {
+                return status;
+              }
+            } catch (error) {
+              log.debug(`Error checking risk engine status during cleanup: ${error}`);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          throw new Error(
+            `Timeout waiting for risk engine cleanup (status 'NOT_INSTALLED') after ${timeoutMs}ms. Last status: ${JSON.stringify(
               lastStatus
             )}`
           );
