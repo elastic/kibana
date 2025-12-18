@@ -253,6 +253,18 @@ describe('RERANK Autocomplete', () => {
 
       await expectRerankSuggestions(query, NEXT_ACTIONS_EXPRESSIONS);
     });
+
+    test('suggests next actions after simple field assignment', async () => {
+      const query =
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'col0 = keywordField',
+        }) + ' ';
+
+      await expectRerankSuggestions(query, {
+        contains: NEXT_ACTIONS,
+      });
+    });
   });
 
   describe('Terminal operators', () => {
