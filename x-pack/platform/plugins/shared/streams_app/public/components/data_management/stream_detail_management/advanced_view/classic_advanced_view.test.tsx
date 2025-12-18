@@ -11,6 +11,14 @@ import type { Streams } from '@kbn/streams-schema';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ClassicAdvancedView } from './classic_advanced_view';
 
+jest.mock('@kbn/ebt-tools', () => ({
+  usePerformanceContext: () => ({ onPageReady: jest.fn() }),
+}));
+
+jest.mock('../../../../hooks/use_ai_features', () => ({
+  useAIFeatures: () => null,
+}));
+
 // Mock the useStreamsPrivileges hook
 jest.mock('../../../../hooks/use_streams_privileges');
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
@@ -89,9 +97,23 @@ jest.mock('../../../../hooks/use_kibana', () => ({
     core: {
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
       application: { navigateToApp: jest.fn() },
+      pricing: { isFeatureAvailable: jest.fn(() => false) },
+      uiSettings: {
+        get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue),
+      },
     },
     dependencies: {
       start: {
+        licensing: {
+          license$: {
+            subscribe: (observer: any) => {
+              const license = { hasAtLeast: () => true };
+              if (typeof observer === 'function') observer(license);
+              else observer?.next?.(license);
+              return { unsubscribe: jest.fn() };
+            },
+          },
+        },
         streams: { streamsRepositoryClient: { fetch: jest.fn() } },
         indexManagement: {
           getComponentTemplateFlyoutComponent: () => () => null,
@@ -132,23 +154,23 @@ describe('ClassicAdvancedView', () => {
   const createMockDefinition = (
     streamName: string = 'logs-test-default'
   ): Streams.ClassicStream.GetResponse =>
-    ({
-      stream: {
-        name: streamName,
-        description: '',
-        ingest: {
-          processing: { steps: [] },
-          lifecycle: { dsl: { data_retention: '7d' } },
-          settings: {},
-        },
+  ({
+    stream: {
+      name: streamName,
+      description: '',
+      ingest: {
+        processing: { steps: [] },
+        lifecycle: { dsl: { data_retention: '7d' } },
+        settings: {},
       },
-      effective_lifecycle: { dsl: { data_retention: '7d' } },
-      effective_settings: {
-        'index.refresh_interval': { value: '1s' },
-      },
-      privileges: { manage: true, simulate: true, read: true },
-      data_stream_exists: true,
-    } as unknown as Streams.ClassicStream.GetResponse);
+    },
+    effective_lifecycle: { dsl: { data_retention: '7d' } },
+    effective_settings: {
+      'index.refresh_interval': { value: '1s' },
+    },
+    privileges: { manage: true, simulate: true, read: true },
+    data_stream_exists: true,
+  } as unknown as Streams.ClassicStream.GetResponse);
 
   const mockRefreshDefinition = jest.fn();
 
