@@ -14,7 +14,7 @@ import {
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { monitoringEntitySourceTypeName } from '../saved_objects';
-import type { MonitoringEntitySourceNoId } from '../../../../../common/api/entity_analytics';
+import type { MonitoringEntitySourceAttributes } from '../../../../../common/api/entity_analytics';
 import type { PartialMonitoringEntitySource } from '../types';
 
 describe('MonitoringEntitySourceDataClient', () => {
@@ -31,7 +31,7 @@ describe('MonitoringEntitySourceDataClient', () => {
     kibanaVersion: '8.0.0',
   };
 
-  const testSource: MonitoringEntitySourceNoId = {
+  const testSource: MonitoringEntitySourceAttributes = {
     type: 'index',
     name: 'Test Source',
     indexPattern: 'test-index-pattern',

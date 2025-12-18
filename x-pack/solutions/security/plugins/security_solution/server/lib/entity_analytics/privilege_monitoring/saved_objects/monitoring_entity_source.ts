@@ -6,7 +6,7 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  MonitoringEntitySourceNoId,
+  MonitoringEntitySourceAttributes,
   ListEntitySourcesRequestQuery,
   MonitoringEntitySource,
 } from '../../../../../common/api/entity_analytics';
@@ -18,7 +18,7 @@ export interface MonitoringEntitySourceDependencies {
   namespace: string;
 }
 
-type UpsertInput = MonitoringEntitySource | MonitoringEntitySourceNoId;
+type UpsertInput = MonitoringEntitySource | MonitoringEntitySourceAttributes;
 interface UpsertResult {
   action: 'created' | 'updated';
   source: MonitoringEntitySource;
@@ -29,11 +29,11 @@ export type Processor = (source: MonitoringEntitySource) => Promise<void>;
 export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
-  async create(attributes: MonitoringEntitySourceNoId) {
+  async create(attributes: MonitoringEntitySourceAttributes) {
     await this.assertNameUniqueness(attributes);
 
     const { id, attributes: created } =
-      await this.dependencies.soClient.create<MonitoringEntitySourceNoId>(
+      await this.dependencies.soClient.create<MonitoringEntitySourceAttributes>(
         monitoringEntitySourceTypeName,
         { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
         { refresh: 'wait_for' }
@@ -42,7 +42,7 @@ export class MonitoringEntitySourceDescriptorClient {
     return { ...created, id };
   }
 
-  async bulkCreate(sources: MonitoringEntitySourceNoId[]) {
+  async bulkCreate(sources: MonitoringEntitySourceAttributes[]) {
     const createdSources = await this.dependencies.soClient.bulkCreate(
       sources.map((source) => ({
         type: monitoringEntitySourceTypeName,

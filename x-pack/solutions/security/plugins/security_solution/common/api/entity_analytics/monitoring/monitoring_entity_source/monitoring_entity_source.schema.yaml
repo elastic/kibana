@@ -190,7 +190,7 @@ components:
             - type: string
             - type: object
 
-    MonitoringEntitySourceNoId:
+    MonitoringEntitySourceAttributes:
       allOf:
       - $ref: '#/components/schemas/MonitoringEntitySourceProperties'
       - type: object

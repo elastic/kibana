@@ -84,8 +84,10 @@ export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySource
   })
 );
 
-export type MonitoringEntitySourceNoId = z.infer<typeof MonitoringEntitySourceNoId>;
-export const MonitoringEntitySourceNoId = MonitoringEntitySourceProperties.merge(z.object({}));
+export type MonitoringEntitySourceAttributes = z.infer<typeof MonitoringEntitySourceAttributes>;
+export const MonitoringEntitySourceAttributes = MonitoringEntitySourceProperties.merge(
+  z.object({})
+);
 
 export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
 export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(

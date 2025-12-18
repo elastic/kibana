@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  MonitoringEntitySourceNoId,
+  MonitoringEntitySourceAttributes,
   MonitoringEntitySource,
   ListEntitySourcesRequestQuery,
 } from '../../../../../common/api/entity_analytics';
@@ -30,7 +30,7 @@ export class MonitoringEntitySourceDataClient {
     });
   }
 
-  public async create(input: MonitoringEntitySourceNoId): Promise<MonitoringEntitySource> {
+  public async create(input: MonitoringEntitySourceAttributes): Promise<MonitoringEntitySource> {
     const source = await this.monitoringEntitySourceClient.create({
       ...input,
     });
