@@ -49,6 +49,7 @@ export interface WorkflowSelectorConfig {
   label?: string;
   placeholder?: string;
   createWorkflowLinkText?: string;
+  panelStyle?: React.CSSProperties;
 
   // Error Messages
   errorMessages?: {
