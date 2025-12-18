@@ -11,6 +11,4 @@ export const DependencyRT = t.type({
   actionGroupsToSuppressOn: t.array(t.string),
 });
 
-export const DependenciesRT = t.array(DependencyRT);
-
 export type Dependency = t.OutputOf<typeof DependencyRT>;
