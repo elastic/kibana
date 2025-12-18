@@ -18,6 +18,13 @@ import type { EventsViewerProps } from '../events_viewer';
 jest.mock('../../lib/kibana');
 jest.mock('../../utils/normalize_time_range');
 
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
+  () => ({
+    useAddBulkToTimelineAction: jest.fn().mockReturnValue([]),
+  })
+);
+
 const startDate = '2022-03-22T22:10:56.794Z';
 const endDate = '2022-03-21T22:10:56.791Z';
 

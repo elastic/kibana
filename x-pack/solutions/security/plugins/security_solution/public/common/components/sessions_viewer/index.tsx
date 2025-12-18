@@ -127,7 +127,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     [ACTION_BUTTON_COUNT]
   );
 
-  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+  const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: sessionsFilter,
     tableId,
     from: startDate,
@@ -138,9 +138,9 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
       alertStatusActions: false,
-      customBulkActions: [addBulkToTimelineAction],
+      customBulkActions: addBulkToTimelineActions,
     } as BulkActionsProp;
-  }, [addBulkToTimelineAction]);
+  }, [addBulkToTimelineActions]);
 
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
