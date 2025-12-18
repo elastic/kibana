@@ -213,12 +213,6 @@ export function generateLayer(
     },
   };
 
-  // DEBUG: Remove after debugging
-  // eslint-disable-next-line no-console
-  console.log('\n=== FINAL RESULT ===');
-  // eslint-disable-next-line no-console
-  console.dir(result, { depth: null });
-
   return result;
 }
 
