@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractDataStreamName, getErrorMessage } from '../utils';
 
@@ -51,7 +52,7 @@ export async function reindexThroughPipeline({
   log.debug(`Reindexing to ${destIndex}`);
 
   try {
-    const response = await esClient.reindex(
+    const response: ReindexResponse = await esClient.reindex(
       {
         wait_for_completion: true,
         source: { index: sourceIndex },
@@ -64,10 +65,10 @@ export async function reindexThroughPipeline({
       { requestTimeout: requestTimeoutMs }
     );
 
-    const failures = (response as { failures?: unknown[] }).failures ?? [];
-    const timedOut = Boolean((response as { timed_out?: boolean }).timed_out);
-    const created = Number((response as { created?: number }).created ?? 0);
-    const total = Number((response as { total?: number }).total ?? 0);
+    const failures = response.failures ?? [];
+    const timedOut = response.timed_out;
+    const created = response.created ?? 0;
+    const total = response.total ?? 0;
 
     if (timedOut) {
       throw new Error(`Reindex timed out for ${destIndex}`);
@@ -77,7 +78,7 @@ export async function reindexThroughPipeline({
       log.warning(`Reindex had ${failures.length} failures`);
       const sampleFailures = failures.slice(0, 3);
       for (const failure of sampleFailures) {
-        const cause = (failure as { cause?: { type?: string; reason?: string } })?.cause;
+        const cause = failure.cause;
         const reason = cause?.reason?.split('\n')[0]?.slice(0, 120) ?? 'unknown';
         log.debug(`  - ${cause?.type ?? 'error'}: ${reason}`);
       }
