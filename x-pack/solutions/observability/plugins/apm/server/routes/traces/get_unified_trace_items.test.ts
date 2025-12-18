@@ -39,7 +39,6 @@ import {
   TRANSACTION_ID,
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 describe('getErrorsByDocId', () => {
   it('groups errors by doc id from apmErrors and unprocessedOtelErrors', () => {
