@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
+  distinctUntilChanged,
   filter,
   map,
   mergeMap,
@@ -220,7 +221,12 @@ export function getDataStateContainer({
   });
 
   // The main subscription to handle state changes
-  dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
+  dataSubjects.documents$
+    .pipe(
+      distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
+      switchMap(esqlFetchSubscribe)
+    )
+    .subscribe();
   // Make sure to clean up the ES|QL state when the saved search changes
   savedSearchContainer.getInitial$().subscribe(cleanupEsql);
 
@@ -404,6 +410,12 @@ export function getDataStateContainer({
                 fetchChart$.next(latestFetchDetails);
               }
 
+              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
+
+              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
+                return;
+              }
+
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
@@ -417,11 +429,6 @@ export function getDataStateContainer({
                     appState: postFetchStateUpdate,
                   })
                 );
-              }
-
-              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
-              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
-                return;
               }
 
               // Clear the default profile state flags after the data fetching
