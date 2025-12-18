@@ -126,7 +126,15 @@ async function generateFakeCerts(eisDir: string, log: ToolingLog) {
   log.debug('Certificates generated');
 }
 
-export async function ensureEis({ log, signal }: { log: ToolingLog; signal: AbortSignal }) {
+export async function ensureEis({
+  log,
+  signal,
+  onDirCreated,
+}: {
+  log: ToolingLog;
+  signal: AbortSignal;
+  onDirCreated?: (dir: string) => void;
+}) {
   log.info('Ensuring EIS is available');
 
   await assertDockerAvailable();
@@ -138,14 +146,13 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
   const eisDir = await cloneEisGateway(log);
   log.info(`EIS Gateway cloned to ${eisDir}`);
 
+  // Notify caller of the directory so they can register cleanup
+  if (onDirCreated) {
+    onDirCreated(eisDir);
+  }
+
   // Generate certificates
   await generateFakeCerts(eisDir, log);
-
-  // Clean up on signal abort
-  signal.addEventListener('abort', async () => {
-    log.debug('Cleaning up eis-gateway directory');
-    await fs.rm(eisDir, { recursive: true, force: true }).catch(() => {});
-  });
 
   log.write('');
   log.write(
@@ -158,12 +165,27 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
   log.info('Starting EIS Gateway...');
 
   // Run make run (runs the Go binary directly)
-  await execa.command('make ENTITLEMENTS_SKIP_CHECK=true TLS_CLIENT_AUTH=NoClientCert run', {
-    cwd: eisDir,
-    stdio: 'inherit',
-    env: {
-      ...credentials,
-      PATH: process.env.PATH,
-    },
-  });
+  const makeProcess = execa.command(
+    'make ENTITLEMENTS_SKIP_CHECK=true TLS_CLIENT_AUTH=NoClientCert run',
+    {
+      cwd: eisDir,
+      stdio: 'inherit',
+      env: {
+        ...credentials,
+        PATH: process.env.PATH,
+      },
+    }
+  );
+
+  // Handle abort signal to kill the process
+  const abortHandler = () => {
+    makeProcess.kill('SIGTERM');
+  };
+  signal.addEventListener('abort', abortHandler);
+
+  try {
+    await makeProcess;
+  } finally {
+    signal.removeEventListener('abort', abortHandler);
+  }
 }
