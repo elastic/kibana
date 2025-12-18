@@ -33,7 +33,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getCursorContext } from '../shared/get_cursor_context';
 import { getFromCommandHelper } from '../shared/resources_helpers';
-import { getCommandContext, getCommandFunctionsContext } from './get_command_context';
+import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
@@ -237,6 +237,20 @@ async function getSuggestionsWithinCommandExpression(
   const columnMap: Map<string, ESQLColumnData> = await getColumnMap();
   const references = { columns: columnMap };
 
+  // Get the context that might be needed by the command itself
+  const additionalCommandContext = await getCommandContext(
+    astContext.command,
+    innerText,
+    callbacks
+  );
+
+  const context = {
+    ...references,
+    ...additionalCommandContext,
+    activeProduct: callbacks?.getActiveProduct?.(),
+    isCursorInSubquery: astContext.isCursorInSubquery,
+  };
+
   const getSuggestedUserDefinedColumnName = () => {
     const allUserDefinedColumns = new Set(
       Walker.findAll(commands, (node) => node.type === 'column').map((col) =>
@@ -244,27 +258,6 @@ async function getSuggestionsWithinCommandExpression(
       )
     );
     return findNewUserDefinedColumn(allUserDefinedColumns);
-  };
-
-  // Get the context that might be needed by the command itself
-  const additionalCommandContext = await getCommandContext(
-    astContext.command.name,
-    innerText,
-    callbacks
-  );
-
-  // Get the context that might be needed by functions used within this command
-  const additionalFunctionsContext = await getCommandFunctionsContext(
-    astContext.command,
-    callbacks
-  );
-
-  const context = {
-    ...references,
-    ...additionalCommandContext,
-    ...additionalFunctionsContext,
-    activeProduct: callbacks?.getActiveProduct?.(),
-    isCursorInSubquery: astContext.isCursorInSubquery,
   };
 
   // does it make sense to have a different context per command?
@@ -282,7 +275,6 @@ async function getSuggestionsWithinCommandExpression(
       hasMinimumLicenseRequired,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
       isServerless: callbacks?.isServerless,
-      getInferenceEndpoints: callbacks?.getInferenceEndpoints,
     },
     context,
     offset

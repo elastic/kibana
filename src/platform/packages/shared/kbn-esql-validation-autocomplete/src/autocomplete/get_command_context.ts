@@ -14,58 +14,63 @@ import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getFunctionDefinition } from '@kbn/esql-ast/src/commands/definitions/utils';
 import { isEqual, uniqWith } from 'lodash';
 import { parametersFromHintsMap } from '@kbn/esql-ast/src/commands/definitions/utils/autocomplete/parameters_from_hints';
+import type { ICommandContext } from '@kbn/esql-ast/src/commands/registry/types';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
 export const getCommandContext = async (
-  commandName: string,
+  command: ESQLAstAllCommands,
   queryString: string,
   callbacks?: ESQLCallbacks
-) => {
+): Promise<Partial<ICommandContext>> => {
   const getSources = getSourcesHelper(callbacks);
   const helpers = getPolicyHelper(callbacks);
-  switch (commandName) {
+
+  let context: Partial<ICommandContext> = {};
+
+  switch (command.name) {
     case 'completion':
       const inferenceEndpoints =
         (await callbacks?.getInferenceEndpoints?.('completion'))?.inferenceEndpoints || [];
-      return {
+      context = {
         inferenceEndpoints,
       };
     case 'enrich':
       const policies = await helpers.getPolicies();
       const policiesMap = new Map(policies.map((policy) => [policy.name, policy]));
-      return {
+      context = {
         policies: policiesMap,
       };
     case 'from':
       const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
         recommendedQueries: [],
+        recommendedFields: [],
       };
-      return {
+      context = {
         sources: await getSources(),
         editorExtensions,
       };
     case 'join':
       const joinSources = await callbacks?.getJoinIndices?.();
-      return {
+      context = {
         joinSources: joinSources?.indices || [],
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
       };
     case 'stats':
       const histogramBarTarget = (await callbacks?.getPreferences?.())?.histogramBarTarget || 50;
-      return {
+      context = {
         histogramBarTarget,
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
         variables: callbacks?.getVariables?.(),
       };
     case 'inline stats':
-      return {
+      context = {
         histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
         variables: callbacks?.getVariables?.(),
       };
     case 'fork':
       const enrichPolicies = await helpers.getPolicies();
-      return {
+      context = {
         histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
         joinSources: (await callbacks?.getJoinIndices?.())?.indices || [],
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
@@ -75,26 +80,32 @@ export const getCommandContext = async (
       };
     case 'ts':
       const timeseriesSources = await callbacks?.getTimeseriesIndices?.();
-      return {
+      context = {
         timeSeriesSources: timeseriesSources?.indices || [],
         sources: await getSources(),
         editorExtensions: (await callbacks?.getEditorExtensions?.(queryString)) ?? {
           recommendedQueries: [],
+          recommendedFields: [],
         },
       };
-    default:
-      return {};
   }
+
+  // Check if the functions used within the command needs additional context
+  context = await enhanceWithFunctionsContext(command, context, callbacks);
+
+  return context;
 };
 
 /**
  *  Returns the context needed by the functions used within a command.
  */
-export const getCommandFunctionsContext = async (
+export const enhanceWithFunctionsContext = async (
   command: ESQLAstAllCommands,
+  context: Partial<ICommandContext>,
   callbacks?: ESQLCallbacks
-) => {
+): Promise<Partial<ICommandContext>> => {
   const hints: ParameterHint[] = [];
+  const newContext: Partial<ICommandContext> = Object.assign({}, context);
 
   // Gathers all hints from all functions used within the command
   walk(command, {
@@ -102,12 +113,13 @@ export const getCommandFunctionsContext = async (
       const functionDefinition = getFunctionDefinition(funcNode.name);
 
       if (functionDefinition) {
-        hints.push(
-          ...functionDefinition.signatures
-            .flatMap((sig) => sig.params)
-            .filter((param) => param.hint)
-            .map((param) => param.hint!)
-        );
+        for (const signature of functionDefinition.signatures) {
+          for (const param of signature.params) {
+            if (param.hint) {
+              hints.push(param.hint);
+            }
+          }
+        }
       }
     },
   });
@@ -118,15 +130,18 @@ export const getCommandFunctionsContext = async (
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 
-  // If the hint needs ne data to build the suggestions, we add that dat to the context
-  const context = {};
+  // If the hint needs new data to build the suggestions, we add that data to the context
   for (const hint of uniqueHints) {
     const parameterHandler = parametersFromHintsMap[hint.entityType];
     if (parameterHandler?.contextResolver) {
-      const resolvedContext = await parameterHandler.contextResolver(hint, callbacks ?? {});
-      Object.assign(context, resolvedContext);
+      const resolvedContext = await parameterHandler.contextResolver(
+        hint,
+        context,
+        callbacks ?? {}
+      );
+      Object.assign(newContext, resolvedContext);
     }
   }
 
-  return context;
+  return newContext;
 };

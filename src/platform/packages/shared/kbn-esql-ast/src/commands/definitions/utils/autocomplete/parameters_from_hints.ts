@@ -8,10 +8,10 @@
  */
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { i18n } from '@kbn/i18n';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import { uniqBy } from 'lodash';
 import type { ParameterHint, ParameterHintEntityType } from '../../..';
-import type { ISuggestionItem } from '../../../registry/types';
+import type { ICommandContext, ISuggestionItem } from '../../../registry/types';
 import type { ExpressionContext } from './expressions/types';
 import { createInferenceEndpointToCompletionItem } from './helpers';
 
@@ -22,16 +22,26 @@ import { createInferenceEndpointToCompletionItem } from './helpers';
  * For each hint we need to provide:
  * - a suggestionResolver to generate the autocomplettion items to shown for that param.
  * - optionally, a contextResolver that populates the context with the data needed by the suggestionResolver.
+ *
+ * Important!
+ * Be mindful while implementing context resolvers, context is shared by the command and all functions used within it.
+ * If the data you need is already present, don't overwrite it, preffer merging it.
  */
-export const parametersFromHintsMap: Record<
-  ParameterHintEntityType,
-  {
-    suggestionResolver: (hint: ParameterHint, ctx: ExpressionContext) => Promise<ISuggestionItem[]>;
-    contextResolver?: (
-      hint: ParameterHint,
-      callbacks: ESQLCallbacks
-    ) => Promise<Record<string, unknown>>;
-  }
+export const parametersFromHintsMap: Partial<
+  Record<
+    ParameterHintEntityType,
+    {
+      suggestionResolver: (
+        hint: ParameterHint,
+        ctx: ExpressionContext
+      ) => Promise<ISuggestionItem[]>;
+      contextResolver?: (
+        hint: ParameterHint,
+        context: Partial<ICommandContext>,
+        callbacks: ESQLCallbacks
+      ) => Promise<Record<string, unknown>>;
+    }
+  >
 > = {
   ['inference_endpoint']: {
     suggestionResolver: inferenceEndpointSuggestionResolver,
@@ -42,15 +52,27 @@ export const parametersFromHintsMap: Record<
 // -------- INFERENCE ENDPOINT -------- //
 async function inferenceEndpointContextResolver(
   hint: ParameterHint,
+  context: Partial<ICommandContext>,
   callbacks: ESQLCallbacks
 ): Promise<Record<string, unknown>> {
   if (hint.constraints?.task_type) {
+    const inferenceEndpointsFromContext = context.inferenceEndpoints ?? [];
+
+    // If the context already has an endpoint for the task type, we don't need to fetch them again
+    if (
+      inferenceEndpointsFromContext.find(
+        (endpoint) => endpoint.task_type === hint.constraints?.task_type
+      )
+    ) {
+      return {};
+    }
+
     const inferenceEnpoints =
       (await callbacks?.getInferenceEndpoints?.(hint.constraints?.task_type as InferenceTaskType))
         ?.inferenceEndpoints || [];
 
     return {
-      inferenceEndpoints: inferenceEnpoints,
+      inferenceEndpoints: uniqBy([...inferenceEndpointsFromContext, ...inferenceEnpoints], 'id'),
     };
   }
   return {};
@@ -68,9 +90,7 @@ async function inferenceEndpointSuggestionResolver(
     return inferenceEnpoints.map(createInferenceEndpointToCompletionItem).map((item) => {
       return {
         ...item,
-        detail: i18n.translate('kbn-esql-ast.esql.definitions.inferenceEndpointInFunction', {
-          defaultMessage: 'Inference endpoint used for this function',
-        }),
+        detail: '',
         text: `"${item.text}"`,
       };
     });
