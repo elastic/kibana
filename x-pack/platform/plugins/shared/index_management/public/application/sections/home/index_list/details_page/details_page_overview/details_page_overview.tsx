@@ -123,7 +123,9 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
         promoId="indexDetailsOverview"
         isSelfManaged={!cloud?.isCloudEnabled}
         direction="row"
-        navigateToApp={() => core.application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+        navigateToApp={() =>
+          core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+        }
         addSpacer="bottom"
       />
       {hasElserOnMlNodeSemanticText && (

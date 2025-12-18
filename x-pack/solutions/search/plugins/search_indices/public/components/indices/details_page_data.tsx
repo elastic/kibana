@@ -90,7 +90,10 @@ export const IndexDetailsData = ({
         promoId="indexDetailsData"
         isSelfManaged={!cloud?.isCloudEnabled}
         direction="row"
-        navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+        navigateToApp={() =>
+          application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+        }
+        addSpacer="top"
       />
       {fieldsForUpdate && (
         <EisUpdateCallout

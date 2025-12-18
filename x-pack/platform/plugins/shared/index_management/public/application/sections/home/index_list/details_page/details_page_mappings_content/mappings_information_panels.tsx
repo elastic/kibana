@@ -112,7 +112,9 @@ export const MappingsInformationPanels = ({
           promoId="indexDetailsMappings"
           isSelfManaged={!cloud?.isCloudEnabled}
           direction="column"
-          navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
         />
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
