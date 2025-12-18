@@ -270,7 +270,7 @@ describe('rollbackInstallation', () => {
         spaceId,
       })
     ).rejects.toThrow(
-      'Wrong previous version for package policies: test-package-policy (version: 1.2.0, expected: 1.0.0)'
+      'Rollback not available because not all integration policies were upgraded from the same previous version 1.0.0'
     );
   });
 

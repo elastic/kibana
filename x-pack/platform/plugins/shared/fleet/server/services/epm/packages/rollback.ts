@@ -158,14 +158,9 @@ export async function rollbackAvailableCheck(
       return false;
     });
     if (policiesOnWrongPreviousVersion.length > 0) {
-      const report = policiesOnWrongPreviousVersion.map((so) => {
-        return `${so.id.replace(':prev', '')} (version: ${
-          so.attributes.package?.version
-        }, expected: ${previousVersion})`;
-      });
       return {
         isAvailable: false,
-        reason: `Wrong previous version for package policies: ${report.join(', ')}`,
+        reason: `Rollback not available because not all integration policies were upgraded from the same previous version ${previousVersion}`,
       };
     }
   }
