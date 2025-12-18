@@ -342,14 +342,6 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       white-space: normal !important;
     }
 
-    // Modifies the height of the signature popup to make it fit under the page header.
-    // This is temprary until https://github.com/elastic/kibana/issues/245694 is resolved.
-    // This solution is succeptible to errors if the editor height or the page header height changes.
-    .parameter-hints-widget > .phwrapper {
-      max-height: 90px !important;
-      overflow: auto;
-    }
-
     .suggest-details .rendered-markdown h1 {
       display: block;
       margin-top: ${theme.euiTheme.size.m};
