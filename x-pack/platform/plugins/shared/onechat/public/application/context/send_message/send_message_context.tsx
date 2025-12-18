@@ -8,6 +8,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
+import { useResumeRoundMutation } from './use_resume_round_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
@@ -21,6 +22,8 @@ interface SendMessageState {
   canCancel: boolean;
   cancel: () => void;
   cleanConversation: () => void;
+  resumeRound: ({ confirm }: { confirm: boolean }) => void;
+  isResuming: boolean;
   connectorSelection: {
     selectedConnector: string | undefined;
     selectConnector: (connectorId: string) => void;
@@ -46,6 +49,10 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     cleanConversation,
   } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
 
+  const { resumeRound, isResuming } = useResumeRoundMutation({
+    connectorId: connectorSelection.selectedConnector,
+  });
+
   return (
     <SendMessageContext.Provider
       value={{
@@ -59,6 +66,8 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         canCancel,
         cancel,
         cleanConversation,
+        resumeRound,
+        isResuming,
         connectorSelection: {
           selectedConnector: connectorSelection.selectedConnector,
           selectConnector: connectorSelection.selectConnector,

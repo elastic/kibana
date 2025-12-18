@@ -7,14 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/onechat-common';
+import { ConversationRoundStatus } from '@kbn/onechat-common';
+import { isConfirmationPrompt } from '@kbn/onechat-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { RoundError } from './round_error/round_error';
+import { ConfirmationPrompt } from './round_confirmation_prompt';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -34,12 +37,28 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   rawRound,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
-  const { steps, response, input } = rawRound;
+  const { steps, response, input, status, pending_prompt: pendingPrompt } = rawRound;
 
-  const { isResponseLoading, error, retry: retrySendMessage } = useSendMessage();
+  const {
+    isResponseLoading,
+    error,
+    retry: retrySendMessage,
+    resumeRound,
+    isResuming,
+  } = useSendMessage();
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
+  const isAwaitingPrompt =
+    isCurrentRound && status === ConversationRoundStatus.awaitingPrompt && pendingPrompt;
+
+  const handleConfirm = useCallback(() => {
+    resumeRound({ confirm: true });
+  }, [resumeRound]);
+
+  const handleCancel = useCallback(() => {
+    resumeRound({ confirm: false });
+  }, [resumeRound]);
 
   useEffect(() => {
     // Pending rounds and error rounds should have a min-height to match the scroll container height
@@ -73,6 +92,18 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           <RoundThinking steps={steps} isLoading={isLoadingCurrentRound} rawRound={rawRound} />
         )}
       </EuiFlexItem>
+
+      {/* Confirmation Prompt */}
+      {isAwaitingPrompt && isConfirmationPrompt(pendingPrompt) && (
+        <EuiFlexItem grow={false}>
+          <ConfirmationPrompt
+            prompt={pendingPrompt}
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+            isLoading={isResuming}
+          />
+        </EuiFlexItem>
+      )}
 
       {/* Response Message */}
       <EuiFlexItem grow={false}>
