@@ -154,6 +154,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
       listProps={{
         bordered: false,
         showIcons: false,
+        onFocusBadge: false,
       }}
       css={listStylesOverride}
     >
