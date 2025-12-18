@@ -11,6 +11,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { getDefaultQuery } from '@kbn/data-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export function processFilters(
   optionalFilters?: Filter[],
@@ -54,7 +55,7 @@ export function processFilters(
       };
     }
 
-    if (filterQuery) {
+    if (filterQuery && isPopulatedObject(filterQuery)) {
       if (negate) {
         mustNot.push(filterQuery);
       } else {
