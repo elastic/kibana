@@ -86,12 +86,22 @@ export type MyStepInput = z.infer<typeof InputSchema>;
 export type MyStepOutput = z.infer<typeof OutputSchema>;
 
 /**
+ * Config schema for the step (optional).
+ * Defines config properties that appear at the step level (outside the `with` block).
+ * Example: `id`.
+ */
+export const ConfigSchema = z.object({
+  'id': z.string(),
+});
+
+/**
  * Common step definition shared between server and public.
  */
 export const myStepCommonDefinition: CommonStepDefinition = {
   id: MyStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  configSchema: ConfigSchema, // Optional: only needed if step has config properties
 };
 ```
 
@@ -143,6 +153,8 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { MyStepTypeId, myStepCommonDefinition } from '../../common/step_types/my_step';
 
+import { StepMenuCatalog } from '@kbn/workflows-extensions/public';
+
 export const myStepDefinition: PublicStepDefinition = {
   ...myStepCommonDefinition,
   icon: React.lazy(() =>
@@ -168,6 +180,7 @@ export const myStepDefinition: PublicStepDefinition = {
 \`\`\``,
     ],
   },
+  actionsMenuCatalog: StepMenuCatalog.kibana, // Optional: determines which catalog the step appears under in the actions menu
 };
 ```
 
@@ -317,12 +330,14 @@ The `context` parameter provides access to runtime services and step information
 The public definition must include:
 
 - `id`: Step type identifier (must match server-side)
+- `label`: User-facing label (i18n recommended)
 - `inputSchema`: Zod schema for input validation
 - `outputSchema`: Zod schema for output validation
-- `label`: User-facing label (i18n recommended)
-- `icon`: React component (can be imported from EUI assets, not a direct string), preferably lazy loaded using `React.lazy`.
-- `description`: Optional user-facing description
-- `documentation`: Optional documentation with details and examples
+- `configSchema`: (Optional) Zod schema for config properties (properties outside the `with` block)
+- `icon`: (Optional) React component (can be imported from EUI assets, not a direct string), preferably lazy loaded using `React.lazy`.
+- `description`: (Optional) user-facing description
+- `documentation`: (Optional) documentation with details and examples
+- `actionsMenuCatalog`: (Optional) The catalog under which the step is displayed in the actions menu. Must be one of `StepMenuCatalog.elasticsearch`, `StepMenuCatalog.external`, `StepMenuCatalog.ai`, or `StepMenuCatalog.kibana`. Defaults to `StepMenuCatalog.kibana` if not provided.
 
 ## Dependencies
 

@@ -83,11 +83,9 @@ export class OnechatPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    if (setupDeps.workflowsExtensions) {
-      setupDeps.workflowsExtensions.registerStepDefinition(
-        getRunAgentStepDefinition(this.serviceManager)
-      );
-    }
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      getRunAgentStepDefinition(this.serviceManager)
+    );
 
     registerOnechatHandlerContext({ coreSetup });
 

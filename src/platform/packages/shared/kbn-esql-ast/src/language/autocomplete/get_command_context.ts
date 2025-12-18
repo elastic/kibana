@@ -19,10 +19,14 @@ export const getCommandContext = async (
   const helpers = getPolicyHelper(callbacks);
   switch (commandName) {
     case 'completion':
-      const inferenceEndpoints =
-        (await callbacks?.getInferenceEndpoints?.('completion'))?.inferenceEndpoints || [];
       return {
-        inferenceEndpoints,
+        inferenceEndpoints:
+          (await callbacks?.getInferenceEndpoints?.('completion'))?.inferenceEndpoints || [],
+      };
+    case 'rerank':
+      return {
+        inferenceEndpoints:
+          (await callbacks?.getInferenceEndpoints?.('rerank'))?.inferenceEndpoints || [],
       };
     case 'enrich':
       const policies = await helpers.getPolicies();
