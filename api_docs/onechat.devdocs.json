@@ -198,6 +198,43 @@
         },
         {
           "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.toggleConversationFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "toggleConversationFlyout",
+          "description": [
+            "\nToggles the conversation flyout.\n\nIf the flyout is open, it will be closed. Otherwise, it will be opened."
+          ],
+          "signature": [
+            "(options?: ",
+            "OpenConversationFlyoutOptions",
+            " | undefined) => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "onechat",
+              "id": "def-public.OnechatPluginStart.toggleConversationFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "OpenConversationFlyoutOptions",
+                " | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "onechat",
           "id": "def-public.OnechatPluginStart.setConversationFlyoutActiveConfig",
           "type": "Function",
           "tags": [],

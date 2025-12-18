@@ -16,6 +16,8 @@ jest.mock('../span_links/get_linked_children');
 
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
+import { getTraceItemIcon } from './get_unified_trace_items';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AT_TIMESTAMP,
   EVENT_OUTCOME,
@@ -41,18 +43,18 @@ describe('getErrorsByDocId', () => {
   it('groups errors by doc id from apmErrors and unprocessedOtelErrors', () => {
     const unifiedTraceErrors = {
       apmErrors: [
-        { spanId: 'a', id: 'error-1' },
-        { spanId: 'a', id: 'error-2' },
-        { spanId: 'b', id: 'error-3' },
-        { spanId: undefined, id: 'error-4' },
+        { span: { id: 'a' }, id: 'error-1' },
+        { span: { id: 'a' }, id: 'error-2' },
+        { span: { id: 'b' }, id: 'error-3' },
+        { span: { id: undefined }, id: 'error-4' },
       ],
       unprocessedOtelErrors: [
-        { spanId: 'a', id: 'error-5' },
-        { spanId: 'c', id: 'error-6' },
-        { spanId: undefined, id: 'error-7' },
+        { span: { id: 'a' }, id: 'error-5' },
+        { span: { id: 'c' }, id: 'error-6' },
+        { span: { id: undefined }, id: 'error-7' },
       ],
       totalErrors: 7,
-    } as UnifiedTraceErrors;
+    } as unknown as UnifiedTraceErrors;
 
     const result = getErrorsByDocId(unifiedTraceErrors);
 
@@ -106,11 +108,11 @@ describe('getUnifiedTraceItems', () => {
     config: mockConfig,
   };
 
-  const mockUnifiedTraceErrors: UnifiedTraceErrors = {
-    apmErrors: [{ spanId: 'span-1', id: 'error-1', error: { id: 'error-1' } }],
+  const mockUnifiedTraceErrors = {
+    apmErrors: [{ span: { id: 'span-1' }, id: 'error-1', error: { id: 'error-1' } }],
     unprocessedOtelErrors: [],
     totalErrors: 1,
-  };
+  } as unknown as UnifiedTraceErrors;
 
   const defaultSearchFields = {
     [AT_TIMESTAMP]: ['2023-01-01T00:00:00.000Z'],
@@ -587,10 +589,10 @@ describe('getUnifiedTraceItems', () => {
 
       const mockUnifiedTraceErrorsWithMultiple = {
         apmErrors: [
-          { spanId: 'span-1', id: 'error-1' },
-          { spanId: 'span-1', id: 'error-2' },
+          { span: { id: 'span-1' }, id: 'error-1' },
+          { span: { id: 'span-1' }, id: 'error-2' },
         ],
-        unprocessedOtelErrors: [{ spanId: 'span-2', id: 'error-3' }],
+        unprocessedOtelErrors: [{ span: { id: 'span-2' }, id: 'error-3' }],
         totalErrors: 3,
       } as unknown as UnifiedTraceErrors;
 
@@ -632,6 +634,110 @@ describe('getUnifiedTraceItems', () => {
       const result = await getUnifiedTraceItems(defaultParams);
 
       expect(result.traceItems[0].errors).toEqual([]);
+    });
+  });
+});
+
+describe('getTraceItemIcon', () => {
+  describe('database icon', () => {
+    it('returns "database" when spanType starts with "db"', () => {
+      expect(getTraceItemIcon({ spanType: 'db' })).toBe('database');
+    });
+
+    it('returns "database" when spanType is "db.mysql"', () => {
+      expect(getTraceItemIcon({ spanType: 'db.mysql' })).toBe('database');
+    });
+
+    it('returns "database" when spanType is "db.elasticsearch"', () => {
+      expect(getTraceItemIcon({ spanType: 'db.elasticsearch' })).toBe('database');
+    });
+
+    it('returns "database" even when processorEvent is transaction', () => {
+      expect(
+        getTraceItemIcon({
+          spanType: 'db.redis',
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'nodejs',
+        })
+      ).toBe('database');
+    });
+  });
+
+  describe('non-transaction processor events', () => {
+    it('returns undefined when processorEvent is span', () => {
+      expect(getTraceItemIcon({ processorEvent: ProcessorEvent.span })).toBeUndefined();
+    });
+
+    it('returns undefined when processorEvent is undefined', () => {
+      expect(getTraceItemIcon({})).toBeUndefined();
+    });
+
+    it('returns undefined when processorEvent is error', () => {
+      expect(getTraceItemIcon({ processorEvent: ProcessorEvent.error })).toBeUndefined();
+    });
+  });
+
+  describe('transaction processor events', () => {
+    it('returns "globe" for RUM agent "js-base"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'js-base',
+        })
+      ).toBe('globe');
+    });
+
+    it('returns "globe" for RUM agent "rum-js"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'rum-js',
+        })
+      ).toBe('globe');
+    });
+
+    it('returns "globe" for RUM agent "opentelemetry/webjs"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'opentelemetry/webjs',
+        })
+      ).toBe('globe');
+    });
+
+    it('returns "merge" for non-RUM agent "nodejs"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'nodejs',
+        })
+      ).toBe('merge');
+    });
+
+    it('returns "merge" for non-RUM agent "java"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'java',
+        })
+      ).toBe('merge');
+    });
+
+    it('returns "merge" for non-RUM agent "python"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'python',
+        })
+      ).toBe('merge');
+    });
+
+    it('returns "merge" when agentName is undefined', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+        })
+      ).toBe('merge');
     });
   });
 });
