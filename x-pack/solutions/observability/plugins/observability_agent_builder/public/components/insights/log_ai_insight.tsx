@@ -90,7 +90,7 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
         context,
         attachmentLabel: i18n.translate(
           'xpack.observabilityAgentBuilder.logAiInsight.attachmentLabel',
-          { defaultMessage: 'Log AI Insight' }
+          { defaultMessage: 'Log summary' }
         ),
       },
     },

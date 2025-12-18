@@ -60,7 +60,7 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
         context,
         attachmentLabel: i18n.translate(
           'xpack.observabilityAgentBuilder.alertAiInsight.attachmentLabel',
-          { defaultMessage: 'Alert AI Insight' }
+          { defaultMessage: 'Alert summary' }
         ),
       },
     },

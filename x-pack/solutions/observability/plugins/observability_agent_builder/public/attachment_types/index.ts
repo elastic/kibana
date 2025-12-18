@@ -30,7 +30,7 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
   {
     type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
     label: i18n.translate('xpack.observabilityAgentBuilder.attachments.aiInsight.label', {
-      defaultMessage: 'AI Insight',
+      defaultMessage: 'Summary',
     }),
     icon: 'sparkles',
   },

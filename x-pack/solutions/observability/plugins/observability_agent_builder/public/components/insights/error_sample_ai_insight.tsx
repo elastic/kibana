@@ -82,7 +82,7 @@ export function ErrorSampleAiInsight({
         context,
         attachmentLabel: i18n.translate(
           'xpack.observabilityAgentBuilder.errorAiInsight.attachmentLabel',
-          { defaultMessage: 'Error AI Insight' }
+          { defaultMessage: 'Error summary' }
         ),
       },
     },
