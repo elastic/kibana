@@ -130,7 +130,6 @@ export const useRuleDetailsTabs = ({
     canReadEndpointExceptions,
     canReadExceptions,
     canReadAlerts,
-    isEndpointExceptionsMovedFFEnabled,
     rule,
     ruleDetailTabs,
     ruleExecutionSettings,
