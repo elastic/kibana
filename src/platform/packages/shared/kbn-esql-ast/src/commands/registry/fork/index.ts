@@ -28,8 +28,14 @@ export const forkCommand = {
     description: i18n.translate('kbn-esql-ast.esql.definitions.forkDoc', {
       defaultMessage: 'Forks the stream.',
     }),
-    declaration: `TODO`,
-    examples: [],
+    declaration: 'FORK (<processing_commands>) (<processing_commands>) ... (<processing_commands>)',
+    examples: [
+      `FROM employees
+| FORK (WHERE emp_no == 10001)
+  (WHERE emp_no == 10002)
+| KEEP emp_no, _fork
+| SORT emp_no`,
+    ],
     subqueryRestrictions: {
       hideInside: true,
       hideOutside: true,

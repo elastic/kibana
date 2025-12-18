@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { Dependency } from '../../../../../common/types';
-import type { KibanaSavedObjectsSLORepository } from '../../../../services';
+import type { SLODefinitionRepository } from '../../../../services';
 import type { BurnRateRuleParams } from '../types';
 import type { SLODefinition } from '../../../../domain/models';
 import { evaluate } from './evaluate';
@@ -29,7 +29,7 @@ export interface EvaulateDependenciesResponse {
 export async function evaluateDependencies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  sloRepository: KibanaSavedObjectsSLORepository,
+  sloRepository: SLODefinitionRepository,
   dependencies: Dependency[],
   startedAt: Date
 ): Promise<EvaulateDependenciesResponse> {
