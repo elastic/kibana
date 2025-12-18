@@ -10,7 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition'
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ComponentTemplatePanel } from '../component_template_panel';
@@ -77,9 +77,9 @@ export function UnmanagedElasticsearchAssets({
 
   const [currentFlyout, setCurrentFlyout] = useState<
     | {
-      type: 'data_stream' | 'component_template' | 'index_template' | 'ingest_pipeline';
-      name: string;
-    }
+        type: 'data_stream' | 'component_template' | 'index_template' | 'ingest_pipeline';
+        name: string;
+      }
     | undefined
   >(undefined);
 
