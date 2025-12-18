@@ -89,7 +89,7 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: false,
+      canReadAlerts: false,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -101,7 +101,7 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -120,7 +120,7 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -145,7 +145,7 @@ describe('useRuleDetailsTabs', () => {
       },
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -171,7 +171,7 @@ describe('useRuleDetailsTabs', () => {
       },
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -183,7 +183,7 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
@@ -201,7 +201,7 @@ describe('useRuleDetailsTabs', () => {
       rule: mockRule,
       ruleId: mockRule.rule_id,
       isExistingRule: true,
-      hasIndexRead: true,
+      canReadAlerts: true,
     });
     const tabsNames = Object.keys(tabs.result.current);
 
