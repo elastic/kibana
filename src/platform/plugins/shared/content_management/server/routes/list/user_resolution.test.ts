@@ -34,8 +34,7 @@ describe('user_resolution', () => {
   });
 
   describe('getDistinctCreators', () => {
-    const createMockLogger = (): jest.Mocked<Logger> =>
-      loggingSystemMock.createLogger();
+    const createMockLogger = (): jest.Mocked<Logger> => loggingSystemMock.createLogger();
 
     const createMockSavedObjectsClient = () => ({
       search: jest.fn(),
@@ -115,17 +114,19 @@ describe('user_resolution', () => {
   });
 
   describe('resolveCreatedByFilter', () => {
-    const createMockLogger = (): jest.Mocked<Logger> =>
-      loggingSystemMock.createLogger();
+    const createMockLogger = (): jest.Mocked<Logger> => loggingSystemMock.createLogger();
 
-    const createMockCoreStart = (profiles: Array<{
-      uid: string;
-      user: { username: string; email?: string };
-    }> = []): CoreStart => ({
-      userProfile: {
-        bulkGet: jest.fn().mockResolvedValue(profiles),
-      },
-    } as unknown as CoreStart);
+    const createMockCoreStart = (
+      profiles: Array<{
+        uid: string;
+        user: { username: string; email?: string };
+      }> = []
+    ): CoreStart =>
+      ({
+        userProfile: {
+          bulkGet: jest.fn().mockResolvedValue(profiles),
+        },
+      } as unknown as CoreStart);
 
     it('should pass through UIDs without resolution', async () => {
       const mockLogger = createMockLogger();
@@ -140,8 +141,8 @@ describe('user_resolution', () => {
 
       expect(result.uids).toEqual(['u_user1_0', 'u_user2_0']);
       expect(result.inputToUidMap).toEqual({
-        'u_user1_0': 'u_user1_0',
-        'u_user2_0': 'u_user2_0',
+        u_user1_0: 'u_user1_0',
+        u_user2_0: 'u_user2_0',
       });
       expect(mockCoreStart.userProfile.bulkGet).not.toHaveBeenCalled();
     });
@@ -213,12 +214,7 @@ describe('user_resolution', () => {
       const mockLogger = createMockLogger();
       const mockCoreStart = createMockCoreStart();
 
-      const result = await resolveCreatedByFilter(
-        ['john.doe'],
-        [],
-        mockCoreStart,
-        mockLogger
-      );
+      const result = await resolveCreatedByFilter(['john.doe'], [], mockCoreStart, mockLogger);
 
       // UIDs are empty but no error; just can't resolve.
       expect(result.uids).toEqual([]);
@@ -240,7 +236,7 @@ describe('user_resolution', () => {
 
       expect(result.uids).toContain('u_existing_0');
       expect(result.uids).toContain('u_john_0');
-      expect(result.inputToUidMap['u_existing_0']).toBe('u_existing_0');
+      expect(result.inputToUidMap.u_existing_0).toBe('u_existing_0');
       expect(result.inputToUidMap['john.doe']).toBe('u_john_0');
     });
 
@@ -267,18 +263,20 @@ describe('user_resolution', () => {
   });
 
   describe('fetchUserProfiles', () => {
-    const createMockLogger = (): jest.Mocked<Logger> =>
-      loggingSystemMock.createLogger();
+    const createMockLogger = (): jest.Mocked<Logger> => loggingSystemMock.createLogger();
 
-    const createMockCoreStart = (profiles: Array<{
-      uid: string;
-      user: { username: string; email?: string; full_name?: string };
-      data: { avatar?: { initials?: string } };
-    }> = []): CoreStart => ({
-      userProfile: {
-        bulkGet: jest.fn().mockResolvedValue(profiles),
-      },
-    } as unknown as CoreStart);
+    const createMockCoreStart = (
+      profiles: Array<{
+        uid: string;
+        user: { username: string; email?: string; full_name?: string };
+        data: { avatar?: { initials?: string } };
+      }> = []
+    ): CoreStart =>
+      ({
+        userProfile: {
+          bulkGet: jest.fn().mockResolvedValue(profiles),
+        },
+      } as unknown as CoreStart);
 
     it('should fetch and map user profiles', async () => {
       const mockLogger = createMockLogger();
@@ -342,4 +340,3 @@ describe('user_resolution', () => {
     });
   });
 });
-

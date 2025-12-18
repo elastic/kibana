@@ -404,4 +404,3 @@ describe('registerListRoute', () => {
     });
   });
 });
-
