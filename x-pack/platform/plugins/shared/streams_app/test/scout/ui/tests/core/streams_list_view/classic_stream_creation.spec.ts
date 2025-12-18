@@ -7,7 +7,7 @@
 
 import { expect, type EsClient, type ApiServicesFixture } from '@kbn/scout';
 import type { Locator } from '@kbn/scout';
-import { test } from '../../fixtures';
+import { test } from '../../../fixtures';
 
 const CLASSIC_STREAM_TEMPLATE_NAME = 'classic_stream_template';
 const CLASSIC_STREAM_INDEX_PATTERN_PREFIX = 'classic-stream';

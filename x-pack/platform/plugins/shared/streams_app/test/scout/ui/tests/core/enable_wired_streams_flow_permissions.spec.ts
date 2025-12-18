@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../fixtures';
+import { test } from '../../fixtures';
 
 // Common test IDs
 const WIRED_SWITCH = 'streamsWiredSwitch';

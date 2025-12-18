@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { test } from '../../fixtures';
-import { generateLogsData } from '../../fixtures/generators';
+import { test } from '../../../fixtures';
+import { generateLogsData } from '../../../fixtures/generators';
 
 const INGESTION_DURATION_MINUTES = 5;
 const INGESTION_RATE = 10;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from '../../fixtures';
+import { test } from '../../../fixtures';
 
 test.describe(
   'Stream list view - expand and collapse streams in the table',
