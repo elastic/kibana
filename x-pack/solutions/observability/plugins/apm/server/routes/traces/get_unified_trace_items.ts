@@ -183,7 +183,7 @@ export async function getUnifiedTraceItems({
   ]);
 
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
-  let agentMarks: Record<string, number> = {};
+  const agentMarks: Record<string, number> = {};
   const traceItems = compactMap(unifiedTraceItems.hits.hits, (hit) => {
     const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
     if (event[PROCESSOR_EVENT] === ProcessorEvent.transaction) {
