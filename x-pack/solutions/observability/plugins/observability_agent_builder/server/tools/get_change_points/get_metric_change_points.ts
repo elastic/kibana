@@ -13,9 +13,9 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { dateHistogram } from './common';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
@@ -242,8 +242,11 @@ export function createObservabilityGetMetricChangePointsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
   const toolDefinition: BuiltinToolDefinition<typeof getMetricChangePointsSchema> = {
@@ -285,7 +288,7 @@ export function createObservabilityGetMetricChangePointsTool({
             {
               type: ToolResultType.other,
               data: {
-                changes: {
+                changePoints: {
                   metrics: topMetricChangePoints,
                 },
               },

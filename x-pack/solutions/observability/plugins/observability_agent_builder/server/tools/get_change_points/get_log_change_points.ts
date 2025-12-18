@@ -14,9 +14,9 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { dateHistogram } from './common';
 import { getLogsIndices } from '../../utils/get_logs_indices';
@@ -170,8 +170,11 @@ export function createObservabilityGetLogChangePointsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
   const toolDefinition: BuiltinToolDefinition<typeof getLogChangePointsSchema> = {

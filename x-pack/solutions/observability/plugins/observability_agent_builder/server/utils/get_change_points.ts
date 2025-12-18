@@ -55,8 +55,9 @@ export async function getChangePoints({
 }): Promise<ChangePoint[]> {
   const series = buckets
     .filter(
-      // filter out indeterminable changes
-      (bucket) => bucket.changes && !bucket.changes.type?.indeterminable
+      // filter out non-change points (stationary = no change, indeterminable = can't determine)
+      (bucket) =>
+        bucket.changes && !bucket.changes.type?.stationary && !bucket.changes.type?.indeterminable
     )
     .map((bucket) => {
       const changes = bucket.changes!;
