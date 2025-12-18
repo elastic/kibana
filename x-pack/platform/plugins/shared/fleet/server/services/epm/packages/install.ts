@@ -803,7 +803,6 @@ export async function installPackageWithStateMachine(options: {
           ...telemetryEvent!,
           status: 'success',
         });
-        logger.debug(`Finished removing old assets from previous versions of ${pkgName}`);
         return {
           assets,
           status: 'installed' as InstallResultStatus,

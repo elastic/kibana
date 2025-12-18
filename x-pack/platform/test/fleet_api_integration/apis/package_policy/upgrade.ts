@@ -9,7 +9,6 @@ import type {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
-import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { getInstallationInfo } from './helper';
@@ -1270,10 +1269,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
-        expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
-      };
-
       describe('upgrade', function () {
         it('upgrades the package policy and creates the correct templates', async function () {
           await supertest
@@ -1290,17 +1285,13 @@ export default function (providerContext: FtrProviderContext) {
               'integration_to_input',
               '3.0.0'
             );
-            // expectedAssets.forEach((item) => {
-            //   expect(
-            //     installation.installed_es.find(
-            //       (asset: any) => asset.type === item.type && asset.id === item.id
-            //     )
-            //   ).to.not.be(undefined);
-            // });
-            expectIdArraysEqual(
-              installation.installed_es.filter((item: any) => item.type !== 'knowledge_base'),
-              expectedAssets
-            );
+            expectedAssets.forEach((item) => {
+              expect(
+                installation.installed_es.find(
+                  (asset: any) => asset.type === item.type && asset.id === item.id
+                )
+              ).to.eql(item, `Expected asset not found: ${item.type}:${item.id}`);
+            });
           });
 
           const expectedComponentTemplates = expectedAssets.filter(
