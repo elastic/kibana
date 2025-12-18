@@ -13,7 +13,6 @@
       "presentationUtil",
       "presentationPanel",
       "embeddable",
-      "dashboard",
       "dataViews",
       "data",
       "unifiedSearch",
