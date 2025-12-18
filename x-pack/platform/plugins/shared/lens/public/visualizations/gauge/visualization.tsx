@@ -35,10 +35,9 @@ import type {
   UserMessage,
   Visualization,
 } from '@kbn/lens-common';
-import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from './palette_config';
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
-import { GROUP_ID, LENS_GAUGE_ID } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, DEFAULT_PALETTE } from './constants';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
@@ -227,39 +226,13 @@ export const getGaugeVisualization = ({
   },
 
   initialize(addNewLayer, state, mainPalette) {
-    const defaultPalette: PaletteOutput<CustomPaletteParams> = {
-      name: DEFAULT_PALETTE_NAME,
-      type: 'palette',
-      params: {
-        ...defaultPaletteParams,
-        stops: [
-          {
-            color: '#24c292',
-            stop: 0,
-          },
-          {
-            color: '#aee8d2',
-            stop: 25,
-          },
-          {
-            color: '#ffc9c2',
-            stop: 50,
-          },
-          {
-            color: '#f6726a',
-            stop: 75,
-          },
-        ],
-      },
-    };
-
     return (
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
         colorMode: 'palette',
-        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : defaultPalette,
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : DEFAULT_PALETTE,
         ticksPosition: 'auto',
         labelMajorMode: 'auto',
       }

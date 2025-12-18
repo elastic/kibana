@@ -21,7 +21,7 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization, VisualizationSuggestion } from '@kbn/lens-common';
 import type { GaugeVisualizationState } from './constants';
-import { gaugeTitlesByType } from './constants';
+import { gaugeTitlesByType, DEFAULT_PALETTE } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
@@ -61,6 +61,8 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.AUTO,
       labelMajorMode: GaugeLabelMajorModes.AUTO,
+      colorMode: 'palette',
+      palette: DEFAULT_PALETTE,
     },
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',

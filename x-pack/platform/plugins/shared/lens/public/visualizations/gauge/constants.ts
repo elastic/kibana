@@ -12,10 +12,38 @@ import type {
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { LensLayerType as LayerType } from '@kbn/lens-common';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from './palette_config';
 
 export type { GaugeVisualizationState } from '@kbn/lens-common';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
+
+export const DEFAULT_PALETTE: PaletteOutput<CustomPaletteParams> = {
+  name: DEFAULT_PALETTE_NAME,
+  type: 'palette',
+  params: {
+    ...defaultPaletteParams,
+    stops: [
+      {
+        color: '#24c292',
+        stop: 0,
+      },
+      {
+        color: '#aee8d2',
+        stop: 25,
+      },
+      {
+        color: '#ffc9c2',
+        stop: 50,
+      },
+      {
+        color: '#f6726a',
+        stop: 75,
+      },
+    ],
+  },
+};
 
 export const GROUP_ID = {
   METRIC: 'metric',
