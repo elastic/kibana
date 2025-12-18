@@ -58,20 +58,23 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     }
 
     if (result != null && indexName) {
+      const hasIndexWrite = result.index[indexName].create ||
+          result.index[indexName].create_doc ||
+          result.index[indexName].index ||
+          result.index[indexName].write
+      const hasIndexRead = result.index[indexName].read
       return {
         isAuthenticated: result.is_authenticated,
         hasEncryptionKey: result.has_encryption_key,
         hasIndexManage: result.index[indexName].manage && result.cluster.manage,
         hasIndexMaintenance: result.index[indexName].maintenance,
-        hasIndexRead: result.index[indexName].read,
-        hasIndexWrite:
-          result.index[indexName].create ||
-          result.index[indexName].create_doc ||
-          result.index[indexName].index ||
-          result.index[indexName].write,
+        hasIndexRead,
+        hasIndexWrite,
         hasIndexUpdateDelete: result.index[indexName].write,
-        hasAlertsRead,
-        hasAlertsAll,
+        // For now hasAlertsRead and hasAlertsAll will depend both on the RBAC setup and the explicit read/write access to the alerts index
+        // We do this to avoid doing this double wherever this hook is used.
+        hasAlertsRead: hasAlertsRead && hasIndexRead,
+        hasAlertsAll: hasAlertsAll && hasIndexWrite,
       };
     }
 
