@@ -9,6 +9,7 @@ import expect from 'expect';
 import type {
   CreateEntitySourceRequestBody,
   ListEntitySourcesRequestQuery,
+  ListEntitySourcesResponse,
   MonitoringEntitySource,
   UpdateEntitySourceRequestBody,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
@@ -307,7 +308,7 @@ export default ({ getService }: FtrProviderContext) => {
         const listResponse = await api.listEntitySources({
           query,
         });
-        return { ...listResponse, body: listResponse.body as MonitoringEntitySource[] };
+        return { ...listResponse, body: listResponse.body as ListEntitySourcesResponse[] };
       };
 
       it('should list all entity sources', async () => {
@@ -329,9 +330,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(listResponse.status).toBe(200);
-        expect(listResponse.body.length).toBe(1);
-        expect(listResponse.body[0].id).toBe(source.id);
-        expect(listResponse.body[0].name).toBe(source.name);
+        expect(listResponse.body.sources.length).toBe(1);
+        expect(listResponse.body.sources[0].id).toBe(source.id);
+        expect(listResponse.body.sources[0].name).toBe(source.name);
       });
 
       it('should filter sources by type', async () => {
@@ -343,7 +344,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(listResponse.status).toBe(200);
         expect(Array.isArray(listResponse.body)).toBe(true);
-        listResponse.body.forEach((source: MonitoringEntitySource) => {
+        listResponse.body.sources.forEach((source: MonitoringEntitySource) => {
           expect(source.type).toBe('index');
         });
       });
@@ -357,7 +358,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(managedListResponse.status).toBe(200);
         expect(Array.isArray(managedListResponse.body)).toBe(true);
-        managedListResponse.body.forEach((source: MonitoringEntitySource) => {
+        managedListResponse.body.sources.forEach((source: MonitoringEntitySource) => {
           expect(source.managed).toBe(true);
         });
 
@@ -369,7 +370,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(nonManagedListResponse.status).toBe(200);
         expect(Array.isArray(nonManagedListResponse.body)).toBe(true);
-        nonManagedListResponse.body.forEach((source: MonitoringEntitySource) => {
+        nonManagedListResponse.body.sources.forEach((source: MonitoringEntitySource) => {
           expect(source.managed).toBe(false);
         });
       });
@@ -382,7 +383,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(listResponse.status).toBe(200);
-        expect(listResponse.body.length).toBe(0);
+        expect(listResponse.body.sources.length).toBe(0);
       });
     });
   });

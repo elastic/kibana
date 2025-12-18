@@ -371,7 +371,7 @@ export const PrivMonUtils = (
       query: {},
     });
 
-    const sources = res.body as ListEntitySourcesResponse;
+    const { sources } = res.body as ListEntitySourcesResponse;
     const source = sources.find((s) => s.integrationName === integrationName);
     if (!source) {
       throw new Error(`No monitoring source found for integration ${integrationName}`);

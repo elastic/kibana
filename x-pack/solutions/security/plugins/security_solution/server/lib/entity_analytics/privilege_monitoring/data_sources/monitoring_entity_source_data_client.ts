@@ -10,6 +10,7 @@ import type {
   MonitoringEntitySourceAttributes,
   MonitoringEntitySource,
   ListEntitySourcesRequestQuery,
+  ListEntitySourcesResponse,
 } from '../../../../../common/api/entity_analytics';
 import type { PartialMonitoringEntitySource } from '../types';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
@@ -62,9 +63,9 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.delete(id);
   }
 
-  public async list(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
+  public async list(query: ListEntitySourcesRequestQuery): Promise<ListEntitySourcesResponse> {
     this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
-    return this.monitoringEntitySourceClient.findAll(query);
+    return this.monitoringEntitySourceClient.list(query);
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

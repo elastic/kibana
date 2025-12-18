@@ -9,9 +9,10 @@ import type {
   MonitoringEntitySourceAttributes,
   ListEntitySourcesRequestQuery,
   MonitoringEntitySource,
+  ListEntitySourcesResponse,
 } from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
-import type { MonitoringEntitySyncType, PartialMonitoringEntitySource } from '../types';
+import type { PartialMonitoringEntitySource } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
@@ -54,8 +55,8 @@ export class MonitoringEntitySourceDescriptorClient {
   }
 
   async upsert(source: UpsertInput): Promise<UpsertResult> {
-    const foundResult = await this.find({ name: source.name });
-    const found = foundResult.saved_objects[0];
+    const { sources } = await this.list({ name: source.name, per_page: 1 });
+    const found = sources[0];
     if (found) {
       await this.update({ ...source, id: found.id });
       return { action: 'updated', source: { ...source, id: found.id } as MonitoringEntitySource };
@@ -68,27 +69,47 @@ export class MonitoringEntitySourceDescriptorClient {
   async bulkUpsert(sources: UpsertInput[]) {
     if (!sources.length) return { created: 0, updated: 0, results: [] };
 
-    const existing = await this.findAll({});
-    const byName = new Map(existing.map((s) => [s.name, s]));
-
     let created = 0;
     let updated = 0;
     const results: UpsertResult[] = [];
+    const BATCH_SIZE = 100;
 
-    for (const attrs of sources) {
-      const found = byName.get(attrs.name);
-      if (!found) {
-        const createdSo = await this.create(attrs);
-        created++;
-        byName.set(createdSo.name, createdSo);
-        results.push({ action: 'created', source: createdSo });
-      } else {
-        const updatedSo = await this.update({ id: found.id, ...attrs });
-        updated++;
-        byName.set(updatedSo.name, updatedSo);
-        results.push({ action: 'updated', source: updatedSo });
+    for (let i = 0; i < sources.length; i += BATCH_SIZE) {
+      const batch = sources.slice(i, i + BATCH_SIZE);
+
+      // Build KQL query to find existing sources by name
+      const kuery = batch
+        .map((source) => `${monitoringEntitySourceTypeName}.attributes.name: "${source.name}"`)
+        .join(' or ');
+
+      // Lookup existing sources for this batch
+      const { sources: existingSources } = await this.find({
+        kuery,
+        perPage: BATCH_SIZE,
+      });
+
+      const existingByName = new Map<string, MonitoringEntitySource>();
+      for (const source of existingSources) {
+        if (source.name) {
+          existingByName.set(source.name, source);
+        }
+      }
+
+      // Create or update each source in the batch
+      for (const attrs of batch) {
+        const existing = existingByName.get(attrs.name ?? '');
+        if (existing) {
+          const updatedSo = await this.update({ id: existing.id, ...attrs });
+          updated++;
+          results.push({ action: 'updated', source: updatedSo });
+        } else {
+          const createdSo = await this.create(attrs);
+          created++;
+          results.push({ action: 'created', source: createdSo });
+        }
       }
     }
+
     return { created, updated, results };
   }
 
@@ -105,14 +126,6 @@ export class MonitoringEntitySourceDescriptorClient {
     );
 
     return { ...(attributes as MonitoringEntitySource), id: monitoringEntitySource.id };
-  }
-
-  async find(query?: ListEntitySourcesRequestQuery) {
-    const scopedSoClient = this.dependencies.soClient;
-    return scopedSoClient.find<MonitoringEntitySource>({
-      type: monitoringEntitySourceTypeName,
-      filter: this.getQueryFilters(query),
-    });
   }
 
   private getQueryFilters = (query?: ListEntitySourcesRequestQuery) => {
@@ -134,44 +147,79 @@ export class MonitoringEntitySourceDescriptorClient {
     await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
   }
 
-  /**
-   * entity_analytics_integration or index type
-   */
-  public async findSourcesByType(
-    type: MonitoringEntitySyncType
-  ): Promise<MonitoringEntitySource[]> {
-    const result = await this.find();
-    return result.saved_objects
-      .filter((so) => so.attributes.type === type)
-      .map((so) => ({ ...so.attributes, id: so.id }));
-  }
-
-  public async findAll(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
-    const result = await this.find(query);
-    return result.saved_objects.map((so) => ({ ...so.attributes, id: so.id }));
-  }
-
-  public async findByQuery(query: string): Promise<MonitoringEntitySource[]> {
+  async find({
+    kuery,
+    sortField,
+    sortOrder,
+    page,
+    perPage,
+  }: {
+    kuery: string;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+    page?: number;
+    perPage?: number;
+  }): Promise<ListEntitySourcesResponse> {
     const scopedSoClient = this.dependencies.soClient;
-
-    const results = await scopedSoClient.find<MonitoringEntitySource>({
+    const soResult = await scopedSoClient.find<MonitoringEntitySource>({
       type: monitoringEntitySourceTypeName,
-      filter: query,
-      namespaces: [this.dependencies.namespace],
+      filter: kuery,
+      sortField,
+      sortOrder,
+      page,
+      perPage,
     });
-    return results.saved_objects.map((so) => ({ ...so.attributes, id: so.id }));
+
+    return {
+      sources: soResult.saved_objects.map((so) => ({ ...so.attributes, id: so.id })),
+      page: page ?? 1,
+      per_page: perPage ?? 10,
+      total: soResult.total,
+    };
+  }
+
+  public async list(query: ListEntitySourcesRequestQuery): Promise<ListEntitySourcesResponse> {
+    return this.find({
+      kuery: this.getQueryFilters(query),
+      sortField: query?.sort_field ?? undefined,
+      sortOrder: query?.sort_order ?? undefined,
+      page: query?.page ?? 1,
+      perPage: query?.per_page ?? 10,
+    });
+  }
+
+  public async listByKuery({
+    kuery,
+    sortField,
+    sortOrder,
+    page,
+    perPage,
+  }: {
+    kuery: string;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+    page?: number;
+    perPage?: number;
+  }): Promise<ListEntitySourcesResponse> {
+    return this.find({
+      kuery,
+      sortField,
+      sortOrder,
+      page,
+      perPage,
+    });
   }
 
   private async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {
     if (attributes.name) {
-      const { saved_objects: savedObjects } = await this.find({
+      const { sources } = await this.list({
         name: attributes.name,
       });
 
       // Exclude the current entity source if updating
       const filteredSavedObjects = attributes.id
-        ? savedObjects.filter((so) => so.id !== attributes.id)
-        : savedObjects;
+        ? sources.filter((so) => so.id !== attributes.id)
+        : sources;
 
       if (filteredSavedObjects.length > 0) {
         throw new Error(

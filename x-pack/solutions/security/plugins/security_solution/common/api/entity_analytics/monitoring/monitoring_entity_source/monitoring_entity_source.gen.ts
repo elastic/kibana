@@ -129,11 +129,20 @@ export const ListEntitySourcesRequestQuery = z.object({
   type: z.string().optional(),
   managed: BooleanFromString.optional(),
   name: z.string().optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  per_page: z.coerce.number().int().min(1).max(10000).optional(),
+  sort_field: z.string().optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
 });
 export type ListEntitySourcesRequestQueryInput = z.input<typeof ListEntitySourcesRequestQuery>;
 
 export type ListEntitySourcesResponse = z.infer<typeof ListEntitySourcesResponse>;
-export const ListEntitySourcesResponse = z.array(MonitoringEntitySource);
+export const ListEntitySourcesResponse = z.object({
+  sources: z.array(MonitoringEntitySource),
+  page: z.number().int().min(1),
+  per_page: z.number().int().min(1).max(10000),
+  total: z.number().int().min(0),
+});
 
 export type UpdateEntitySourceRequestParams = z.infer<typeof UpdateEntitySourceRequestParams>;
 export const UpdateEntitySourceRequestParams = z.object({

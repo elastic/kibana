@@ -19,8 +19,8 @@ export const IndexImportManageDataSource = ({
   setAddDataSourceResult: (result: AddDataSourceResult) => void;
 }) => {
   const [isIndexModalOpen, { on: showIndexModal, off: hideIndexModal }] = useBoolean(false);
-  const { data: datasources = [], isFetching, refetch } = useFetchMonitoredIndices();
-  const monitoredDataSource = datasources[0];
+  const { data: { sources = [] } = {}, isFetching, refetch } = useFetchMonitoredIndices();
+  const monitoredDataSource = sources[0];
   const monitoredIndices = monitoredDataSource?.indexPattern
     ? monitoredDataSource.indexPattern.split(',')
     : [];

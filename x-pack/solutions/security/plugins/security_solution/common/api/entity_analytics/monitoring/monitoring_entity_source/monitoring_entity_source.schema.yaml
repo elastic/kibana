@@ -115,6 +115,26 @@ paths:
           in: query
           schema:
             type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10000
+        - name: sort_field
+          in: query
+          schema:
+            type: string
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
 
       responses:
         "200":
@@ -122,9 +142,27 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/MonitoringEntitySource"
+                type: object
+                properties:
+                  sources:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MonitoringEntitySource"
+                  page:
+                    type: integer
+                    minimum: 1
+                  per_page:
+                    type: integer
+                    minimum: 1
+                    maximum: 10000
+                  total:
+                    type: integer
+                    minimum: 0
+                required:
+                  - sources
+                  - page
+                  - per_page
+                  - total
 components:
   schemas:
     MonitoringEntitySourceType:
