@@ -10,29 +10,10 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui
 import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { onechatIconType } from '@kbn/onechat-plugin/public';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import type { AgentBuilderAddToChatTelemetry } from '../hooks/use_report_add_to_chat';
+import { useReportAddToChat } from '../hooks/use_report_add_to_chat';
 import * as i18n from './translations';
 import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
-import { useKibana } from '../../common/lib/kibana/use_kibana';
-
-export interface NewAgentBuilderAttachmentTelemetry {
-  /**
-   * Pathway where "Add to Chat" was clicked
-   */
-  pathway:
-    | 'alerts_flyout'
-    | 'entity_highlights'
-    | 'entity_risk_contribution'
-    | 'rules_table'
-    | 'rule_creation'
-    | 'rule_failure'
-    | 'attack_discovery_top'
-    | 'attack_discovery_bottom';
-  /**
-   * Attachment type
-   */
-  attachments?: Array<'alert' | 'entity' | 'rule'>;
-}
 
 export interface NewAgentBuilderAttachmentProps {
   /**
@@ -55,7 +36,7 @@ export interface NewAgentBuilderAttachmentProps {
   /**
    * Telemetry data for tracking "Add to Chat" clicks
    */
-  telemetry?: NewAgentBuilderAttachmentTelemetry;
+  telemetry?: AgentBuilderAddToChatTelemetry;
 }
 
 /**
@@ -70,17 +51,17 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const { telemetry } = useKibana().services;
+  const reportAddToChatClick = useReportAddToChat();
 
   const handleClick = useCallback(() => {
     if (telemetryData) {
-      telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
+      reportAddToChatClick({
         pathway: telemetryData.pathway,
         attachments: telemetryData.attachments,
       });
     }
     onClick();
-  }, [onClick, telemetry, telemetryData]);
+  }, [onClick, reportAddToChatClick, telemetryData]);
 
   if (!isAgentBuilderEnabled) {
     return null;
