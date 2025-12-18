@@ -154,6 +154,7 @@ describe('getUnifiedTraceItems', () => {
       expect(result).toEqual({
         traceItems: [
           {
+            icon: 'merge',
             id: 'span-1',
             name: 'Test Span',
             timestampUs: 1672531200000000,
@@ -209,6 +210,7 @@ describe('getUnifiedTraceItems', () => {
       expect(result).toEqual({
         traceItems: [
           {
+            icon: 'merge',
             id: 'span-1',
             name: 'Test Span',
             timestampUs: 1672531200000000,
