@@ -96,7 +96,7 @@ export const MetricsExplorerToolbar = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup wrap alignItems="center">
           <EuiFlexItem>
             <UnifiedSearchBar onQuerySubmit={onFilterQuerySubmit} />
           </EuiFlexItem>
