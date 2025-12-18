@@ -237,6 +237,15 @@ async function getSuggestionsWithinCommandExpression(
   const columnMap: Map<string, ESQLColumnData> = await getColumnMap();
   const references = { columns: columnMap };
 
+  const getSuggestedUserDefinedColumnName = () => {
+    const allUserDefinedColumns = new Set(
+      Walker.findAll(commands, (node) => node.type === 'column').map((col) =>
+        (col as ESQLColumn).parts.join('.')
+      )
+    );
+    return findNewUserDefinedColumn(allUserDefinedColumns);
+  };
+
   // Get the context that might be needed by the command itself
   const additionalCommandContext = await getCommandContext(
     astContext.command,
@@ -249,15 +258,6 @@ async function getSuggestionsWithinCommandExpression(
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
-  };
-
-  const getSuggestedUserDefinedColumnName = () => {
-    const allUserDefinedColumns = new Set(
-      Walker.findAll(commands, (node) => node.type === 'column').map((col) =>
-        (col as ESQLColumn).parts.join('.')
-      )
-    );
-    return findNewUserDefinedColumn(allUserDefinedColumns);
   };
 
   // does it make sense to have a different context per command?
