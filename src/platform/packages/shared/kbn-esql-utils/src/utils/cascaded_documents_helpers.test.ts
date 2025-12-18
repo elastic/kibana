@@ -35,16 +35,6 @@ describe('cascaded documents helpers utils', () => {
       expect(result.appliedFunctions).toEqual([]);
     });
 
-    it('should return an empty array of group by fields and applied functions if the query has a keep command that does not specify the current group field', () => {
-      const queryString = `
-        FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count
-      `;
-
-      const result = getESQLStatsQueryMeta(queryString);
-      expect(result.groupByFields).toEqual([]);
-      expect(result.appliedFunctions).toEqual([{ aggregation: 'COUNT', identifier: 'count' }]);
-    });
-
     it('should return an array of the columns the query has been denoted to be grouped by with the STATS command', () => {
       const queryString = `
         FROM kibana_sample_data_logs, another_index
@@ -179,6 +169,31 @@ describe('cascaded documents helpers utils', () => {
       expect(result.appliedFunctions).toEqual([
         { identifier: 'count', aggregation: 'COUNT' },
         { identifier: 'average', aggregation: 'AVG' },
+      ]);
+    });
+
+    it('should return an empty array of group by fields and applied functions if the query has a keep command that does not specify the current group field', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([{ aggregation: 'COUNT', identifier: 'count' }]);
+    });
+
+    it('should return the appropriate metadata despite there being a keep, as long as it specifies the current group field', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs | STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = PERCENTILE(bytes, 95), median = MEDIAN(bytes) BY response.keyword | KEEP Visits, Unique, p95, median, response.keyword | LIMIT 123
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([{ field: 'response.keyword', type: 'column' }]);
+      expect(result.appliedFunctions).toEqual([
+        { aggregation: 'COUNT', identifier: 'Visits' },
+        { aggregation: 'COUNT_DISTINCT', identifier: 'Unique' },
+        { aggregation: 'PERCENTILE', identifier: 'p95' },
+        { aggregation: 'MEDIAN', identifier: 'median' },
       ]);
     });
   });

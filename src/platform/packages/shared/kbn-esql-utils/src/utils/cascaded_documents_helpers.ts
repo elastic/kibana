@@ -190,6 +190,9 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
   const dataSourceCommand = getESQLQueryDataSourceCommand(esqlQuery);
   const summarizedStatsCommand = getStatsCommandToOperateOn(esqlQuery);
+  const operatingStatsCommandIndex = esqlQuery.ast.commands.findIndex(
+    (cmd) => cmd.text === summarizedStatsCommand?.command.text
+  );
 
   if (
     dataSourceCommand?.args.some(isSubQuery) ||
@@ -198,10 +201,6 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   ) {
     return { groupByFields, appliedFunctions };
   }
-
-  // get all the new fields created by the stats commands in the query,
-  // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
-  const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
 
   const grouping = Object.values(summarizedStatsCommand.grouping);
 
@@ -213,55 +212,74 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       return { groupByFields: [], appliedFunctions: [] };
     }
 
+    // unnamed grouping functions are wrapped in backticks in the generated AST so we strip them off if they exist,
+    // so the value displayed in the UI is the same as the value used in the query
     const groupFieldName = removeBackticks(group.field);
+
+    // this is a placeholder for the index of the stats command that declared the group field
+    // we start off assuming it's index is the same as the stats command we are operating on,
+    // it however will be updated if the group field is determined to be declared by some other stats command
+    let groupDeclarationStatsCommandIndex = operatingStatsCommandIndex;
+
+    // this is a placeholder for the group field node,
+    // it will be updated to the actual definition of the group field if it was declared by a preceding stats command
     let groupFieldNode = group;
 
-    const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-      field.has(groupFieldName)
-    );
+    if (!summarizedStatsCommand.newFields.has(groupFieldName)) {
+      // get all the new fields created by the stats commands in the query,
+      // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
+      const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
 
-    let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+      const groupDeclarationStatsCommandLookupIndex = statsCommandRuntimeFields.findIndex((field) =>
+        field.has(groupFieldName)
+      );
 
-    if (
-      groupDeclarationCommandIndex >= 0 &&
-      (groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
-        esqlQuery,
-        groupDeclarationCommandIndex
-      ))
-    ) {
-      // update the group field node to it's actual definition
-      groupFieldNode = groupDeclarationCommandSummary.grouping[groupFieldName];
+      let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+
+      if (
+        groupDeclarationStatsCommandLookupIndex >= 0 &&
+        (groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
+          esqlQuery,
+          groupDeclarationStatsCommandLookupIndex
+        ))
+      ) {
+        groupDeclarationStatsCommandIndex = groupDeclarationStatsCommandLookupIndex;
+        // update the group field node to it's actual definition
+        groupFieldNode = groupDeclarationCommandSummary.grouping[groupFieldName];
+      }
     }
 
-    // assert that if a keep command exists after the operating stats command, it specifies the current group field
-    const keepCommand = esqlQuery.ast.commands.slice(groupDeclarationCommandIndex).find((cmd) => {
-      return cmd.name === 'keep';
-    });
+    // given that keep commands strip fields from the resulting records,
+    // we need to ascertain that if a keep command exists after the operating stats command, it specifies the current group field
+    const offendingKeepCommand = esqlQuery.ast.commands
+      .slice(groupDeclarationStatsCommandIndex)
+      .reduce((acc, cmd) => {
+        if (cmd.name !== 'keep') {
+          return acc || false;
+        }
 
-    if (keepCommand) {
-      let found = false;
+        let offending = false;
 
-      Walker.walk(keepCommand, {
-        visitIdentifier: (node) => {
-          if (found) {
-            return;
-          }
+        Walker.walk(cmd, {
+          visitColumn: (node) => {
+            // if we don't find a node that targets the current group field,
+            // then we know the keep command is invalidating the possibility of grouping by the current group field
+            offending = node.name !== groupFieldName;
+          },
+        });
 
-          if (node.name === groupFieldName) {
-            found = true;
-          }
-        },
-      });
+        return acc || offending;
+      }, false);
 
-      if (!found) {
-        // if the keep command does not specify the current group field, then we break out of the loop
-        break;
-      }
+    if (offendingKeepCommand) {
+      // we found a keep command that strips the current group field from the resulting records,
+      // so we break out of the loop as that invalidates the possibility of grouping by the current group field
+      break;
     }
 
     // check if there is a where command after the operating stats command targeting any of it's grouping options
     const whereCommandGroupFieldSearch = esqlQuery.ast.commands
-      .slice(groupDeclarationCommandIndex)
+      .slice(groupDeclarationStatsCommandIndex)
       .find((cmd) => {
         if (cmd.name !== 'where') {
           return false;
