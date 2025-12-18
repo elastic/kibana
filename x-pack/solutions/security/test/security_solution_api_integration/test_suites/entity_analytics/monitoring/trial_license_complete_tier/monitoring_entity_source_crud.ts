@@ -6,14 +6,17 @@
  */
 
 import expect from 'expect';
+import type {
+  CreateEntitySourceRequestBody,
+  ListEntitySourcesRequestQuery,
+  MonitoringEntitySource,
+  UpdateEntitySourceRequestBody,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { PrivMonUtils } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
   const privMonUtils = PrivMonUtils(getService);
 
   const getOktaSource = async () => {
@@ -53,7 +56,9 @@ export default ({ getService }: FtrProviderContext) => {
           filter: {},
         };
 
-        const createResponse = await api.createEntitySource({ body: entitySource });
+        const createResponse = await api.createEntitySource({
+          body: entitySource as CreateEntitySourceRequestBody,
+        });
         expect(createResponse.status).toBe(400);
         expect(createResponse.body.message).toBe('Cannot create managed entity source');
       });
@@ -75,7 +80,9 @@ export default ({ getService }: FtrProviderContext) => {
           filter: {},
         };
 
-        const createResponse = await api.createEntitySource({ body: entitySource });
+        const createResponse = await api.createEntitySource({
+          body: entitySource as CreateEntitySourceRequestBody,
+        });
         expect(createResponse.status).toBe(200);
         expect(createResponse.body.id).toBeDefined();
         expect(createResponse.body.managed).toBe(false);
@@ -104,7 +111,9 @@ export default ({ getService }: FtrProviderContext) => {
           filter: {},
         };
 
-        const createResponse = await api.createEntitySource({ body: entitySource });
+        const createResponse = await api.createEntitySource({
+          body: entitySource as CreateEntitySourceRequestBody,
+        });
         expect(createResponse.status).toBe(200);
         expect(createResponse.body.id).toBeDefined();
         expect(createResponse.body.managed).toBe(false);
@@ -127,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           body: {
             managed: false,
-          },
+          } as UpdateEntitySourceRequestBody,
         });
         expect(updatedSource.status).toBe(400);
       });
@@ -138,6 +147,9 @@ export default ({ getService }: FtrProviderContext) => {
           params: {
             id: source.id,
           },
+          body: {
+            type: 'index',
+          } as UpdateEntitySourceRequestBody,
         });
         expect(updatedSource.status).toBe(400);
       });
@@ -191,7 +203,9 @@ export default ({ getService }: FtrProviderContext) => {
           filter: {},
         };
 
-        const createResponse = await api.createEntitySource({ body: entitySource });
+        const createResponse = await api.createEntitySource({
+          body: entitySource as CreateEntitySourceRequestBody,
+        });
         expect(createResponse.status).toBe(200);
         expect(createResponse.body.id).toBeDefined();
 
@@ -249,7 +263,9 @@ export default ({ getService }: FtrProviderContext) => {
           filter: {},
         };
 
-        const createResponse = await api.createEntitySource({ body: entitySource });
+        const createResponse = await api.createEntitySource({
+          body: entitySource as CreateEntitySourceRequestBody,
+        });
         expect(createResponse.status).toBe(200);
 
         const getResponse = await api.getEntitySource({
@@ -283,8 +299,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('List Entity Sources', () => {
-      it('should list all entity sources', async () => {
+      const typedListEntitySources = async ({
+        query,
+      }: {
+        query: ListEntitySourcesRequestQuery;
+      }) => {
         const listResponse = await api.listEntitySources({
+          query,
+        });
+        return { ...listResponse, body: listResponse.body as MonitoringEntitySource[] };
+      };
+
+      it('should list all entity sources', async () => {
+        const listResponse = await typedListEntitySources({
           query: {},
         });
 
@@ -295,7 +322,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should filter sources by name', async () => {
         const source = await getOktaSource();
-        const listResponse = await api.listEntitySources({
+        const listResponse = await typedListEntitySources({
           query: {
             name: source.name,
           },
@@ -308,7 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should filter sources by type', async () => {
-        const listResponse = await api.listEntitySources({
+        const listResponse = await typedListEntitySources({
           query: {
             type: 'index',
           },
@@ -316,13 +343,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(listResponse.status).toBe(200);
         expect(Array.isArray(listResponse.body)).toBe(true);
-        listResponse.body.forEach((source) => {
+        listResponse.body.forEach((source: MonitoringEntitySource) => {
           expect(source.type).toBe('index');
         });
       });
 
       it('should filter sources by managed status', async () => {
-        const managedListResponse = await api.listEntitySources({
+        const managedListResponse = await typedListEntitySources({
           query: {
             managed: true,
           },
@@ -330,11 +357,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(managedListResponse.status).toBe(200);
         expect(Array.isArray(managedListResponse.body)).toBe(true);
-        managedListResponse.body.forEach((source) => {
+        managedListResponse.body.forEach((source: MonitoringEntitySource) => {
           expect(source.managed).toBe(true);
         });
 
-        const nonManagedListResponse = await api.listEntitySources({
+        const nonManagedListResponse = await typedListEntitySources({
           query: {
             managed: false,
           },
@@ -342,13 +369,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(nonManagedListResponse.status).toBe(200);
         expect(Array.isArray(nonManagedListResponse.body)).toBe(true);
-        nonManagedListResponse.body.forEach((source) => {
+        nonManagedListResponse.body.forEach((source: MonitoringEntitySource) => {
           expect(source.managed).toBe(false);
         });
       });
 
       it('should return empty array when no sources match filter', async () => {
-        const listResponse = await api.listEntitySources({
+        const listResponse = await typedListEntitySources({
           query: {
             name: 'non-existent-source-name-12345',
           },

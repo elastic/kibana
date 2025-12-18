@@ -12,6 +12,7 @@ import {
   getPrivilegedMonitorUsersIndex,
 } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
+import type { MonitoringEntitySourceType } from '../../../../../common/api/entity_analytics';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { IntegrationType } from '../data_sources';
 import {
@@ -88,7 +89,7 @@ const getLastFullSyncMarkersIndex = (namespace: string, integration: Integration
 };
 
 const makeIntegrationSource = (namespace: string, integration: IntegrationType) => ({
-  type: 'entity_analytics_integration' as const,
+  type: 'entity_analytics_integration' as MonitoringEntitySourceType,
   managed: true,
   indexPattern: getStreamPatternFor(integration, namespace),
   name: integrationsSourceIndex(namespace, integration),

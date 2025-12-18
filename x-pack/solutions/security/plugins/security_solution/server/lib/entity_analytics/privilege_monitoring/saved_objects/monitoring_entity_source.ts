@@ -6,20 +6,19 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  CreateMonitoringEntitySource,
+  MonitoringEntitySourceNoId,
   ListEntitySourcesRequestQuery,
   MonitoringEntitySource,
 } from '../../../../../common/api/entity_analytics';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
-import type { MonitoringEntitySyncType } from '../types';
+import type { MonitoringEntitySyncType, PartialMonitoringEntitySource } from '../types';
 
 export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
 }
 
-type UpsertWithId = CreateMonitoringEntitySource & { id: string };
-type UpsertInput = CreateMonitoringEntitySource | UpsertWithId;
+type UpsertInput = MonitoringEntitySource | MonitoringEntitySourceNoId;
 interface UpsertResult {
   action: 'created' | 'updated';
   source: MonitoringEntitySource;
@@ -30,11 +29,11 @@ export type Processor = (source: MonitoringEntitySource) => Promise<void>;
 export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
-  async create(attributes: CreateMonitoringEntitySource) {
+  async create(attributes: MonitoringEntitySourceNoId) {
     await this.assertNameUniqueness(attributes);
 
     const { id, attributes: created } =
-      await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
+      await this.dependencies.soClient.create<MonitoringEntitySourceNoId>(
         monitoringEntitySourceTypeName,
         { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
         { refresh: 'wait_for' }
@@ -43,7 +42,7 @@ export class MonitoringEntitySourceDescriptorClient {
     return { ...created, id };
   }
 
-  async bulkCreate(sources: CreateMonitoringEntitySource[]) {
+  async bulkCreate(sources: MonitoringEntitySourceNoId[]) {
     const createdSources = await this.dependencies.soClient.bulkCreate(
       sources.map((source) => ({
         type: monitoringEntitySourceTypeName,
@@ -61,7 +60,7 @@ export class MonitoringEntitySourceDescriptorClient {
       await this.update({ ...source, id: found.id });
       return { action: 'updated', source: { ...source, id: found.id } as MonitoringEntitySource };
     } else {
-      const createdSource = await this.create(source as CreateMonitoringEntitySource);
+      const createdSource = await this.create(source);
       return { action: 'created', source: createdSource };
     }
   }
@@ -94,7 +93,7 @@ export class MonitoringEntitySourceDescriptorClient {
   }
 
   async update(
-    monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }
+    monitoringEntitySource: PartialMonitoringEntitySource
   ): Promise<MonitoringEntitySource> {
     await this.assertNameUniqueness(monitoringEntitySource);
 
@@ -105,7 +104,7 @@ export class MonitoringEntitySourceDescriptorClient {
       { refresh: 'wait_for' }
     );
 
-    return { ...attributes, id: monitoringEntitySource.id };
+    return { ...(attributes as MonitoringEntitySource), id: monitoringEntitySource.id };
   }
 
   async find(query?: ListEntitySourcesRequestQuery) {
@@ -149,9 +148,7 @@ export class MonitoringEntitySourceDescriptorClient {
 
   public async findAll(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
     const result = await this.find(query);
-    return result.saved_objects
-      .filter((so) => so.attributes.type !== 'csv') // from the spec we are not using CSV on monitoring
-      .map((so) => ({ ...so.attributes, id: so.id }));
+    return result.saved_objects.map((so) => ({ ...so.attributes, id: so.id }));
   }
 
   public async findByQuery(query: string): Promise<MonitoringEntitySource[]> {
