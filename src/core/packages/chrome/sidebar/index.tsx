@@ -25,7 +25,6 @@ export type {
   SidebarApp,
   SidebarAppContent,
   SidebarAppButton,
-  SidebarSize,
   SidebarRegistryServiceApi,
   SidebarStateServiceApi,
   SidebarAppStateServiceApi,

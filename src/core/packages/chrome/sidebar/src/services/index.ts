@@ -17,7 +17,8 @@ export type {
   SidebarApp,
   SidebarAppButton,
   SidebarAppContent,
-  SidebarSize,
+  SidebarComponentProps,
+  SidebarComponentType,
 } from './sidebar_registry_service';
 
 export { SidebarRegistryService, type SidebarRegistryServiceApi } from './sidebar_registry_service';

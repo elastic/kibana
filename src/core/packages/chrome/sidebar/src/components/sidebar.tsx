@@ -34,9 +34,15 @@ export function Sidebar(props: SidebarProps) {
     return null;
   }
 
+  const currentState = sidebarService.appState.getAppState(currentAppId);
+
   return (
     <SidebarPanel title={currentApp.app.title} onClose={close}>
-      <SidebarAppRenderer key={currentAppId} loadComponent={currentApp.app.loadComponent} />
+      <SidebarAppRenderer
+        key={currentAppId}
+        loadComponent={currentApp.app.loadComponent}
+        state={currentState}
+      />
     </SidebarPanel>
   );
 }

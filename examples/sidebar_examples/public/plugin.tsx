@@ -11,9 +11,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { counterAppId, type CounterState } from './counter_app';
-import { tabSelectionAppId, type TabSelectionState } from './tab_selection_app';
-import { textInputAppId, type TextInputState } from './text_input_app';
+import { counterAppId } from './counter_app';
+import { tabSelectionAppId, type TabSelectionSidebarState } from './tab_selection_app';
+import { textInputAppId, type TextInputSidebarState } from './text_input_app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -29,7 +29,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       app: {
         title: 'Text Input Example',
         loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
-        getInitialState: (): TextInputState => ({ userName: '' }),
+        getInitialState: (): TextInputSidebarState => ({ userName: '' }),
       },
     });
 
@@ -41,7 +41,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       app: {
         title: 'Counter Example',
         loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
-        getInitialState: (): CounterState => ({ counter: 0 }),
+        getInitialState: () => ({ counter: 0 }),
       },
     });
 
@@ -53,7 +53,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       app: {
         title: 'Tab Selection Example',
         loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
-        getInitialState: (): TabSelectionState => ({ selectedTab: 'overview' }),
+        getInitialState: (): TabSelectionSidebarState => ({ selectedTab: 'overview' }),
       },
     });
 

@@ -13,12 +13,16 @@ import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 
-export interface TabSelectionState {
+export interface TabSelectionProps {
+  state: TabSelectionSidebarState;
+}
+
+export interface TabSelectionSidebarState {
   selectedTab: string;
 }
 
 const useTabSelectionAppState = () => {
-  return useSidebarAppState<TabSelectionState>(tabSelectionAppId);
+  return useSidebarAppState<TabSelectionSidebarState>(tabSelectionAppId);
 };
 
 export const useTabSelectionSideBarApp = () => {
@@ -30,8 +34,10 @@ export const useTabSelectionSideBarApp = () => {
   };
 };
 
-export function TabSelectionApp() {
+export function TabSelectionApp(props: TabSelectionProps) {
   const [state, { update }] = useTabSelectionAppState();
+
+  const selectedTab = state.selectedTab;
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -59,7 +65,7 @@ export function TabSelectionApp() {
             id: tab.id,
             label: tab.label,
           }))}
-          idSelected={state.selectedTab}
+          idSelected={selectedTab}
           onChange={(id) => update({ selectedTab: id })}
         />
       </EuiFormRow>
@@ -68,7 +74,7 @@ export function TabSelectionApp() {
 
       <EuiPanel color="subdued" paddingSize="s">
         <EuiText size="xs">
-          <pre>{JSON.stringify(state, null, 2)}</pre>
+          <pre>{JSON.stringify({ selectedTab }, null, 2)}</pre>
         </EuiText>
       </EuiPanel>
     </EuiPanel>

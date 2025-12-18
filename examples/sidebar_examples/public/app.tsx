@@ -9,7 +9,6 @@
 
 import {
   EuiButton,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -18,7 +17,6 @@ import {
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { useSidebar } from '@kbn/core-chrome-sidebar';

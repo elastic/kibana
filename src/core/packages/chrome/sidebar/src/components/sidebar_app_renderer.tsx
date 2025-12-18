@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentType, lazy, Suspense, useMemo } from 'react';
+import React, { lazy, Suspense, useMemo } from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import type { SidebarComponentType } from '../services';
 
-interface SidebarAppRendererProps {
-  loadComponent: () => Promise<ComponentType<{}>>;
+interface SidebarAppRendererProps<TState> {
+  loadComponent: () => Promise<SidebarComponentType<TState>>;
+  state: TState;
 }
 
-export function SidebarAppRenderer({ loadComponent }: SidebarAppRendererProps) {
+export function SidebarAppRenderer<TState>({
+  loadComponent,
+  state,
+}: SidebarAppRendererProps<TState>) {
   const LazyComponent = useMemo(
     () => lazy(() => loadComponent().then((c) => ({ default: c }))),
     [loadComponent]
@@ -22,7 +27,7 @@ export function SidebarAppRenderer({ loadComponent }: SidebarAppRendererProps) {
 
   return (
     <Suspense fallback={<Fallback />}>
-      <LazyComponent />
+      <LazyComponent state={state} />
     </Suspense>
   );
 }

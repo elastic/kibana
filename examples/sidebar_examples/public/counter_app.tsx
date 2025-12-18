@@ -23,12 +23,17 @@ import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
 
 export const counterAppId = 'sidebarExampleCounter';
 
-export interface CounterState {
+export interface CounterProps {
+  /** state passed from sidebar state store */
+  state: CounterSidebarState;
+}
+
+export interface CounterSidebarState {
   counter: number;
 }
 
 const useCounterAppState = () => {
-  return useSidebarAppState<CounterState>(counterAppId);
+  return useSidebarAppState<CounterSidebarState>(counterAppId);
 };
 
 export const useCounterSideBarApp = () => {
@@ -40,8 +45,10 @@ export const useCounterSideBarApp = () => {
   };
 };
 
-export function CounterApp() {
+export function CounterApp(props: CounterProps) {
   const [state, { update }] = useCounterAppState();
+
+  const counter = state.counter;
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
@@ -59,15 +66,15 @@ export function CounterApp() {
       <EuiFormRow label="Counter">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => update({ counter: state.counter - 1 })}>
+            <EuiButton size="s" onClick={() => update({ counter: counter - 1 })}>
               -
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{state?.counter || 0}</EuiBadge>
+            <EuiBadge color="primary">{counter || 0}</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => update({ counter: state.counter + 1 })}>
+            <EuiButton size="s" onClick={() => update({ counter: counter + 1 })}>
               +
             </EuiButton>
           </EuiFlexItem>
@@ -78,7 +85,7 @@ export function CounterApp() {
 
       <EuiPanel color="subdued" paddingSize="s">
         <EuiText size="xs">
-          <pre>{JSON.stringify(state, null, 2)}</pre>
+          <pre>{JSON.stringify({ counter }, null, 2)}</pre>
         </EuiText>
       </EuiPanel>
     </EuiPanel>

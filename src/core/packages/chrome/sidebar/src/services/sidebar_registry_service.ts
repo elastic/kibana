@@ -25,10 +25,15 @@ export interface SidebarAppButton {
   title?: string;
 }
 
+export interface SidebarComponentProps<TState> {
+  state: TState;
+}
+export type SidebarComponentType<TState> = ComponentType<SidebarComponentProps<TState>>;
+
 /**
  * Content configuration for a sidebar app panel
  */
-export interface SidebarAppContent {
+export interface SidebarAppContent<TState = unknown> {
   /**
    * Title displayed at the top of the sidebar panel
    */
@@ -36,17 +41,17 @@ export interface SidebarAppContent {
   /**
    * Asynchronously loads the main component for the sidebar app
    */
-  loadComponent: () => Promise<ComponentType<{}>>;
+  loadComponent: () => Promise<SidebarComponentType<TState>>;
   /**
    * Function to get the initial state for the sidebar app, accessible via SidebarAppStateService or useSidebarAppState hook
    */
-  getInitialState: () => unknown;
+  getInitialState: () => TState;
 }
 
 /**
  * Complete app definition for sidebar registration
  */
-export interface SidebarApp {
+export interface SidebarApp<TAppState = unknown> {
   /**
    * Unique identifier for the sidebar app
    */
@@ -58,13 +63,13 @@ export interface SidebarApp {
   /**
    * Content configuration for the sidebar app panel
    */
-  app: SidebarAppContent;
+  app: SidebarAppContent<TAppState>;
 }
 
 export interface SidebarRegistryServiceApi {
   apps$: Observable<SidebarApp[]>;
   getApps: () => SidebarApp[];
-  registerApp: (app: SidebarApp) => void;
+  registerApp<TAppState = {}>(app: SidebarApp<TAppState>): void;
   getApp(appId: string): SidebarApp | undefined;
   hasApp: (appId: string) => boolean;
 }
@@ -76,11 +81,11 @@ export class SidebarRegistryService implements SidebarRegistryServiceApi {
 
   constructor() {}
 
-  registerApp(app: SidebarApp): void {
+  registerApp<TAppState = {}>(app: SidebarApp<TAppState>): void {
     if (this.registeredApps.has(app.appId)) {
       throw new Error(`[Sidebar Registry] App already registered: ${app.appId}`);
     }
-    this.registeredApps.set(app.appId, app);
+    this.registeredApps.set(app.appId, app as unknown as SidebarApp);
     this.updateAppsObservable();
   }
 
