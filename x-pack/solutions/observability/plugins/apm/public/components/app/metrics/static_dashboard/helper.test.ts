@@ -21,19 +21,23 @@ describe('APM metrics static dashboard helpers', () => {
       });
     });
 
-    it.skip('replaces placeholders in JSON with index pattern values', async () => {
+    it('replaces placeholders in JSON with index pattern values', async () => {
       const dataView = {
         id: 'id-1',
-        name: 'apm-data-view',
+        title: 'test-remote:metrics*,metrics*',
       } as unknown as any;
 
       const panels = await convertSavedDashboardToPanels(
         {
-          agentName: 'java',
+          agentName: 'opentelemetry/java/opentelemetry-java-instrumentation',
         },
         dataView
       );
-      expect(panels[0]).not.toBeUndefined();
+
+      // Find a panel and check the ES|QL query
+      expect(
+        panels.find((panel) => panel.config?.query?.esql !== undefined)?.config?.query?.esql
+      ).toContain('from test-remote:metrics*,metrics*');
     });
   });
 });
