@@ -19,7 +19,7 @@ import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import {
   areChangesSkippable,
-  // doAnyChangesMatch,
+  doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
