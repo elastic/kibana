@@ -885,36 +885,30 @@ export class ExceptionListClient {
   }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
 
-    if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
-        'exceptionsListPreSingleListFind',
-        {
-          filter,
-          listId,
-          namespaceType,
-          page,
-          perPage,
-          pit,
-          searchAfter,
-          sortField,
-          sortOrder,
-        },
-        this.getServerExtensionCallbackContext()
-      );
-    }
-
-    return findExceptionListItem({
+    const findOptions = {
       filter,
       listId,
       namespaceType,
       page,
       perPage,
       pit,
-      savedObjectsClient,
-      search,
       searchAfter,
       sortField,
       sortOrder,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreSingleListFind',
+        findOptions,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return findExceptionListItem({
+      ...findOptions,
+      savedObjectsClient,
+      search,
     });
   };
 
@@ -1083,7 +1077,7 @@ export class ExceptionListClient {
     const { savedObjectsClient } = this;
     await this.createEndpointList();
 
-    let findOptions = {
+    const findOptions = {
       filter,
       listId: ENDPOINT_LIST_ID,
       namespaceType: 'agnostic' as const,
@@ -1096,7 +1090,7 @@ export class ExceptionListClient {
     };
 
     if (this.enableServerExtensionPoints) {
-      findOptions = await this.serverExtensionsClient.pipeRun(
+      await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreSingleListFind',
         findOptions,
         this.getServerExtensionCallbackContext()
