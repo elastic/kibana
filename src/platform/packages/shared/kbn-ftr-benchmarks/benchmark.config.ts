@@ -22,7 +22,7 @@ function createBenchmark(name: string, config: string) {
       missing: 'lhs' as const,
     },
     ensure: {
-      bootstrap: true,
+      build: true,
     },
   } satisfies ScriptBenchmark;
 }
