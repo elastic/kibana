@@ -6,9 +6,9 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
-import { RULE_NAMES } from '../../fixtures/generators';
-import { SHORTER_TIMEOUT } from '../../fixtures/constants';
+import { test } from '../../../fixtures';
+import { RULE_NAMES } from '../../../fixtures/generators';
+import { SHORTER_TIMEOUT } from '../../../fixtures/constants';
 
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {

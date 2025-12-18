@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const BIGGER_TIMEOUT = 100000 as const;
+export const BIGGER_TIMEOUT = 20000 as const;
 export const SHORTER_TIMEOUT = 5000 as const;
 
 /**
