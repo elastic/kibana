@@ -100,6 +100,7 @@ export function Wrapper({
     canReadFailureStore: Streams.ingest.all.GetResponse.is(definition)
       ? definition.privileges.read_failure_store
       : true,
+    numDataPoints: 25,
   });
   const docCountsFetch = getStreamDocCounts(streamId);
 
@@ -107,13 +108,11 @@ export function Wrapper({
   const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
   const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
 
-  const docCount = countResult?.value ? Number(countResult.value?.values?.[0]?.[0]) : 0;
-  const degradedDocCount = degradedDocsResult?.value
-    ? Number(degradedDocsResult.value?.values?.[0]?.[0])
-    : 0;
-  const failedDocCount = failedDocsResult?.value
-    ? Number(failedDocsResult.value?.values?.[0]?.[0])
-    : 0;
+  const docCount = countResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
+  const degradedDocCount =
+    degradedDocsResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
+  const failedDocCount =
+    failedDocsResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
 
   const quality = calculateDataQuality({
     totalDocs: docCount,
@@ -160,6 +159,7 @@ export function Wrapper({
                       quality={quality}
                       isLoading={isQualityLoading}
                       verbose={true}
+                      showTooltip={true}
                     />
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -177,7 +177,19 @@ export function Wrapper({
           const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
 
           const wrappedLabel = stepProps ? (
-            <EuiTourStep {...stepProps}>
+            <EuiTourStep
+              step={stepProps.step}
+              stepsTotal={stepProps.stepsTotal}
+              title={stepProps.title}
+              subtitle={stepProps.subtitle}
+              content={stepProps.content}
+              anchorPosition={stepProps.anchorPosition}
+              offset={stepProps.offset}
+              maxWidth={stepProps.maxWidth}
+              isStepOpen={stepProps.isStepOpen}
+              footerAction={stepProps.footerAction}
+              onFinish={stepProps.onFinish}
+            >
               <span>{label}</span>
             </EuiTourStep>
           ) : (
