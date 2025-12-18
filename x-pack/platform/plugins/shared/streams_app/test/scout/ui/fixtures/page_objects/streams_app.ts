@@ -928,11 +928,8 @@ export class StreamsApp {
   /**
    * Significant events utility methods
    */
-  async createManualSignificantEventEntry(hasFeatures: boolean = true) {
-    const id = hasFeatures
-      ? 'significant_events_manual_entry_button'
-      : 'significant_events_manual_entry_no_features_button';
-    await this.page.getByTestId(id).click();
+  async createManualSignificantEventEntry() {
+    await this.page.getByTestId('significant_events_manual_entry_button').click();
   }
 
   async fillSignificantEventForm(query: StreamQueryKql) {
@@ -945,7 +942,7 @@ export class StreamsApp {
 
     await new EuiSuperSelectWrapper(this.page, {
       dataTestSubj: 'significant_events_form_feature_select',
-    }).selectOption(query.feature?.name ?? 'No feature');
+    }).selectOption(query.feature?.name ?? 'All data');
 
     const queryInput = flyout.getByTestId('kbnQueryBar').getByTestId('queryInput');
     await queryInput.fill(query.kql?.query ?? '');
