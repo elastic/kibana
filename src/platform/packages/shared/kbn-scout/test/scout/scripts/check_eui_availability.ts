@@ -11,7 +11,7 @@
 import https from 'https';
 import { getEuiBaseUrlWithVersion } from '../fixtures/eui_helpers';
 
-function handleUnavailable(euiUrl: string, reason?: string): number {
+function handleUnavailable(euiUrl: string, reason?: string) {
   console.error(`EUI website is not available at ${euiUrl}`);
   if (reason) {
     console.error(`Reason: ${reason}`);
