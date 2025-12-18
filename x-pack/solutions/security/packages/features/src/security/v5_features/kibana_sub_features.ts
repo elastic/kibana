@@ -77,5 +77,9 @@ export const getSecurityV5SubFeaturesMap = ({
     securitySubFeaturesMap.delete(SecuritySubFeatureId.trustedDevices);
   }
 
+  if (!experimentalFeatures.responseActionsScriptLibraryManagement) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.scriptsManagement);
+  }
+
   return Object.freeze(securitySubFeaturesMap);
 };
