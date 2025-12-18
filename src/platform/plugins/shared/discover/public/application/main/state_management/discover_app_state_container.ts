@@ -19,7 +19,7 @@ import {
   FilterStateStore,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type {
   IKbnUrlStateStorage,
   INullableBaseStateContainer,
@@ -27,7 +27,7 @@ import type {
 import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
 import { type GlobalQueryStateFromUrl, connectToQueryState } from '@kbn/data-plugin/public';
-import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DiscoverGridSettings, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { distinctUntilChanged, from, map } from 'rxjs';
@@ -87,10 +87,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
-  /*
-   * Get updated AppState when given a saved search
-   */
-  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
 export interface DiscoverAppState {
@@ -202,7 +198,8 @@ export const getDiscoverAppStateContainer = ({
 }): DiscoverAppStateContainer => {
   let initialState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
-    savedSearch: savedSearchContainer.getState(),
+    persistedTab: undefined,
+    dataView: savedSearchContainer.getState().searchSource.getField('index'),
     services,
   });
   let previousState = initialState;
@@ -228,14 +225,6 @@ export const getDiscoverAppStateContainer = ({
 
   const hasChanged = () => {
     return !isEqualState(initialState, enhancedAppContainer.getState());
-  };
-
-  const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
-    return getInitialState({
-      initialUrlState: undefined,
-      savedSearch: newSavedSearch,
-      services,
-    });
   };
 
   const resetToState = (state: DiscoverAppState) => {
@@ -408,11 +397,10 @@ export const getDiscoverAppStateContainer = ({
     updateUrlWithCurrentState,
     replaceUrlState,
     update,
-    getAppStateFromSavedSearch,
   };
 };
 
-function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
+export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
   return (
     cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
     {}
@@ -421,18 +409,18 @@ function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: Discove
 
 export function getInitialState({
   initialUrlState,
-  savedSearch,
-  overrideDataView,
+  persistedTab,
+  dataView,
   services,
 }: {
   initialUrlState: DiscoverAppState | undefined;
-  savedSearch: SavedSearch | undefined;
-  overrideDataView?: DataView | undefined;
+  persistedTab: DiscoverSessionTab | undefined;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
 }) {
   const defaultAppState = getStateDefaults({
-    savedSearch,
-    overrideDataView,
+    persistedTab,
+    dataView,
     services,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
