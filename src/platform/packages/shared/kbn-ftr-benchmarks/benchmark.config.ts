@@ -10,17 +10,18 @@
 import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
 
-function createBenchmark(name: string, config: string) {
+function createBenchmark(name: string, config: string, focus: string) {
   return {
     kind: 'script' as const,
     name,
+    beforeAll: `node scripts/build_kibana_platform_plugins.js --focus ${focus}`,
     run: `node scripts/functional_tests --config ${config}`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
     },
     ensure: {
-      build: true,
+      bootstrap: true,
     },
   } satisfies ScriptBenchmark;
 }
@@ -30,13 +31,19 @@ const config: InitialBenchConfig = {
   benchmarks: [
     createBenchmark(
       'discover',
-      'src/platform/test/functional/apps/discover/observability/config.ts'
+      'src/platform/test/functional/apps/discover/observability/config.ts',
+      'discover'
     ),
-    createBenchmark('fleet', 'x-pack/platform/test/fleet_functional/config.ts'),
-    createBenchmark('security-saml', 'x-pack/platform/test/security_functional/saml.config.ts'),
+    createBenchmark('fleet', 'x-pack/platform/test/fleet_functional/config.ts', 'fleet'),
+    createBenchmark(
+      'security-saml',
+      'x-pack/platform/test/security_functional/saml.config.ts',
+      'security'
+    ),
     createBenchmark(
       'lens',
-      'x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts'
+      'x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts',
+      'lens'
     ),
   ],
   runs: 1,
