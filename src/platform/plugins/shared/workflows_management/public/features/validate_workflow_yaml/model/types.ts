@@ -85,7 +85,7 @@ interface YamlValidationResultLiquidTemplate extends YamlValidationResultBase {
 }
 interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
   severity: null;
-  message: null;
+  message: string | null;
   owner: 'connector-id-validation';
 }
 

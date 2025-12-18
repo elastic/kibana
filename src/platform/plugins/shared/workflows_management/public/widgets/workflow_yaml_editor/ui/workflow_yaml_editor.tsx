@@ -30,6 +30,7 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
+import { useMonacoHoverClickInterceptor } from './hooks/use_monaco_hover_click_interceptor';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
@@ -238,6 +239,9 @@ export const WorkflowYAMLEditor = ({
   const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
     editorRef.current
   );
+
+  // Intercept clicks on Monaco hover widget to dispatch Redux actions
+  useMonacoHoverClickInterceptor(editorRef.current);
 
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({

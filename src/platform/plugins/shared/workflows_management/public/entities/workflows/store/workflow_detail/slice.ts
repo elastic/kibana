@@ -28,6 +28,11 @@ const initialState: WorkflowDetailState = {
   highlightedStepId: undefined,
   isTestModalOpen: false,
   loading: initialLoadingState,
+  connectorFlyout: {
+    isOpen: false,
+    connectorType: undefined,
+    connectorIdToEdit: undefined,
+  },
 };
 
 // Slice
@@ -76,6 +81,20 @@ const workflowDetailSlice = createSlice({
       state.activeTab = action.payload;
     },
 
+    // Connector flyout actions
+    openCreateConnectorFlyout: (state, action: { payload: { connectorType: string } }) => {
+      state.connectorFlyout = { isOpen: true, ...action.payload };
+    },
+    openEditConnectorFlyout: (
+      state,
+      action: { payload: { connectorType: string; connectorIdToEdit: string } }
+    ) => {
+      state.connectorFlyout = { isOpen: true, ...action.payload };
+    },
+    closeConnectorFlyout: (state) => {
+      state.connectorFlyout = { isOpen: false }; // connectorType and connectorToEdit are undefined
+    },
+
     // Internal actions - these are not for components usage
     _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
       state.computed = action.payload;
@@ -110,6 +129,9 @@ export const {
   setExecution,
   clearExecution,
   setActiveTab,
+  openCreateConnectorFlyout,
+  openEditConnectorFlyout,
+  closeConnectorFlyout,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,

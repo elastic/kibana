@@ -8,7 +8,7 @@
  */
 
 import { useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
@@ -19,8 +19,12 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
   const editorStateRef = useRef<WorkflowDetailState>(editorState);
   editorStateRef.current = editorState;
 
+  const dispatch = useDispatch();
+  const dispatchRef = useRef(dispatch);
+  dispatchRef.current = dispatch;
+
   const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(() => editorStateRef.current);
+    return getCompletionItemProvider(() => editorStateRef.current, dispatchRef.current);
   }, []);
 
   return completionProvider;

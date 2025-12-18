@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Dispatch } from 'redux';
 import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions } from './suggestions/get_suggestions';
+import { openCreateConnectorFlyout } from '../../../../entities/workflows/store';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -43,8 +45,20 @@ function mapSuggestions(
 }
 
 export function getCompletionItemProvider(
-  getState: () => WorkflowDetailState
+  getState: () => WorkflowDetailState,
+  dispatch: Dispatch
 ): monaco.languages.CompletionItemProvider {
+  // Register the command handler - this will be called when the completion item is actually selected
+  // Note: This should ideally be registered once, but Monaco's command system handles duplicates
+  monaco.editor.registerCommand(
+    'workflows.editor.action.createConnector',
+    (_, connectorType: string) => {
+      if (connectorType) {
+        dispatch(openCreateConnectorFlyout({ connectorType }));
+      }
+    }
+  );
+
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
     __providerId: WORKFLOW_COMPLETION_PROVIDER_ID,

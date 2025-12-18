@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { workflowDefaultYaml } from './workflow_default_yml';
+import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
@@ -139,6 +140,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           />
         )}
         <WorkflowDetailTestModal />
+        <WorkflowDetailConnectorFlyout onConnectorsChanged={loadConnectors} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

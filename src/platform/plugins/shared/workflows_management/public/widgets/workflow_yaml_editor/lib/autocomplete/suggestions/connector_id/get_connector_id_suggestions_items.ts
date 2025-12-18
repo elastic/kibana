@@ -56,18 +56,20 @@ export function getConnectorIdSuggestionsItems(
     });
   });
 
-  // If no instances are configured, still allow manual input
-  if (instances.length === 0) {
-    suggestions.push({
-      label: 'Enter connector ID manually',
-      kind: monaco.languages.CompletionItemKind.Text,
-      insertText: '',
-      range,
-      detail: 'No configured instances found',
-      documentation: `No instances of ${connectorType} are currently configured. You can enter a connector ID manually.`,
-      sortText: 'z_manual',
-    });
-  }
+  suggestions.push({
+    label: 'Create a new connector',
+    kind: monaco.languages.CompletionItemKind.Text,
+    insertText: '',
+    range,
+    detail: connectorType,
+    documentation: `Create a new connector of type ${connectorType}`,
+    sortText: 'z_create',
+    command: {
+      id: 'workflows.editor.action.createConnector',
+      title: 'Create connector',
+      arguments: [getConnectorActionType(connectorType)],
+    },
+  });
 
   return suggestions;
 }
@@ -110,4 +112,10 @@ export function getConnectorInstancesForType(
   }
 
   return [];
+}
+
+function getConnectorActionType(stepType: string): string {
+  const cleanStepType = stepType.startsWith('.') ? stepType.slice(1) : stepType;
+  const [actionType] = cleanStepType.split('.');
+  return `.${actionType}`;
 }

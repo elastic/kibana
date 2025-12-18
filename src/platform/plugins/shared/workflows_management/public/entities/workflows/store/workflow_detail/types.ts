@@ -41,6 +41,12 @@ export interface WorkflowDetailState {
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */
   loading: LoadingStates;
+  /** Connector flyout state */
+  connectorFlyout: {
+    isOpen: boolean;
+    connectorType?: string;
+    connectorIdToEdit?: string;
+  };
 }
 
 export type ActiveTab = 'workflow' | 'executions';

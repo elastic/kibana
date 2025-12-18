@@ -100,9 +100,8 @@ export function useYamlValidation(
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
     const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
 
-    // Generate the connectors management URL
-    const connectorsManagementUrl = application?.getUrlForApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+    const connectorsManagementUrl = application.getUrlForApp('management', {
+      deepLinkId: 'triggersActionsConnectors',
       absolute: true,
     });
 

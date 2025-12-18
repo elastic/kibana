@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
+import {
+  createHoverClickActionLink,
+  WorkflowAction,
+} from '../../../widgets/workflow_yaml_editor/ui/hooks/use_monaco_hover_click_interceptor';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
-  connectorsManagementUrl?: string
+  connectorsManagementUrl: string | null
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
@@ -41,7 +46,9 @@ export function validateConnectorIds(
 
   for (const connectorIdItem of notReferenceConnectorIds) {
     const connectorType = dynamicConnectorTypes[connectorIdItem.connectorType];
-    const displayName = connectorType?.displayName ?? connectorIdItem.connectorType;
+    const displayName =
+      connectorType?.displayName ??
+      getActionTypeDisplayNameFromStepType(connectorIdItem.connectorType);
     const instances = getConnectorInstancesForType(
       connectorIdItem.connectorType,
       dynamicConnectorTypes
@@ -51,36 +58,83 @@ export function validateConnectorIds(
       (ins) => ins.id === connectorIdItem.key || ins.name === connectorIdItem.key
     );
 
+    const createConnectorMessage = i18n.translate(
+      'workflows.validateConnectorIds.createConnectorMessage',
+      { defaultMessage: 'Create a new {displayName} connector', values: { displayName } }
+    );
+
+    const actionType = getActionTypeFromStepType(connectorIdItem.connectorType);
+    const createConnectorLink = createHoverClickActionLink({
+      action: WorkflowAction.OpenConnectorFlyout,
+      params: { connectorType: actionType },
+      text: createConnectorMessage,
+    });
+
+    const manageConnectorLink = connectorsManagementUrl
+      ? `<a href="${connectorsManagementUrl}" target="_blank">${i18n.translate(
+          'workflows.validateConnectorIds.manageConnectorMessage',
+          { defaultMessage: 'Manage connectors ↗' }
+        )}</a>`
+      : '';
+
     if (!instance) {
       results.push({
         id: connectorIdItem.id,
         severity: 'error',
-        message: `${displayName} connector "${connectorIdItem.key}" not found. Add a new connector or choose an existing one`,
+        message: i18n.translate('workflows.validateConnectorIds.connectorNotFoundMessage', {
+          defaultMessage:
+            '{displayName} connector "{key}" not found. Add a new connector or choose an existing one',
+          values: { displayName, key: connectorIdItem.key },
+        }),
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
         afterMessage: null,
-        hoverMessage: connectorsManagementUrl
-          ? `[Open connectors management](${connectorsManagementUrl})`
-          : null,
+        hoverMessage: `${createConnectorLink} <br /> ${manageConnectorLink}`,
       });
     } else {
+      const editConnectorMessage = i18n.translate(
+        'workflows.validateConnectorIds.editConnectorMessage',
+        {
+          defaultMessage: 'Edit "{connectorName}" connector',
+          values: { connectorName: `${instance.name}` },
+        }
+      );
+      const editConnectorLink = createHoverClickActionLink({
+        action: WorkflowAction.OpenConnectorEditFlyout,
+        params: { connectorType: actionType, connectorId: instance.id },
+        text: editConnectorMessage,
+      });
+
       results.push({
         id: connectorIdItem.id,
-        severity: null,
-        message: null,
+        severity: 'info',
+        message: i18n.translate('workflows.validateConnectorIds.connectorFoundMessage', {
+          defaultMessage: 'Connected to {displayName} connector "{key}"',
+          values: { displayName, key: connectorIdItem.key },
+        }),
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `✓ Connected (${connectorIdItem.connectorType} connector, ID: ${instance.id})`,
-        hoverMessage: null,
+        afterMessage: `✓ Connected (${displayName} connector, ID: ${instance.id})`,
+        hoverMessage: `${editConnectorLink} <br /> ${createConnectorLink} <br /> ${manageConnectorLink}`,
       });
     }
   }
 
   return results;
+}
+
+function getActionTypeFromStepType(stepType: string): string {
+  const [actionType] = stepType.split('.');
+  return `.${actionType}`;
+}
+
+function getActionTypeDisplayNameFromStepType(stepType: string): string {
+  const [actionType] = stepType.split('.');
+  return actionType.charAt(0).toUpperCase() + actionType.slice(1);
 }
