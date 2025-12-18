@@ -32,11 +32,11 @@ dependsOn:
   - '@kbn/test-subj-selector'
   - '@kbn/scout-info'
   - '@kbn/scout-reporting'
-  - '@kbn/apm-synthtrace'
-  - '@kbn/apm-synthtrace-client'
   - '@kbn/zod'
   - '@kbn/core-http-common'
   - '@kbn/axe-config'
+  - '@kbn/apm-synthtrace'
+  - '@kbn/apm-synthtrace-client'
 tags:
   - test-helper
   - package
