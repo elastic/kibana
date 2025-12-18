@@ -60,10 +60,7 @@ export function useIsNavControlVisible(isServerless?: boolean) {
   const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
-    const chatExperience$ = settings.client.get$<AIChatExperience>(
-      AI_CHAT_EXPERIENCE_TYPE,
-      AIChatExperience.Classic
-    );
+    const chatExperience$ = settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
     const appSubscription = combineLatest([
       currentAppId$,
