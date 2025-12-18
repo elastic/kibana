@@ -11,6 +11,8 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
@@ -32,12 +34,13 @@ import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
-import { createInternalStateAsyncThunk } from '../utils';
+import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
   dataViewSpec: DataViewSpec | undefined;
+  esqlControls: ControlPanelsState<ESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
@@ -50,6 +53,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         stateContainer,
         customizationService,
         dataViewSpec,
+        esqlControls,
         defaultUrlState,
       },
     }: TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>,
@@ -85,6 +89,27 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     if (tabState.initialInternalState) {
       tabInitialInternalState = cloneDeep(tabState.initialInternalState);
+    }
+
+    if (esqlControls) {
+      tabInitialInternalState = {
+        ...tabInitialInternalState,
+        controlGroupJson: JSON.stringify(esqlControls),
+      };
+
+      dispatch(
+        internalStateSlice.actions.setControlGroupState({
+          tabId,
+          controlGroupState: esqlControls,
+        })
+      );
+
+      dispatch(
+        internalStateSlice.actions.setEsqlVariables({
+          tabId,
+          esqlVariables: extractEsqlVariables(esqlControls),
+        })
+      );
     }
 
     // Get a snapshot of the current URL state before any async work is done
@@ -211,6 +236,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView,
       services,
     });
+
     const savedSearch = updateSavedSearch({
       savedSearch: persistedTabSavedSearch
         ? copySavedSearch(persistedTabSavedSearch)
