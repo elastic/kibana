@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useMissingPrivileges } from './use_missing_privileges';
 import { useUserPrivileges } from '../components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../components/user_privileges/__mocks__';
-import { RULES_FEATURE_ID } from '../../../common/constants';
+import { ALERTS_FEATURE_ID, RULES_FEATURE_ID } from '../../../common/constants';
 
 jest.mock('../components/user_privileges');
 jest.mock('../../detections/components/user_info');
@@ -117,6 +117,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: false, read: true },
           exceptions: { edit: false, read: true },
         },
+        alertsPrivileges: { alerts: { edit: true, read: true } },
       })
     );
 
@@ -125,6 +126,26 @@ describe('useMissingPrivileges', () => {
     expect(hookResult.result.current).toEqual(
       expect.objectContaining({
         featurePrivileges: expect.arrayContaining([[RULES_FEATURE_ID, ['all']]]),
+      })
+    );
+  });
+
+  it('reports missing alertsPrivileges if user cannot edit alerts', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        rulesPrivileges: {
+          rules: { edit: true, read: true },
+          exceptions: { crud: true, read: true },
+        },
+        alertsPrivileges: { alerts: { edit: false, read: true } },
+      })
+    );
+
+    const hookResult = renderHook(() => useMissingPrivileges());
+
+    expect(hookResult.result.current).toEqual(
+      expect.objectContaining({
+        featurePrivileges: expect.arrayContaining([[ALERTS_FEATURE_ID, ['all']]]),
       })
     );
   });
@@ -146,21 +167,35 @@ describe('useMissingPrivileges', () => {
     });
   });
 
-  it('reports missing "all" privilege for security if user does not have CRUD', () => {
+  it('reports missing "all" privilege for rules and alerts if user does not have edit permissions', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        rulesPrivileges: {
+          rules: { edit: false, read: true },
+          exceptions: { crud: false, read: true },
+        },
+        alertsPrivileges: { alerts: { edit: false, read: true } },
+      })
+    );
+
     const hookResult = renderHook(() => useMissingPrivileges());
 
     expect(hookResult.result.current.featurePrivileges).toEqual(
-      expect.arrayContaining([[RULES_FEATURE_ID, ['all']]])
+      expect.arrayContaining([
+        [RULES_FEATURE_ID, ['all']],
+        [ALERTS_FEATURE_ID, ['all']],
+      ])
     );
   });
 
-  it('reports no missing rule privileges if user can edit rules', () => {
+  it('reports no missing feature privileges if user can edit rules and alerts', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
           rules: { edit: true, read: true },
           exceptions: { edit: true, read: true },
         },
+        alertsPrivileges: { alerts: { edit: true, read: true } },
       })
     );
 
@@ -170,10 +205,23 @@ describe('useMissingPrivileges', () => {
   });
 
   it('reports complex index privileges when all data is available', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        rulesPrivileges: {
+          rules: { edit: false, read: true },
+          exceptions: { crud: false, read: true },
+        },
+        alertsPrivileges: { alerts: { edit: false, read: true } },
+      })
+    );
+
     const hookResult = renderHook(() => useMissingPrivileges());
 
     expect(hookResult.result.current).toEqual({
-      featurePrivileges: [[RULES_FEATURE_ID, ['all']]],
+      featurePrivileges: [
+        [RULES_FEATURE_ID, ['all']],
+        [ALERTS_FEATURE_ID, ['all']],
+      ],
       indexPrivileges: [
         ['.items-default', ['view_index_metadata', 'manage']],
         ['.lists-default', ['view_index_metadata', 'manage']],
