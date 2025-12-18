@@ -102,6 +102,9 @@ jest.mock('../../../connector_list_button/connector_list_button', () => ({
   ConnectorListButton: ({ buttonProps }: { buttonProps: { children: React.ReactNode } }) => (
     <button type="button">{buttonProps.children}</button>
   ),
+  ConnectorListButtonBase: ({ buttonProps }: { buttonProps: { children: React.ReactNode } }) => (
+    <button type="button">{buttonProps.children}</button>
+  ),
 }));
 
 const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<
