@@ -159,7 +159,7 @@ export function StreamListView() {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}>
+              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)} size="s">
                 {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
                   defaultMessage: 'Create classic stream',
                 })}
