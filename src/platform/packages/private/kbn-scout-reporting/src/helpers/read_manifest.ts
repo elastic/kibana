@@ -32,27 +32,21 @@ export interface KibanaModuleMetadata {
  * Resolves the path to the `kibana.jsonc` manifest based on the Playwright configuration file path.
  * @param configPath - Absolute path to the Playwright configuration file.
  * @returns Absolute path to the `kibana.jsonc` file.
- * @throws Error if no `kibana.jsonc` can be found in the directory ancestry.
+ * @throws Error if `scout` is not found in the path.
  */
 export const getKibanaModulePath = (configPath: string): string => {
-  let dir = path.dirname(path.resolve(configPath));
+  const pathSegments = configPath.split(path.sep);
+  const testDirIndex = pathSegments.indexOf('scout');
 
-  // Walk up the directory tree looking for the nearest kibana.jsonc.
-  // This supports both plugin-based Scout configs (`.../test/scout/...`) and package-based configs.
-  while (true) {
-    const manifestPath = path.join(dir, 'kibana.jsonc');
-    if (fs.existsSync(manifestPath)) {
-      return manifestPath;
-    }
-
-    const parent = path.dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
+  if (testDirIndex === -1) {
+    throw new Error(
+      `Invalid path: "scout" directory not found in ${configPath}.
+  Ensure playwright configuration file is in the plugin directory: '/plugins/<plugin-name>/test/scout/ui/<config-file>'`
+    );
   }
 
-  throw new Error(
-    `Manifest file not found for Playwright config at ${configPath}. Expected to find a kibana.jsonc in a parent directory.`
-  );
+  const manifestSegments = pathSegments.slice(0, testDirIndex - 1).concat('kibana.jsonc');
+  return path.resolve('/', ...manifestSegments); // Ensure absolute path
 };
 
 /**
