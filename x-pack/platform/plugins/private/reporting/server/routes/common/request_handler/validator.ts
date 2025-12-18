@@ -99,8 +99,6 @@ const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObject
 const relativeUrlSchema = z.string().max(4096);
 const relativeUrlsSchema = z.array(relativeUrlSchema).max(100);
 
-const isEsqlModeSchema = z.boolean();
-
 const jobParamsSchema = z
   .object({
     browserTimezone: timezoneSchema.optional(),
@@ -115,7 +113,7 @@ const jobParamsSchema = z
     columns: z.array(z.string()).optional(), // this is for CSV v1 compatibility
     relativeUrls: relativeUrlsSchema.optional(), // used in tests could be legacy
     relativeUrl: relativeUrlSchema.optional(), // used in tests could be legacy
-    isEsqlMode: isEsqlModeSchema.optional(),
+    isEsqlMode: z.boolean().optional(), // for CSV reports
   })
   .strict();
 
