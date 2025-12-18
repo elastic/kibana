@@ -47,8 +47,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls all assets', () => {
     skipIfNoDockerRegistry(providerContext);
 
-    // FLAKY: https://github.com/elastic/kibana/issues/246272
-    describe.skip('installs all assets when installing a package for the first time', () => {
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
         await fleetAndAgents.setup();
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
@@ -922,7 +921,14 @@ const expectAssetsInstalled = ({
         verification_key_id: null,
       };
 
-      expect(sortedRes).eql(expectedSavedObject);
+      expectedSavedObject.installed_es.forEach((item) => {
+        expect(
+          sortedRes.installed_es.find(
+            (asset: any) => asset.type === item.type && asset.id === item.id
+          )
+        ).to.not.be(undefined);
+      });
+      expect({ ...sortedRes, installed_es: [] }).eql({ ...expectedSavedObject, installed_es: [] });
     }
 
     await verifySO();

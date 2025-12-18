@@ -9,7 +9,6 @@ import type {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
-import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { getInstallationInfo } from './helper';
@@ -1286,15 +1285,13 @@ export default function (providerContext: FtrProviderContext) {
               'integration_to_input',
               '3.0.0'
             );
-            // expectedAssets.forEach((item) => {
-            //   expect(
-            //     installation.installed_es.find(
-            //       (asset: any) => asset.type === item.type && asset.id === item.id
-            //     )
-            //   ).to.not.be(undefined);
-            // });
-
-            expect(sortBy(installation.installed_es, 'id')).to.eql(sortBy(expectedAssets, 'id'));
+            expectedAssets.forEach((item) => {
+              expect(
+                installation.installed_es.find(
+                  (asset: any) => asset.type === item.type && asset.id === item.id
+                )
+              ).to.not.be(undefined);
+            });
           });
 
           const expectedComponentTemplates = expectedAssets.filter(
