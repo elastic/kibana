@@ -25,10 +25,7 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('Verify overview tab is selected', async () => {
       await expect(dependencyDetailsPage.getOverviewTab()).toBeVisible();
-      await expect(dependencyDetailsPage.getOperationsTab()).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      await expect(dependencyDetailsPage.getOverviewTab()).toHaveAttribute('aria-selected', 'true');
 
       const url = new URL(page.url());
       expect(url.pathname).toContain(`/dependencies/overview`);

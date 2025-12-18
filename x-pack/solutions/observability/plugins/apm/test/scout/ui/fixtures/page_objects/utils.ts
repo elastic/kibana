@@ -12,7 +12,7 @@ export async function waitForTableToLoad(page: ScoutPage, testId: string) {
 
   await table.waitFor();
 
-  await table.locator('css=div[class="euiBasicTable"]').waitFor();
+  await table.locator('div.euiBasicTable').waitFor();
 }
 
 export async function waitForChartToLoad(page: ScoutPage, testId: string) {
