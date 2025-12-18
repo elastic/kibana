@@ -21,6 +21,7 @@ import type { Streams, Feature } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeaturesTable } from './stream_features_table';
 
@@ -39,6 +40,10 @@ export const StreamFeaturesFlyout = ({
   onFeaturesAdded: () => void;
   onFeaturesDiscarded: () => void;
 }) => {
+  const {
+    core: { notifications },
+  } = useKibana();
+
   const [selectedFeatureNames, setSelectedFeatureNames] = useState<Set<string>>(new Set());
   const { addFeaturesToStream } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -124,6 +129,16 @@ export const StreamFeaturesFlyout = ({
                   onClick={() => {
                     setIsUpdating(true);
                     addFeaturesToStream(selectedFeatures).finally(() => {
+                      notifications.toasts.addSuccess({
+                        title: i18n.translate(
+                          'xpack.streams.streamFeaturesFlyout.addFeaturesSuccessToastTitle',
+                          {
+                            defaultMessage:
+                              '{count} {count, plural, one {feature} other {features}} added to stream',
+                            values: { count: selectedFeatures.length },
+                          }
+                        ),
+                      });
                       onFeaturesAdded();
                       setIsUpdating(false);
                     });

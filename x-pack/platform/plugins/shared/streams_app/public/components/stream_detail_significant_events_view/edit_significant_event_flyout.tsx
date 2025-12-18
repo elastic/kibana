@@ -27,7 +27,7 @@ export const EditSignificantEventFlyout = ({
   setQueryToEdit,
   features,
   refresh,
-  onFeatureIdentificationClick,
+  refreshFeatures,
   generateOnMount,
 }: {
   refreshDefinition: () => void;
@@ -41,7 +41,7 @@ export const EditSignificantEventFlyout = ({
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onFeatureIdentificationClick: () => void;
+  refreshFeatures: () => void;
   generateOnMount: boolean;
 }) => {
   const {
@@ -62,7 +62,7 @@ export const EditSignificantEventFlyout = ({
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
       refreshDefinition={refreshDefinition}
-      onFeatureIdentificationClick={onFeatureIdentificationClick}
+      refreshFeatures={refreshFeatures}
       definition={definition}
       query={queryToEdit}
       onSave={async (data: SaveData) => {

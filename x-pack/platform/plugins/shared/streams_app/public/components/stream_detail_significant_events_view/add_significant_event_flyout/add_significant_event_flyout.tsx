@@ -58,7 +58,7 @@ interface Props {
   query?: StreamQueryKql;
   initialFlow?: Flow;
   initialSelectedFeatures: Feature[];
-  onFeatureIdentificationClick: () => void;
+  refreshFeatures: () => void;
   generateOnMount: boolean;
 }
 
@@ -72,7 +72,7 @@ export function AddSignificantEventFlyout({
   initialFlow = undefined,
   initialSelectedFeatures,
   features,
-  onFeatureIdentificationClick,
+  refreshFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -304,7 +304,8 @@ export function AddSignificantEventFlyout({
                   selectedFeatures={selectedFeatures}
                   onFeaturesChange={setSelectedFeatures}
                   onGenerateSuggestionsClick={generateQueries}
-                  onFeatureIdentificationClick={onFeatureIdentificationClick}
+                  definition={definition.stream}
+                  refreshFeatures={refreshFeatures}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}

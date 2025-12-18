@@ -56,7 +56,7 @@ export const Default: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
       generateOnMount={false}
-      onFeatureIdentificationClick={() => {}}
+      refreshFeatures={() => {}}
       definition={logsStreamDefinition}
       initialSelectedFeatures={[]}
       onClose={() => {}}
@@ -82,7 +82,7 @@ export const Edit: StoryFn<{}> = () => {
     <AddSignificantEventFlyout
       generateOnMount={false}
       refreshDefinition={() => {}}
-      onFeatureIdentificationClick={() => {}}
+      refreshFeatures={() => {}}
       initialSelectedFeatures={[]}
       definition={logsStreamDefinition}
       onClose={() => {}}
