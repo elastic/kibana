@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AggregateQuery } from '@kbn/es-query';
+import { type AggregateQuery, getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import {
   BasicPrettyPrinter,
   Builder,
@@ -35,7 +35,7 @@ import type {
   ESQLPostfixUnaryExpression,
   ESQLLiteral,
 } from '@kbn/esql-ast/src/types';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { type DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query/utils';
@@ -86,9 +86,11 @@ export const isSupportedFieldType = (fieldType: unknown): fieldType is Supported
 const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields']) => {
   let dataViewField = dataViewFields.getByName(fieldName);
 
-  if (dataViewField?.subType?.multi?.parent) {
+  const multiSubtype = dataViewField && getDataViewFieldSubtypeMulti(dataViewField);
+
+  if (multiSubtype) {
     // if the field is a subtype, we want to use the parent field to determine wether to use the match phrase
-    dataViewField = dataViewFields.getByName(dataViewField.subType.multi.parent);
+    dataViewField = dataViewFields.getByName(multiSubtype.multi.parent);
   }
 
   return (
