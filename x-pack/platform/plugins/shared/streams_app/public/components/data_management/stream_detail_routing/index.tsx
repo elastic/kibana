@@ -19,6 +19,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -103,9 +104,18 @@ export function StreamDetailRoutingImpl() {
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
-      onPageReady();
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'available_streams_count',
+          value1: streamsListFetch.value?.streams?.length ?? 0,
+        },
+      });
     }
-  }, [streamsListFetch, onPageReady]);
+  }, [streamsListFetch, onPageReady, definition.stream]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
