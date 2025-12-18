@@ -273,6 +273,34 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
   });
+
+  describe('getAllSpacesForMonitor', () => {
+    it('should return spaces from config if they exist', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = {
+        fields: {
+          meta: {
+            space_id: ['space1', 'space2'],
+          },
+        },
+      } as unknown as HeartbeatConfig;
+      // @ts-expect-error - testing private method
+      const spaces = syntheticsPrivateLocation.getAllSpacesForMonitor(config, 'current-space');
+      expect(spaces).toEqual(['space1', 'space2']);
+    });
+
+    it('should fall back to the current spaceId if no spaces are in config', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = {
+        fields: {
+          meta: {},
+        },
+      } as unknown as HeartbeatConfig;
+      // @ts-expect-error - testing private method
+      const spaces = syntheticsPrivateLocation.getAllSpacesForMonitor(config, 'current-space');
+      expect(spaces).toEqual(['current-space']);
+    });
+  });
 });
 
 const dummyBrowserConfig: Partial<MonitorFields> & {

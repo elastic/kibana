@@ -289,13 +289,22 @@ export class SyntheticsPrivateLocation {
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
+      const allSpaces = this.getAllSpacesForMonitor(config, spaceId);
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        const hasPolicy = existingPolicies?.some((policy) => policy.id === currId);
+        const allPossiblePolicyIds = allSpaces.map((space) =>
+          this.getPolicyId(config, privateLocation.id, space)
+        );
+        let currId = this.getPolicyId(config, privateLocation.id, spaceId);
+        const hasPolicy = existingPolicies?.some((policy) => {
+          if (allPossiblePolicyIds.includes(policy.id)) {
+            currId = policy.id;
+            return true;
+          }
+        });
         try {
           if (hasLocation) {
             const newPolicy = await this.generateNewPolicy(
@@ -367,9 +376,12 @@ export class SyntheticsPrivateLocation {
 
     const listOfPolicies: string[] = [];
     for (const config of configs) {
+      const allSpaces = this.getAllSpacesForMonitor(config, spaceId);
+
       for (const privateLocation of allPrivateLocations) {
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        listOfPolicies.push(currId);
+        allSpaces.forEach((space) => {
+          listOfPolicies.push(this.getPolicyId(config, privateLocation.id, space));
+        });
       }
     }
     return (
@@ -474,6 +486,10 @@ export class SyntheticsPrivateLocation {
       return configNamespace;
     }
     return undefined;
+  }
+
+  getAllSpacesForMonitor(config: HeartbeatConfig, spaceId: string): string[] {
+    return Array.isArray(config.fields?.meta?.space_id) ? config.fields?.meta?.space_id : [spaceId];
   }
 }
 
