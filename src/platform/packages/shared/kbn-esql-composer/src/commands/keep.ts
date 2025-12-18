@@ -8,15 +8,19 @@
  */
 
 import { append } from '../pipeline/append';
+import type { CommandOptions, QueryOperator } from '../types';
+import { extractOptions } from '../utils/extract_options';
 
 /**
  * Appends a `KEEP` command to the ESQL composer pipeline.
  *
- * @param columns The columns to keep.
+ * @param args The columns to keep and optional configuration including comment.
  * @returns A `QueryPipeline` instance with the `KEEP` command appended.
  */
-export function keep(...columns: Array<string | string[]>) {
+export function keep(...args: Array<string | string[] | CommandOptions>): QueryOperator {
+  const { options, remaining: columns } = extractOptions<string | string[]>(args);
+
   const command = `KEEP ${columns.flatMap((column) => column).join(', ')}`;
 
-  return append({ command });
+  return append({ command, comment: options?.comment });
 }

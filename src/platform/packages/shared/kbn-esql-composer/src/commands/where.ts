@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Params } from '../types';
+import type { Params, CommandOptions } from '../types';
 import { append } from '../pipeline/append';
 
 /**
@@ -15,11 +15,13 @@ import { append } from '../pipeline/append';
  *
  * @param body The body of the `WHERE` command.
  * @param params The parameters to use in the `WHERE` command.
+ * @param options Optional configuration including comment.
  * @returns A `QueryPipeline` instance with the `WHERE` command appended.
  */
 export function where<TQuery extends string, TParams extends Params<TQuery>>(
   body: TQuery,
-  params?: TParams
+  params?: TParams,
+  options?: CommandOptions
 ) {
-  return append({ command: `WHERE ${body}`, params });
+  return append({ command: `WHERE ${body}`, params, comment: options?.comment });
 }
