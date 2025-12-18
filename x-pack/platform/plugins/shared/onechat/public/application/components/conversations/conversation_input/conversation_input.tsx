@@ -21,7 +21,11 @@ import { useSendMessage } from '../../../context/send_message/send_message_conte
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
-import { useAgentId, useHasActiveConversation, useIsAwaitingPrompt } from '../../../hooks/use_conversation';
+import {
+  useAgentId,
+  useHasActiveConversation,
+  useIsAwaitingPrompt,
+} from '../../../hooks/use_conversation';
 import { MessageEditor, useMessageEditor } from './message_editor';
 import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
@@ -113,12 +117,6 @@ const enabledPlaceholder = i18n.translate(
     defaultMessage: 'Ask anything',
   }
 );
-const awaitingPromptPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.textArea.awaitingPromptPlaceholder',
-  {
-    defaultMessage: 'Please respond to the confirmation prompt above to continue.',
-  }
-);
 
 export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
@@ -137,18 +135,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
-  const isSubmitDisabled = messageEditor.isEmpty || isSendingMessage || !isAgentIdValid || isAwaitingPrompt;
+  const isSubmitDisabled =
+    messageEditor.isEmpty || isSendingMessage || !isAgentIdValid || isAwaitingPrompt;
 
-  const getPlaceholder = () => {
-    if (isAgentDeleted) {
-      return disabledPlaceholder(agentId);
-    }
-    if (isAwaitingPrompt) {
-      return awaitingPromptPlaceholder;
-    }
-    return enabledPlaceholder;
-  };
-  const placeholder = getPlaceholder();
+  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;
@@ -223,7 +213,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
           data-test-subj="agentBuilderConversationInputEditor"
         />
       </EuiFlexItem>
-      {!isInputDisabled && (
+      {!isAgentDeleted && (
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
