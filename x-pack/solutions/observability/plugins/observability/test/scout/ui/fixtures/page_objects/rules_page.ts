@@ -125,42 +125,12 @@ export class RulesPage {
   }
 
   /**
-   * Gets a producer filter button locator
-   */
-  getProducerFilterButton(producer: string) {
-    return this.page.testSubj.locator(`${producer}-LeftSidebarSelectOption`);
-  }
-
-  /**
-   * Gets a rule type card locator
-   */
-  getRuleTypeCard(ruleTypeId: string) {
-    return this.page.testSubj.locator(`${ruleTypeId}-SelectOption`);
-  }
-
-  /**
    * Clicks the create rule button to open the modal
    */
   async openRuleTypeModal() {
     await expect(this.createRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.createRuleButton.click();
     await expect(this.ruleTypeModal).toBeVisible();
-  }
-
-  /**
-   * Verifies the rule type modal is visible with expected elements
-   */
-  async expectRuleTypeModalVisible() {
-    await expect(this.ruleTypeModal).toBeVisible();
-    await expect(this.ruleTypeModalSearch).toBeVisible();
-    await expect(this.allRuleTypesButton).toBeVisible();
-  }
-
-  /**
-   * Verifies the "All" button shows the expected total count
-   */
-  async expectAllRuleTypesCount(expectedCount: number) {
-    await expect(this.allRuleTypesButton).toContainText(expectedCount.toString());
   }
 
   /**

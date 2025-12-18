@@ -43,8 +43,6 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
   RULE_TYPE_MODAL: 'ruleTypeModal',
   RULE_TYPE_MODAL_SEARCH: 'ruleTypeModalSearch',
   ALL_RULE_TYPES_BUTTON: 'allRuleTypesButton',
-  // Producer filter buttons use pattern: `${producer}-LeftSidebarSelectOption`
-  // Rule type cards use pattern: `${ruleTypeId}-SelectOption`
 } as const;
 
 /**
