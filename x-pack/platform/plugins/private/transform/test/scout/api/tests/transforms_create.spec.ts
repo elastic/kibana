@@ -6,34 +6,11 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { CookieHeader, KbnClient } from '@kbn/scout';
+import type { CookieHeader } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
-
-// use Scout data views API service when available
-const deleteDataViewByTitle = async (title: string, kbnClient: KbnClient) => {
-  try {
-    // Get all data views to find the one with matching title
-    const response = await kbnClient.request({
-      method: 'GET',
-      path: '/api/data_views',
-    });
-
-    const dataViews = (response.data as any).data_view || [];
-    const dataView = dataViews.find((dv: any) => dv.title === title);
-
-    if (dataView && dataView.id) {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/api/data_views/data_view/${dataView.id}`,
-      });
-    }
-  } catch (error) {
-    throw new Error(`Failed to delete data view with title ${title}: ${error}`);
-  }
-};
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create',
@@ -47,11 +24,11 @@ apiTest.describe(
       transformPowerUserCookieHeader = credentials.cookieHeader;
     });
 
-    apiTest.afterEach(async ({ apiServices, kbnClient }) => {
+    apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.transform.cleanTransformIndices();
 
       if (dataViewToBeDeletedTitle) {
-        await deleteDataViewByTitle(dataViewToBeDeletedTitle, kbnClient);
+        await apiServices.dataViews.deleteByTitle(dataViewToBeDeletedTitle);
         dataViewToBeDeletedTitle = undefined; // reset after deletion
       }
     });
