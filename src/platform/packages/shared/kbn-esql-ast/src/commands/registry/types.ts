@@ -58,7 +58,7 @@ export interface ISuggestionItem {
   /**
    * A very short description for the suggestion entry that can be shown on the UI next to the label
    */
-  detail: string;
+  detail?: string;
   /**
    * A longer description for the suggestion entry that can be shown on demand on the UI.
    */
