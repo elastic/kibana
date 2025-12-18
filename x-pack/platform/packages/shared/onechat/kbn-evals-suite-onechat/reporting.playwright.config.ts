@@ -14,7 +14,7 @@ const baseConfig = createPlaywrightEvalsConfig({
 });
 
 // Override projects to only include a single project for reporting
-// eslint-disable-next-line import/no-default-export
+
 export default {
   ...baseConfig,
   projects: [
