@@ -25,6 +25,8 @@ export const paths = {
   sloCreate: `${SLOS_BASE_PATH}${SLO_CREATE_PATH}`,
   sloCreateWithEncodedForm: (encodedParams: string) =>
     `${SLOS_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,
+  sloCreateFromTemplate: (templateId: string) =>
+    `${SLOS_BASE_PATH}${SLO_CREATE_PATH}?fromTemplateId=${encodeURIComponent(templateId)}`,
   sloEdit: (sloId: string) => `${SLOS_BASE_PATH}/edit/${encodeURIComponent(sloId)}`,
   sloEditWithEncodedForm: (sloId: string, encodedParams: string) =>
     `${SLOS_BASE_PATH}/edit/${encodeURIComponent(sloId)}?_a=${encodedParams}`,

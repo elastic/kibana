@@ -63,6 +63,12 @@ export const sloTemplate: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
+    getInAppUrl: (savedObject: SavedObject<StoredSLOTemplate>) => {
+      return {
+        path: `/app/slos/create?fromTemplateId=${encodeURIComponent(savedObject.id)}`,
+        uiCapabilitiesPath: '',
+      };
+    },
     getTitle(template: SavedObject<StoredSLOTemplate>) {
       const templateName =
         'name' in template.attributes && typeof template.attributes.name === 'string'
