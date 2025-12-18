@@ -8,14 +8,39 @@
 import type { CoreStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 
 import type { AlertingConfig } from '../config';
-import type { AlertingPluginsStart } from '../plugin';
+import type { AlertingPluginsStart, AlertingServerStart } from '../plugin';
 import { spaceIdToNamespace } from '../lib';
 import type { RawRule } from '../saved_objects/schemas/raw_rule/latest';
 import { getDecryptedRuleSo } from '../data/rule/methods/get_decrypted_rule_so';
 import type { EsqlRulesTaskParams } from './types';
 import { getEsqlRulesAlertsDataStreamName } from './lib';
+
+function getFakeKibanaRequest({
+  basePathService,
+  spaceId,
+  apiKey,
+}: {
+  basePathService: CoreStart['http']['basePath'];
+  spaceId: string;
+  apiKey: RawRule['apiKey'];
+}) {
+  const requestHeaders: Headers = {};
+  if (apiKey) {
+    requestHeaders.authorization = `ApiKey ${apiKey}`;
+  }
+  const fakeRawRequest: FakeRawRequest = {
+    headers: requestHeaders,
+    path: '/',
+  };
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+  basePathService.set(fakeRequest, addSpaceIdToPath('/', spaceId));
+  return fakeRequest;
+}
 
 export function createEsqlRulesTaskRunner({
   logger,
@@ -34,7 +59,7 @@ export function createEsqlRulesTaskRunner({
         }
 
         const params = taskInstance.params as EsqlRulesTaskParams;
-        const [, pluginsStart] = await coreStartServices;
+        const [coreStart, pluginsStart, alertingStart] = await coreStartServices;
 
         const namespace = spaceIdToNamespace(pluginsStart.spaces, params.spaceId);
         const encryptedSavedObjectsClient = pluginsStart.encryptedSavedObjects.getClient({
@@ -60,6 +85,15 @@ export function createEsqlRulesTaskRunner({
         if (!rawRule.enabled) {
           return { state: taskInstance.state };
         }
+
+        const rulesClient = await (alertingStart as AlertingServerStart).getRulesClientWithRequest(
+          getFakeKibanaRequest({
+            basePathService: coreStart.http.basePath,
+            spaceId: params.spaceId,
+            apiKey: rawRule.apiKey,
+          })
+        );
+        await rulesClient.get({ id: params.ruleId });
 
         const targetDataStream = getEsqlRulesAlertsDataStreamName({
           config,
