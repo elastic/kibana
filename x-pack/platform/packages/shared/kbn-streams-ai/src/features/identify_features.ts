@@ -32,7 +32,8 @@ export interface IdentifyFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   analysis: DocumentAnalysis;
-  systemPromptOverride?: string;
+  featurePromptOverride?: string;
+  descriptionPromptOverride?: string;
 }
 
 /**
@@ -52,9 +53,9 @@ export async function identifySystemFeatures({
   logger,
   signal,
   analysis,
+  featurePromptOverride,
   dropUnmapped = false,
   maxSteps: initialMaxSteps,
-  systemPromptOverride,
 }: IdentifyFeaturesOptions & {
   dropUnmapped?: boolean;
   maxSteps?: number;
@@ -95,9 +96,7 @@ export async function identifySystemFeatures({
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,
       },
-      prompt: createIdentifySystemsPrompt({
-        systemPromptOverride,
-      }),
+      prompt: createIdentifySystemsPrompt({ systemPromptOverride: featurePromptOverride }),
       inferenceClient,
       finalToolChoice: {
         function: 'finalize_systems',

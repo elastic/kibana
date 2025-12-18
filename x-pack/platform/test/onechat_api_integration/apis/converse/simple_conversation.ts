@@ -72,10 +72,12 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
       });
     });
 
-    it('returns 400 when payload is invalid', async () => {
-      const res = (await oneChatApiClient.converse({} as any)) as unknown as Payload;
+    describe('Error cases', () => {
+      it('returns 400 when payload is invalid', async () => {
+        const res = (await oneChatApiClient.converse({} as any)) as unknown as Payload;
 
-      expect(res.error).to.eql('Bad Request');
+        expect(res.error).to.eql('Bad Request');
+      });
     });
   });
 }

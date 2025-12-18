@@ -26,7 +26,7 @@ describe('WHERE Validation', () => {
   });
 
   // @TODO - this test is largely about function/operator validation, which is not the focus of this file.
-  // consider merging with the functions validation tests (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/__tests__/functions.test.ts).
+  // consider merging with the functions validation tests (src/platform/packages/shared/kbn-esql-ast/src/validation/__tests__/functions.test.ts).
   test('validates the WHERE command', () => {
     whereExpectErrors('from a_index | where b', ['Unknown column "b"']);
     for (const cond of ['true', 'false']) {
