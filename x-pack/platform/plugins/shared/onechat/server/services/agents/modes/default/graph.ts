@@ -12,11 +12,9 @@ import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
-import { ConversationRoundStatus } from '@kbn/onechat-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents';
 import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
-import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
@@ -31,7 +29,6 @@ import {
   processToolNodeResponse,
 } from './action_utils';
 import { createAnswerAgentStructured } from './answer_agent_structured';
-import type { ResearchAgentAction } from './actions';
 import {
   errorAction,
   handoverAction,
@@ -43,7 +40,6 @@ import {
   isToolPromptAction,
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
-import { roundToActions } from '../utils/round_to_actions';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -58,7 +54,6 @@ export const createAgentGraph = ({
   structuredOutput = false,
   outputSchema,
   processedConversation,
-  onechatToLangchainIdMap,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -69,34 +64,9 @@ export const createAgentGraph = ({
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
-  onechatToLangchainIdMap: ToolIdMapping;
 }) => {
-  const initialize = async (state: StateType) => {
-    const restoredState: Partial<StateType> = {};
-    let actions: ResearchAgentAction[] = [];
-
-    const lastRound = processedConversation.previousRounds.length
-      ? processedConversation.previousRounds[processedConversation.previousRounds.length - 1]
-      : undefined;
-
-    if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-      actions = roundToActions({ round: lastRound, toolIdMapping: onechatToLangchainIdMap });
-      restoredState.resumeToStep = steps.executeTool;
-    }
-
-    if (lastRound?.state) {
-      restoredState.currentCycle = lastRound.state.agent.current_cycle;
-      restoredState.errorCount = lastRound.state.agent.error_count;
-    }
-
-    return { ...restoredState, mainActions: [...actions] };
-  };
-
-  const initializeEdge = async (state: StateType) => {
-    if (state.resumeToStep === steps.executeTool) {
-      return steps.executeTool;
-    }
-    return steps.researchAgent;
+  const init = async () => {
+    return {};
   };
 
   const researcherModel = chatModel.bindTools(tools).withConfig({
@@ -301,7 +271,7 @@ export const createAgentGraph = ({
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     // nodes
-    .addNode(steps.initialize, initialize)
+    .addNode(steps.init, init)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
@@ -309,11 +279,8 @@ export const createAgentGraph = ({
     .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
     // edges
-    .addEdge(_START_, steps.initialize)
-    .addConditionalEdges(steps.initialize, initializeEdge, {
-      [steps.researchAgent]: steps.researchAgent,
-      [steps.executeTool]: steps.executeTool,
-    })
+    .addEdge(_START_, steps.init)
+    .addEdge(steps.init, steps.researchAgent)
     .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,

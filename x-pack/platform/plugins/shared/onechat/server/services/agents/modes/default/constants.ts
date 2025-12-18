@@ -6,7 +6,7 @@
  */
 
 export const steps = {
-  initialize: 'initialize',
+  init: 'init',
   researchAgent: 'researchAgent',
   executeTool: 'executeTool',
   handleToolInterrupt: 'handleToolInterrupt',

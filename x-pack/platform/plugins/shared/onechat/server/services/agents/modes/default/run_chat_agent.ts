@@ -7,10 +7,17 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
-import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
+import { Command } from '@langchain/langgraph';
+import {
+  isStreamEvent,
+  type ToolIdMapping,
+  toolsToLangchain,
+} from '@kbn/onechat-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
+import { ConversationRoundStatus } from '@kbn/onechat-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/onechat-server';
 import type { StructuredTool } from '@langchain/core/tools';
+import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
   addRoundCompleteEvent,
   conversationToLangchainMessages,
@@ -23,10 +30,13 @@ import {
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { ensureValidInput } from '../utils/preflight_checks';
+import { roundToActions } from '../utils/round_to_actions';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import { steps } from './constants';
+import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
@@ -117,10 +127,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
-  const initialMessages = conversationToLangchainMessages({
-    conversation: processedConversation,
-  });
-
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -130,14 +136,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
-    onechatToLangchainIdMap,
     processedConversation,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    { initialMessages, cycleLimit },
+    createInitializerCommand({
+      conversation: processedConversation,
+      onechatToLangchainIdMap,
+      cycleLimit,
+    }),
     {
       version: 'v2',
       signal: abortSignal,
@@ -192,6 +201,46 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   return {
     round,
   };
+};
+
+const createInitializerCommand = ({
+  conversation,
+  cycleLimit,
+  onechatToLangchainIdMap,
+}: {
+  conversation: ProcessedConversation;
+  cycleLimit: number;
+  onechatToLangchainIdMap: ToolIdMapping;
+}): Command => {
+  const initialMessages = conversationToLangchainMessages({
+    conversation,
+  });
+
+  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
+  let startAt = steps.init;
+
+  const lastRound = conversation.previousRounds.length
+    ? conversation.previousRounds[conversation.previousRounds.length - 1]
+    : undefined;
+
+  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
+    initialState.mainActions = roundToActions({
+      round: lastRound,
+      toolIdMapping: onechatToLangchainIdMap,
+    });
+
+    startAt = steps.executeTool;
+  }
+
+  if (lastRound?.state) {
+    initialState.currentCycle = lastRound.state.agent.current_cycle;
+    initialState.errorCount = lastRound.state.agent.error_count;
+  }
+
+  return new Command({
+    update: initialState,
+    goto: startAt,
+  });
 };
 
 const getRecursionLimit = (cycleLimit: number): number => {
