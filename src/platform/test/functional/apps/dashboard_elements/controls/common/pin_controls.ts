@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { dashboardControls, dashboard } = getPageObjects([
+  const { dashboardControls, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
+      await timePicker.setDefaultDataRange();
       await dashboard.saveDashboard(DASHBOARD_NAME, {
         exitFromEditMode: false,
         saveAsNew: true,
