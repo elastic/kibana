@@ -1083,36 +1083,30 @@ export class ExceptionListClient {
     const { savedObjectsClient } = this;
     await this.createEndpointList();
 
+    let findOptions = {
+      filter,
+      listId: ENDPOINT_LIST_ID,
+      namespaceType: 'agnostic' as const,
+      page,
+      perPage,
+      pit,
+      searchAfter,
+      sortField,
+      sortOrder,
+    };
+
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      findOptions = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreSingleListFind',
-        {
-          filter,
-          listId: ENDPOINT_LIST_ID,
-          namespaceType: 'agnostic',
-          page,
-          perPage,
-          pit,
-          searchAfter,
-          sortField,
-          sortOrder,
-        },
+        findOptions,
         this.getServerExtensionCallbackContext()
       );
     }
 
     return findExceptionListItem({
-      filter,
-      listId: ENDPOINT_LIST_ID,
-      namespaceType: 'agnostic',
-      page,
-      perPage,
-      pit,
+      ...findOptions,
       savedObjectsClient,
       search,
-      searchAfter,
-      sortField,
-      sortOrder,
     });
   };
 
