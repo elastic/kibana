@@ -146,10 +146,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             -webkit-line-clamp: 2;
           `);
 
-      const textStyles = css`
-        ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' })};
-        font-weight: ${euiTheme.font.weight.semiBold};
-      `;
+    const textStyles = css`
+      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' })};
+      font-weight: ${euiTheme.font.weight.semiBold};
+    `;
 
     const labelStyles = css`
       ${truncatedStyles}
