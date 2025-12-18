@@ -1,0 +1,289 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  type FC,
+  type PropsWithChildren,
+} from 'react';
+
+import { Query } from '@elastic/eui';
+
+import type { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
+
+import type { ParsedQuery, Tag } from './types';
+
+/**
+ * Core services interface for content management tags functionality.
+ *
+ * @property getTagList - Synchronously retrieves the list of all available tags.
+ * @property parseSearchQuery - Optional function to parse a search query string and extract tag filters.
+ * @property onError - Optional error handler for reporting errors to the user. Defaults to noop.
+ */
+export interface Services {
+  getTagList: () => Tag[];
+  parseSearchQuery?: (searchQuery: string) => ParsedQuery;
+  /** Optional error handler for reporting errors to the user. Defaults to noop. */
+  onError?: (error: Error, title: string) => void;
+}
+
+/**
+ * Public type alias for the content management tags services interface.
+ *
+ * Use this type when implementing custom service providers or when type-checking
+ * service objects passed to {@link ContentManagementTagsProvider}.
+ */
+export type ContentManagementTagsServices = Services;
+
+/**
+ * Dependencies required from Kibana plugins to enable content management tags functionality.
+ *
+ * This interface defines the contract between the content management tags package and
+ * the Kibana plugin ecosystem. Consumers should provide these dependencies when using
+ * {@link ContentManagementTagsKibanaProvider}.
+ *
+ * @property savedObjectsTagging.ui - Tagging UI utilities from the saved objects tagging plugin.
+ * @property core.notifications.toasts - Toast notification service for error reporting.
+ *
+ * @example
+ * ```tsx
+ * const dependencies: ContentManagementTagsKibanaDependencies = {
+ *   savedObjectsTagging: {
+ *     ui: savedObjectsTaggingOss.getTaggingApi().ui,
+ *   },
+ *   core: {
+ *     notifications: coreStart.notifications,
+ *   },
+ * };
+ * ```
+ */
+export interface ContentManagementTagsKibanaDependencies {
+  savedObjectsTagging: {
+    ui: Pick<
+      SavedObjectsTaggingApiUi,
+      'getTagList' | 'parseSearchQuery' | 'getSearchBarFilter' | 'getTagIdFromName'
+    >;
+  };
+  core: {
+    notifications: {
+      toasts: Pick<IToasts, 'addError'>;
+    };
+  };
+}
+
+const ContentManagementTagsContext = createContext<Services | null>(null);
+
+/**
+ * Context provider for content management tags services.
+ *
+ * Use this provider when you want to supply custom tag services directly,
+ * without integrating with Kibana's saved objects tagging plugin.
+ *
+ * For Kibana plugin integration, use {@link ContentManagementTagsKibanaProvider} instead.
+ *
+ * @param props - The services to provide plus children to render.
+ * @param props.getTagList - Function that returns the list of available tags.
+ * @param props.parseSearchQuery - Optional function to parse search queries for tag filters.
+ * @param props.onError - Optional error handler callback.
+ * @param props.children - Child components that will have access to the tag services.
+ *
+ * @example
+ * ```tsx
+ * <ContentManagementTagsProvider
+ *   getTagList={() => myTags}
+ *   parseSearchQuery={(query) => parseMyQuery(query)}
+ *   onError={(err, title) => console.error(title, err)}
+ * >
+ *   <MyApp />
+ * </ContentManagementTagsProvider>
+ * ```
+ */
+export const ContentManagementTagsProvider: FC<
+  PropsWithChildren<ContentManagementTagsServices>
+> = ({ children, ...services }) => {
+  const { getTagList, parseSearchQuery, onError } = services;
+
+  return (
+    <ContentManagementTagsContext.Provider value={{ getTagList, parseSearchQuery, onError }}>
+      {children}
+    </ContentManagementTagsContext.Provider>
+  );
+};
+
+/**
+ * Kibana-integrated context provider for content management tags services.
+ *
+ * This provider adapts Kibana's saved objects tagging plugin API to the content management
+ * tags interface. It automatically handles tag list retrieval, search query parsing with
+ * EUI Query syntax support, and error reporting via toast notifications.
+ *
+ * Use this provider in Kibana plugins that need tag functionality. For standalone usage
+ * without Kibana dependencies, use {@link ContentManagementTagsProvider} instead.
+ *
+ * @param props - Kibana plugin dependencies plus children to render.
+ * @param props.savedObjectsTagging - The saved objects tagging plugin's UI API.
+ * @param props.core - Core Kibana services including notifications.
+ * @param props.children - Child components that will have access to the tag services.
+ *
+ * @example
+ * ```tsx
+ * // In a Kibana plugin's application component
+ * <ContentManagementTagsKibanaProvider
+ *   savedObjectsTagging={{ ui: savedObjectsTaggingOss.getTaggingApi().ui }}
+ *   core={{ notifications: coreStart.notifications }}
+ * >
+ *   <MyKibanaApp />
+ * </ContentManagementTagsKibanaProvider>
+ * ```
+ */
+export const ContentManagementTagsKibanaProvider: FC<
+  PropsWithChildren<ContentManagementTagsKibanaDependencies>
+> = ({ children, ...dependencies }) => {
+  const {
+    savedObjectsTagging: {
+      ui: { getTagList: getTagListFn },
+    },
+    core: {
+      notifications: {
+        toasts: { addError },
+      },
+    },
+  } = dependencies;
+
+  const onError = useCallback(
+    (error: Error, title: string) => {
+      addError(error, { title });
+    },
+    [addError]
+  );
+
+  const getTagList = useCallback(() => {
+    try {
+      return getTagListFn();
+    } catch (error) {
+      onError(error instanceof Error ? error : new Error(String(error)), 'Error fetching tag list');
+      return [];
+    }
+  }, [getTagListFn, onError]);
+
+  const parseSearchQuery = useMemo(() => {
+    return (searchQuery: string): ParsedQuery => {
+      try {
+        // 1. Get tags synchronously (from cache via ui.getTagList)
+        const tags = getTagListFn();
+
+        // 2. Parse the EUI Query syntax with a schema that recognises the tag field.
+        // Use strict: false to allow other field clauses (createdBy, is:favorite, etc.)
+        // while still extracting tag clauses.
+        const query = Query.parse(searchQuery, {
+          schema: {
+            strict: false,
+            fields: {
+              tag: {
+                type: 'string',
+              },
+            },
+          },
+        });
+
+        // 3. Extract tag clauses from the parsed query.
+        const tagClauses = query.ast.getFieldClauses('tag');
+
+        // 4. Resolve tag names to IDs.
+        const tagIds: string[] = [];
+        const tagIdsToExclude: string[] = [];
+
+        if (tagClauses) {
+          tagClauses.forEach((clause) => {
+            const tagNames = Array.isArray(clause.value) ? clause.value : [clause.value];
+
+            tagNames.forEach((tagName) => {
+              // Find tag by name in the cached tag list.
+              const tag = tags.find((t) => t.name === tagName);
+              if (tag && tag.id) {
+                if (clause.match === 'must') {
+                  tagIds.push(tag.id);
+                } else if (clause.match === 'must_not') {
+                  tagIdsToExclude.push(tag.id);
+                }
+              }
+            });
+          });
+        }
+
+        // 5. Remove tag clauses from search query to get clean search term.
+        const cleanQuery = query.removeOrFieldClauses('tag');
+        const hasResolvedTags = tagIds.length > 0 || tagIdsToExclude.length > 0;
+
+        if (!hasResolvedTags) {
+          // If no tag IDs could be resolved, fall back to the original query text.
+          return {
+            searchQuery,
+            tagIds: undefined,
+            tagIdsToExclude: undefined,
+          };
+        }
+
+        // 6. Return parsed result synchronously.
+        return {
+          searchQuery: cleanQuery.text,
+          tagIds: tagIds.length > 0 ? tagIds : undefined,
+          tagIdsToExclude: tagIdsToExclude.length > 0 ? tagIdsToExclude : undefined,
+        };
+      } catch (error) {
+        onError(
+          error instanceof Error ? error : new Error(String(error)),
+          'Error parsing search query for tags'
+        );
+        // If parsing fails, return the original query.
+        return {
+          searchQuery,
+          tagIds: undefined,
+          tagIdsToExclude: undefined,
+        };
+      }
+    };
+  }, [getTagListFn, onError]);
+
+  const value: Services = {
+    getTagList,
+    parseSearchQuery,
+    onError,
+  };
+
+  return <ContentManagementTagsProvider {...value}>{children}</ContentManagementTagsProvider>;
+};
+
+/**
+ * Hook to access content management tags services from the context.
+ *
+ * Returns the services object if used within a `ContentManagementTagsProvider`,
+ * or `undefined` if the context is not available. This allows components to
+ * gracefully handle scenarios where tags support may not be configured.
+ *
+ * @returns The `Services` object containing `getTagList` and optionally `parseSearchQuery`,
+ *          or `undefined` if no provider is present in the component tree.
+ *
+ * @example
+ * ```tsx
+ * const services = useServices();
+ *
+ * // Check if services are available before using
+ * if (services) {
+ *   const tags = services.getTagList();
+ * }
+ * ```
+ */
+export const useServices = (): Services | undefined => {
+  return useContext(ContentManagementTagsContext) ?? undefined;
+};
