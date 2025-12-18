@@ -177,7 +177,19 @@ export function Wrapper({
           const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
 
           const wrappedLabel = stepProps ? (
-            <EuiTourStep {...stepProps}>
+            <EuiTourStep
+              step={stepProps.step}
+              stepsTotal={stepProps.stepsTotal}
+              title={stepProps.title}
+              subtitle={stepProps.subtitle}
+              content={stepProps.content}
+              anchorPosition={stepProps.anchorPosition}
+              offset={stepProps.offset}
+              maxWidth={stepProps.maxWidth}
+              isStepOpen={stepProps.isStepOpen}
+              footerAction={stepProps.footerAction}
+              onFinish={stepProps.onFinish}
+            >
               <span>{label}</span>
             </EuiTourStep>
           ) : (

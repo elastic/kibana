@@ -29,6 +29,10 @@ export const completionCommand = {
         'Send prompts to an LLM. Requires an inference endpoint set up for `completion` tasks.',
     }),
     declaration: `COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)`,
-    examples: [],
+    examples: [
+      `ROW question = "What is Elasticsearch?"
+| COMPLETION answer = question WITH test_completion_model
+| KEEP question, answer`,
+    ],
   },
 };

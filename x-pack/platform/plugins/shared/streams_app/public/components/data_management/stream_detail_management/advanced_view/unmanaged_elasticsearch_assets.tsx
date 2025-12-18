@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition'
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ComponentTemplatePanel } from '../component_template_panel';
@@ -37,6 +39,8 @@ export function UnmanagedElasticsearchAssets({
     },
   } = useKibana();
 
+  const { onPageReady } = usePerformanceContext();
+
   const unmanagedAssetsDetailsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /internal/streams/{name}/_unmanaged_assets', {
@@ -51,15 +55,31 @@ export function UnmanagedElasticsearchAssets({
     [definition.stream.name, streamsRepositoryClient]
   );
 
+  useEffect(() => {
+    if (unmanagedAssetsDetailsFetch.value && !unmanagedAssetsDetailsFetch.loading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+      });
+    }
+  }, [
+    definition.stream,
+    unmanagedAssetsDetailsFetch.value,
+    unmanagedAssetsDetailsFetch.loading,
+    onPageReady,
+  ]);
+
   const indexManagementLocator = share.url.locators.get<IndexManagementLocatorParams>(
     'INDEX_MANAGEMENT_LOCATOR_ID'
   );
 
   const [currentFlyout, setCurrentFlyout] = useState<
     | {
-        type: 'data_stream' | 'component_template' | 'index_template' | 'ingest_pipeline';
-        name: string;
-      }
+      type: 'data_stream' | 'component_template' | 'index_template' | 'ingest_pipeline';
+      name: string;
+    }
     | undefined
   >(undefined);
 

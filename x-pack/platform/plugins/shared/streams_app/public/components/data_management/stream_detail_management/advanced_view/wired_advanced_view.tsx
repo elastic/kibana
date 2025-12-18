@@ -11,6 +11,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { Streams } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition'
 import { StreamFeatureConfiguration } from '../../../stream_detail_features/stream_feature_configuration';
 import { StreamDescription } from '../../../stream_detail_features/stream_description';
 import { IndexConfiguration } from './index_configuration';
@@ -34,7 +35,12 @@ export function WiredAdvancedView({
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (definition && !contentPacks?.enabled && !significantEvents?.enabled) {
-      onPageReady();
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+      });
     }
   }, [definition, contentPacks?.enabled, significantEvents?.enabled, onPageReady]);
 
