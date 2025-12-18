@@ -32,6 +32,7 @@ import {
   buildStreamName,
   countWildcards,
   type IlmPolicyFetcher,
+  type SimulatedTemplateFetcher,
 } from '../../utils';
 import { useStreamValidation } from './hooks/use_stream_validation';
 import { formReducer, initialFormState } from './reducers/form_reducer';
@@ -84,6 +85,11 @@ interface CreateClassicStreamFlyoutProps {
    */
   getIlmPolicy?: IlmPolicyFetcher;
   /**
+   * Async callback to fetch simulated template data by template name.
+   * If provided, the resolved template data will be used in the template details section.
+   */
+  getSimulatedTemplate?: SimulatedTemplateFetcher;
+  /**
    * Whether to show data retention information.
    * If false, data retention details (ILM policies and retention periods) will be hidden
    * in both the template selection step and the confirmation step.
@@ -102,6 +108,7 @@ export const CreateClassicStreamFlyout = ({
   onRetryLoadTemplates,
   onValidate,
   getIlmPolicy,
+  getSimulatedTemplate,
   showDataRetention = true,
 }: CreateClassicStreamFlyoutProps) => {
   const [currentStep, setCurrentStep] = useState<ClassicStreamStep>(
@@ -244,6 +251,7 @@ export const CreateClassicStreamFlyout = ({
             validationError={validationError}
             conflictingIndexPattern={conflictingIndexPattern}
             getIlmPolicy={getIlmPolicy}
+            getSimulatedTemplate={getSimulatedTemplate}
             showDataRetention={showDataRetention}
           />
         );

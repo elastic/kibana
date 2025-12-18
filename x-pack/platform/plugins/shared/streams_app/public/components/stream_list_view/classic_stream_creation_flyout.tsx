@@ -65,6 +65,20 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
     [indexLifecycleManagement.apiService, signal]
   );
 
+  const getSimulatedTemplate = useCallback(
+    async (templateName: string, templateSignal?: AbortSignal) => {
+      try {
+        return await indexManagement.apiService.simulateIndexTemplate({
+          templateName,
+          signal: templateSignal ?? signal,
+        });
+      } catch (error) {
+        return null;
+      }
+    },
+    [indexManagement.apiService, signal]
+  );
+
   const handleCreate = useCallback(
     async (streamName: string) => {
       try {
@@ -179,6 +193,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}
       getIlmPolicy={getIlmPolicy}
+      getSimulatedTemplate={getSimulatedTemplate}
       showDataRetention={isIlmAvailable}
     />
   );
