@@ -129,6 +129,6 @@ export const getBulkActionHook =
       return [...alertActions, ...timelineActions, ...alertTagsItems, ...alertAssigneesItems];
     }, [alertActions, alertTagsItems, timelineActions, alertAssigneesItems]);
     return useMemo(() => {
-      return [{ id: 0, items }, ...alertActionsPanels, ...alertTagsPanels, ...alertAssigneesPanels];
-    }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels]);
+      return [{ id: 0, items }, ...alertTagsPanels, ...alertAssigneesPanels];
+    }, [alertTagsPanels, items, alertAssigneesPanels]);
   };
