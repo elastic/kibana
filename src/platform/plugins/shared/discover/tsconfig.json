@@ -122,6 +122,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/react-query",
     "@kbn/shared-ux-document-data-cascade",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

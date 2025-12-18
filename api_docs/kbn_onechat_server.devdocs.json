@@ -684,7 +684,15 @@
                 "section": "def-common.ToolHandlerReturn",
                 "text": "ToolHandlerReturn"
               },
-              ">"
+              "<",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ToolResult",
+                "text": "ToolResult"
+              },
+              "<Record<string, unknown>>>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/builtin.ts",
             "deprecated": false,
@@ -1780,7 +1788,7 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              "[]"
+              "<Record<string, unknown>>[]"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
             "deprecated": false,
@@ -2532,6 +2540,16 @@
         "description": [
           "\nReturn value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}"
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-server",
+            "scope": "common",
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.ToolHandlerReturn",
+            "text": "ToolHandlerReturn"
+          },
+          "<TResult>"
+        ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2551,7 +2569,7 @@
                 "section": "def-common.ToolHandlerResult",
                 "text": "ToolHandlerResult"
               },
-              "[]"
+              "<TResult>[]"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
             "deprecated": false,
@@ -2923,7 +2941,8 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
-              }
+              },
+              "<Record<string, unknown>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/result_store.ts",
             "deprecated": false,
@@ -2996,7 +3015,7 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              ") => void"
+              "<Record<string, unknown>>) => void"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/result_store.ts",
             "deprecated": false,
@@ -3016,7 +3035,8 @@
                     "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.ToolResult",
                     "text": "ToolResult"
-                  }
+                  },
+                  "<Record<string, unknown>>"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/result_store.ts",
                 "deprecated": false,
@@ -4217,7 +4237,15 @@
             "section": "def-common.ToolHandlerReturn",
             "text": "ToolHandlerReturn"
           },
-          ">"
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolResult",
+            "text": "ToolResult"
+          },
+          "<Record<string, unknown>>>>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
         "deprecated": false,
@@ -4271,15 +4299,7 @@
           "\nTool result as returned by the tool handler."
         ],
         "signature": [
-          "Omit<",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolResult",
-            "text": "ToolResult"
-          },
-          ", \"tool_result_id\"> & { tool_result_id?: string | undefined; }"
+          "Omit<TResult, \"tool_result_id\"> & { tool_result_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
         "deprecated": false,
