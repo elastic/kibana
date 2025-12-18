@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
-import { useAIFeatures } from '../../hooks/use_ai_features';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { StreamFeaturesFlyout } from './stream_features/stream_features_flyout';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
@@ -19,15 +19,15 @@ import { useKibana } from '../../hooks/use_kibana';
 
 interface StreamConfigurationProps {
   definition: Streams.all.Definition;
+  aiFeatures: AIFeatures | null;
 }
 
-export function StreamFeatureConfiguration({ definition }: StreamConfigurationProps) {
+export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamConfigurationProps) {
   const {
     core: { notifications },
   } = useKibana();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { identifyFeatures, abort } = useStreamFeaturesApi(definition);
-  const aiFeatures = useAIFeatures();
   const [features, setFeatures] = useState<Feature[]>([]);
   const {
     features: existingFeatures,
@@ -111,6 +111,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                 features={existingFeatures}
                 loading={featuresLoading}
                 refresh={refreshFeatures}
+                aiFeatures={aiFeatures}
               />
             </>
           )}

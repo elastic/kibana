@@ -20,11 +20,12 @@ import React from 'react';
 import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
-import { useAIFeatures } from '../../hooks/use_ai_features';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 
 export interface AISummaryProps {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
+  aiFeatures: AIFeatures | null;
 }
 
 const STREAM_DESCRIPTION_PANEL_TITLE = i18n.translate(
@@ -84,8 +85,11 @@ const CANCEL_LABEL = i18n.translate(
   }
 );
 
-export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refreshDefinition }) => {
-  const aiFeatures = useAIFeatures();
+export const StreamDescription: React.FC<AISummaryProps> = ({
+  definition,
+  refreshDefinition,
+  aiFeatures,
+}) => {
   const {
     isGenerating,
     description,
