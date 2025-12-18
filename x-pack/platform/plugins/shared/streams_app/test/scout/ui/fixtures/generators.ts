@@ -35,6 +35,7 @@ export function generateLogsData(
     endTime = TEST_END_TIME,
     docsPerMinute = 10,
     isMalformed = false,
+    defaults = {},
   }) => {
     const logsData = timerange(startTime, endTime)
       .interval('1m')
@@ -48,6 +49,7 @@ export function generateLogsData(
           .setHostIp('127.0.0.1')
           .defaults({
             'service.name': 'test-service',
+            ...defaults,
           })
       );
 

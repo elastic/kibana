@@ -8,8 +8,9 @@
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { runAgentStepDefinition } from './run_agent_step';
 
-export function registerStepDefinitions(
+export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
+  // Register steps
   workflowsExtensions.registerStepDefinition(runAgentStepDefinition);
 }
