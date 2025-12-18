@@ -29,9 +29,10 @@ const convertMatchResult = (result: MatchResult): ResourceResult => {
         index: result.index,
       },
       partial: true,
-      content: {
-        highlights: result.highlights,
-      },
+      content: result.content,
+      // content: {
+      //   highlights: result.highlights,
+      // },
     },
   };
 };

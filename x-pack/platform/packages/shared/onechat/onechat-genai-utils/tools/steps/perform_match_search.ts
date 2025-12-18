@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MappingField } from '../utils/mappings';
 
 export interface MatchResult {
   id: string;
   index: string;
-  highlights: string[];
+  content: Record<string, string>;
+  highlights: Record<string, string[]>;
 }
 
 export interface PerformMatchSearchResponse {
@@ -79,10 +81,15 @@ export const performMatchSearch = async ({
     return {
       id: hit._id!,
       index: hit._index!,
+      content: fields.reduce((content, field) => {
+        const result = hit.fields?.[field.path] ?? get(hit._source, field.path);
+        content[field.path] = Array.isArray(result) ? result.join(',') : result;
+        return content;
+      }, {} as Record<string, string>),
       highlights: Object.entries(hit.highlight ?? {}).reduce((acc, [field, highlights]) => {
-        acc.push(...highlights);
+        acc[field] = highlights;
         return acc;
-      }, [] as string[]),
+      }, {} as Record<string, string[]>),
     };
   });
 
