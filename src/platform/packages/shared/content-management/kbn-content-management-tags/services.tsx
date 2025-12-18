@@ -11,7 +11,6 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useMemo,
   type FC,
   type PropsWithChildren,
 } from 'react';
@@ -82,6 +81,77 @@ export interface ContentManagementTagsKibanaDependencies {
 }
 
 const ContentManagementTagsContext = createContext<Services | null>(null);
+
+/**
+ * Pure parsing logic for extracting tag filters from a search query.
+ *
+ * This function is intentionally defined outside the component to avoid
+ * recreation on each render. It contains no dependencies on React state
+ * or callbacks.
+ *
+ * @param searchQuery - The raw search query string to parse.
+ * @param tags - The list of available tags to resolve names against.
+ * @returns Parsed query with extracted tag IDs and cleaned search text.
+ */
+const parseSearchQueryCore = (searchQuery: string, tags: Tag[]): ParsedQuery => {
+  // Parse the EUI Query syntax with a schema that recognises the tag field.
+  // Use strict: false to allow other field clauses (createdBy, is:favorite, etc.)
+  // while still extracting tag clauses.
+  const query = Query.parse(searchQuery, {
+    schema: {
+      strict: false,
+      fields: {
+        tag: {
+          type: 'string',
+        },
+      },
+    },
+  });
+
+  // Extract tag clauses from the parsed query.
+  const tagClauses = query.ast.getFieldClauses('tag');
+
+  // Resolve tag names to IDs.
+  const tagIds: string[] = [];
+  const tagIdsToExclude: string[] = [];
+
+  if (tagClauses) {
+    tagClauses.forEach((clause) => {
+      const tagNames = Array.isArray(clause.value) ? clause.value : [clause.value];
+
+      tagNames.forEach((tagName) => {
+        // Find tag by name in the cached tag list.
+        const tag = tags.find((t) => t.name === tagName);
+        if (tag && tag.id) {
+          if (clause.match === 'must') {
+            tagIds.push(tag.id);
+          } else if (clause.match === 'must_not') {
+            tagIdsToExclude.push(tag.id);
+          }
+        }
+      });
+    });
+  }
+
+  // Remove tag clauses from search query to get clean search term.
+  const cleanQuery = query.removeOrFieldClauses('tag');
+  const hasResolvedTags = tagIds.length > 0 || tagIdsToExclude.length > 0;
+
+  if (!hasResolvedTags) {
+    // If no tag IDs could be resolved, fall back to the original query text.
+    return {
+      searchQuery,
+      tagIds: undefined,
+      tagIdsToExclude: undefined,
+    };
+  }
+
+  return {
+    searchQuery: cleanQuery.text,
+    tagIds: tagIds.length > 0 ? tagIds : undefined,
+    tagIdsToExclude: tagIdsToExclude.length > 0 ? tagIdsToExclude : undefined,
+  };
+};
 
 /**
  * Context provider for content management tags services.
@@ -176,70 +246,11 @@ export const ContentManagementTagsKibanaProvider: FC<
     }
   }, [getTagListFn, onError]);
 
-  const parseSearchQuery = useMemo(() => {
-    return (searchQuery: string): ParsedQuery => {
+  const parseSearchQuery = useCallback(
+    (searchQuery: string): ParsedQuery => {
       try {
-        // 1. Get tags synchronously (from cache via ui.getTagList)
         const tags = getTagListFn();
-
-        // 2. Parse the EUI Query syntax with a schema that recognises the tag field.
-        // Use strict: false to allow other field clauses (createdBy, is:favorite, etc.)
-        // while still extracting tag clauses.
-        const query = Query.parse(searchQuery, {
-          schema: {
-            strict: false,
-            fields: {
-              tag: {
-                type: 'string',
-              },
-            },
-          },
-        });
-
-        // 3. Extract tag clauses from the parsed query.
-        const tagClauses = query.ast.getFieldClauses('tag');
-
-        // 4. Resolve tag names to IDs.
-        const tagIds: string[] = [];
-        const tagIdsToExclude: string[] = [];
-
-        if (tagClauses) {
-          tagClauses.forEach((clause) => {
-            const tagNames = Array.isArray(clause.value) ? clause.value : [clause.value];
-
-            tagNames.forEach((tagName) => {
-              // Find tag by name in the cached tag list.
-              const tag = tags.find((t) => t.name === tagName);
-              if (tag && tag.id) {
-                if (clause.match === 'must') {
-                  tagIds.push(tag.id);
-                } else if (clause.match === 'must_not') {
-                  tagIdsToExclude.push(tag.id);
-                }
-              }
-            });
-          });
-        }
-
-        // 5. Remove tag clauses from search query to get clean search term.
-        const cleanQuery = query.removeOrFieldClauses('tag');
-        const hasResolvedTags = tagIds.length > 0 || tagIdsToExclude.length > 0;
-
-        if (!hasResolvedTags) {
-          // If no tag IDs could be resolved, fall back to the original query text.
-          return {
-            searchQuery,
-            tagIds: undefined,
-            tagIdsToExclude: undefined,
-          };
-        }
-
-        // 6. Return parsed result synchronously.
-        return {
-          searchQuery: cleanQuery.text,
-          tagIds: tagIds.length > 0 ? tagIds : undefined,
-          tagIdsToExclude: tagIdsToExclude.length > 0 ? tagIdsToExclude : undefined,
-        };
+        return parseSearchQueryCore(searchQuery, tags);
       } catch (error) {
         onError(
           error instanceof Error ? error : new Error(String(error)),
@@ -252,8 +263,9 @@ export const ContentManagementTagsKibanaProvider: FC<
           tagIdsToExclude: undefined,
         };
       }
-    };
-  }, [getTagListFn, onError]);
+    },
+    [getTagListFn, onError]
+  );
 
   const value: Services = {
     getTagList,
