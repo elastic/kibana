@@ -11,6 +11,7 @@ import {
   ENDPOINT_ARTIFACT_LISTS,
 } from '@kbn/securitysolution-list-constants';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import type { ImportQuerySchemaDecoded } from '@kbn/securitysolution-io-ts-types';
 import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
@@ -44,6 +45,23 @@ export const getExceptionsPreImportHandler = (
       }
     }
 
+    const query: ImportQuerySchemaDecoded = {
+      as_new_list: false,
+      overwrite: false,
+      overwrite_action_connectors: false,
+      overwrite_exceptions: false,
+      ...(request?.query ?? {}),
+    } as ImportQuerySchemaDecoded;
+
+    console.log(
+      '🧀 exceptions_pre_import_handler.ts:52 🥭 ',
+      JSON.stringify({ query }, null, ' '),
+      query.as_new_list,
+      query.overwrite,
+      query.overwrite_action_connectors,
+      query.overwrite_exceptions
+    );
+
     const hasEndpointArtifact = ENDPOINT_ARTIFACT_LIST_IDS.some((endpointListId) =>
       importedListIds.has(endpointListId)
     );
@@ -59,6 +77,16 @@ export const getExceptionsPreImportHandler = (
     }
 
     const importedListId = Array.from(importedListIds)[0];
+
+    // todo better typing
+    if (request && (request.query as ImportQuerySchemaDecoded).overwrite) {
+      (request.query as ImportQuerySchemaDecoded).overwrite = false;
+    }
+
+    console.log(
+      '🧀 exceptions_pre_import_handler.ts:86 🥭 ',
+      JSON.stringify({ newQuery: request?.query }, null, ' ')
+    );
 
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp({ listId: importedListId })) {

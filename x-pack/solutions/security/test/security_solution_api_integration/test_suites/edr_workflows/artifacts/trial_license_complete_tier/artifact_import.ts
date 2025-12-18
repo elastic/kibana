@@ -26,6 +26,8 @@ import {
   buildSpaceOwnerIdTag,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { Role } from '@kbn/security-plugin-types-common';
+import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import type { FindExceptionListItemsResponse } from '@kbn/securitysolution-exceptions-common/api';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createSupertestErrorLogger } from '../../utils';
@@ -175,6 +177,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               await endpointArtifactTestResources.deleteList(artifact.listId);
             });
 
+            afterEach(async () => {
+              await endpointArtifactTestResources.deleteList(artifact.listId);
+            });
+
             describe('ALL privilege', () => {
               it(`should error when importing without artifact privileges`, async () => {
                 await supertest[artifact.listId].none
@@ -233,6 +239,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                           tags: [
                             DEFAULT_SPACE_OWNER_ID,
                             buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+
+                            // even if assigned to policy in other space, the tag is kept
+                            buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
                           ],
                         },
                       ]),
@@ -249,22 +258,24 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       success_count_exception_list_items: 2,
                     } as ImportExceptionsResponseSchema);
 
-                  const { body } = await endpointOpsAnalystSupertest
-                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-                    .set('kbn-xsrf', 'true')
-                    .on('error', createSupertestErrorLogger(log))
-                    .query({
-                      list_id: artifact.listId,
-                      namespace_type: 'agnostic',
-                    })
-                    .send()
-                    .expect(200);
+                  const { body }: { body: FindExceptionListItemsResponse } =
+                    await endpointOpsAnalystSupertest
+                      .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .query({
+                        list_id: artifact.listId,
+                        namespace_type: 'agnostic',
+                      })
+                      .send()
+                      .expect(200);
 
                   expect(body.data.length).to.eql(2);
                   expect(body.data[0].tags).to.eql([DEFAULT_SPACE_OWNER_ID]);
                   expect(body.data[1].tags).to.eql([
                     DEFAULT_SPACE_OWNER_ID,
                     buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                    buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
                   ]);
                 });
 
@@ -308,16 +319,17 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       success_count_exception_list_items: 1,
                     } as ImportExceptionsResponseSchema);
 
-                  const { body } = await endpointOpsAnalystSupertest
-                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-                    .set('kbn-xsrf', 'true')
-                    .on('error', createSupertestErrorLogger(log))
-                    .query({
-                      list_id: artifact.listId,
-                      namespace_type: 'agnostic',
-                    })
-                    .send()
-                    .expect(200);
+                  const { body }: { body: FindExceptionListItemsResponse } =
+                    await endpointOpsAnalystSupertest
+                      .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .query({
+                        list_id: artifact.listId,
+                        namespace_type: 'agnostic',
+                      })
+                      .send()
+                      .expect(200);
 
                   expect(body.data.length).to.eql(1);
                   expect(body.data[0].item_id).to.eql('good-item');
@@ -363,16 +375,17 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       success_count_exception_list_items: 1,
                     } as ImportExceptionsResponseSchema);
 
-                  const { body } = await endpointOpsAnalystSupertest
-                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-                    .set('kbn-xsrf', 'true')
-                    .on('error', createSupertestErrorLogger(log))
-                    .query({
-                      list_id: artifact.listId,
-                      namespace_type: 'agnostic',
-                    })
-                    .send()
-                    .expect(200);
+                  const { body }: { body: FindExceptionListItemsResponse } =
+                    await endpointOpsAnalystSupertest
+                      .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .query({
+                        list_id: artifact.listId,
+                        namespace_type: 'agnostic',
+                      })
+                      .send()
+                      .expect(200);
 
                   expect(body.data.length).to.eql(1);
                   expect(body.data[0].item_id).to.eql('good-item');
@@ -405,16 +418,17 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       success_count_exception_list_items: 3,
                     } as ImportExceptionsResponseSchema);
 
-                  const { body } = await endpointOpsAnalystSupertest
-                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-                    .set('kbn-xsrf', 'true')
-                    .on('error', createSupertestErrorLogger(log))
-                    .query({
-                      list_id: artifact.listId,
-                      namespace_type: 'agnostic',
-                    })
-                    .send()
-                    .expect(200);
+                  const { body }: { body: FindExceptionListItemsResponse } =
+                    await endpointOpsAnalystSupertest
+                      .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .query({
+                        list_id: artifact.listId,
+                        namespace_type: 'agnostic',
+                      })
+                      .send()
+                      .expect(200);
 
                   expect(body.data.length).to.eql(3);
                 });
@@ -449,16 +463,17 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       success_count_exception_list_items: 1,
                     } as ImportExceptionsResponseSchema);
 
-                  const { body } = await endpointOpsAnalystSupertest
-                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-                    .set('kbn-xsrf', 'true')
-                    .on('error', createSupertestErrorLogger(log))
-                    .query({
-                      list_id: artifact.listId,
-                      namespace_type: 'agnostic',
-                    })
-                    .send()
-                    .expect(200);
+                  const { body }: { body: FindExceptionListItemsResponse } =
+                    await endpointOpsAnalystSupertest
+                      .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .query({
+                        list_id: artifact.listId,
+                        namespace_type: 'agnostic',
+                      })
+                      .send()
+                      .expect(200);
 
                   expect(body.data.length).to.eql(1);
                   expect(body.data[0].tags).to.eql([
@@ -509,16 +524,17 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       success_count_exception_list_items: 1,
                     } as ImportExceptionsResponseSchema);
 
-                  const { body } = await endpointOpsAnalystSupertest
-                    .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-                    .set('kbn-xsrf', 'true')
-                    .on('error', createSupertestErrorLogger(log))
-                    .query({
-                      list_id: artifact.listId,
-                      namespace_type: 'agnostic',
-                    })
-                    .send()
-                    .expect(200);
+                  const { body }: { body: FindExceptionListItemsResponse } =
+                    await endpointOpsAnalystSupertest
+                      .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .query({
+                        list_id: artifact.listId,
+                        namespace_type: 'agnostic',
+                      })
+                      .send()
+                      .expect(200);
 
                   expect(body.data.length).to.eql(1);
 
@@ -540,9 +556,127 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 });
               });
 
-              describe('when `overwrite` query param is `true`', () => {
+              it('should return conflict on list, but import artifacts when list exist', async () => {
+                await endpointArtifactTestResources.createList(artifact.listId);
+
+                await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                  .post(`${EXCEPTION_LIST_URL}/_import`)
+                  .set('kbn-xsrf', 'true')
+                  .on('error', createSupertestErrorLogger(log))
+                  .attach(
+                    'file',
+                    buildImportBuffer(artifact.listId, [{ tags: [DEFAULT_SPACE_OWNER_ID] }]),
+                    'import_data.ndjson'
+                  )
+                  .expect(200)
+                  .expect({
+                    errors: [
+                      {
+                        error: {
+                          message: `Found that list_id: "${artifact.listId}" already exists. Import of list_id: "${artifact.listId}" skipped.`,
+                          status_code: 409,
+                        },
+                        list_id: artifact.listId,
+                      },
+                    ],
+                    success: false,
+                    success_count: 1,
+                    success_exception_lists: false,
+                    success_count_exception_lists: 0,
+                    success_exception_list_items: true,
+                    success_count_exception_list_items: 1,
+                  } as ImportExceptionsResponseSchema);
+              });
+
+              describe.only('when `overwrite` query param is `true`', () => {
+                let existingGlobalArtifactInCurrentSpace: ArtifactTestData;
+                let existingGlobalArtifactInOtherSpace: ArtifactTestData;
+                let existingPerPolicyArtifactInCurrentSpace: ArtifactTestData;
+                let existingUnassignedPerPolicyArtifactInOtherSpace: ArtifactTestData;
+                let existingPerPolicyArtifactInOtherSpaceVisibleInCurrentSpace: ArtifactTestData;
+
+                beforeEach(async () => {
+                  await endpointArtifactTestResources.createList(artifact.listId);
+
+                  existingGlobalArtifactInCurrentSpace =
+                    await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                      tags: [DEFAULT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      item_id: 'existing-global-artifact-in-current-space',
+                    });
+
+                  existingGlobalArtifactInOtherSpace =
+                    await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                      tags: [OTHER_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      item_id: 'existing-global-artifact-in-other-space',
+                    });
+
+                  existingPerPolicyArtifactInCurrentSpace =
+                    await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                      tags: [
+                        DEFAULT_SPACE_OWNER_ID,
+                        buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                      ],
+                      item_id: 'existing-per-policy-artifact-in-current-space',
+                    });
+
+                  existingUnassignedPerPolicyArtifactInOtherSpace =
+                    await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                      tags: [OTHER_SPACE_OWNER_ID],
+                      item_id: 'existing-per-policy-artifact-in-other-space',
+                    });
+
+                  existingPerPolicyArtifactInOtherSpaceVisibleInCurrentSpace =
+                    await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                      tags: [
+                        OTHER_SPACE_OWNER_ID,
+                        buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                      ],
+                      item_id:
+                        'existing-per-policy-artifact-in-other-space-visible-in-current-space',
+                    });
+                });
                 describe('when without global artifact privilege', () => {
-                  it('should remove existing per-policy artifacts only from the same space', async () => {});
+                  it('should remove existing per-policy artifacts only from the same space', async () => {
+                    await supertest[artifact.listId].all
+                      .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .attach(
+                        'file',
+                        buildImportBuffer(artifact.listId, [
+                          { name: "i'm imported!", tags: [DEFAULT_SPACE_OWNER_ID] },
+                        ]),
+                        'import_data.ndjson'
+                      )
+                      .expect(200)
+                      .expect({
+                        errors: [],
+                        success: true,
+                        success_count: 2,
+                        success_exception_lists: true,
+                        success_count_exception_lists: 1,
+                        success_exception_list_items: true,
+                        success_count_exception_list_items: 1,
+                      } as ImportExceptionsResponseSchema);
+
+                    const { body }: { body: FindExceptionListItemsResponse } =
+                      await endpointOpsAnalystSupertest
+                        .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+                        .set('kbn-xsrf', 'true')
+                        .on('error', createSupertestErrorLogger(log))
+                        .query({
+                          list_id: artifact.listId,
+                          namespace_type: 'agnostic',
+                        })
+                        .send()
+                        .expect(200);
+
+                    expect(body.data.length).to.eql(5); // 5 existing -1 removed +1 imported
+                    const returnedItemIds = body.data.map((item) => item.item_id);
+                    expect(returnedItemIds).to.contain(
+                      existingGlobalArtifactInCurrentSpace.artifact.item_id
+                    );
+                  });
                 });
 
                 describe('when with global artifact privilege', () => {
@@ -617,7 +751,6 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             });
 
             it('should error when `new_list` query param is `true`', async () => {});
-            it('should add current space ID to artifacts without ownerSpaceId on import', async () => {});
             it('should add a comment to imported artifacts with relevant data', async () => {});
             it('should add a tag to imported artifacts', async () => {});
 
@@ -666,17 +799,18 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             )
             .expect(200);
 
-          const { body } = await endpointOpsAnalystSupertest
-            .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
-            .set('kbn-xsrf', 'true')
-            .on('error', createSupertestErrorLogger(log))
-            .query({
-              list_id: 'endpoint_list',
-              namespace_type: 'agnostic',
-              per_page: 50,
-            })
-            .send()
-            .expect(200);
+          const { body }: { body: FindExceptionListItemsResponse } =
+            await endpointOpsAnalystSupertest
+              .get(`${EXCEPTION_LIST_ITEM_URL}/_find`)
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .query({
+                list_id: 'endpoint_list',
+                namespace_type: 'agnostic',
+                per_page: 50,
+              })
+              .send()
+              .expect(200);
 
           // After import - all items should be returned on a GET `find` request.
           expect(body.data.length).to.eql(3);

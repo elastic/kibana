@@ -1146,6 +1146,10 @@ export class ExceptionListClient {
     overwrite,
     generateNewListId,
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
+    console.log(
+      '🧀 exception_list_client.ts:1086 🥭 importExceptionListAndItems',
+      JSON.stringify({}, null, ' ')
+    );
     const { savedObjectsClient, user } = this;
 
     // validation of import and sorting of lists and items
@@ -1185,6 +1189,10 @@ export class ExceptionListClient {
     maxExceptionsImportSize,
     overwrite,
   }: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
+    console.log(
+      '🧀 exception_list_client.ts:1126 🥭 importExceptionListAndItemsAsArray',
+      JSON.stringify({}, null, ' ')
+    );
     const { savedObjectsClient, user } = this;
 
     // validation of import and sorting of lists and items
