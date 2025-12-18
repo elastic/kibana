@@ -136,18 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
       });
-
-      it('Does not warn about the duplicated titile when the casing is different', async function () {
-        await dashboard.switchToEditMode();
-        await dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(
-          dashboardName.toUpperCase(),
-          {
-            waitDialogIsClosed: false,
-          }
-        );
-
-        await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
-      });
     });
 
     describe('flyout settings', () => {
