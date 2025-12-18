@@ -91,7 +91,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
               onClick={openAgentBuilderFlyout}
               size="xs"
               telemetry={{
-                pathway: 'attack_discovery',
+                pathway: 'attack_discovery_bottom',
                 attachments: ['alert'],
               }}
             />

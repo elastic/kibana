@@ -215,7 +215,7 @@ const TakeActionComponent: React.FC<Props> = ({
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
     telemetry?.reportEvent(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, {
-      pathway: 'attack_discovery',
+      pathway: 'attack_discovery_take_action',
       attachments: ['alert'],
     });
     openAgentBuilderFlyout();

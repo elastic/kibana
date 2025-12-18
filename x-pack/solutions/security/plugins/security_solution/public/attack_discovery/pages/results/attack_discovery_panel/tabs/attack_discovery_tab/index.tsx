@@ -131,7 +131,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
             <NewAgentBuilderAttachment
               onClick={openAgentBuilderFlyout}
               telemetry={{
-                pathway: 'attack_discovery',
+                pathway: 'attack_discovery_top',
                 attachments: ['alert'],
               }}
             />

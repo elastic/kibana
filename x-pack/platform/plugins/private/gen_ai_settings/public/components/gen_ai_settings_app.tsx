@@ -236,7 +236,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       ? (unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue as AIChatExperience)
       : undefined;
     const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Classic;
-    const normalizedUnsavedChatExperience = unsavedChatExperience ?? AIChatExperience.Classic;
 
     // Telemetry should compare the effective "before" and "after" values.
     // - "before" should include the default if there is no saved value.

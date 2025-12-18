@@ -26,7 +26,8 @@ export interface NewAgentBuilderAttachmentTelemetry {
     | 'rules_table'
     | 'rule_creation'
     | 'rule_failure'
-    | 'attack_discovery';
+    | 'attack_discovery_top'
+    | 'attack_discovery_bottom';
   /**
    * Attachment type
    */
