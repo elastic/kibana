@@ -9,9 +9,8 @@ import React from 'react';
 import type { FC } from 'react';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import { RuleDetailTabs } from '../../../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { SecurityPageName } from '../../../../common/constants';
-import { getRuleDetailsTabUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
+import { getRuleDetailsUrl } from '../../../common/components/link_to';
 
 interface LinkToRuleDetailsProps {
   referenceName: string;
@@ -28,11 +27,12 @@ const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
   external,
   dataTestSubj,
 }) => {
+  const ruleDetailsUrl = getRuleDetailsUrl(referenceId);
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}
       deepLinkId={SecurityPageName.rules}
-      path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
+      path={ruleDetailsUrl}
       target={external ? '_blank' : undefined}
     >
       {referenceName}
