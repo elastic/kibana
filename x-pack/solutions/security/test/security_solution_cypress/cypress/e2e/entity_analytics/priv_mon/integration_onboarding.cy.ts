@@ -29,6 +29,7 @@ describe(
     });
 
     beforeEach(() => {
+      cleanFleet();
       login();
     });
 
