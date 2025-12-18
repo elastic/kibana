@@ -14,14 +14,13 @@ function createBenchmark(name: string, config: string) {
   return {
     kind: 'script' as const,
     name,
-    // We want each workspace to use it's own build rather than the dist from the build itself (like normal FTR does)
-    beforeAll: `node scripts/build_kibana_platform_plugins.js`,
     run: `node scripts/functional_tests --config ${config}`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
     },
     ensure: {
+      // We want each workspace to use it's own build rather than the dist from the build itself (like normal FTR does)
       build: true,
     },
   } satisfies ScriptBenchmark;
