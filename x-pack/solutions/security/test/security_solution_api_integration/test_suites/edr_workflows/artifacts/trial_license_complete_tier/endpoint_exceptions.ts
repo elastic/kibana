@@ -180,7 +180,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe(`and using Import API`, function () {
-      const buildImportBuffer = (listId: typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS[number]): Buffer => {
+      const buildImportBuffer = (
+        listId: (typeof ALL_ENDPOINT_ARTIFACT_LIST_IDS)[number]
+      ): Buffer => {
         const generator = new ExceptionsListItemGenerator();
         const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
           return listDefinition.id === listId;
