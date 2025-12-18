@@ -48,8 +48,7 @@ const ConnectorPopoverButton: React.FC<{
   onClick: () => void;
   disabled: boolean;
   selectedConnectorName?: string;
-  isUsingNonDefaultConnector: boolean;
-}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName, isUsingNonDefaultConnector }) => {
+}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName }) => {
   return (
     <InputPopoverButton
       open={isPopoverOpen}
@@ -179,9 +178,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
   // Calculate height based on item count, capped at max rows
   const listHeight = Math.min(listItemsHeight, getMaxListHeight({ withHeader: false }));
 
-  const isUsingNonDefaultConnector =
-    selectedConnectorId !== defaultConnectorId && selectedConnectorId !== undefined;
-
   return (
     <EuiPopover
       panelProps={{ css: panelStyles }}
@@ -191,7 +187,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
           onClick={togglePopover}
           disabled={isLoading || connectors.length === 0}
           selectedConnectorName={selectedConnector?.name}
-          isUsingNonDefaultConnector={isUsingNonDefaultConnector}
         />
       }
       isOpen={isPopoverOpen}
