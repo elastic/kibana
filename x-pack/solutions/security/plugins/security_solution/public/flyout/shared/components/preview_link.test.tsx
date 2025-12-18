@@ -20,6 +20,8 @@ import { USER_PREVIEW_BANNER } from '../../document_details/right/components/use
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -37,6 +39,10 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
+jest.mock('../../../common/components/user_privileges');
+
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+
 const renderPreviewLink = (field: string, value: string, dataTestSuj?: string) =>
   render(
     <TestProviders>
@@ -53,6 +59,17 @@ const renderPreviewLink = (field: string, value: string, dataTestSuj?: string) =
 describe('<PreviewLink />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
+      },
+    });
   });
 
   it('should not render a link if field does not have preview', () => {
@@ -156,5 +173,44 @@ describe('<PreviewLink />', () => {
       </TestProviders>
     );
     expect(queryByTestId('rule-link')).not.toBeInTheDocument();
+  });
+
+  it('should not render a rule preview link when user cannot read rules', () => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: false, edit: false },
+      },
+    });
+
+    const { queryByTestId, getByText } = render(
+      <TestProviders>
+        <PreviewLink
+          field={'kibana.alert.rule.name'}
+          value={'rule-name'}
+          data-test-subj={'rule-link'}
+          scopeId={'scopeId'}
+          ruleId={'ruleId'}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('rule-link')).not.toBeInTheDocument();
+    expect(getByText('rule-name')).toBeInTheDocument();
+  });
+
+  it('should still render host preview link when user cannot read rules', () => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: false, edit: false },
+      },
+    });
+
+    const { getByTestId } = renderPreviewLink('host.name', 'host', 'host-link');
+
+    expect(getByTestId('host-link')).toBeInTheDocument();
   });
 });
