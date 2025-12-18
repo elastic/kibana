@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import type { ServiceType } from '../../../../types';
 
@@ -48,7 +49,25 @@ export interface ServiceCardProps {
   isCardDisabled?: boolean;
   subscriptionRequired?: boolean;
   hasActiveSubscription?: boolean;
+  validLicenseTypes?: string[];
+  currentLicenseType?: string;
 }
+
+const isLicenseValid = (
+  validLicenseTypes: string[] | undefined,
+  currentLicenseType: string | undefined
+): boolean => {
+  // If no license requirements, it's valid
+  if (!validLicenseTypes || validLicenseTypes.length === 0) {
+    return true;
+  }
+  // If no current license type, consider it valid
+  if (!currentLicenseType) {
+    return true;
+  }
+  // Check if current license is in the valid list
+  return validLicenseTypes.includes(currentLicenseType);
+};
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
   serviceKey,
@@ -69,12 +88,17 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   isCardDisabled = false,
   subscriptionRequired = false,
   hasActiveSubscription = true,
+  validLicenseTypes,
+  currentLicenseType,
 }) => {
   const { hasConfigurePermission, telemetryService } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
 
   const closePopover = () => setIsPopoverOpen(false);
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
+  const closeLicensePopover = () => setIsLicensePopoverOpen(false);
+  const toggleLicensePopover = () => setIsLicensePopoverOpen(!isLicensePopoverOpen);
 
   const renderBadge = () => {
     if (isCardDisabled && badge) {
@@ -127,7 +151,77 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   };
 
   const renderActions = () => {
-    if (isCardDisabled || !supported) {
+    if (isCardDisabled) {
+      return null;
+    }
+
+    if (!isLicenseValid(validLicenseTypes, currentLicenseType) && !supported) {
+      const formattedLicenses = validLicenseTypes!.map(capitalize).join(', ');
+
+      return (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="serviceCardLicenseMessage"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.requiresDifferentLicense"
+                defaultMessage="Requires different license"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  iconType="info"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.cloudConnect.connectedServices.service.licenseInfoAriaLabel',
+                    {
+                      defaultMessage: 'License information',
+                    }
+                  )}
+                  onClick={toggleLicensePopover}
+                  data-test-subj="serviceCardLicenseInfoButton"
+                />
+              }
+              isOpen={isLicensePopoverOpen}
+              closePopover={closeLicensePopover}
+              panelPaddingSize="s"
+              anchorPosition="upCenter"
+            >
+              <div style={{ maxWidth: '300px' }}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.cloudConnect.connectedServices.service.licenseInfo"
+                    defaultMessage="This service requires one of the following licenses: {licenses}. Learn how to {extendTrialLink} or view subscription options."
+                    values={{
+                      licenses: <strong>{formattedLicenses}</strong>,
+                      extendTrialLink: (
+                        <EuiLink href="https://www.elastic.co/trialextension" target="_blank">
+                          {i18n.translate(
+                            'xpack.cloudConnect.connectedServices.service.extendTrial',
+                            {
+                              defaultMessage: 'extend your trial',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </div>
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (!supported) {
       return null;
     }
 

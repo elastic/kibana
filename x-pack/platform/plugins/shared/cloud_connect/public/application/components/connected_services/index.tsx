@@ -194,6 +194,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
           services={clusterDetails.services}
           onServiceUpdate={onServiceUpdate}
           subscription={clusterDetails.metadata.subscription}
+          currentLicenseType={clusterDetails.license?.type}
         />
 
         <MigrationSection />
