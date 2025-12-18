@@ -38,9 +38,7 @@ interface Props {
 
 export const QueryInput = (props: Props) => {
   const {
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useKibana<{
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;

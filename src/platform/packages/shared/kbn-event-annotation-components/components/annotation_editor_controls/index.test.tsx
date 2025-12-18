@@ -23,7 +23,7 @@ import { act } from 'react-dom/test-utils';
 import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-jest.mock('@kbn/unified-search-plugin/public', () => ({
+jest.mock('@kbn/kql/public', () => ({
   QueryStringInput: () => {
     return 'QueryStringInput';
   },

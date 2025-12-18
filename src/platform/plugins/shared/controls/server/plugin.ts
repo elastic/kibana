@@ -10,7 +10,7 @@
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as KqlSetup } from '@kbn/kql/server';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
@@ -22,11 +22,11 @@ import { setupOptionsListClusterSettingsRoute } from './options_list/options_lis
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   data: DataSetup;
-  unifiedSearch: UnifiedSearchSetup;
+  kql: KqlSetup;
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
-  public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
+  public setup(core: CoreSetup, { embeddable, kql }: SetupDeps) {
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)
     );
@@ -35,7 +35,7 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(esqlStaticControlPersistableStateServiceFactory());
     setupOptionsListClusterSettingsRoute(core);
-    setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
+    setupOptionsListSuggestionsRoute(core, kql.autocomplete.getAutocompleteSettings);
     return {};
   }
 

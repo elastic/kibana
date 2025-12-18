@@ -74,7 +74,6 @@ fileGroups:
   src:
     - public/**/*
     - public/**/*.json
-    - server/**/*
     - '!target/**/*'
 tasks:
   jest:

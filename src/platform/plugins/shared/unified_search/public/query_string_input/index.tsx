@@ -28,7 +28,7 @@ export const QueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
 );
 
 const LazyQueryStringInputUI = React.lazy(async () => {
-  const { QueryStringInput } = await import('../ui_module');
+  const { QueryStringInput } = await import('@kbn/kql/public');
   return { default: QueryStringInput };
 });
 

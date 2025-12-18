@@ -88,7 +88,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       return;
     }
     this.setState({ isLoading: true });
-    const suggestions = await this.services.unifiedSearch.autocomplete.getValueSuggestions({
+    const suggestions = await this.services.kql.autocomplete.getValueSuggestions({
       indexPattern,
       field,
       query,

@@ -60,30 +60,30 @@ import { StyledDiv } from './query_string_input.styles';
 
 export const strings = {
   getSearchInputPlaceholderForText: () =>
-    i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
+    i18n.translate('kql.query.queryBar.searchInputPlaceholderForText', {
       defaultMessage: 'Filter your data',
     }),
   getSearchInputPlaceholder: (language: string) =>
-    i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+    i18n.translate('kql.query.queryBar.searchInputPlaceholder', {
       defaultMessage: 'Filter your data using {language} syntax',
       values: { language },
     }),
   getQueryBarComboboxAriaLabel: (pageType: string) =>
-    i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
+    i18n.translate('kql.query.queryBar.comboboxAriaLabel', {
       defaultMessage: 'Search and filter the {pageType} page',
       values: { pageType },
     }),
   getQueryBarSearchInputAriaLabel: (pageType: string) =>
-    i18n.translate('unifiedSearch.query.queryBar.searchInputAriaLabel', {
+    i18n.translate('kql.query.queryBar.searchInputAriaLabel', {
       defaultMessage: 'Start typing to search and filter the {pageType} page',
       values: { pageType },
     }),
   getQueryBarClearInputLabel: () =>
-    i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
+    i18n.translate('kql.query.queryBar.clearInputLabel', {
       defaultMessage: 'Clear input',
     }),
   getKQLNestedQuerySyntaxInfoTitle: () =>
-    i18n.translate('unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
+    i18n.translate('kql.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
       defaultMessage: 'KQL nested query syntax',
     }),
 };
@@ -537,7 +537,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
             <div>
               <p>
                 <FormattedMessage
-                  id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoText"
+                  id="kql.query.queryBar.KQLNestedQuerySyntaxInfoText"
                   defaultMessage="It looks like you're querying on a nested field.
                   You can construct KQL syntax for nested queries in different ways, depending on the results you want.
                   Learn more in our {link}."
@@ -545,7 +545,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                     link: (
                       <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
                         <FormattedMessage
-                          id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
+                          id="kql.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
                           defaultMessage="docs"
                         />
                       </EuiLink>
@@ -557,7 +557,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                 <EuiFlexItem grow={false}>
                   <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
                     <FormattedMessage
-                      id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
+                      id="kql.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
                       defaultMessage="Don't show again"
                     />
                   </EuiButton>

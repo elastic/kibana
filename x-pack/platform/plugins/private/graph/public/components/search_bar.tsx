@@ -28,6 +28,7 @@ import type {
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { css } from '@emotion/react';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import type { GraphState, IndexpatternDatasource } from '../state_management';
@@ -111,15 +112,14 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     IUnifiedSearchPluginServices & {
       contentManagement: ContentManagementPublicStart;
       unifiedSearch: UnifiedSearchPublicPluginStart;
+      kql: KqlPluginStart;
     }
   >();
 
   const {
     uiSettings,
     appName,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
     contentManagement,
   } = services;
   if (!overlays) return null;

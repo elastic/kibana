@@ -16,17 +16,17 @@ import { QuerySuggestionTypes } from '../query_suggestion_provider';
 
 const bothArgumentsText = (
   <FormattedMessage
-    id="unifiedSearch.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
+    id="kql.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
     defaultMessage="both arguments"
-    description="Part of unifiedSearch.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
+    description="Part of kql.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
   />
 );
 
 const oneOrMoreArgumentsText = (
   <FormattedMessage
-    id="unifiedSearch.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
+    id="kql.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
     defaultMessage="one or more arguments"
-    description="Part of unifiedSearch.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
+    description="Part of kql.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
   />
 );
 
@@ -34,20 +34,20 @@ const conjunctions: Record<string, JSX.Element> = {
   and: (
     <p>
       <FormattedMessage
-        id="unifiedSearch.kueryAutocomplete.andOperatorDescription"
+        id="kql.kueryAutocomplete.andOperatorDescription"
         defaultMessage="Requires {bothArguments} to be true"
         values={{
           bothArguments: <span className="kbnSuggestionItem__callout">{bothArgumentsText}</span>,
         }}
         description="Full text: ' Requires both arguments to be true'. See
-          'unifiedSearch.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
+          'kql.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
       />
     </p>
   ),
   or: (
     <p>
       <FormattedMessage
-        id="unifiedSearch.kueryAutocomplete.orOperatorDescription"
+        id="kql.kueryAutocomplete.orOperatorDescription"
         defaultMessage="Requires {oneOrMoreArguments} to be true"
         values={{
           oneOrMoreArguments: (
@@ -55,7 +55,7 @@ const conjunctions: Record<string, JSX.Element> = {
           ),
         }}
         description="Full text: 'Requires one or more arguments to be true'. See
-          'unifiedSearch.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
+          'kql.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
       />
     </p>
   ),

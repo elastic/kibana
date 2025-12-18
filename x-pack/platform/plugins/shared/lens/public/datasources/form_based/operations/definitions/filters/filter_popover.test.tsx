@@ -12,7 +12,7 @@ import { EuiPopover, EuiLink } from '@elastic/eui';
 import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { QueryStringInput } from '@kbn/kql/public';
 import { QueryInput } from '@kbn/visualization-ui-components';
 import type { Query } from '@kbn/es-query';
 
@@ -27,7 +27,7 @@ jest.mock('@kbn/visualization-ui-components', () => {
   };
 });
 
-jest.mock('@kbn/unified-search-plugin/public', () => ({
+jest.mock('@kbn/kql/public', () => ({
   QueryStringInput: () => 'QueryStringInput',
 }));
 

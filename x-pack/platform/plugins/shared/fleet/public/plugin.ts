@@ -47,6 +47,7 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
@@ -134,6 +135,7 @@ export interface FleetStartDeps {
   dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
@@ -148,6 +150,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   dashboard: DashboardStart;
+  core: CoreStart;
   automaticImport?: AutomaticImportPluginStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
@@ -202,6 +205,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             : undefined;
 
         const startServices: FleetStartServices = {
+          core: coreStartServices,
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
@@ -245,6 +249,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             ? { ...deps.cloud, ...startDepsServices.cloud }
             : undefined;
         const startServices: FleetStartServices = {
+          core: coreStartServices,
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,

@@ -15,6 +15,7 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { logsDataAccessPluginMock } from '@kbn/logs-data-access-plugin/public/mocks';
 
@@ -97,6 +98,7 @@ export const observabilityPublicPluginsStartMock = {
       spaces: spacesPluginMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
     };
   },
 };

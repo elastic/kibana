@@ -13,7 +13,6 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type {
@@ -31,6 +30,7 @@ import type {
   ParamEditorCustomProps,
   UserMessage,
 } from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -159,7 +159,7 @@ export interface ParamEditorProps<
   dateRange: DateRange;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
   activeData?: FormBasedDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;

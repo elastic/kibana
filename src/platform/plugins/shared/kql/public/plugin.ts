@@ -15,7 +15,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { createQueryStringInput } from './components/query_string_input/get_query_string_input';
 import type { QueryStringInputProps } from './components/query_string_input/query_string_input';
-import { AutocompleteService, type AutocompleteStart } from './autocomplete/autocomplete_service';
+import {
+  AutocompleteService,
+  type AutocompleteStart,
+  type AutocompleteSetup,
+} from './autocomplete/autocomplete_service';
 
 export interface KqlPluginSetupDependencies {
   data: DataPublicPluginSetup;
@@ -25,6 +29,10 @@ export interface KqlPluginSetupDependencies {
 export interface KqlPluginStartDependencies {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+}
+
+export interface KqlPluginSetup {
+  autocomplete: AutocompleteSetup;
 }
 
 export interface KqlPluginStart {
@@ -48,7 +56,7 @@ export class KqlPlugin implements Plugin<{}, KqlPluginStart> {
   public setup(
     core: CoreSetup<KqlPluginSetupDependencies, KqlPluginStart>,
     { data, usageCollection }: KqlPluginSetupDependencies
-  ) {
+  ): KqlPluginSetup {
     const { query } = data;
     return {
       autocomplete: this.autocomplete.setup(core, {

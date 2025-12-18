@@ -6,6 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-export type { KqlPluginStart } from './plugin';
+export type { KqlPluginStart, KqlPluginSetup } from './plugin';
 export type { QueryStringInputProps } from './components/query_string_input/query_string_input';
 export { QueryStringInput } from './components/query_string_input/query_string_input';
+
+export type {
+  QuerySuggestion,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  AutocompleteStart,
+} from './autocomplete';
+
+export { QuerySuggestionTypes } from './autocomplete/providers/query_suggestion_provider';

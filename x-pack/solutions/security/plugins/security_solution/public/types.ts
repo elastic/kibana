@@ -67,6 +67,7 @@ import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -130,6 +131,7 @@ export interface StartPlugins {
   cases: CasesPublicStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;

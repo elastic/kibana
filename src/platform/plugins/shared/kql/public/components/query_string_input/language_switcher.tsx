@@ -24,15 +24,15 @@ import { i18n } from '@kbn/i18n';
 
 export const strings = {
   getSwitchLanguageButtonText: () =>
-    i18n.translate('unifiedSearch.switchLanguage.buttonText', {
+    i18n.translate('kql.switchLanguage.buttonText', {
       defaultMessage: 'Switch language button.',
     }),
   getFilterLanguageLabel: () =>
-    i18n.translate('unifiedSearch.switchLanguage.filterLanguageLabel', {
+    i18n.translate('kql.switchLanguage.filterLanguageLabel', {
       defaultMessage: 'Filter language',
     }),
   documentationLabel: () =>
-    i18n.translate('unifiedSearch.switchLanguage.documentationLabel', {
+    i18n.translate('kql.switchLanguage.documentationLabel', {
       defaultMessage: 'Documentation',
     }),
 };
@@ -129,7 +129,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
     >
       <EuiPopoverTitle paddingSize="s">
         <FormattedMessage
-          id="unifiedSearch.query.queryBar.syntaxOptionsTitle"
+          id="kql.query.queryBar.syntaxOptionsTitle"
           defaultMessage="Syntax options"
         />
       </EuiPopoverTitle>

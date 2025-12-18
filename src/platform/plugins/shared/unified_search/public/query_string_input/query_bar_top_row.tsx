@@ -50,6 +50,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { QueryStringInput } from '@kbn/kql/public';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -62,7 +63,6 @@ import type {
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 
-import { QueryStringInput } from './query_string_input';
 import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
 export const strings = {

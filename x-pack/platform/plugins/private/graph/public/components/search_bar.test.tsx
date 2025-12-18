@@ -18,7 +18,7 @@ import type {
   OverlayStart,
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { QueryStringInput } from '@kbn/kql/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -32,8 +32,9 @@ import { setDatasource, submitSearchSaga } from '../state_management';
 import type { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
-import { createQueryStringInput } from '@kbn/unified-search-plugin/public/query_string_input/get_query_string_input';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { createQueryStringInput } from '@kbn/kql/public/components/query_string_input/get_query_string_input';
+import { coreMock } from '@kbn/core/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -56,6 +57,7 @@ function getServiceMocks() {
     },
   } as IUiSettingsClient;
 
+  const kqlMock = kqlPluginMock.createStartContract();
   return {
     overlays: {} as OverlayStart,
     unifiedSearch: {
@@ -70,10 +72,11 @@ function getServiceMocks() {
             clear: () => {},
           } as IStorageWrapper,
           data: dataPluginMock.createStartContract(),
-          unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+          autocomplete: kqlMock.autocomplete,
           notifications: {} as NotificationsStart,
           http: {} as HttpStart,
           dataViews: dataViewPluginMocks.createStartContract(),
+          core: coreMock.createStart(),
         }),
       },
     },
