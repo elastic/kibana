@@ -50,4 +50,14 @@ export interface IBasePath {
    * Removes the prepended basePath from the `path`.
    */
   remove(path: string): string;
+
+  /**
+   * Overrides the `basePath` value for an existing request.
+   * Unlike {@link IBasePath.set}, this can be called even if a basePath was previously set.
+   *
+   * @remarks
+   * Use with caution - this changes the space context for all downstream
+   * operations using this request.
+   */
+  override(request: KibanaRequest, requestSpecificBasePath: string): void;
 }

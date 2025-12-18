@@ -134,13 +134,14 @@ export class StreamsPlugin
         contentService.getClient(),
       ]);
 
-      const [queryClient, uiSettingsClient] = await Promise.all([
-        queryService.getClientWithRequest({
-          request,
-          assetClient,
-        }),
-        coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
-      ]);
+      const queryClient = await queryService.getClientWithRequest({
+        request,
+        assetClient,
+      });
+
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+        coreStart.savedObjects.getScopedClient(request)
+      );
 
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const soClient = coreStart.savedObjects.getScopedClient(request);

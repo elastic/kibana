@@ -68,4 +68,9 @@ export class BasePath implements IBasePath {
 
     return path;
   };
+
+  public override = (request: KibanaRequest, requestSpecificBasePath: string) => {
+    const rawRequest = ensureRawRequest(request);
+    this.basePathCache.set(rawRequest, requestSpecificBasePath);
+  };
 }
