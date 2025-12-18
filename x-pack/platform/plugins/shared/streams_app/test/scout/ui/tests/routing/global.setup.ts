@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
 
-/**
- * Shard 1: Core Streams functionality
- * - Enable/disable wired streams flow
- * - Streams list view tests
- */
-export default createPlaywrightConfig({
-  testDir: './tests/core',
-  runGlobalSetup: true,
+globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
+  log.debug('[setup] Enabling streams...');
+  await apiServices.streams.enable();
 });

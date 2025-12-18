@@ -13,11 +13,8 @@ import { createPlaywrightConfig } from '@kbn/scout';
  * - Pipeline suggestions
  * - Processing simulation preview
  * - Permissions (editor/viewer)
- *
- * ~11 test files
  */
 export default createPlaywrightConfig({
-  testDir: './tests',
-  testMatch: ['data_management/data_processing/**/*.spec.ts'],
+  testDir: './tests/processing',
   runGlobalSetup: true,
 });

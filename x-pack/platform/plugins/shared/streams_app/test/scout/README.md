@@ -12,28 +12,16 @@ node scripts/scout.js start-server --serverless=[es|oblt|security]
 
 Then you can run the tests in another terminal.
 
-### Running all tests (sequential)
-
-To run all tests with a single config:
-
-```bash
-// ESS
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep @ess
-
-// Serverless
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep @svlOblt
-```
-
-### Running sharded tests (faster CI execution)
+### Running tests
 
 Tests are split into 4 shards for faster CI execution. Each shard runs in a separate CI job with its own ES/Kibana instance.
 
-| Config | Tests | Description |
-|--------|-------|-------------|
-| `core.playwright.config.ts` | 5 files | Enable/disable wired streams, list view |
-| `routing.playwright.config.ts` | 9 files | Data routing rules, AI suggestions |
-| `processing.playwright.config.ts` | 11 files | Data processing, pipeline suggestions |
-| `schema.playwright.config.ts` | 12 files | Data retention, schema mapping, quality |
+| Config | Test Directory | Description |
+|--------|----------------|-------------|
+| `core.playwright.config.ts` | `tests_core/` | Enable/disable wired streams, list view |
+| `routing.playwright.config.ts` | `tests_routing/` | Data routing rules, AI suggestions |
+| `processing.playwright.config.ts` | `tests_processing/` | Data processing, pipeline suggestions |
+| `schema.playwright.config.ts` | `tests_schema/` | Data retention, schema mapping, quality |
 
 To run a specific shard locally:
 

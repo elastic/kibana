@@ -12,11 +12,8 @@ import { createPlaywrightConfig } from '@kbn/scout';
  * - Routing rules CRUD operations
  * - AI suggestions for partitioning
  * - Routing data preview
- *
- * ~9 test files
  */
 export default createPlaywrightConfig({
-  testDir: './tests',
-  testMatch: ['data_management/data_routing/**/*.spec.ts'],
+  testDir: './tests/routing',
   runGlobalSetup: true,
 });

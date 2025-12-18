@@ -15,17 +15,8 @@ import { createPlaywrightConfig } from '@kbn/scout';
  * - Schema mapping (classic & wired)
  * - Data quality
  * - Stream header
- *
- * ~12 test files
  */
 export default createPlaywrightConfig({
-  testDir: './tests',
-  testMatch: [
-    'data_management/data_retention/**/*.spec.ts',
-    'data_management/data_mapping/**/*.spec.ts',
-    'data_management/data_quality.spec.ts',
-    'data_management/streams_header.spec.ts',
-  ],
+  testDir: './tests/schema',
   runGlobalSetup: true,
 });
-
