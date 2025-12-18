@@ -70,6 +70,7 @@ export {
   type TabActionInjector,
   createTabActionInjector,
   createTabItem,
+  getSerializedSearchSourceDataViewDetails,
   parseControlGroupJson,
   extractEsqlVariables,
 } from './utils';

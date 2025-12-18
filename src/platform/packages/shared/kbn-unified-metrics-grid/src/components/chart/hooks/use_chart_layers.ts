@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, MetricField } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
