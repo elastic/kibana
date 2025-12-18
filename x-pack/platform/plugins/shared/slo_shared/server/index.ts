@@ -13,7 +13,5 @@ const plugin = async (initContext: PluginInitializerContext) => {
   return new SloSharedPlugin(initContext);
 };
 
-export { SO_SLO_TEMPLATE_TYPE, sloTemplate } from './saved_objects';
-
 export type { SloSharedPluginSetup, SloSharedPluginStart };
 export { plugin };

@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { storedSloTemplateSchema } from '@kbn/slo-schema';
 import type * as t from 'io-ts';
 import { pick } from 'lodash';
-
-export const SO_SLO_TEMPLATE_TYPE = 'slo_template';
+import { SO_SLO_TEMPLATE_TYPE } from '../../common';
 
 type StoredSLOTemplate = t.TypeOf<typeof storedSloTemplateSchema>;
 

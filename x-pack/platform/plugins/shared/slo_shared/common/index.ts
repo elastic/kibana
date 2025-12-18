@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { sloTemplate } from './slo_template';
+export const SO_SLO_TEMPLATE_TYPE = 'slo_template';
