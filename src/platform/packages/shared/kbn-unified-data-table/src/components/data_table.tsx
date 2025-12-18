@@ -1085,7 +1085,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       const leftControls = (
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
           {Boolean(selectedDocsCount) && (
             <EuiFlexItem grow={false}>
               <DataTableDocumentToolbarBtn
