@@ -358,6 +358,9 @@ describe('processFilters', () => {
       bool: {
         must: [
           {
+            match_all: {},
+          },
+          {
             match: {
               field1: 'value1',
             },
