@@ -19,15 +19,23 @@ const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 describe('When displaying the EndpointPackageCustomExtension fleet UI extension', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
+  let mockedTestContext: AppContextTestRender;
   const artifactCards = Object.freeze([
     'trustedApps-fleetCard',
     'eventFilters-fleetCard',
+    'endpointExceptions-fleetCard',
     'hostIsolationExceptions-fleetCard',
     'blocklists-fleetCard',
   ]);
 
   beforeEach(() => {
-    const mockedTestContext = createFleetContextRendererMock();
+    mockedTestContext = createFleetContextRendererMock();
+
+    // Mock experimental feature flag
+    mockedTestContext.setExperimentalFlag({
+      endpointExceptionsMovedUnderManagement: true,
+    });
+
     render = () => {
       renderResult = mockedTestContext.render(
         <EndpointPackageCustomExtension
@@ -61,6 +69,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
           canReadHostIsolationExceptions: false,
           canDeleteHostIsolationExceptions: false,
           canReadTrustedApplications: false,
+          canReadEndpointExceptions: false,
         }),
       });
 
