@@ -76,6 +76,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     return {
       input,
       rawInput: this.node.configuration.with || {},
+      config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
       contextManager: {
         getContext: () => {
           return this.stepExecutionRuntime.contextManager.getContext();
