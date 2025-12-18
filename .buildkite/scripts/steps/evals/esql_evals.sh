@@ -5,7 +5,9 @@ set -euo pipefail
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
-# Write kibana.dev.yml with env var placeholders for Phoenix tracing
+# Write repo-root config with env var placeholders for Phoenix tracing.
+# Note: when running Kibana from a distributable (`--kibana-install-dir`), Kibana will NOT read this file.
+# The distributable reads `${KIBANA_BUILD_LOCATION}/config/kibana.yml`, which we patch below as well.
 mkdir -p config
 cat > config/kibana.dev.yml <<'EOF'
 telemetry:
@@ -18,6 +20,22 @@ telemetry:
           public_url: '${PHOENIX_PUBLIC_URL}'
           project_name: '${PHOENIX_PROJECT_NAME}'
           api_key: '${PHOENIX_API_KEY}'
+EOF
+
+# Also apply the Phoenix tracing exporter config to the Kibana distributable.
+# When running with `--kibana-install-dir`, Kibana will read config from the install dir,
+# not from the repo root `config/kibana.dev.yml`.
+KIBANA_CONFIG_FILE="${KIBANA_BUILD_LOCATION:?}/config/kibana.yml"
+mkdir -p "$(dirname "$KIBANA_CONFIG_FILE")"
+cat >> "$KIBANA_CONFIG_FILE" <<'EOF'
+
+telemetry.tracing.enabled: true
+telemetry.tracing.exporters:
+  - phoenix:
+      base_url: '${PHOENIX_BASE_URL}'
+      public_url: '${PHOENIX_PUBLIC_URL}'
+      project_name: '${PHOENIX_PROJECT_NAME}'
+      api_key: '${PHOENIX_API_KEY}'
 EOF
 
 cleanup() {
