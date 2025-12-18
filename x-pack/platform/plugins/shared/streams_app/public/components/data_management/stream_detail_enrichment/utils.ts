@@ -10,6 +10,7 @@ import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   GrokProcessor,
+  LowercaseProcessor,
   MathProcessor,
   ProcessorType,
   ReplaceProcessor,
@@ -47,6 +48,7 @@ import type {
   DropFormState,
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
+  LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
   ProcessorFormState,
@@ -68,6 +70,7 @@ export const SPECIALISED_TYPES = [
   'replace',
   'drop_document',
   'uppercase',
+  'lowercase',
 ];
 
 interface FormStateDependencies {
@@ -225,6 +228,14 @@ const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultLowercaseProcessorFormState = (): LowercaseFormState => ({
+  action: 'lowercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -254,6 +265,7 @@ const defaultProcessorFormStateByType: Record<
   math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
   uppercase: defaultUppercaseProcessorFormState,
+  lowercase: defaultLowercaseProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -295,7 +307,8 @@ export const getFormStateFromActionStep = (
     step.action === 'convert' ||
     step.action === 'replace' ||
     step.action === 'math' ||
-    step.action === 'uppercase'
+    step.action === 'uppercase' ||
+    step.action === 'lowercase'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -515,6 +528,21 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         },
+      };
+    }
+
+    if (formState.action === 'lowercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'lowercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as LowercaseProcessor,
       };
     }
 

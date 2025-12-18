@@ -18,6 +18,7 @@ import type {
   SetProcessor,
   StreamlangConditionBlockWithUIAttributes,
   UppercaseProcessor,
+  LowercaseProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
@@ -39,6 +40,7 @@ export type ReplaceFormState = ReplaceProcessor;
 export type SetFormState = SetProcessor;
 export type MathFormState = MathProcessor;
 export type UppercaseFormState = UppercaseProcessor;
+export type LowercaseFormState = LowercaseProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState
@@ -50,7 +52,8 @@ export type SpecialisedFormState =
   | ReplaceFormState
   | SetFormState
   | MathFormState
-  | UppercaseFormState;
+  | UppercaseFormState
+  | LowercaseFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 export type ConditionBlockFormState = StreamlangConditionBlockWithUIAttributes;

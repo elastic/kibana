@@ -15,6 +15,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  LowercaseProcessor,
   MathProcessor,
   ProcessorType,
   RemoveByPrefixProcessor,
@@ -153,6 +154,12 @@ const actionStepValidators: {
     }
   },
   uppercase: (step: UppercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  lowercase: (step: LowercaseProcessor) => {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
       checkFieldName(step.to);

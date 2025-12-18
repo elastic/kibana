@@ -367,6 +367,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  lowercase: {
+    type: 'lowercase' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseInputDisplay',
+      {
+        defaultMessage: 'Lowercase',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.lowercaseHelpText"
+          defaultMessage="{lowercaseLink}. If the field is an array of strings, all members of the array will be converted."
+          values={{
+            lowercaseLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsLowercaseLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.lowercase}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.lowercaseLinkLabel', {
+                  defaultMessage: 'Converts a string to its lowercase equivalent.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -408,6 +439,7 @@ const PROCESSOR_GROUP_MAP: Record<
   math: 'set',
   manual_ingest_pipeline: 'other',
   uppercase: 'set',
+  lowercase: 'set',
 };
 
 const getProcessorDescription =

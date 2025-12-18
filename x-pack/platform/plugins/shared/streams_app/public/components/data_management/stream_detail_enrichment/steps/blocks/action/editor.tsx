@@ -54,6 +54,7 @@ import { MathProcessorForm } from './math';
 import { ProcessorContextProvider } from './processor_context';
 import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { UppercaseProcessorForm } from './uppercase';
+import { LowercaseProcessorForm } from './lowercase';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -149,6 +150,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 {type === 'drop_document' && <DropProcessorForm />}
                 {type === 'math' && <MathProcessorForm />}
                 {type === 'uppercase' && <UppercaseProcessorForm />}
+                {type === 'lowercase' && <LowercaseProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}
