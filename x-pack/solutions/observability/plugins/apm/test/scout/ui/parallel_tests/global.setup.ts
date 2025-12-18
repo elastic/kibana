@@ -9,7 +9,6 @@ import { globalSetupHook } from '@kbn/scout-oblt';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
-import { generateLargeTrace } from '../fixtures/synthtrace/generate_large_trace';
 import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_links_data';
 import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
 import { testData } from '../fixtures';
@@ -31,16 +30,6 @@ globalSetupHook(
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
     await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
-
-    // Generate large trace data for waterfall tests
-    const largeTraceData = generateLargeTrace({
-      start: new Date(testData.LARGE_TRACE_START_DATE).getTime(),
-      end: new Date(testData.LARGE_TRACE_END_DATE).getTime(),
-      rootTransactionName: testData.LARGE_TRACE_TRANSACTION_NAME,
-      repeaterFactor: 10,
-      environment: testData.LARGE_TRACE_ENVIRONMENT,
-    });
-    await apmSynthtraceEsClient.index(largeTraceData);
 
     // Generate span links data for span links tests
     const spanLinksData = generateSpanLinksData();
