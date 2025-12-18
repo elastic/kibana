@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
+  EuiPageHeader,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiPageSection,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
@@ -26,7 +28,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -362,214 +363,207 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           requestRefresh();
         }}
       />
-      <KibanaPageTemplate
-        restrictWidth={false}
-        panelled
-        pageHeader={{
-          paddingSize: 'xl',
-          bottomBorder: true,
-          pageTitle: (
-            <span data-test-subj="ruleDetailsTitle">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
-                defaultMessage="{ruleName}"
-                values={{ ruleName: rule.name }}
-              />
-            </span>
-          ),
-          description: (
-            <EuiFlexGroup gutterSize="m">
+      <EuiPageHeader
+        data-test-subj="ruleDetailsTitle"
+        bottomBorder
+        pageTitle={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
+            defaultMessage="{ruleName}"
+            values={{ ruleName: rule.name }}
+          />
+        }
+        description={
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
+                        defaultMessage="Type"
+                      />
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
                       <p>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
-                          defaultMessage="Type"
+                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
+                          defaultMessage="API key owner"
                         />
                       </p>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
+                    <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
+                      <b>{rule.apiKeyOwner}</b>
+                      {rule.apiKeyCreatedByUser ? (
+                        <>
+                          &nbsp;
+                          <EuiIconTip
+                            position="right"
+                            content={i18n.translate(
+                              'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
+                              {
+                                defaultMessage: 'This rule is associated with an API key.',
+                              }
+                            )}
+                          />
+                        </>
+                      ) : null}
+                    </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <p>
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
-                            defaultMessage="API key owner"
-                          />
-                        </p>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
-                        <b>{rule.apiKeyOwner}</b>
-                        {rule.apiKeyCreatedByUser ? (
-                          <>
-                            &nbsp;
-                            <EuiIconTip
-                              position="right"
-                              content={i18n.translate(
-                                'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
-                                {
-                                  defaultMessage: 'This rule is associated with an API key.',
-                                }
-                              )}
-                            />
-                          </>
-                        ) : null}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            )}
+          </EuiFlexGroup>
+        }
+        rightSideItems={[
+          canSaveRule && (
+            <RuleActionsPopover
+              rule={rule}
+              onDelete={(ruleId) => {
+                setIsDeleteModalVisibility(true);
+                setRulesToDelete([ruleId]);
+              }}
+              onApiKeyUpdate={(ruleId) => {
+                setRulesToUpdateAPIKey([ruleId]);
+              }}
+              onEnableDisable={onEnableDisable}
+              onRunRule={onRunRule}
+              isInternallyManaged={ruleType.isInternallyManaged}
+            />
           ),
-          rightSideItems: [
-            canSaveRule && (
-              <RuleActionsPopover
-                rule={rule}
-                onDelete={(ruleId) => {
-                  setIsDeleteModalVisibility(true);
-                  setRulesToDelete([ruleId]);
-                }}
-                onApiKeyUpdate={(ruleId) => {
-                  setRulesToUpdateAPIKey([ruleId]);
-                }}
-                onEnableDisable={onEnableDisable}
-                onRunRule={onRunRule}
-                isInternallyManaged={ruleType.isInternallyManaged}
-              />
-            ),
-            editButton,
-            <EuiButtonEmpty
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.refreshRulesButtonLabel',
-                {
-                  defaultMessage: 'Refresh',
-                }
-              )}
-              data-test-subj="refreshRulesButton"
-              iconType="refresh"
-              onClick={requestRefresh}
-              name="refresh"
-              color="primary"
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
-                defaultMessage="Refresh"
-              />
-            </EuiButtonEmpty>,
-            <ViewInApp rule={rule} />,
-          ],
-        }}
-      >
-        <KibanaPageTemplate.Section paddingSize="l" data-test-subj="ruleDetailsSection">
-          {rule.enabled &&
-          rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiCallOut
-                  announceOnMount
-                  color="danger"
-                  data-test-subj="ruleErrorBanner"
-                  size="s"
-                  iconType="error"
-                  title={getRuleStatusErrorReasonText()}
-                >
-                  <EuiText size="xs">{rule.executionStatus.error?.message}</EuiText>
-                  <EuiSpacer size="s" />
-                  <EuiLink
-                    href={`${http.basePath.get()}/app/management/stack/license_management`}
-                    color="primary"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-                      defaultMessage="Manage license"
-                    />
-                  </EuiLink>
-                </EuiCallOut>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-          {rule.enabled && rule.executionStatus.status === 'warning' ? (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  data-test-subj="ruleWarningBanner"
-                  size="s"
-                  iconType="warning"
-                >
-                  <p>
-                    <EuiIcon color="warning" type="warning" />
-                    &nbsp;
-                    {getRuleStatusWarningReasonText()}
-                    &nbsp;
-                    {rule.executionStatus.warning?.message}
-                  </p>
-                </EuiCallOut>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-          {hasActionsWithBrokenConnector && (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiSpacer size="s" />
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  data-test-subj="actionWithBrokenConnectorWarningBanner"
-                  size="s"
-                >
-                  <p>
-                    <EuiIcon color="warning" type="warning" />
-                    &nbsp;
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"
-                      defaultMessage="There is an issue with one of the connectors associated with this rule."
-                    />
-                    &nbsp;
-                    {hasEditButton && (
-                      <EuiLink
-                        data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
-                        color="primary"
-                        onClick={onEditRuleClick}
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"
-                          defaultMessage="Edit rule"
-                        />
-                      </EuiLink>
-                    )}
-                  </p>
-                </EuiCallOut>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          editButton,
+          <EuiButtonEmpty
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.ruleDetails.refreshRulesButtonLabel',
+              {
+                defaultMessage: 'Refresh',
+              }
+            )}
+            data-test-subj="refreshRulesButton"
+            iconType="refresh"
+            onClick={requestRefresh}
+            name="refresh"
+            color="primary"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButtonEmpty>,
+          <ViewInApp rule={rule} />,
+        ]}
+      />
+      <EuiPageSection>
+        {rule.enabled &&
+        rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
-            <EuiFlexItem style={ruleDetailStyle}>
-              <RuleRouteWithApi
-                requestRefresh={requestRefresh}
-                refreshToken={refreshToken}
-                rule={rule}
-                ruleType={ruleType}
-                readOnly={!canSaveRule}
-              />
+            <EuiFlexItem>
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                data-test-subj="ruleErrorBanner"
+                size="s"
+                iconType="error"
+                title={getRuleStatusErrorReasonText()}
+              >
+                <EuiText size="xs">{rule.executionStatus.error?.message}</EuiText>
+                <EuiSpacer size="s" />
+                <EuiLink
+                  href={`${http.basePath.get()}/app/management/stack/license_management`}
+                  color="primary"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+                    defaultMessage="Manage license"
+                  />
+                </EuiLink>
+              </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+        ) : null}
+        {rule.enabled && rule.executionStatus.status === 'warning' ? (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCallOut
+                announceOnMount
+                color="warning"
+                data-test-subj="ruleWarningBanner"
+                size="s"
+                iconType="warning"
+              >
+                <p>
+                  <EuiIcon color="warning" type="warning" />
+                  &nbsp;
+                  {getRuleStatusWarningReasonText()}
+                  &nbsp;
+                  {rule.executionStatus.warning?.message}
+                </p>
+              </EuiCallOut>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        {hasActionsWithBrokenConnector && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                announceOnMount
+                color="warning"
+                data-test-subj="actionWithBrokenConnectorWarningBanner"
+                size="s"
+              >
+                <p>
+                  <EuiIcon color="warning" type="warning" />
+                  &nbsp;
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"
+                    defaultMessage="There is an issue with one of the connectors associated with this rule."
+                  />
+                  &nbsp;
+                  {hasEditButton && (
+                    <EuiLink
+                      data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
+                      color="primary"
+                      onClick={onEditRuleClick}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"
+                        defaultMessage="Edit rule"
+                      />
+                    </EuiLink>
+                  )}
+                </p>
+              </EuiCallOut>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        <EuiFlexGroup>
+          <EuiFlexItem style={ruleDetailStyle}>
+            <RuleRouteWithApi
+              requestRefresh={requestRefresh}
+              refreshToken={refreshToken}
+              rule={rule}
+              ruleType={ruleType}
+              readOnly={!canSaveRule}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageSection>
     </>
   );
 };
