@@ -91,4 +91,20 @@ export class EncryptionHelper {
     );
     return { ...response, saved_objects: modifiedObjects };
   }
+
+  async hashEncryptedAttributes<T>(object: SavedObject<T>, originalAttributes?: T) {
+    if (this.encryptionExtension?.isEncryptableType(object.type)) {
+      const hashedAttributes = await this.encryptionExtension.decryptAndHashAttributes(
+        object.id,
+        object.type,
+        object.namespaces?.[0],
+        object.attributes as Record<string, unknown>,
+        originalAttributes as Record<string, unknown>
+      );
+      const result = structuredClone(object);
+      result.attributes = { ...result.attributes, ...hashedAttributes };
+      return result;
+    }
+    return object;
+  }
 }

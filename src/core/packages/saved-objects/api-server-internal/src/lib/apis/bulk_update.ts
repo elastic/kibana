@@ -41,7 +41,7 @@ import {
   rawDocExistsInNamespace,
   getSavedObjectFromSource,
   mergeForUpdate,
-  diffDocSource,
+  processSingleSnapshot,
 } from './utils';
 import type { ApiExecutionContext } from './types';
 
@@ -86,6 +86,7 @@ export const performBulkUpdate = async <T>(
     common: commonHelper,
     encryption: encryptionHelper,
     migration: migrationHelper,
+    serializer: serializerHelper,
     user: userHelper,
   } = helpers;
   const { securityExtension } = extensions;
@@ -337,7 +338,7 @@ export const performBulkUpdate = async <T>(
         documentToSave: expectedBulkGetResult.value.documentToSave,
         rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
         migrationVersionCompatibility,
-        diff: {} as IndexRequest,
+        diff: {} as IndexRequest | undefined,
       };
 
       const _id = serializer.generateRawId(getNamespaceId(objectNamespace), type, id);
@@ -358,56 +359,16 @@ export const performBulkUpdate = async <T>(
       const registryType = registry.getType(type);
       if (registryType?.snapshots) {
         try {
-          const { _source } = updatedMigratedDocumentToSave._source;
-          // TODO: Below needs to be a bulk.get() not an individual request.
-          const current = await client.get({ id: _id, index: _index }, { ignore: [404] }); // What happens if we error out finding the current version?
-          const currentSource = current?._source as SavedObjectsRawDocSource;
-          const _diff = diffDocSource(currentSource, _source, registryType?.snapshotFilter);
-          if (_diff.stats.total > 0) {
-            // Diff detected
-            // 1. Add current version to snapshot index
-            const changeId = current?._version ?? 0;
-            const snapshotId = `${_id}:${changeId}`; // <-- deterministic id
-            const timestamp = new Date().toISOString();
-            const userId = updatedBy || 'unknown';
-            const message = options.reason ?? `item bulk_update`;
-            bulkUpdateParams.push(
-              {
-                // `index` allows us to rewrite an existing snapshot without erroring
-                index: {
-                  _id: snapshotId,
-                  _index: commonHelper.getSnapshotIndexForType(type),
-                },
-              },
-              {
-                '@timestamp': timestamp,
-                userId,
-                message,
-                changeId,
-                objectId: _id,
-                data: currentSource,
-              }
-            );
-
-            // 2. Prepare diff data so it can be stored separately
-            //    (On success)
-            expectedResult.diff = {
-              id: snapshotId,
-              index: commonHelper.getDiffIndexForType(type),
-              document: {
-                '@timestamp': timestamp,
-                userId,
-                message,
-                objectId: _id,
-                changeId,
-                snapshotId,
-                coreMigrationVersion: currentSource?.coreMigrationVersion,
-                changedFields: _diff.changedFields,
-                oldValues: _diff.oldValues,
-                newValues: _diff.newValues,
-              },
-            };
-          }
+          expectedResult.diff = await processSingleSnapshot(
+            client,
+            migratedUpdatedSavedObjectDoc as SavedObject<T>,
+            registryType,
+            commonHelper,
+            serializer,
+            encryptionHelper,
+            updatedBy || 'unknown',
+            options.reason ?? `item bulk_update`
+          );
         } catch (err) {
           // Error?
           // How do we recover?

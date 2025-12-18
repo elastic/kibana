@@ -72,6 +72,38 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
     return response;
   }
 
+  async decryptAndHashAttributes<T extends Record<string, unknown>>(
+    id: string,
+    type: string,
+    namespace: string | undefined,
+    incomingAttributes: T,
+    originalAttributes?: T
+  ): Promise<T> {
+    if (incomingAttributes && this._service.isRegistered(type)) {
+      const normalizedDescriptor = {
+        id,
+        type,
+        namespace: getDescriptorNamespace(this._baseTypeRegistry, type, namespace),
+      };
+      const user = await this._getCurrentUser();
+      // Error is returned when decryption fails, and in this case encrypted attributes will be
+      // stripped from the returned attributes collection. That will let consumer decide whether to
+      // fail or handle recovery gracefully.
+      const { attributes, error } = await this._service.decryptAndHashAttributes(
+        normalizedDescriptor,
+        incomingAttributes,
+        originalAttributes,
+        { user }
+      );
+
+      if (error) throw error;
+
+      return { ...attributes } as T;
+    }
+
+    return {} as T;
+  }
+
   async encryptAttributes<T extends Record<string, unknown>>(
     descriptor: EncryptedObjectDescriptor,
     attributes: T

@@ -35,9 +35,12 @@ export const WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS = 15 * 1000; // 1
 export const CLAIM_STRATEGY_UPDATE_BY_QUERY = 'update_by_query';
 export const CLAIM_STRATEGY_MGET = 'mget';
 
-export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
+export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 60 * 30; // 30 minutes
 const MIN_DISCOVERY_INTERVAL_MS = 1000; // 1 second
-const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 5; // 5 minutes
+const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 30; // 30 minutes
+// export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
+// const MIN_DISCOVERY_INTERVAL_MS = 1000; // 1 second
+// const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 5; // 5 minutes
 export const DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS = 6 * 1000 * 10; // 60 seconds
 
 export const DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION = '30s';

@@ -177,9 +177,11 @@ export const performCreate = async <T>(
     try {
       diff = await processSingleSnapshot(
         client,
-        raw,
+        migrated as SavedObject<T>,
         registryType,
         commonHelper,
+        serializer,
+        encryptionHelper,
         updatedBy,
         options.reason ?? 'item created'
       );

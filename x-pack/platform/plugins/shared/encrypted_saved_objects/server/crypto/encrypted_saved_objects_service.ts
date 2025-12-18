@@ -6,6 +6,7 @@
  */
 
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
+import crypto from 'crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
@@ -214,6 +215,59 @@ export class EncryptedSavedObjectsService {
       return { attributes: { ...attributes, ...decryptedAttributes } };
     } catch (error) {
       return { attributes, error };
+    }
+  }
+
+  /**
+   * Runs a SHA256 hash on decrypted attributes and retrieves the last 12 hex.
+   * Used for creating non-reversible representations of encrypted attributes
+   * for comparison to see if they change between versions.
+   * @param descriptor Descriptor of the saved object to decrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [originalAttributes] Original attributes. To skip decryption if not necessary.
+   * @param [params] Additional parameters to aid decryption
+   * @param [lenght] The length of the shortened hash
+   * @returns
+   */
+  public async decryptAndHashAttributes<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    originalAttributes?: T,
+    params?: DecryptParameters,
+    length = 12
+  ) {
+    const result = { attributes: {} as Record<string, unknown>, error: undefined };
+    if (!Object.keys(attributes || {}).length) {
+      return result;
+    }
+    try {
+      const decrypted = await this.decryptAttributesAndStrip<T>(
+        descriptor,
+        attributes,
+        originalAttributes,
+        params
+      );
+
+      // Use object id as salt
+      // @see https://en.wikipedia.org/wiki/Salt_(cryptography)
+      const salt = descriptor.id;
+      for (const key of Object.keys(decrypted)) {
+        const value = decrypted[key];
+        // Run SHA. Overwrite with result.
+        // Shorten to last X characters. We dont need the whole thing.
+        result.attributes[key] =
+          value === null // <-- watch out for `null`, these are being used and we want to keep them
+            ? null
+            : crypto
+                .createHash('sha256')
+                .update(`${value}|${salt}`)
+                .digest('hex')
+                .substr(-1 * length);
+      }
+      return result;
+    } catch (error) {
+      result.error = error;
+      return result;
     }
   }
 
@@ -481,6 +535,51 @@ export class EncryptedSavedObjectsService {
     }
 
     return iteratorResult.value;
+  }
+
+  /**
+   * Decrypts and returns (only) encrypted attributes, stripping the rest.
+   * @param descriptor Descriptor of the saved object to decrypt attributes for.
+   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param originalAttributes Original attributes, if available, to skip decryption.
+   * @param [params] Additional parameters.
+   * @returns List of encrypted attributes, but decrypted
+   */
+  private async decryptAttributesAndStrip<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    originalAttributes?: T,
+    params?: DecryptParameters
+  ): Promise<T> {
+    const result = {} as Record<string, unknown>;
+    const typeDefinition = this.typeDefinitions.get(descriptor.type);
+    if (Object.keys(attributes).length && typeDefinition?.attributesToEncrypt?.size) {
+      // Decrypt with all attributes
+      let decrypted: Record<string, unknown> = {};
+
+      // Why decrypt when unencrypted values are available?
+      if (originalAttributes) {
+        // TODO: its possible only some are available and not others,
+        // need to check for this.
+        for (const attr of typeDefinition.attributesToEncrypt) {
+          if (originalAttributes[attr]) {
+            decrypted[attr] = originalAttributes[attr];
+          }
+        }
+      } else {
+        decrypted = await this.decryptAttributes(descriptor, attributes, params);
+      }
+
+      // Strip out any non-encrypted attributes
+      if (Object.keys(decrypted).length) {
+        for (const attr of Object.keys(decrypted)) {
+          if (typeDefinition.shouldBeEncrypted(attr)) {
+            result[attr] = decrypted[attr];
+          }
+        }
+      }
+    }
+    return result as T;
   }
 
   /**

@@ -236,6 +236,7 @@ export const performFind = async <T = unknown, A = unknown>(
   const savedObjects: SavedObjectsFindResult[] = [];
 
   body.hits.hits.forEach((hit: estypes.SearchHit<SavedObjectsRawDocSource>) => {
+    // here
     const obj = serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
       migrationVersionCompatibility,
     });

@@ -204,9 +204,11 @@ export const executeUpdate = async <T>(
         // Are we tracking snapshots?
         diff = await processSingleSnapshot(
           client,
-          rawUpsert,
+          migratedUpsert,
           registryType,
           commonHelper,
+          serializer,
+          encryptionHelper,
           updatedBy,
           options.reason ?? 'item updated'
         );
@@ -322,9 +324,11 @@ export const executeUpdate = async <T>(
         // Are we tracking snapshots?
         diff = await processSingleSnapshot(
           client,
-          docToSend,
+          migratedUpdatedSavedObjectDoc as SavedObject<T>,
           registryType,
           commonHelper,
+          serializer,
+          encryptionHelper,
           updatedBy,
           options.reason ?? 'item updated'
         );

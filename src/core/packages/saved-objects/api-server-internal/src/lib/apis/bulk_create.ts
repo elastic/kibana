@@ -23,7 +23,6 @@ import type {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
-  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';
 import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
@@ -39,7 +38,7 @@ import {
   normalizeNamespace,
   setManaged,
   errorContent,
-  diffDocSource,
+  processSingleSnapshot,
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
@@ -295,56 +294,16 @@ export const performBulkCreate = async <T>(
       const registryType = registry.getType(object.type);
       if (registryType?.snapshots) {
         try {
-          const { _id, _source } = expectedResult.rawMigratedDoc;
-          // TODO: Below needs to be a bulk.get(), not an individual request.
-          const current = await client.get({ id: _id, index: _index }, { ignore: [404] });
-          const currentSource = current?._source as SavedObjectsRawDocSource;
-          const _diff = diffDocSource(currentSource, _source, registryType?.snapshotFilter);
-          if (_diff.stats.total > 0) {
-            // Diff detected
-            // 1. Add current version to snapshot index
-            const changeId = current?._version ?? 0;
-            const snapshotId = `${_id}:${changeId}`; // <-- deterministic id
-            const timestamp = new Date().toISOString();
-            const userId = updatedBy || 'unknown';
-            const message = options.reason ?? `item bulk_create`;
-            bulkCreateParams.push(
-              {
-                // `index` allows us to rewrite an existing snapshot without erroring
-                index: {
-                  _id: snapshotId,
-                  _index: commonHelper.getSnapshotIndexForType(object.type),
-                },
-              },
-              {
-                '@timestamp': timestamp,
-                userId,
-                message,
-                changeId,
-                objectId: _id,
-                data: currentSource,
-              }
-            );
-
-            // 2. Prepare diff data so it can be stored separately
-            //    (On success)
-            expectedResult.diff = {
-              id: snapshotId,
-              index: commonHelper.getDiffIndexForType(object.type),
-              document: {
-                '@timestamp': timestamp,
-                userId,
-                message,
-                objectId: _id,
-                changeId,
-                snapshotId,
-                coreMigrationVersion: currentSource?.coreMigrationVersion,
-                changedFields: _diff.changedFields,
-                oldValues: _diff.oldValues,
-                newValues: _diff.newValues,
-              },
-            };
-          }
+          expectedResult.diff = await processSingleSnapshot(
+            client,
+            migrated,
+            registryType,
+            commonHelper,
+            serializer,
+            encryptionHelper,
+            updatedBy || 'unknown',
+            options.reason ?? `so bulk_create`
+          );
         } catch (err) {
           // Error?
           // How do we recover?

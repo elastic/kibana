@@ -42,7 +42,7 @@ export const getRuleHistory = async ({
   page = 1,
 }: GetRuleHistoryOptions): Promise<GetRuleHistoryResponse> => {
   const result = await client.search<RawRuleHistoryItem>({
-    index: '.kibana_alerting_cases_diffs_001', // TODO: This needs to be defined centrally
+    index: '.kibana_alerting_cases_snapshots_001', // TODO: This needs to be defined centrally
     from: (page - 1) * perPage,
     size: perPage,
     query: {

@@ -62,11 +62,6 @@ export interface KibanaMigratorOptions {
   kibanaVersionCheck?: string;
 }
 
-enum SnapshotIndexKind {
-  snapshots = 'snapshots',
-  diffs = 'diffs',
-}
-
 /**
  * Manages the shape of mappings and documents in the Kibana index.
  */
@@ -177,8 +172,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       // Add indices for tracking SO history (snapshots + diffs).
       for (const type of this.typeRegistry.getAllTypes()) {
         if (type.snapshots) {
-          await this.createAdditionalIndex(type, SnapshotIndexKind.snapshots);
-          await this.createAdditionalIndex(type, SnapshotIndexKind.diffs);
+          await this.createSnapshotIndex(type);
         }
       }
     } catch (error) {
@@ -265,13 +259,13 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 
-  async createAdditionalIndex(type: SavedObjectsType, kind: SnapshotIndexKind) {
+  async createSnapshotIndex(type: SavedObjectsType) {
     if (!type.indexPattern) {
       throw new Error(
         `Unable to create snapshot index for [${type.name}]. Missing [indexPattern] in type definition.`
       );
     }
-    const alias = `${type.indexPattern}_${String(kind)}`;
+    const alias = `${type.indexPattern}_snapshots`;
     const index = `${alias}_001`;
     const exists = await this.client.indices.exists({ index });
     if (exists) {
@@ -281,33 +275,21 @@ export class KibanaMigrator implements IKibanaMigrator {
       // await this.client.indices.delete({ index });
     }
 
-    const mappings: MappingTypeMapping =
-      kind === SnapshotIndexKind.snapshots
-        ? {
-            properties: {
-              '@timestamp': { type: 'date' },
-              userId: { type: 'keyword' },
-              message: { type: 'text' },
-              objectId: { type: 'keyword' },
-              changeId: { type: 'keyword' },
-              coreMigrationVersion: { type: 'keyword' },
-              data: { type: 'flattened' },
-            },
-          }
-        : {
-            properties: {
-              '@timestamp': { type: 'date' },
-              userId: { type: 'keyword' },
-              message: { type: 'text' },
-              objectId: { type: 'keyword' },
-              changeId: { type: 'keyword' },
-              snapshotId: { type: 'keyword' },
-              coreMigrationVersion: { type: 'keyword' },
-              changedFields: { type: 'keyword' },
-              oldValues: { type: 'flattened' },
-              newValues: { type: 'flattened' },
-            },
-          };
+    const mappings: MappingTypeMapping = {
+      properties: {
+        '@timestamp': { type: 'date' },
+        userId: { type: 'keyword' },
+        message: { type: 'text' },
+        objectId: { type: 'keyword' },
+        changeId: { type: 'keyword' },
+        snapshotId: { type: 'keyword' },
+        coreMigrationVersion: { type: 'keyword' },
+        changedFields: { type: 'keyword' },
+        oldValues: { type: 'flattened' },
+        newValues: { type: 'flattened' },
+        snapshot: { type: 'flattened' },
+      },
+    };
 
     // TODO: This should really be a data stream
     this.log.info(`Index [${index}] missing. Creating..`);

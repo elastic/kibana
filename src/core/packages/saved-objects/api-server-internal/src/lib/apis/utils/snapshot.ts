@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ISavedObjectsSerializer, SavedObject } from '@kbn/core-saved-objects-server';
 import {
   type SavedObjectsRawDoc,
   type SavedObjectsRawDocSource,
@@ -16,7 +17,7 @@ import {
 import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import flatten from 'flat';
 import type { RepositoryEsClient } from '../../repository_es_client';
-import type { ICommonHelper } from '../helpers';
+import type { ICommonHelper, IEncryptionHelper } from '../helpers';
 
 export interface SavedObjectSnapshotDiff {
   stats: {
@@ -120,31 +121,42 @@ export function diffDocSource(
   return result;
 }
 
-export async function processSingleSnapshot(
+export async function processSingleSnapshot<T>(
   client: RepositoryEsClient,
-  raw: SavedObjectsRawDoc,
+  soB: SavedObject<T>,
   registryType: SavedObjectsType,
   commonHelper: ICommonHelper,
+  serializerHelper: ISavedObjectsSerializer,
+  encryptionHelper: IEncryptionHelper,
   updatedBy?: string,
   reason?: string
 ): Promise<IndexRequest | undefined> {
-  // Are we tracking snapshots?
-  // Fetch current version of the document see if there is any difference
-  const { _id, _source } = raw;
+  // `B` is the object after changes
+  // Hash encrypted attributes and get source
+  const hashedSOB = await encryptionHelper.hashEncryptedAttributes(soB);
+  const { _id, _source: b } = serializerHelper.savedObjectToRaw(hashedSOB);
   const type = registryType.name;
   const index = commonHelper.getIndexForType(type);
-  const current = await client.get({ id: _id, index }, { ignore: [404] });
-  const currentSource = current?._source as SavedObjectsRawDocSource;
-  const _diff = diffDocSource(currentSource, _source, registryType?.snapshotFilter);
+  // `A` is the original document in ES
+  // Fetch it see if there is any difference
+  let a: SavedObjectsRawDocSource | undefined;
+  const docA = await client.get({ id: _id, index }, { ignore: [404] });
+  if (docA.found) {
+    const soA = serializerHelper.rawToSavedObject(docA as SavedObjectsRawDoc);
+    const hashedSOA = await encryptionHelper.hashEncryptedAttributes(soA);
+    a = serializerHelper.savedObjectToRaw(hashedSOA)._source;
+  }
+  const _diff = diffDocSource(a, b, registryType?.snapshotFilter);
   if (_diff.stats.total > 0) {
     // Diff detected
-    // 1. Add current version to snapshot index
-    const changeId = current?._version ?? 0;
+    const changeId = docA?._version ?? 0;
     const snapshotId = `${_id}:${changeId}`; // <-- deterministic id
     const timestamp = new Date().toISOString();
     const userId = updatedBy || 'unknown';
     const message = reason || 'unknown reason';
-    const snapshotRequestParams: IndexRequest = {
+
+    // Queue up the diff+snapshot to process after saved object change
+    return {
       id: snapshotId,
       index: commonHelper.getSnapshotIndexForType(type),
       document: {
@@ -153,29 +165,12 @@ export async function processSingleSnapshot(
         message,
         changeId,
         objectId: _id,
-        data: currentSource,
-      },
-      require_alias: true,
-    };
-
-    // Create the snapshot entry (overwrite if it exists)
-    await client.index(snapshotRequestParams, { meta: true });
-
-    // 2. Queue up the diff to process after saved object change
-    return {
-      id: snapshotId,
-      index: commonHelper.getDiffIndexForType(type),
-      document: {
-        '@timestamp': timestamp,
-        userId,
-        message,
-        changeId,
-        objectId: _id,
         snapshotId,
-        coreMigrationVersion: currentSource?.coreMigrationVersion,
+        coreMigrationVersion: b?.coreMigrationVersion,
         changedFields: _diff.changedFields,
         oldValues: _diff.oldValues,
         newValues: _diff.newValues,
+        snapshot: b,
       },
       require_alias: true,
     };

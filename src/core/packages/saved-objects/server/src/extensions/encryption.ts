@@ -61,6 +61,25 @@ export interface ISavedObjectsEncryptionExtension {
   ) => Promise<R>;
 
   /**
+   * Decrypts and hashes up encrypted attributes
+   * @param response - any object R that extends SavedObject with attributes T
+   * @param originalAttributes - optional, original attributes T from when the object was created (NOT encrypted).
+   * These are used to avoid decryption execution cost if they are supplied.
+   * @returns R with decrypted and hashed attributes
+   */
+  // decryptAndHashResponseAttributes: <T, R extends SavedObject<T>>(
+  //   response: R,
+  //   originalAttributes?: T
+  // ) => Promise<T>;
+  decryptAndHashAttributes: <T extends Record<string, unknown>>(
+    id: string,
+    type: string,
+    namespace: string | undefined,
+    incomingAttributes: T,
+    originalAttributes?: T
+  ) => Promise<T>;
+
+  /**
    * Given a saved object descriptor and some attributes, returns an encrypted version
    * of supplied attributes.
    * @param descriptor - an object containing a saved object id, type, and optional namespace.
