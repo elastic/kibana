@@ -55,7 +55,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
   const renderActionOption = (option: ActionOptionData, searchValue: string) => {
-    const shouldUseGroupStyle = isActionGroup(option) || option.isGroupStyled;
+    const shouldUseGroupStyle = isActionGroup(option);
     return (
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
         <EuiFlexItem
