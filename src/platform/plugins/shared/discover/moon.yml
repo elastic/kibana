@@ -128,7 +128,6 @@ dependsOn:
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/controls-schemas'
-  - '@kbn/controls-plugin'
 tags:
   - plugin
   - prod
