@@ -66,6 +66,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 
   savedObjectsClient = savedObjectsClientMock.create();
+  savedObjectsClient.asScopedToNamespace = jest.fn().mockReturnValue(savedObjectsClient);
   savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 
   securityPluginSetup = securityMock.createSetup();
