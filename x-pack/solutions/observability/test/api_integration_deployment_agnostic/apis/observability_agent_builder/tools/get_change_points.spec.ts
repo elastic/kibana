@@ -106,7 +106,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 {
                   name: 'test-metrics',
                   index: METRIC_CHANGE_POINTS_INDEX,
-                  type: 'count',
                 },
               ],
             },

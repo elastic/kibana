@@ -219,23 +219,28 @@ const getMetricChangePointsSchema = z.object({
         field: z
           .string()
           .describe(
-            'Metric field that contains the metric. Only use if the metric aggregation type is not `count`.'
+            `Optional numeric field to aggregate and observe for changes (e.g., 'transaction.duration.us'). REQUIRED when 'aggregationType' is 'avg', 'sum', 'min', 'max', 'p95', or 'p99'.`
           )
           .optional(),
         aggregationType: z
           .enum(['count', 'avg', 'sum', 'min', 'max', 'p95', 'p99'])
-          .describe('The type of metric aggregation to perform. Defaults to `count`')
+          .describe(
+            'The aggregation to apply to the specified field. Required when a field is provided.'
+          )
           .optional(),
         groupBy: z
           .array(z.string())
           .describe(
-            'Optional keyword fields to group metrics by. eg: ["host.name", "service.name", "service.environment", "service.version", "event.outcome", "log.level", "event.dataset"]'
+            `Optional keyword fields to break down metrics by to identify which specific group experienced a change.
+Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance.
+Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone']
+`
           )
           .optional(),
       })
     )
     .describe(
-      'Optional keyword fields to group metrics by. DO NOT UNDER ANY CIRCUMSTANCES use high cardinality fields like date or metric fields. Leave empty unless needed.'
+      `Analyze changes in metrics. DO NOT UNDER ANY CIRCUMSTANCES use high cardinality fields like date or metric fields for groupBy, leave empty unless needed. If 'field' and 'aggregationType' are both omitted the metric to observe is throughput.`
     ),
 });
 
@@ -254,7 +259,10 @@ export function createObservabilityGetMetricChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getMetricChangePointsSchema> = {
     id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Return change points such as spikes and dips for metrics.',
+    description: `Analyzes metrics to detect statistically significant changes like spikes and dips, in specific metric patterns.
+
+How it works:
+It uses the "auto_date_histogram" aggregation to group metrics by time and then detects change points (spikes/dips) within each time bucket.`,
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
     handler: async ({ start, end, metrics = [] }, { esClient }) => {
@@ -266,19 +274,28 @@ export function createObservabilityGetMetricChangePointsTool({
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
 
         const metricChangePoints = await Promise.all(
-          metrics.map(async (metric) => {
-            return await getMetricChangePoints({
-              name: metric.name,
-              index: metric.index || metricIndexPatterns.join(','),
-              esClient,
-              start,
-              end,
-              kqlFilter: metric.kqlFilter,
-              groupBy: metric.groupBy ?? [],
-              type: metric.type || 'count',
-              field: metric.field,
-            });
-          })
+          metrics.map(
+            async ({
+              name,
+              index = metricIndexPatterns.join(','),
+              kqlFilter: kqlFilterValue,
+              groupBy = [],
+              field,
+              aggregationType = 'count',
+            }) => {
+              return await getMetricChangePoints({
+                name,
+                index,
+                esClient,
+                start,
+                end,
+                kqlFilter: kqlFilterValue,
+                groupBy,
+                aggregationType,
+                field,
+              });
+            }
+          )
         );
 
         const topMetricChangePoints = orderBy(metricChangePoints.flat(), [
