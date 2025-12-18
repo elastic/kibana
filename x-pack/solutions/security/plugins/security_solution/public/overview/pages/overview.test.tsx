@@ -25,6 +25,7 @@ import { initialUserPrivilegesState } from '../../common/components/user_privile
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/components/empty_prompt');
@@ -67,22 +68,8 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../common/components/user_privileges', () => {
-  return {
-    ...jest.requireActual('../../common/components/user_privileges'),
-    useUserPrivileges: jest.fn(() => {
-      return {
-        listPrivileges: { loading: false, error: undefined, result: undefined },
-        detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
-        endpointPrivileges: {
-          loading: false,
-          canAccessEndpointManagement: true,
-          canAccessFleet: true,
-        },
-      };
-    }),
-  };
-});
+jest.mock('../../common/components/user_privileges');
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../common/containers/local_storage/use_messages_storage');
 
 jest.mock('../containers/overview_cti_links');
@@ -113,6 +100,19 @@ jest.mock('../../sourcerer/containers', () => ({
   }),
 }));
 
+const defaultAlertsPrivileges = {
+  hasAlertsAll: true,
+  hasAlertsRead: true,
+  hasEncryptionKey: true,
+  hasIndexManage: true,
+  hasIndexMaintenance: true,
+  hasIndexRead: true,
+  hasIndexWrite: true,
+  hasIndexUpdateDelete: true,
+  isAuthenticated: true,
+  loading: false,
+};
+
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {
     hasMessage: () => hasMessageValue,
@@ -122,8 +122,10 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
     clearAllMessages: () => undefined,
   };
 };
+
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 
@@ -142,6 +144,7 @@ describe('Overview', () => {
 
   beforeEach(() => {
     mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState());
+    mockUseAlertsPrivileges.mockReturnValue(defaultAlertsPrivileges);
     mockUseFetchIndex.mockReturnValue([
       false,
       {
@@ -150,14 +153,7 @@ describe('Overview', () => {
     ]);
   });
 
-  afterAll(() => {
-    mockUseUserPrivileges.mockReset();
-  });
-
   describe('rendering', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
     test('it DOES NOT render the Getting started text when an index is available', () => {
       mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
