@@ -44,6 +44,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       showAssistantOverlay,
       settings,
       toasts,
+      docLinks,
     } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -281,6 +282,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
           <AIAgentConfirmationModal
             onConfirm={handleConfirmAIAgent}
             onCancel={handleCancelAIAgent}
+            docLinks={docLinks.links}
           />
         )}
       </>

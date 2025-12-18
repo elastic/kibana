@@ -37,8 +37,10 @@ const icon = 'logoElasticsearch';
 
 export const getNavigationTreeDefinition = ({
   dynamicItems$,
+  isCloudEnabled,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
+  isCloudEnabled?: boolean;
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
@@ -66,7 +68,6 @@ export const getNavigationTreeDefinition = ({
               link: 'dashboards',
             },
             {
-              badgeType: 'techPreview',
               icon: LazyIconAgents,
               link: 'agent_builder',
             },
@@ -214,6 +215,15 @@ export const getNavigationTreeDefinition = ({
                       }),
                       breadcrumbStatus: 'hidden',
                     },
+                    // Only show Cloud Connect in on-prem deployments (not cloud)
+                    ...(isCloudEnabled
+                      ? []
+                      : [
+                          {
+                            id: 'cloud_connect' as const,
+                            link: 'cloud_connect' as const,
+                          },
+                        ]),
                     {
                       id: 'monitoring',
                       link: 'monitoring',
