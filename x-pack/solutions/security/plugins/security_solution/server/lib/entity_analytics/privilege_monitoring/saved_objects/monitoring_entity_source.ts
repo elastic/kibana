@@ -123,11 +123,12 @@ export class MonitoringEntitySourceDescriptorClient {
   };
 
   async get(id: string): Promise<MonitoringEntitySource> {
-    const { attributes } = await this.dependencies.soClient.get<MonitoringEntitySource>(
-      monitoringEntitySourceTypeName,
-      id
-    );
-    return attributes;
+    const { attributes, id: savedObjectId } =
+      await this.dependencies.soClient.get<MonitoringEntitySource>(
+        monitoringEntitySourceTypeName,
+        id
+      );
+    return { ...attributes, id: savedObjectId };
   }
 
   async delete(id: string) {
