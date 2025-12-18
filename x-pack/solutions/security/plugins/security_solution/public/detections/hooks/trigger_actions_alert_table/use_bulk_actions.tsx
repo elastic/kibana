@@ -16,7 +16,6 @@ import type {
   BulkActionsPanelConfig,
   ItemsPanelConfig,
 } from '@kbn/response-ops-alerts-table/types';
-import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
