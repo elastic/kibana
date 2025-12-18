@@ -42,22 +42,29 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     pendingMessage,
     error,
     errorSteps,
-    agentReasoning,
+    agentReasoning: sendAgentReasoning,
     retry,
     canCancel,
     cancel,
     cleanConversation,
   } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
 
-  const { resumeRound, isResuming } = useResumeRoundMutation({
+  const {
+    resumeRound,
+    isResuming,
+    agentReasoning: resumeAgentReasoning,
+  } = useResumeRoundMutation({
     connectorId: connectorSelection.selectedConnector,
   });
+
+  // Combine agentReasoning from both mutations - use the one that's currently active
+  const agentReasoning = isResuming ? resumeAgentReasoning : sendAgentReasoning;
 
   return (
     <SendMessageContext.Provider
       value={{
         sendMessage,
-        isResponseLoading,
+        isResponseLoading: isResponseLoading || isResuming,
         pendingMessage,
         error,
         errorSteps,
