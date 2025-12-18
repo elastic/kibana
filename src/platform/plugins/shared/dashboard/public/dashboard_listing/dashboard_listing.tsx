@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
@@ -34,6 +34,7 @@ export const DashboardListing = ({
     page: 'list',
   });
 
+  const history = useHistory();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
 
   const tabs = useMemo(
@@ -57,7 +58,7 @@ export const DashboardListing = ({
   const activeTabId = tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
 
   const changeActiveTab = (tabId: string) => {
-    coreServices.application.navigateToUrl(`#/list/${tabId}`);
+    history.push(`/list/${tabId}`);
   };
 
   return (

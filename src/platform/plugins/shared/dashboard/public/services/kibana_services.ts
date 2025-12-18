@@ -40,7 +40,7 @@ export let contentManagementService: ContentManagementPublicStart;
 export let dataService: DataPublicPluginStart;
 export let dataViewEditorService: DataViewEditorStart;
 export let embeddableService: EmbeddableStart;
-export let eventAnnotationService: EventAnnotationService;
+export let eventAnnotationService: EventAnnotationService | undefined;
 export let fieldFormatService: FieldFormatsStart;
 export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
@@ -55,7 +55,7 @@ export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
-export let visualizationsService: VisualizationsStart;
+export let visualizationsService: VisualizationsStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 

@@ -13,11 +13,6 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardListingViewRegistry } from '../plugin';
 
-export const TAB_IDS = {
-  DASHBOARDS: 'dashboards',
-} as const;
-
-export type TabId = (typeof TAB_IDS)[keyof typeof TAB_IDS];
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
   initialFilter?: string;
@@ -29,7 +24,6 @@ export type DashboardListingProps = PropsWithChildren<{
   listingViewRegistry: DashboardListingViewRegistry;
 }>;
 
-// Dashboard's own content type
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
   type: 'dashboard';
   managed?: boolean;

@@ -143,7 +143,7 @@ describe('useDashboardListingTable', () => {
       createItem: expect.any(Function),
       deleteItems: expect.any(Function),
       editItem: expect.any(Function),
-      emptyPrompt: expect.anything(),
+      emptyPrompt: expect.any(Object),
       entityName: 'Dashboard',
       entityNamePlural: 'Dashboards',
       findItems: expect.any(Function),
@@ -158,7 +158,6 @@ describe('useDashboardListingTable', () => {
       title: 'Dashboard List',
       urlStateEnabled: false,
       contentEditor: {
-        isReadonly: false,
         onSave: expect.any(Function),
         customValidators: expect.any(Object),
       },
@@ -170,7 +169,7 @@ describe('useDashboardListingTable', () => {
     expect(tableListViewTableProps).toEqual(expectedProps);
   });
 
-  test('should call deleteDashboards when deleteItems is called', async () => {
+  test('should call deleteDashboards when deleteItems is called', () => {
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -178,8 +177,8 @@ describe('useDashboardListingTable', () => {
       })
     );
 
-    await act(async () => {
-      await result.current.tableListViewTableProps.deleteItems?.([
+    act(() => {
+      result.current.tableListViewTableProps.deleteItems?.([
         { id: 'test-id', type: 'dashboard' } as DashboardSavedObjectUserContent,
       ]);
     });

@@ -100,7 +100,6 @@ export const getCustomColumn = () => {
         );
       }
 
-      // We should have a way to display generic item errors from TableListViewTable
       return (
         <EuiToolTip position="left" content={record.error}>
           <span tabIndex={0}>

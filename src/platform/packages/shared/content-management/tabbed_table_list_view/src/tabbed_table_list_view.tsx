@@ -16,12 +16,32 @@ import type { TableListViewProps } from '@kbn/content-management-table-list-view
 export type TableListTabParentProps<T extends UserContentCommonSchema = UserContentCommonSchema> =
   Pick<TableListViewTableProps<T>, 'onFetchSuccess' | 'setPageDataTestSubject'>;
 
+/**
+ * Configuration for making a tab searchable via Kibana's global search
+ */
+export interface TableListTabDeepLinkConfig {
+  /**
+   * Title to display in global search results
+   */
+  title: string;
+  /**
+   * Where this deep link should be visible
+   * @default ['globalSearch']
+   */
+  visibleIn?: Array<'globalSearch' | 'sideNav'>;
+}
+
 export interface TableListTab<T extends UserContentCommonSchema = UserContentCommonSchema> {
   title: string;
   id: string;
   getTableList: (
     propsFromParent: TableListTabParentProps<T>
   ) => Promise<React.ReactNode> | React.ReactNode;
+  /**
+   * Optional deep link configuration to make this tab discoverable via global search.
+   * If provided, the host application will automatically register this tab as a deep link.
+   */
+  deepLink?: TableListTabDeepLinkConfig;
 }
 
 type TabbedTableListViewProps = Pick<

@@ -11,4 +11,5 @@ export {
   TabbedTableListView,
   type TableListTab,
   type TableListTabParentProps,
+  type TableListTabDeepLinkConfig,
 } from './tabbed_table_list_view';

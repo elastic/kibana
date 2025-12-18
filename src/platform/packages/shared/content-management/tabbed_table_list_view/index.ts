@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabbedTableListView, type TableListTab, type TableListTabParentProps } from './src';
+export {
+  TabbedTableListView,
+  type TableListTab,
+  type TableListTabParentProps,
+  type TableListTabDeepLinkConfig,
+} from './src';

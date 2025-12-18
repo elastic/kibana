@@ -80,7 +80,7 @@ test('renders TabbedTableListView with correct title and dashboards tab', () => 
     headingId: 'dashboardListingHeading',
   });
   expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });
-  expect(props.tabs.length).toBe(1); // Only dashboards tab when registry is empty
+  expect(props.tabs.length).toBe(1);
 });
 
 test('reads activeTab from URL path param when tab exists in registry', () => {

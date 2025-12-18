@@ -95,6 +95,12 @@ export class EventAnnotationListingPlugin
         const { getTableList } = await import('./get_table_list');
         return getTableList(props, services);
       },
+      // deepLink: {
+      //   title: i18n.translate('eventAnnotationListing.deepLinkTitle', {
+      //     defaultMessage: 'Annotation groups',
+      //   }),
+      //   visibleIn: ['globalSearch'],
+      // },
     };
     dependencies.visualizations.listingViewRegistry.add(annotationGroupsTabConfig);
     dependencies.dashboard.listingViewRegistry.add(annotationGroupsTabConfig);

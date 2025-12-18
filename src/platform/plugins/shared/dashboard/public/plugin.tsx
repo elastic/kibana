@@ -16,7 +16,7 @@ import type {
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
   App,
-  AppDeepLinkLocations,
+  AppDeepLink,
   AppMountParameters,
   AppUpdater,
   Plugin,
@@ -102,7 +102,7 @@ export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   embeddable: EmbeddableStart;
-  eventAnnotation: EventAnnotationService;
+  eventAnnotation?: EventAnnotationService;
   fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
@@ -117,7 +117,7 @@ export interface DashboardStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
-  visualizations: VisualizationsStart;
+  visualizations?: VisualizationsStart;
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
@@ -229,15 +229,6 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
-    const visualizeLibraryDeepLink = {
-      id: 'visualizations',
-      title: i18n.translate('dashboard.deepLinks.visualizeLibrary.title', {
-        defaultMessage: 'Visualize library',
-      }),
-      path: `#${LANDING_PAGE_PATH}/visualizations`,
-      visibleIn: ['globalSearch'] as AppDeepLinkLocations[],
-    };
-
     const app: App = {
       id: DASHBOARD_APP_ID,
       title: 'Dashboards',
@@ -246,7 +237,7 @@ export class DashboardPlugin
       defaultPath: `#${LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      deepLinks: [visualizeLibraryDeepLink],
+      deepLinks: [],
       mount: async (params: AppMountParameters) => {
         performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
@@ -323,6 +314,24 @@ export class DashboardPlugin
       const { getDashboardsByIdsAction } = await import('./dashboard_client');
       return getDashboardsByIdsAction;
     });
+
+    const deepLinks: AppDeepLink[] = [];
+
+    // Iterate through registered tabs and auto-register their deep links
+    for (const tab of this.listingViewRegistry as Set<TableListTab>) {
+      if (tab.deepLink) {
+        deepLinks.push({
+          id: tab.id,
+          title: tab.deepLink.title,
+          path: `#${LANDING_PAGE_PATH}/${tab.id}`,
+          visibleIn: tab.deepLink.visibleIn || ['globalSearch'],
+        });
+      }
+    }
+
+    if (deepLinks.length > 0) {
+      this.appStateUpdater.next(() => ({ deepLinks }));
+    }
 
     return {
       registerDashboardPanelSettings,

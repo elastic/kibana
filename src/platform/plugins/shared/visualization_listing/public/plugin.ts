@@ -62,6 +62,12 @@ export class VisualizationListingPlugin
         const { getTableList } = await import('./get_table_list');
         return getTableList(props, services);
       },
+      deepLink: {
+        title: i18n.translate('visualizationListing.deepLinkTitle', {
+          defaultMessage: 'Visualize library',
+        }),
+        visibleIn: ['globalSearch'],
+      },
     };
 
     if (dependencies.dashboard) {
