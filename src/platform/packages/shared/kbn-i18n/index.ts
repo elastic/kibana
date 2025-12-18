@@ -8,7 +8,6 @@
  */
 
 import {
-  formatList,
   getIsInitialized,
   getLocale,
   getTranslation,
