@@ -192,7 +192,7 @@ export async function getUnifiedTraceItems({
       };
 
       if (source.transaction?.marks?.agent) {
-        agentMarks = { ...agentMarks, ...source.transaction.marks.agent };
+        Object.assign(agentMarks, source.transaction.marks.agent);
       }
     }
 
