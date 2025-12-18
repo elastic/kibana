@@ -9,6 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const TIMESTAMP_TRANSFORM_SCRIPT = `
+  // Reset the _id field to null to avoid conflicts with subsequent reindex operations
+  ctx._id = null;
   if (ctx.containsKey('@timestamp') && ctx['@timestamp'] != null) {
     Instant maxTime = Instant.parse(params.max_timestamp);
     Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
