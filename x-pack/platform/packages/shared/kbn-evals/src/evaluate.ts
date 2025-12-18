@@ -33,6 +33,16 @@ import {
 } from './evaluators/trace_based';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
 
+function isElasticCloudEsUrl(esUrl: string): boolean {
+  try {
+    const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
+    const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
+    return hostname === 'elastic-cloud.com' || hostname.endsWith('.elastic-cloud.com');
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Test type for evaluations. Loads an inference client and a
  * (Kibana-flavored) Phoenix client.
@@ -283,7 +293,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const traceEsClient = esUrl
         ? createEsClientForTesting({
             esUrl,
-            isCloud: esUrl.includes('elastic-cloud.com'),
+            isCloud: isElasticCloudEsUrl(esUrl),
           })
         : esClient;
       await use(traceEsClient);
@@ -296,7 +306,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluationsEsClient = esUrl
         ? createEsClientForTesting({
             esUrl,
-            isCloud: esUrl.includes('elastic-cloud.com'),
+            isCloud: isElasticCloudEsUrl(esUrl),
           })
         : esClient;
       await use(evaluationsEsClient);
