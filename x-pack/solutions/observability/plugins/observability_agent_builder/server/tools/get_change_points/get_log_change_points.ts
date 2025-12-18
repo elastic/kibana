@@ -180,7 +180,10 @@ export function createObservabilityGetLogChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogChangePointsSchema> = {
     id: OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Return change points such as spikes and dips for logs.',
+    description: 'Analyzes log messages to detect statistically significant changes like spikes and dips, in specific log patterns.
+
+How it works:
+It uses the `categorize_text` aggregation to group similar unstructured messages into categories and then detects change points (spikes/dips) within each cateogory.',
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
     handler: async ({ start, end, logs = [] }, { esClient }) => {

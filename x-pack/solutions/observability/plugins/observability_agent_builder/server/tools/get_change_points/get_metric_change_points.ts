@@ -208,7 +208,7 @@ const getMetricChangePointsSchema = z.object({
   metrics: z
     .array(
       z.object({
-        name: z.string().describe('The name of the set of metrics'),
+        name: z.string().describe('A descriptive label for the metric, e.g. 'Error Rate' or 'Latency P95'. Used to identify results in the output.'),
         index: z.string().describe('The index or index pattern to find the metrics').optional(),
         kqlFilter: z
           .string()
@@ -220,7 +220,7 @@ const getMetricChangePointsSchema = z.object({
             'Metric field that contains the metric. Only use if the metric aggregation type is not `count`.'
           )
           .optional(),
-        type: z
+        aggregationType: z
           .enum(['count', 'avg', 'sum', 'min', 'max', 'p95', 'p99'])
           .describe('The type of metric aggregation to perform. Defaults to `count`')
           .optional(),
