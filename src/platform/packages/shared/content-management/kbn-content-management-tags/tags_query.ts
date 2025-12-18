@@ -107,12 +107,12 @@ export function useTags<T extends { id: string; tags?: string[] }>({
         return false;
       }
 
-    return tagClauses
-      .filter(({ match }) => match === matchType)
-      .some((clause) => {
-        const clauseValues = Array.isArray(clause.value) ? clause.value : [clause.value];
-        return clauseValues.some((value) => value === tag.name);
-      });
+      return tagClauses
+        .filter(({ match }) => match === matchType)
+        .some((clause) => {
+          const clauseValues = Array.isArray(clause.value) ? clause.value : [clause.value];
+          return clauseValues.some((value) => value === tag.name);
+        });
     },
     [query]
   );

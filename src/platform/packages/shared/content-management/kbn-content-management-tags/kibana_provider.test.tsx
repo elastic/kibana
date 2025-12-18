@@ -71,7 +71,6 @@ describe('ContentManagementTagsKibanaProvider', () => {
       expect(tags).toEqual(mockTags);
       expect(mockSavedObjectsTagging.ui.getTagList).toHaveBeenCalled();
     });
-
   });
 
   describe('parseSearchQuery', () => {
@@ -264,7 +263,6 @@ describe('ContentManagementTagsKibanaProvider', () => {
       expect(result.current?.getTagList).toBeDefined();
       expect(result.current?.parseSearchQuery).toBeDefined();
     });
-
   });
 
   describe('memoization', () => {
