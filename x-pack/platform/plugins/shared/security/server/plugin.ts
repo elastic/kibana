@@ -304,6 +304,11 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       getCurrentUser,
       getTypeRegistry: () => {
+        /**
+         * The setup spaces client just registers the callback during setup using `registerClientWrapper` but doesn't invoke it.
+         * When `createSpacesClient` is run during `start`, startServices is guaranteed to be passed in
+         * and we can use the type registry from there.
+         */
         if (!getTypeRegistrySync) {
           throw new Error('Type registry is not available');
         }
