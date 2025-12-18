@@ -177,3 +177,7 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
+
+xpack.fleet.developer.bundledPackageLocation: /non-existent
+xpack.fleet.registryUrl: https://bk-epr-serverless-test-5-34.123.185.152.nip.io
+xpack.securitySolution.prebuiltRulesPackageVersion: 8.19.11
