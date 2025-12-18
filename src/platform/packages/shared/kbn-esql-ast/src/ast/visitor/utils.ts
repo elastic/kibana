@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isPromqlNode } from '../../promql/is';
+import { childrenOfPromqlNode } from '../../promql/traversal';
+import type { PromQLAstNode } from '../../promql/types';
 import type {
   ESQLAstExpression,
   ESQLAstHeaderCommand,
@@ -102,9 +105,14 @@ export function* children(
   }
 }
 
-export function* childrenFoAnyNode(
-  node: ESQLProperNode
-): Iterable<ESQLAstExpression | ESQLCommand | ESQLAstHeaderCommand> {
+export function* childrenOfAnyNode(
+  node: ESQLProperNode | PromQLAstNode
+): Iterable<ESQLAstExpression | ESQLCommand | ESQLAstHeaderCommand | PromQLAstNode> {
+  if (isPromqlNode(node)) {
+    yield* childrenOfPromqlNode(node);
+    return;
+  }
+
   if ('args' in node && Array.isArray(node.args)) {
     yield* singleItems(node.args);
     return;
