@@ -44,5 +44,3 @@ describe('useReportAddToChat', () => {
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.AddToChatClicked, payload);
   });
 });
-
-
