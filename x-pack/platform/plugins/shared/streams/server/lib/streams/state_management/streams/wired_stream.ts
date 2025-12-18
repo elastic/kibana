@@ -527,34 +527,33 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     validateSettings(this._definition, this.dependencies.isServerless);
 
-    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
-
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map(
       (id) => desiredState.get(id)!
     ) as WiredStream[];
 
     // Settings can be applied due to an upstream stream change, so validate when any stream in the chain changed.
-    if (
-      existsInStartingState &&
-      ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings())
-    ) {
-      const { existsAsDataStream } = await this.getMatchingDataStream();
-      if (existsAsDataStream) {
-        const inheritedSettings = getInheritedSettings(
-          ancestorsAndSelf.map(
-            (ancestor) => ancestor.definition
-          ) as Streams.WiredStream.Definition[]
-        );
-        const settingsValidation = await validateSettingsWithDryRun({
-          scopedClusterClient: this.dependencies.scopedClusterClient,
-          streamName: this._definition.name,
-          settings: inheritedSettings,
-          isServerless: this.dependencies.isServerless,
-        });
-        if (!settingsValidation.isValid) {
-          return settingsValidation;
-        }
-      }
+    const shouldValidateSettingsWithDryRun =
+      existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+
+    // Run ES validations in parallel to avoid sequential latency
+    const [, settingsValidation] = await Promise.all([
+      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+      shouldValidateSettingsWithDryRun
+        ? validateSettingsWithDryRun({
+            scopedClusterClient: this.dependencies.scopedClusterClient,
+            streamName: this._definition.name,
+            settings: getInheritedSettings(
+              ancestorsAndSelf.map(
+                (ancestor) => ancestor.definition
+              ) as Streams.WiredStream.Definition[]
+            ),
+            isServerless: this.dependencies.isServerless,
+          })
+        : Promise.resolve({ isValid: true, errors: [] } as ValidationResult),
+    ]);
+
+    if (!settingsValidation.isValid) {
+      return settingsValidation;
     }
 
     return { isValid: true, errors: [] };

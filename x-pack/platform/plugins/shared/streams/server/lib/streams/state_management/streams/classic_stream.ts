@@ -234,19 +234,20 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     validateSettings(this._definition, this.dependencies.isServerless);
 
-    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
+    const [, settingsValidation] = await Promise.all([
+      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+      this._changes.settings
+        ? validateSettingsWithDryRun({
+            scopedClusterClient: this.dependencies.scopedClusterClient,
+            streamName: this._definition.name,
+            settings: this._definition.ingest.settings,
+            isServerless: this.dependencies.isServerless,
+          })
+        : Promise.resolve({ isValid: true, errors: [] } as ValidationResult),
+    ]);
 
-    // Validate settings with dry_run against ES
-    if (this._changes.settings) {
-      const settingsValidation = await validateSettingsWithDryRun({
-        scopedClusterClient: this.dependencies.scopedClusterClient,
-        streamName: this._definition.name,
-        settings: this._definition.ingest.settings,
-        isServerless: this.dependencies.isServerless,
-      });
-      if (!settingsValidation.isValid) {
-        return settingsValidation;
-      }
+    if (!settingsValidation.isValid) {
+      return settingsValidation;
     }
 
     return { isValid: true, errors: [] };
