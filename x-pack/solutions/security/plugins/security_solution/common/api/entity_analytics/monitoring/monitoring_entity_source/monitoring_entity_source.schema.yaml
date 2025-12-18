@@ -111,24 +111,23 @@ paths:
                   $ref: "#/components/schemas/MonitoringEntitySource"
 components:
   schemas:
+    MonitoringEntitySourceType:
+      type: string
+      enum:
+        - index
+        - integration
     CreateMonitoringEntitySource:
       type: object
       required: [type, name]
       properties:
         type:
-          type: string
+          $ref: "#/components/schemas/MonitoringEntitySourceType"
         name:
           type: string
-        managed:
-          type: boolean
         indexPattern:
           type: string
         enabled:
           type: boolean
-        error:
-          type: string
-        integrationName:
-          type: string
         matchers:
           type: array
           items:
@@ -151,9 +150,7 @@ components:
             kuery:
               oneOf:
                 - type: string
-                - type: object
-        integrations:
-            $ref: '#/components/schemas/Integrations'          
+                - type: object        
 
     UpdateableMonitoringEntitySourceProperties:
       type: object
@@ -192,7 +189,7 @@ components:
       - type: object
         properties:
           type:
-            type: string
+            $ref: "#/components/schemas/MonitoringEntitySourceType"
           managed:
             type: boolean
 

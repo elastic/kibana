@@ -17,6 +17,11 @@
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
+export type MonitoringEntitySourceType = z.infer<typeof MonitoringEntitySourceType>;
+export const MonitoringEntitySourceType = z.enum(['index', 'integration']);
+export type MonitoringEntitySourceTypeEnum = typeof MonitoringEntitySourceType.enum;
+export const MonitoringEntitySourceTypeEnum = MonitoringEntitySourceType.enum;
+
 export type Integrations = z.infer<typeof Integrations>;
 export const Integrations = z.object({
   /**
@@ -42,7 +47,7 @@ export const Integrations = z.object({
 
 export type CreateMonitoringEntitySource = z.infer<typeof CreateMonitoringEntitySource>;
 export const CreateMonitoringEntitySource = z.object({
-  type: z.string(),
+  type: MonitoringEntitySourceType,
   name: z.string(),
   managed: z.boolean().optional(),
   indexPattern: z.string().optional(),
@@ -98,7 +103,7 @@ export const UpdateEntitySourceNoadditionalProps = UpdateableMonitoringEntitySou
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
 export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.merge(
   z.object({
-    type: z.string().optional(),
+    type: MonitoringEntitySourceType.optional(),
     managed: z.boolean().optional(),
   })
 );
