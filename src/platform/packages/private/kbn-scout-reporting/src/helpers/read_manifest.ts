@@ -10,7 +10,6 @@
 import path from 'path';
 import fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 export interface KibanaJsoncMetadata {
   id: string;
@@ -36,12 +35,11 @@ export interface KibanaModuleMetadata {
  * @throws Error if no `kibana.jsonc` can be found in the directory ancestry.
  */
 export const getKibanaModulePath = (configPath: string): string => {
-  const repoRoot = path.resolve(REPO_ROOT);
   let dir = path.dirname(path.resolve(configPath));
 
   // Walk up the directory tree looking for the nearest kibana.jsonc.
   // This supports both plugin-based Scout configs (`.../test/scout/...`) and package-based configs.
-  while (dir.startsWith(repoRoot)) {
+  while (true) {
     const manifestPath = path.join(dir, 'kibana.jsonc');
     if (fs.existsSync(manifestPath)) {
       return manifestPath;
