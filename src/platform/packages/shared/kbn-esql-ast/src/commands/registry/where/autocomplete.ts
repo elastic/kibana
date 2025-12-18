@@ -6,12 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isFunctionExpression } from '../../../ast/is';
-import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../complete_items';
 import { suggestForExpression } from '../../definitions/utils';
-import { isExpressionComplete, getExpressionType } from '../../definitions/utils/expressions';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../types';
 
@@ -26,10 +23,9 @@ export async function autocomplete(
     return [];
   }
 
-  const innerText = query.substring(0, cursorPosition);
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
-  const suggestions = await suggestForExpression({
+  const { suggestions, computed } = await suggestForExpression({
     query,
     expressionRoot,
     command,
@@ -42,20 +38,9 @@ export async function autocomplete(
     },
   });
 
-  const insideFunction =
-    expressionRoot &&
-    isFunctionExpression(expressionRoot) &&
-    within(cursorPosition, expressionRoot);
+  const { expressionType, isComplete, insideFunction } = computed;
 
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
-
-  if (
-    // Complete boolean expression
-    expressionType === 'boolean' &&
-    isExpressionComplete(expressionType, innerText) &&
-    // Don't suggest pipe if we're inside a function
-    !insideFunction
-  ) {
+  if (expressionType === 'boolean' && isComplete && !insideFunction) {
     suggestions.push(pipeCompleteItem);
   }
 

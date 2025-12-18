@@ -12687,6 +12687,10 @@
               },
               {
                 "plugin": "@kbn/response-ops-rules-apis",
+                "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_find_templates_query.ts"
+              },
+              {
+                "plugin": "@kbn/response-ops-rules-apis",
                 "path": "src/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_tags_query.ts"
               },
               {
@@ -12920,10 +12924,6 @@
               {
                 "plugin": "stackConnectors",
                 "path": "x-pack/platform/plugins/shared/stack_connectors/public/common/auth/use_secret_headers.tsx"
-              },
-              {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/public/connector_types/slack_api/use_valid_channels.tsx"
               },
               {
                 "plugin": "osquery",
@@ -14827,7 +14827,7 @@
         "label": "MutationStatus",
         "description": [],
         "signature": [
-          "\"error\" | \"success\" | \"idle\" | \"loading\""
+          "\"error\" | \"success\" | \"loading\" | \"idle\""
         ],
         "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
         "deprecated": false,
