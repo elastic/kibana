@@ -80,16 +80,13 @@ const renderFlyout = (props = {}) => {
 };
 
 // Helper to select a template and navigate to second step
+// Selecting a template automatically navigates to the next step
 const selectTemplateAndGoToStep2 = (
   getByTestId: (id: string) => HTMLElement,
   templateName: string
 ) => {
-  // Click on a template option
   const templateOption = getByTestId(`template-option-${templateName}`);
   fireEvent.click(templateOption);
-
-  // Navigate to second step
-  fireEvent.click(getByTestId('nextButton'));
 };
 
 describe('CreateClassicStreamFlyout', () => {
@@ -116,11 +113,8 @@ describe('CreateClassicStreamFlyout', () => {
   });
 
   describe('navigation', () => {
-    it('navigates to second step when clicking Next button with selected template', () => {
+    it('auto-advances to second step when selecting a template', () => {
       const { getByTestId, queryByTestId } = renderFlyout();
-
-      // Select a template first
-      fireEvent.click(getByTestId('template-option-template-1'));
 
       // Check that the first step content is rendered
       expect(getByTestId('selectTemplateStep')).toBeInTheDocument();
@@ -128,12 +122,11 @@ describe('CreateClassicStreamFlyout', () => {
 
       // Verify that correct buttons are visible
       expect(getByTestId('cancelButton')).toBeInTheDocument();
-      expect(getByTestId('nextButton')).toBeInTheDocument();
       expect(queryByTestId('backButton')).not.toBeInTheDocument();
       expect(queryByTestId('createButton')).not.toBeInTheDocument();
 
-      // Click Next button
-      fireEvent.click(getByTestId('nextButton'));
+      // Select a template
+      fireEvent.click(getByTestId('template-option-template-1'));
 
       // Verify that the second step content is rendered
       expect(queryByTestId('selectTemplateStep')).not.toBeInTheDocument();
@@ -143,13 +136,12 @@ describe('CreateClassicStreamFlyout', () => {
       expect(getByTestId('backButton')).toBeInTheDocument();
       expect(getByTestId('createButton')).toBeInTheDocument();
       expect(queryByTestId('cancelButton')).not.toBeInTheDocument();
-      expect(queryByTestId('nextButton')).not.toBeInTheDocument();
     });
 
-    it('navigates back to first step when clicking Back button', () => {
+    it('navigates back to first step when clicking Back button and clears template selection', () => {
       const { getByTestId, queryByTestId } = renderFlyout();
 
-      // Select template and navigate to second step
+      // Select template
       selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
       // Verify that the second step content is rendered
@@ -160,7 +152,6 @@ describe('CreateClassicStreamFlyout', () => {
       expect(getByTestId('backButton')).toBeInTheDocument();
       expect(getByTestId('createButton')).toBeInTheDocument();
       expect(queryByTestId('cancelButton')).not.toBeInTheDocument();
-      expect(queryByTestId('nextButton')).not.toBeInTheDocument();
 
       // Navigate back
       fireEvent.click(getByTestId('backButton'));
@@ -171,9 +162,12 @@ describe('CreateClassicStreamFlyout', () => {
 
       // Verify that correct buttons are visible
       expect(getByTestId('cancelButton')).toBeInTheDocument();
-      expect(getByTestId('nextButton')).toBeInTheDocument();
       expect(queryByTestId('backButton')).not.toBeInTheDocument();
       expect(queryByTestId('createButton')).not.toBeInTheDocument();
+
+      // Verify that template selection was cleared (step 2 is disabled)
+      const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
+      expect(nextStep).toBeDisabled();
     });
   });
 
@@ -238,8 +232,6 @@ describe('CreateClassicStreamFlyout', () => {
       // Select template
       fireEvent.click(getByTestId('template-option-template-1'));
 
-      // Navigate forward
-      fireEvent.click(getByTestId('nextButton'));
       expect(onCreate).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
 
@@ -313,27 +305,11 @@ describe('CreateClassicStreamFlyout', () => {
       });
     });
     describe('template selection', () => {
-      it('disables next step and Next button when no template is selected', () => {
+      it('disables next step in horizontal steps when no template is selected', () => {
         const { getByTestId } = renderFlyout();
 
         const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
         expect(nextStep).toBeDisabled();
-
-        const nextButton = getByTestId('nextButton');
-        expect(nextButton).toBeDisabled();
-      });
-
-      it('enables next step and Next button when a template is selected', () => {
-        const { getByTestId } = renderFlyout();
-
-        // Select a template
-        fireEvent.click(getByTestId('template-option-template-1'));
-
-        const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
-        expect(nextStep).toBeEnabled();
-
-        const nextButton = getByTestId('nextButton');
-        expect(nextButton).toBeEnabled();
       });
 
       it('renders all template options including managed templates', () => {
@@ -529,9 +505,6 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Select a different template
         fireEvent.click(getByTestId('template-option-template-2'));
-
-        // Navigate to second step again
-        fireEvent.click(getByTestId('nextButton'));
 
         // The input should be reset (empty)
         const newInput = getByTestId('streamNameInput-wildcard-0');
@@ -750,7 +723,6 @@ describe('CreateClassicStreamFlyout', () => {
         // Go back and change template
         fireEvent.click(getByTestId('backButton'));
         fireEvent.click(getByTestId('template-option-template-2'));
-        fireEvent.click(getByTestId('nextButton'));
 
         // Validation error should be cleared (stream name reset is tested in existing test above)
         await waitFor(() => {
@@ -996,7 +968,6 @@ describe('CreateClassicStreamFlyout', () => {
       // Go back and select template-2
       fireEvent.click(getByTestId('backButton'));
       fireEvent.click(getByTestId('template-option-template-2'));
-      fireEvent.click(getByTestId('nextButton'));
 
       await waitFor(() => {
         expect(mockGetIlmPolicy).toHaveBeenCalledTimes(2);
@@ -1142,7 +1113,6 @@ describe('CreateClassicStreamFlyout', () => {
       // Go back and select template-2
       fireEvent.click(getByTestId('backButton'));
       fireEvent.click(getByTestId('template-option-template-2'));
-      fireEvent.click(getByTestId('nextButton'));
 
       await waitFor(() => {
         expect(mockGetSimulatedTemplate).toHaveBeenCalledTimes(2);

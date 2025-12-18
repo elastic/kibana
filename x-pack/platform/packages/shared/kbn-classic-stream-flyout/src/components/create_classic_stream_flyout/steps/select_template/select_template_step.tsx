@@ -25,6 +25,7 @@ interface SelectTemplateStepProps {
   templates: IndexTemplate[];
   selectedTemplate: string | null;
   onTemplateSelect: (templateName: string | null) => void;
+  onTemplateConfirm: (templateName: string) => void;
   onCreateTemplate: () => void;
   hasErrorLoadingTemplates?: boolean;
   onRetryLoadTemplates: () => void;
@@ -34,6 +35,7 @@ export const SelectTemplateStep = ({
   templates,
   selectedTemplate,
   onTemplateSelect,
+  onTemplateConfirm,
   onCreateTemplate,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
@@ -80,9 +82,15 @@ export const SelectTemplateStep = ({
   const handleTemplateChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selected = newOptions.find((option) => option.checked === 'on');
-      onTemplateSelect(selected?.label ?? null);
+      const templateName = selected?.label ?? null;
+      onTemplateSelect(templateName);
+
+      // Auto-advance to next step when a template is selected
+      if (templateName) {
+        onTemplateConfirm(templateName);
+      }
     },
-    [onTemplateSelect]
+    [onTemplateSelect, onTemplateConfirm]
   );
 
   if (hasErrorLoadingTemplates) {
