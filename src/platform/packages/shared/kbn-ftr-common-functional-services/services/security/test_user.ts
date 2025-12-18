@@ -14,6 +14,7 @@ import type { Role } from './role';
 import type { User } from './user';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
+import { fipsIsEnabled } from '@kbn/test';
 
 const TEST_USER_NAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
@@ -48,6 +49,13 @@ export class TestUser extends FtrService {
 
   async setRoles(roles: string[], options?: { skipBrowserRefresh?: boolean }) {
     if (!this.enabled) {
+      return;
+    }
+
+    if (fipsIsEnabled()) {
+      this.log.debug(
+        `FTR is running in FIPS mode and does not allow for Test User's roles to be overridden`
+      );
       return;
     }
 
