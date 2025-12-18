@@ -21,7 +21,6 @@ function createBenchmark(name: string, config: string) {
     kind: 'script' as const,
     name,
     run: `node scripts/functional_tests --config ${config} --kibana-install-dir ${path.resolve(
-      '.',
       'build',
       'default',
       KIBANA_BUILD_VERSION
