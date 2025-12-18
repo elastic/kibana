@@ -57,8 +57,8 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
 
       this.workflowLogger.logDebug(`Set ${variableCount} variable(s)`);
 
-      this.stepExecutionRuntime.contextManager.setVariables(variables);
-
+      // Variables are stored as step output and will be retrieved by context manager
+      // when building context for subsequent steps
       return { input, output: variables, error: undefined };
     } catch (err) {
       const error = ExecutionError.fromError(err).toSerializableObject();

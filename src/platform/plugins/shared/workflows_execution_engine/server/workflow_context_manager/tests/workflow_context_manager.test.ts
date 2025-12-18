@@ -82,8 +82,9 @@ describe('WorkflowContextManager', () => {
       delete: jest.fn(),
     } as any;
 
-    workflowExecutionState.getVariables = jest.fn().mockReturnValue({});
-    workflowExecutionState.setVariables = jest.fn();
+    workflowExecutionState.getLatestStepExecution = jest
+      .fn()
+      .mockReturnValue({} as EsWorkflowStepExecution);
 
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,

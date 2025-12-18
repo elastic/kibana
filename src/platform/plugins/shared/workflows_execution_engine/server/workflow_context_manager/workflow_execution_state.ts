@@ -19,7 +19,6 @@ export class WorkflowExecutionState {
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
   private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
-  private variables: Record<string, unknown> = {};
 
   /**
    * Maps step IDs to their execution IDs in chronological order.
@@ -189,16 +188,5 @@ export class WorkflowExecutionState {
         })
       );
     }
-  }
-
-  public getVariables(): Record<string, unknown> {
-    return this.variables;
-  }
-
-  public setVariables(variables: Record<string, unknown>): void {
-    this.variables = {
-      ...this.variables,
-      ...variables,
-    };
   }
 }

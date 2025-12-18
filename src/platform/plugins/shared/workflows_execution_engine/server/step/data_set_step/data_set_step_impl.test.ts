@@ -23,7 +23,7 @@ describe('DataSetStepImpl', () => {
 
   let stepContextAbortController: AbortController;
   let mockContextManager: jest.Mocked<
-    Pick<WorkflowContextManager, 'renderValueAccordingToContext' | 'setVariables'>
+    Pick<WorkflowContextManager, 'renderValueAccordingToContext'>
   > & {
     abortController: AbortController;
   };
@@ -32,7 +32,6 @@ describe('DataSetStepImpl', () => {
     stepContextAbortController = new AbortController();
     mockContextManager = {
       renderValueAccordingToContext: jest.fn(<T>(value: T): T => value),
-      setVariables: jest.fn(),
       abortController: stepContextAbortController,
     } as any;
 
@@ -122,15 +121,19 @@ describe('DataSetStepImpl', () => {
     it('should set variables and return them as output', async () => {
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({
-        user_id: '12345',
-        email: 'user@example.com',
-        is_active: true,
-      });
+      // Variables are now stored as step output, not via setVariables
       expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        user_id: '12345',
-        email: 'user@example.com',
-        is_active: true,
+        input: {
+          user_id: '12345',
+          email: 'user@example.com',
+          is_active: true,
+        },
+        output: {
+          user_id: '12345',
+          email: 'user@example.com',
+          is_active: true,
+        },
+        error: undefined,
       });
       expect(mockWorkflowLogger.logDebug).toHaveBeenCalledWith('Set 3 variable(s)');
     });
@@ -149,10 +152,14 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({
-        name: 'John Doe',
-        message: 'Hello World',
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          output: {
+            name: 'John Doe',
+            message: 'Hello World',
+          },
+        })
+      );
     });
 
     it('should preserve number values', async () => {
@@ -170,11 +177,15 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({
-        age: 25,
-        count: 100,
-        price: 99.99,
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          output: {
+            age: 25,
+            count: 100,
+            price: 99.99,
+          },
+        })
+      );
     });
 
     it('should preserve boolean values', async () => {
@@ -191,10 +202,14 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({
-        is_active: true,
-        is_verified: false,
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          output: {
+            is_active: true,
+            is_verified: false,
+          },
+        })
+      );
     });
 
     it('should preserve nested objects', async () => {
@@ -217,16 +232,20 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({
-        profile: {
-          name: 'John Doe',
-          age: 30,
-          address: {
-            city: 'San Francisco',
-            country: 'USA',
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          output: {
+            profile: {
+              name: 'John Doe',
+              age: 30,
+              address: {
+                city: 'San Francisco',
+                country: 'USA',
+              },
+            },
           },
-        },
-      });
+        })
+      );
     });
 
     it('should preserve arrays', async () => {
@@ -244,11 +263,15 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({
-        tags: ['workflow', 'automation', 'data'],
-        numbers: [1, 2, 3, 4, 5],
-        mixed: ['string', 42, true, { key: 'value' }],
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          output: {
+            tags: ['workflow', 'automation', 'data'],
+            numbers: [1, 2, 3, 4, 5],
+            mixed: ['string', 42, true, { key: 'value' }],
+          },
+        })
+      );
     });
 
     it('should handle empty object', async () => {
@@ -262,7 +285,11 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({});
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          output: {},
+        })
+      );
       expect(mockWorkflowLogger.logDebug).toHaveBeenCalledWith('Set 0 variable(s)');
     });
 
@@ -280,10 +307,14 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).toHaveBeenCalledWith({
-        nullable: null,
-        optional: undefined,
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          output: {
+            nullable: null,
+            optional: undefined,
+          },
+        })
+      );
     });
 
     it('should error when input is not an object', async () => {
@@ -291,7 +322,6 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).not.toHaveBeenCalled();
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalled();
       expect(mockWorkflowLogger.logError).toHaveBeenCalledWith(
         'Failed to set variables: invalid input type',
@@ -304,7 +334,6 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).not.toHaveBeenCalled();
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalled();
       expect(mockWorkflowLogger.logError).toHaveBeenCalledWith(
         'Failed to set variables: invalid input type',
@@ -317,22 +346,7 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockContextManager.setVariables).not.toHaveBeenCalled();
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalled();
-    });
-
-    it('should handle errors during setVariables', async () => {
-      mockContextManager.setVariables.mockImplementation(() => {
-        throw new Error('Test error');
-      });
-
-      await dataSetStep.run();
-
-      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalled();
-      expect(mockWorkflowLogger.logError).toHaveBeenCalledWith(
-        'Failed to set variables',
-        expect.any(Error)
-      );
     });
   });
 });
