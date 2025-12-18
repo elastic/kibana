@@ -96,7 +96,7 @@ export async function getRuleIdsWithGaps(
     }
 
     if (ruleIdsFilter?.length) {
-      const ruleIdsFilterKql = ruleIdsFilter.map((ruleId) => `rule.id: "${ruleId}"`).join(' OR ');
+      const ruleIdsFilterKql = [...new Set(ruleIdsFilter)].map((ruleId) => `rule.id: "${ruleId}"`).join(' OR ');
       filter = `${filter} AND (${ruleIdsFilterKql})`;
     }
 
