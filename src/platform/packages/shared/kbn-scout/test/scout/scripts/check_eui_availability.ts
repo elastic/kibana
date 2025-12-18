@@ -24,7 +24,7 @@ function handleUnavailable(euiUrl: string, reason?: string): number {
  * Checks if the EUI website for the current version is available.
  * Returns exit code 0 if available, 2 if not available.
  */
-async function checkEuiAvailability(): Promise<number> {
+async function checkEuiAvailability(): Promise<0 | 2> {
   let euiUrl: string;
   try {
     euiUrl = getEuiBaseUrlWithVersion();
