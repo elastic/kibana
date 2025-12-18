@@ -37,7 +37,7 @@
       "taskManager",
       "serverless",
       "noDataPage",
-      // "observabilityAIAssistant", // TODO: Re-add this once `dashboard` dependency is removed from Controls
+      "observabilityAIAssistant",
       "lens",
       "security",
       "cps"
