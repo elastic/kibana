@@ -159,7 +159,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               size="s"
               disabled={isLoading || !assistantResult}
               telemetry={{
-                pathway: 'entity_flyout',
+                pathway: 'entity_highlights',
                 attachments: ['entity'],
               }}
             />

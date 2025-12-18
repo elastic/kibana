@@ -21,7 +21,8 @@ export interface NewAgentBuilderAttachmentTelemetry {
    */
   pathway:
     | 'alerts_flyout'
-    | 'entity_flyout'
+    | 'entity_highlights'
+    | 'entity_risk_contribution'
     | 'rules_table'
     | 'rule_creation'
     | 'rule_failure'
