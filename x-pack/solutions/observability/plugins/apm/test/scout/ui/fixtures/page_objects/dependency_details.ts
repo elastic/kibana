@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { capitalize } from 'lodash';
+import { subj } from '@kbn/test-subj-selector';
 import { waitForChartToLoad, waitForTableToLoad } from './utils';
 import { testData } from '..';
 
@@ -23,11 +24,15 @@ export class DependencyDetailsPage {
 
   readonly operationsTabOperationsTable;
 
+  readonly operationDetailBreadcrumb;
   readonly operationDetailLatencyChart;
   readonly operationDetailThroughputChart;
   readonly operationDetailFailedTransactionRateChart;
   readonly operationDetailCorrelationsChart;
   readonly operationDetailWaterfallInvestigateButton;
+  readonly operationDetailWaterfallInvestigatePopup;
+  readonly operationDetailWaterfallPaginationLastButton;
+  readonly operationDetailWaterfallSpanLinksBadge;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.overviewTabLatencyChart = this.page.getByTestId('latencyChart');
@@ -39,6 +44,7 @@ export class DependencyDetailsPage {
       'apmDependencyDetailOperationsListTable'
     );
 
+    this.operationDetailBreadcrumb = this.page.getByTestId('apmDetailViewHeaderLink');
     this.operationDetailLatencyChart = this.page.getByTestId('latencyChart');
     this.operationDetailThroughputChart = this.page.getByTestId('throughputChart');
     this.operationDetailFailedTransactionRateChart = this.page.getByTestId('errorRateChart');
@@ -46,6 +52,12 @@ export class DependencyDetailsPage {
     this.operationDetailWaterfallInvestigateButton = this.page.getByTestId(
       'apmActionMenuButtonInvestigateButton'
     );
+    this.operationDetailWaterfallInvestigatePopup = this.page.getByTestId(
+      'apmActionMenuInvestigateButtonPopup'
+    );
+    this.operationDetailWaterfallPaginationLastButton =
+      this.page.getByTestId('pagination-button-last');
+    this.operationDetailWaterfallSpanLinksBadge = this.page.locator(subj('^spanLinksBadge_'));
   }
 
   async goToPage(overrides?: { dependencyName?: string; rangeFrom?: string; rangeTo?: string }) {
