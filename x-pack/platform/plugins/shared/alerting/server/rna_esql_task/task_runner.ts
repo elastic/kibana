@@ -11,6 +11,7 @@ import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { ESQLParamsSchema } from '@kbn/response-ops-rule-params/esql';
 
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart, AlertingServerStart } from '../plugin';
@@ -19,6 +20,7 @@ import type { RawRule } from '../saved_objects/schemas/raw_rule/latest';
 import { getDecryptedRuleSo } from '../data/rule/methods/get_decrypted_rule_so';
 import type { EsqlRulesTaskParams } from './types';
 import { getEsqlRulesAlertsDataStreamName } from './lib';
+import { executeEsqlRule } from './execute_esql';
 
 function getFakeKibanaRequest({
   basePathService,
@@ -86,14 +88,33 @@ export function createEsqlRulesTaskRunner({
           return { state: taskInstance.state };
         }
 
+        const fakeRequest = getFakeKibanaRequest({
+          basePathService: coreStart.http.basePath,
+          spaceId: params.spaceId,
+          apiKey: rawRule.apiKey,
+        });
+
         const rulesClient = await (alertingStart as AlertingServerStart).getRulesClientWithRequest(
-          getFakeKibanaRequest({
-            basePathService: coreStart.http.basePath,
-            spaceId: params.spaceId,
-            apiKey: rawRule.apiKey,
-          })
+          fakeRequest
         );
-        await rulesClient.get({ id: params.ruleId });
+        const rule = await rulesClient.get({ id: params.ruleId });
+
+        const esqlParams = ESQLParamsSchema.validate(rule.params);
+
+        const abortController = new AbortController();
+        const searchClient = pluginsStart.data.search.asScoped(fakeRequest);
+        const esqlResponse = await executeEsqlRule({
+          logger,
+          searchClient,
+          abortController,
+          rule: {
+            id: params.ruleId,
+            alertTypeId: rule.alertTypeId,
+            spaceId: params.spaceId,
+            name: rule.name,
+          },
+          params: esqlParams,
+        });
 
         const targetDataStream = getEsqlRulesAlertsDataStreamName({
           config,
@@ -104,8 +125,13 @@ export function createEsqlRulesTaskRunner({
         logger.debug(
           `alerting:esql skeleton run: ruleId=${params.ruleId} spaceId=${params.spaceId} alertsDataStream=${targetDataStream} type=${rawRule.alertTypeId}`
         );
+        logger.debug(
+          `alerting:esql esql execution: columns=${esqlResponse.columns?.length ?? 0} rows=${
+            esqlResponse.values?.length ?? 0
+          }`
+        );
 
-        // no ES|QL execution yet.
+        // No persistence yet (append-only indexing is next).
         return { state: taskInstance.state };
       },
     };
