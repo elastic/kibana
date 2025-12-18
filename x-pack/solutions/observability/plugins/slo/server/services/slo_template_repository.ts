@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import * as t from 'io-ts';
+import { arrayToStringRt } from '@kbn/io-ts-utils';
 import {
   budgetingMethodSchema,
   indicatorSchema,
@@ -118,6 +120,10 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
         if (isRight(decoded)) {
           template.settings = decoded.right;
         }
+      }
+
+      if (stored.groupBy && t.array(t.string).is(stored.groupBy)) {
+        template.groupBy = stored.groupBy;
       }
 
       return template;
