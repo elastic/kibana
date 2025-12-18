@@ -21,6 +21,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -88,6 +89,10 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   relatedSavedObjects?: RelatedSavedObjects;
   request: KibanaRequest;
+  /**
+   * Optional spaceId override to be used by internal services that otherwise derive space from the request.
+   */
+  spaceId?: string;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   connectorTokenClient?: ConnectorTokenClientContract;
@@ -148,6 +153,7 @@ export class ActionExecutor {
     request,
     params,
     relatedSavedObjects,
+    spaceId,
     source,
     taskInfo,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
@@ -159,9 +165,21 @@ export class ActionExecutor {
       spaces,
     } = this.actionExecutorContext!;
 
-    const services = getServices(request);
-    const spaceId = spaces && spaces.getSpaceId(request);
-    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+    const effectiveSpaceId = spaceId ?? (spaces && spaces.getSpaceId(request));
+    const baseServices = getServices(request);
+    const services =
+      effectiveSpaceId == null
+        ? baseServices
+        : {
+            ...baseServices,
+            savedObjectsClient: baseServices.savedObjectsClient.asScopedToNamespace(
+              SavedObjectsUtils.namespaceIdToString(
+                effectiveSpaceId !== 'default' ? effectiveSpaceId : undefined
+              )
+            ),
+          };
+    const namespace =
+      effectiveSpaceId && effectiveSpaceId !== 'default' ? { namespace: effectiveSpaceId } : {};
     const authorization = getActionsAuthorizationWithRequest(request);
     const currentUser = security?.authc.getCurrentUser(request);
 
@@ -194,7 +212,7 @@ export class ActionExecutor {
       request,
       services,
       source,
-      spaceId,
+      spaceId: effectiveSpaceId,
       taskInfo,
     });
   }

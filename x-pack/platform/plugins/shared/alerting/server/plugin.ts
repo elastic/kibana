@@ -175,6 +175,7 @@ export interface AlertingServerStart {
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientForSpace(request: KibanaRequest, spaceId: string): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -602,17 +603,25 @@ export class AlertingPlugin {
       ],
     });
 
-    alertingAuthorizationClientFactory.initialize({
+    const alertingAuthorizationClientFactoryOpts = {
       ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getActiveSpace(request);
       },
+      async getSpaceById(request: KibanaRequest, spaceId: string) {
+        if (!plugins.spaces) {
+          return undefined;
+        }
+        return await plugins.spaces.spacesService.createSpacesClient(request).get(spaceId);
+      },
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
       features: plugins.features,
-    });
+    };
+
+    alertingAuthorizationClientFactory.initialize(alertingAuthorizationClientFactoryOpts);
 
     rulesClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
@@ -659,6 +668,15 @@ export class AlertingPlugin {
         );
       }
       return rulesClientFactory!.create(request, core.savedObjects);
+    };
+
+    const getRulesClientForSpace = async (request: KibanaRequest, spaceId: string) => {
+      if (isESOCanEncrypt !== true) {
+        throw new Error(
+          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        );
+      }
+      return rulesClientFactory!.create(request, core.savedObjects, { spaceId });
     };
 
     this.getRulesClientWithRequest = getRulesClientWithRequest;
@@ -716,15 +734,23 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
-    this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
-      return async (objects?: SavedObjectsBulkGetObject[]) => {
-        const client = await getRulesClientWithRequest(request);
+    this.eventLogService!.registerSavedObjectProvider(
+      RULE_SAVED_OBJECT_TYPE,
+      (request, options) => {
+        return async (objects?: SavedObjectsBulkGetObject[]) => {
+          const client =
+            options?.spaceId == null
+              ? await getRulesClientWithRequest(request)
+              : await getRulesClientForSpace(request, options.spaceId);
 
-        return objects
-          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
-          : Promise.resolve([]);
-      };
-    });
+          return objects
+            ? Promise.all(
+                objects.map(async (objectItem) => await client.get({ id: objectItem.id }))
+              )
+            : Promise.resolve([]);
+        };
+      }
+    );
 
     this.eventLogService!.isEsContextReady()
       .then(() => {
@@ -744,6 +770,7 @@ export class AlertingPlugin {
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
+      getRulesClientForSpace,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
     };

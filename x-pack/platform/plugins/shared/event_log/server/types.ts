@@ -58,6 +58,7 @@ export interface IEventLogService {
 
 export interface IEventLogClientService {
   getClient(request: KibanaRequest): IEventLogClient;
+  getClientForSpace(request: KibanaRequest, spaceId: string): IEventLogClient;
 }
 
 export interface IEventLogClient {

@@ -40,6 +40,35 @@ describe('EventLogClientService', () => {
       expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request);
     });
   });
+
+  describe('getClientForSpace', () => {
+    test('creates a client with explicit spaceId override', () => {
+      const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
+      const request = fakeRequest();
+
+      const eventLogStartService = new EventLogClientService({
+        esContext,
+        savedObjectProviderRegistry,
+      });
+
+      eventLogStartService.getClientForSpace(request, 'default');
+
+      const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request, {
+        spaceId: 'default',
+      });
+      expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
+        esContext,
+        request,
+        savedObjectGetter,
+        spacesService: undefined,
+        spaceId: 'default',
+      });
+
+      expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request, {
+        spaceId: 'default',
+      });
+    });
+  });
 });
 
 function fakeRequest(): KibanaRequest {

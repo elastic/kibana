@@ -98,6 +98,10 @@ export interface ConstructorOptions {
   actionExecutor: ActionExecutorContract;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
+  /**
+   * Optional spaceId override to be used by internal services that otherwise derive space from the request.
+   */
+  spaceId?: string;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -120,6 +124,10 @@ export interface ActionsClientContext {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
+  /**
+   * Optional spaceId override to be used by internal services that otherwise derive space from the request.
+   */
+  spaceId?: string;
   authorization: ActionsAuthorization;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
@@ -147,6 +155,7 @@ export class ActionsClient {
     actionExecutor,
     bulkExecutionEnqueuer,
     request,
+    spaceId,
     authorization,
     auditLogger,
     usageCounter,
@@ -167,6 +176,7 @@ export class ActionsClient {
       actionExecutor,
       bulkExecutionEnqueuer,
       request,
+      spaceId,
       authorization,
       auditLogger,
       usageCounter,

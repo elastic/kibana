@@ -131,8 +131,10 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       message: 'eventLog starting',
     });
 
-    this.savedObjectProviderRegistry.registerDefaultProvider((request) => {
-      const client = core.savedObjects.getScopedClient(request);
+    this.savedObjectProviderRegistry.registerDefaultProvider((request, options) => {
+      const baseClient = core.savedObjects.getScopedClient(request);
+      const client =
+        options?.spaceId == null ? baseClient : baseClient.asScopedToNamespace(options.spaceId);
       return client.bulkGet.bind(client);
     });
 

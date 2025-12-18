@@ -16,6 +16,7 @@ export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginStart?: SecurityPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
+  getSpaceById: (request: KibanaRequest, spaceId: string) => Promise<Space | undefined>;
   getSpaceId: (request: KibanaRequest) => string;
   features: FeaturesPluginStart;
 }
@@ -43,6 +44,22 @@ export class AlertingAuthorizationClientFactory {
       request,
       getSpace: this.options.getSpace,
       getSpaceId: this.options.getSpaceId,
+      ruleTypeRegistry: this.options.ruleTypeRegistry,
+      features: this.options.features,
+    });
+  }
+
+  public async createForSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<AlertingAuthorization> {
+    this.validateInitialization();
+
+    return AlertingAuthorization.create({
+      authorization: this.options.securityPluginStart?.authz,
+      request,
+      getSpace: async () => await this.options.getSpaceById(request, spaceId),
+      getSpaceId: () => spaceId,
       ruleTypeRegistry: this.options.ruleTypeRegistry,
       features: this.options.features,
     });
