@@ -39,10 +39,9 @@ describe('SLO Selector', () => {
     expect(screen.getByTestId('sloSelectorLoadingSpinner')).toBeInTheDocument();
   });
 
-  it('renders an empty state when it has loaded only once and there are no SLOs', async () => {
+  it('renders an empty state when it has loaded and there are no SLOs', async () => {
     useFetchSloDefinitionsMock.mockReturnValue({
       isLoading: false,
-      hasLoadedOnlyOnce: true,
       data: emptySloList,
     });
 
@@ -76,9 +75,9 @@ describe('SLO Selector', () => {
 
   it('does not render empty state when there are no results for the search term', async () => {
     useFetchSloDefinitionsMock
-      .mockReturnValueOnce({ isLoading: false, data: sloList, hasLoadedOnlyOnce: true })
-      .mockReturnValueOnce({ isLoading: false, data: sloList, hasLoadedOnlyOnce: false })
-      .mockReturnValue({ isLoading: false, data: emptySloList, hasLoadedOnlyOnce: false });
+      .mockReturnValueOnce({ isLoading: false, data: sloList, isInitialLoading: true })
+      .mockReturnValueOnce({ isLoading: false, data: sloList })
+      .mockReturnValue({ isLoading: false, data: emptySloList });
 
     render(<SloSelector onSelected={onSelectedSpy} />);
 

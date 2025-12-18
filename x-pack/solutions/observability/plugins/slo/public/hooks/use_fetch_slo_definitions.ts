@@ -7,7 +7,6 @@
 
 import type { FindSLODefinitionsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
-import { useState } from 'react';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
@@ -18,7 +17,6 @@ export interface UseFetchSloDefinitionsResponse {
   isSuccess: boolean;
   isError: boolean;
   refetch: () => void;
-  hasLoadedOnlyOnce: boolean;
 }
 
 interface SLODefinitionParams {
@@ -41,9 +39,8 @@ export function useFetchSloDefinitions({
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
   const validTags = tags.filter((tag) => !!tag).join();
-  const [numOfLoads, setNumOfLoads] = useState(0);
 
-  const { isLoading, isError, isSuccess, data, refetch } = useQuery({
+  const { isLoading, isInitialLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly, validTags }),
     queryFn: async ({ signal }) => {
       try {
@@ -62,8 +59,6 @@ export function useFetchSloDefinitions({
         });
       } catch (error) {
         throw new Error(`Something went wrong. Error: ${error}`);
-      } finally {
-        setNumOfLoads((prev) => prev + 1);
       }
     },
     retry: false,
@@ -72,8 +67,7 @@ export function useFetchSloDefinitions({
 
   return {
     isLoading,
-    isInitialLoading: isLoading && numOfLoads === 0,
-    hasLoadedOnlyOnce: numOfLoads === 1,
+    isInitialLoading,
     isError,
     isSuccess,
     data,
