@@ -3825,7 +3825,7 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              "[]"
+              "<Record<string, unknown>>[]"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
@@ -4083,7 +4083,7 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              "[]"
+              "<Record<string, unknown>>[]"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
@@ -5297,7 +5297,7 @@
             "section": "def-common.ToolResultType",
             "text": "ToolResultType"
           },
-          ".other, Record<string, unknown>>"
+          ".other, T>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_result.ts",
         "deprecated": false,
@@ -5734,7 +5734,7 @@
             "section": "def-common.OtherResult",
             "text": "OtherResult"
           },
-          " | ",
+          "<T> | ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
