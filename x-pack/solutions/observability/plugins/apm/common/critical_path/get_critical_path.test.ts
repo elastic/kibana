@@ -30,7 +30,10 @@ describe('getCriticalPath', () => {
 
     return {
       waterfall,
-      criticalPath: getCriticalPath(waterfall),
+      criticalPath: getCriticalPath(
+        waterfall.entryWaterfallTransaction,
+        waterfall.childrenByParentId
+      ),
     };
   }
   it('adds the only active span to the critical path', () => {

@@ -7,13 +7,23 @@
 
 import type { IWaterfallSpanOrTransaction } from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
-export interface CriticalPathSegment {
-  item: IWaterfallSpanOrTransaction;
+/**
+ * Minimal interface that any item must implement to be used in critical path calculations
+ */
+export interface CriticalPathItemLike {
+  id: string;
+  offset: number;
+  duration: number;
+  skew: number;
+}
+
+export interface CriticalPathSegment<T extends CriticalPathItemLike = IWaterfallSpanOrTransaction> {
+  item: T;
   offset: number;
   duration: number;
   self: boolean;
 }
 
-export interface CriticalPath {
-  segments: CriticalPathSegment[];
+export interface CriticalPath<T extends CriticalPathItemLike = IWaterfallSpanOrTransaction> {
+  segments: CriticalPathSegment<T>[];
 }

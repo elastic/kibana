@@ -12,8 +12,14 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 // Mock dependencies
 jest.mock('./bar', () => ({
-  Bar: ({ width, left, color }: any) => (
-    <div data-test-subj="bar" data-width={width} data-left={left} data-color={color} />
+  Bar: ({ width, left, color, segments }: any) => (
+    <div
+      data-test-subj="bar"
+      data-width={width}
+      data-left={left}
+      data-color={color}
+      data-segments={segments ? JSON.stringify(segments) : undefined}
+    />
   ),
 }));
 jest.mock('./bar_details', () => ({
@@ -42,6 +48,8 @@ jest.mock('./trace_waterfall_context', () => ({
     onClick: jest.fn(),
     onErrorClick: jest.fn(),
     highlightedTraceId: 'highlighted-id',
+    criticalPathSegmentsById: {},
+    showCriticalPath: false,
   }),
 }));
 jest.mock('@elastic/eui', () => {
@@ -121,6 +129,8 @@ describe('TraceItemRow', () => {
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
       highlightedTraceId: 'highlighted-id',
+      criticalPathSegmentsById: {},
+      showCriticalPath: false,
     });
     const { container } = render(
       <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
@@ -137,10 +147,198 @@ describe('TraceItemRow', () => {
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
       highlightedTraceId: 'span-1',
+      criticalPathSegmentsById: {},
+      showCriticalPath: false,
     });
     const { getByTestId } = render(
       <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
     );
     expect(getByTestId('trace-item-container')).toHaveStyle('background-color: #fafafa');
+  });
+
+  describe('with critical path', () => {
+    beforeAll(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('@elastic/eui'), 'useEuiTheme').mockReturnValue({
+        euiTheme: {
+          border: { thin: '1px solid #eee', width: { thick: '2px' } },
+          colors: { danger: 'red', lightestShade: '#fafafa', accent: 'orange' },
+        },
+      });
+    });
+
+    it('renders without segments when criticalPathSegmentsById is undefined', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: true,
+        criticalPathSegmentsById: {},
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      expect(bar).not.toHaveAttribute('data-segments');
+    });
+
+    it('renders without segments when criticalPathSegmentsById has no segments for item', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: true,
+        criticalPathSegmentsById: {
+          'other-span': [],
+        },
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      expect(bar).not.toHaveAttribute('data-segments');
+    });
+
+    it('filters segments to only include self:true segments', () => {
+      const item = { ...baseItem, offset: 10, duration: 100, skew: 0 };
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 200,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: true,
+        criticalPathSegmentsById: {
+          'span-1': [
+            { item, offset: 20, duration: 30, self: true },
+            { item, offset: 50, duration: 40, self: false },
+            { item, offset: 90, duration: 10, self: true },
+          ],
+        },
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
+      expect(segments).toHaveLength(2);
+    });
+
+    it('calculates segment left position correctly', () => {
+      const item = { ...baseItem, offset: 10, duration: 100, skew: 5 };
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 200,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: true,
+        criticalPathSegmentsById: {
+          'span-1': [
+            { item, offset: 25, duration: 30, self: true }, // (25 - 10 - 5) / 100 = 0.1
+          ],
+        },
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
+      expect(segments[0].left).toBe(0.1);
+    });
+
+    it('calculates segment width correctly', () => {
+      const item = { ...baseItem, offset: 10, duration: 100, skew: 0 };
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 200,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: true,
+        criticalPathSegmentsById: {
+          'span-1': [
+            { item, offset: 20, duration: 30, self: true }, // 30 / 100 = 0.3
+          ],
+        },
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
+      expect(segments[0].width).toBe(0.3);
+    });
+
+    it('preserves segment id and uses accent color', () => {
+      const item = { ...baseItem, offset: 10, duration: 100, skew: 0 };
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 200,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: true,
+        criticalPathSegmentsById: {
+          'span-1': [{ item, offset: 20, duration: 30, self: true }],
+        },
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      const segments = JSON.parse(bar.getAttribute('data-segments') || '[]');
+      expect(segments[0].id).toBe('span-1');
+      expect(segments[0].color).toBe('orange');
+    });
+
+    it('applies transparent color when showCriticalPath is true', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: true,
+        criticalPathSegmentsById: {},
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      const color = bar.getAttribute('data-color');
+      // transparentize(0.5, 'red') should make the color more transparent
+      expect(color).not.toBe('red');
+      expect(color).toContain('rgba');
+    });
+
+    it('applies normal color when showCriticalPath is false', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+        duration: 100,
+        margin: { left: 20, right: 10 },
+        showAccordion: true,
+        onClick: jest.fn(),
+        highlightedTraceId: 'highlighted-id',
+        showCriticalPath: false,
+        criticalPathSegmentsById: {},
+      });
+      const { getByTestId } = render(
+        <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+      );
+      const bar = getByTestId('bar');
+      expect(bar).toHaveAttribute('data-color', 'red');
+    });
   });
 });

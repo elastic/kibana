@@ -62,7 +62,10 @@ export function WaterfallContextProvider({
       return {};
     }
 
-    const criticalPath = getCriticalPath(waterfall);
+    const criticalPath = getCriticalPath(
+      waterfall.entryWaterfallTransaction,
+      waterfall.childrenByParentId
+    );
     return groupBy(criticalPath.segments, (segment) => segment.item.id);
   }, [showCriticalPath, waterfall]);
 

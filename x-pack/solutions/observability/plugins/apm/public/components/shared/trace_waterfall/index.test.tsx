@@ -212,4 +212,18 @@ describe('TraceWaterfall', () => {
       expect(screen.getByText('Test Span 2')).toBeInTheDocument();
     });
   });
+
+  describe('Critical Path Control', () => {
+    it('does not render critical path control when showCriticalPathControl is false', () => {
+      renderTraceWaterfall({ showCriticalPathControl: false });
+
+      expect(screen.queryByLabelText('Show critical path')).not.toBeInTheDocument();
+    });
+
+    it('renders critical path control when showCriticalPathControl is true', () => {
+      renderTraceWaterfall({ showCriticalPathControl: true });
+
+      expect(screen.getByLabelText('Show critical path')).toBeInTheDocument();
+    });
+  });
 });

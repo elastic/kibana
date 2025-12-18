@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { groupBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
@@ -21,6 +22,8 @@ import {
   getAgentMarks,
   type AgentMark,
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
+import type { CriticalPathSegment } from '../../../../common/critical_path/types';
+import { getCriticalPath } from '../../../../common/critical_path/get_critical_path';
 
 export interface TraceWaterfallContextProps {
   duration: number;
@@ -29,11 +32,15 @@ export interface TraceWaterfallContextProps {
   rootItem?: TraceItem;
   margin: { left: number; right: number };
   traceWaterfallMap: Record<string, TraceWaterfallItem[]>;
+  criticalPathSegmentsById: Record<string, CriticalPathSegment<TraceWaterfallItem>[]>;
   showAccordion: boolean;
   isAccordionOpen: boolean;
   accordionStatesMap: Record<string, EuiAccordionProps['forceState']>;
   toggleAccordionState: (id: string) => void;
   toggleAllAccordions: () => void;
+  showCriticalPath: boolean;
+  setShowCriticalPath: (value: boolean) => void;
+  showCriticalPathControl: boolean;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   highlightedTraceId?: string;
@@ -56,11 +63,15 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   rootItem: undefined,
   margin: { left: 0, right: 0 },
   traceWaterfallMap: {},
+  criticalPathSegmentsById: {},
   showAccordion: true,
   isAccordionOpen: true,
   accordionStatesMap: {},
   toggleAccordionState: () => {},
   toggleAllAccordions: () => {},
+  showCriticalPath: false,
+  setShowCriticalPath: () => {},
+  showCriticalPathControl: false,
   isEmbeddable: false,
   legends: [],
   colorBy: WaterfallLegendType.ServiceName,
@@ -93,6 +104,7 @@ interface Props {
   isFiltered?: boolean;
   errors?: Error[];
   agentMarks?: Record<string, number>;
+  showCriticalPathControl?: boolean;
 }
 
 export function TraceWaterfallContextProvider({
@@ -110,6 +122,7 @@ export function TraceWaterfallContextProvider({
   isFiltered,
   errors,
   agentMarks,
+  showCriticalPathControl,
 }: Props) {
   const {
     duration,
@@ -128,6 +141,7 @@ export function TraceWaterfallContextProvider({
     onErrorClick,
   });
 
+  const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [isAccordionOpen, setAccordionOpen] = useState(true);
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>
@@ -162,7 +176,29 @@ export function TraceWaterfallContextProvider({
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
 
-  const traceWaterfallMap = useMemo(() => groupByParent(traceWaterfall), [traceWaterfall]);
+  const fullTraceWaterfallMap = useMemo(() => groupByParent(traceWaterfall), [traceWaterfall]);
+
+  const criticalPathSegmentsById = useMemo(() => {
+    if (!showCriticalPath) {
+      return {};
+    }
+
+    const root = traceWaterfall[0];
+    if (!root) {
+      return {};
+    }
+
+    const criticalPath = getCriticalPath(root, fullTraceWaterfallMap);
+    return groupBy(criticalPath.segments, (segment) => segment.item.id);
+  }, [fullTraceWaterfallMap, showCriticalPath, traceWaterfall]);
+
+  const traceWaterfallMap = useMemo(() => {
+    if (!showCriticalPath) {
+      return fullTraceWaterfallMap;
+    }
+
+    return filterMapByCriticalPath(fullTraceWaterfallMap, criticalPathSegmentsById);
+  }, [criticalPathSegmentsById, fullTraceWaterfallMap, showCriticalPath]);
 
   return (
     <TraceWaterfallContext.Provider
@@ -173,11 +209,15 @@ export function TraceWaterfallContextProvider({
         traceWaterfall,
         margin: { left: showAccordion ? Math.max(100, left) : left, right },
         traceWaterfallMap,
+        criticalPathSegmentsById,
         showAccordion,
         isAccordionOpen,
         accordionStatesMap,
         toggleAccordionState,
         toggleAllAccordions,
+        showCriticalPath,
+        setShowCriticalPath,
+        showCriticalPathControl,
         onClick,
         onErrorClick,
         highlightedTraceId,
@@ -214,4 +254,16 @@ export function groupByParent(items: TraceWaterfallItem[]) {
     }
     return acc;
   }, {});
+}
+
+export function filterMapByCriticalPath(
+  map: Record<string, TraceWaterfallItem[]>,
+  criticalPathSegmentsById: Record<string, CriticalPathSegment<TraceWaterfallItem>[]>
+): Record<string, TraceWaterfallItem[]> {
+  return Object.fromEntries(
+    Object.entries(map).map(([parentId, children]) => [
+      parentId,
+      children.filter((child) => criticalPathSegmentsById[child.id]?.length),
+    ])
+  );
 }
