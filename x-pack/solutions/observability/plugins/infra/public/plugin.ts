@@ -107,13 +107,13 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     // fetchData `appLink` redirects to logs explorer
-    pluginsSetup.observability.dashboard.register({
+    pluginsSetup.observabilityOverview.dashboard.register({
       appName: 'infra_logs',
       hasData: getLogsHasDataFetcher(core.getStartServices),
       fetchData: getLogsOverviewDataFetcher(core.getStartServices),
     });
 
-    pluginsSetup.observability.dashboard.register({
+    pluginsSetup.observabilityOverview.dashboard.register({
       appName: 'infra_metrics',
       hasData: createMetricsHasData(core.getStartServices),
       fetchData: createMetricsFetchData(core.getStartServices),

@@ -27,6 +27,7 @@
       "logsShared",
       "metricsDataAccess",
       "observability",
+      "observabilityOverview",
       "observabilityShared",
       "ruleRegistry",
       "savedSearch",

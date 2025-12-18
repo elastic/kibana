@@ -48,6 +48,7 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import type { ObservabilityOverviewPublicSetup } from '@kbn/observability-overview-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilitySharedPluginSetup,
@@ -114,6 +115,7 @@ export interface ApmPluginSetupDeps {
   licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityOverview: ObservabilityOverviewPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -349,7 +351,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: ObservabilityTriggerId.ApmErrorContextMenu,
     });
 
-    plugins.observability.dashboard.register({
+    plugins.observabilityOverview.dashboard.register({
       appName: 'apm',
       hasData: async () => {
         const dataHelper = await getApmDataHelper();

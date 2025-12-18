@@ -37,6 +37,7 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import type { ObservabilityOverviewPublicSetup } from '@kbn/observability-overview-plugin/public';
 import { enableLegacyUptimeApp } from '@kbn/observability-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
@@ -76,6 +77,7 @@ export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
+  observabilityOverview: ObservabilityOverviewPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
@@ -150,7 +152,7 @@ export class UptimePlugin
       return UptimeDataHelper(coreStart);
     };
 
-    plugins.observability.dashboard.register({
+    plugins.observabilityOverview.dashboard.register({
       appName: 'uptime',
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
