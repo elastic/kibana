@@ -10,18 +10,18 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
-import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
+import { SetUnifiedAlertsTagsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL } from '../../../../../common/constants';
-import { searchAlertsHandler } from '../common/search_alerts_handler';
+import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL } from '../../../../../common/constants';
+import { setAlertTagsHandler } from '../common/set_alert_tags_handler';
 
-export const searchUnifiedAlertsRoute = (
+export const setUnifiedAlertsTagsRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null
 ) => {
   router.versioned
     .post({
-      path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+      path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
       access: 'internal',
       security: {
         authz: {
@@ -34,7 +34,7 @@ export const searchUnifiedAlertsRoute = (
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(SearchUnifiedAlertsRequestBody),
+            body: buildRouteValidationWithZod(SetUnifiedAlertsTagsRequestBody),
           },
         },
       },
@@ -49,7 +49,7 @@ export const searchUnifiedAlertsRoute = (
           return indexPattern;
         };
 
-        return searchAlertsHandler({ context, request, response, getIndexPattern });
+        return setAlertTagsHandler({ context, request, response, getIndexPattern });
       }
     );
 };
