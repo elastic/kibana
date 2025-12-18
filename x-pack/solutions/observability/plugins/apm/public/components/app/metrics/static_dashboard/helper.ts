@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Mustache from 'mustache';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
@@ -49,11 +50,22 @@ export async function convertSavedDashboardToPanels(
   dataView: DataView
 ): Promise<DashboardState['panels'] | undefined> {
   const dashboardFilename = getDashboardFileNameFromProps(props);
-  const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
+  const unreplacedDashboardJSON = !!dashboardFilename
+    ? await loadDashboardFile(dashboardFilename)
+    : false;
 
-  if (!dashboardFilename || !dashboardJSON) {
+  if (!dashboardFilename || !unreplacedDashboardJSON) {
     return undefined;
   }
+
+  // Convert the Dashboard into a string
+  const dashboardString = JSON.stringify(unreplacedDashboardJSON);
+  // Replace indexPattern placeholder
+  const dashboardStringWithReplacements = Mustache.render(dashboardString, {
+    indexPattern: dataView.title,
+  });
+  // Convert to JSON object
+  const dashboardJSON = JSON.parse(dashboardStringWithReplacements);
 
   const panelsRawObjects = JSON.parse(dashboardJSON.attributes.panelsJSON) as any[];
 
