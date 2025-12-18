@@ -8,11 +8,9 @@
  */
 import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
 import { within } from '../../../ast/location';
-import { isMarkerNode } from '../../definitions/utils/ast';
-import { getExpressionPosition } from '../../definitions/utils/autocomplete/expressions';
 import { suggestForExpression } from '../../definitions/utils';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { getExpressionType, isExpressionComplete } from '../../definitions/utils/expressions';
+import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import {
   commaCompleteItem,
@@ -34,27 +32,21 @@ export async function autocomplete(
   }
   const innerText = query.substring(0, cursorPosition);
   const lastArg = command.args[command.args.length - 1] as ESQLSingleAstItem | undefined;
-  const startingNewExpression =
-    // ends with a comma
-    /,\s*$/.test(innerText) &&
-    lastArg &&
-    // and we aren't within a function
-    !(isFunctionExpression(lastArg) && within(innerText.length, lastArg));
+
+  const endsWithComma = /,\s*$/.test(innerText);
+  const withinFunction =
+    lastArg && isFunctionExpression(lastArg) && within(innerText.length, lastArg);
+  const startingNewExpression = endsWithComma && !withinFunction;
 
   let expressionRoot = startingNewExpression ? undefined : lastArg;
-
   let insideAssignment = false;
-  if (expressionRoot && isAssignment(expressionRoot)) {
-    // EVAL foo = <use this as the expression root>
-    expressionRoot = (expressionRoot.args[1] as ESQLSingleAstItem[])[0] as ESQLSingleAstItem;
-    insideAssignment = true;
 
-    if (isMarkerNode(expressionRoot)) {
-      expressionRoot = undefined;
-    }
+  if (expressionRoot && isAssignment(expressionRoot)) {
+    expressionRoot = getAssignmentExpressionRoot(expressionRoot);
+    insideAssignment = true;
   }
 
-  const suggestions = await suggestForExpression({
+  const { suggestions, computed } = await suggestForExpression({
     query,
     expressionRoot,
     command,
@@ -67,26 +59,18 @@ export async function autocomplete(
     },
   });
 
-  const positionInExpression = getExpressionPosition(query, expressionRoot);
-  if (positionInExpression === 'empty_expression' && !insideAssignment) {
+  const { position, isComplete, insideFunction } = computed;
+
+  if (position === 'empty_expression' && !insideAssignment) {
     suggestions.push(
       getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
     );
   }
 
-  const insideFunction =
-    lastArg && isFunctionExpression(lastArg) && within(cursorPosition || 0, lastArg);
-
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
-
   if (
-    // don't suggest finishing characters if incomplete expression
-    isExpressionComplete(expressionType, innerText) &&
-    // don't suggest finishing characters if the expression is a column
-    // because "EVAL columnName" is a useless expression
+    isComplete &&
     expressionRoot &&
     (!isColumn(expressionRoot) || insideAssignment) &&
-    // don't suggest finishing characters if we're inside a function
     !insideFunction
   ) {
     suggestions.push(

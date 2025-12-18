@@ -11,6 +11,8 @@ import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schem
 import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
 import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
 import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
+import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
+import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -303,6 +305,10 @@ export const createVisualizationGraph = (
           validatedConfig = tagcloudStateSchemaESQL.validate(config);
         } else if (state.chartType === SupportedChartType.XY) {
           validatedConfig = xyStateSchema.validate(config);
+        } else if (state.chartType === SupportedChartType.RegionMap) {
+          validatedConfig = regionMapStateSchemaESQL.validate(config);
+        } else if (state.chartType === SupportedChartType.Heatmap) {
+          validatedConfig = heatmapStateSchemaESQL.validate(config);
         } else {
           throw new Error(`Unsupported chart type: ${state.chartType}`);
         }
