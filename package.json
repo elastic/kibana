@@ -1049,6 +1049,7 @@
     "@kbn/siem-readiness": "link:x-pack/solutions/security/packages/siem-readiness",
     "@kbn/slo-plugin": "link:x-pack/solutions/observability/plugins/slo",
     "@kbn/slo-schema": "link:x-pack/platform/packages/shared/kbn-slo-schema",
+    "@kbn/slo-shared-plugin": "link:x-pack/platform/plugins/shared/slo_shared",
     "@kbn/snapshot-restore-plugin": "link:x-pack/platform/plugins/private/snapshot_restore",
     "@kbn/sort-predicates": "link:src/platform/packages/shared/kbn-sort-predicates",
     "@kbn/spaces-plugin": "link:x-pack/platform/plugins/shared/spaces",
