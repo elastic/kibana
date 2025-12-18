@@ -13,18 +13,13 @@ import type {
   ESQLAstAllCommands,
   ESQLCommandOption,
 } from '../../../types';
-import { isAssignment, isFunctionExpression } from '../../../ast/is';
-import { within } from '../../../ast/location';
-import {
-  extractValidExpressionRoot,
-  getBinaryExpressionOperand,
-} from '../../definitions/utils/expressions';
+import { isAssignment } from '../../../ast/is';
+import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 
 export interface RerankPosition {
   position: CaretPosition;
   context?: {
     expressionRoot?: ESQLSingleAstItem;
-    insideFunction?: boolean;
   };
 }
 
@@ -44,11 +39,7 @@ export enum CaretPosition {
 /**
  * Determines caret position in RERANK command
  */
-export function getPosition(
-  query: string,
-  command: ESQLAstAllCommands,
-  cursorPosition: number
-): RerankPosition {
+export function getPosition(query: string, command: ESQLAstAllCommands): RerankPosition {
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(rerankCommand.location.min);
   const onMap = rerankCommand.args[1];
@@ -74,18 +65,10 @@ export function getPosition(
     const lastField = rerankCommand.fields?.[rerankCommand.fields.length - 1];
 
     if (lastField && isAssignment(lastField)) {
-      const rhs = getBinaryExpressionOperand(lastField, 'right');
-      const rhsExpression = Array.isArray(rhs) ? rhs[0] : rhs;
-      const insideFunction =
-        rhsExpression &&
-        isFunctionExpression(rhsExpression) &&
-        within(cursorPosition, rhsExpression);
-
       return {
         position: CaretPosition.ON_EXPRESSION,
         context: {
-          expressionRoot: extractValidExpressionRoot(rhs),
-          insideFunction,
+          expressionRoot: getAssignmentExpressionRoot(lastField),
         },
       };
     }
