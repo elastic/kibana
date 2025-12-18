@@ -128,6 +128,5 @@
     "@kbn/setup-node-env",
     "@kbn/react-query",
     "@kbn/fs",
-    "@kbn/slo-shared-plugin"
   ]
 }
