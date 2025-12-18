@@ -23,17 +23,24 @@ import { type Bucket, getChangePoints } from '../../utils/get_change_points';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
+import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 
 export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
   'observability.get_metric_change_points';
 
 type MetricType = 'min' | 'max' | 'sum' | 'count' | 'avg' | 'p95' | 'p99';
 
-function getMetricAggregation({ field, type }: { field?: string; type: MetricType }): {
+function getMetricAggregation({
+  field,
+  aggregationType,
+}: {
+  field?: string;
+  aggregationType: MetricType;
+}): {
   agg: AggregationsAggregationContainer;
   buckets_path?: string;
 } {
-  if (type === 'count') {
+  if (aggregationType === 'count') {
     return field
       ? {
           agg: {
@@ -53,20 +60,20 @@ function getMetricAggregation({ field, type }: { field?: string; type: MetricTyp
   }
 
   if (!field) {
-    throw new Error(`Metric type ${type} needs a field to aggregate over`);
+    throw new Error(`Metric type ${aggregationType} needs a field to aggregate over`);
   }
 
-  if (['min', 'max', 'sum', 'avg'].includes(type)) {
+  if (['min', 'max', 'sum', 'avg'].includes(aggregationType)) {
     return {
       agg: {
-        [type]: {
+        [aggregationType]: {
           field,
         },
       } as Record<Exclude<MetricType, 'count' | 'p95' | 'p99'>, { field: string }>,
     };
   }
 
-  const percentile = `${type.split('p')[1]}.0`;
+  const percentile = `${aggregationType.split('p')[1]}.0`;
 
   return {
     agg: {
@@ -113,7 +120,7 @@ async function getMetricChangePoints({
   kqlFilter: kuery,
   groupBy,
   field,
-  type,
+  aggregationType,
   esClient,
 }: {
   name: string;
@@ -123,11 +130,11 @@ async function getMetricChangePoints({
   kqlFilter?: string;
   groupBy: string[];
   field?: string;
-  type: MetricType;
+  aggregationType: MetricType;
   esClient: IScopedClusterClient;
 }) {
   const { agg: metricAgg, buckets_path: bucketsPathMetric } = getMetricAggregation({
-    type,
+    aggregationType,
     field,
   });
 
@@ -195,16 +202,7 @@ async function getMetricChangePoints({
 }
 
 const getMetricChangePointsSchema = z.object({
-  start: z
-    .string()
-    .describe(
-      'The beginning of the time range, in Elasticsearch datemath, like `now-24h`, or an ISO timestamp'
-    ),
-  end: z
-    .string()
-    .describe(
-      'The end of the time range, in Elasticsearch datemath, like `now`, or an ISO timestamp'
-    ),
+  ...timeRangeSchemaRequired,
   metrics: z
     .array(
       z.object({

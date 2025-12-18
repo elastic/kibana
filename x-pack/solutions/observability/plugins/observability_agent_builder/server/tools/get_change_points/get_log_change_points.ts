@@ -25,6 +25,7 @@ import { type Bucket, getChangePoints } from '../../utils/get_change_points';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { getTypedSearch } from '../../utils/get_typed_search';
+import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
 
@@ -38,7 +39,7 @@ async function getLogChangePoint({
   index,
   start,
   end,
-  kqlFilter: kuery,
+  kqlFilter: kqlFilterValue,
   field,
   esClient,
 }: {
@@ -61,7 +62,7 @@ async function getLogChangePoint({
             start: parseDatemath(start),
             end: parseDatemath(end),
           }),
-          ...kqlFilter(kuery),
+          ...kqlFilter(kqlFilterValue),
         ],
       },
     },
@@ -113,7 +114,7 @@ async function getLogChangePoint({
             start: parseDatemath(start),
             end: parseDatemath(end),
           }),
-          ...kqlFilter(kuery),
+          ...kqlFilter(kqlFilterValue),
         ],
       },
     },
@@ -133,16 +134,7 @@ async function getLogChangePoint({
 }
 
 const getLogChangePointsSchema = z.object({
-  start: z
-    .string()
-    .describe(
-      'The beginning of the time range, in Elasticsearch datemath, like `now-24h`, or an ISO timestamp'
-    ),
-  end: z
-    .string()
-    .describe(
-      'The end of the time range, in Elasticsearch datemath, like `now`, or an ISO timestamp'
-    ),
+  ...timeRangeSchemaRequired,
   logs: z
     .array(
       z.object({
