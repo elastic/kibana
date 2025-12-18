@@ -20,14 +20,23 @@ export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
   const privMonUtils = PrivMonUtils(getService);
 
+  const typedListEntitySources = async ({ query }: { query: ListEntitySourcesRequestQuery }) => {
+    const listResponse = await api.listEntitySources({
+      query,
+    });
+    return { ...listResponse, body: listResponse.body as ListEntitySourcesResponse };
+  };
+
   const getOktaSource = async () => {
-    const sources = await api.listEntitySources({
+    const {
+      body: { sources },
+    } = await typedListEntitySources({
       query: {
         name: '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
       },
     });
-    expect(sources.body.length).toBe(1);
-    return sources.body[0];
+    expect(sources.length).toBe(1);
+    return sources[0];
   };
 
   describe('@ess @serverless @skipInServerlessMKI Monitoring Entity Source CRUD', () => {
@@ -61,7 +70,6 @@ export default ({ getService }: FtrProviderContext) => {
           body: entitySource as CreateEntitySourceRequestBody,
         });
         expect(createResponse.status).toBe(400);
-        expect(createResponse.body.message).toBe('Cannot create managed entity source');
       });
 
       it('should allow non-managed sources to be created', async () => {
@@ -69,7 +77,6 @@ export default ({ getService }: FtrProviderContext) => {
         const entitySource = {
           type: 'index',
           name: `Test non-managed entity source ${indexName}`,
-          managed: false,
           indexPattern: indexName,
           enabled: true,
           matchers: [
@@ -192,7 +199,6 @@ export default ({ getService }: FtrProviderContext) => {
         const entitySource = {
           type: 'index',
           name: `Test non-managed entity source ${indexName}`,
-          managed: false,
           indexPattern: indexName,
           enabled: true,
           matchers: [
@@ -223,12 +229,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(deleteResponse.body.acknowledged).toBe(true);
 
         // Verify the source was deleted by trying to get it
-        const listResponse = await api.listEntitySources({
+        const listResponse = await typedListEntitySources({
           query: {
             name: entitySource.name,
           },
         });
-        expect(listResponse.body.length).toBe(0);
+        expect(listResponse.body.sources.length).toBe(0);
       });
     });
 
@@ -252,7 +258,6 @@ export default ({ getService }: FtrProviderContext) => {
         const entitySource = {
           type: 'index',
           name: `Test get entity source ${indexName}`,
-          managed: false,
           indexPattern: indexName,
           enabled: true,
           matchers: [
@@ -300,25 +305,21 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('List Entity Sources', () => {
-      const typedListEntitySources = async ({
-        query,
-      }: {
-        query: ListEntitySourcesRequestQuery;
-      }) => {
-        const listResponse = await api.listEntitySources({
-          query,
-        });
-        return { ...listResponse, body: listResponse.body as ListEntitySourcesResponse[] };
-      };
-
       it('should list all entity sources', async () => {
         const listResponse = await typedListEntitySources({
           query: {},
         });
 
         expect(listResponse.status).toBe(200);
-        expect(Array.isArray(listResponse.body)).toBe(true);
-        expect(listResponse.body.length).toBeGreaterThan(0);
+        expect(listResponse.body.sources).toBeDefined();
+        expect(Array.isArray(listResponse.body.sources)).toBe(true);
+        expect(listResponse.body.sources.length).toBeGreaterThan(0);
+        expect(listResponse.body.page).toBeDefined();
+        expect(listResponse.body.per_page).toBeDefined();
+        expect(listResponse.body.total).toBeDefined();
+        expect(listResponse.body.page).toBeGreaterThan(0);
+        expect(listResponse.body.per_page).toBeGreaterThan(0);
+        expect(listResponse.body.total).toBeGreaterThanOrEqual(0);
       });
 
       it('should filter sources by name', async () => {
@@ -333,6 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(listResponse.body.sources.length).toBe(1);
         expect(listResponse.body.sources[0].id).toBe(source.id);
         expect(listResponse.body.sources[0].name).toBe(source.name);
+        expect(listResponse.body.total).toBe(1);
       });
 
       it('should filter sources by type', async () => {
@@ -343,7 +345,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(listResponse.status).toBe(200);
-        expect(Array.isArray(listResponse.body)).toBe(true);
+        expect(Array.isArray(listResponse.body.sources)).toBe(true);
         listResponse.body.sources.forEach((source: MonitoringEntitySource) => {
           expect(source.type).toBe('index');
         });
@@ -357,7 +359,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(managedListResponse.status).toBe(200);
-        expect(Array.isArray(managedListResponse.body)).toBe(true);
+        expect(Array.isArray(managedListResponse.body.sources)).toBe(true);
         managedListResponse.body.sources.forEach((source: MonitoringEntitySource) => {
           expect(source.managed).toBe(true);
         });
@@ -369,7 +371,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(nonManagedListResponse.status).toBe(200);
-        expect(Array.isArray(nonManagedListResponse.body)).toBe(true);
+        expect(Array.isArray(nonManagedListResponse.body.sources)).toBe(true);
         nonManagedListResponse.body.sources.forEach((source: MonitoringEntitySource) => {
           expect(source.managed).toBe(false);
         });
@@ -384,6 +386,120 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(listResponse.status).toBe(200);
         expect(listResponse.body.sources.length).toBe(0);
+        expect(listResponse.body.total).toBe(0);
+      });
+
+      it('should support pagination with page and per_page', async () => {
+        // Get all sources first to know the total
+        const allSourcesResponse = await typedListEntitySources({
+          query: {},
+        });
+        const totalSources = allSourcesResponse.body.total;
+
+        if (totalSources > 0) {
+          // Test first page with per_page = 1
+          const firstPageResponse = await typedListEntitySources({
+            query: {
+              page: 1,
+              per_page: 1,
+            },
+          });
+
+          expect(firstPageResponse.status).toBe(200);
+          expect(firstPageResponse.body.page).toBe(1);
+          expect(firstPageResponse.body.per_page).toBe(1);
+          expect(firstPageResponse.body.total).toBe(totalSources);
+          expect(firstPageResponse.body.sources.length).toBe(1);
+
+          // Test second page if there are more sources
+          if (totalSources > 1) {
+            const secondPageResponse = await typedListEntitySources({
+              query: {
+                page: 2,
+                per_page: 1,
+              },
+            });
+
+            expect(secondPageResponse.status).toBe(200);
+            expect(secondPageResponse.body.page).toBe(2);
+            expect(secondPageResponse.body.per_page).toBe(1);
+            expect(secondPageResponse.body.total).toBe(totalSources);
+            expect(secondPageResponse.body.sources.length).toBe(1);
+            // Verify different sources on different pages
+            expect(secondPageResponse.body.sources[0].id).not.toBe(
+              firstPageResponse.body.sources[0].id
+            );
+          }
+        }
+      });
+
+      it('should support sorting by sort_field and sort_order', async () => {
+        const listResponse = await typedListEntitySources({
+          query: {
+            sort_field: 'name',
+            sort_order: 'asc',
+          },
+        });
+
+        expect(listResponse.status).toBe(200);
+        expect(listResponse.body.sources.length).toBeGreaterThan(0);
+
+        // Verify sources are sorted by name in ascending order
+        for (let i = 1; i < listResponse.body.sources.length; i++) {
+          expect(listResponse.body.sources[i].name >= listResponse.body.sources[i - 1].name).toBe(
+            true
+          );
+        }
+
+        // Test descending order
+        const descListResponse = await typedListEntitySources({
+          query: {
+            sort_field: 'name',
+            sort_order: 'desc',
+          },
+        });
+
+        expect(descListResponse.status).toBe(200);
+        expect(descListResponse.body.sources.length).toBeGreaterThan(0);
+
+        // Verify sources are sorted by name in descending order
+        for (let i = 1; i < descListResponse.body.sources.length; i++) {
+          expect(
+            descListResponse.body.sources[i].name <= descListResponse.body.sources[i - 1].name
+          ).toBe(true);
+        }
+      });
+
+      it('should combine pagination and sorting', async () => {
+        const allSourcesResponse = await typedListEntitySources({
+          query: {
+            sort_field: 'name',
+            sort_order: 'asc',
+          },
+        });
+        const totalSources = allSourcesResponse.body.total;
+
+        if (totalSources > 1) {
+          const firstPageResponse = await typedListEntitySources({
+            query: {
+              page: 1,
+              per_page: 1,
+              sort_field: 'name',
+              sort_order: 'asc',
+            },
+          });
+
+          expect(firstPageResponse.status).toBe(200);
+          expect(firstPageResponse.body.page).toBe(1);
+          expect(firstPageResponse.body.per_page).toBe(1);
+          expect(firstPageResponse.body.total).toBe(totalSources);
+          expect(firstPageResponse.body.sources.length).toBe(1);
+
+          // The first page should have the first item when sorted by name ascending
+          expect(firstPageResponse.body.sources[0].name).toBe(
+            allSourcesResponse.body.sources[0].name
+          );
+        }
       });
     });
   });

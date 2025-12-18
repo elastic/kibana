@@ -320,7 +320,7 @@ export const PrivMonUtils = (
 
   async function getLastProcessedMarker(indexPattern: string) {
     const res = await api.listEntitySources({ query: {} });
-    const integration = res.body.find(
+    const integration = res.body.sources.find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
     return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
