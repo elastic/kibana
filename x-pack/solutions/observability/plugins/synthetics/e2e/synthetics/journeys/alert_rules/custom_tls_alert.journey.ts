@@ -95,7 +95,8 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
       }
     });
 
-    // Setting the rule schedule to 1 second so that the alert will be created quickly
+    // Setting the rule schedule to 5 seconds so that the alert will be created quickly
+    await page.getByTestId('ruleScheduleNumberInput').fill('5');
     await page.getByTestId('ruleScheduleUnitInput').selectOption('second');
     await page.getByTestId('ruleFormStep-details').click();
     await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
@@ -116,7 +117,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
     await retry.tryForTime(5 * 1000, async () => {
       await page.getByTestId('querySubmitButton').click();
-      if (!((await page.getByText(tlsRuleName).count()) > 0)) {
+      if (!(await page.getByText(tlsRuleName).isVisible())) {
         throw new Error('Alert not found');
       }
     });
