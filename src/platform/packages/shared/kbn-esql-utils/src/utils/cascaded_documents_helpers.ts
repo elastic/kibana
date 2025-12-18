@@ -288,7 +288,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
         let found = false;
 
         Walker.walk(cmd, {
-          visitIdentifier: (node) => {
+          visitColumn: (node) => {
             if (found) {
               return;
             }
