@@ -350,6 +350,10 @@ export default function (providerContext: FtrProviderContext) {
                 type: 'alerting_rule_template',
               },
               {
+                id: 'sample_slo_template',
+                type: 'slo_template',
+              },
+              {
                 id: 'sample_dashboard',
                 type: 'dashboard',
               },
@@ -508,12 +512,6 @@ export default function (providerContext: FtrProviderContext) {
               type: 'epm-packages-assets',
             },
             {
-              id: 'sample_slo_template',
-              type: 'slo_template',
-            },
-            {
-              id: 'sample_ml_module',
-              type: 'ml-module',
               id: '4035007b-9c33-5227-9803-2de8a17523b5',
               path: 'all_assets-0.2.0/kibana/security_rule/sample_security_rule.json',
               type: 'epm-packages-assets',
@@ -591,6 +589,11 @@ export default function (providerContext: FtrProviderContext) {
             {
               id: 'c5eaf69c-2dab-5678-a6e5-e586db4f3728',
               path: 'all_assets-0.2.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
+              type: 'epm-packages-assets',
+            },
+            {
+              id: 'cf050fd1-4a35-50e7-b98c-4a48dfca5724',
+              path: 'all_assets-0.2.0/kibana/slo_template/nginx-availability.json',
               type: 'epm-packages-assets',
             },
             {
