@@ -154,15 +154,8 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
     )} EIS Gateway ready. Start Elasticsearch with "-E xpack.inference.elastic.url=https://localhost:8443 -E xpack.inference.elastic.http.ssl.verification_mode=none -E xpack.inference.elastic.ccm_supported_environment=false" to connect`
   );
   log.write('');
-  log.write(
-    `${chalk.green(
-      '📋'
-    )} Paste the following config in kibana.(dev.).yml if you don't already have a connector:`
-  );
   log.write('');
-
-  log.write('');
-  log.info('Starting EIS Gateway via make target...');
+  log.info('Starting EIS Gateway...');
 
   // Run make run (runs the Go binary directly)
   await execa.command('make ENTITLEMENTS_SKIP_CHECK=true TLS_CLIENT_AUTH=NoClientCert run', {
