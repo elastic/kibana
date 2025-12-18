@@ -54,6 +54,7 @@ export enum ActionsMenuGroup {
   external = 'external',
   ai = 'ai',
   kibana = 'kibana',
+  data = 'data',
 }
 
 /**

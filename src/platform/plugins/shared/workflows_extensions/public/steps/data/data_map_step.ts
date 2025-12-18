@@ -10,7 +10,7 @@
 import { icon as listIcon } from '@elastic/eui/es/components/icon/assets/list';
 import { i18n } from '@kbn/i18n';
 import { dataMapStepCommonDefinition, DataMapStepTypeId } from '../../../common/steps/data';
-import type { PublicStepDefinition } from '../../step_registry/types';
+import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
 export const dataMapStepDefinition: PublicStepDefinition = {
   ...dataMapStepCommonDefinition,
@@ -22,6 +22,7 @@ export const dataMapStepDefinition: PublicStepDefinition = {
     defaultMessage:
       'Transform arrays or single objects by renaming fields, removing keys, or computing new values',
   }),
+  actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataMapStep.documentation.details', {
       defaultMessage: `The ${DataMapStepTypeId} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. The output is accessible via {outputSyntax}.`,
