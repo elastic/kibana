@@ -8,7 +8,12 @@
  */
 
 import type { ESQLVariableType } from '@kbn/esql-types';
-import type { ICommandCallbacks, ICommandContext, Location } from '../../../../registry/types';
+import type {
+  ICommandCallbacks,
+  ICommandContext,
+  ISuggestionItem,
+  Location,
+} from '../../../../registry/types';
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../../../types';
 import type {
   FunctionDefinition,
@@ -93,4 +98,17 @@ export interface FunctionDef {
     minParams?: number;
     returnType?: string;
   }>;
+}
+
+export interface ExpressionComputedMetadata {
+  innerText: string;
+  position: ExpressionPosition;
+  expressionType: SupportedDataType | 'unknown';
+  isComplete: boolean;
+  insideFunction: boolean;
+}
+
+export interface SuggestForExpressionResult {
+  suggestions: ISuggestionItem[];
+  computed: ExpressionComputedMetadata;
 }
