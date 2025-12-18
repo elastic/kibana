@@ -16,7 +16,11 @@ import {
 } from '@kbn/evals';
 import { AiInsightClient } from '../src/clients/ai_insight_client';
 import { apmErrorCountAIInsight } from '../src/alert_templates/alerts';
-import { OTEL_DEMO_SNAPSHOT_NAME, replayObservabilitySignals } from '../src/data_generators/replay';
+import {
+  OTEL_DEMO_SNAPSHOT_NAME,
+  replayObservabilityDataStreams,
+  cleanObservabilityDataStreams,
+} from '../src/data_generators/replay';
 
 const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 const ALERT_CREATION_WAIT_MS = 3000;
@@ -115,7 +119,7 @@ evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
     });
     ruleId = ruleResponse.data.id;
 
-    await replayObservabilitySignals(esClient, log, OTEL_DEMO_SNAPSHOT_NAME);
+    await replayObservabilityDataStreams(esClient, log, OTEL_DEMO_SNAPSHOT_NAME);
 
     log.info('Triggering rule run');
     await kbnClient.request<void>({
@@ -178,35 +182,22 @@ Key observations:
   });
 
   evaluate.afterAll(async ({ kbnClient, apmSynthtraceEsClient, esClient, log }) => {
-    log.info('Cleaning up indices');
+    log.debug('Cleaning up indices');
     await Promise.all([
       esClient.deleteByQuery({
         index: APM_ALERTS_INDEX,
         query: { match_all: {} },
         refresh: true,
       }),
-      esClient.deleteByQuery({
-        index: 'logs-*',
-        query: { match_all: {} },
-        refresh: true,
-      }),
-      esClient.deleteByQuery({
-        index: 'metrics-*',
-        query: { match_all: {} },
-        refresh: true,
-      }),
-      esClient.deleteByQuery({
-        index: 'traces-*',
-        query: { match_all: {} },
-        refresh: true,
-      }),
+      ...(ruleId
+        ? [
+            kbnClient.request({
+              method: 'DELETE',
+              path: `/api/alerting/rule/${ruleId}`,
+            }),
+          ]
+        : []),
+      cleanObservabilityDataStreams(esClient),
     ]);
-
-    if (ruleId) {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/api/alerting/rule/${ruleId}`,
-      });
-    }
   });
 });

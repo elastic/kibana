@@ -10,7 +10,7 @@ import { replaySnapshot } from '@kbn/es-snapshot-loader';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 export const OTEL_DEMO_SNAPSHOT_NAME = 'payment-service-failures';
-export async function replayObservabilitySignals(
+export async function replayObservabilityDataStreams(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string
@@ -25,4 +25,24 @@ export async function replayObservabilitySignals(
     snapshotName,
     patterns: ['logs-*', 'metrics-*', 'traces-*'],
   });
+}
+
+export async function cleanObservabilityDataStreams(esClient: Client): Promise<void> {
+  await Promise.all([
+    esClient.deleteByQuery({
+      index: 'logs-*',
+      query: { match_all: {} },
+      refresh: true,
+    }),
+    esClient.deleteByQuery({
+      index: 'metrics-*',
+      query: { match_all: {} },
+      refresh: true,
+    }),
+    esClient.deleteByQuery({
+      index: 'traces-*',
+      query: { match_all: {} },
+      refresh: true,
+    }),
+  ]);
 }

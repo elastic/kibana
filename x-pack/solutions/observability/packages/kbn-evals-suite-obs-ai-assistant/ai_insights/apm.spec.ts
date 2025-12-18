@@ -15,7 +15,11 @@ import {
   type KibanaPhoenixClient,
 } from '@kbn/evals';
 import { AiInsightClient, type ErrorInsightParams } from '../src/clients/ai_insight_client';
-import { OTEL_DEMO_SNAPSHOT_NAME, replayObservabilitySignals } from '../src/data_generators/replay';
+import {
+  OTEL_DEMO_SNAPSHOT_NAME,
+  replayObservabilityDataStreams,
+  cleanObservabilityDataStreams,
+} from '../src/data_generators/replay';
 
 const INDEX_REFRESH_WAIT_MS = 2500;
 
@@ -112,7 +116,7 @@ evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
     end = moment().toISOString();
     start = moment().subtract(15, 'minutes').toISOString();
 
-    await replayObservabilitySignals(esClient, log, OTEL_DEMO_SNAPSHOT_NAME);
+    await replayObservabilityDataStreams(esClient, log, OTEL_DEMO_SNAPSHOT_NAME);
 
     log.debug('Waiting to make sure all indices are refreshed');
     await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
@@ -180,23 +184,7 @@ Immediate actions:
   });
 
   evaluate.afterAll(async ({ esClient, log }) => {
-    log.info('Cleaning up indices');
-    await Promise.all([
-      esClient.deleteByQuery({
-        index: 'logs-*',
-        query: { match_all: {} },
-        refresh: true,
-      }),
-      esClient.deleteByQuery({
-        index: 'metrics-*',
-        query: { match_all: {} },
-        refresh: true,
-      }),
-      esClient.deleteByQuery({
-        index: 'traces-*',
-        query: { match_all: {} },
-        refresh: true,
-      }),
-    ]);
+    log.debug('Cleaning up indices');
+    await cleanObservabilityDataStreams(esClient);
   });
 });
