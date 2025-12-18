@@ -8,9 +8,9 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../hooks/use_kibana';
@@ -18,8 +18,8 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloEditForm } from './components/slo_edit_form';
-import { useParseUrlState } from './hooks/use_parse_url_state';
 import { transformSloResponseToFormState } from './helpers/process_slo_form_values';
+import { useParseUrlState } from './hooks/use_parse_url_state';
 
 export function SloEditPage() {
   const {

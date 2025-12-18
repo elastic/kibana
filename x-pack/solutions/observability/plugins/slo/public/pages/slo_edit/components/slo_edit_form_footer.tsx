@@ -8,10 +8,10 @@
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { paths } from '../../../../common/locators/paths';
 import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
 import { useKibana } from '../../../hooks/use_kibana';

@@ -25,9 +25,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, type SLODefinitionResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
-import { paths } from '../../../../common/locators/paths';
 import { useActionModal } from '../../../context/action_modal';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';

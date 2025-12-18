@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elast
 import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { paths } from '../../../common/locators/paths';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
