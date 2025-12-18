@@ -19,8 +19,8 @@ import { queryClient } from './query_client';
 import { RulesPage } from './sections/rules_page/rules_page';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
-const RuleDetailsRoute = lazy(
-  () => import('./sections/rule_details/components/rule_details_route')
+const RuleDetailsRouteWrapper = lazy(
+  () => import('./sections/rule_details/components/rule_details_route_wrapper')
 );
 
 export const renderRulesPageApp = (deps: TriggersAndActionsUiServices) => {
@@ -59,7 +59,7 @@ const AppWithoutRouter = () => {
         <Routes>
           <Route
             path={ruleDetailsRoute}
-            component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
+            component={suspendedComponentWithProps(RuleDetailsRouteWrapper, 'xl')}
           />
           <Route path="/" component={suspendedComponentWithProps(RulesPage, 'xl')} />
         </Routes>
