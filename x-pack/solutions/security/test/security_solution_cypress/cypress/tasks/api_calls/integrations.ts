@@ -112,7 +112,9 @@ export const waitForPackageInstalled = (
     return checkPackageInstalled(packageName).then((isInstalled) => {
       if (isInstalled) {
         cy.log(`Package ${packageName} is now installed`);
-        return cy.wrap(undefined);
+        return cy.then(() => {
+          // Return void explicitly
+        });
       }
 
       const elapsed = Date.now() - startTime;
