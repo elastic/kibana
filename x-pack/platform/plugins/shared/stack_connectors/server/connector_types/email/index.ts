@@ -7,7 +7,6 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
