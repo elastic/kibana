@@ -18,17 +18,13 @@ export const RunAgentStepTypeId = 'onechat.runAgent';
  */
 export const InputSchema = z.object({
   /**
-   * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
-   */
-  agent_id: z.string().optional(),
-  /**
    * output schema for the run agent step, if provided agent will return structured output
    */
-  schema: z.string().optional(),
+  schema: z.string().optional().describe('The schema for the output of the agent.'),
   /**
    * The user input message to send to the agent.
    */
-  message: z.string(),
+  message: z.string().describe('The user input message to send to the agent.'),
 });
 
 /**
@@ -36,10 +32,22 @@ export const InputSchema = z.object({
  */
 export const OutputSchema = z.union([z.string(), z.any()]);
 
+/**
+ * Config schema for the run agent step.
+ */
+export const ConfigSchema = z.object({
+  /**
+   * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
+   */
+  agent_id: z
+    .string()
+    .optional()
+    .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
+});
+
 export type RunAgentStepInputSchema = typeof InputSchema;
 export type RunAgentStepOutputSchema = typeof OutputSchema;
-export type RunAgentStepInput = z.infer<typeof InputSchema>;
-export type RunAgentStepOutput = z.infer<typeof OutputSchema>;
+export type RunAgentStepConfigSchema = typeof ConfigSchema;
 
 /**
  * Common step definition for RunAgent step.
@@ -48,9 +56,11 @@ export type RunAgentStepOutput = z.infer<typeof OutputSchema>;
  */
 export const runAgentStepCommonDefinition: CommonStepDefinition<
   RunAgentStepInputSchema,
-  RunAgentStepOutputSchema
+  RunAgentStepOutputSchema,
+  RunAgentStepConfigSchema
 > = {
   id: RunAgentStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  configSchema: ConfigSchema,
 };
