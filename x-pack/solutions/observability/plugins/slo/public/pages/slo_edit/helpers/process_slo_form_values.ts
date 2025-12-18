@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
+import type {
+  CreateSLOInput,
+  GetSLOResponse,
+  Indicator,
+  SLOTemplateResponse,
+  UpdateSLOInput,
+} from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
@@ -255,6 +261,81 @@ export function transformPartialSLOStateToFormState(
     }
     if (values.settings.syncField) {
       state.settings.syncField = values.settings.syncField;
+    }
+  }
+
+  return state;
+}
+
+export function transformSLOTemplateToFormState(
+  template?: SLOTemplateResponse
+): CreateSLOForm | undefined {
+  if (!template) return undefined;
+
+  let state: CreateSLOForm;
+  const indicator = transformPartialIndicatorState(template.indicator);
+
+  switch (indicator?.type) {
+    case 'sli.synthetics.availability':
+      state = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY);
+      break;
+    default:
+      state = cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES);
+  }
+
+  if (indicator !== undefined) {
+    state.indicator = indicator;
+  }
+
+  if (template.name) {
+    state.name = template.name;
+  }
+  if (template.description) {
+    state.description = template.description;
+  }
+  if (template.tags) {
+    state.tags = [template.tags].flat().filter((tag) => !!tag) as string[];
+  }
+
+  if (template.objective) {
+    if (template.objective.target) {
+      state.objective = {
+        target: template.objective.target * 100,
+      };
+
+      if (template.objective.timesliceTarget && template.objective.timesliceWindow) {
+        state.objective.timesliceTarget = template.objective.timesliceTarget * 100;
+        state.objective.timesliceWindow = String(
+          toDuration(template.objective.timesliceWindow).value
+        );
+      }
+    }
+  }
+
+  if (template.budgetingMethod) {
+    state.budgetingMethod = template.budgetingMethod;
+  }
+
+  if (template.groupBy) {
+    state.groupBy = [template.groupBy].flat().filter((group) => !!group) as string[];
+  }
+
+  if (template.timeWindow?.duration && template.timeWindow?.type) {
+    state.timeWindow = { duration: template.timeWindow.duration, type: template.timeWindow.type };
+  }
+
+  if (!!template.settings) {
+    if (template.settings.preventInitialBackfill) {
+      state.settings.preventInitialBackfill = template.settings.preventInitialBackfill;
+    }
+    if (template.settings.syncDelay) {
+      state.settings.syncDelay = toMinutes(toDuration(template.settings.syncDelay));
+    }
+    if (template.settings.frequency) {
+      state.settings.frequency = toMinutes(toDuration(template.settings.frequency));
+    }
+    if (template.settings.syncField) {
+      state.settings.syncField = template.settings.syncField;
     }
   }
 

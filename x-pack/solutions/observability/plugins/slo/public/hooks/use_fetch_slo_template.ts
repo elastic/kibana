@@ -16,19 +16,21 @@ export interface UseFetchSloTemplateResponse {
   data: GetSLOTemplateResponse | undefined;
 }
 
-export function useFetchSloTemplate(templateId: string): UseFetchSloTemplateResponse {
+export function useFetchSloTemplate(templateId?: string): UseFetchSloTemplateResponse {
   const { sloClient } = usePluginContext();
 
   const { isLoading, isError, data } = useQuery({
-    queryKey: sloKeys.template(templateId),
+    queryKey: sloKeys.template(templateId!),
     queryFn: async ({ signal }) => {
       return await sloClient.fetch('GET /api/observability/slo_templates/{templateId}', {
-        params: { path: { templateId } },
+        params: { path: { templateId: templateId! } },
         signal,
       });
     },
     keepPreviousData: true,
     refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    enabled: Boolean(templateId),
   });
 
   return {

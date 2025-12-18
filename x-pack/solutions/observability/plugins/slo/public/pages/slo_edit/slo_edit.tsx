@@ -20,6 +20,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloEditForm } from './components/slo_edit_form';
 import { transformSloResponseToFormState } from './helpers/process_slo_form_values';
 import { useParseUrlState } from './hooks/use_parse_url_state';
+import { useParseTemplateId } from './hooks/use_parse_template_id';
 
 export function SloEditPage() {
   const {
@@ -37,6 +38,7 @@ export function SloEditPage() {
   const hasRightLicense = hasAtLeast('platinum');
 
   const sloFormValuesFromUrlState = useParseUrlState();
+  const sloFormValuesFromTemplateId = useParseTemplateId();
   const sloFormValuesFromSloResponse = transformSloResponseToFormState(slo);
 
   useBreadcrumbs(
@@ -100,7 +102,11 @@ export function SloEditPage() {
         <SloEditForm
           slo={slo}
           isEditMode={isEditMode}
-          initialValues={isEditMode ? sloFormValuesFromSloResponse : sloFormValuesFromUrlState}
+          initialValues={
+            isEditMode
+              ? sloFormValuesFromSloResponse
+              : sloFormValuesFromUrlState ?? sloFormValuesFromTemplateId
+          }
         />
       )}
     </ObservabilityPageTemplate>
