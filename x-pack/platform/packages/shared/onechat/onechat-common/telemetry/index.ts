@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const eventTypes = {
-  // For reporting errors when conversing with the assistant
-  ONECHAT_CONVERSE_ERROR: 'onechat_converse_error',
-} as const;
+export {
+  AGENT_BUILDER_EVENT_TYPES,
+  agentBuilderPublicEbtEvents,
+  agentBuilderServerEbtEvents,
+  type AgentBuilderTelemetryEventsMap,
+  type AgentBuilderEventTypes,
+} from './agent_builder_events';
