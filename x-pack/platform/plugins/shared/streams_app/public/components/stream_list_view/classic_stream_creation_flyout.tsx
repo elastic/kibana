@@ -61,7 +61,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
       return policies.find((policy) => policy.name === policyName) ?? null;
     },
-    [indexLifecycleManagement.apiService, isIlmAvailable, signal]
+    [indexLifecycleManagement?.apiService, isIlmAvailable, signal]
   );
 
   const getSimulatedTemplate = useCallback(
