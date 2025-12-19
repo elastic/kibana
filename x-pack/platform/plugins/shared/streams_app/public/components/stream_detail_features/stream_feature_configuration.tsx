@@ -20,12 +20,14 @@ import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
 import { FeatureIdentificationControl } from '../stream_detail_significant_events_view/feature_identification_control';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 
 interface StreamConfigurationProps {
   definition: Streams.all.Definition;
+  aiFeatures: AIFeatures | null;
 }
 
-export function StreamFeatureConfiguration({ definition }: StreamConfigurationProps) {
+export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamConfigurationProps) {
   const {
     features: existingFeatures,
     refreshFeatures,
@@ -99,6 +101,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                 features={existingFeatures}
                 loading={featuresLoading}
                 refresh={refreshFeatures}
+                aiFeatures={aiFeatures}
               />
             </>
           )}

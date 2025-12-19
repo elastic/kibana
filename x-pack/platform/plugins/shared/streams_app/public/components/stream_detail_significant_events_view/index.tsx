@@ -113,6 +113,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       features={features}
       refreshFeatures={refreshFeatures}
       generateOnMount={generateOnMount}
+      aiFeatures={aiFeatures}
     />
   );
 
@@ -140,6 +141,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
             setInitialFlow('ai');
             setIsEditFlyoutOpen(true);
           }}
+          aiFeatures={aiFeatures}
         />
         {editFlyout(true)}
       </>

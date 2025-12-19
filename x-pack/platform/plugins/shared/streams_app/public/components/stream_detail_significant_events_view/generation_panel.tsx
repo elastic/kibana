@@ -21,8 +21,9 @@ import { i18n } from '@kbn/i18n';
 import type { FeatureSelectorProps } from './feature_selector';
 import { FeaturesSelector } from './feature_selector';
 import { AssetImage } from '../asset_image';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import type { Flow } from './add_significant_event_flyout/types';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { FeatureIdentificationControl } from './feature_identification_control';
 
 export function SignificantEventsGenerationPanel({
@@ -36,6 +37,7 @@ export function SignificantEventsGenerationPanel({
   isGeneratingQueries,
   isSavingManualEntry,
   selectedFlow,
+  aiFeatures,
 }: FeatureSelectorProps & {
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
@@ -44,6 +46,7 @@ export function SignificantEventsGenerationPanel({
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
   selectedFlow?: Flow;
+  aiFeatures: AIFeatures | null;
 }) {
   const [generatingFrom, setGeneratingFrom] = useState<'all_data' | 'features'>(
     selectedFeatures.length === 0 ? 'all_data' : 'features'
@@ -72,6 +75,7 @@ export function SignificantEventsGenerationPanel({
               }}
               generatingFrom={generatingFrom}
               isSavingManualEntry={isSavingManualEntry}
+              aiFeatures={aiFeatures}
             />
           )}
         </EuiPanel>
@@ -109,7 +113,7 @@ export function SignificantEventsGenerationPanel({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <ConnectorListButton
+            <ConnectorListButtonBase
               buttonProps={{
                 iconType: 'sparkles',
                 onClick: () => {
@@ -127,6 +131,7 @@ export function SignificantEventsGenerationPanel({
                   }
                 ),
               }}
+              aiFeatures={aiFeatures}
             />
           </EuiFlexItem>
 
@@ -161,11 +166,13 @@ function GenerationContext({
   onGenerateSuggestionsClick,
   generatingFrom,
   isSavingManualEntry,
+  aiFeatures,
 }: FeatureSelectorProps & {
   isGeneratingQueries: boolean;
   onGenerateSuggestionsClick: () => void;
   generatingFrom: 'all_data' | 'features';
   isSavingManualEntry: boolean;
+  aiFeatures: AIFeatures | null;
 }) {
   return (
     <>
@@ -214,7 +221,7 @@ function GenerationContext({
       <EuiSpacer size="s" />
 
       <EuiFlexItem>
-        <ConnectorListButton
+        <ConnectorListButtonBase
           buttonProps={{
             iconType: 'sparkles',
             isLoading: isGeneratingQueries && generatingFrom === 'features',
@@ -228,6 +235,7 @@ function GenerationContext({
               }
             ),
           }}
+          aiFeatures={aiFeatures}
         />
       </EuiFlexItem>
     </>
