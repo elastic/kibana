@@ -13,7 +13,10 @@ import './peggy_setup';
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
+
+// Matchers
 export { expect } from './expect';
+export { expectApi } from './matchers';
 
 // Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
