@@ -19,7 +19,7 @@ export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvid
 
 export const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
 // FIXME: could kbn-esql-ast provide a union type with existing commands?
-const SUPPORTED_ESQL_COMMANDS = new Set(['ts', 'limit', 'sort']);
+const SUPPORTED_ESQL_COMMANDS = new Set(['ts', 'limit', 'sort', 'where']);
 export const createMetricsDataSourceProfileProvider =
   (): MetricsExperienceDataSourceProfileProvider => ({
     profileId: METRICS_DATA_SOURCE_PROFILE_ID,
