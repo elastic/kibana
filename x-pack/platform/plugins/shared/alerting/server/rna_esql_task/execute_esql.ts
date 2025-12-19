@@ -14,6 +14,8 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-ty
 import { catchError, filter, lastValueFrom, map, throwError } from 'rxjs';
 import { parseDuration } from '../lib';
 
+export type ESQLRuleParams = ESQLParams;
+
 export async function executeEsqlRule({
   logger,
   searchClient,
@@ -25,7 +27,7 @@ export async function executeEsqlRule({
   searchClient: IScopedSearchClient;
   abortController: AbortController;
   rule: { id: string; alertTypeId: string; spaceId: string; name?: string };
-  params: ESQLParams;
+  params: ESQLRuleParams;
 }): Promise<ESQLSearchResponse> {
   const windowMs = parseDuration(`${params.timeWindowSize}${params.timeWindowUnit}`);
   const dateEnd = new Date().toISOString();

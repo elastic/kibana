@@ -8,9 +8,6 @@
 import type { CoreStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ESQLParamsSchema } from '@kbn/response-ops-rule-params/esql';
 
 import type { AlertingConfig } from '../config';
@@ -19,30 +16,9 @@ import { spaceIdToNamespace } from '../lib';
 import type { RawRule } from '../saved_objects/schemas/raw_rule/latest';
 import { getDecryptedRuleSo } from '../data/rule/methods/get_decrypted_rule_so';
 import type { EsqlRulesTaskParams } from './types';
-import { getEsqlRulesAlertsDataStreamName } from './lib';
 import { executeEsqlRule } from './execute_esql';
-
-function getFakeKibanaRequest({
-  basePathService,
-  spaceId,
-  apiKey,
-}: {
-  basePathService: CoreStart['http']['basePath'];
-  spaceId: string;
-  apiKey: RawRule['apiKey'];
-}) {
-  const requestHeaders: Headers = {};
-  if (apiKey) {
-    requestHeaders.authorization = `ApiKey ${apiKey}`;
-  }
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    path: '/',
-  };
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-  basePathService.set(fakeRequest, addSpaceIdToPath('/', spaceId));
-  return fakeRequest;
-}
+import { ensureAlertsDataStream, ensureAlertsResources } from './resources';
+import { writeEsqlAlerts } from './write_alerts';
 
 export function createEsqlRulesTaskRunner({
   logger,
@@ -53,17 +29,24 @@ export function createEsqlRulesTaskRunner({
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
   config: AlertingConfig;
 }) {
-  return ({ taskInstance }: RunContext) => {
+  return ({ taskInstance, abortController, fakeRequest }: RunContext) => {
     return {
       async run() {
         if (!config.esqlRules.enabled) {
           return { state: taskInstance.state };
         }
 
+        if (!fakeRequest) {
+          throw new Error('Cannot execute a task without Kibana Request');
+        }
+
         const params = taskInstance.params as EsqlRulesTaskParams;
         const [coreStart, pluginsStart, alertingStart] = await coreStartServices;
 
-        const namespace = spaceIdToNamespace(pluginsStart.spaces, params.spaceId);
+        const namespace: string | undefined = spaceIdToNamespace(
+          pluginsStart.spaces,
+          params.spaceId
+        );
         const encryptedSavedObjectsClient = pluginsStart.encryptedSavedObjects.getClient({
           includedHiddenTypes: [],
         });
@@ -88,20 +71,12 @@ export function createEsqlRulesTaskRunner({
           return { state: taskInstance.state };
         }
 
-        const fakeRequest = getFakeKibanaRequest({
-          basePathService: coreStart.http.basePath,
-          spaceId: params.spaceId,
-          apiKey: rawRule.apiKey,
-        });
-
         const rulesClient = await (alertingStart as AlertingServerStart).getRulesClientWithRequest(
           fakeRequest
         );
         const rule = await rulesClient.get({ id: params.ruleId });
 
-        const esqlParams = ESQLParamsSchema.validate(rule.params);
-
-        const abortController = new AbortController();
+        const esqlRuleParams = ESQLParamsSchema.validate(rule.params);
         const searchClient = pluginsStart.data.search.asScoped(fakeRequest);
         const esqlResponse = await executeEsqlRule({
           logger,
@@ -113,13 +88,39 @@ export function createEsqlRulesTaskRunner({
             spaceId: params.spaceId,
             name: rule.name,
           },
-          params: esqlParams,
+          params: esqlRuleParams,
         });
 
-        const targetDataStream = getEsqlRulesAlertsDataStreamName({
-          config,
+        const esClient = coreStart.elasticsearch.client.asInternalUser;
+        await ensureAlertsResources({
+          logger,
+          esClient,
+          dataStreamPrefix: config.esqlRules.alertsDataStreamPrefix,
+        });
+        const targetDataStream = await ensureAlertsDataStream({
+          logger,
+          esClient,
+          dataStreamPrefix: config.esqlRules.alertsDataStreamPrefix,
           spaceId: params.spaceId,
           spaces: pluginsStart.spaces,
+        });
+
+        const scheduledAt = taskInstance.scheduledAt;
+        const taskRunKey =
+          (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
+          (taskInstance.startedAt instanceof Date
+            ? taskInstance.startedAt.toISOString()
+            : undefined) ??
+          new Date().toISOString();
+        await writeEsqlAlerts({
+          services: { logger, esClient, dataStreamName: targetDataStream },
+          input: {
+            ruleId: params.ruleId,
+            rawRule,
+            esqlRuleParams,
+            esqlResponse,
+            taskRunKey,
+          },
         });
 
         logger.debug(
@@ -131,7 +132,6 @@ export function createEsqlRulesTaskRunner({
           }`
         );
 
-        // No persistence yet (append-only indexing is next).
         return { state: taskInstance.state };
       },
     };

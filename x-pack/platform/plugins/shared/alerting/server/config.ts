@@ -108,7 +108,8 @@ export const configSchema = schema.object({
    */
   esqlRules: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    alertsDataStreamPrefix: schema.string({ defaultValue: 'alerts-esql' }),
+    // `alerts-*` data streams, one per Kibana space (e.g. `alerts-default`, `alerts-<space_namespace>`)
+    alertsDataStreamPrefix: schema.string({ defaultValue: 'alerts' }),
   }),
 });
 
