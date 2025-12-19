@@ -33,17 +33,20 @@ export const getCommandContext = async (
         inferenceEndpoints:
           (await callbacks?.getInferenceEndpoints?.('completion'))?.inferenceEndpoints || [],
       };
+      break;
     case 'rerank':
       context = {
         inferenceEndpoints:
           (await callbacks?.getInferenceEndpoints?.('rerank'))?.inferenceEndpoints || [],
       };
+      break;
     case 'enrich':
       const policies = await helpers.getPolicies();
       const policiesMap = new Map(policies.map((policy) => [policy.name, policy]));
       context = {
         policies: policiesMap,
       };
+      break;
     case 'from':
       const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
         recommendedQueries: [],
@@ -53,12 +56,14 @@ export const getCommandContext = async (
         sources: await getSources(),
         editorExtensions,
       };
+      break;
     case 'join':
       const joinSources = await callbacks?.getJoinIndices?.();
       context = {
         joinSources: joinSources?.indices || [],
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
       };
+      break;
     case 'stats':
       const histogramBarTarget = (await callbacks?.getPreferences?.())?.histogramBarTarget || 50;
       context = {
@@ -66,12 +71,14 @@ export const getCommandContext = async (
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
         variables: callbacks?.getVariables?.(),
       };
+      break;
     case 'inline stats':
       context = {
         histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
         variables: callbacks?.getVariables?.(),
       };
+      break;
     case 'fork':
       const enrichPolicies = await helpers.getPolicies();
       context = {
@@ -82,6 +89,7 @@ export const getCommandContext = async (
         inferenceEndpoints:
           (await callbacks?.getInferenceEndpoints?.('completion'))?.inferenceEndpoints || [],
       };
+      break;
     case 'ts':
       const timeseriesSources = await callbacks?.getTimeseriesIndices?.();
       context = {
@@ -92,6 +100,9 @@ export const getCommandContext = async (
           recommendedFields: [],
         },
       };
+      break;
+    default:
+      break;
   }
 
   // Check if the functions used within the command needs additional context
