@@ -9,7 +9,7 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { AgentName } from '@kbn/apm-types/es_schemas_ui';
-import { getAgentSyncValue } from './constants';
+import { getAgentSyncValue } from './helper';
 
 export interface SyncBadgeProps {
   /**
