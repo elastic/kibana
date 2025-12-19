@@ -9245,14 +9245,7 @@
             "label": "projectType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es",
-                "scope": "common",
-                "docId": "kibKbnEsPluginApi",
-                "section": "def-common.ServerlessProjectType",
-                "text": "ServerlessProjectType"
-              },
-              " | undefined"
+              "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,
@@ -9806,6 +9799,20 @@
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityApiServicesFixture.entityAnalytics",
+            "type": "Object",
+            "tags": [],
+            "label": "entityAnalytics",
+            "description": [],
+            "signature": [
+              "EntityAnalyticsApiService"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9861,6 +9868,20 @@
             "description": [],
             "signature": [
               "AlertDetailsRightPanelPage"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityPageObjects.entityAnalyticsDashboardsPage",
+            "type": "Object",
+            "tags": [],
+            "label": "entityAnalyticsDashboardsPage",
+            "description": [],
+            "signature": [
+              "EntityAnalyticsDashboardsPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
             "deprecated": false,

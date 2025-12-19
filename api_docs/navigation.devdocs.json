@@ -220,7 +220,9 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenu",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenu",
         "description": [],
         "signature": [
@@ -235,8 +237,30 @@
           "<QT>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/__mocks__/services.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/__mocks__/services.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/__mocks__/services.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "navigation",
@@ -268,7 +292,9 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuBadges",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenuBadges",
         "description": [],
         "signature": [
@@ -283,8 +309,9 @@
           "[] | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "navigation",
@@ -328,15 +355,18 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuItems",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenuItems",
         "description": [],
         "signature": [
           "({ config, className, popoverBreakpoints, gutterSize, }: TopNavMenuItemsProps) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "navigation",
@@ -505,6 +535,20 @@
             "description": [],
             "signature": [
               "string | (() => string | undefined) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.tooltipTitle",
+            "type": "string",
+            "tags": [],
+            "label": "tooltipTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
@@ -1047,7 +1091,9 @@
               "section": "def-common.AggregateQuery",
               "text": "AggregateQuery"
             },
-            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; createTopNavWithCustomContext: (customUnifiedSearch?: ",
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; TopNavMenuBeta: ({ config, visible, }: { config: ",
+            "TopNavMenuConfigBeta",
+            "; visible?: boolean | undefined; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; createTopNavWithCustomContext: (customUnifiedSearch?: ",
             {
               "pluginId": "unifiedSearch",
               "scope": "public",

@@ -189,6 +189,7 @@ import {
   deleteSecretsIfNotReferenced as deleteSecrets,
   isSecretStorageEnabled,
 } from './secrets';
+import { extractAccountType } from './cloud_connectors/integration_helpers';
 import { getAgentTemplateAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
@@ -196,7 +197,11 @@ import {
   validateAdditionalDatastreamsPermissionsForSpace,
   validatePolicyNamespaceForSpace,
 } from './spaces/policy_namespaces';
-import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
+import {
+  getSpaceForPackagePolicy,
+  isSpaceAwarenessEnabled,
+  isSpaceAwarenessMigrationPending,
+} from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import {
   _packagePoliciesGetUpgradeDryRunDiff,
@@ -2643,7 +2648,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         async (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           const existingPackagePolicy = await this.get(soClient, packagePolicy.id);
 
@@ -2674,7 +2679,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           return this.update(
             soClient,
@@ -3041,6 +3046,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        // Extract account type from package policy vars
+        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy);
         try {
           // Extract cloud connector name from package policy
           const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
@@ -3051,6 +3058,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
             vars: cloudConnectorVars,
             cloudProvider,
+            accountType,
           });
           logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
           return cloudConnector;

@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { newConversationId } from '../../utils/new_conversation';
 
 interface PendingMessageState {
-  error?: unknown;
   pendingMessage?: string;
 }
 
@@ -42,16 +41,6 @@ export const usePendingMessageState = ({ conversationId }: { conversationId?: st
     removePendingMessage: () => {
       updateState((state) => {
         delete state.pendingMessage;
-      });
-    },
-    setError: (error: unknown) => {
-      updateState((state) => {
-        state.error = error;
-      });
-    },
-    removeError: () => {
-      updateState((state) => {
-        delete state.error;
       });
     },
   };

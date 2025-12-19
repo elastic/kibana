@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { registerPatchUpdateScriptRoute } from './update_script';
+import { registerListScriptsRoute } from './list_scripts';
 import { registerCreateScriptRoute } from './create_script';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { EndpointAppContext } from '../../types';
@@ -17,5 +19,7 @@ export const registerScriptsLibraryRoutes = (
     endpointContext.logFactory.get('scriptsLibrary').debug('Registering scripts library routes');
 
     registerCreateScriptRoute(router, endpointContext);
+    registerListScriptsRoute(router, endpointContext);
+    registerPatchUpdateScriptRoute(router, endpointContext);
   }
 };

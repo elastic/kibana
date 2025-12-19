@@ -13,7 +13,9 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+
 import type {
+  AgentsServiceStartContract,
   AttachmentServiceStartContract,
   ToolServiceStartContract,
 } from '@kbn/onechat-browser';
@@ -22,6 +24,9 @@ import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
@@ -44,9 +49,11 @@ export interface OnechatSetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface OnechatStartDependencies {
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -55,6 +62,7 @@ export interface OnechatStartDependencies {
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface OnechatPluginSetup {}
@@ -63,6 +71,10 @@ export interface OnechatPluginSetup {}
  * Public start contract for the browser-side onechat plugin.
  */
 export interface OnechatPluginStart {
+  /**
+   * Agent service contract, can be used to list agents.
+   */
+  agents: AgentsServiceStartContract;
   /**
    * Attachment service contract, can be used to register and retrieve attachment UI definitions.
    */
@@ -89,6 +101,12 @@ export interface OnechatPluginStart {
    * ```
    */
   openConversationFlyout: (options?: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  /**
+   * Toggles the conversation flyout.
+   *
+   * If the flyout is open, it will be closed. Otherwise, it will be opened.
+   */
+  toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => void;
   setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
 }
