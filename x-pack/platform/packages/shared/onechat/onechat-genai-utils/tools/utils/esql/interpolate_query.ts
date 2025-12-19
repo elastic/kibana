@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@kbn/esql-ast';
+import { esql, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@kbn/esql-language';
 
 const defaultPrintOpts: WrappingPrettyPrinterOptions = {
   wrap: 80,
@@ -20,7 +20,7 @@ const defaultPrintOpts: WrappingPrettyPrinterOptions = {
  * @param printOpts (optional) Options for the pretty printer.
  * @returns The interpolated ESQL query string.
  *
- * **Important** This is meant as a workaround until a proper util gets exposed from `@kbn/esql-ast`,
+ * **Important** This is meant as a workaround until a proper util gets exposed from `@kbn/esql-language`,
  *               and likely doesn't cover all edge cases.
  */
 export const interpolateEsqlQuery = (
