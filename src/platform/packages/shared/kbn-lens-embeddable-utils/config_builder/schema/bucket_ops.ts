@@ -204,7 +204,7 @@ export const bucketTermsOperationSchema = schema.object({
          */
         metric: schema.number({
           meta: {
-            description: 'Metric to be used for the column',
+            description: 'Metric to be used for the column by index number (0 based)',
           },
         }),
         /**
