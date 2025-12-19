@@ -109,7 +109,7 @@ describe('Endpoint exceptions flyout', () => {
     });
 
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
-      hasAlertsUpdate: true,
+      hasAlertsAll: true,
     });
 
     render = (props) => {

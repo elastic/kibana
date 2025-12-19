@@ -82,7 +82,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   const [bulkCloseAlerts, setBulkCloseAlerts] = useState(false);
   const [disableBulkClose, setDisableBulkCloseAlerts] = useState(false);
   const [bulkCloseIndex, setBulkCloseIndex] = useState<string[] | undefined>();
-  const { hasAlertsUpdate } = useAlertsPrivileges();
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   useEffect(() => {
     if (!isAlertDataLoading && alertData) {
@@ -183,7 +183,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
           />
         )}
 
-        {hasAlertsUpdate && (
+        {hasAlertsAll && (
           <>
             <EuiHorizontalRule />
 
