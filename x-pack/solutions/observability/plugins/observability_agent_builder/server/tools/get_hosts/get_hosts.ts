@@ -58,12 +58,8 @@ const getHostsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional KQL filter to narrow down results. Example: "host.name: web-*" or "cloud.provider: aws".'
+      'Optional KQL filter to narrow down results. Examples: "service.name: frontend" (show only hosts running the frontend service), "host.name: web-*", or "cloud.provider: aws".'
     ),
-  hostNames: z
-    .array(z.string().min(1))
-    .optional()
-    .describe('Optional list of specific host names to retrieve metrics for.'),
 });
 
 export function createGetHostsTool({
@@ -104,7 +100,6 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
         end = DEFAULT_TIME_RANGE.end,
         limit = DEFAULT_LIMIT,
         kqlFilter,
-        hostNames,
       },
       { request }
     ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
@@ -131,7 +126,6 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
           to: new Date(endMs).toISOString(),
           limit,
           kqlFilter,
-          hostNames,
         });
 
         if (!result) {
