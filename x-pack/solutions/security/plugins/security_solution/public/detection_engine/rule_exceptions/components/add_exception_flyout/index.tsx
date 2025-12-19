@@ -114,7 +114,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
-  const { hasAlertsUpdate } = useAlertsPrivileges();
+  const { hasAlertsAll } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -621,7 +621,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             />
           </>
         )}
-        {hasAlertsUpdate && showAlertCloseOptions && (
+        {hasAlertsAll && showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions

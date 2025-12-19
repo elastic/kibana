@@ -77,7 +77,7 @@ describe('When the add exception modal is opened', () => {
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
   });
 
   afterEach(() => {
@@ -1039,7 +1039,7 @@ describe('When the add exception modal is opened', () => {
   describe('when the user does not have permissions to write alerts', () => {
     let wrapper: ReactWrapper;
     beforeAll(async () => {
-      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
       mockUseFetchIndex.mockImplementation(() => [
         false,
         {
@@ -1082,7 +1082,7 @@ describe('When the add exception modal is opened', () => {
     });
 
     afterAll(() => {
-      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
     });
 
     it('should not render the close single alert checkbox', () => {
