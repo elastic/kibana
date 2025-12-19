@@ -417,7 +417,7 @@ export const buildRiskScoreBucket =
         category,
         score: value,
         contribution: currentScore / RIEMANN_ZETA_VALUE,
-        index, // Use the index parameter, not from parsed data
+        index,
       };
     });
 
