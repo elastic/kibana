@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/object-utils'
   - '@kbn/esql-ast'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
