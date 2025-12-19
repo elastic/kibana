@@ -84,6 +84,27 @@ export const stepMachine = setup({
       isUpdated: true,
     })),
     forwardEventToParent: forwardTo(({ context }) => context.parentRef),
+    notifyStepSave: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.save',
+        id: context.step.customIdentifier,
+      })
+    ),
+    notifyStepCancel: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.cancel',
+        id: context.step.customIdentifier,
+      })
+    ),
+    notifyStepEdit: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.edit',
+        id: context.step.customIdentifier,
+      })
+    ),
     forwardChangeEventToParent: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => ({
@@ -129,9 +150,12 @@ export const stepMachine = setup({
       on: {
         'step.save': {
           target: '#configured',
-          actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
+          actions: [{ type: 'markAsUpdated' }, { type: 'notifyStepSave' }],
         },
-        'step.cancel': '#deleted',
+        'step.cancel': {
+          target: '#deleted',
+          actions: [{ type: 'notifyStepCancel' }],
+        },
         'step.changeProcessor': {
           actions: [
             { type: 'changeProcessor', params: ({ event }) => event },
@@ -160,7 +184,7 @@ export const stepMachine = setup({
           on: {
             'step.edit': {
               target: 'editing',
-              actions: [{ type: 'forwardEventToParent' }],
+              actions: [{ type: 'notifyStepEdit' }],
             },
             'step.changeDescription': {
               actions: [
@@ -175,11 +199,11 @@ export const stepMachine = setup({
           on: {
             'step.save': {
               target: 'idle',
-              actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
+              actions: [{ type: 'markAsUpdated' }, { type: 'notifyStepSave' }],
             },
             'step.cancel': {
               target: 'idle',
-              actions: [{ type: 'resetToPrevious' }, { type: 'forwardEventToParent' }],
+              actions: [{ type: 'resetToPrevious' }, { type: 'notifyStepCancel' }],
             },
             'step.changeProcessor': {
               actions: [
