@@ -32,6 +32,7 @@ import { resetSLORoute } from './reset_slo';
 import { repairSLORoute } from './repair_slo';
 import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
+import { getSLOTemplateRoute, findSLOTemplatesRoute } from './slo_templates';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -64,5 +65,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...purgeInstancesRoute,
     ...getPurgeInstancesStatusRoute,
     ...findSLOInstancesRoute,
+    ...getSLOTemplateRoute,
+    ...findSLOTemplatesRoute,
   };
 };
