@@ -19,6 +19,7 @@ runner:
   installDependencies: false
   archivableTargets:
     - eslint
+    - eslint-fix
 
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.

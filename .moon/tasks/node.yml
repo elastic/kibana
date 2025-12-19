@@ -37,6 +37,9 @@ tasks:
       - '--fix'
     options:
       runFromWorkspaceRoot: true
+      cache: true
+    deps:
+      - '@kbn/eslint-config:source'
     inputs:
       - '@group(src)'
       # Other config files
