@@ -2010,14 +2010,4 @@ describe('functions arg suggestions', () => {
       expect(labels).not.toContain(',');
     });
   });
-
-  describe('function parameter built from hint', () => {
-    it('suggests inference endpoints for TEXT_EMBEDDING function', async () => {
-      const { suggest } = await setup();
-      const suggestions = await suggest('FROM index | EVAL result = TEXT_EMBEDDING("text", /');
-      const labels = suggestions.map(({ label }) => label);
-
-      expect(labels).toEqual(['inference_1']);
-    });
-  });
 });

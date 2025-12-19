@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniq } from 'lodash';
 import type { ICommandContext } from '../../../registry/types';
 import type { ParameterHint } from '../../types';
 import { parametersFromHintsResolvers } from './parameters_from_hints';
@@ -37,14 +36,14 @@ describe('Parameters from hints handlers', () => {
       jest.clearAllMocks();
     });
 
-    it('should return inference endpoint suggestions filtered by task_type constraint', () => {
-      testHandlersForHint(hint, ['text_embedding_endpoint'], undefined, mockCallbacks);
+    it('should return inference endpoint suggestions filtered by task_type constraint', async () => {
+      const suggestions = await getSuggestionsForHint(hint, undefined, mockCallbacks);
+      expect(suggestions).toEqual(['text_embedding_endpoint']);
     });
 
-    it('should not refetch inference endpoints if the context already has endpoints for the task type', () => {
-      testHandlersForHint(
+    it('should not refetch inference endpoints if the context already has endpoints for the task type', async () => {
+      const suggestions = await getSuggestionsForHint(
         hint,
-        ['text_embedding_endpoint'],
         {
           columns: new Map(),
           inferenceEndpoints,
@@ -52,10 +51,11 @@ describe('Parameters from hints handlers', () => {
         mockCallbacks
       );
 
+      expect(suggestions).toEqual(['text_embedding_endpoint']);
       expect(mockCallbacks.getInferenceEndpoints).not.toHaveBeenCalled();
     });
 
-    it('should fetch inference endpoints if the context already has endpoints, but not of the requested task type, also, it should preserve both', () => {
+    it('should fetch inference endpoints if the context already has endpoints, but not of the requested task type, also, it should preserve both', async () => {
       const otherInferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
         {
           inference_id: 'completion_endpoint',
@@ -63,9 +63,8 @@ describe('Parameters from hints handlers', () => {
         },
       ];
 
-      testHandlersForHint(
+      const suggestions = await getSuggestionsForHint(
         hint,
-        ['text_embedding_endpoint'],
         {
           columns: new Map(),
           inferenceEndpoints: otherInferenceEndpoints,
@@ -73,6 +72,7 @@ describe('Parameters from hints handlers', () => {
         mockCallbacks
       );
 
+      expect(suggestions).toEqual(['text_embedding_endpoint']);
       expect(mockCallbacks.getInferenceEndpoints).toHaveBeenCalledWith('text_embedding');
     });
   });
@@ -82,9 +82,8 @@ describe('Parameters from hints handlers', () => {
  * Tests that the suggestion handler returns the expected suggestions for a given hint,
  * executing the context resolver if available to build the context.
  */
-async function testHandlersForHint(
+export async function getSuggestionsForHint(
   hint: ParameterHint,
-  expectedSuggestions: string[],
   formerContext?: ICommandContext,
   callbacks: ESQLCallbacks = {}
 ) {
@@ -110,5 +109,5 @@ async function testHandlersForHint(
 
   const suggestions = suggestionResolver(hint, context).map((s) => s.label);
 
-  expect(uniq(suggestions).sort()).toEqual(uniq(expectedSuggestions).sort());
+  return suggestions;
 }
