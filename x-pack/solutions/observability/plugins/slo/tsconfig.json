@@ -117,6 +117,5 @@
     "@kbn/deeplinks-management",
     "@kbn/react-query",
     "@kbn/deeplinks-observability",
-    "@kbn/io-ts-utils"
   ]
 }
