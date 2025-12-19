@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import type { ReplaceProcessor } from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
 import { conditionToESQLAst } from '../condition_to_esql';
@@ -95,7 +95,6 @@ export function convertReplaceProcessorToESQL(processor: ReplaceProcessor): ESQL
     to,
     pattern,
     replacement,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default: false (field must exist, similar to 'gsub' Ingest Pipeline processor)
   } = processor;
 
