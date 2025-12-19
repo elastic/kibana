@@ -32,6 +32,8 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     title: string;
     chartLayers: LensSeriesLayer[];
     yBounds?: LensYBoundsConfig;
+    isLoading?: boolean;
+    error?: Error;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -52,6 +54,8 @@ export const Chart = ({
   syncTooltips,
   yBounds,
   extraDisabledActions,
+  isLoading = false,
+  error,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -70,6 +74,11 @@ export const Chart = ({
     yBounds,
   });
 
+  // if error, set datasourceStates to empty to trigger Lens error about datasource
+  if (lensProps && error) {
+    lensProps.attributes.state.datasourceStates = {};
+  }
+
   return (
     <div
       css={css`
@@ -86,7 +95,7 @@ export const Chart = ({
       `}
       ref={chartRef}
     >
-      {lensProps ? (
+      {lensProps && !isLoading ? (
         <>
           <LensWrapperMemo
             lensProps={lensProps}
