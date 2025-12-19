@@ -22,7 +22,7 @@ import type { BucketSize } from '../../../../../utils/calculate_bucket_size';
 import { buildEsQuery } from '../../../../../utils/build_es_query';
 
 const ALERTS_PER_PAGE = 10;
-const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
+const ALERTS_TABLE_ID = 'xpack.observabilityOverview.overview.alert.table';
 const tableColumns = getColumns({ showRuleName: true });
 
 export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {

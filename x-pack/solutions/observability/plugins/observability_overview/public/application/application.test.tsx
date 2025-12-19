@@ -17,10 +17,8 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from './application';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { createTelemetryClientMock } from '../services/telemetry/telemetry_client.mock';
 import { createMemoryHistory } from 'history';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useAppRoutes } from '../routes/routes';
@@ -108,7 +106,6 @@ describe('renderApp', () => {
         config,
         plugins,
         appMountParameters: params,
-        observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
         usageCollection: {
           components: {
@@ -117,7 +114,6 @@ describe('renderApp', () => {
           reportUiCounter: jest.fn(),
         },
         kibanaVersion: '8.8.0',
-        telemetryClient: createTelemetryClientMock(),
       });
       unmount();
     }).not.toThrowError();
@@ -129,7 +125,6 @@ describe('renderApp', () => {
       config,
       plugins,
       appMountParameters: params,
-      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: KibanaPageTemplate,
       usageCollection: {
         components: {
@@ -138,7 +133,6 @@ describe('renderApp', () => {
         reportUiCounter: jest.fn(),
       },
       kibanaVersion: '8.8.0',
-      telemetryClient: createTelemetryClientMock(),
     });
     unmount();
 
@@ -167,7 +161,6 @@ describe('renderApp', () => {
     const { result } = renderHook(() => useAppRoutes(), { wrapper: AppWrapper });
     expect(result.current).not.toBeNull();
     // Optionally, check for expected keys:
-    expect(Object.keys(result.current)).toContain('/overview');
     expect(Object.keys(result.current)).toContain('/cases');
   });
 

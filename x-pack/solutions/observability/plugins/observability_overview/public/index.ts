@@ -62,7 +62,7 @@ export type {
   ObservabilityFetchDataResponse,
   ObservabilityHasDataResponse,
   Subset,
-} from './typings';
+} from './typings/fetch_overview_data';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';
 

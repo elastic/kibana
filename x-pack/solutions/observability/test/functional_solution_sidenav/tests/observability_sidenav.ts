@@ -99,30 +99,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.expectExists();
 
         await solutionNavigation.sidenav.expectLinkExists({
-          deepLinkId: 'observability-overview:cases',
+          deepLinkId: 'observability:cases',
         });
       });
 
       it('navigates to cases app', async () => {
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
 
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'observability-overview:cases',
+          deepLinkId: 'observability:cases',
         });
         expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
 
         await testSubjects.click('createNewCaseBtn');
         expect(await browser.getCurrentUrl()).contain('app/observability/cases/create');
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'observability-overview:cases',
+          deepLinkId: 'observability:cases',
         });
 
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
 
         await testSubjects.click('configure-case-button');
         expect(await browser.getCurrentUrl()).contain('app/observability/cases/configure');
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'observability-overview:cases',
+          deepLinkId: 'observability:cases',
         });
       });
 

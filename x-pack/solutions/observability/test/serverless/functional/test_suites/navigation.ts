@@ -76,15 +76,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.expectExists();
 
       await svlCommonNavigation.sidenav.expectLinkExists({
-        deepLinkId: 'observability-overview:cases',
+        deepLinkId: 'observability:cases',
       });
     });
 
     it('navigates to cases app', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
 
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:cases',
+        deepLinkId: 'observability:cases',
       });
       expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases']);
@@ -92,29 +92,29 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await testSubjects.click('createNewCaseBtn');
       expect(await browser.getCurrentUrl()).contain('app/observability/cases/create');
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:cases',
+        deepLinkId: 'observability:cases',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Create']);
 
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
 
       await testSubjects.click('configure-case-button');
       expect(await browser.getCurrentUrl()).contain('app/observability/cases/configure');
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:cases',
+        deepLinkId: 'observability:cases',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Settings']);
     });
 
     it('navigates to alerts app', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:alerts' });
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       });
       await testSubjects.click('manageRulesPageButton');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       });
     });
 

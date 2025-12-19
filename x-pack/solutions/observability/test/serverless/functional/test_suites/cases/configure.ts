@@ -26,7 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
       await header.waitUntilLoadingHasFinished();
 
       await retry.waitFor('configure-case-button exist', async () => {

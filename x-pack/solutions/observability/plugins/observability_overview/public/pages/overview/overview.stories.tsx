@@ -27,7 +27,6 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 
 import type { ApmIndicesConfig } from '../../typings/apm';
-import type { ConfigSchema } from '../../plugin';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -76,16 +75,6 @@ const withCore = makeDecorator({
       },
     } as unknown as Partial<CoreStart>);
 
-    const config: ConfigSchema = {
-      unsafe: {
-        alertDetails: {
-          uptime: { enabled: false },
-          observability: { enabled: false },
-        },
-      },
-      managedOtlpServiceUrl: '',
-    };
-
     return (
       <MemoryRouter>
         <KibanaReactContext.Provider>
@@ -94,7 +83,6 @@ const withCore = makeDecorator({
               appMountParameters: {
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
-              config,
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}
           >

@@ -86,12 +86,12 @@ export function APMSection({ bucketSize }: Props) {
 
   return (
     <SectionContainer
-      title={i18n.translate('xpack.observability.overview.apm.title', {
+      title={i18n.translate('xpack.observabilityOverview.overview.apm.title', {
         defaultMessage: 'Service inventory',
       })}
       appLink={{
         href: appLink,
-        label: i18n.translate('xpack.observability.overview.apm.appLink', {
+        label: i18n.translate('xpack.observabilityOverview.overview.apm.appLink', {
           defaultMessage: 'Show service inventory',
         }),
       }}
@@ -101,7 +101,7 @@ export function APMSection({ bucketSize }: Props) {
         <EuiFlexItem grow={false}>
           <StyledStat
             title={numeral(stats?.services.value).format('0a')}
-            description={i18n.translate('xpack.observability.overview.apm.services', {
+            description={i18n.translate('xpack.observabilityOverview.overview.apm.services', {
               defaultMessage: 'Service inventory',
             })}
             isLoading={isLoading}
@@ -113,13 +113,13 @@ export function APMSection({ bucketSize }: Props) {
             title={`${formatTpmStat(stats?.transactions.value)} tpm`}
             description={
               <EuiToolTip
-                content={i18n.translate('xpack.observability.overview.apm.throughputTip', {
+                content={i18n.translate('xpack.observabilityOverview.overview.apm.throughputTip', {
                   defaultMessage:
                     'Values are calculated for transactions with type "Request" or "page-load". If neither are available, values reflect the top transaction type.',
                 })}
               >
                 <>
-                  {i18n.translate('xpack.observability.overview.apm.throughput', {
+                  {i18n.translate('xpack.observabilityOverview.overview.apm.throughput', {
                     defaultMessage: 'Throughput',
                   })}{' '}
                   <EuiIcon size="s" color="subdued" type="question" className="eui-alignCenter" />

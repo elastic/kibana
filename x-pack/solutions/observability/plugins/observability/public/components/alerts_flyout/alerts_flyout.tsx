@@ -34,7 +34,7 @@ import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { paths } from '../../../common/locators/paths';
 import { AlertOverview } from '../alert_overview/alert_overview';
 import { useKibana } from '../../utils/kibana_react';
-import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-alerts-table';
 
 type TabId = 'overview' | 'table';
 

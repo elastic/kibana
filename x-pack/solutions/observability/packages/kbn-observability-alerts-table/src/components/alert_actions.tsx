@@ -63,7 +63,6 @@ export function AlertActions(
   const {
     observabilityRuleTypeRegistry,
     alert,
-    tableId,
     refresh,
     parentAlert,
     rowIndex,
@@ -139,7 +138,7 @@ export function AlertActions(
             onClick={handleAddToExistingCaseClick}
             size="s"
           >
-            {i18n.translate('xpack.observabilityAlertsTable.alerts.actions.addToCase', {
+            {i18n.translate('undefined.alerts.actions.addToCase', {
               defaultMessage: 'Add to existing case',
             })}
           </EuiContextMenuItem>,
@@ -149,7 +148,7 @@ export function AlertActions(
             onClick={handleAddToNewCaseClick}
             size="s"
           >
-            {i18n.translate('xpack.observabilityAlertsTable.alerts.actions.addToNewCase', {
+            {i18n.translate('undefined.alerts.actions.addToNewCase', {
               defaultMessage: 'Add to new case',
             })}
           </EuiContextMenuItem>,
@@ -172,10 +171,10 @@ export function AlertActions(
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
-      ? i18n.translate('xpack.observabilityAlertsTable.alertsTable.notEnoughPermissions', {
+      ? i18n.translate('undefined.alertsTable.notEnoughPermissions', {
           defaultMessage: 'Additional privileges required',
         })
-      : i18n.translate('xpack.observabilityAlertsTable.alertsTable.moreActionsTextLabel', {
+      : i18n.translate('undefined.alertsTable.moreActionsTextLabel', {
           defaultMessage: 'More actions',
         });
 
@@ -208,22 +207,16 @@ export function AlertActions(
       {!hideViewInApp && (
         <EuiFlexItem>
           <EuiToolTip
-            content={i18n.translate(
-              'xpack.observabilityAlertsTable.alertsTable.viewInAppTextLabel',
-              {
-                defaultMessage: 'View in app',
-              }
-            )}
+            content={i18n.translate('undefined.alertsTable.viewInAppTextLabel', {
+              defaultMessage: 'View in app',
+            })}
             disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="o11yAlertActionsButton"
-              aria-label={i18n.translate(
-                'xpack.observabilityAlertsTable.alertsTable.viewInAppTextLabel',
-                {
-                  defaultMessage: 'View in app',
-                }
-              )}
+              aria-label={i18n.translate('undefined.alertsTable.viewInAppTextLabel', {
+                defaultMessage: 'View in app',
+              })}
               color="text"
               onMouseOver={handleViewInAppUrl}
               onClick={() => window.open(viewInAppUrl)}
@@ -274,11 +267,8 @@ export function AlertActions(
 // eslint-disable-next-line import/no-default-export
 export default AlertActions;
 
-const VIEW_DETAILS = i18n.translate(
-  'xpack.observabilityAlertsTable.alertsTable.viewDetailsTextLabel',
-  {
-    defaultMessage: 'Alert details',
-  }
-);
+const VIEW_DETAILS = i18n.translate('undefined.alertsTable.viewDetailsTextLabel', {
+  defaultMessage: 'Alert details',
+});
 
 export type AlertActionsType = typeof AlertActions;

@@ -8,12 +8,10 @@
 import { createContext } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import type { ObservabilityRuleTypeRegistry } from '../../application/types';
 
 export interface PluginContextValue {
   isDev?: boolean;
   appMountParameters?: AppMountParameters;
-  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }
 

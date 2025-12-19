@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { merge } from 'lodash';
 import { render as testLibRender } from '@testing-library/react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -18,25 +17,12 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { PluginContext } from '../context/plugin_context/plugin_context';
 
-import type { ConfigSchema } from '../plugin';
-import type { Subset } from '../typings';
-
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
-const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 export const core = coreMock.createStart();
 export const data = dataPluginMock.createStartContract();
 
-const defaultConfig: ConfigSchema = {
-  unsafe: {
-    alertDetails: {
-      uptime: { enabled: false },
-    },
-  },
-  managedOtlpServiceUrl: '',
-};
-
-export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
+export const render = (component: React.ReactNode) => {
   return testLibRender(
     <IntlProvider locale="en-US">
       <KibanaContextProvider
@@ -48,8 +34,6 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
         <PluginContext.Provider
           value={{
             appMountParameters,
-            config: merge(defaultConfig, config),
-            observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >

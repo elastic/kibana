@@ -40,7 +40,6 @@ export async function getNewsFeed({
       )}.json`
     );
   } catch (e) {
-    console.error('Error while fetching news feed', e);
     return { items: [] };
   }
 }

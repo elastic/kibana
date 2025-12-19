@@ -23,7 +23,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
     });
 
     after(async () => {
@@ -150,7 +150,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('severity filtering', () => {
       before(async () => {
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
 
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'observability' });
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'observability' });
@@ -166,7 +166,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          * There is no easy way to clear the filtering.
          * Refreshing the page seems to be easier.
          */
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability:cases' });
       });
 
       after(async () => {
