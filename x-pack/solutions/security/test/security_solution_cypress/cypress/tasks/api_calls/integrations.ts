@@ -99,47 +99,17 @@ export const checkPackageInstalled = (packageName: string): Cypress.Chainable<bo
  * @param options - Configuration options
  * @param options.timeout - Maximum time to wait in milliseconds (default: 60000)
  * @param options.interval - Polling interval in milliseconds (default: 2000)
- * @returns Cypress chainable that resolves when package is installed or times out
  */
 export const waitForPackageInstalled = (
   packageName: string,
   options: { timeout?: number; interval?: number } = {}
-): Cypress.Chainable<void> => {
+): void => {
   const { timeout = 60000, interval = 2000 } = options;
-  const startTime = Date.now();
 
-  const checkStatus = (): Cypress.Chainable<void> => {
-    return checkPackageInstalled(packageName).then((isInstalled): Cypress.Chainable<void> => {
-      if (isInstalled) {
-        cy.log(`Package ${packageName} is now installed`);
-        return cy.then<void>(() => {
-          // Return void explicitly
-        });
-      }
+  cy.waitUntil(() => checkPackageInstalled(packageName), {
+    interval,
+    timeout,
+  });
 
-      const elapsed = Date.now() - startTime;
-      if (elapsed > timeout) {
-        // Get current status for better error message
-        return rootRequest<GetInfoResponse>({
-          method: 'GET',
-          url: `/api/fleet/epm/packages/${packageName}`,
-          failOnStatusCode: false,
-        }).then<void>((response) => {
-          const currentStatus = response.body?.item?.status || 'unknown';
-          throw new Error(
-            `Package ${packageName} installation timeout after ${timeout}ms. Current status: ${currentStatus}`
-          );
-        });
-      }
-
-      cy.log(
-        `Waiting for package ${packageName} to be installed... (${Math.round(
-          elapsed / 1000
-        )}s elapsed)`
-      );
-      return cy.wait(interval).then<void>(() => checkStatus());
-    });
-  };
-
-  return checkStatus();
+  cy.log(`Package ${packageName} is now installed`);
 };
