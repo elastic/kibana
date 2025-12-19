@@ -133,6 +133,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
       pageCount > 1 ? (
         <EuiFlexItem grow={false}>
           <EuiPagination
+            data-test-subj="indicesListPagination"
             pageCount={pageCount}
             activePage={page}
             onPageClick={this.onChangePage}
@@ -153,7 +154,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
             closePopover={this.closePerPageControl}
             panelPaddingSize="none"
           >
-            <EuiContextMenuPanel items={items} />
+            <EuiContextMenuPanel items={items} data-test-subj="perPageIndicesListMenu" />
           </EuiPopover>
         </EuiFlexItem>
         {paginationControls}
