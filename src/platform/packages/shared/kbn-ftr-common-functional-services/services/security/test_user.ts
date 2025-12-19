@@ -10,11 +10,11 @@
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 
+import { fipsIsEnabled } from '@kbn/test';
 import type { Role } from './role';
 import type { User } from './user';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
-import { fipsIsEnabled } from '@kbn/test';
 
 const TEST_USER_NAME = 'test_user';
 const TEST_USER_PASSWORD = 'changeme';
