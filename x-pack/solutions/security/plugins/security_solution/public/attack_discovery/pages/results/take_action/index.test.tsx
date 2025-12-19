@@ -128,7 +128,7 @@ describe('TakeAction', () => {
       hasSearchAILakeConfigurations: false, // EASE is not configured
     });
 
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
   });
 
   it('renders the Add to new case action', () => {
@@ -620,7 +620,7 @@ describe('TakeAction', () => {
 
   describe('when the user does not have alert edit privileges', () => {
     beforeEach(() => {
-      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
     });
 
     it('does not render mark as open action', () => {

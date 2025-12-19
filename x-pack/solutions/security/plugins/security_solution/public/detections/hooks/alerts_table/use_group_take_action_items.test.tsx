@@ -35,7 +35,7 @@ describe('useGroupTakeActionsItems', () => {
   };
 
   beforeEach(() => {
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
   });
 
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
@@ -183,7 +183,7 @@ describe('useGroupTakeActionsItems', () => {
 
   describe('when the user does not have alert edit privileges', () => {
     beforeEach(() => {
-      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
     });
 
     it('returns empty take actions items', async () => {
@@ -196,7 +196,7 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitFor(() => expect(result.current(getActionItemsParams)).toBeUndefined());
+      await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(0));
     });
   });
 });

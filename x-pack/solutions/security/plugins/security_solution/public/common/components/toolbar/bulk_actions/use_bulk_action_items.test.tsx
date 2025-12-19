@@ -39,7 +39,7 @@ function renderUseBulkActionItems(props?: Partial<BulkActionsProps>) {
 describe('useBulkActionItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
   });
 
   it('should return "mark as open" option by default', () => {
@@ -66,7 +66,7 @@ describe('useBulkActionItems', () => {
   });
 
   it('should not return alert status actions when user does not have alerts privileges', () => {
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
 
     const { result } = renderUseBulkActionItems();
 
