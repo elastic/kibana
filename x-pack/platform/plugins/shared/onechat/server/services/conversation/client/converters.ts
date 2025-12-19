@@ -14,7 +14,7 @@ import type {
   ToolResult,
   UserIdAndName,
 } from '@kbn/onechat-common';
-import { ConversationRoundStepType } from '@kbn/onechat-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/onechat-common';
 import { getToolResultId } from '@kbn/onechat-server';
 import type {
   ConversationCreateRequest,
@@ -66,6 +66,7 @@ function serializeStepResults(rounds: ConversationRound[]): PersistentConversati
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => ({
     ...round,
+    status: round.status ?? ConversationRoundStatus.completed,
     started_at: round.started_at ?? new Date(0).toISOString(),
     time_to_first_token: round.time_to_first_token ?? 0,
     time_to_last_token: round.time_to_last_token ?? 0,
