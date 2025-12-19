@@ -53,6 +53,7 @@ import {
   spawnStep,
   type StepSpawner,
 } from './utils';
+import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
 
 export type InteractiveModeActorRef = ActorRefFrom<typeof interactiveModeMachine>;
 export type InteractiveModeSnapshot = SnapshotFrom<typeof interactiveModeMachine>;
@@ -375,15 +376,21 @@ export const interactiveModeMachine = setup({
                 },
               ],
             },
-            onError: {
-              target: 'idle',
-              actions: [
-                {
-                  type: 'notifySuggestionFailure',
-                  params: ({ event }: { event: { error: unknown } }) => ({ event }),
-                },
-              ],
-            },
+            onError: [
+              {
+                guard: ({ event }) => isNoSuggestionsError(event.error),
+                target: 'noSuggestionsFound',
+              },
+              {
+                target: 'idle',
+                actions: [
+                  {
+                    type: 'notifySuggestionFailure',
+                    params: ({ event }: { event: { error: unknown } }) => ({ event }),
+                  },
+                ],
+              },
+            ],
           },
           on: {
             'suggestion.cancel': {
@@ -397,6 +404,16 @@ export const interactiveModeMachine = setup({
                 { type: 'syncToDSL' },
                 { type: 'sendStepsToSimulator' },
               ],
+            },
+          },
+        },
+        noSuggestionsFound: {
+          on: {
+            'suggestion.generate': {
+              target: 'generatingSuggestion',
+            },
+            'suggestion.dismiss': {
+              target: 'idle',
             },
           },
         },
