@@ -323,6 +323,51 @@ describe('appendConversationMessages', () => {
       })
     );
   });
+
+  it('preserves refusal reason when present on messages', async () => {
+    const messageWithRefusal = createMockMessage({
+      refusal: 'Detected harmful input content: INSULTS',
+    });
+    setupSuccessfulTest();
+
+    await callAppendConversationMessages([messageWithRefusal]);
+
+    expect(dataWriter.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentsToUpdate: expect.arrayContaining([
+          expect.objectContaining({
+            messages: expect.arrayContaining([
+              expect.objectContaining({
+                refusal: 'Detected harmful input content: INSULTS',
+              }),
+            ]),
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('generates UUID for messages without id', async () => {
+    const messageWithoutId = createMockMessage({ id: undefined });
+    setupSuccessfulTest();
+
+    await callAppendConversationMessages([messageWithoutId]);
+
+    expect(dataWriter.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentsToUpdate: expect.arrayContaining([
+          expect.objectContaining({
+            messages: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(String),
+                content: 'test content',
+              }),
+            ]),
+          }),
+        ]),
+      })
+    );
+  });
 });
 
 describe('transformToUpdateScheme', () => {
