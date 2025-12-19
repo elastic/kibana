@@ -20,18 +20,10 @@ run(
     const bail = !!(flags.bail || false);
 
     const moonCommand = IS_CI ? 'ci' : 'run';
-    const parallelismSplit = IS_CI
-      ? [
-          '--job',
-          process.env.BUILDKITE_PARALLEL_JOB ?? '0',
-          '--jobTotal',
-          process.env.BUILDKITE_PARALLEL_JOB_COUNT ?? '1',
-        ]
-      : [];
     const lintCommand = flags.fix ? ':eslint-fix' : ':eslint';
-    const cacheFlag = flags.cache ? [] : ['-u'];
+    const cacheFlag = flags.updateCache ? [] : ['-u'];
 
-    const fullArgs = [moonCommand, lintCommand, ...parallelismSplit, ...cacheFlag];
+    const fullArgs = [moonCommand, lintCommand, ...cacheFlag];
 
     log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);
 
@@ -58,14 +50,14 @@ run(
   {
     description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
     flags: {
-      boolean: ['bail', 'cache', 'fix'],
+      boolean: ['bail', 'update-cache', 'fix'],
       default: {
         bail: false,
-        cache: true, // Enable caching by default
+        updateCache: false,
       },
       help: `
         --bail            Stop on the first linting error
-        --no-cache        Disable ESLint caching
+        --update-cache    Updates Moon's caches for the lint targets
         --fix             Fix files
       `,
     },

@@ -11,7 +11,6 @@ node scripts/stylelint
 echo "stylelint ✅"
 
 echo '--- Lint: eslint'
-export PATH=$PATH:./node_modules/.bin
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
 # after possibly commiting fixed files to the repo
 set +e;
@@ -19,8 +18,8 @@ if is_pr && ! is_auto_commit_disabled; then
   desc="node scripts/eslint_all_files --fix"
   node scripts/eslint_all_files --fix
 else
-  desc="node scripts/eslint_all_files --fix --no-cache"
-  node scripts/eslint_all_files --fix --no-cache
+  desc="node scripts/eslint_all_files --fix --update-cache"
+  node scripts/eslint_all_files --fix --update-cache
 fi
 
 eslint_exit=$?
