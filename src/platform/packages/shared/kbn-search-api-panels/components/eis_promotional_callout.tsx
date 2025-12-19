@@ -39,7 +39,7 @@ export const EisPromotionalCallout = ({
   direction,
 }: EisPromotionalCalloutProps) => {
   const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
-    promoId: `${promoId}Callout`,
+    promoId: `${promoId}EisPromoCallout`,
   });
 
   const dataId = `${promoId}-eis-promo-callout`;

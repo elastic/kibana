@@ -56,7 +56,7 @@ export const EisTokenCostTour = ({
 }: EisTokenCostTourProps) => {
   const { euiTheme } = useEuiTheme();
   const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
-    promoId: `${promoId}Tour`,
+    promoId: `${promoId}EisCostsTour`,
   });
   const dataId = `${promoId}-eis-costs-tour`;
 

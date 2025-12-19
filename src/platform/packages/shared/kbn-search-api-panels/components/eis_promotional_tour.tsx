@@ -41,7 +41,7 @@ export const EisPromotionalTour = ({
 }: EisPromotionalTourProps) => {
   const { euiTheme } = useEuiTheme();
   const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
-    promoId: `${promoId}Tour`,
+    promoId: `${promoId}EisPromoTour`,
   });
   const dataId = `${promoId}-eis-promo-tour`;
 
