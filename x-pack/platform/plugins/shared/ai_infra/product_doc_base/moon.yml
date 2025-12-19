@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/licensing-types'
   - '@kbn/fs'
-  - '@kbn/react-query'
 tags:
   - plugin
   - prod
