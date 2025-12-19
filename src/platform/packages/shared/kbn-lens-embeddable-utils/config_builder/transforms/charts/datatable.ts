@@ -437,47 +437,65 @@ function parseSortingToAPI(
   return;
 }
 
+function parseDensityToAPI(
+  visualization: Pick<
+    DatatableVisualizationState,
+    'density' | 'rowHeight' | 'rowHeightLines' | 'headerRowHeight' | 'headerRowHeightLines'
+  >
+): DatatableState['density'] | undefined {
+  const { rowHeight, headerRowHeight, density, rowHeightLines, headerRowHeightLines } =
+    visualization;
+
+  if (!rowHeight && !headerRowHeight && !density && !rowHeightLines && !headerRowHeightLines) {
+    return;
+  }
+
+  const height: Record<string, unknown> = {};
+  const isLegacySingleMode = (heightMode: string) => heightMode === LEGACY_SINGLE_ROW_HEIGHT_MODE;
+  const getHeightMode = (heightMode?: string) =>
+    heightMode
+      ? isLegacySingleMode(heightMode)
+        ? LENS_ROW_HEIGHT_MODE.custom
+        : heightMode
+      : LENS_ROW_HEIGHT_MODE.custom;
+
+  if (rowHeight || rowHeightLines) {
+    // Handle legacy 'single' row height mode by mapping it to 'custom'
+    const isLegacyRowHeight = rowHeight ? isLegacySingleMode(rowHeight) : false;
+    const heightMode = getHeightMode(rowHeight);
+    const shouldIncludeLines =
+      (heightMode === LENS_ROW_HEIGHT_MODE.custom && rowHeightLines) || isLegacyRowHeight;
+    height.value = {
+      type: heightMode,
+      ...(shouldIncludeLines ? { lines: rowHeightLines ?? 1 } : {}),
+    };
+  }
+
+  if (headerRowHeight || headerRowHeightLines) {
+    // Handle legacy 'single' header row height mode by mapping it to 'custom'
+    const isLegacyHeaderRowHeight = headerRowHeight ? isLegacySingleMode(headerRowHeight) : false;
+    const heightMode = getHeightMode(headerRowHeight);
+    const shouldIncludeMaxLines =
+      (heightMode === LENS_ROW_HEIGHT_MODE.custom && headerRowHeightLines) ||
+      isLegacyHeaderRowHeight;
+    height.header = {
+      type: heightMode,
+      ...(shouldIncludeMaxLines ? { max_lines: headerRowHeightLines ?? 1 } : {}),
+    };
+  }
+
+  return {
+    ...(density ? { mode: density === LENS_DATAGRID_DENSITY.NORMAL ? 'default' : density } : {}),
+    ...(Object.keys(height).length > 0 ? { height } : {}),
+  };
+}
+
 function convertAppearanceToAPIFormat(
   visualization: DatatableVisualizationState
 ): Pick<DatatableState, 'density' | 'paging' | 'sorting'> {
-  const {
-    rowHeight,
-    headerRowHeight,
-    density,
-    rowHeightLines,
-    headerRowHeightLines,
-    paging,
-    sorting,
-    columns,
-  } = visualization;
+  const { paging, sorting, columns } = visualization;
 
-  const height: Record<string, unknown> = {};
-
-  const isLegacySingleMode = (heightMode: string) => heightMode === LEGACY_SINGLE_ROW_HEIGHT_MODE;
-
-  if (rowHeight) {
-    // Handle legacy 'single' row height mode by mapping it to 'custom'
-    const isLegacyRowHeight = isLegacySingleMode(rowHeight);
-    height.value = {
-      type: isLegacyRowHeight ? LENS_ROW_HEIGHT_MODE.custom : rowHeight,
-      ...((rowHeight === LENS_ROW_HEIGHT_MODE.custom && rowHeightLines) || isLegacyRowHeight
-        ? { lines: rowHeightLines ?? 1 }
-        : {}),
-    };
-  }
-
-  if (headerRowHeight) {
-    // Handle legacy 'single' header row height mode by mapping it to 'custom'
-    const isLegacyHeaderRowHeight = isLegacySingleMode(headerRowHeight);
-    height.header = {
-      type: isLegacyHeaderRowHeight ? LENS_ROW_HEIGHT_MODE.custom : headerRowHeight,
-      ...((headerRowHeight === LENS_ROW_HEIGHT_MODE.custom && headerRowHeightLines) ||
-      isLegacyHeaderRowHeight
-        ? { max_lines: headerRowHeightLines ?? 1 }
-        : {}),
-    };
-  }
-
+  const densityAPI = parseDensityToAPI(visualization);
   const sortingAPI = parseSortingToAPI(sorting, columns);
 
   const isValidPagingSize = (size: number): size is 10 | 20 | 30 | 50 | 100 => {
@@ -485,18 +503,7 @@ function convertAppearanceToAPIFormat(
   };
 
   return {
-    ...(rowHeight || headerRowHeight || density
-      ? {
-          density: {
-            ...(density
-              ? {
-                  mode: density === LENS_DATAGRID_DENSITY.NORMAL ? 'default' : density,
-                }
-              : {}),
-            ...(Object.keys(height).length > 0 ? { height } : {}),
-          },
-        }
-      : {}),
+    ...(densityAPI ? { density: densityAPI } : {}),
     ...(paging && paging.enabled
       ? { paging: isValidPagingSize(paging.size) ? paging.size : 10 }
       : {}),
