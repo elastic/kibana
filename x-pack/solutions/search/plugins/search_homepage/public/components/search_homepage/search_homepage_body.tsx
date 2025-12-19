@@ -17,7 +17,6 @@ import { BodyLinks } from './body_links';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { GettingStartedBanner } from './getting_started_banner';
-import { AdminSettingsLinks } from './homepage_nav_links';
 
 export const SearchHomepageBody = () => {
   const { euiTheme } = useEuiTheme();
