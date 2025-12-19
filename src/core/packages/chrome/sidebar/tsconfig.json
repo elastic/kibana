@@ -14,5 +14,6 @@
   "kbn_references": [
     "@kbn/react-context-registry",
     "@kbn/use-observable",
+    "@kbn/zod",
   ]
 }

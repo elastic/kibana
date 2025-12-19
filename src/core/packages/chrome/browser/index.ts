@@ -54,7 +54,6 @@ export type {
   SidebarApp,
   SidebarAppContent,
   SidebarAppButton,
-  SidebarSize,
   SidebarServiceStart,
   SidebarServiceSetup,
 } from './src';
