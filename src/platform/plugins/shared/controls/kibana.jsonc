@@ -17,6 +17,7 @@
       "dataViews",
       "data",
       "unifiedSearch",
+      "kql",
       "uiActions",
     ],
     "extraPublicDirs": [

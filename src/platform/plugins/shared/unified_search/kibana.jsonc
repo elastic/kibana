@@ -23,7 +23,8 @@
       "uiActions",
       "screenshotMode",
       "savedObjectsManagement",
-      "cps"
+      "cps",
+      "kql"
     ],
     "optionalPlugins": [
       "usageCollection"
