@@ -55,7 +55,3 @@ export const getGroupStats: GetGroupStats<AlertsByGroupingAgg> = (selectedGroup,
     ...defaultBadges,
   ];
 };
-
-
-
-

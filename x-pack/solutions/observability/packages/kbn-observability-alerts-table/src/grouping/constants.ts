@@ -36,7 +36,3 @@ export const DEFAULT_GROUPING_OPTIONS = [
     key: ALERT_INSTANCE_ID,
   },
 ];
-
-
-
-

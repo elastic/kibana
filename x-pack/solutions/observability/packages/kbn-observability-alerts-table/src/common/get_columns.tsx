@@ -136,7 +136,3 @@ export const getColumns = (
     },
   ];
 };
-
-
-
-

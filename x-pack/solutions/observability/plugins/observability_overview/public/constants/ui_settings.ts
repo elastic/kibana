@@ -12,6 +12,3 @@ export const apmServiceGroupMaxNumberOfServices =
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
 export const enableLegacyUptimeApp = 'observability:enableLegacyUptimeApp';
-
-
-

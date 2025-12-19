@@ -12,4 +12,3 @@ export interface ApmIndicesConfig {
   transaction: string;
   metric: string;
 }
-

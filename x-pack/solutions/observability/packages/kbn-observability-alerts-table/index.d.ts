@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 export { ObservabilityAlertsTable } from './src/alerts_table';
 export { ObservabilityAlertsTableLazy } from './src/alerts_table_lazy';
 export { AlertsTableCellValue, getAlertFieldValue } from './src/common/cell_value';
@@ -14,4 +21,13 @@ export { AlertStatusIndicator } from './src/components/alert_status_indicator';
 export { Tags } from './src/components/tags';
 export { AlertActions } from './src/components/alert_actions';
 export { useCaseActions } from './src/components/use_case_actions';
-export type { ObservabilityAlertsTableContext, ObservabilityAlertsTableProps, GetObservabilityAlertsTableProp, BucketItem, AlertsByGroupingAgg, ObservabilityRuleTypeRegistry, ConfigSchema, TopAlert, } from './src/types';
+export type {
+  ObservabilityAlertsTableContext,
+  ObservabilityAlertsTableProps,
+  GetObservabilityAlertsTableProp,
+  BucketItem,
+  AlertsByGroupingAgg,
+  ObservabilityRuleTypeRegistry,
+  ConfigSchema,
+  TopAlert,
+} from './src/types';

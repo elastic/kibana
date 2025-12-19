@@ -59,7 +59,3 @@ export function TimestampTooltip({ time, timeUnit = 'milliseconds' }: Props) {
     </EuiToolTip>
   );
 }
-
-
-
-

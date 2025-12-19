@@ -22,7 +22,3 @@ export function ObservabilityAlertsTableLazy(
     </Suspense>
   );
 }
-
-
-
-

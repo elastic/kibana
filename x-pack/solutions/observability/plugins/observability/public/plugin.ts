@@ -80,12 +80,7 @@ import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
-import {
-  ALERTS_PATH,
-  CASES_PATH,
-  OBSERVABILITY_BASE_PATH,
-  RULES_PATH,
-} from '../common/locators/paths';
+import { ALERTS_PATH, CASES_PATH, OBSERVABILITY_BASE_PATH } from '../common/locators/paths';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';

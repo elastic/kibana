@@ -22,6 +22,3 @@ export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar)
       return `${time} ${unit}`;
   }
 };
-
-
-
