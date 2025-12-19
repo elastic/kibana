@@ -25,7 +25,7 @@ const CategorySummaryItemSchema = schema.object({
 });
 
 export const GetCategoriesResponseSchema = schema.object({
-  items: schema.arrayOf(CategorySummaryItemSchema, { maxSize: 100 }),
+  items: schema.arrayOf(CategorySummaryItemSchema, { maxSize: 1000 }),
 });
 
 export const GetPackagesRequestSchema = {
@@ -252,7 +252,7 @@ export const InstalledPackageSchema = schema.object({
 });
 
 export const GetInstalledPackagesResponseSchema = schema.object({
-  items: schema.arrayOf(InstalledPackageSchema, { maxSize: 1000 }),
+  items: schema.arrayOf(InstalledPackageSchema, { maxSize: 10000 }),
   total: schema.number(),
   searchAfter: schema.maybe(
     schema.arrayOf(
@@ -269,7 +269,7 @@ export const GetInstalledPackagesResponseSchema = schema.object({
 });
 
 export const GetLimitedPackagesResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 export const GetStatsResponseSchema = schema.object({
@@ -299,11 +299,11 @@ export const GetInputsResponseSchema = schema.oneOf([
               .extendsDeep({
                 unknowns: 'allow',
               }),
-            { maxSize: 1000 }
+            { maxSize: 10000 }
           )
         ),
       }),
-      { maxSize: 1000 }
+      { maxSize: 10000 }
     ),
   }),
 ]);
@@ -359,7 +359,7 @@ export const GetKnowledgeBaseResponseSchema = schema.object({
       installed_at: schema.string(),
       version: schema.string(),
     }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
 });
 
@@ -373,7 +373,7 @@ export const AssetReferenceSchema = schema.oneOf([
 ]);
 
 export const InstallPackageResponseSchema = schema.object({
-  items: schema.arrayOf(AssetReferenceSchema, { maxSize: 1000 }),
+  items: schema.arrayOf(AssetReferenceSchema, { maxSize: 10000 }),
   _meta: schema.object({
     install_source: schema.string(),
     name: schema.string(),
@@ -410,7 +410,7 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
 ]);
 
 export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
-  items: schema.arrayOf(BulkInstallPackagesResponseItemSchema, { maxSize: 1000 }),
+  items: schema.arrayOf(BulkInstallPackagesResponseItemSchema, { maxSize: 10000 }),
 });
 
 export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
@@ -427,13 +427,13 @@ export const GetOneBulkOperationPackagesResponseSchema = schema.object({
         success: schema.boolean(),
         error: schema.maybe(schema.object({ message: schema.string() })),
       }),
-      { maxSize: 1000 }
+      { maxSize: 10000 }
     )
   ),
 });
 
 export const DeletePackageResponseSchema = schema.object({
-  items: schema.arrayOf(AssetReferenceSchema, { maxSize: 1000 }),
+  items: schema.arrayOf(AssetReferenceSchema, { maxSize: 10000 }),
 });
 
 export const GetVerificationKeyIdResponseSchema = schema.object({
@@ -445,7 +445,7 @@ export const GetDataStreamsResponseSchema = schema.object({
     schema.object({
       name: schema.string(),
     }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
 });
 
@@ -462,7 +462,7 @@ export const GetBulkAssetsResponseSchema = schema.object({
         description: schema.maybe(schema.string()),
       }),
     }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
 });
 
@@ -472,7 +472,7 @@ export const ReauthorizeTransformResponseSchema = schema.arrayOf(
     success: schema.boolean(),
     error: schema.oneOf([schema.literal(null), schema.any()]),
   }),
-  { maxSize: 1000 }
+  { maxSize: 10000 }
 );
 
 export const RollbackPackageResponseSchema = schema.object({

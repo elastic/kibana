@@ -573,7 +573,7 @@ export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
 });
 
 export const OrphanedPackagePoliciesResponseSchema = schema.object({
-  items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 1000 }),
+  items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 10000 }),
   total: schema.number(),
 });
 

@@ -103,7 +103,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       created_at: schema.string(),
       updated_at: schema.string(),
     }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
 });
 
@@ -242,11 +242,11 @@ export const GetCloudConnectorUsageResponseSchema = schema.object({
           version: schema.string(),
         })
       ),
-      policy_ids: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
       created_at: schema.string(),
       updated_at: schema.string(),
     }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
   total: schema.number(),
   page: schema.number(),

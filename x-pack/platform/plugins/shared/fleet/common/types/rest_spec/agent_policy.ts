@@ -67,7 +67,7 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
         })
       ),
     }),
-    { maxSize: 100 }
+    { maxSize: 10000 }
   ),
   totalAgents: schema.number(),
 });

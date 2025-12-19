@@ -164,7 +164,7 @@ export const AgentResponseSchema = schema.object({
           meta: { deprecated: true },
         }
       ),
-      { maxSize: 10 }
+      { maxSize: 100 }
     )
   ),
   outputs: schema.maybe(
@@ -179,7 +179,7 @@ export const AgentResponseSchema = schema.object({
               id: schema.string(),
               retired_at: schema.string(),
             }),
-            { maxSize: 10 }
+            { maxSize: 100 }
           )
         ),
       })
@@ -229,7 +229,7 @@ export const AgentResponseSchema = schema.object({
     ])
   ),
   upgrade_attempts: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string(), { maxSize: 100 })])
+    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string(), { maxSize: 1000 })])
   ),
   access_api_key_id: schema.maybe(schema.string()),
   default_api_key: schema.maybe(schema.string()),
@@ -249,7 +249,7 @@ export const AgentResponseSchema = schema.object({
   last_checkin_message: schema.maybe(schema.string()),
   user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   local_metadata: schema.recordOf(schema.string(), schema.any()),
-  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   components: schema.maybe(
     schema.arrayOf(
       schema.object({

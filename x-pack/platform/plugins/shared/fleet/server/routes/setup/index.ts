@@ -25,7 +25,7 @@ export const FleetSetupResponseSchema = schema.object(
         name: schema.string(),
         message: schema.string(),
       }),
-      { maxSize: 100 }
+      { maxSize: 10000 }
     ),
   },
   {

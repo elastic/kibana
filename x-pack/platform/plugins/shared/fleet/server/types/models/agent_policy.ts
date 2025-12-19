@@ -333,13 +333,13 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   schema_version: schema.maybe(schema.string()),
   package_policies: schema.maybe(
     schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
       schema.arrayOf(PackagePolicyResponseSchema, {
         meta: {
           description:
             'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter',
         },
-        maxSize: 1000,
+        maxSize: 10000,
       }),
     ])
   ),
@@ -387,7 +387,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       schema.string(),
       schema.object({
         type: schema.string(),
-        hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        hosts: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
         ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         proxy_url: schema.maybe(schema.string()),
         proxy_headers: schema.maybe(ProxyHeadersSchema),
@@ -402,7 +402,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
   fleet: schema.maybe(
     schema.oneOf([
       schema.object({
-        hosts: schema.arrayOf(schema.string(), { maxSize: 10 }),
+        hosts: schema.arrayOf(schema.string(), { maxSize: 100 }),
         proxy_url: schema.maybe(schema.string()),
         proxy_headers: schema.maybe(ProxyHeadersSchema),
         ssl: schema.maybe(BaseSSLSchema),
@@ -410,7 +410,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       }),
       schema.object({
         kibana: schema.object({
-          hosts: schema.arrayOf(schema.string(), { maxSize: 10 }),
+          hosts: schema.arrayOf(schema.string(), { maxSize: 100 }),
           protocol: schema.string(),
           path: schema.maybe(schema.string()),
         }),
@@ -453,7 +453,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
                   type: schema.maybe(schema.string()),
                 }),
               }),
-              { maxSize: 1000 }
+              { maxSize: 10000 }
             )
             .extendsDeep({
               unknowns: 'allow',
@@ -470,14 +470,14 @@ export const FullAgentPolicyResponseSchema = schema.object({
                 ),
               }),
             }),
-            { maxSize: 1000 }
+            { maxSize: 10000 }
           )
         ),
       })
       .extendsDeep({
         unknowns: 'allow',
       }),
-    { maxSize: 1000 }
+    { maxSize: 10000 }
   ),
   revision: schema.maybe(schema.number()),
   agent: schema.maybe(
@@ -574,7 +574,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       schema.object({
         id: schema.string(),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
   signed: schema.maybe(
@@ -616,5 +616,5 @@ export const GetAgentPolicyOutputsResponseSchema = schema.object({
 });
 
 export const GetListAgentPolicyOutputsResponseSchema = schema.object({
-  items: schema.arrayOf(OutputsForAgentPolicySchema, { maxSize: 1000 }),
+  items: schema.arrayOf(OutputsForAgentPolicySchema, { maxSize: 10000 }),
 });

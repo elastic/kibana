@@ -92,7 +92,7 @@ export const BulkGetAgentPoliciesRequestSchema = {
 };
 
 export const BulkGetAgentPoliciesResponseSchema = schema.object({
-  items: schema.arrayOf(AgentPolicyResponseSchema, { maxSize: 1000 }),
+  items: schema.arrayOf(AgentPolicyResponseSchema, { maxSize: 10000 }),
 });
 
 export const GetOneAgentPolicyRequestSchema = {

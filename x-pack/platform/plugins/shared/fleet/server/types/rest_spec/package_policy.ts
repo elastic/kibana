@@ -68,7 +68,7 @@ export const BulkGetPackagePoliciesRequestSchema = {
 };
 
 export const BulkGetPackagePoliciesResponseBodySchema = schema.object({
-  items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 1000 }),
+  items: schema.arrayOf(PackagePolicyResponseSchema, { maxSize: 10000 }),
 });
 
 export const GetOnePackagePolicyRequestSchema = {
@@ -135,11 +135,11 @@ export const DeletePackagePoliciesResponseBodySchema = schema.arrayOf(
         }),
       ])
     ),
-    policy_ids: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+    policy_ids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
     output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
     package: PackagePolicyPackageSchema,
   }),
-  { maxSize: 1000 }
+  { maxSize: 10000 }
 );
 
 export const DeleteOnePackagePolicyRequestSchema = {
@@ -163,7 +163,7 @@ export const UpgradePackagePoliciesRequestSchema = {
 
 export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
   PackagePolicyStatusResponseSchema,
-  { maxSize: 1000 }
+  { maxSize: 10000 }
 );
 
 export const DryRunPackagePoliciesRequestSchema = {
@@ -230,7 +230,7 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
                     .extendsDeep({
                       unknowns: 'allow',
                     }),
-                  { maxSize: 1000 }
+                  { maxSize: 10000 }
                 )
               ),
               processors: schema.maybe(
@@ -244,18 +244,18 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
                       ),
                     }),
                   }),
-                  { maxSize: 1000 }
+                  { maxSize: 10000 }
                 )
               ),
             })
             .extendsDeep({
               unknowns: 'allow',
             }),
-          { maxSize: 1000 }
+          { maxSize: 10000 }
         ),
         { maxSize: 1 }
       )
     ),
   }),
-  { maxSize: 1000 }
+  { maxSize: 10000 }
 );
