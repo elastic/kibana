@@ -1103,7 +1103,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor);
+                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor, onQueryUpdate);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;

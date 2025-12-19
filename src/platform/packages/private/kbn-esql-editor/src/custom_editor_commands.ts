@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { ESQLVariableType, type ESQLControlVariable, QuerySource } from '@kbn/esql-types';
 import { ControlTriggerSource } from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
+import { prettifyQuery } from '@kbn/esql-utils';
 import type { ESQLEditorDeps, ControlsContext } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 
@@ -160,8 +161,9 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
 
 export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
-  onQuerySubmit: (source: any) => void,
-  toggleVisor: () => void
+  onQuerySubmit: (source: QuerySource) => void,
+  toggleVisor: () => void,
+  onQueryUpdate: (qs: string) => void
 ) => {
   // Add editor key bindings
   editor.addCommand(
@@ -174,6 +176,18 @@ export const addEditorKeyBindings = (
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
     () => toggleVisor()
+  );
+
+  editor.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+    () => {
+      const code = editor.getValue();
+      const prettyCode = prettifyQuery(code);
+      if (code !== prettyCode) {
+        onQueryUpdate(prettyCode);
+      }
+    }
   );
 };
 
