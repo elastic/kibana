@@ -55,10 +55,7 @@ export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
 export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
-// The ID of the observability app. Should more appropriately be called
-// 'observability' but it's used in telemetry by applicationUsage so we don't
-// want to change it.
-export const observabilityAppId = 'observability-overview';
+export const observabilityAppId = 'observability';
 
 // Used by feature and "solution" registration
 export const observabilityFeatureId = 'observability';

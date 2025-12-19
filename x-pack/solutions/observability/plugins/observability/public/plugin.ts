@@ -86,7 +86,6 @@ import {
   OBSERVABILITY_BASE_PATH,
   RULES_PATH,
 } from '../common/locators/paths';
-import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
@@ -370,6 +369,19 @@ export class Plugin
             switchMap(([coreStart, pluginsStart]) => {
               const deepLinks = value(app)?.deepLinks ?? [];
 
+              const overviewLink = !Boolean(pluginsSetup.serverless)
+                ? [
+                    {
+                      label: i18n.translate('xpack.observability.overviewLinkTitle', {
+                        defaultMessage: 'Overview',
+                      }),
+                      app: 'observabilityOverview',
+                      path: '/',
+                      matchPath: (currentPath: string) => currentPath === '/' || currentPath === '',
+                    },
+                  ]
+                : [];
+
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
@@ -439,7 +451,13 @@ export class Plugin
                     {
                       label: '',
                       sortKey: 100,
-                      entries: [...alertsLink, ...sloLink, ...casesLink, ...aiAssistantLink],
+                      entries: [
+                        ...overviewLink,
+                        ...alertsLink,
+                        ...sloLink,
+                        ...casesLink,
+                        ...aiAssistantLink,
+                      ],
                     },
                   ];
                 })
@@ -484,7 +502,6 @@ export class Plugin
     );
 
     return {
-      dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
       rulesLocator,

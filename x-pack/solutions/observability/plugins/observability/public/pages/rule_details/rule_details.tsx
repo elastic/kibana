@@ -91,7 +91,7 @@ export function RuleDetailsPage() {
           defaultMessage: 'Alerts',
         }),
         href: basePath.prepend(paths.observability.alerts),
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       },
       {
         href: basePath.prepend(paths.observability.rules),

@@ -62,14 +62,14 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
 const completeRoutes = {
   [ROOT_PATH]: {
     handler: () => {
-      return <SimpleRedirect to="/" redirectToApp="observability-overview-app" />;
+      return <SimpleRedirect to="/" redirectToApp="observabilityOverview" />;
     },
     params: {},
     exact: true,
   },
   [OVERVIEW_PATH]: {
     handler: () => {
-      return <SimpleRedirect to="/" redirectToApp="observability-overview-app" />;
+      return <SimpleRedirect to="/" redirectToApp="observabilityOverview" />;
     },
     params: {},
     exact: true,
@@ -100,9 +100,7 @@ const completeRoutes = {
 const routes = {
   [LANDING_PATH]: {
     handler: () => {
-      return (
-        <SimpleRedirect to="/app/observability/landing" redirectToApp="observability-overview" />
-      );
+      return <SimpleRedirect to="/landing" redirectToApp="observabilityOverview" />;
     },
     params: {},
     exact: true,

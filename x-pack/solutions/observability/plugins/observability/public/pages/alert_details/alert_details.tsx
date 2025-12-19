@@ -208,7 +208,7 @@ export function AlertDetails() {
         text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
           defaultMessage: 'Alerts',
         }),
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       },
       {
         text: alertDetail

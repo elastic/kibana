@@ -35,7 +35,7 @@ export function AnnotationsPage() {
         text: i18n.translate('xpack.observability.breadcrumbs.annotationsLinkText', {
           defaultMessage: 'Annotations',
         }),
-        deepLinkId: 'observability-overview',
+        deepLinkId: 'observability',
       },
     ],
     { serverless }

@@ -19,7 +19,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import * as dataContext from '../../hooks/use_has_data';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import type { ObservabilityPublicPluginsStart } from '../../plugin';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
@@ -99,14 +98,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   isAllRequestsComplete: true,
 }));
 
-jest.spyOn(dataContext, 'useHasData').mockImplementation(() => ({
-  hasDataMap: {},
-  hasAnyData: true,
-  isAllRequestsComplete: true,
-  onRefreshTimeRange: jest.fn(),
-  forceUpdate: 'false',
-}));
-
 jest.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
@@ -116,12 +107,7 @@ jest.mock('../../hooks/use_time_buckets', () => ({
   useTimeBuckets: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_has_data', () => ({
-  useHasData: jest.fn(),
-}));
-
 const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
-const { useHasData } = jest.requireMock('../../hooks/use_has_data');
 
 jest.mock('../../hooks/use_get_available_rules_with_descriptions');
 
@@ -174,20 +160,6 @@ describe('AlertsPage with all capabilities', () => {
 
   beforeAll(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
-    useHasData.mockReturnValue({
-      hasDataMap: {
-        apm: { hasData: true, status: 'success' },
-        synthetics: { hasData: true, status: 'success' },
-        infra_logs: { hasData: undefined, status: 'success' },
-        infra_metrics: { hasData: true, status: 'success' },
-        ux: { hasData: undefined, status: 'success' },
-        alert: { hasData: false, status: 'success' },
-      },
-      hasAnyData: true,
-      isAllRequestsComplete: true,
-      onRefreshTimeRange: () => {},
-      forceUpdate: '',
-    });
   });
 
   beforeEach(() => {

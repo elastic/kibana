@@ -73,7 +73,7 @@ export function RulePage() {
           defaultMessage: 'Alerts',
         }),
         href: http.basePath.prepend(paths.observability.alerts),
-        deepLinkId: 'observability-overview:alerts',
+        deepLinkId: 'observability:alerts',
       },
       {
         href: http.basePath.prepend(paths.observability.rules),
@@ -126,6 +126,7 @@ export function RulePage() {
       <ObservabilityPageTemplate data-test-subj="rulePage">
         <HeaderMenu />
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.observability.ruleForm.templateError.title', {
             defaultMessage: 'Error loading rule template',
           })}

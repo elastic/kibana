@@ -64,7 +64,6 @@
       "discover",
       "kibanaReact",
       "kibanaUtils",
-      "observabilityAlertsTable",
       "unifiedSearch",
       "stackAlerts",
       "spaces"

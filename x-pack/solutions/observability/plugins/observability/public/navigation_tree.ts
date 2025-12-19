@@ -56,7 +56,7 @@ function createNavTree({
   const navTree: NavigationTreeDefinition = {
     body: [
       {
-        link: 'observability-overview',
+        link: 'observability',
         title,
         icon,
         renderAs: 'home',
@@ -77,17 +77,17 @@ function createNavTree({
         link: 'workflows',
       },
       {
-        link: 'observability-overview:alerts',
+        link: 'observability:alerts',
         icon: 'warning',
       },
       {
-        link: 'observability-overview:cases',
+        link: 'observability:cases',
         children: [
           {
-            link: 'observability-overview:cases_configure',
+            link: 'observability:cases_configure',
           },
           {
-            link: 'observability-overview:cases_create',
+            link: 'observability:cases_create',
           },
         ],
         icon: LazyIconBriefcase,
