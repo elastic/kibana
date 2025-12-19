@@ -11,8 +11,9 @@ import type { monaco } from '@kbn/monaco';
 
 /**
  * Adjust the suggestions widget:
- *  - for detailsto always be visible
+ *  - for details to always be visible
  *  - for the widget to be wider: by default 500x500px
+ *  - for the details overlay to always appear at the top, aligned with the suggestion list
  * @param editor - The Monaco editor instance
  */
 export const adjustSuggestWidget = (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -28,9 +29,19 @@ export const adjustSuggestWidget = (editor: monaco.editor.IStandaloneCodeEditor)
       // they will remain switched off:
       suggestWidget._setDetailsVisible(true);
     }
-    // The widget should be wider by default
+    // I also wanted my widget to be shorter by default:
     if (suggestWidget && suggestWidget._persistedSize) {
       suggestWidget._persistedSize.store({ width: 500, height: 500 });
+    }
+
+    // Make the details overlay always appear at the top, aligned with the suggestion list
+    if (suggestWidget && suggestWidget._details) {
+      const detailsOverlay = suggestWidget._details;
+      // Override placeAtAnchor to always pass true for preferAlignAtTop
+      const originalPlaceAtAnchor = detailsOverlay.placeAtAnchor.bind(detailsOverlay);
+      detailsOverlay.placeAtAnchor = function (anchor: HTMLElement, preferAlignAtTop: boolean) {
+        originalPlaceAtAnchor(anchor, true); // Always force true
+      };
     }
   }
 };
