@@ -109,11 +109,13 @@ export const getPluginNameFromRequest = ({
 export const getMessageFromRawResponse = ({
   rawContent,
   metadata,
+  refusal,
   isError,
   traceData,
 }: {
   rawContent?: string;
   metadata?: MessageMetadata;
+  refusal?: string;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -122,6 +124,7 @@ export const getMessageFromRawResponse = ({
     return {
       role: 'assistant',
       content: rawContent,
+      ...(refusal ? { refusal } : {}),
       timestamp: dateTimeString,
       metadata,
       isError,
@@ -179,6 +182,7 @@ export const getSystemPromptFromUserConversation = async ({
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
+  messageRefusal?: string;
   replacements: Replacements;
   conversationId: string;
   contentReferences: ContentReferences;
@@ -189,6 +193,7 @@ export interface AppendAssistantMessageToConversationParams {
 export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
   messageContent,
+  messageRefusal,
   replacements,
   conversationId,
   contentReferences,
@@ -214,6 +219,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
+        refusal: messageRefusal,
         metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
