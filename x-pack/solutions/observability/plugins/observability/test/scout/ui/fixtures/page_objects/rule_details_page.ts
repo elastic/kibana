@@ -121,13 +121,6 @@ export class RuleDetailsPage {
         await this.totalAlerts.click();
         // URL updates synchronously via search params, no navigation event
       },
-
-      /**
-       * Verifies the widget is visible
-       */
-      async expectWidgetVisible() {
-        await expect(this.compact).toBeVisible({ timeout: SHORTER_TIMEOUT });
-      },
     };
   }
 
@@ -146,27 +139,5 @@ export class RuleDetailsPage {
     await expect(this.actionsButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.actionsButton.click();
     await expect(this.editRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
-  }
-
-  /**
-   * Verifies the actions button is visible and can be opened
-   */
-  async expectActionsButtonVisible() {
-    await expect(this.actionsButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
-  }
-
-  /**
-   * Verifies the actions button is not visible
-   */
-  async expectActionsButtonHidden() {
-    await expect(this.actionsButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
-  }
-
-  /**
-   * Verifies edit and delete buttons are visible in the actions menu
-   */
-  async expectEditDeleteButtonsVisible() {
-    await expect(this.editRuleButton).toBeVisible();
-    await expect(this.deleteRuleButton).toBeVisible();
   }
 }
