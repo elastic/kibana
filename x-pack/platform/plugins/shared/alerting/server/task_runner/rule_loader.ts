@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -20,6 +17,7 @@ import type { RuleTypeParams } from '../../common';
 import { MONITORING_HISTORY_LIMIT } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getAlertFromRaw } from '../rules_client/lib';
+import { getFakeKibanaRequest as buildFakeKibanaRequest } from '../lib/get_fake_kibana_request';
 
 interface RuleData {
   rawRule: RawRule;
@@ -154,21 +152,5 @@ export function getFakeKibanaRequest(
   spaceId: string,
   apiKey: RawRule['apiKey']
 ) {
-  const requestHeaders: Headers = {};
-
-  if (apiKey) {
-    requestHeaders.authorization = `ApiKey ${apiKey}`;
-  }
-
-  const path = addSpaceIdToPath('/', spaceId);
-
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    path: '/',
-  };
-
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-  context.basePathService.set(fakeRequest, path);
-
-  return fakeRequest;
+  return buildFakeKibanaRequest({ basePathService: context.basePathService, spaceId, apiKey });
 }

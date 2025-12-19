@@ -20,6 +20,7 @@ import type { EsqlRulesTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
 import { ensureAlertsDataStream, ensureAlertsResources } from './resources';
 import { writeEsqlAlerts } from './write_alerts';
+import { getFakeKibanaRequest } from '../lib/get_fake_kibana_request';
 
 export function createEsqlRulesTaskRunner({
   logger,
@@ -35,10 +36,6 @@ export function createEsqlRulesTaskRunner({
       async run() {
         if (!config.esqlRules.enabled) {
           return { state: taskInstance.state };
-        }
-
-        if (!fakeRequest) {
-          throw new Error('Cannot execute a task without Kibana Request');
         }
 
         const params = taskInstance.params as EsqlRulesTaskParams;
@@ -72,13 +69,24 @@ export function createEsqlRulesTaskRunner({
           return { state: taskInstance.state };
         }
 
+        const runAsRequest =
+          fakeRequest ??
+          getFakeKibanaRequest({
+            basePathService: coreStart.http.basePath,
+            spaceId: params.spaceId,
+            apiKey: rawRule.apiKey,
+          });
+        if (!runAsRequest) {
+          throw new Error('Cannot execute a task without Kibana Request');
+        }
+
         const rulesClient = await (alertingStart as AlertingServerStart).getRulesClientWithRequest(
-          fakeRequest
+          runAsRequest
         );
         const rule = await rulesClient.get({ id: params.ruleId });
 
         const esqlRuleParams = ESQLParamsSchema.validate(rule.params);
-        const searchClient = pluginsStart.data.search.asScoped(fakeRequest);
+        const searchClient = pluginsStart.data.search.asScoped(runAsRequest);
         const esqlResponse = await executeEsqlRule({
           logger,
           searchClient,
