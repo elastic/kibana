@@ -235,9 +235,9 @@ async function handleOnExpression({
     },
   });
 
-  const { expressionType, isComplete, insideFunction } = computed;
+  const { isComplete, insideFunction } = computed;
 
-  if (expressionRoot && expressionType === 'boolean' && isComplete && !insideFunction) {
+  if (expressionRoot && isComplete && !insideFunction) {
     suggestions.push(...buildNextActions());
   }
 

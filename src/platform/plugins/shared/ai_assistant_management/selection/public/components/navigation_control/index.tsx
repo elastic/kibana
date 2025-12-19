@@ -133,7 +133,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                 {i18n.translate(
                   'aiAssistantManagementSelection.headerButton.selectAIChatExperienceTitle',
                   {
-                    defaultMessage: 'Select an AI chat experience',
+                    defaultMessage: 'Select a chat experience',
                   }
                 )}
               </EuiModalHeaderTitle>
