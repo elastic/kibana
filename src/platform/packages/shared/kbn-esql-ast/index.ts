@@ -38,6 +38,7 @@ export * from './src/ast';
 export * from './src/composer';
 export * from './src/pretty_print';
 export * from './src/commands';
+export * from './src/language';
 
 // temporary export to ease migration
 export { getNoValidCallSignatureError } from './src/commands/definitions/utils/validation/utils';
