@@ -11,6 +11,7 @@ import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/ut
 import type { EventOutcome, StatusCode } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { Transaction } from '@kbn/apm-types';
 import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
@@ -27,12 +28,14 @@ import {
   SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
   SPAN_SUBTYPE,
+  SPAN_SYNC,
   SPAN_TYPE,
   STATUS_CODE,
   TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
+  TRANSACTION_MARKS_AGENT,
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -63,6 +66,7 @@ const optionalFields = asMutableArray([
   STATUS_CODE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_SYNC,
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
@@ -107,7 +111,11 @@ export async function getUnifiedTraceItems({
   end: number;
   config: APMConfig;
   serviceName?: string;
-}): Promise<{ traceItems: TraceItem[]; unifiedTraceErrors: UnifiedTraceErrors }> {
+}): Promise<{
+  traceItems: TraceItem[];
+  unifiedTraceErrors: UnifiedTraceErrors;
+  agentMarks: Record<string, number>;
+}> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
 
@@ -142,6 +150,7 @@ export async function getUnifiedTraceItems({
       },
       collapse: { field: SPAN_ID },
       fields: [...fields, ...optionalFields],
+      _source: [TRANSACTION_MARKS_AGENT],
       sort: [
         { _score: 'asc' },
         {
@@ -179,42 +188,57 @@ export async function getUnifiedTraceItems({
   ]);
 
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
+  const agentMarks: Record<string, number> = {};
+  const traceItems = compactMap(unifiedTraceItems.hits.hits, (hit) => {
+    const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
+    if (event[PROCESSOR_EVENT] === ProcessorEvent.transaction) {
+      const source = hit._source as {
+        transaction?: Pick<Required<Transaction>['transaction'], 'marks'>;
+      };
+
+      if (source.transaction?.marks?.agent) {
+        Object.assign(agentMarks, source.transaction.marks.agent);
+      }
+    }
+
+    const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
+    const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
+    const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
+
+    if (!id || !name) {
+      return undefined;
+    }
+
+    return {
+      id,
+      name,
+      timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
+      traceId: event[TRACE_ID],
+      duration: resolveDuration(apmDuration, event[DURATION]),
+      status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
+      errors: errorsByDocId[id] ?? [],
+      parentId: event[PARENT_ID],
+      serviceName: event[SERVICE_NAME],
+      type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
+      sync: event[SPAN_SYNC],
+      agentName: event[AGENT_NAME],
+      spanLinksCount: {
+        incoming: incomingSpanLinksCountById[id] ?? 0,
+        outgoing:
+          event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
+      },
+      icon: getTraceItemIcon({
+        spanType: event[SPAN_TYPE],
+        agentName: event[AGENT_NAME],
+        processorEvent: event[PROCESSOR_EVENT],
+      }),
+    } satisfies TraceItem;
+  });
 
   return {
-    traceItems: compactMap(unifiedTraceItems.hits.hits, (hit) => {
-      const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
-      const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
-      const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
-      const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
-
-      if (!id || !name) {
-        return undefined;
-      }
-
-      return {
-        id,
-        name,
-        timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
-        traceId: event[TRACE_ID],
-        duration: resolveDuration(apmDuration, event[DURATION]),
-        status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
-        errors: errorsByDocId[id] ?? [],
-        parentId: event[PARENT_ID],
-        serviceName: event[SERVICE_NAME],
-        type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
-        spanLinksCount: {
-          incoming: incomingSpanLinksCountById[id] ?? 0,
-          outgoing:
-            event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
-        },
-        icon: getTraceItemIcon({
-          spanType: event[SPAN_TYPE],
-          agentName: event[AGENT_NAME],
-          processorEvent: event[PROCESSOR_EVENT],
-        }),
-      } satisfies TraceItem;
-    }),
+    traceItems,
     unifiedTraceErrors,
+    agentMarks,
   };
 }
 

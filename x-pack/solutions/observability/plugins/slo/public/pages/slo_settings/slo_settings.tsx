@@ -23,9 +23,16 @@ export function SloSettingsPage() {
   useBreadcrumbs(
     [
       {
+        href: basePath.prepend(paths.slos),
+        text: i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
+          defaultMessage: 'SLOs',
+        }),
+        deepLinkId: 'slo',
+      },
+      {
         href: basePath.prepend(paths.slosSettings),
         text: i18n.translate('xpack.slo.breadcrumbs.slosSettingsText', {
-          defaultMessage: 'SLOs Settings',
+          defaultMessage: 'Settings',
         }),
       },
     ],
