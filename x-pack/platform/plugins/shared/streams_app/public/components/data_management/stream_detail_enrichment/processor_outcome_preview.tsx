@@ -124,13 +124,10 @@ const PreviewDocumentsGroupBy = () => {
     const total = filteredDocs.length;
     if (total === 0) return undefined;
 
-    const counts = filteredDocs.reduce(
-      (acc, doc) => {
-        acc[doc.status] = (acc[doc.status] ?? 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+    const counts = filteredDocs.reduce((acc, doc) => {
+      acc[doc.status] = (acc[doc.status] ?? 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
     return {
       failed_rate: (counts.failed ?? 0) / total,

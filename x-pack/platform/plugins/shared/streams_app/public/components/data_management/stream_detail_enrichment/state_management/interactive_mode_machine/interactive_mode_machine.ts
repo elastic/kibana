@@ -111,8 +111,7 @@ export const interactiveModeMachine = setup({
         if (parentId) {
           const parentStep = assignArgs.context.stepRefs
             .find((ref) => ref.id === parentId)
-            ?.getSnapshot()
-            ?.context.step;
+            ?.getSnapshot()?.context.step;
           if (parentStep && isConditionBlock(parentStep)) {
             assignArgs.context.parentRef.send({
               type: 'simulation.filterByConditionAuto',
@@ -225,9 +224,7 @@ export const interactiveModeMachine = setup({
       const parentId = step.parentId;
       if (!parentId) return;
 
-      const parentStep = context.stepRefs
-        .find((ref) => ref.id === parentId)
-        ?.getSnapshot()
+      const parentStep = context.stepRefs.find((ref) => ref.id === parentId)?.getSnapshot()
         ?.context.step;
       if (parentStep && isConditionBlock(parentStep)) {
         context.parentRef.send({ type: 'simulation.filterByConditionAuto', conditionId: parentId });

@@ -37,7 +37,7 @@ function createConditionNoopProcessor({
   // Use set + remove instead of a painless script to avoid compilation overhead.
   // This creates a true no-op that doesn't require painless to be enabled.
   const tempField = '_streams_condition_noop';
-  
+
   return [
     {
       set: {
@@ -76,7 +76,9 @@ function buildSimulationProcessorsFromSteps({
       // (UI blocks always have ids, but Streamlang schema allows them to be omitted).
       if (conditionId && combinedCondition) {
         // Pre-order insertion: ensure this runs before any nested processors (even if they later fail).
-        processors.push(...createConditionNoopProcessor({ conditionId, condition: combinedCondition }));
+        processors.push(
+          ...createConditionNoopProcessor({ conditionId, condition: combinedCondition })
+        );
       }
 
       processors.push(
@@ -118,8 +120,8 @@ function buildSimulationProcessorsFromSteps({
  * Builds ingest pipeline processors for simulation runs.
  *
  * This is identical to normal transpilation, except it injects simulation-only no-op processors
- * (set + remove of a temporary field) *under each condition block* (tagged with the condition 
- * customIdentifier), so simulation metrics can compute condition match rates even if there are 
+ * (set + remove of a temporary field) *under each condition block* (tagged with the condition
+ * customIdentifier), so simulation metrics can compute condition match rates even if there are
  * no descendants or descendants are faulty.
  *
  * The set processor is tagged with the condition ID for metric tracking. Using set+remove instead

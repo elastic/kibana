@@ -587,7 +587,10 @@ export const streamEnrichmentMachine = setup({
                     },
                     'simulation.clearAutoConditionFilter': {
                       guard: 'hasAutoSelectedConditionId',
-                      actions: [{ type: 'clearConditionFilter' }, { type: 'clearAutoSelectedConditionId' }],
+                      actions: [
+                        { type: 'clearConditionFilter' },
+                        { type: 'clearAutoSelectedConditionId' },
+                      ],
                     },
                     // Forward other step events to interactive mode machine
                     'step.*': {

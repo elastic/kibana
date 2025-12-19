@@ -182,7 +182,8 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const transpiledIngestPipelineProcessors = buildSimulationProcessorsWithConditionNoops(processing);
+  const transpiledIngestPipelineProcessors =
+    buildSimulationProcessorsWithConditionNoops(processing);
 
   return transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
@@ -620,7 +621,10 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  const processorResults = filterOutConditionNoopProcessorResults(doc.processor_results, conditionProcessorTags);
+  const processorResults = filterOutConditionNoopProcessorResults(
+    doc.processor_results,
+    conditionProcessorTags
+  );
 
   // If a simulation run contains no non-condition processors, treat it as parsed (noop pipeline),
   // rather than incorrectly classifying it as "skipped" (Array.every() is true on empty arrays).
@@ -661,8 +665,7 @@ const getLastDoc = (
     conditionProcessorTags
   );
   const lastDocSource =
-    processorResults.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
-    sample;
+    processorResults.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ?? sample;
 
   if (status === 'parsed') {
     return {

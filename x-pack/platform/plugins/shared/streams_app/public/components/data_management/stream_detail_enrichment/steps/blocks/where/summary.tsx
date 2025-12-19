@@ -48,7 +48,8 @@ export const WhereBlockSummary = ({
     if (!metrics) return undefined;
     return 1 - (metrics.skipped_rate ?? 0);
   });
-  const conditionMatchPercentage = conditionMatchRate !== undefined ? formatter.format(conditionMatchRate) : undefined;
+  const conditionMatchPercentage =
+    conditionMatchRate !== undefined ? formatter.format(conditionMatchRate) : undefined;
 
   const handleTitleClick = (event?: React.MouseEvent) => {
     event?.stopPropagation();
