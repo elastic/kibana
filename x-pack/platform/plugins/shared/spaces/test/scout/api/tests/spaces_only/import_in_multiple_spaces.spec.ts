@@ -13,7 +13,7 @@
  * proper role-based access control.
  */
 
-import type { KbnClient, RoleApiCredentials, ScoutLogger } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
 import { expect, tags } from '@kbn/scout';
 
 import {
