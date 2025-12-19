@@ -8,22 +8,27 @@
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useConversationTitle } from '../../../hooks/use_conversation';
+import { useConversationContext } from '../../context/conversation/conversation_context';
+import { useConversationId } from '../../context/conversation/use_conversation_id';
+import { useConversationTitle } from '../../hooks/use_conversation';
 
 interface DeleteConversationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  // Override conversation to be deleted
+  conversation?: { id: string; title: string };
 }
 
 export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = ({
   isOpen,
   onClose,
+  conversation,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const conversationId = useConversationId();
-  const { title } = useConversationTitle();
+  const currentConversationId = useConversationId();
+  const { title: currentTitle } = useConversationTitle();
+  const conversationId = conversation?.id ?? currentConversationId;
+  const title = conversation?.title ?? currentTitle;
   const { conversationActions } = useConversationContext();
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
 
