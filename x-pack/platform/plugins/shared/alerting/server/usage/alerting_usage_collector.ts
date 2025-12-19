@@ -123,6 +123,24 @@ const byStatusPerDaySchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_execut
     unknown: { type: 'long' },
   };
 
+const gapAutoFillSchedulerRunStatusSchema: MakeSchemaFrom<AlertingUsage>['gap_auto_fill_scheduler_runs_by_status_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: { type: 'long' },
+    success: { type: 'long' },
+    error: { type: 'long' },
+    skipped: { type: 'long' },
+    no_gaps: { type: 'long' },
+  };
+
+const gapAutoFillSchedulerResultStatusSchema: MakeSchemaFrom<AlertingUsage>['gap_auto_fill_scheduler_results_by_status_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: { type: 'long' },
+    success: { type: 'long' },
+    error: { type: 'long' },
+  };
+
 const byNotifyWhenSchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_notify_when'] = {
   on_action_group_change: { type: 'long' },
   on_active_alert: { type: 'long' },
@@ -249,6 +267,17 @@ export function createAlertingUsageCollector(
           count_gaps: 0,
           total_unfilled_gap_duration_ms: 0,
           total_filled_gap_duration_ms: 0,
+          gap_auto_fill_scheduler_runs_per_day: 0,
+          gap_auto_fill_scheduler_runs_by_status_per_day: {},
+          gap_auto_fill_scheduler_duration_ms_per_day: {
+            min: 0,
+            max: 0,
+            avg: 0,
+            sum: 0,
+          },
+          gap_auto_fill_scheduler_unique_rule_count_per_day: 0,
+          gap_auto_fill_scheduler_processed_gaps_total_per_day: 0,
+          gap_auto_fill_scheduler_results_by_status_per_day: {},
         };
       }
     },
@@ -332,6 +361,17 @@ export function createAlertingUsageCollector(
       count_gaps: { type: 'long' },
       total_unfilled_gap_duration_ms: { type: 'long' },
       total_filled_gap_duration_ms: { type: 'long' },
+      gap_auto_fill_scheduler_runs_per_day: { type: 'long' },
+      gap_auto_fill_scheduler_runs_by_status_per_day: gapAutoFillSchedulerRunStatusSchema,
+      gap_auto_fill_scheduler_duration_ms_per_day: {
+        min: { type: 'long' },
+        max: { type: 'long' },
+        avg: { type: 'float' },
+        sum: { type: 'float' },
+      },
+      gap_auto_fill_scheduler_unique_rule_count_per_day: { type: 'long' },
+      gap_auto_fill_scheduler_processed_gaps_total_per_day: { type: 'long' },
+      gap_auto_fill_scheduler_results_by_status_per_day: gapAutoFillSchedulerResultStatusSchema,
     },
   });
 }
