@@ -151,3 +151,4 @@ export {
   isToolProgressEvent,
   isPromptRequestEvent,
 } from './chat';
+export * from './telemetry';
