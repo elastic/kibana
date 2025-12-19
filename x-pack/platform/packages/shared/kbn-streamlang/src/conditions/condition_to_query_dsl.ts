@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FilterCondition, Condition } from '../../types/conditions';
+import type { FilterCondition, Condition, RangeCondition } from '../../types/conditions';
 import {
   isFilterCondition,
   isAndCondition,
@@ -52,8 +52,8 @@ function conditionToClause(condition: FilterCondition) {
     case 'endsWith':
       return { wildcard: { [condition.field]: `*${value}` } };
     case 'range': {
-      const rangeValue = value as any;
-      const rangeQuery: any = {};
+      const rangeValue = value as RangeCondition;
+      const rangeQuery: RangeCondition = {};
 
       if (rangeValue.gte !== undefined) {
         rangeQuery.gte = rangeValue.gte;
