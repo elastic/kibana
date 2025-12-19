@@ -10,7 +10,10 @@ import expect from '@kbn/expect';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import {
   buildPerPolicyTag,
@@ -84,10 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
     }>;
 
     const endpointListCalls: EndpointListApiCallsInterface<
-      Pick<ExceptionListItemSchema, 'item_id' | 'os_types' | 'tags' | 'entries'> & {
-        id?: string;
-        _version?: string;
-      }
+      CreateExceptionListItemSchema | UpdateExceptionListItemSchema
     > = [
       {
         method: 'post',
@@ -104,13 +104,19 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'put',
         info: 'update single item',
         path: ENDPOINT_LIST_ITEM_URL,
-        getBody: () =>
-          exceptionsGenerator.generateEndpointExceptionForUpdate({
+        getBody: () => {
+          const { list_id: _, ...createBody } =
+            exceptionsGenerator.generateEndpointExceptionForCreate({
+              tags: endpointExceptionData.artifact.tags,
+            });
+
+          return {
+            ...createBody,
             id: endpointExceptionData.artifact.id,
             item_id: endpointExceptionData.artifact.item_id,
-            tags: endpointExceptionData.artifact.tags,
             _version: endpointExceptionData.artifact._version,
-          }),
+          };
+        },
       },
     ];
 
@@ -275,7 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
             const requestBody = endpointListApiCall.getBody();
             // keep space tag, but replace any per-policy tags with a global tag
             requestBody.tags = [
-              ...requestBody.tags.filter((tag) => !isPolicySelectionTag(tag)),
+              ...(requestBody.tags ?? []).filter((tag) => !isPolicySelectionTag(tag)),
               GLOBAL_ARTIFACT_TAG,
             ];
 
@@ -295,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
             const requestBody = endpointListApiCall.getBody();
 
             // remove existing tag
-            requestBody.tags = requestBody.tags.filter((tag) => !isPolicySelectionTag(tag));
+            requestBody.tags = (requestBody.tags ?? []).filter((tag) => !isPolicySelectionTag(tag));
 
             await noGlobalArtifactSupertest[endpointListApiCall.method](endpointListApiCall.path)
               .set('kbn-xsrf', 'true')
@@ -349,7 +355,13 @@ export default function ({ getService }: FtrProviderContext) {
       for (const endpointListApiCall of [
         ...endpointListCalls,
         ...needsWritePrivilege,
-        ...needsReadPrivilege,
+        // NOTE: needsReadPrivilege tests are excluded in 9.2 because the privilege model is different.
+        // In 9.2, siemV3: ['all'] grants ALL privileges including endpoint exceptions.
+        // In 9.3+, endpoint exceptions were moved to a separate sub-feature, so
+        // siemV3: ['all'] no longer includes them and requires explicit
+        // endpoint_exceptions_read/endpoint_exceptions_all privileges.
+        // The t1_analyst role with siemV3: ['all'] has full endpoint exceptions access in 9.2.
+        // ...needsReadPrivilege,
       ]) {
         it(`should error on [${endpointListApiCall.method}] - [${endpointListApiCall.info}]`, async () => {
           await t1AnalystSupertest[endpointListApiCall.method](endpointListApiCall.path)
