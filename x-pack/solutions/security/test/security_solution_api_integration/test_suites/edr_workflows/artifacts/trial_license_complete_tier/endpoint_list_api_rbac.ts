@@ -93,24 +93,37 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         info: 'create single item',
         path: ENDPOINT_LIST_ITEM_URL,
-        getBody: () =>
-          exceptionsGenerator.generateEndpointExceptionForCreate({
+        getBody: () => {
+          const item = exceptionsGenerator.generateEndpointExceptionForCreate({
             tags: endpointExceptionData?.artifact.tags || [
               buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
             ],
-          }),
+          });
+          return {
+            ...item,
+            item_id: item.item_id ?? `test-item-${Date.now()}`,
+            os_types: item.os_types ?? ['windows'],
+            tags: item.tags ?? [],
+          };
+        },
       },
       {
         method: 'put',
         info: 'update single item',
         path: ENDPOINT_LIST_ITEM_URL,
-        getBody: () =>
-          exceptionsGenerator.generateEndpointExceptionForUpdate({
+        getBody: () => {
+          const item = exceptionsGenerator.generateEndpointExceptionForCreate({
+            tags: endpointExceptionData.artifact.tags,
+          });
+          return {
+            ...item,
             id: endpointExceptionData.artifact.id,
             item_id: endpointExceptionData.artifact.item_id,
-            tags: endpointExceptionData.artifact.tags,
             _version: endpointExceptionData.artifact._version,
-          }),
+            os_types: item.os_types ?? ['windows'],
+            tags: item.tags ?? [],
+          };
+        },
       },
     ];
 
@@ -244,7 +257,11 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has endpoint exception access but no global artifact access', () => {
+    // NOTE: This test is skipped in 9.1 because the privilege model is different.
+    // In 9.1, endpoint_exceptions_all doesn't grant lists-all privilege, so POST/PUT
+    // fail at the route level (403 for missing lists-all) before reaching the extension
+    // point validation that would return EndpointArtifactError.
+    describe.skip('@skipInServerless and user has endpoint exception access but no global artifact access', () => {
       let noGlobalArtifactSupertest: TestAgent;
 
       before(async () => {
@@ -275,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
             const requestBody = endpointListApiCall.getBody();
             // keep space tag, but replace any per-policy tags with a global tag
             requestBody.tags = [
-              ...requestBody.tags.filter((tag) => !isPolicySelectionTag(tag)),
+              ...(requestBody.tags ?? []).filter((tag) => !isPolicySelectionTag(tag)),
               GLOBAL_ARTIFACT_TAG,
             ];
 
@@ -295,7 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
             const requestBody = endpointListApiCall.getBody();
 
             // remove existing tag
-            requestBody.tags = requestBody.tags.filter((tag) => !isPolicySelectionTag(tag));
+            requestBody.tags = (requestBody.tags ?? []).filter((tag) => !isPolicySelectionTag(tag));
 
             await noGlobalArtifactSupertest[endpointListApiCall.method](endpointListApiCall.path)
               .set('kbn-xsrf', 'true')
@@ -349,7 +366,13 @@ export default function ({ getService }: FtrProviderContext) {
       for (const endpointListApiCall of [
         ...endpointListCalls,
         ...needsWritePrivilege,
-        ...needsReadPrivilege,
+        // NOTE: needsReadPrivilege tests are excluded in 9.1 because the privilege model is different.
+        // In 9.1, siemV3: ['all'] grants ALL privileges including endpoint exceptions.
+        // In 9.3+, endpoint exceptions were moved to a separate sub-feature, so
+        // siemV3: ['all'] no longer includes them and requires explicit
+        // endpoint_exceptions_read/endpoint_exceptions_all privileges.
+        // The t1_analyst role with siemV3: ['all'] has full endpoint exceptions access in 9.1.
+        // ...needsReadPrivilege,
       ]) {
         it(`should error on [${endpointListApiCall.method}] - [${endpointListApiCall.info}]`, async () => {
           await t1AnalystSupertest[endpointListApiCall.method](endpointListApiCall.path)
