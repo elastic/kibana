@@ -31,11 +31,16 @@ const timeRange = {
   from: '2025-10-18T12:18:59.691Z',
 };
 
+const reportTitle = 'Elastic AI value report dude!';
+
 const mockKibana = (share: typeof shareServiceMock | undefined, serverless: boolean) =>
   useKibanaMock.mockReturnValue({
     services: {
       share,
       serverless,
+      uiSettings: {
+        get: jest.fn(() => reportTitle),
+      },
     },
   });
 
@@ -165,7 +170,7 @@ describe('useDownloadAIValueReport', () => {
               id: 'AI_VALUE_REPORT_LOCATOR',
               params: forwardedState,
             },
-            title: 'AI Value Report',
+            title: reportTitle,
           },
         })
       );

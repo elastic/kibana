@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
+import { SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE } from '@kbn/management-settings-ids';
 import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import type { AIValueReportParams } from '../../../common/locators/ai_value_report/locator';
@@ -21,7 +22,7 @@ export const useDownloadAIValueReport = ({
   anchorElement,
   timeRange,
 }: UseDownloadAIValueReportParams) => {
-  const { share: shareService, serverless } = useKibana().services;
+  const { share: shareService, serverless, uiSettings } = useKibana().services;
   const isServerless = !!serverless;
   const aiValueExportContext = useAIValueExportContext();
   const buildForwardedState = aiValueExportContext?.buildForwardedState;
@@ -47,6 +48,11 @@ export const useDownloadAIValueReport = ({
     }
 
     return () => {
+      const reportTitle =
+        uiSettings?.get<string>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE) ??
+        i18n.translate('xpack.securitySolution.reports.aiValue.pdfReportJobTitle', {
+          defaultMessage: 'AI Value Report',
+        });
       shareService.toggleShareContextMenu({
         isDirty: false,
         anchorElement,
@@ -66,10 +72,7 @@ export const useDownloadAIValueReport = ({
           },
         },
         sharingData: {
-          title: i18n.translate('xpack.securitySolution.reports.aiValue.pdfReportJobTitle', {
-            // TODO confirm what wording we want hre
-            defaultMessage: 'AI Value Report',
-          }),
+          title: reportTitle,
           locatorParams: {
             id: AI_VALUE_REPORT_LOCATOR,
             params: forwardedState,
@@ -77,7 +80,7 @@ export const useDownloadAIValueReport = ({
         },
       });
     };
-  }, [anchorElement, shareService, forwardedState, isExportEnabled]);
+  }, [anchorElement, shareService, forwardedState, isExportEnabled, uiSettings]);
 
   return {
     toggleContextMenu,
