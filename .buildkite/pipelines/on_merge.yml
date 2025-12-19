@@ -405,21 +405,6 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    label: 'Defend Workflows Cypress Tests on Serverless'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      enableNestedVirtualization: true
-      machineType: n2-standard-4
-    timeout_in_minutes: 75
-    parallelism: 14
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:
