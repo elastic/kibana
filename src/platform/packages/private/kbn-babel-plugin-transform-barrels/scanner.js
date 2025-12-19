@@ -25,7 +25,6 @@ async function buildBarrelIndex(repoRoot) {
   const barrelFiles = await fg('**/index.{ts,tsx,js,jsx}', {
     cwd: repoRoot,
     ignore: [
-      '**/node_modules/**',
       '**/dist/**',
       '**/target/**',
       '**/build/**',
