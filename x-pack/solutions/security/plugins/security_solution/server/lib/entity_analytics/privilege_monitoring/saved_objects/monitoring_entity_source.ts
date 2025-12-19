@@ -37,7 +37,7 @@ export class MonitoringEntitySourceDescriptorClient {
     const { id, attributes: created } =
       await this.dependencies.soClient.create<MonitoringEntitySourceAttributes>(
         monitoringEntitySourceTypeName,
-        { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
+        { ...attributes, managed: attributes.managed ?? false },
         { refresh: 'wait_for' }
       );
 

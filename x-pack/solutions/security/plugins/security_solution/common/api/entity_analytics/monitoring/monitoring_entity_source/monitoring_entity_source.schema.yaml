@@ -170,7 +170,7 @@ components:
       type: string
       enum:
         - index
-        - integration
+        - entity_analytics_integration
     UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:

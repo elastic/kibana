@@ -138,6 +138,20 @@ export default ({ getService }: FtrProviderContext) => {
 
         await deleteEntitySource(body.id);
       });
+
+      it('should not allow integration type sources to be created', async () => {
+        const { status } = await api.createEntitySource({
+          body: {
+            type: 'integration',
+            name: `Test integration entity source ${Date.now()}`,
+            indexPattern: `test-integration-${Date.now()}`,
+            enabled: true,
+            matchers: defaultMatchers,
+            filter: {},
+          } as CreateEntitySourceRequestBody,
+        });
+        expect(status).toBe(400);
+      });
     });
 
     describe('Update Entity Source', () => {
@@ -203,6 +217,14 @@ export default ({ getService }: FtrProviderContext) => {
           query: { name },
         });
         expect(sources.length).toBe(0);
+      });
+
+      it('should return 404 for non-existent source', async () => {
+        const { status } = await api.deleteEntitySource({
+          params: { id: 'non-existent-id' },
+        });
+
+        expect(status).toBe(404);
       });
     });
 
