@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { sortBy } from 'lodash';
 import type {
   CreateEntitySourceRequestBody,
   ListEntitySourcesRequestQuery,
@@ -47,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const createEntitySource = async (
     overrides: Partial<CreateEntitySourceRequestBody> = {}
-  ): Promise<{ id: string; managed: boolean }> => {
+  ): Promise<MonitoringEntitySource> => {
     const indexName = `test-entity-source-${Date.now()}`;
     const entitySource: CreateEntitySourceRequestBody = {
       type: 'index',
@@ -378,6 +379,19 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should support sorting by sort_field and sort_order', async () => {
+        // Get all sources without sorting to create expected sorted lists
+        const {
+          body: { sources: allSources },
+        } = await typedListEntitySources({
+          query: {},
+        });
+
+        expect(allSources.length).toBeGreaterThan(0);
+
+        // Create expected ascending sorted list
+        const expectedAscSorted = sortBy(allSources, (source) => source.name ?? '');
+
+        // Test ascending order
         const {
           status: ascStatus,
           body: { sources: ascSources },
@@ -386,12 +400,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(ascStatus).toBe(200);
-        expect(ascSources.length).toBeGreaterThan(0);
+        expect(ascSources.length).toBe(allSources.length);
+        expect(ascSources).toEqual(expectedAscSorted);
 
-        // Verify sources are sorted by name in ascending order
-        for (let i = 1; i < ascSources.length; i++) {
-          expect(ascSources[i].name >= ascSources[i - 1].name).toBe(true);
-        }
+        // Create expected descending sorted list
+        const expectedDescSorted = sortBy(allSources, (source) => source.name ?? '').reverse();
 
         // Test descending order
         const {
@@ -402,12 +415,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(descStatus).toBe(200);
-        expect(descSources.length).toBeGreaterThan(0);
-
-        // Verify sources are sorted by name in descending order
-        for (let i = 1; i < descSources.length; i++) {
-          expect(descSources[i].name <= descSources[i - 1].name).toBe(true);
-        }
+        expect(descSources.length).toBe(allSources.length);
+        expect(descSources).toEqual(expectedDescSorted);
       });
 
       it('should combine pagination and sorting', async () => {
