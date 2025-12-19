@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { Asset, AssetType } from './assets';
+export type { QueryAsset } from './assets';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,

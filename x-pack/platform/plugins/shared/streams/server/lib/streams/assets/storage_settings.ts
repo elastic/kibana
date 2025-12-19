@@ -17,7 +17,7 @@ import {
   STREAM_NAME,
 } from './fields';
 
-export const assetStorageSettings = {
+export const queryAssetStorageSettings = {
   name: '.kibana_streams_assets',
   schema: {
     properties: {
@@ -33,4 +33,4 @@ export const assetStorageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export type AssetStorageSettings = typeof assetStorageSettings;
+export type QueryAssetStorageSettings = typeof queryAssetStorageSettings;

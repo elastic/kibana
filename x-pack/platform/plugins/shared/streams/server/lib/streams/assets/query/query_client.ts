@@ -16,10 +16,9 @@ import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import type {
-  Asset,
-  AssetLink,
-  AssetLinkRequest,
-  AssetUnlinkRequest,
+  QueryAsset,
+  QueryAssetLinkRequest,
+  QueryAssetUnlinkRequest,
   QueryLink,
 } from '../../../../../common/assets';
 import type { EsqlRuleParams } from '../../../rules/esql/types';
@@ -37,7 +36,7 @@ import {
   QUERY_TITLE,
   STREAM_NAME,
 } from '../fields';
-import type { AssetStorageSettings } from '../storage_settings';
+import type { QueryAssetStorageSettings } from '../storage_settings';
 import { getRuleIdFromQueryLink } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
@@ -84,7 +83,7 @@ function wildcardQuery<T extends string>(
   return [{ wildcard: { [field]: { value: `*${value}*`, case_insensitive: true } } }];
 }
 
-export function getQueryLinkUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
+export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id' | 'asset.type'>) {
   return objectHash({
     [STREAM_NAME]: name,
     [ASSET_ID]: asset[ASSET_ID],
@@ -92,7 +91,7 @@ export function getQueryLinkUuid(name: string, asset: Pick<AssetLink, 'asset.id'
   });
 }
 
-function toQueryLink<TQueryLink extends AssetLinkRequest>(
+function toQueryLink<TQueryLink extends QueryAssetLinkRequest>(
   name: string,
   asset: TQueryLink
 ): TQueryLink & { [ASSET_UUID]: string } {
@@ -108,26 +107,26 @@ type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_SEVERITY_SCORE]?: number;
 };
 
-export type StoredAssetLink = StoredQueryLink & {
+export type StoredQueryAssetLink = StoredQueryLink & {
   [STREAM_NAME]: string;
 };
 
 interface QueryBulkIndexOperation {
-  index: { asset: AssetLinkRequest };
+  index: { asset: QueryAssetLinkRequest };
 }
 interface QueryBulkDeleteOperation {
-  delete: { asset: AssetUnlinkRequest };
+  delete: { asset: QueryAssetUnlinkRequest };
 }
 
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
-function fromStorage(link: StoredAssetLink): QueryLink {
+function fromStorage(link: StoredQueryAssetLink): QueryLink {
   const storedQueryLink: StoredQueryLink & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
     [QUERY_FEATURE_TYPE]: FeatureType;
     [QUERY_EVIDENCE]?: string[];
-  } = link as StoredAssetLink & {
+  } = link as StoredQueryAssetLink & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
     [QUERY_FEATURE_TYPE]: FeatureType;
@@ -154,7 +153,7 @@ function fromStorage(link: StoredAssetLink): QueryLink {
   } satisfies QueryLink;
 }
 
-function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
+function toStorage(name: string, request: QueryAssetLinkRequest): StoredQueryAssetLink {
   const link = toQueryLink(name, request);
   const { query, ...rest } = link;
   return {
@@ -167,7 +166,7 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
     [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
-  } as unknown as StoredAssetLink;
+  } as unknown as StoredQueryAssetLink;
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
@@ -189,7 +188,7 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
 export class QueryClient {
   constructor(
     private readonly dependencies: {
-      storageClient: IStorageClient<AssetStorageSettings, StoredAssetLink>;
+      storageClient: IStorageClient<QueryAssetStorageSettings, StoredQueryAssetLink>;
       soClient: SavedObjectsClientContract;
       rulesClient: RulesClient;
       logger: Logger;
@@ -199,7 +198,7 @@ export class QueryClient {
 
   // ==================== Storage Operations ====================
 
-  async linkQuery(name: string, link: AssetLinkRequest): Promise<QueryLink> {
+  async linkQuery(name: string, link: QueryAssetLinkRequest): Promise<QueryLink> {
     const document = toStorage(name, link);
 
     await this.dependencies.storageClient.index({
@@ -212,7 +211,7 @@ export class QueryClient {
 
   async syncQueryList(
     name: string,
-    links: AssetLinkRequest[]
+    links: QueryAssetLinkRequest[]
   ): Promise<{ deleted: QueryLink[]; indexed: QueryLink[] }> {
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -250,7 +249,7 @@ export class QueryClient {
     };
   }
 
-  async unlinkQuery(name: string, asset: AssetUnlinkRequest): Promise<void> {
+  async unlinkQuery(name: string, asset: QueryAssetUnlinkRequest): Promise<void> {
     const id = getQueryLinkUuid(name, asset);
 
     const { result } = await this.dependencies.storageClient.delete({ id });
@@ -340,7 +339,10 @@ export class QueryClient {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
-          const document = toStorage(name, Object.values(operation)[0].asset as AssetLinkRequest);
+          const document = toStorage(
+            name,
+            Object.values(operation)[0].asset as QueryAssetLinkRequest
+          );
           return {
             index: {
               document,
@@ -360,7 +362,7 @@ export class QueryClient {
     });
   }
 
-  async getAssets(name: string): Promise<Asset[]> {
+  async getAssets(name: string): Promise<QueryAsset[]> {
     const { [name]: queryLinks } = await this.getQueryLinks([name]);
 
     if (queryLinks.length === 0) {

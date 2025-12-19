@@ -10,9 +10,8 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
-import type { AssetStorageSettings } from '../storage_settings';
-import { assetStorageSettings } from '../storage_settings';
-import { QueryClient, type StoredAssetLink } from './query_client';
+import { queryAssetStorageSettings, type QueryAssetStorageSettings } from '../storage_settings';
+import { QueryClient, type StoredQueryAssetLink } from './query_client';
 
 export class QueryService {
   constructor(
@@ -31,10 +30,10 @@ export class QueryService {
     const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
     const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
-    const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
+    const adapter = new StorageIndexAdapter<QueryAssetStorageSettings, StoredQueryAssetLink>(
       core.elasticsearch.client.asInternalUser,
       this.logger.get('queries'),
-      assetStorageSettings
+      queryAssetStorageSettings
     );
 
     return new QueryClient(
