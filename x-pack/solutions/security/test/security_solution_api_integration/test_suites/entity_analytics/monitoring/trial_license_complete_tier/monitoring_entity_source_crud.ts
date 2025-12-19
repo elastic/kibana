@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not allow integration type sources to be created', async () => {
         const { status } = await api.createEntitySource({
           body: {
-            type: 'integration',
+            type: 'entity_analytics_integration',
             name: `Test integration entity source ${Date.now()}`,
             indexPattern: `test-integration-${Date.now()}`,
             enabled: true,
