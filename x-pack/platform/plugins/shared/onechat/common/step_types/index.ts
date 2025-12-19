@@ -14,6 +14,5 @@ export {
 export type {
   RunAgentStepInputSchema,
   RunAgentStepOutputSchema,
-  RunAgentStepInput,
-  RunAgentStepOutput,
+  RunAgentStepConfigSchema,
 } from './run_agent_step';

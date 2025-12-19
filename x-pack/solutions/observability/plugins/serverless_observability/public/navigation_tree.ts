@@ -27,8 +27,8 @@ const LazyIconProductCloudInfra = lazy(() =>
   }))
 );
 const LazyAgentBuilderIcon = lazy(() =>
-  import('@kbn/ai-insights/src/icons/robot_icon').then(({ RobotIcon }) => ({
-    default: RobotIcon,
+  import('@kbn/observability-nav-icons').then(({ iconRobot }) => ({
+    default: iconRobot,
   }))
 );
 
@@ -212,7 +212,6 @@ export const createNavigationTree = ({
         {
           link: 'agent_builder',
           icon: LazyAgentBuilderIcon, // Temp svg until we have the icon in EUI
-          badgeType: 'techPreview',
         },
         !showAiAssistant
       ),
@@ -459,24 +458,25 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
-          ...filterForFeatureAvailability(
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
-                defaultMessage: 'AI',
-              }),
-              children: [
-                {
-                  link: 'management:genAiSettings',
-                  breadcrumbStatus: 'hidden',
-                },
-                {
-                  link: 'management:observabilityAiAssistantManagement',
-                  breadcrumbStatus: 'hidden',
-                },
-              ],
-            },
-            overviewAvailable
-          ),
+          {
+            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
+              defaultMessage: 'AI',
+            }),
+            children: [
+              {
+                link: 'management:genAiSettings' as const,
+                breadcrumbStatus: 'hidden' as const,
+              },
+              ...(showAiAssistant
+                ? [
+                    {
+                      link: 'management:observabilityAiAssistantManagement' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ]
+                : []),
+            ],
+          },
           {
             id: 'content',
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {

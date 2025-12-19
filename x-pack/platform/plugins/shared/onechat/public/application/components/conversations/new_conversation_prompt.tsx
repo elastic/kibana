@@ -15,7 +15,6 @@ import {
   conversationElementWidthStyles,
 } from './conversation.styles';
 import { useConversationContext } from '../../context/conversation/conversation_context';
-import { TechPreviewBadge } from '../common/tech_preview';
 
 const titleStyles = css`
   font-weight: 400;
@@ -42,7 +41,6 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       data-test-subj="agentBuilderWelcomePage"
     >
       <EuiFlexItem grow={isEmbeddedContext ? true : false} css={centerFlexItemStyles}>
-        <TechPreviewBadge />
         <EuiTitle size="m" css={titleStyles}>
           <h2>
             {i18n.translate('xpack.onechat.conversations.newConversationPrompt', {
