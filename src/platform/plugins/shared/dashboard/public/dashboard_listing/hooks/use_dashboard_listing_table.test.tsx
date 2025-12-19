@@ -179,7 +179,7 @@ describe('useDashboardListingTable', () => {
 
     act(() => {
       result.current.tableListViewTableProps.deleteItems?.([
-        { id: 'test-id', type: 'dashboard' } as DashboardSavedObjectUserContent,
+        { id: 'test-id' } as DashboardSavedObjectUserContent,
       ]);
     });
 

@@ -307,8 +307,6 @@ export class DashboardPlugin
     });
 
     const deepLinks: AppDeepLink[] = [];
-
-    // Iterate through registered tabs and auto-register their deep links
     for (const tab of this.listingViewRegistry as Set<DashboardListingTab>) {
       if (tab.deepLink) {
         deepLinks.push({

@@ -37,7 +37,7 @@ export type DashboardListingProps = PropsWithChildren<{
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
   urlStateEnabled?: boolean;
   showCreateDashboardButton?: boolean;
-  listingViewRegistry: DashboardListingViewRegistry;
+  listingViewRegistry?: DashboardListingViewRegistry;
 }>;
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {

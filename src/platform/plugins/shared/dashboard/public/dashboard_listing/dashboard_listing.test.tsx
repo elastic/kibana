@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { I18nProvider } from '@kbn/i18n-react';
+import { render, waitFor } from '@testing-library/react';
 /**
  * Mock Tabbed Table List view. This dashboard component is a wrapper around the shared UX tabbed table List view. We
  * need to ensure we're passing down the correct props, but the tabbed table list view itself doesn't need to be rendered
@@ -19,26 +20,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
 
 import { DashboardListing } from './dashboard_listing';
-import type { DashboardListingProps } from './types';
-import { coreServices } from '../services/kibana_services';
-import { render } from '@testing-library/react';
+import type { DashboardListingProps, DashboardListingViewRegistry } from './types';
 
 jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
   __esModule: true,
   TabbedTableListView: jest.fn().mockReturnValue(null),
 }));
 
-jest.mock('../services/kibana_services', () => ({
-  coreServices: {
-    executionContext: {
-      set: jest.fn(),
-      clear: jest.fn(),
-    },
-    application: {
-      navigateToUrl: jest.fn(),
-    },
-  },
-}));
+const emptyRegistry: DashboardListingViewRegistry = new Set();
 
 const renderDashboardListing = (
   props: Partial<DashboardListingProps> = {},
@@ -51,7 +40,7 @@ const renderDashboardListing = (
           <DashboardListing
             goToDashboard={jest.fn()}
             getDashboardUrl={jest.fn()}
-            listingViewRegistry={new Set()}
+            listingViewRegistry={emptyRegistry}
             {...props}
           />
         </Route>
@@ -81,6 +70,22 @@ test('renders TabbedTableListView with correct title and dashboards tab', () => 
   });
   expect(props.tabs[0]).toMatchObject({ id: 'dashboards', title: 'Dashboards' });
   expect(props.tabs.length).toBe(1);
+});
+
+test('works without listingViewRegistry (for embedded use cases)', () => {
+  render(
+    <I18nProvider>
+      <MemoryRouter initialEntries={['/list']}>
+        <Route path={['/list/:activeTab', '/list']}>
+          <DashboardListing goToDashboard={jest.fn()} getDashboardUrl={jest.fn()} />
+        </Route>
+      </MemoryRouter>
+    </I18nProvider>
+  );
+
+  const props = getLastCalledProps();
+  expect(props.tabs).toHaveLength(1);
+  expect(props.tabs[0].id).toBe('dashboards');
 });
 
 test('reads activeTab from URL path param when tab exists in registry', () => {
@@ -116,7 +121,7 @@ test('appends registry tabs after built-in tabs and preserves getTableList', () 
   expect(lastTab.getTableList).toBe(mockGetTableList);
 });
 
-test('changeActiveTab navigates to the correct URL', () => {
+test('changeActiveTab updates route to show new tab', async () => {
   const mockTab = {
     id: 'custom-tab',
     title: 'Custom Tab',
@@ -129,7 +134,10 @@ test('changeActiveTab navigates to the correct URL', () => {
   const { changeActiveTab } = getLastCalledProps();
   changeActiveTab('custom-tab');
 
-  expect(coreServices.application.navigateToUrl).toHaveBeenCalledWith('#/list/custom-tab');
+  // Wait for the route change to cause a re-render
+  await waitFor(() => {
+    expect(getLastCalledProps().activeTabId).toBe('custom-tab');
+  });
 });
 
 test('falls back to dashboards tab when URL has invalid activeTab', () => {
