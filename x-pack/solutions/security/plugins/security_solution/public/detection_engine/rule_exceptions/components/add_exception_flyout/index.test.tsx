@@ -21,6 +21,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import * as helpers from '../../utils/helpers';
 import type { Rule } from '../../../rule_management/logic/types';
 
@@ -38,6 +39,7 @@ jest.mock('../../../../common/containers/source');
 jest.mock('../../logic/use_create_update_exception');
 jest.mock('../../logic/use_exception_flyout_data');
 jest.mock('@kbn/lists-plugin/public');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../rule_management/api/hooks/use_fetch_rule_by_id_query');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
@@ -51,6 +53,7 @@ const mockFetchIndexPatterns = useFetchIndexPatterns as jest.Mock<
 >;
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 const alertDataMock: AlertData = {
   '@timestamp': '1234567890',
@@ -74,6 +77,7 @@ describe('When the add exception modal is opened', () => {
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
   });
 
   afterEach(() => {
@@ -1029,6 +1033,68 @@ describe('When the add exception modal is opened', () => {
           warningExists: true,
         })
       ).toEqual({ ...exceptionItemsInitialState, partialCodeSignatureWarningExists: true });
+    });
+  });
+
+  describe('when the user does not have permissions to write alerts', () => {
+    let wrapper: ReactWrapper;
+    beforeAll(async () => {
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        {
+          indexPatterns: stubIndexPattern,
+        },
+      ]);
+
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesSchemaMock(),
+                index: ['filebeat-*'],
+                exceptions_list: [
+                  {
+                    id: 'endpoint_list',
+                    list_id: 'endpoint_list',
+                    namespace_type: 'agnostic',
+                    type: 'endpoint',
+                  },
+                ],
+              } as Rule,
+            ]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    });
+
+    afterAll(() => {
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
+    });
+
+    it('should not render the close single alert checkbox', () => {
+      expect(
+        wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+      ).toBeFalsy();
+    });
+
+    it('should not render the bulk close alerts checkbox', () => {
+      expect(
+        wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').exists()
+      ).toBeFalsy();
     });
   });
 });
