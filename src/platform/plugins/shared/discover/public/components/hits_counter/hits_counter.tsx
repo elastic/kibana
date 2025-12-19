@@ -25,16 +25,20 @@ export interface HitsCounterProps {
   mode: HitsCounterMode;
   stateContainer: DiscoverStateContainer;
   hitCounterLabel?: string;
+  hitCounterPluralLabel?: string;
+  hitsTotalToDisplay?: number;
 }
 
 export const HitsCounter: React.FC<HitsCounterProps> = ({
   mode,
   stateContainer,
+  hitsTotalToDisplay,
   hitCounterLabel,
+  hitCounterPluralLabel,
 }) => {
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
-  let hitsTotal = totalHitsState.result;
+  let hitsTotal = hitsTotalToDisplay || totalHitsState.result;
   const hitsStatus = totalHitsState.fetchStatus;
 
   const documents$ = stateContainer.dataState.data$.documents$;
@@ -46,6 +50,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
   }
 
   if (
+    !hitsTotalToDisplay &&
     hitsStatus === FetchStatus.ERROR &&
     documentsState.fetchStatus === FetchStatus.COMPLETE &&
     documentsCount > (hitsTotal ?? 0)
@@ -90,7 +95,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
               mode === HitsCounterMode.standalone ? (
                 <FormattedMessage
                   id="discover.hitsCounter.partialHitsPluralTitle"
-                  defaultMessage={`≥{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterLabel}s}}`}
+                  defaultMessage={`≥{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterPluralLabel}}}`}
                   values={{
                     hits: hitsTotal,
                     formattedHits,
@@ -98,6 +103,11 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
                       hitCounterLabel ??
                       i18n.translate('discover.hitsCounter.resultLabel', {
                         defaultMessage: 'result',
+                      }),
+                    hitCounterPluralLabel:
+                      hitCounterPluralLabel ??
+                      i18n.translate('discover.hitsCounter.resultsLabel', {
+                        defaultMessage: 'results',
                       }),
                   }}
                 />
@@ -111,7 +121,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
             ) : mode === HitsCounterMode.standalone ? (
               <FormattedMessage
                 id="discover.hitsCounter.hitsPluralTitle"
-                defaultMessage={`{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterLabel}s}}`}
+                defaultMessage={`{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterPluralLabel}}}`}
                 values={{
                   hits: hitsTotal,
                   formattedHits,
@@ -119,6 +129,11 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
                     hitCounterLabel ??
                     i18n.translate('discover.hitsCounter.resultLabel', {
                       defaultMessage: 'result',
+                    }),
+                  hitCounterPluralLabel:
+                    hitCounterPluralLabel ??
+                    i18n.translate('discover.hitsCounter.resultsLabel', {
+                      defaultMessage: 'results',
                     }),
                 }}
               />

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,6 +29,8 @@ export const DocumentViewModeToggle = ({
   patternCount,
   dataView,
   hitCounterLabel,
+  hitCounterPluralLabel,
+  hitsTotalToDisplay,
 }: {
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
@@ -36,8 +39,10 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
-  hitCounterLabel?: string;
-}) => {
+} & Pick<
+  ComponentProps<typeof HitsCounter>,
+  'hitCounterLabel' | 'hitCounterPluralLabel' | 'hitsTotalToDisplay'
+>) => {
   const { euiTheme } = useEuiTheme();
   const {
     uiSettings,
@@ -135,6 +140,8 @@ export const DocumentViewModeToggle = ({
             mode={HitsCounterMode.standalone}
             stateContainer={stateContainer}
             hitCounterLabel={hitCounterLabel}
+            hitCounterPluralLabel={hitCounterPluralLabel}
+            hitsTotalToDisplay={hitsTotalToDisplay}
           />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
@@ -155,6 +162,8 @@ export const DocumentViewModeToggle = ({
                 mode={HitsCounterMode.appended}
                 stateContainer={stateContainer}
                 hitCounterLabel={hitCounterLabel}
+                hitCounterPluralLabel={hitCounterPluralLabel}
+                hitsTotalToDisplay={hitsTotalToDisplay}
               />
             </EuiTab>
 
