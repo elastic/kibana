@@ -245,7 +245,7 @@ describe('Calculate risk scores with ESQL', () => {
       });
 
       it('prefers Base64 encoded fields over plain fields when both exist', () => {
-        const correctRuleName = 'Life would be so much easy Rule Name';
+        const correctRuleName = 'Rule Name like this would make life so much easier';
         const ruleNameB64 = Buffer.from(correctRuleName, 'utf-8').toString('base64');
 
         const inputs = [

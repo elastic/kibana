@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -392,28 +392,42 @@ export const buildRiskScoreBucket =
     ];
 
     const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
-      const parsedRiskInputData = JSON.parse(input);
+      let parsedRiskInputData = JSON.parse('{}');
+      let ruleName: string | undefined;
+      let category: string | undefined;
 
-      // Decode Base64 encoded fields to handle special characters (quotes, backslashes, newlines, etc.)
-      const ruleName = parsedRiskInputData.rule_name_b64
-        ? Buffer.from(parsedRiskInputData.rule_name_b64, 'base64').toString('utf-8')
-        : parsedRiskInputData.rule_name; // Fallback for backward compatibility
-      const category = parsedRiskInputData.category_b64
-        ? Buffer.from(parsedRiskInputData.category_b64, 'base64').toString('utf-8')
-        : parsedRiskInputData.category; // Fallback for backward compatibility
+      try {
+        // Parse JSON and decode Base64 encoded fields to handle special characters (quotes, backslashes, newlines, etc.)
+        parsedRiskInputData = JSON.parse(input);
+
+        ruleName = parsedRiskInputData.rule_name_b64
+          ? Buffer.from(parsedRiskInputData.rule_name_b64, 'base64').toString('utf-8')
+          : parsedRiskInputData.rule_name; // Fallback for backward compatibility
+        category = parsedRiskInputData.category_b64
+          ? Buffer.from(parsedRiskInputData.category_b64, 'base64').toString('utf-8')
+          : parsedRiskInputData.category; // Fallback for backward compatibility
+      } catch {
+        // Attempt to use fallback values if parsedRiskInputData was parsed but decoding failed
+        if (parsedRiskInputData && Object.keys(parsedRiskInputData).length > 0) {
+          ruleName = parsedRiskInputData.rule_name;
+          category = parsedRiskInputData.category;
+        }
+      }
 
       const value = parseFloat(parsedRiskInputData.risk_score);
       const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
-      const {
-        risk_score: _,
-        rule_name_b64: __,
-        category_b64: ___,
-        ...otherFields
-      } = parsedRiskInputData;
+      const otherFields = omit(parsedRiskInputData, [
+        'risk_score',
+        'rule_name',
+        'rule_name_b64',
+        'category',
+        'category_b64',
+      ]);
 
       return {
+        id: parsedRiskInputData.id,
         ...otherFields,
-        rule_name,
+        rule_name: ruleName,
         category,
         score: value,
         contribution: currentScore / RIEMANN_ZETA_VALUE,
