@@ -16,7 +16,7 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
+import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID = 'observability.get_data_sources';
 
@@ -49,31 +49,13 @@ export function createGetDataSourcesTool({
     },
     handler: async () => {
       try {
-        const {
-          apmIndexPatterns: apmIndices,
-          logIndexPatterns,
-          metricIndexPatterns,
-          alertsIndexPattern,
-        } = await getObservabilityDataSources({ core, plugins, logger });
+        const data = await getToolHandler({ core, plugins, logger });
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: {
-                apm: {
-                  indexPatterns: apmIndices,
-                },
-                logs: {
-                  indexPatterns: logIndexPatterns,
-                },
-                metrics: {
-                  indexPatterns: metricIndexPatterns,
-                },
-                alerts: {
-                  indexPattern: alertsIndexPattern,
-                },
-              },
+              data,
             },
           ],
         };
