@@ -10,6 +10,15 @@
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 
+// We need to come up with a better way for suggestions due to custom steps support
+// We use this workaround until that happens.
+// Ideally, it should be managed on custom step level.
+const aiSteps = ['ai.prompt', 'ai.summarize', 'ai.classify'];
+const aiConnectors = [
+  'gen-ai.run',
+  // 'inference.completion' // for some reason inference connectors are not recognized by InferencePluginStart
+];
+
 /**
  * Generate connector-id suggestions for a specific connector type
  */
@@ -71,10 +80,10 @@ export function getConnectorIdSuggestionsItems(
 
   return suggestions;
 }
+
 /**
  * Get connector instances for a specific connector type
  */
-
 export function getConnectorInstancesForType(
   connectorType: string,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
@@ -83,31 +92,45 @@ export function getConnectorInstancesForType(
   name: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  connectorType: string;
 }> {
-  if (!dynamicConnectorTypes) {
-    return [];
+  let resolvedConnectorTypes = [connectorType];
+
+  if (aiSteps.includes(connectorType)) {
+    resolvedConnectorTypes = aiConnectors;
   }
 
-  // For sub-action connectors (e.g., "inference.completion"), get the base type
-  const baseConnectorType = connectorType.includes('.')
-    ? connectorType.split('.')[0]
-    : connectorType;
+  return resolvedConnectorTypes
+    .map((resolvedConnectorType) => {
+      if (!dynamicConnectorTypes) {
+        return [];
+      }
 
-  // Try multiple lookup strategies to find the connector type
-  const lookupCandidates = [
-    connectorType, // Direct match (e.g., "slack")
-    `.${connectorType}`, // With dot prefix (e.g., ".slack")
-    baseConnectorType, // Base type for sub-actions (e.g., "inference" from "inference.completion")
-    `.${baseConnectorType}`, // Base type with dot prefix (e.g., ".inference")
-  ];
+      // For sub-action connectors (e.g., "inference.completion"), get the base type
+      const baseConnectorType = resolvedConnectorType.includes('.')
+        ? resolvedConnectorType.split('.')[0]
+        : resolvedConnectorType;
 
-  for (const candidate of lookupCandidates) {
-    const connectorTypeInfo = dynamicConnectorTypes[candidate];
+      // Try multiple lookup strategies to find the connector type
+      const lookupCandidates = [
+        resolvedConnectorType, // Direct match (e.g., "slack")
+        `.${resolvedConnectorType}`, // With dot prefix (e.g., ".slack")
+        baseConnectorType, // Base type for sub-actions (e.g., "inference" from "inference.completion")
+        `.${baseConnectorType}`, // Base type with dot prefix (e.g., ".inference")
+      ];
 
-    if (connectorTypeInfo?.instances?.length > 0) {
-      return connectorTypeInfo.instances;
-    }
-  }
+      for (const candidate of lookupCandidates) {
+        const connectorTypeInfo = dynamicConnectorTypes[candidate];
 
-  return [];
+        if (connectorTypeInfo?.instances?.length > 0) {
+          return connectorTypeInfo.instances.map((instance) => ({
+            ...instance,
+            connectorType: connectorTypeInfo.actionTypeId,
+          }));
+        }
+      }
+
+      return [];
+    })
+    .flat();
 }

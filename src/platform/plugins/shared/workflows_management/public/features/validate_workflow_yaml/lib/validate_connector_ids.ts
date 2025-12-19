@@ -76,7 +76,7 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `✓ Connected (${connectorIdItem.connectorType} connector, ID: ${instance.id})`,
+        afterMessage: `✓ Connected (${instance.connectorType} connector, ID: ${instance.id})`,
         hoverMessage: null,
       });
     }
