@@ -32,6 +32,8 @@ export interface XmlOptions {
   indentChar?: string;
   /** The initial indentation level. Defaults to 0. */
   initialIndentLevel?: number;
+  /** Whether to escape special XML characters in text content. Defaults to true. */
+  escapeContent?: boolean;
 }
 
 // =================================================================================
@@ -77,7 +79,9 @@ const _buildAttributeString = (attributes?: XmlAttributes): string => {
  * @returns A formatted XML string with proper nesting and indentation.
  */
 export const generateXmlTree = (node: XmlNode, options: XmlOptions = {}): string => {
-  const { indentChar = '  ', initialIndentLevel = 0 } = options;
+  const { indentChar = '  ', initialIndentLevel = 0, escapeContent = true } = options;
+
+  const maybeEscape = (text: string): string => (escapeContent ? _escapeXml(text) : text);
 
   /**
    * The internal recursive function that does the rendering.
@@ -87,9 +91,9 @@ export const generateXmlTree = (node: XmlNode, options: XmlOptions = {}): string
   const _render = (currentNode: XmlNode | string, level: number): string => {
     const indent = indentChar.repeat(level);
 
-    // Base case: If the current "node" is just a string, escape it and indent it.
+    // Base case: If the current "node" is just a string, optionally escape it and indent it.
     if (typeof currentNode === 'string') {
-      return indent + _escapeXml(currentNode);
+      return indent + maybeEscape(currentNode);
     }
 
     const { tagName, attributes, children } = currentNode;
@@ -103,7 +107,7 @@ export const generateXmlTree = (node: XmlNode, options: XmlOptions = {}): string
     // Case 2: The only child is a single string, create a single-line tag.
     // This avoids unnecessary newlines for simple content like `<name>John Doe</name>`.
     if (children.length === 1 && typeof children[0] === 'string') {
-      const content = _escapeXml(children[0]);
+      const content = maybeEscape(children[0]);
       return `${indent}<${tagName}${attributeString}>${content}</${tagName}>`;
     }
 

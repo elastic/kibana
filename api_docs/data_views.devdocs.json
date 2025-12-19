@@ -13729,6 +13729,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
               },
               {
@@ -26024,6 +26028,23 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.SavedObject.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "\nAccess control information of the saved object.\nThis can be be used to customize access to the object in addition to RBAC, e.g.\nto set an object to read-only mode, where it is only editable by the owner of\nthe object (or an admin), even if other users are granted write access via a role."
+            ],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
             ],
             "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,

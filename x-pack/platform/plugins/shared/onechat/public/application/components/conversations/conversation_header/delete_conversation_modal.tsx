@@ -43,6 +43,7 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
 
   return (
     <EuiConfirmModal
+      maxWidth="400px"
       aria-labelledby={confirmModalTitleId}
       title={
         <FormattedMessage

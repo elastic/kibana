@@ -77,12 +77,13 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
 
               // Create identified resource documents to keep track of them (without content)
               const resourceIdentifier = new DashboardResourceIdentifier('splunk');
-              const resourcesToCreate = resourceIdentifier
-                .fromResources(resources)
-                .map<CreateSiemMigrationResourceInput>((resource) => ({
+              const identifiedResources = await resourceIdentifier.fromResources(resources);
+              const resourcesToCreate = identifiedResources.map<CreateSiemMigrationResourceInput>(
+                (resource) => ({
                   ...resource,
                   migration_id: migrationId,
-                }));
+                })
+              );
 
               await Promise.all([
                 dashboardMigrationsClient.data.resources.upsert(resourcesUpsert),

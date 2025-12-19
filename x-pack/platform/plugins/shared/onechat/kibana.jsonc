@@ -14,6 +14,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "aiAssistantManagementSelection",
       "data",
       "dataViews",
       "uiActions",
@@ -28,7 +29,9 @@
       "spaces",
       "stackConnectors",
       "licensing",
-      "triggersActionsUi"
+      "triggersActionsUi",
+      "esUiShared",
+      "workflowsExtensions",
     ],
     "requiredBundles": [
       "kibanaReact"

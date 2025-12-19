@@ -1318,6 +1318,39 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isFeature",
+        "type": "Function",
+        "tags": [],
+        "label": "isFeature",
+        "description": [],
+        "signature": [
+          "(feature: any) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isFeature.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isFeatureWithFilter",
         "type": "Function",
         "tags": [],
@@ -1988,6 +2021,20 @@
             "tags": [],
             "label": "severity_score",
             "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.GeneratedSignificantEventQuery.evidence",
+            "type": "Array",
+            "tags": [],
+            "label": "evidence",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3021,6 +3068,55 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.SignificantEventsGetResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantEventsGetResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.SignificantEventsGetResponse.significant_events",
+            "type": "Array",
+            "tags": [],
+            "label": "significant_events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.SignificantEventsResponse",
+                "text": "SignificantEventsResponse"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.SignificantEventsGetResponse.aggregated_occurrences",
+            "type": "Array",
+            "tags": [],
+            "label": "aggregated_occurrences",
+            "description": [],
+            "signature": [
+              "SignificantEventOccurrence[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.SimulationDocReport",
         "type": "Interface",
         "tags": [],
@@ -3073,7 +3169,21 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"failed\" | \"dropped\" | \"skipped\" | \"parsed\" | \"partially_parsed\""
+              "\"skipped\" | \"failed\" | \"dropped\" | \"parsed\" | \"partially_parsed\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.SimulationDocReport.processed_by",
+            "type": "Array",
+            "tags": [],
+            "label": "processed_by",
+            "description": [],
+            "signature": [
+              "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
             "deprecated": false,
@@ -3174,6 +3284,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.StreamQueryKql.evidence",
+            "type": "Array",
+            "tags": [],
+            "label": "evidence",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
             "deprecated": false,
@@ -3294,7 +3418,7 @@
         "label": "DocSimulationStatus",
         "description": [],
         "signature": [
-          "\"failed\" | \"dropped\" | \"skipped\" | \"parsed\" | \"partially_parsed\""
+          "\"skipped\" | \"failed\" | \"dropped\" | \"parsed\" | \"partially_parsed\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
         "deprecated": false,
@@ -3765,35 +3889,13 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.SignificantEventsGetResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "SignificantEventsGetResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.SignificantEventsResponse",
-            "text": "SignificantEventsResponse"
-          },
-          "[]"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.SignificantEventsPreviewResponse",
         "type": "Type",
         "tags": [],
         "label": "SignificantEventsPreviewResponse",
         "description": [],
         "signature": [
-          "{ kql: { query: string; }; occurrences: { date: string; count: number; }[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; }"
+          "{ kql: { query: string; }; occurrences: SignificantEventOccurrence[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
         "deprecated": false,
@@ -3815,7 +3917,7 @@
             "section": "def-common.StreamQueryKql",
             "text": "StreamQueryKql"
           },
-          " & { occurrences: { date: string; count: number; }[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; }"
+          " & { occurrences: SignificantEventOccurrence[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
         "deprecated": false,
@@ -4616,7 +4718,13 @@
           "ZodOptional",
           "<",
           "ZodNumber",
-          ">; }, \"strip\", ",
+          ">; evidence: ",
+          "ZodOptional",
+          "<",
+          "ZodArray",
+          "<",
+          "ZodString",
+          ", \"many\">>; }, \"strip\", ",
           "ZodTypeAny",
           ", { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
@@ -4626,7 +4734,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; severity_score?: number | undefined; }, { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
+          "; } | undefined; severity_score?: number | undefined; evidence?: string[] | undefined; }, { title: string; kql: { query: string; }; feature?: { type: \"system\"; name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4634,7 +4742,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; } | undefined; severity_score?: number | undefined; }>"
+          "; } | undefined; severity_score?: number | undefined; evidence?: string[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
         "deprecated": false,

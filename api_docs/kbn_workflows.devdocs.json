@@ -1887,6 +1887,20 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.BaseConnectorContract.configSchema",
+            "type": "Any",
+            "tags": [],
+            "label": "configSchema",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.BaseConnectorContract.summary",
             "type": "CompoundType",
             "tags": [],
@@ -5801,7 +5815,7 @@
         "label": "ExecutionStatusUnion",
         "description": [],
         "signature": [
-          "\"running\" | \"pending\" | \"failed\" | \"timed_out\" | \"completed\" | \"cancelled\" | \"skipped\" | \"waiting\" | \"waiting_for_input\""
+          "\"running\" | \"skipped\" | \"pending\" | \"failed\" | \"timed_out\" | \"completed\" | \"cancelled\" | \"waiting\" | \"waiting_for_input\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,

@@ -43,6 +43,7 @@ jobs:
           all: 'true'
           project-number: 787
           owner: 'elastic'
+          mapping: 'mapping-sizes-and-impact-p787.json'
 
       - name: Update every issue in project 859 (https://github.com/orgs/elastic/projects/859)
         uses: ./actions/github-projects/map-labels
