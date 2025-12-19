@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiDescriptionList,
   EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
 import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import type { JsonValue } from '@kbn/utility-types';
@@ -73,11 +74,13 @@ export const AlertDetailFlyout = ({
                 title: (column.displayAsText as string) ?? column.id,
                 description:
                   value != null ? (
-                    <DefaultCellValue
-                      columnId={column.id}
-                      alert={alert}
-                      openLinksInNewTab={openLinksInNewTab}
-                    />
+                    <div className="eui-textBreakWord">
+                      <DefaultCellValue
+                        columnId={column.id}
+                        alert={alert}
+                        openLinksInNewTab={openLinksInNewTab}
+                      />
+                    </div>
                   ) : (
                     '—'
                   ),
