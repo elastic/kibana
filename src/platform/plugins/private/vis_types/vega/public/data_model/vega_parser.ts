@@ -20,6 +20,7 @@ import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
 import { EsQueryParser } from './es_query_parser';
+import { EsqlQueryParser } from './esql_query_parser';
 import { Utils, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
@@ -605,6 +606,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       const onWarn = this._onWarning.bind(this);
       this._urlParsers = {
         elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        esql: new EsqlQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
       };
