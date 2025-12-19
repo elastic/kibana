@@ -58,7 +58,7 @@ export interface StreamsAppStartDependencies {
   discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  indexLifecycleManagement: IndexLifecycleManagementPluginStart;
+  indexLifecycleManagement?: IndexLifecycleManagementPluginStart;
   indexManagement: IndexManagementPluginStart;
   ingestPipelines: IngestPipelinesPluginStart;
   licensing: LicensingPluginStart;
