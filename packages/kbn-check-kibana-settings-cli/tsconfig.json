@@ -14,5 +14,10 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-root-server-internal",
+    "@kbn/dev-cli-runner",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-plugins-server-internal",
+    "@kbn/tooling-log",
   ]
 }
