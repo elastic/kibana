@@ -52,6 +52,7 @@ import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
 
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -61,7 +62,6 @@ import {
   RulesSettingsService,
   getRulesSettingsFeature,
 } from './rules_settings';
-import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import type { ILicenseState } from './lib/license_state';
 import { LicenseState } from './lib/license_state';
 import type { AlertingRequestHandlerContext, RuleAlertData } from './types';
@@ -82,16 +82,13 @@ import {
   setupSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
-import {
-  initializeMaintenanceWindowEventsGenerator,
-  scheduleMaintenanceWindowEventsGenerator,
-} from './maintenance_window_events/task';
 import type { AlertingConfig, AlertingRulesConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -107,7 +104,6 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
@@ -117,6 +113,7 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
+import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -131,6 +128,7 @@ export const EVENT_LOG_ACTIONS = {
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
   deleteAlerts: 'delete-alerts',
+  gapAutoFillSchedule: 'gap-auto-fill-schedule',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -210,6 +208,7 @@ export interface AlertingPluginsStart {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
+  maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 
 export class AlertingPlugin {
@@ -223,7 +222,6 @@ export class AlertingPlugin {
   private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
-  private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
@@ -241,6 +239,7 @@ export class AlertingPlugin {
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
+  private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -251,7 +250,6 @@ export class AlertingPlugin {
     this.nodeRoles = initializerContext.node.roles;
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
-    this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
@@ -280,7 +278,6 @@ export class AlertingPlugin {
         management: {
           insightsAndAlerting: {
             triggersActions: true,
-            maintenanceWindows: true,
           },
         },
       };
@@ -288,9 +285,6 @@ export class AlertingPlugin {
 
     if (this.config.rulesSettings.enabled) {
       plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
-    }
-    if (this.config.maintenanceWindow.enabled) {
-      plugins.features.registerKibanaFeature(maintenanceWindowFeature);
     }
 
     if (this.config.cancelAlertsOnRuleTimeout === false) {
@@ -419,12 +413,6 @@ export class AlertingPlugin {
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
-    initializeMaintenanceWindowEventsGenerator(
-      this.logger,
-      plugins.taskManager,
-      core.getStartServices
-    );
-
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
       'alerting',
       this.createRouteHandlerContext(core)
@@ -438,6 +426,16 @@ export class AlertingPlugin {
       registerClusterCollector({
         monitoringCollection: plugins.monitoringCollection,
         core,
+      });
+    }
+
+    if (this?.config?.gapAutoFillScheduler?.enabled ?? false) {
+      registerGapAutoFillSchedulerTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        getRulesClientWithRequest: (request) => this?.getRulesClientWithRequest?.(request),
+        eventLogger: this.eventLogger!,
+        schedulerConfig: this.config.gapAutoFillScheduler,
       });
     }
 
@@ -591,14 +589,17 @@ export class AlertingPlugin {
       rulesClientFactory,
       alertingAuthorizationClientFactory,
       rulesSettingsClientFactory,
-      maintenanceWindowClientFactory,
       security,
       licenseState,
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        RULE_SAVED_OBJECT_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      ],
     });
 
     alertingAuthorizationClientFactory.initialize({
@@ -622,6 +623,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
@@ -650,13 +652,6 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
-    maintenanceWindowClientFactory.initialize({
-      logger: this.logger,
-      savedObjectsService: core.savedObjects,
-      securityService: core.security,
-      uiSettings: core.uiSettings,
-    });
-
     const getRulesClientWithRequest = async (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
@@ -666,6 +661,8 @@ export class AlertingPlugin {
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 
+    this.getRulesClientWithRequest = getRulesClientWithRequest;
+
     const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);
     };
@@ -674,8 +671,11 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
-    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
-      return maintenanceWindowClientFactory!.create(request);
+    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+      if (!plugins.maintenanceWindows) {
+        return;
+      }
+      return plugins.maintenanceWindows.getMaintenanceWindowClientInternal(request);
     };
 
     taskRunnerFactory.initialize({
@@ -696,8 +696,8 @@ export class AlertingPlugin {
       logger,
       maintenanceWindowsService: new MaintenanceWindowsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
-        getMaintenanceWindowClientWithRequest,
         logger,
+        getMaintenanceWindowClientInternal,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
       ruleTypeRegistry: this.ruleTypeRegistry!,
@@ -736,7 +736,6 @@ export class AlertingPlugin {
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
       () => {}
     ); // it shouldn't reject, but just in case
-    scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
@@ -758,7 +757,6 @@ export class AlertingPlugin {
       ruleTypeRegistry,
       rulesClientFactory,
       rulesSettingsClientFactory,
-      maintenanceWindowClientFactory,
     } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
@@ -774,9 +772,6 @@ export class AlertingPlugin {
             return rulesSettingsClientFactory.create(request);
           }
           return rulesSettingsClientFactory.createWithAuthorization(request);
-        },
-        getMaintenanceWindowClient: () => {
-          return maintenanceWindowClientFactory.createWithAuthorization(request);
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>

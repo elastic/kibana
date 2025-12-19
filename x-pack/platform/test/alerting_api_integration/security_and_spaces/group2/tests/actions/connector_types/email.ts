@@ -241,7 +241,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"from\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+            message: `error validating connector type config: Field \"from\": Required`,
           });
         });
     });
@@ -268,7 +268,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration",
+              "error validating connector type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration",
           });
         });
 
@@ -294,7 +294,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [host] value 'stmp.gmail.com' is not in the allowedHosts configuration",
+              "error validating connector type config: [host] value 'stmp.gmail.com' is not in the allowedHosts configuration",
           });
         });
     });

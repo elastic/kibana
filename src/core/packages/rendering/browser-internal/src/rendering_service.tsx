@@ -30,6 +30,7 @@ import { getLayoutVersion, getLayoutDebugFlag } from '@kbn/core-chrome-layout-fe
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
+import type { CoreEnv } from '@kbn/core-base-browser-internal';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -37,6 +38,7 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  coreEnv: CoreEnv;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -136,6 +138,7 @@ export class RenderingService implements IRenderingService {
         i18n={deps.i18n}
         theme={deps.theme}
         userProfile={deps.userProfile}
+        coreEnv={deps.coreEnv}
       >
         {children}
       </KibanaRenderContextProvider>

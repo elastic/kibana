@@ -8,6 +8,7 @@
  */
 
 import { join } from 'path';
+import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   clearLog,
@@ -16,7 +17,6 @@ import {
   defaultKibanaIndex,
   defaultKibanaTaskIndex,
 } from '@kbn/migrator-test-kit';
-import { delay } from '../test_utils';
 import '../jest_matchers';
 import { getElasticsearchClientWrapperFactory } from '@kbn/migrator-test-kit';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
@@ -225,7 +225,7 @@ describe('split .kibana index into multiple system indices', () => {
       ).toEqual(true);
 
       await esServer?.stop();
-      await delay(2);
+      await timer(2_000);
     });
   });
 });

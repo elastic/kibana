@@ -25,8 +25,14 @@ const retryResponseStatuses = [
   408, // RequestTimeout
   410, // Gone
   429, // TooManyRequests -> ES circuit breaker
+  502, // BadGateway
   503, // ServiceUnavailable
   504, // GatewayTimeout
+];
+
+const temporarySearchPhaseExecutionExceptionReasons = [
+  'Search rejected due to missing shards',
+  'all shards failed',
 ];
 
 export const catchRetryableEsClientErrors = (
@@ -48,7 +54,9 @@ export const catchRetryableSearchPhaseExecutionException = (
 ): Either.Either<RetryableEsClientError, never> => {
   if (
     e?.body?.error?.type === 'search_phase_execution_exception' &&
-    e?.body?.error?.caused_by?.reason?.includes('Search rejected due to missing shards')
+    temporarySearchPhaseExecutionExceptionReasons.some((reason) =>
+      e?.body?.error?.caused_by?.reason?.includes(reason)
+    )
   ) {
     return Either.left({
       type: 'retryable_es_client_error' as const,

@@ -8,14 +8,18 @@
 import type { OnechatEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
+import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
+  browserToolCall = 'browser_tool_call',
   toolProgress = 'tool_progress',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
+  thinkingComplete = 'thinking_complete',
+  promptRequest = 'prompt_request',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -39,6 +43,23 @@ export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventD
 
 export const isToolCallEvent = (event: OnechatEvent<string, any>): event is ToolCallEvent => {
   return event.type === ChatEventType.toolCall;
+};
+
+export interface BrowserToolCallEventData {
+  tool_call_id: string;
+  tool_id: string;
+  params: Record<string, unknown>;
+}
+
+export type BrowserToolCallEvent = ChatEventBase<
+  ChatEventType.browserToolCall,
+  BrowserToolCallEventData
+>;
+
+export const isBrowserToolCallEvent = (
+  event: OnechatEvent<string, any>
+): event is BrowserToolCallEvent => {
+  return event.type === ChatEventType.browserToolCall;
 };
 
 // Tool progress
@@ -68,6 +89,21 @@ export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResult
 
 export const isToolResultEvent = (event: OnechatEvent<string, any>): event is ToolResultEvent => {
   return event.type === ChatEventType.toolResult;
+};
+
+// Prompt request
+
+export interface PromptRequestEventData {
+  prompt: PromptRequest;
+  source: PromptRequestSource;
+}
+
+export type PromptRequestEvent = ChatEventBase<ChatEventType.promptRequest, PromptRequestEventData>;
+
+export const isPromptRequestEvent = (
+  event: OnechatEvent<string, any>
+): event is PromptRequestEvent => {
+  return event.type === ChatEventType.promptRequest;
 };
 
 // reasoning
@@ -109,6 +145,8 @@ export interface MessageCompleteEventData {
   message_id: string;
   /** full text content of the message */
   message_content: string;
+  /** optional structured data */
+  structured_output?: object;
 }
 
 export type MessageCompleteEvent = ChatEventBase<
@@ -122,11 +160,31 @@ export const isMessageCompleteEvent = (
   return event.type === ChatEventType.messageComplete;
 };
 
+// Thinking complete
+
+export interface ThinkingCompleteEventData {
+  /** time elapsed from round start to first token arrival, in ms */
+  time_to_first_token: number;
+}
+
+export type ThinkingCompleteEvent = ChatEventBase<
+  ChatEventType.thinkingComplete,
+  ThinkingCompleteEventData
+>;
+
+export const isThinkingCompleteEvent = (
+  event: OnechatEvent<string, any>
+): event is ThinkingCompleteEvent => {
+  return event.type === ChatEventType.thinkingComplete;
+};
+
 // Round complete
 
 export interface RoundCompleteEventData {
   /** round that was completed */
   round: ConversationRound;
+  /** if true, it means the round was resumed, so we need to replace the last one instead of adding a new one */
+  resumed?: boolean;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -195,11 +253,14 @@ export const isConversationIdSetEvent = (
  */
 export type ChatAgentEvent =
   | ToolCallEvent
+  | BrowserToolCallEvent
   | ToolProgressEvent
   | ToolResultEvent
+  | PromptRequestEvent
   | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
+  | ThinkingCompleteEvent
   | RoundCompleteEvent;
 
 /**

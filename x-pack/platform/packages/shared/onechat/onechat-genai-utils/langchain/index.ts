@@ -16,7 +16,10 @@ export {
   createMessageEvent,
   createReasoningEvent,
   createToolCallEvent,
+  createBrowserToolCallEvent,
   createToolResultEvent,
+  createThinkingCompleteEvent,
+  createPromptRequestEvent,
 } from './graph_events';
 export {
   extractTextContent,

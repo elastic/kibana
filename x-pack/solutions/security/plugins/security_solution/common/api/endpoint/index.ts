@@ -32,3 +32,5 @@ export * from './metadata';
 export * from './policy';
 
 export * from './suggestions';
+
+export * from './scripts_library';

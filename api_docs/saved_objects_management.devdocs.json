@@ -294,7 +294,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; name: React.ReactNode; security?: string | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; name: React.ReactNode; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
               "Interpolation",
               "<",
               "Theme",
@@ -316,7 +316,9 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; height?: string | number | undefined; align?: ",
+              "HorizontalAlignment",
+              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; render?: ((value: any, item: ",
               {
@@ -326,9 +328,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; align?: ",
-              "HorizontalAlignment",
-              " | undefined; height?: string | number | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; nameTooltip?: ",
+              ") => React.ReactNode) | undefined; nameTooltip?: ",
               "EuiTableColumnNameTooltipProps",
               " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
@@ -685,7 +685,9 @@
               " | ",
               "SavedObjectsImportMissingReferencesError",
               " | ",
-              "SavedObjectsImportUnknownError"
+              "SavedObjectsImportUnknownError",
+              " | ",
+              "SavedObjectsImportUnexpectedAccessControlMetadataError"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,
@@ -828,7 +830,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
@@ -2050,7 +2052,7 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
             "deprecated": false,

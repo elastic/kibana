@@ -264,7 +264,11 @@ export const EsqlQueryExpression: React.FC<
     async (q: AggregateQuery) => {
       const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview(queryObj.esql, dataViews);
+          const esqlDataView = await getESQLAdHocDataview({
+            dataViewsService: dataViews,
+            query: queryObj.esql,
+            http,
+          });
           const indexPattern: string = esqlDataView.getIndexPattern();
           const currentEsFields = await getFields(http, [indexPattern]);
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);

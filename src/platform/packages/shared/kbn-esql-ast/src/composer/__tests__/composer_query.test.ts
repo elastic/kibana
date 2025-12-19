@@ -24,6 +24,28 @@ ComposerQuery
    └─ {}`);
 });
 
+test('can dump query with AST structure', () => {
+  const query = esql`ROW a = 1 + 2`;
+
+  expect('\n' + query.dump()).toBe(`
+ComposerQuery
+├─ query
+│  └─ ROW a = 1 + 2
+│
+├─ params
+│  └─ {}
+│
+└─ ast
+   └─ query
+      └─ command "row"
+         └─ function "="
+            ├─ column "a"
+            │  └─ identifier "a"
+            └─ function "+"
+               ├─ literal "1"
+               └─ literal "2"`);
+});
+
 describe('.pipe``', () => {
   test('can add additional commands to the query', () => {
     const query = esql`FROM kibana_ecommerce_index`;
@@ -386,6 +408,14 @@ describe('high-level helpers', () => {
         // @ts-expect-error - TypeScript types do not allow empty .lookup_join() call
         query.lookup_join('lookup_index');
       }).toThrow();
+    });
+
+    test('can specify source with alias', () => {
+      const query = esql`FROM index`;
+
+      query.lookup_join({ index: 'lookup_index', alias: 'li' }, 'field1');
+
+      expect(query.print('basic')).toBe('FROM index | LOOKUP JOIN lookup_index AS li ON field1');
     });
   });
 

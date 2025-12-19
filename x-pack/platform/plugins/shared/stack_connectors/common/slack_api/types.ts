@@ -74,11 +74,13 @@ export interface SlackApiService {
   postMessage: ({
     channels,
     channelIds,
+    channelNames,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
   postBlockkit: ({
     channels,
     channelIds,
+    channelNames,
     text,
   }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

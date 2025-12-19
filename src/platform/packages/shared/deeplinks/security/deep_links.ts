@@ -10,10 +10,16 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  attacks = 'attacks',
   aiValue = 'ai_value',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'alert_detections',
+
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All Cases page names must match `CasesDeepLinkId` in x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts
@@ -30,6 +36,8 @@ export enum SecurityPageName {
   cloudSecurityPostureVulnerabilityDashboard = 'cloud_security_posture-vulnerability_dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
+  cloudDefend = 'cloud_defend',
+  cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
   dataQuality = 'data_quality',
   detections = 'detections',
@@ -65,6 +73,7 @@ export enum SecurityPageName {
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
+  scriptsLibrary = 'scripts_library',
   siemReadiness = 'siem_readiness',
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
@@ -89,6 +98,7 @@ export enum SecurityPageName {
   entityAnalyticsLanding = 'entity_analytics-landing',
   entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
   entityAnalyticsOverview = 'entity_analytics-overview',
+  entityAnalyticsThreatHunting = 'entity_analytics-threat_hunting',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',

@@ -247,7 +247,7 @@ describe('Search service', () => {
 
         expect(mockSessionClient.trackId).toBeCalledTimes(1);
 
-        expect(mockSessionClient.trackId.mock.calls[0]).toEqual([searchRequest, 'my_id', options]);
+        expect(mockSessionClient.trackId.mock.calls[0]).toEqual(['my_id', options]);
       });
 
       it('does not call `trackId` if search is already tracked', async () => {

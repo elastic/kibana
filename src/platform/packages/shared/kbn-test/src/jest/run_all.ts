@@ -59,8 +59,9 @@ export async function runJestAll() {
   const configsArg: string | undefined = argv.configs;
   const maxParallelRaw: string | undefined = argv.maxParallel || process.env.JEST_MAX_PARALLEL;
   const maxParallel = Math.max(1, parseInt(maxParallelRaw || '3', 10));
-
   let configs: string[] = [];
+
+  let hasAnyConfigs = false;
 
   if (configsArg) {
     const passedConfigs = configsArg
@@ -72,6 +73,8 @@ export async function runJestAll() {
 
     writeConfigDiscoverySummary(passedConfigs, configsWithTests, emptyConfigs, log);
 
+    hasAnyConfigs = Boolean(configsWithTests.length || emptyConfigs.length);
+
     configs = configsWithTests.map((c) => c.config);
   } else {
     log.info('--configs flag is not passed. Finding and running all configs in the repo.');
@@ -80,22 +83,24 @@ export async function runJestAll() {
 
     configs = configsWithTests.map((c) => c.config);
 
+    hasAnyConfigs = Boolean(configs.length);
+
     log.info(
       `Found ${configs.length} configs to run. Found ${emptyConfigs.length} configs with no tests. Skipping them.`
     );
-  }
-
-  if (!configs.length) {
-    log.error('No configs found after parsing --configs');
-    process.exit(1);
   }
 
   log.info(
     `Launching up to ${maxParallel} parallel Jest config processes (forcing --runInBand per process).`
   );
 
+  if (!hasAnyConfigs) {
+    log.error('No configs found after parsing --configs');
+    process.exit(1);
+  }
+
   // First pass
-  const firstPass = await runConfigs(configs, maxParallel, log);
+  const firstPass = configs.length ? await runConfigs(configs, maxParallel, log) : [];
 
   let failing = firstPass.filter((r) => r.code !== 0).map((r) => r.config);
 

@@ -6,10 +6,13 @@
  */
 
 export const steps = {
+  init: 'init',
   researchAgent: 'researchAgent',
   executeTool: 'executeTool',
+  handleToolInterrupt: 'handleToolInterrupt',
   prepareToAnswer: 'prepareToAnswer',
   answerAgent: 'answerAgent',
+  finalize: 'finalize',
 };
 
 export const tags = {
@@ -17,3 +20,5 @@ export const tags = {
   researchAgent: 'research-agent',
   answerAgent: 'answer-agent',
 };
+
+export const BROWSER_TOOL_PREFIX = 'browser_';

@@ -261,6 +261,7 @@ export class DiscoverPlugin
           return esqlLocatorGetLocation({
             discoverAppLocator,
             dataViews: plugins.dataViews,
+            http: core.http,
           });
         },
       });
@@ -416,23 +417,17 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME } =
-          await getEmbeddableServices();
+        const { addControlsFromSavedSession } = await getEmbeddableServices();
 
         addControlsFromSavedSession(container, savedObject);
         container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {},
-              references: [
-                ...savedObject.references,
-                {
-                  name: SAVED_OBJECT_REF_NAME,
-                  type: SEARCH_EMBEDDABLE_TYPE,
-                  id: savedObject.id,
-                },
-              ],
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: [],
             },
           },
           true

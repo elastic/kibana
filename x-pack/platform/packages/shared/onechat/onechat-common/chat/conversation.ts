@@ -7,10 +7,17 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
-import type { Attachment, AttachmentInput } from '../attachments';
+import type {
+  Attachment,
+  AttachmentInput,
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '../attachments';
+import type { PromptRequest } from '../agents/prompts';
+import type { RoundState } from './round_state';
 
 /**
- * Represents a user input that initiated a conversation round.
+ * Represents the input that initiated a conversation round.
  */
 export interface RoundInput {
   /**
@@ -19,22 +26,36 @@ export interface RoundInput {
   message: string;
   /**
    * Optional attachments to provide to the agent.
+   * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: Attachment[];
+  /**
+   * References to versioned conversation-level attachments.
+   */
+  attachment_refs?: AttachmentVersionRef[];
 }
 
 /**
- * Raw version of RoundInput, as accepted as input by the converse and agent APIs.
+ * Represents the input used to interact with an agent (new round, resume round)
  */
-export interface RawRoundInput {
+export interface ConverseInput {
   /**
    * A text message from the user.
    */
-  message: string;
+  message?: string;
   /**
    * Optional attachments to provide to the agent.
+   * @deprecated Use attachment_refs with conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
+  /**
+   * References to versioned conversation-level attachments.
+   */
+  attachment_refs?: AttachmentVersionRef[];
+  /**
+   * Response from the user to an prompt request.
+   */
+  prompt_response?: Record<string, unknown>;
 }
 
 /**
@@ -45,6 +66,7 @@ export interface AssistantResponse {
    * The text message from the assistant.
    */
   message: string;
+  structured_output?: object;
 }
 
 export enum ConversationRoundStepType {
@@ -138,6 +160,15 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
  */
 export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 
+export enum ConversationRoundStatus {
+  /** round is currently being processed */
+  inProgress = 'in_progress',
+  /** the round is completed */
+  completed = 'completed',
+  /** round has been interrupted and is awaiting user input */
+  awaitingPrompt = 'awaiting_prompt',
+}
+
 /**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
@@ -145,24 +176,76 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 export interface ConversationRound {
   /** unique id for this round */
   id: string;
+  /** current status of the round */
+  status: ConversationRoundStatus;
+  /** persisted state to resume interrupted states */
+  state?: RoundState;
+  /** if status is awaiting_prompt, contains the current prompt request*/
+  pending_prompt?: PromptRequest;
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
+  /** when the round was started */
+  started_at: string;
+  /** time it took to first token, in ms */
+  time_to_first_token: number;
+  /** time it took to last token, in ms */
+  time_to_last_token: number;
+  /** Model Usage statistics for this round */
+  model_usage: RoundModelUsageStats;
   /** when tracing is enabled, contains the traceId associated with this round */
-  trace_id?: string;
+  trace_id?: string | string[];
 }
 
+export interface RoundModelUsageStats {
+  /**
+   * Id of the connector used for this round
+   */
+  connector_id: string;
+  /**
+   * Number of LLM calls which were done during this round.
+   */
+  llm_calls: number;
+  /**
+   * Total number of input tokens sent this round.
+   */
+  input_tokens: number;
+  /**
+   * Total number of output tokens received this round.
+   */
+  output_tokens: number;
+  /**
+   * Model identifier from the provider response, if available.
+   */
+  model?: string;
+}
+
+/**
+ * Main structure representing a conversation with an agent.
+ */
 export interface Conversation {
+  /** unique id for this conversation */
   id: string;
+  /** id of the agent this conversation is bound to */
   agent_id: string;
+  /** info of the owner of the discussion */
   user: UserIdAndName;
+  /** title of the conversation */
   title: string;
+  /** creation date */
   created_at: string;
+  /** update date */
   updated_at: string;
+  /** list of round for this conversation */
   rounds: ConversationRound[];
+  /**
+   * Conversation-level versioned attachments.
+   * These attachments are shared across all rounds and can be referenced via attachment_refs.
+   */
+  attachments?: VersionedAttachment[];
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

@@ -6,14 +6,18 @@
  */
 
 export type {
+  Runner,
+  RunToolFn,
+  RunInternalToolFn,
   ScopedRunner,
   ScopedRunToolFn,
+  ScopedRunnerRunInternalToolParams,
+  ScopedRunInternalToolFn,
   ScopedRunnerRunToolsParams,
+  RunInternalToolParams,
   RunContext,
   RunContextStackEntry,
   RunToolParams,
-  RunToolFn,
-  Runner,
   RunToolReturn,
 } from './runner';
 export {
@@ -34,6 +38,13 @@ export type {
   LLmDescriptionHandlerParams,
   LlmDescriptionHandler,
 } from './tool_provider';
-export type { ModelProvider, ScopedModel } from './model_provider';
+export type {
+  ModelProvider,
+  ScopedModel,
+  ModelProviderStats,
+  ModelCallInfo,
+} from './model_provider';
 export type { ToolResultStore, WritableToolResultStore } from './result_store';
 export type { AttachmentsService } from './attachments_service';
+export type { PromptManager, ToolPromptManager } from './prompt_manager';
+export type { ConversationStateManager, ToolStateManager } from './state_manager';

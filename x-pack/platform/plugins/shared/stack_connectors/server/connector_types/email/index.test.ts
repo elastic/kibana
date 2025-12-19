@@ -14,6 +14,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { getActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { configSchema as actionsConfigSchema } from '@kbn/actions-plugin/server/config';
 import {
   validateConfig,
   validateConnector,
@@ -34,6 +36,7 @@ import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
 import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email';
+import type { ActionsConfig } from '@kbn/actions-plugin/server/config';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -163,25 +166,15 @@ describe('config validation', () => {
     // empty object
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"from\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"from\\": Required"`
+    );
 
     // no service or host/port
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host]/[port] is required"`
+      `"error validating connector type config: [host]/[port] is required"`
     );
 
     // host but no port
@@ -192,14 +185,14 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [port] is required"`
+      `"error validating connector type config: [port] is required"`
     );
 
     // port but no host
     expect(() => {
       validateConfig(connectorType, { ...baseConfig, port: 8080 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host] is required"`
+      `"error validating connector type config: [host] is required"`
     );
 
     // invalid service
@@ -213,7 +206,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service] value 'bad-nodemailer-service' is not valid"`
+      `"error validating connector type config: [service] value 'bad-nodemailer-service' is not valid"`
     );
 
     // invalid exchange_server no clientId and no tenantId
@@ -227,7 +220,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [clientId]/[tenantId] is required"`
+      `"error validating connector type config: [clientId]/[tenantId] is required"`
     );
 
     // invalid exchange_server no clientId
@@ -242,7 +235,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [clientId] is required"`
+      `"error validating connector type config: [clientId] is required"`
     );
 
     // invalid exchange_server no tenantId
@@ -257,7 +250,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [tenantId] is required"`
+      `"error validating connector type config: [tenantId] is required"`
     );
   });
 
@@ -311,13 +304,44 @@ describe('config validation', () => {
         configurationUtilities: configUtils,
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
+      `"error validating connector type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
     );
 
     expect(() => {
       validateConfig(connectorType, notAllowedHosts2, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
+      `"error validating connector type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
+    );
+  });
+
+  test('config validation handles oauthTokenUrl in allowedHosts', () => {
+    const configUtilsAny = getActionsConfigUtils({});
+    const configUtilsSmtp = getActionsConfigUtils({
+      allowedHosts: ['smtp.example.com'],
+    });
+    const configUtilsSmtpAuth = getActionsConfigUtils({
+      allowedHosts: ['smtp.example.com', 'auth.example.com'],
+    });
+
+    const config = getConfig({
+      service: undefined,
+      host: 'smtp.example.com',
+      port: 35,
+      oauthTokenUrl: 'http://auth.example.com',
+    });
+
+    expect(
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsAny })
+    ).toBeTruthy();
+
+    expect(
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsSmtpAuth })
+    ).toBeTruthy();
+
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsSmtp });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: [oauthTokenUrl]: host name value for 'http://auth.example.com' is not in the allowedHosts configuration"`
     );
   });
 
@@ -335,7 +359,7 @@ describe('config validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [from]: stub for actual message"`
+      `"error validating connector type config: [from]: stub for actual message"`
     );
     expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail'], {
       isSender: true,
@@ -482,26 +506,9 @@ describe('params validation', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"subject\\"
-          ],
-          \\"message\\": \\"Required\\"
-        },
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"message\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
+      "error validating action params: 2 errors:
+       [1]: Field \\"subject\\": Required;
+       [2]: Field \\"message\\": Required"
     `);
   });
 
@@ -567,7 +574,7 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service]: \\"other\\" is not in the list of enabled email services: google-mail,elastic-cloud"`
+      `"error validating connector type config: [service]: \\"other\\" is not in the list of enabled email services: google-mail,elastic-cloud"`
     );
   });
 
@@ -1575,7 +1582,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination"`
+      `"error validating connector type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination"`
     );
   });
 
@@ -1584,7 +1591,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.host] does not match with the configured AWS SES host"`
+      `"error validating connector type config: [ses.host] does not match with the configured AWS SES host"`
     );
   });
 
@@ -1593,7 +1600,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.port] does not match with the configured AWS SES port"`
+      `"error validating connector type config: [ses.port] does not match with the configured AWS SES port"`
     );
   });
 
@@ -1602,7 +1609,7 @@ describe('validateConfig AWS SES specific checks', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.secure] must be true for AWS SES"`
+      `"error validating connector type config: [ses.secure] must be true for AWS SES"`
     );
   });
 });
@@ -1612,4 +1619,9 @@ function validateEmailAddressesImpl(
   options?: ValidateEmailAddressesOptions
 ): string | undefined {
   return 'stub for actual message';
+}
+
+function getActionsConfigUtils(config: Partial<ActionsConfig>): ActionsConfigurationUtilities {
+  const validatedConfig = actionsConfigSchema.validate(config);
+  return getActionsConfigurationUtilities(validatedConfig);
 }

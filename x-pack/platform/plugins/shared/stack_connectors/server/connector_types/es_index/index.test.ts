@@ -77,19 +77,9 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(connectorType, { index: 666 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"number\\",
-          \\"path\\": [
-            \\"index\\"
-          ],
-          \\"message\\": \\"Expected string, received number\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"index\\": Expected string, received number"`
+    );
     delete config.executionTimeField;
 
     expect(() => {
@@ -98,19 +88,9 @@ describe('config validation', () => {
         { index: 'testing-123', executionTimeField: true },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"boolean\\",
-          \\"path\\": [
-            \\"executionTimeField\\"
-          ],
-          \\"message\\": \\"Expected string, received boolean\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"executionTimeField\\": Expected string, received boolean"`
+    );
 
     delete config.refresh;
     expect(() => {
@@ -119,19 +99,9 @@ describe('config validation', () => {
         { index: 'testing-123', refresh: 'foo' },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"boolean\\",
-          \\"received\\": \\"string\\",
-          \\"path\\": [
-            \\"refresh\\"
-          ],
-          \\"message\\": \\"Expected boolean, received string\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: Field \\"refresh\\": Expected boolean, received string"`
+    );
   });
 
   test('config validation fails when config is not valid', () => {
@@ -142,79 +112,24 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"index\\"
-          ],
-          \\"message\\": \\"Required\\"
-        },
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"indeX\\"
-          ],
-          \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'indeX'\\"
-        }
-      ]"
-    `);
-  });
-});
-
-describe('params validation', () => {
-  test('params validation succeeds when params is valid', () => {
-    const params: Record<string, unknown> = {
-      documents: [{ rando: 'thing' }],
-      indexOverride: null,
-    };
-    expect(validateParams(connectorType, params, { configurationUtilities }))
-      .toMatchInlineSnapshot(`
-        Object {
-          "documents": Array [
-            Object {
-              "rando": "thing",
-            },
-          ],
-          "indexOverride": null,
-        }
+      "error validating connector type config: 2 errors:
+       [1]: Unrecognized key(s) in object: 'indeX';
+       [2]: Field \\"index\\": Required"
     `);
   });
 
   test('params validation fails when params is not valid', () => {
     expect(() => {
       validateParams(connectorType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"jim\\"
-          ],
-          \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'jim'\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Unrecognized key(s) in object: 'jim'"`
+    );
 
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"array\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"documents\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"documents\\": Required"`
+    );
 
     expect(() => {
       validateParams(
@@ -222,20 +137,9 @@ describe('params validation', () => {
         { documents: ['should be an object'] },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"object\\",
-          \\"received\\": \\"string\\",
-          \\"path\\": [
-            \\"documents\\",
-            0
-          ],
-          \\"message\\": \\"Expected object, received string\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"documents.0\\": Expected object, received string"`
+    );
   });
 });
 

@@ -11,7 +11,11 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
-describe('workflow level timeout', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/240055
+// FLAKY: https://github.com/elastic/kibana/issues/241729
+// FLAKY: https://github.com/elastic/kibana/issues/241728
+// FLAKY: https://github.com/elastic/kibana/issues/241727
+describe.skip('workflow level timeout', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
   beforeAll(async () => {

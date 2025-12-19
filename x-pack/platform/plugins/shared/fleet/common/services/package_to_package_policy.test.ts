@@ -49,6 +49,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         data_stream_ilm_policy: [],
         ml_model: [],
         knowledge_base: [],
+        esql_view: [],
       },
     },
     status: 'not_installed',

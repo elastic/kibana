@@ -54,6 +54,9 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    actions,
+    trackingService,
+    analyticsService,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -76,12 +79,15 @@ export class ServiceManager {
       elasticsearch,
       uiSettings,
       savedObjects,
+      actions,
     });
 
     const agents = this.services.agents.start({
       spaces,
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       getRunner,
       toolsService: tools,
     });
@@ -91,9 +97,12 @@ export class ServiceManager {
       security,
       elasticsearch,
       inference,
+      spaces,
+      actions,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      trackingService,
     });
     runner = runnerFactory.getRunner();
 
@@ -111,6 +120,8 @@ export class ServiceManager {
       agentService: agents,
       uiSettings,
       savedObjects,
+      trackingService,
+      analyticsService,
     });
 
     this.internalStart = {

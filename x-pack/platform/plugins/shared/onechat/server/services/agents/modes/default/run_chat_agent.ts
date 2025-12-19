@@ -6,26 +6,44 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
-import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
-import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
+import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
+import { Command } from '@langchain/langgraph';
+import {
+  isStreamEvent,
+  type ToolIdMapping,
+  toolsToLangchain,
+} from '@kbn/onechat-genai-utils/langchain';
+import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
+import { ConversationRoundStatus } from '@kbn/onechat-common';
+import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/onechat-server';
+import type { StructuredTool } from '@langchain/core/tools';
+import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
   addRoundCompleteEvent,
-  extractRound,
-  selectProviderTools,
   conversationToLangchainMessages,
+  extractRound,
   prepareConversation,
+  selectTools,
+  getPendingRound,
+  evictInternalEvents,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
+import { ensureValidInput } from '../utils/preflight_checks';
+import { roundToActions } from '../utils/round_to_actions';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
+import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import { steps } from './constants';
+import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
-export type RunChatAgentParams = Omit<RunAgentParams, 'mode'>;
+export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
+  browserApiTools?: BrowserApiToolMetadata[];
+  startTime?: Date;
+};
 
 export type RunChatAgentFn = (
   params: RunChatAgentParams,
@@ -44,60 +62,91 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
+    browserApiTools,
+    structuredOutput = false,
+    outputSchema,
+    startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, attachments, events }
+  context
 ) => {
+  const { logger, modelProvider, toolProvider, attachments, request, stateManager, events } =
+    context;
+
+  ensureValidInput({ input: nextInput, conversation });
+
+  const pendingRound = getPendingRound(conversation);
+
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
-
-  const selectedTools = await selectProviderTools({
-    provider: toolProvider,
-    selection: agentConfiguration.tools,
-    request,
-  });
 
   const manualEvents$ = new Subject<ChatAgentEvent>();
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
 
-  const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
+  const processedConversation = await prepareConversation({
+    nextInput,
+    previousRounds: conversation?.rounds ?? [],
+    context,
+  });
+
+  const selectedTools = await selectTools({
+    conversation: processedConversation,
+    toolProvider,
+    agentConfiguration,
+    attachmentsService: attachments,
+    request,
+  });
+
+  const {
+    tools: langchainTools,
+    idMappings: toolIdMapping,
+    onechatToLangchainIdMap,
+  } = await toolsToLangchain({
     tools: selectedTools,
     logger,
     request,
     sendEvent: eventEmitter,
   });
 
+  let browserLangchainTools: StructuredTool[] = [];
+  let browserIdMappings = new Map<string, string>();
+  if (browserApiTools && browserApiTools.length > 0) {
+    const browserToolResult = browserToolsToLangchain({
+      browserApiTools,
+    });
+    browserLangchainTools = browserToolResult.tools;
+    browserIdMappings = browserToolResult.idMappings;
+  }
+
+  const allTools = [...langchainTools, ...browserLangchainTools];
+  const allToolIdMappings = new Map([...toolIdMapping, ...browserIdMappings]);
+
   const cycleLimit = 10;
-  // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
-  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
-  const graphRecursionLimit = cycleLimit * 2 + 8;
-
-  const processedConversation = await prepareConversation({
-    nextInput,
-    previousRounds: conversation?.rounds ?? [],
-    attachmentsService: attachments,
-  });
-
-  const initialMessages = conversationToLangchainMessages({
-    conversation: processedConversation,
-  });
+  const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
     chatModel: model.chatModel,
-    tools: langchainTools,
+    tools: allTools,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    structuredOutput,
+    outputSchema,
+    processedConversation,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    { initialMessages, cycleLimit },
+    createInitializerCommand({
+      conversation: processedConversation,
+      onechatToLangchainIdMap,
+      cycleLimit,
+    }),
     {
       version: 'v2',
       signal: abortSignal,
@@ -105,7 +154,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
-        runId,
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
@@ -116,8 +164,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
-      toolIdMapping,
+      toolIdMapping: allToolIdMappings,
       logger,
+      startTime,
+      pendingRound,
     }),
     finalize(() => manualEvents$.complete())
   );
@@ -128,7 +178,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput }),
+    addRoundCompleteEvent({
+      userInput: processedInput,
+      pendingRound,
+      startTime,
+      modelProvider,
+      stateManager,
+    }),
+    evictInternalEvents(),
     shareReplay()
   );
 
@@ -144,4 +201,50 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   return {
     round,
   };
+};
+
+const createInitializerCommand = ({
+  conversation,
+  cycleLimit,
+  onechatToLangchainIdMap,
+}: {
+  conversation: ProcessedConversation;
+  cycleLimit: number;
+  onechatToLangchainIdMap: ToolIdMapping;
+}): Command => {
+  const initialMessages = conversationToLangchainMessages({
+    conversation,
+  });
+
+  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
+  let startAt = steps.init;
+
+  const lastRound = conversation.previousRounds.length
+    ? conversation.previousRounds[conversation.previousRounds.length - 1]
+    : undefined;
+
+  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
+    initialState.mainActions = roundToActions({
+      round: lastRound,
+      toolIdMapping: onechatToLangchainIdMap,
+    });
+
+    startAt = steps.executeTool;
+  }
+
+  if (lastRound?.state) {
+    initialState.currentCycle = lastRound.state.agent.current_cycle;
+    initialState.errorCount = lastRound.state.agent.error_count;
+  }
+
+  return new Command({
+    update: initialState,
+    goto: startAt,
+  });
+};
+
+const getRecursionLimit = (cycleLimit: number): number => {
+  // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
+  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
+  return cycleLimit * 2 + 8;
 };

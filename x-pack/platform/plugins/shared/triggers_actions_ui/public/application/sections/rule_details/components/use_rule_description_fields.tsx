@@ -6,9 +6,17 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import { css } from '@emotion/react';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common/data_views/data_view';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -71,6 +79,10 @@ export const AsyncField = <T,>({
 };
 
 const IndexPattern = ({ patterns }: { patterns: string[] }) => {
+  if (patterns.length === 0) {
+    return <span>-</span>;
+  }
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -79,9 +91,16 @@ const IndexPattern = ({ patterns }: { patterns: string[] }) => {
       data-test-subj="rule-description-index-patterns"
     >
       {patterns.map((pattern) => (
-        <EuiBadge key={pattern} color="hollow">
-          {pattern}
-        </EuiBadge>
+        <EuiFlexItem grow={false} key={pattern}>
+          <EuiBadge
+            color="hollow"
+            css={css`
+              max-width: 180px;
+            `}
+          >
+            <span className="eui-textTruncate">{pattern}</span>
+          </EuiBadge>
+        </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );

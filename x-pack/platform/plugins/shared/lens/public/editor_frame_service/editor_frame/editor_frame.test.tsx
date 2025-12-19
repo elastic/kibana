@@ -94,7 +94,7 @@ describe('editor_frame', () => {
   beforeEach(() => {
     mockVisualization = {
       ...createMockVisualization(),
-      ToolbarComponent: jest.fn(() => <div />),
+      FlyoutToolbarComponent: jest.fn(() => <div />),
     };
 
     mockVisualization2 = createMockVisualization('testVis2', ['second']);
@@ -141,7 +141,11 @@ describe('editor_frame', () => {
       {
         preloadedState: {
           activeDatasourceId: 'testDatasource',
-          visualization: { activeId: mockVisualization.id, state: 'initialState' },
+          visualization: {
+            activeId: mockVisualization.id,
+            state: 'initialState',
+            selectedLayerId: 'layer1',
+          },
           datasourceStates: {
             testDatasource: {
               isLoading: false,
@@ -246,12 +250,13 @@ describe('editor_frame', () => {
             visualization: {
               activeId: mockVisualization.id,
               state: updatedState,
+              selectedLayerId: null,
             },
           })
         );
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(4);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -307,7 +312,7 @@ describe('editor_frame', () => {
         setDatasourceState('newState');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({

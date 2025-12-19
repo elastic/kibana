@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { tap } from 'rxjs';
 import { filter, of, defer, shareReplay, switchMap, merge, EMPTY } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -13,6 +14,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { type ChatEvent, oneChatDefaultAgentId, isRoundCompleteEvent } from '@kbn/onechat-common';
+import { getConnectorProvider } from '@kbn/inference-common';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -30,6 +32,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -38,6 +41,8 @@ interface ChatServiceDeps {
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  trackingService?: TrackingService;
+  analyticsService?: AnalyticsService;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
@@ -67,7 +72,11 @@ class ChatServiceImpl implements ChatService {
     abortSignal,
     nextInput,
     autoCreateConversationWithId = false,
+    browserApiTools,
   }: ChatConverseParams): Observable<ChatEvent> {
+    const { trackingService, analyticsService } = this.dependencies;
+    const requestId = trackingService?.trackQueryStart();
+
     return withConverseSpan({ agentId, conversationId }, (span) => {
       // Resolve scoped services
       return defer(async () => {
@@ -115,6 +124,7 @@ class ChatServiceImpl implements ChatService {
             conversation: context.conversation,
             defaultConnectorId: context.selectedConnectorId,
             agentService: this.dependencies.agentService,
+            browserApiTools,
           });
 
           // Generate title (for CREATE) or use existing title (for UPDATE)
@@ -138,9 +148,41 @@ class ChatServiceImpl implements ChatService {
           });
 
           // Merge all event streams
+          const effectiveConversationId =
+            context.conversation.operation === 'CREATE' ? context.conversation.id : conversationId;
+          const modelProvider = getConnectorProvider(context.chatModel.getConnector());
           return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
             handleCancellation(abortSignal),
-            convertErrors({ logger: this.dependencies.logger }),
+            convertErrors({
+              agentId,
+              logger: this.dependencies.logger,
+              analyticsService,
+              trackingService,
+              modelProvider,
+              conversationId: effectiveConversationId,
+            }),
+            tap((event) => {
+              // Track round completion and query-to-result time
+              try {
+                if (isRoundCompleteEvent(event)) {
+                  if (requestId) trackingService?.trackQueryEnd(requestId);
+                  const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
+                  if (conversationId) {
+                    trackingService?.trackConversationRound(conversationId, currentRoundCount);
+                  }
+
+                  analyticsService?.reportRoundComplete({
+                    conversationId: effectiveConversationId,
+                    roundCount: currentRoundCount,
+                    agentId,
+                    round: event.data.round,
+                    modelProvider,
+                  });
+                }
+              } catch (error) {
+                this.dependencies.logger.error(error);
+              }
+            }),
             shareReplay()
           );
         })

@@ -19,8 +19,10 @@ import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agent
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ConverseRequest, ConverseStreamRequest } from '@aws-sdk/client-bedrock-runtime';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
+  SUB_ACTION,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
@@ -31,7 +33,8 @@ import {
   BedrockClientSendParamsSchema,
   ConverseActionParamsSchema,
   ConverseStreamActionParamsSchema,
-} from '../../../common/bedrock/schema';
+  DashboardActionParamsSchema,
+} from '@kbn/connector-schemas/bedrock';
 import type {
   Config,
   Secrets,
@@ -46,18 +49,11 @@ import type {
   ConverseActionResponse,
   ConverseParams,
   ConverseStreamParams,
-} from '../../../common/bedrock/types';
-import {
-  SUB_ACTION,
-  DEFAULT_TOKEN_LIMIT,
-  DEFAULT_TIMEOUT_MS,
-} from '../../../common/bedrock/constants';
-import type {
   DashboardActionParams,
   DashboardActionResponse,
   StreamingResponse,
-} from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
+} from '@kbn/connector-schemas/bedrock';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   extractRegionId,
   formatBedrockBody,

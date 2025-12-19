@@ -8,18 +8,18 @@
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type { AssistantResponse, ToolCallWithResult } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
+import { ConversationRoundStatus, isToolCallStep } from '@kbn/onechat-common';
 import {
-  sanitizeToolId,
-  createUserMessage,
   createAIMessage,
+  createUserMessage,
+  sanitizeToolId,
 } from '@kbn/onechat-genai-utils/langchain';
 import { generateXmlTree } from '@kbn/onechat-genai-utils/tools/utils';
 import type {
-  ProcessedConversation,
-  ProcessedRoundInput,
-  ProcessedConversationRound,
   ProcessedAttachment,
+  ProcessedConversation,
+  ProcessedConversationRound,
+  ProcessedRoundInput,
 } from './prepare_conversation';
 
 /**
@@ -34,11 +34,22 @@ export const conversationToLangchainMessages = ({
 }): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
-  for (const round of conversation.previousRounds) {
+  let rounds = conversation.previousRounds;
+  let input = conversation.nextInput;
+
+  // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
+  // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
+  const lastRound = conversation.previousRounds[conversation.previousRounds.length - 1];
+  if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
+    rounds = rounds.slice(0, rounds.length - 1);
+    input = lastRound.input;
+  }
+
+  for (const round of rounds) {
     messages.push(...roundToLangchain(round, { ignoreSteps }));
   }
 
-  messages.push(formatRoundInput({ input: conversation.nextInput }));
+  messages.push(formatRoundInput({ input }));
 
   return messages;
 };
@@ -99,7 +110,7 @@ const formatAttachment = ({
       },
       children: [attachment.representation.value],
     },
-    { initialIndentLevel: indent }
+    { initialIndentLevel: indent, escapeContent: false }
   );
 };
 

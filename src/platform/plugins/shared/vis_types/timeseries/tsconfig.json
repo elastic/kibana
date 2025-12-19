@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "allowJs": true
@@ -53,6 +53,9 @@
     "@kbn/lens-common",
     "@kbn/expression-xy-plugin",
     "@kbn/event-annotation-common",
+    "@kbn/ui-actions-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-containers",
   ],
   "exclude": [
     "target/**/*",

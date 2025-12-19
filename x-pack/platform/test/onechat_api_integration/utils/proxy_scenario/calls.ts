@@ -17,16 +17,18 @@ export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
 };
 
 export const mockAgentToolCall = ({
+  name = 'agent:tool_call',
   llmProxy,
   toolName,
   toolArg,
 }: {
+  name?: string;
   llmProxy: LlmProxy;
   toolName: string;
   toolArg: Record<string, any>;
 }) => {
   void llmProxy.interceptors.userMessage({
-    name: 'agent:tool_call',
+    name,
     // when: ({ messages }) => {
     //   const lastMessage = last(messages)?.content as string;
     //   return lastMessage.includes(options.userPrompt);

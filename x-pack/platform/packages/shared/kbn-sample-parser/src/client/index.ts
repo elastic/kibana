@@ -46,8 +46,8 @@ export class SampleParserClient {
   }): Promise<StreamLogGenerator[]> {
     const { loghub, serverless } = systems;
 
-    const includeLoghub = typeof loghub === 'boolean' ? loghub : !!loghub?.length;
-    const includeServerless = typeof serverless === 'boolean' ? serverless : !!serverless?.length;
+    const includeLoghub = typeof loghub === 'boolean' ? loghub : !!loghub;
+    const includeServerless = typeof serverless === 'boolean' ? serverless : !!serverless;
 
     const requestedLoghubSystems = Array.isArray(loghub) ? loghub : undefined;
     const requestedServerlessSystems = Array.isArray(serverless) ? serverless : undefined;

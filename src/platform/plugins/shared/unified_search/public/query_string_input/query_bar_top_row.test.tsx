@@ -51,6 +51,8 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       ];
     case 'dateFormat':
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
+    case 'dateFormat:tz':
+      return 'UTC';
     case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
     case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
@@ -309,7 +311,9 @@ describe('QueryBarTopRowTopRow', () => {
             )
           );
 
-          await user.click(getByTestId('queryCancelButton-secondary-button'));
+          const button = getByTestId('queryCancelButton-secondary-button');
+          await waitFor(() => expect(button).toBeEnabled(), { timeout: 1000 });
+          await user.click(button);
 
           // Then
           expect(onSendToBackground).toHaveBeenCalled();

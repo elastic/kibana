@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   startElasticsearch,
@@ -16,7 +17,6 @@ import {
   currentVersion,
 } from '@kbn/migrator-test-kit';
 import '../jest_matchers';
-import { delay } from '../test_utils';
 import { getUpToDateMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 
@@ -50,6 +50,6 @@ describe('when rolling back to an older version', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(2);
+    await timer(2_000);
   });
 });

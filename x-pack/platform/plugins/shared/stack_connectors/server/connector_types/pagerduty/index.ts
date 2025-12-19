@@ -18,6 +18,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import {
@@ -61,6 +62,7 @@ export function getConnectorType(): PagerDutyConnectorType {
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

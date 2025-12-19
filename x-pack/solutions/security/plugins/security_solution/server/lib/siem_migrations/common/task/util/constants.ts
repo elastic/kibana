@@ -6,3 +6,15 @@
  */
 
 export const TELEMETRY_SIEM_MIGRATION_ID = 'siem_migrations';
+
+export const SYSTEM_INSTRUCTIONS = `
+
+## Extremely important Guidelines - Read Carefully
+
+### General Guidelines
+1. Do not use quotes for variables or aliases, replace any in the original with snake cased aliases. Only use quotes when necessary as a string literal.
+2. Never add quotes or ticks to index names.
+
+\`\`\`
+
+`;
