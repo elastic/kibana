@@ -35,7 +35,7 @@ export function RedirectToHomeIfUnauthorized({
   const chatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
   const isServerlessSearchSolution =
     cloud?.isServerlessEnabled && cloud?.serverless?.projectType === 'search';
-    
+
   const allowed =
     (capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false) &&
     chatExperience !== AIChatExperience.Agent;
