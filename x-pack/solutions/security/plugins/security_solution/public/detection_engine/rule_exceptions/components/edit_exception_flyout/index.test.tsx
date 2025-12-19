@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { ThemeProvider } from 'styled-components';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 
@@ -18,6 +15,7 @@ import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { Rule } from '../../../rule_management/logic/types';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -27,22 +25,12 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiBreakpoints: {
-      l: '1200px',
-    },
-    euiSizeM: '10px',
-  },
-});
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../logic/use_create_update_exception');
@@ -51,6 +39,7 @@ jest.mock('../../../../common/containers/source');
 jest.mock('../../logic/use_find_references');
 jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../rule_management/logic/use_rule');
 jest.mock('@kbn/lists-plugin/public');
 
@@ -67,6 +56,7 @@ const mockUseAddOrUpdateException = useCreateOrUpdateException as jest.Mock<
   ReturnType<typeof useCreateOrUpdateException>
 >;
 const mockUseFindExceptionListReferences = useFindExceptionListReferences as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 describe('When the edit exception modal is opened', () => {
   beforeEach(() => {
@@ -77,6 +67,10 @@ describe('When the edit exception modal is opened', () => {
       signalIndexName: 'test-signal',
     });
     mockUseAddOrUpdateException.mockImplementation(() => [false, jest.fn()]);
+    mockUseAlertsPrivileges.mockReturnValue({
+      hasAlertsAll: true,
+      hasAlertsRead: true,
+    });
     mockUseFetchIndex.mockImplementation(() => [
       false,
       {
@@ -164,14 +158,13 @@ describe('When the edit exception modal is opened', () => {
 
   describe('when the modal is loading', () => {
     it('renders the loading spinner', async () => {
-      // Mocks one of the hooks as loading
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
         indexPatterns: { fields: [], title: 'foo' },
         getExtendedFields: () => Promise.resolve([]),
       }));
 
-      const wrapper = mount(
+      render(
         <TestProviders>
           <EditExceptionFlyout
             list={getExceptionListSchemaMock()}
@@ -182,48 +175,50 @@ describe('When the edit exception modal is opened', () => {
           />
         </TestProviders>
       );
+
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="loadingEditExceptionFlyout"]').exists()).toBeTruthy();
+        expect(screen.getByTestId('loadingEditExceptionFlyout')).toBeInTheDocument();
       });
     });
   });
 
   describe('exception list type of "endpoint"', () => {
-    mockUseFindExceptionListReferences.mockImplementation(() => [
-      false,
-      false,
-      {
-        endpoint_list: {
-          ...getExceptionListSchemaMock(),
-          id: '123',
-          list_id: 'endpoint_list',
-          namespace_type: 'agnostic',
-          type: ExceptionListTypeEnum.ENDPOINT,
-          name: 'My exception list',
-          referenced_rules: [
-            {
-              id: '345',
-              name: 'My rule',
-              rule_id: 'my_rule_id',
-              exception_lists: [
-                {
-                  id: 'endpoint_list',
-                  list_id: 'endpoint_list',
-                  namespace_type: 'single',
-                  type: ExceptionListTypeEnum.ENDPOINT,
-                },
-              ],
-            },
-          ],
+    beforeEach(() => {
+      mockUseFindExceptionListReferences.mockImplementation(() => [
+        false,
+        false,
+        {
+          endpoint_list: {
+            ...getExceptionListSchemaMock(),
+            id: '123',
+            list_id: 'endpoint_list',
+            namespace_type: 'agnostic',
+            type: ExceptionListTypeEnum.ENDPOINT,
+            name: 'My exception list',
+            referenced_rules: [
+              {
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exception_lists: [
+                  {
+                    id: 'endpoint_list',
+                    list_id: 'endpoint_list',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.ENDPOINT,
+                  },
+                ],
+              },
+            ],
+          },
         },
-      },
-      jest.fn(),
-    ]);
+        jest.fn(),
+      ]);
+    });
 
     describe('common functionality to test', () => {
-      let wrapper: ReactWrapper;
       beforeEach(async () => {
-        wrapper = mount(
+        render(
           <TestProviders>
             <EditExceptionFlyout
               list={{
@@ -260,32 +255,28 @@ describe('When the edit exception modal is opened', () => {
       });
 
       it('should render item name input', () => {
-        expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+        expect(screen.getByTestId('exceptionFlyoutNameInput')).toBeInTheDocument();
       });
 
       it('should render OS info', () => {
-        expect(wrapper.find('[data-test-subj="exceptionItemSelectedOs"]').exists()).toBeTruthy();
+        expect(screen.getByTestId('exceptionItemSelectedOs')).toBeInTheDocument();
       });
 
       it('should render the exception builder', () => {
-        expect(wrapper.find('ExceptionsConditions').exists()).toBeTruthy();
+        expect(screen.getByTestId('edit-exception-builder')).toBeInTheDocument();
       });
 
       it('does NOT render section showing list or rule item assigned to', () => {
-        expect(
-          wrapper.find('[data-test-subj="exceptionItemLinkedToListSection"]').exists()
-        ).toBeFalsy();
-        expect(
-          wrapper.find('[data-test-subj="exceptionItemLinkedToRuleSection"]').exists()
-        ).toBeFalsy();
+        expect(screen.queryByTestId('exceptionItemLinkedToListSection')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('exceptionItemLinkedToRuleSection')).not.toBeInTheDocument();
       });
 
       it('should contain the endpoint specific documentation text', () => {
-        expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeTruthy();
+        expect(screen.getByTestId('addExceptionEndpointText')).toBeInTheDocument();
       });
 
       it('should NOT display the eql sequence callout', () => {
-        expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
+        expect(screen.queryByTestId('eqlSequenceCallout')).not.toBeInTheDocument();
       });
 
       it('should show a warning callout if wildcard is used', async () => {
@@ -308,10 +299,7 @@ describe('When the edit exception modal is opened', () => {
           })
         );
 
-        wrapper.update();
-        expect(
-          wrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()
-        ).toBeTruthy();
+        expect(screen.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
       });
 
       it('should show a warning callout if there is a partial code signature entry with only subject_name', async () => {
@@ -334,10 +322,7 @@ describe('When the edit exception modal is opened', () => {
           })
         );
 
-        wrapper.update();
-        expect(
-          wrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
-        ).toBeTruthy();
+        expect(screen.getByTestId('partialCodeSignatureCallout')).toBeInTheDocument();
       });
 
       it('should show a warning callout if there is a partial code signature entry with only trusted field', async () => {
@@ -360,15 +345,11 @@ describe('When the edit exception modal is opened', () => {
           })
         );
 
-        wrapper.update();
-        expect(
-          wrapper.find('[data-test-subj="partialCodeSignatureCallout"]').exists()
-        ).toBeTruthy();
+        expect(screen.getByTestId('partialCodeSignatureCallout')).toBeInTheDocument();
       });
     });
 
     describe('when exception entry fields and index allow user to bulk close', () => {
-      let wrapper: ReactWrapper;
       beforeEach(async () => {
         const exceptionItemMock = {
           ...getExceptionListItemSchemaMock(),
@@ -376,8 +357,9 @@ describe('When the edit exception modal is opened', () => {
             { field: 'file.hash.sha256', operator: 'included', type: 'match' },
           ] as EntriesArray,
         };
-        wrapper = mount(
-          <ThemeProvider theme={mockTheme}>
+
+        render(
+          <TestProviders>
             <EditExceptionFlyout
               rule={
                 {
@@ -404,7 +386,7 @@ describe('When the edit exception modal is opened', () => {
               onCancel={jest.fn()}
               onConfirm={jest.fn()}
             />
-          </ThemeProvider>
+          </TestProviders>
         );
         const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
         await waitFor(() =>
@@ -413,17 +395,15 @@ describe('When the edit exception modal is opened', () => {
       });
 
       it('should have the bulk close checkbox enabled', () => {
-        expect(
-          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-        ).not.toBeDisabled();
+        const checkbox = screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox');
+        expect(checkbox).not.toBeDisabled();
       });
     });
 
     describe('when entry has non ecs type', () => {
-      let wrapper: ReactWrapper;
       beforeEach(async () => {
-        wrapper = mount(
-          <ThemeProvider theme={mockTheme}>
+        render(
+          <TestProviders>
             <EditExceptionFlyout
               list={{
                 ...getExceptionListSchemaMock(),
@@ -450,26 +430,24 @@ describe('When the edit exception modal is opened', () => {
               onCancel={jest.fn()}
               onConfirm={jest.fn()}
             />
-          </ThemeProvider>
+          </TestProviders>
         );
         const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
-        await waitFor(() => {
-          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
-        });
+        await waitFor(() =>
+          callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+        );
       });
 
       it('should have the bulk close checkbox disabled', () => {
-        expect(
-          wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-        ).toBeDisabled();
+        const checkbox = screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox');
+        expect(checkbox).toBeDisabled();
       });
     });
   });
 
   describe('exception list type of "detection"', () => {
-    let wrapper: ReactWrapper;
     beforeEach(async () => {
-      wrapper = mount(
+      render(
         <TestProviders>
           <EditExceptionFlyout
             list={{
@@ -509,73 +487,68 @@ describe('When the edit exception modal is opened', () => {
     });
 
     it('should render item name input', () => {
-      expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('exceptionFlyoutNameInput')).toBeInTheDocument();
     });
 
     it('should not render OS info', () => {
-      expect(wrapper.find('[data-test-subj="exceptionItemSelectedOs"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('exceptionItemSelectedOs')).not.toBeInTheDocument();
     });
 
     it('should render the exception builder', () => {
-      expect(wrapper.find('ExceptionsConditions').exists()).toBeTruthy();
+      expect(screen.getByTestId('edit-exception-builder')).toBeInTheDocument();
     });
 
     it('does render section showing list item is assigned to', () => {
-      expect(
-        wrapper.find('[data-test-subj="exceptionItemLinkedToListSection"]').exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('exceptionItemLinkedToListSection')).toBeInTheDocument();
     });
 
     it('does NOT render section showing rule item is assigned to', () => {
-      expect(
-        wrapper.find('[data-test-subj="exceptionItemLinkedToRuleSection"]').exists()
-      ).toBeFalsy();
+      expect(screen.queryByTestId('exceptionItemLinkedToRuleSection')).not.toBeInTheDocument();
     });
 
     it('should NOT contain the endpoint specific documentation text', () => {
-      expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('addExceptionEndpointText')).not.toBeInTheDocument();
     });
 
     it('should NOT display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('eqlSequenceCallout')).not.toBeInTheDocument();
     });
   });
 
   describe('exception list type of "rule_default"', () => {
-    mockUseFindExceptionListReferences.mockImplementation(() => [
-      false,
-      false,
-      {
-        my_list_id: {
-          ...getExceptionListSchemaMock(),
-          id: '123',
-          list_id: 'my_list_id',
-          namespace_type: 'single',
-          type: ExceptionListTypeEnum.RULE_DEFAULT,
-          name: 'My exception list',
-          referenced_rules: [
-            {
-              id: '345',
-              name: 'My rule',
-              rule_id: 'my_rule_id',
-              exception_lists: [
-                {
-                  id: '1234',
-                  list_id: 'my_list_id',
-                  namespace_type: 'single',
-                  type: ExceptionListTypeEnum.RULE_DEFAULT,
-                },
-              ],
-            },
-          ],
-        },
-      },
-      jest.fn(),
-    ]);
-
-    let wrapper: ReactWrapper;
     beforeEach(async () => {
-      wrapper = mount(
+      mockUseFindExceptionListReferences.mockImplementation(() => [
+        false,
+        false,
+        {
+          my_list_id: {
+            ...getExceptionListSchemaMock(),
+            id: '123',
+            list_id: 'my_list_id',
+            namespace_type: 'single',
+            type: ExceptionListTypeEnum.RULE_DEFAULT,
+            name: 'My exception list',
+            referenced_rules: [
+              {
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exception_lists: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        jest.fn(),
+      ]);
+
+      render(
         <TestProviders>
           <EditExceptionFlyout
             list={{
@@ -615,42 +588,37 @@ describe('When the edit exception modal is opened', () => {
     });
 
     it('should render item name input', () => {
-      expect(wrapper.find('[data-test-subj="exceptionFlyoutNameInput"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('exceptionFlyoutNameInput')).toBeInTheDocument();
     });
 
     it('should not render OS info', () => {
-      expect(wrapper.find('[data-test-subj="exceptionItemSelectedOs"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('exceptionItemSelectedOs')).not.toBeInTheDocument();
     });
 
     it('should render the exception builder', () => {
-      expect(wrapper.find('ExceptionsConditions').exists()).toBeTruthy();
+      expect(screen.getByTestId('edit-exception-builder')).toBeInTheDocument();
     });
 
     it('does NOT render section showing list item is assigned to', () => {
-      expect(
-        wrapper.find('[data-test-subj="exceptionItemLinkedToListSection"]').exists()
-      ).toBeFalsy();
+      expect(screen.queryByTestId('exceptionItemLinkedToListSection')).not.toBeInTheDocument();
     });
 
     it('does render section showing rule item is assigned to', () => {
-      expect(
-        wrapper.find('[data-test-subj="exceptionItemLinkedToRuleSection"]').exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('exceptionItemLinkedToRuleSection')).toBeInTheDocument();
     });
 
     it('should NOT contain the endpoint specific documentation text', () => {
-      expect(wrapper.find('[data-test-subj="addExceptionEndpointText"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('addExceptionEndpointText')).not.toBeInTheDocument();
     });
 
     it('should NOT display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('eqlSequenceCallout')).not.toBeInTheDocument();
     });
   });
 
   describe('when an exception assigned to a sequence eql rule type is passed', () => {
-    let wrapper: ReactWrapper;
     beforeEach(async () => {
-      wrapper = mount(
+      render(
         <TestProviders>
           <EditExceptionFlyout
             list={{
@@ -685,26 +653,25 @@ describe('When the edit exception modal is opened', () => {
           />
         </TestProviders>
       );
-      const callProps = (getExceptionBuilderComponentLazy as jest.Mock).mock.calls[0][0];
-      await waitFor(() => {
-        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
-      });
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
     });
 
     it('should have the bulk close checkbox disabled', () => {
-      expect(
-        wrapper.find('input[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').getDOMNode()
-      ).toBeDisabled();
+      const checkbox = screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox');
+      expect(checkbox).toBeDisabled();
     });
 
     it('should display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('eqlSequenceCallout')).toBeInTheDocument();
     });
   });
 
   describe('error states', () => {
-    test('when there are exception builder errors has submit button disabled', async () => {
-      const wrapper = mount(
+    it('when there are exception builder errors has submit button disabled', async () => {
+      render(
         <TestProviders>
           <EditExceptionFlyout
             list={{
@@ -740,13 +707,11 @@ describe('When the edit exception modal is opened', () => {
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
 
-      expect(
-        wrapper.find('button[data-test-subj="editExceptionConfirmButton"]').getDOMNode()
-      ).toBeDisabled();
+      expect(screen.getByTestId('editExceptionConfirmButton')).toBeDisabled();
     });
 
-    test('when there is a comment error has submit button disabled', async () => {
-      const { getByLabelText, queryByText, getByTestId } = render(
+    it('when there is a comment error has submit button disabled', async () => {
+      render(
         <TestProviders>
           <EditExceptionFlyout
             list={{
@@ -782,10 +747,10 @@ describe('When the edit exception modal is opened', () => {
         </TestProviders>
       );
 
-      const commentInput = getByLabelText('Comment Input');
+      const commentInput = screen.getByLabelText('Comment Input');
 
       const commentErrorMessage = `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`;
-      expect(queryByText(commentErrorMessage)).toBeNull();
+      expect(screen.queryByText(commentErrorMessage)).not.toBeInTheDocument();
 
       // Put comment with the length above maximum allowed
       act(() => {
@@ -796,8 +761,59 @@ describe('When the edit exception modal is opened', () => {
         });
         fireEvent.blur(commentInput);
       });
-      expect(queryByText(commentErrorMessage)).not.toBeNull();
-      expect(getByTestId('editExceptionConfirmButton')).toBeDisabled();
+
+      expect(screen.getByText(commentErrorMessage)).toBeInTheDocument();
+      expect(screen.getByTestId('editExceptionConfirmButton')).toBeDisabled();
+    });
+  });
+
+  describe('when user does not have alerts privileges', () => {
+    it('should NOT render bulk close alerts section when hasAlertsAll is false', async () => {
+      mockUseAlertsPrivileges.mockReturnValue({
+        hasAlertsAll: false,
+        hasAlertsRead: false,
+      });
+
+      render(
+        <TestProviders>
+          <EditExceptionFlyout
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'detection',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+
+      expect(screen.queryByTestId('bulkCloseAlertOnAddExceptionCheckbox')).not.toBeInTheDocument();
     });
   });
 });
