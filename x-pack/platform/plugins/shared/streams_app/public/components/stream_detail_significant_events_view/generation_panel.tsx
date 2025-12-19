@@ -60,6 +60,7 @@ export function SignificantEventsGenerationPanel({
             <IdentifyFeatures
               definition={definition}
               refreshFeatures={refreshFeatures}
+              aiFeatures={aiFeatures}
               isGeneratingQueries={isGeneratingQueries}
               isSavingManualEntry={isSavingManualEntry}
             />
@@ -245,11 +246,13 @@ function GenerationContext({
 function IdentifyFeatures({
   definition,
   refreshFeatures,
+  aiFeatures,
   isGeneratingQueries,
   isSavingManualEntry,
 }: {
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
+  aiFeatures: AIFeatures | null;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
 }) {
@@ -292,6 +295,7 @@ function IdentifyFeatures({
         <FeatureIdentificationControl
           definition={definition}
           refreshFeatures={refreshFeatures}
+          aiFeatures={aiFeatures}
           disabled={isGeneratingQueries || isSavingManualEntry}
         />
       </EuiFlexItem>

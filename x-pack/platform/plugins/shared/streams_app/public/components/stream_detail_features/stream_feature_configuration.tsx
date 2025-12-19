@@ -88,6 +88,7 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
                   <FeatureIdentificationControl
                     definition={definition}
                     refreshFeatures={refreshFeatures}
+                    aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -17,7 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAIFeatures } from '../../hooks/use_ai_features';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
 import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
@@ -26,17 +26,18 @@ import { ConnectorListButton } from '../connector_list_button/connector_list_but
 interface FeatureIdentificationControlProps {
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
+  aiFeatures: AIFeatures | null;
   disabled?: boolean;
 }
 
 export function FeatureIdentificationControl({
   definition,
   refreshFeatures,
+  aiFeatures,
   disabled = false,
 }: FeatureIdentificationControlProps) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const aiFeatures = useAIFeatures();
   const [features, setFeatures] = useState<Feature[]>([]);
 
   const {
