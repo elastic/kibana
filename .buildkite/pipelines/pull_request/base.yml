@@ -67,6 +67,7 @@ steps:
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'

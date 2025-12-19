@@ -20,10 +20,18 @@ run(
     const bail = !!(flags.bail || false);
 
     const moonCommand = IS_CI ? 'ci' : 'run';
+    const parallelismSplit = IS_CI
+      ? [
+          '--job',
+          process.env.BUILDKITE_PARALLEL_JOB ?? '0',
+          '--jobTotal',
+          process.env.BUILDKITE_PARALLEL_JOB_COUNT ?? '1',
+        ]
+      : [];
     const lintCommand = flags.fix ? ':eslint-fix' : ':eslint';
     const cacheFlag = flags.cache ? [] : ['-u'];
 
-    const fullArgs = [moonCommand, lintCommand, ...cacheFlag];
+    const fullArgs = [moonCommand, lintCommand, ...parallelismSplit, ...cacheFlag];
 
     log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);
 
