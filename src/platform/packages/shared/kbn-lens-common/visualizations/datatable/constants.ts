@@ -15,6 +15,9 @@ export const LENS_ROW_HEIGHT_MODE = {
   custom: 'custom',
 } as const;
 
+// Legacy row height mode that exists in some saved objects -> maps to 'custom' with 1 line
+export const LEGACY_SINGLE_ROW_HEIGHT_MODE = 'single';
+
 export const LENS_DATAGRID_DENSITY = {
   COMPACT: 'compact',
   NORMAL: 'normal',

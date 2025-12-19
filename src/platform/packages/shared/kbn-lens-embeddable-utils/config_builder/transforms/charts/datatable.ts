@@ -18,7 +18,13 @@ import type {
 import { LENS_DATAGRID_DENSITY, LENS_ROW_HEIGHT_MODE } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../schema';
+import { LEGACY_SINGLE_ROW_HEIGHT_MODE } from '@kbn/lens-common/visualizations/datatable/constants';
+import type {
+  DatatableState,
+  DatatableStateESQL,
+  DatatableStateNoESQL,
+  LensApiAllOperations,
+} from '../../schema';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
 import {
@@ -257,9 +263,17 @@ function buildRowsAPI(column: ColumnState): APIRowProps {
   };
 }
 
-// In metric columns the isMetric is not set in all cases
-const isMetricColumn = (col: ColumnState) =>
-  ('isMetric' in col && col.isMetric) || (!('isMetric' in col) && !col.isTransposed);
+/**
+ * In metric columns the isMetric is not set in all cases and neither is for rows
+ * - For formBasedLayers: pass apiOperation to distinguish bucket (row) vs metric operations
+ * - For textBased: don't pass apiOperation and rely on column state only
+ */
+const isMetricColumn = (col: ColumnState, apiOperation?: LensApiAllOperations) => {
+  if (apiOperation && isAPIColumnOfBucketType(apiOperation)) {
+    return false;
+  }
+  return ('isMetric' in col && col.isMetric) || (!('isMetric' in col) && !col.isTransposed);
+};
 
 type DatatableColumnsNoESQL = Pick<
   DatatableStateNoESQL,
@@ -297,7 +311,7 @@ function convertDatatableColumnsToAPI(
       const apiOperation = columnId ? operationFromColumn(columnId, layer) : undefined;
       if (!apiOperation) throw new Error('Column not found');
 
-      if (isMetricColumn(column)) {
+      if (isMetricColumn(column, apiOperation)) {
         if (!isAPIColumnOfMetricType(apiOperation))
           throw new Error('Metric column must be a metric operation');
         metrics.push({
@@ -425,7 +439,7 @@ function parseSortingToAPI(
 
 function convertAppearanceToAPIFormat(
   visualization: DatatableVisualizationState
-): Pick<DatatableState, 'density' | 'paging'> | {} {
+): Pick<DatatableState, 'density' | 'paging' | 'sorting'> {
   const {
     rowHeight,
     headerRowHeight,
@@ -439,25 +453,36 @@ function convertAppearanceToAPIFormat(
 
   const height: Record<string, unknown> = {};
 
+  const isLegacySingleMode = (heightMode: string) => heightMode === LEGACY_SINGLE_ROW_HEIGHT_MODE;
+
   if (rowHeight) {
+    // Handle legacy 'single' row height mode by mapping it to 'custom'
+    const isLegacyRowHeight = isLegacySingleMode(rowHeight);
     height.value = {
-      type: rowHeight,
-      ...(rowHeight === LENS_ROW_HEIGHT_MODE.custom && rowHeightLines
-        ? { lines: rowHeightLines }
+      type: isLegacyRowHeight ? LENS_ROW_HEIGHT_MODE.custom : rowHeight,
+      ...((rowHeight === LENS_ROW_HEIGHT_MODE.custom && rowHeightLines) || isLegacyRowHeight
+        ? { lines: rowHeightLines ?? 1 }
         : {}),
     };
   }
 
   if (headerRowHeight) {
+    // Handle legacy 'single' header row height mode by mapping it to 'custom'
+    const isLegacyHeaderRowHeight = isLegacySingleMode(headerRowHeight);
     height.header = {
-      type: headerRowHeight,
-      ...(headerRowHeight === LENS_ROW_HEIGHT_MODE.custom && headerRowHeightLines
-        ? { max_lines: headerRowHeightLines }
+      type: isLegacyHeaderRowHeight ? LENS_ROW_HEIGHT_MODE.custom : headerRowHeight,
+      ...((headerRowHeight === LENS_ROW_HEIGHT_MODE.custom && headerRowHeightLines) ||
+      isLegacyHeaderRowHeight
+        ? { max_lines: headerRowHeightLines ?? 1 }
         : {}),
     };
   }
 
   const sortingAPI = parseSortingToAPI(sorting, columns);
+
+  const isValidPagingSize = (size: number): size is 10 | 20 | 30 | 50 | 100 => {
+    return [10, 20, 30, 50, 100].includes(size);
+  };
 
   return {
     ...(rowHeight || headerRowHeight || density
@@ -472,7 +497,9 @@ function convertAppearanceToAPIFormat(
           },
         }
       : {}),
-    ...(paging && paging.enabled && paging.size ? { paging: paging.size } : {}),
+    ...(paging && paging.enabled
+      ? { paging: isValidPagingSize(paging.size) ? paging.size : 10 }
+      : {}),
     ...(sortingAPI ? { sorting: sortingAPI } : {}),
   };
 }
