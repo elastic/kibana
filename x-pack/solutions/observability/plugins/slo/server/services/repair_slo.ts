@@ -7,7 +7,12 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { type Logger } from '@kbn/core/server';
-import type { RepairParams } from '@kbn/slo-schema';
+import type {
+  RepairAction,
+  RepairActionResult,
+  RepairActionsGroupResult,
+  RepairParams,
+} from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
 import pLimit from 'p-limit';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
@@ -20,22 +25,6 @@ import type { DefaultTransformManager } from './transform_manager';
 interface RepairActionsGroup {
   slo: SLODefinition;
   actions: RepairAction[];
-}
-
-interface RepairAction {
-  type: 'recreate-transform' | 'start-transform' | 'stop-transform';
-  transformType: 'rollup' | 'summary';
-}
-
-interface RepairActionsGroupResult {
-  id: string;
-  results: RepairActionResult[];
-}
-
-interface RepairActionResult {
-  action: RepairAction;
-  status: 'success' | 'failure';
-  error?: any;
 }
 
 export class RepairSLO {

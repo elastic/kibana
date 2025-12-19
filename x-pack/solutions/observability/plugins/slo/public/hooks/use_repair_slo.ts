@@ -8,6 +8,7 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { RepairActionsGroupResult } from '@kbn/slo-schema';
 
 import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
@@ -23,7 +24,7 @@ export function useRepairSlo({ name }: { name: string }) {
   const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
-  return useMutation<RepairResult[], ServerError, { sloId: string }>(
+  return useMutation<RepairActionsGroupResult[], ServerError, { sloId: string }>(
     ['repairSlo'],
     ({ sloId }) => {
       return sloClient.fetch('POST /api/observability/slos/_repair', {
@@ -44,7 +45,9 @@ export function useRepairSlo({ name }: { name: string }) {
         });
       },
       onSuccess: (response) => {
-        const foundSLO = response.find((result) => result.success && result.id);
+        const foundSLO = response.find(
+          (result) => result.id && result.results.some((r) => r.status === 'success')
+        );
         if (!foundSLO) {
           toasts.addError(new Error('Unknown error occurred while repairing SLO'), {
             title: i18n.translate('xpack.slo.repair.unknownError', {
