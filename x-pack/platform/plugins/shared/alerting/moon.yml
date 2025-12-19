@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/core-ui-settings-common'
   - '@kbn/core-capabilities-common'
   - '@kbn/unified-search-plugin'
+  - '@kbn/kql'
   - '@kbn/core-http-server-mocks'
   - '@kbn/serverless'
   - '@kbn/core-http-router-server-mocks'
