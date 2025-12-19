@@ -46,6 +46,7 @@ sourceCommand
     | timeSeriesCommand
     // in development
     | {this.isDevVersion()}? explainCommand
+    | {this.isDevVersion()}? promqlCommand
     ;
 
 processingCommand
@@ -72,7 +73,6 @@ processingCommand
     // in development
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? insistCommand
-    | {this.isDevVersion()}? promqlCommand
     ;
 
 whereCommand
