@@ -19,6 +19,9 @@
 
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
+
+// TRIGGER LINT RERUN
+
 module.exports = {
   extends: [
     './javascript.js',
