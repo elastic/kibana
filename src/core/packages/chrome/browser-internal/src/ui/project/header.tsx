@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { debounceTime } from 'rxjs';
+import { debounceTime, EMPTY } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
@@ -316,7 +316,7 @@ export const ProjectHeader = ({
       {(observables.actionMenu$ || observables.appMenu$) && (
         <AppMenuBar
           appMenuActions$={observables.actionMenu$}
-          appMenu$={observables.appMenu$}
+          appMenu$={observables.appMenu$ ?? EMPTY}
           isFixed={true}
         />
       )}
