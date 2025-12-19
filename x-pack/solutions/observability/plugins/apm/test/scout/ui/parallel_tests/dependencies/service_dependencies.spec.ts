@@ -24,14 +24,14 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('Navigate to dependencies tab', async () => {
-      await expect(serviceDetailsPage.getDependenciesTab()).toBeVisible();
-      await serviceDetailsPage.clickDependenciesTab();
+      await expect(serviceDetailsPage.dependenciesTab.getTab()).toBeVisible();
+      await serviceDetailsPage.dependenciesTab.clickTab();
     });
 
     await test.step('Land on dependencies tab', async () => {
       const url = new URL(page.url());
       expect(url.pathname).toContain(`/dependencies`);
-      await expect(serviceDetailsPage.getDependenciesTab()).toHaveAttribute(
+      await expect(serviceDetailsPage.dependenciesTab.getTab()).toHaveAttribute(
         'aria-selected',
         'true'
       );
@@ -40,14 +40,14 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('Renders expected content', async ({ pageObjects: { serviceDetailsPage } }) => {
     await test.step('Land on dependencies tab', async () => {
-      await serviceDetailsPage.goToDependenciesTab();
+      await serviceDetailsPage.dependenciesTab.goToTab();
     });
 
     await test.step('Renders dependencies content', async () => {
-      await expect(serviceDetailsPage.dependenciesTabDependenciesBreakdownChart).toBeVisible();
-      await expect(serviceDetailsPage.dependenciesTabDependenciesTable).toBeVisible();
+      await expect(serviceDetailsPage.dependenciesTab.dependenciesBreakdownChart).toBeVisible();
+      await expect(serviceDetailsPage.dependenciesTab.dependenciesTable).toBeVisible();
       await expect(
-        serviceDetailsPage.getDependencyInDependenciesTable(DEPENDENCY_NAME)
+        serviceDetailsPage.dependenciesTab.getDependencyInDependenciesTable(DEPENDENCY_NAME)
       ).toBeVisible();
     });
   });
@@ -57,11 +57,11 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { serviceDetailsPage },
   }) => {
     await test.step('Land on dependencies tab', async () => {
-      await serviceDetailsPage.goToDependenciesTab();
+      await serviceDetailsPage.dependenciesTab.goToTab();
     });
 
     await test.step('Click on a dependency in dependencies table', async () => {
-      await serviceDetailsPage.clickDependencyInDependenciesTable(DEPENDENCY_NAME);
+      await serviceDetailsPage.dependenciesTab.clickDependencyInDependenciesTable(DEPENDENCY_NAME);
     });
 
     await test.step('Lands on the dependency service overview page', async () => {
@@ -76,7 +76,7 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { serviceDetailsPage },
   }) => {
     await test.step('Land on dependencies tab', async () => {
-      await serviceDetailsPage.goToDependenciesTab();
+      await serviceDetailsPage.dependenciesTab.goToTab();
     });
 
     await test.step('Check a11y', async () => {
