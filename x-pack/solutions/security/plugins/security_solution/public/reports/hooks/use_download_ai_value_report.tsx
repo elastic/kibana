@@ -30,10 +30,10 @@ export const useDownloadAIValueReport = ({
 
   const forwardedTimeRange: AIValueReportParams['timeRange'] = useMemo(() => {
     if (timeRange.kind === 'relative') {
-      return { from: timeRange.fromStr, to: timeRange.toStr };
+      return { kind: 'relative', fromStr: timeRange.fromStr, toStr: timeRange.toStr };
     }
 
-    return { from: timeRange.from, to: timeRange.to };
+    return { kind: 'absolute', from: timeRange.from, to: timeRange.to };
   }, [timeRange]);
 
   const forwardedState = useMemo(() => {

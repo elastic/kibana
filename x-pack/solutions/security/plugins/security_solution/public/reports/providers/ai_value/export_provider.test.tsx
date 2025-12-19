@@ -60,6 +60,7 @@ const reportInput = {
 const reportDataHash = '856cbc3cfa41e8458e99f1b017bde73738a10d0cbbe3dea13a4960297957c645';
 
 const timeRange = {
+  kind: 'absolute',
   to: '2025-11-18T13:18:59.691Z',
   from: '2025-10-18T12:18:59.691Z',
 };

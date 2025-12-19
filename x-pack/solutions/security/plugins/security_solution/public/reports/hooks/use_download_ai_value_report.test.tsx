@@ -143,7 +143,7 @@ describe('useDownloadAIValueReport', () => {
 
   describe('when the export is enabled', () => {
     beforeEach(() => {
-      buildForwardedStateMock.mockImplementation(({ timeRange }: { timeRange: { from: string; to: string } }) => ({
+      buildForwardedStateMock.mockImplementation(({ timeRange }: { timeRange: unknown }) => ({
         timeRange,
         insight: 'insight',
         reportDataHash: 'hash',
@@ -174,7 +174,7 @@ describe('useDownloadAIValueReport', () => {
     };
 
     beforeEach(() => {
-      buildForwardedStateMock.mockImplementation(({ timeRange }: { timeRange: { from: string; to: string } }) => ({
+      buildForwardedStateMock.mockImplementation(({ timeRange }: { timeRange: unknown }) => ({
         timeRange,
         insight: 'insight',
         reportDataHash: 'hash',
@@ -186,7 +186,7 @@ describe('useDownloadAIValueReport', () => {
       hookResult.toggleContextMenu();
       expect(
         shareServiceMock.toggleShareContextMenu.mock.calls[0][0].sharingData.locatorParams.params.timeRange
-          .from
+          .fromStr
       ).toBe('now-7d');
     });
   });
