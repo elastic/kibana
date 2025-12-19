@@ -21,7 +21,7 @@ run(
 
     const moonCommand = IS_CI ? 'ci' : 'run';
     const lintCommand = flags.fix ? ':eslint-fix' : ':eslint';
-    const cacheFlag = flags.updateCache ? [] : ['-u'];
+    const cacheFlag = IS_CI ? [] : !flags.updateCache ? ['-u'] : [];
 
     const fullArgs = [moonCommand, lintCommand, ...cacheFlag];
 
