@@ -189,7 +189,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-ast/scripts/**/*',
+  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
