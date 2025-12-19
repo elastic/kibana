@@ -24,21 +24,31 @@ export class ConnectionDetailsService {
   public readonly apiKeyHasAccess$ = new BehaviorSubject<null | boolean>(null);
 
   constructor(public readonly opts: ConnectionDetailsOpts) {
+    // Don't set default tab to apiKeys yet - wait for permission check to avoid flash
+    const shouldDeferDefaultTab = opts.defaultTabId === 'apiKeys';
+
+    if (opts.defaultTabId && !shouldDeferDefaultTab) {
+      this.tabId$.next(opts.defaultTabId);
+    }
+
     opts.apiKeys
       ?.hasPermission()
       .then((hasAccess) => {
         this.apiKeyHasAccess$.next(hasAccess);
-        // If user doesn't have permission and is on the apiKeys tab, switch to endpoints
-        if (!hasAccess && this.tabId$.getValue() === 'apiKeys') {
+
+        // Now set the deferred default tab if user has access
+        if (shouldDeferDefaultTab && hasAccess) {
+          this.tabId$.next('apiKeys');
+        } else if (!hasAccess && this.tabId$.getValue() === 'apiKeys') {
+          // If user doesn't have permission and is on the apiKeys tab, switch to endpoints
           this.tabId$.next('endpoints');
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.error('Error checking API key creation permissions', error);
+        this.apiKeyHasAccess$.next(false);
       });
-
-    if (opts.defaultTabId) this.tabId$.next(opts.defaultTabId);
   }
 
   public readonly setTab = (tab: TabID) => {

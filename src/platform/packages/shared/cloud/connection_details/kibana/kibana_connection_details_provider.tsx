@@ -12,6 +12,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
+import type { QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 import { ConnectionDetailsOptsProvider } from '../context';
 import type { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
@@ -68,29 +69,15 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         };
       },
       hasPermission: async () => {
+        if (!http) return false;
+
         try {
-          // Use native fetch to bypass Kibana's HTTP interceptors which would show error modals
-          // This is a background permission check - we don't want to show errors to users
-          const basePath = http?.basePath.get() ?? '';
-          const response = await fetch(`${basePath}/internal/security/api_key/_query`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'kbn-xsrf': 'true',
-              'x-elastic-internal-origin': 'kibana',
-            },
-            credentials: 'same-origin',
+          const response = await http.post<QueryApiKeyResult>('/internal/security/api_key/_query', {
             body: JSON.stringify({}),
           });
-
-          if (!response.ok) {
-            return false;
-          }
-
-          const data = await response.json();
-          return data.canManageOwnApiKeys ?? false;
+          return response.canManageOwnApiKeys ?? false;
         } catch {
-          // If the request fails (e.g., API keys disabled, no license), assume no permission
+          // Permission check failed - API keys may be disabled or user lacks privileges
           return false;
         }
       },
