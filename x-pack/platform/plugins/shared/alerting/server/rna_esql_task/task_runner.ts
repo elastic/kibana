@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { ESQLParamsSchema } from '@kbn/response-ops-rule-params/esql';
 
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart, AlertingServerStart } from '../plugin';
 import { spaceIdToNamespace } from '../lib';
@@ -48,7 +49,7 @@ export function createEsqlRulesTaskRunner({
           params.spaceId
         );
         const encryptedSavedObjectsClient = pluginsStart.encryptedSavedObjects.getClient({
-          includedHiddenTypes: [],
+          includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
         });
 
         let rawRule: RawRule;
