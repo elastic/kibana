@@ -1,0 +1,165 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import type {
+  FormBasedLayer,
+  DatatableVisualizationState,
+  TextBasedLayer,
+  ColumnState,
+} from '@kbn/lens-common';
+import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
+import { isFormBasedLayer, operationFromColumn } from '../../../utils';
+import { getValueApiColumn } from '../../../columns/esql_column';
+import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
+import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
+import { isMetricColumn } from '../helpers';
+
+type APIMetricRowCommonProps = Partial<
+  Pick<DatatableState['metrics'][number], 'visible' | 'alignment'>
+>;
+
+function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
+  return {
+    ...(column.hidden !== undefined ? { visible: !column.hidden } : {}),
+    ...(column.alignment ? { alignment: column.alignment } : {}),
+  };
+}
+
+type APIMetricProps = APIMetricRowCommonProps &
+  Partial<Pick<DatatableState['metrics'][number], 'apply_color_to' | 'color' | 'summary'>>;
+
+function buildMetricsAPI(column: ColumnState): APIMetricProps {
+  const { summaryRow, summaryLabel, colorMode, palette } = column;
+  return {
+    ...buildCommonMetricRowProps(column),
+    ...(colorMode && colorMode !== 'none'
+      ? {
+          apply_color_to: colorMode === 'text' ? 'value' : 'background',
+          ...(palette ? { color: fromColorByValueLensStateToAPI(palette) } : {}),
+        }
+      : {}),
+    ...(summaryRow && summaryRow !== 'none'
+      ? { summary: { type: summaryRow, ...(summaryLabel ? { label: summaryLabel } : {}) } }
+      : {}),
+  };
+}
+
+type APIRowProps = APIMetricRowCommonProps &
+  Partial<
+    Pick<
+      NonNullable<DatatableState['rows']>[number],
+      'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
+    >
+  >;
+
+function buildRowsAPI(column: ColumnState): APIRowProps {
+  const { collapseFn, oneClickFilter, colorMode, colorMapping } = column;
+  return {
+    ...buildCommonMetricRowProps(column),
+    ...(colorMode && colorMode !== 'none'
+      ? {
+          apply_color_to: colorMode === 'text' ? 'value' : 'background',
+          ...(colorMapping ? { color: fromColorMappingLensStateToAPI(colorMapping) } : {}),
+        }
+      : {}),
+    ...(collapseFn ? { collapse_by: collapseFn } : {}),
+    ...(oneClickFilter !== undefined ? { click_filter: oneClickFilter } : {}),
+  };
+}
+
+type DatatableColumnsNoESQL = Pick<DatatableStateNoESQL, 'metrics' | 'rows' | 'split_metrics_by'>;
+type DatatableColumnsESQL = Pick<DatatableStateESQL, 'metrics' | 'rows' | 'split_metrics_by'>;
+
+export function convertDatatableColumnsToAPI(
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  visualization: DatatableVisualizationState
+): DatatableColumnsNoESQL;
+export function convertDatatableColumnsToAPI(
+  layer: TextBasedLayer,
+  visualization: DatatableVisualizationState
+): DatatableColumnsESQL;
+export function convertDatatableColumnsToAPI(
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  visualization: DatatableVisualizationState
+): DatatableColumnsNoESQL | DatatableColumnsESQL {
+  const { columns } = visualization;
+  if (columns.length === 0) {
+    throw new Error('Datatable must have at least one metric column');
+  }
+
+  if (isFormBasedLayer(layer)) {
+    const metrics: DatatableStateNoESQL['metrics'] = [];
+    const rows: NonNullable<DatatableStateNoESQL['rows']> = [];
+    const splitMetricsBy: NonNullable<DatatableStateNoESQL['split_metrics_by']> = [];
+
+    for (const column of columns) {
+      const { columnId } = column;
+      const apiOperation = columnId ? operationFromColumn(columnId, layer) : undefined;
+      if (!apiOperation) throw new Error('Column not found');
+
+      if (isMetricColumn(column, true, apiOperation)) {
+        if (!isAPIColumnOfMetricType(apiOperation))
+          throw new Error(
+            `Metric column ${columnId} must be a metric operation (got ${apiOperation.operation})`
+          );
+        metrics.push({
+          ...apiOperation,
+          ...buildMetricsAPI(column),
+        });
+      } else if (column.isTransposed) {
+        if (!isAPIColumnOfBucketType(apiOperation))
+          throw new Error(
+            `Split metric column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
+          );
+        splitMetricsBy.push(apiOperation);
+      } else {
+        if (!isAPIColumnOfBucketType(apiOperation))
+          throw new Error(
+            `Row column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
+          );
+        rows.push({
+          ...apiOperation,
+          ...buildRowsAPI(column),
+        });
+      }
+    }
+
+    return {
+      metrics,
+      ...(rows.length > 0 ? { rows } : {}),
+      ...(splitMetricsBy.length > 0 ? { split_metrics_by: splitMetricsBy } : {}),
+    };
+  }
+
+  const metrics: DatatableStateESQL['metrics'] = [];
+  const rows: NonNullable<DatatableStateESQL['rows']> = [];
+  const splitMetricsBy: NonNullable<DatatableStateESQL['split_metrics_by']> = [];
+
+  for (const column of columns) {
+    const { columnId } = column;
+    const apiOperation = columnId ? getValueApiColumn(columnId, layer) : undefined;
+    if (!apiOperation) throw new Error('Column not found');
+
+    if (isMetricColumn(column, false)) {
+      metrics.push({
+        ...apiOperation,
+        ...buildMetricsAPI(column),
+      });
+    } else if (column.isTransposed) {
+      splitMetricsBy.push(apiOperation);
+    } else {
+      rows.push({ ...apiOperation, ...buildRowsAPI(column) });
+    }
+  }
+
+  return {
+    metrics,
+    ...(rows.length > 0 ? { rows } : {}),
+    ...(splitMetricsBy.length > 0 ? { split_metrics_by: splitMetricsBy } : {}),
+  };
+}
