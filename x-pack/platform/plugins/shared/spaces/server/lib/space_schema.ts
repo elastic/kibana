@@ -82,6 +82,7 @@ export const solutionSchema = schema.oneOf([
   schema.literal('security'),
   schema.literal('oblt'),
   schema.literal('es'),
+  schema.literal('workplaceai'),
   schema.literal('classic'),
 ]);
 

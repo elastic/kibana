@@ -75,6 +75,19 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       'data-test-subj': 'solutionViewSecurityOption',
     },
     {
+      value: 'workplaceai',
+      inputDisplay: (
+        <>
+          <EuiIcon type="logoElasticsearch" css={iconCss} />
+          {i18n.translate(
+            'xpack.spaces.management.manageSpacePage.solutionViewSelect.workplaceaiOptionLabel',
+            { defaultMessage: 'Workplace AI' }
+          )}
+        </>
+      ),
+      'data-test-subj': 'solutionViewWorkplaceaiOption',
+    },
+    {
       value: 'classic',
       inputDisplay: (
         <>

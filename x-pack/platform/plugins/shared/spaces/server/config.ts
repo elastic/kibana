@@ -12,10 +12,10 @@ import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
-const solutions = ['es', 'oblt', 'security'] as const;
+const solutions = ['es', 'oblt', 'security', 'workplaceai'] as const;
 
 const solutionSchemaLiterals = [...solutions].map((s) => schema.literal(s)) as [
-  ReturnType<typeof schema.literal<Exclude<SolutionId, 'workplaceai'>>>
+  ReturnType<typeof schema.literal<SolutionId>>
 ];
 
 export const ConfigSchema = schema.object({

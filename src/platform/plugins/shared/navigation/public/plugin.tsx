@@ -199,5 +199,5 @@ function getIsProjectNav(solutionView?: string) {
 }
 
 function isKnownSolutionView(solution?: string): solution is SolutionId {
-  return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
+  return Boolean(solution) && ['oblt', 'es', 'security', 'workplaceai'].includes(solution!);
 }
