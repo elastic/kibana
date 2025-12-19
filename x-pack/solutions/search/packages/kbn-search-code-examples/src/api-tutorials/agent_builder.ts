@@ -55,7 +55,7 @@ GET kbn://api/agent_builder/tools
 
 # ✅ The response includes a list of all available tools, including platform tools.
 
-# TODO: explain the attributes in the response: tags, configuration, readonly
+# Tool configuration values help your agents understand how and when to use various tools.
 
 # NEW STEP
 # Here we are using one of the built in tools to generate an ES|QL query against our sample data
@@ -90,11 +90,23 @@ POST kbn://api/agent_builder/tools
   "id": "most-pages-esql-tool",
   "type": "esql",
   "description": "An ES|QL query tool for getting the book with the most pages",
-  "tags": ["books", "analytics", "sample"],
   "configuration": {
-    "query": "FROM kibana_sample_data_agents | SORT page_count DESC | LIMIT 1",
+    "query": "FROM kibana_sample_data_agents | SORT page_count DESC | LIMIT 1"
   }
 }
+
+# ✅ The response confirms the tool was created with its full configuration.
+
+# Let's run our new purpose-built tool to get the book with the most pages
+
+POST kbn://api/agent_builder/tools/_execute
+{
+    "tool_id": "most-pages-esql-tool",
+    "tool_params": {}
+}
+
+# Here's a more complex tool that leverages parameters and 
+
 # -----------------------------------------------
 # Step 2: Create a custom ES|QL tool ✍️
 # -----------------------------------------------
