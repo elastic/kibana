@@ -10,3 +10,5 @@ export { extractRound } from './extract_round';
 export { conversationToLangchainMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export { selectTools } from './select_tools';
+export { getPendingRound } from './prompts';
+export { evictInternalEvents } from './evict_internal_events';
