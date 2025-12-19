@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import type { ESQLAstCommand } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
@@ -16,6 +16,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  MathProcessor,
   RenameProcessor,
   SetProcessor,
   RemoveByPrefixProcessor,
@@ -35,6 +36,7 @@ import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_pre
 import { convertRemoveProcessorToESQL } from './processors/remove';
 import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
 import { convertReplaceProcessorToESQL } from './processors/replace';
+import { convertMathProcessorToESQL } from './processors/math';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -58,6 +60,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'grok':
       return convertGrokProcessorToESQL(processor as GrokProcessor);
+
+    case 'math':
+      return convertMathProcessorToESQL(processor as MathProcessor);
 
     case 'remove_by_prefix':
       return convertRemoveByPrefixProcessorToESQL(processor as RemoveByPrefixProcessor);
