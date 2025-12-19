@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/fleet-plugin",
-  "owner": [
-    "@elastic/fleet"
-  ],
+  "owner": ["@elastic/fleet"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
     "id": "fleet",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "fleet"
-    ],
+    "configPath": ["xpack", "fleet"],
     "requiredPlugins": [
       "licensing",
       "data",
@@ -33,7 +28,8 @@
       "logsDataAccess",
       "embeddable",
       "savedSearch",
-      "spaces"
+      "spaces",
+      "reporting"
     ],
     "optionalPlugins": [
       "features",
@@ -55,8 +51,6 @@
       "kibanaUtils",
       "usageCollection",
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }
