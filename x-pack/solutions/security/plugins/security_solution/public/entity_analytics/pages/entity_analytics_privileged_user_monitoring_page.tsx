@@ -311,16 +311,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
         {state.type === 'dashboard' && (
           <>
-            <HeaderPage
-              badgeOptions={{
-                beta: true,
-                text: i18n.translate(
-                  'xpack.securitySolution.privilegedUserMonitoring.dashboards.betaStatus',
-                  {
-                    defaultMessage: 'TECHNICAL PREVIEW',
-                  }
-                ),
-              }}
+            <HeaderPage       
               title={
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboards.pageTitle"
