@@ -79,8 +79,8 @@ describe('Parameters from hints handlers', () => {
 });
 
 /**
- * Tests that the suggestion handler returns the expected suggestions for a given hint,
- * executing the context resolver if available to build the context.
+ * Calculates which would be the suggestions for a given parameter hint
+ * given certain callbacks and former context.
  */
 export async function getSuggestionsForHint(
   hint: ParameterHint,
