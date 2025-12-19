@@ -8,7 +8,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import * as t from 'io-ts';
-import { arrayToStringRt } from '@kbn/io-ts-utils';
 import {
   budgetingMethodSchema,
   indicatorSchema,
