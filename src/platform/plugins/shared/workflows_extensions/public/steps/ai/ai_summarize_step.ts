@@ -31,7 +31,7 @@ export const AiSummarizeStepDefinition: PublicStepDefinition = {
   actionsMenuGroup: ActionsMenuGroup.ai,
   documentation: {
     details: i18n.translate('workflowsExtensionsExample.AiSummarizeStep.documentation.details', {
-      defaultMessage: `The ${AiSummarizeStepTypeId} step generates a concise summary of the provided content using an AI connector. The summary can be referenced in later steps using template syntax like {templateSyntax}.`,
+      defaultMessage: `The ${AiSummarizeStepTypeId} step generates a concise summary of the provided content using an AI connector. The summary can be referenced in later steps using template syntax.`,
       values: { templateSyntax: '`{{ steps.stepName.output }}`' },
     }),
     examples: [

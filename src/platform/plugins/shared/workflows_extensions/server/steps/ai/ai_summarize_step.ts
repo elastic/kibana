@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+import type { MessageFieldWithRole } from '@langchain/core/messages';
 import type { CoreSetup } from '@kbn/core/server';
 import { resolveConnectorId } from './utils/resolve_connector_id';
 import { AiSummarizeStepCommonDefinition } from '../../../common/steps/ai';
@@ -16,37 +18,73 @@ import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
 /**
  * Builds a summarization prompt based on the input type and optional parameters
  */
-function buildSummarizationPrompt(params: {
-  input: string | unknown[] | Record<string, unknown>;
-  instructions?: string;
+export function buildModelInput(params: {
+  input: unknown;
+  instructions?: string[];
   maxLength?: number;
-}): string {
+}): BaseLanguageModelInput {
   const { input, instructions, maxLength } = params;
+  const inputType = typeof input === 'object' ? 'json' : 'text';
+  let resolvedInput = input;
 
-  // Convert input to string format
-  let contentToSummarize: string;
-  if (typeof input === 'string') {
-    contentToSummarize = input;
-  } else {
-    contentToSummarize = JSON.stringify(input, null, 2);
+  if (inputType === 'json') {
+    resolvedInput = JSON.stringify(input);
   }
 
-  // Build the prompt
-  let prompt = 'Please provide a concise summary of the following content:\n\n';
-  prompt += contentToSummarize;
-  prompt += '\n\n';
+  const modelInput: MessageFieldWithRole[] = [
+    {
+      role: 'system',
+      content: `
+You are a useful assistent who:
+- Follow summary requirements if present provided by the user
+- Respect additional instructions provided by the user
+- Output summary for provided data
+- You don't include anything additional to summary 
+`,
+    },
+    {
+      role: 'user',
+      content: `
+# Data to summarize:
+\`\`\`${inputType}
+${resolvedInput}
+\`\`\`
+# Requirements:  
+`,
+    },
+  ];
 
-  // Add instructions if provided
-  if (instructions) {
-    prompt += `Additional instructions: ${instructions}\n`;
+  let requirementsPart = '';
+  const summaryRequirements: string[] = [];
+
+  if (typeof maxLength === 'number') {
+    summaryRequirements.push(`Max length of summary must be ${maxLength} characters.`);
   }
 
-  // Add length constraint if provided
-  if (maxLength) {
-    prompt += `Please keep the summary under ${maxLength} tokens.\n`;
+  if (summaryRequirements.length) {
+    requirementsPart += `
+${summaryRequirements.map((req) => `- ${req}`).join('\n')}
+`;
   }
 
-  return prompt;
+  if (requirementsPart) {
+    modelInput.push({
+      role: 'user',
+      content: requirementsPart,
+    });
+  }
+
+  if (instructions?.length) {
+    modelInput.push({
+      role: 'user',
+      content: `
+# Additional instructions:
+${instructions.map((text) => `- ${text}`).join('\n')}
+        `,
+    });
+  }
+
+  return modelInput;
 }
 
 export const aiSummarizeStepDefinition = (
@@ -72,19 +110,11 @@ export const aiSummarizeStepDefinition = (
         },
       });
 
-      // Build the summarization prompt
-      const prompt = buildSummarizationPrompt({
+      const modelInput = buildModelInput({
         input: context.input.input,
         instructions: context.input.instructions,
         maxLength: context.input.maxLength,
       });
-
-      const modelInput = [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ];
 
       const modelResponse = await chatModel.invoke(modelInput, {
         signal: context.abortSignal,
