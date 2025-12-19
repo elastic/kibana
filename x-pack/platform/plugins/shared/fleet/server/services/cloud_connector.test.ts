@@ -539,21 +539,17 @@ describe('CloudConnectorService', () => {
       per_page: 20,
     };
 
+    // Mock aggregation response for package policy counts (perPage: 0 means no docs returned)
     const mockPackagePolicies = {
-      saved_objects: [
-        {
-          id: 'package-policy-1',
-          type: 'ingest-package-policies',
-          score: 1,
-          references: [],
-          attributes: {
-            cloud_connector_id: 'cloud-connector-1',
-          },
-        },
-      ],
+      saved_objects: [],
       total: 1,
       page: 1,
-      per_page: 10000,
+      per_page: 0,
+      aggregations: {
+        packagePolicyCounts: {
+          buckets: [{ key: 'cloud-connector-1', doc_count: 1 }],
+        },
+      },
     };
 
     it('should get cloud connectors list successfully with computed packagePolicyCount', async () => {
@@ -595,7 +591,7 @@ describe('CloudConnectorService', () => {
               type: 'password',
             },
           },
-          packagePolicyCount: 1, // Computed from mockPackagePolicies
+          packagePolicyCount: 1,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
         },
