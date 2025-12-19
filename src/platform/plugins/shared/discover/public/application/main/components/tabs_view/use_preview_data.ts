@@ -174,11 +174,11 @@ const getPreviewDataObservable = (
 
       return combineLatest([
         tabStateContainer.dataState.data$.main$,
-        tabStateContainer.savedSearchState.getCurrent$(),
+        tabRuntimeState.currentDataView$,
       ]).pipe(
-        map(([{ fetchStatus }, { searchSource }]) => ({
+        map(([{ fetchStatus }, dataView]) => ({
           fetchStatus,
-          dataViewName: searchSource?.getField('index')?.name,
+          dataViewName: dataView?.name,
         })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         map(({ fetchStatus, dataViewName }) => {

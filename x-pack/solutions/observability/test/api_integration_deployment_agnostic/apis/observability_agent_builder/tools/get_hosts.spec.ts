@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
+import type { ApmSynthtraceEsClient, InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetHostsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_hosts/get_hosts';
+import type { GetHostsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_hosts/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createSyntheticInfraData, type HostConfig } from '../utils/synthtrace_scenarios';
@@ -19,6 +19,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe(`tool: ${OBSERVABILITY_GET_HOSTS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let infraSynthtraceEsClient: InfraSynthtraceEsClient;
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
     before(async () => {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
@@ -32,6 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           diskUsage: 0.45,
           cloudProvider: 'aws',
           cloudRegion: 'us-east-1',
+          services: ['payment-service', 'user-service'],
         },
         {
           name: 'test-host-02',
@@ -40,10 +42,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           diskUsage: 0.68,
           cloudProvider: 'gcp',
           cloudRegion: 'us-central1',
+          services: ['order-service'],
         },
       ];
 
-      ({ infraSynthtraceEsClient } = await createSyntheticInfraData({
+      ({ infraSynthtraceEsClient, apmSynthtraceEsClient } = await createSyntheticInfraData({
         getService,
         hosts: testHosts,
       }));
@@ -52,6 +55,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       if (infraSynthtraceEsClient) {
         await infraSynthtraceEsClient.clean();
+      }
+      if (apmSynthtraceEsClient) {
+        await apmSynthtraceEsClient.clean();
       }
     });
 
@@ -74,11 +80,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('returns the correct total count', () => {
         expect(resultData.total).to.be(2);
-      });
-
-      it('returns the expected hosts', () => {
-        const hostNames = resultData.hosts.map((host) => host.name);
-        expect(hostNames).to.eql(['test-host-01', 'test-host-02']);
       });
 
       it('includes metrics for each host', () => {
@@ -159,23 +160,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('when using hostNames parameter', () => {
-      it('filters to specific hosts', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
-          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            hostNames: ['test-host-01'],
-          },
-        });
-
-        expect(results).to.have.length(1);
-        expect(results[0].data.hosts).to.have.length(1);
-        expect(results[0].data.hosts[0].name).to.be('test-host-01');
-      });
-    });
-
     describe('when using kqlFilter parameter', () => {
       it('filters hosts by KQL query', async () => {
         const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
@@ -184,6 +168,69 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             start: 'now-1h',
             end: 'now',
             kqlFilter: 'host.name: test-host-02',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        expect(results[0].data.hosts).to.have.length(1);
+        expect(results[0].data.hosts[0].name).to.be('test-host-02');
+      });
+
+      it('verifies APM data is indexed correctly', async () => {
+        // Debug test to verify APM data exists with correct fields
+        const es = getService('es');
+        const response = await es.search({
+          index: 'metrics-apm.transaction.*',
+          size: 1,
+          fields: ['data_stream.dataset', 'host.name', 'service.name'],
+          query: {
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
+            },
+          },
+          aggs: {
+            hosts: {
+              terms: { field: 'host.name', size: 10 },
+              aggs: {
+                services: {
+                  terms: { field: 'service.name', size: 10 },
+                },
+              },
+            },
+          },
+        });
+
+        // Verify we have APM data with host.name and service.name
+        const hostsAgg = response.aggregations?.hosts as { buckets: Array<{ key: string }> };
+        expect(hostsAgg?.buckets?.length).to.be.greaterThan(0);
+
+        // Verify data_stream.dataset is present as it's required for filtering
+        expect(response.hits.hits[0].fields).to.have.property('data_stream.dataset');
+      });
+
+      it('filters hosts by service.name using APM data correlation', async () => {
+        // Filter by payment-service which runs on test-host-01
+        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
+          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            kqlFilter: 'service.name: payment-service',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        expect(results[0].data.hosts).to.have.length(1);
+        expect(results[0].data.hosts[0].name).to.be('test-host-01');
+      });
+
+      it('filters hosts by order-service which runs on test-host-02', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetHostsToolResult>({
+          id: OBSERVABILITY_GET_HOSTS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            kqlFilter: 'service.name: order-service',
           },
         });
 

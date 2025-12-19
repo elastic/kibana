@@ -1306,7 +1306,9 @@
             "type": "Function",
             "tags": [],
             "label": "renderTabContent",
-            "description": [],
+            "description": [
+              "\nA function that renders the content of the tab.\n\nIMPORTANT: This expects an arrow function that returns JSX, NOT a component passed directly.\n"
+            ],
             "signature": [
               "(args: { index: ",
               {
