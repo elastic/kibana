@@ -16,7 +16,6 @@ import { AgentsList } from './agents_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
-import { TechPreviewTitle } from '../../common/tech_preview';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const manageToolsLabel = i18n.translate('xpack.onechat.agents.manageToolsLabel', {
@@ -61,13 +60,9 @@ export const OnechatAgents = () => {
       >
         <KibanaPageTemplate.Header
           css={headerStyles}
-          pageTitle={
-            <TechPreviewTitle
-              title={i18n.translate('xpack.onechat.agents.title', {
-                defaultMessage: 'Agents',
-              })}
-            />
-          }
+          pageTitle={i18n.translate('xpack.onechat.agents.title', {
+            defaultMessage: 'Agents',
+          })}
           pageTitleProps={{ 'data-test-subj': 'agentBuilderAgentsListPageTitle' }}
           description={
             <FormattedMessage

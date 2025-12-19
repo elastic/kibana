@@ -479,7 +479,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    if (!this.startDependencies.config[key]) {
+    if (!Object.prototype.hasOwnProperty.call(this.startDependencies.config, key)) {
       throw new EndpointError(`Missing config value for key: ${key}`);
     }
 
