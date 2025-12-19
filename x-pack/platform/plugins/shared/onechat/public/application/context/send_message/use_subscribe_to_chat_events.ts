@@ -40,55 +40,38 @@ export const useSubscribeToChatEvents = ({
   const unsubscribedRef = useRef(false);
   const subscriptionRef = useRef<Subscription | null>(null);
 
-  // Use refs to always have the latest values in the event handler closure
-  const conversationActionsRef = useRef(conversationActions);
-  conversationActionsRef.current = conversationActions;
-
-  const browserApiToolsRef = useRef(browserApiTools);
-  browserApiToolsRef.current = browserApiTools;
-
-  const setAgentReasoningRef = useRef(setAgentReasoning);
-  setAgentReasoningRef.current = setAgentReasoning;
-
-  const setIsResponseLoadingRef = useRef(setIsResponseLoading);
-  setIsResponseLoadingRef.current = setIsResponseLoading;
-
   const unsubscribeFromChatEvents = () => {
     unsubscribedRef.current = true;
     subscriptionRef.current?.unsubscribe();
   };
 
   const nextChatEvent = (event: ChatEvent) => {
-    // Use refs to get latest values, avoiding stale closure issues
-    const actions = conversationActionsRef.current;
-    const tools = browserApiToolsRef.current;
-
     // chunk received, we append it to the chunk buffer
     if (isMessageChunkEvent(event)) {
-      actions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
+      conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
     }
     // full message received, override chunk buffer
     else if (isMessageCompleteEvent(event)) {
-      actions.setAssistantMessage({
+      conversationActions.setAssistantMessage({
         assistantMessage: event.data.message_content,
       });
     } else if (isToolProgressEvent(event)) {
-      actions.setToolCallProgress({
+      conversationActions.setToolCallProgress({
         progress: { message: event.data.message },
         toolCallId: event.data.tool_call_id,
       });
       // Individual tool progression message should also be displayed as reasoning
-      setAgentReasoningRef.current(event.data.message);
+      setAgentReasoning(event.data.message);
     } else if (isReasoningEvent(event)) {
-      actions.addReasoningStep({
+      conversationActions.addReasoningStep({
         step: createReasoningStep({
           reasoning: event.data.reasoning,
           transient: event.data.transient,
         }),
       });
-      setAgentReasoningRef.current(event.data.reasoning);
+      setAgentReasoning(event.data.reasoning);
     } else if (isToolCallEvent(event)) {
-      actions.addToolCall({
+      conversationActions.addToolCall({
         step: createToolCallStep({
           params: event.data.params,
           results: [],
@@ -99,8 +82,8 @@ export const useSubscribeToChatEvents = ({
     } else if (isBrowserToolCallEvent(event)) {
       // Check if this is a browser tool call and execute it immediately
       const toolId = event.data.tool_id;
-      if (toolId && browserToolExecutor && tools) {
-        const toolDef = tools.find((tool) => tool.id === toolId);
+      if (toolId && browserToolExecutor && browserApiTools) {
+        const toolDef = browserApiTools.find((tool) => tool.id === toolId);
         if (toolDef) {
           const toolsMap = new Map([[toolId, toolDef]]);
           browserToolExecutor
@@ -123,23 +106,23 @@ export const useSubscribeToChatEvents = ({
       }
     } else if (isToolResultEvent(event)) {
       const { tool_call_id: toolCallId, results } = event.data;
-      actions.setToolCallResult({ results, toolCallId });
+      conversationActions.setToolCallResult({ results, toolCallId });
     } else if (isRoundCompleteEvent(event)) {
       // Now we have the full response and can stop the loading indicators
-      setIsResponseLoadingRef.current(false);
+      setIsResponseLoading(false);
     } else if (isConversationCreatedEvent(event)) {
       const { conversation_id: id, title } = event.data;
-      actions.onConversationCreated({ conversationId: id, title });
+      conversationActions.onConversationCreated({ conversationId: id, title });
     } else if (isThinkingCompleteEvent(event)) {
-      actions.setTimeToFirstToken({
+      conversationActions.setTimeToFirstToken({
         timeToFirstToken: event.data.time_to_first_token,
       });
     } else if (isPromptRequestEvent(event)) {
-      actions.setPendingPrompt({
+      conversationActions.setPendingPrompt({
         prompt: event.data.prompt,
       });
       // Stop loading when a prompt is requested - the round is now awaiting user input
-      setIsResponseLoadingRef.current(false);
+      setIsResponseLoading(false);
     }
   };
 
