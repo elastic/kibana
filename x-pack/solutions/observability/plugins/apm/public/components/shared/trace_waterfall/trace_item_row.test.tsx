@@ -9,6 +9,9 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TraceItemRow } from './trace_item_row';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { useTraceWaterfallContext } from './trace_waterfall_context';
+import type { TraceWaterfallContextProps } from './trace_waterfall_context';
+import { useEuiTheme } from '@elastic/eui';
 
 // Mock dependencies
 jest.mock('./bar', () => ({
@@ -40,30 +43,19 @@ jest.mock('./toggle_accordion_button', () => ({
     </button>
   ),
 }));
-jest.mock('./trace_waterfall_context', () => ({
-  useTraceWaterfallContext: () => ({
-    duration: 100,
-    margin: { left: 20, right: 10 },
-    showAccordion: true,
-    onClick: jest.fn(),
-    onErrorClick: jest.fn(),
-    highlightedTraceId: 'highlighted-id',
-    criticalPathSegmentsById: {},
-    showCriticalPath: false,
-  }),
-}));
+jest.mock('./trace_waterfall_context');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
     ...actual,
-    useEuiTheme: () => ({
-      euiTheme: {
-        border: { thin: '1px solid #eee', width: { thick: '2px' } },
-        colors: { danger: 'red', lightestShade: '#fafafa' },
-      },
-    }),
+    useEuiTheme: jest.fn(),
   };
 });
+
+const mockUseTraceWaterfallContext = useTraceWaterfallContext as jest.MockedFunction<
+  typeof useTraceWaterfallContext
+>;
+const mockUseEuiTheme = useEuiTheme as jest.MockedFunction<typeof useEuiTheme>;
 
 const baseItem = {
   id: 'span-1',
@@ -81,6 +73,26 @@ const baseItem = {
 } as TraceWaterfallItem;
 
 describe('TraceItemRow', () => {
+  beforeEach(() => {
+    mockUseTraceWaterfallContext.mockReturnValue({
+      duration: 100,
+      margin: { left: 20, right: 10 },
+      showAccordion: true,
+      onClick: jest.fn(),
+      onErrorClick: jest.fn(),
+      highlightedTraceId: 'highlighted-id',
+      criticalPathSegmentsById: {},
+      showCriticalPath: false,
+    } as unknown as TraceWaterfallContextProps);
+
+    mockUseEuiTheme.mockReturnValue({
+      euiTheme: {
+        border: { thin: '1px solid #eee', width: { thick: '2px' } },
+        colors: { danger: 'red', lightestShade: '#fafafa' },
+      },
+    } as any);
+  });
+
   afterAll(() => {
     jest.clearAllMocks();
   });
@@ -121,8 +133,7 @@ describe('TraceItemRow', () => {
   });
 
   it('renders only content when showAccordion is false', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+    mockUseTraceWaterfallContext.mockReturnValue({
       duration: 100,
       margin: { left: 20, right: 10 },
       showAccordion: false,
@@ -131,7 +142,7 @@ describe('TraceItemRow', () => {
       highlightedTraceId: 'highlighted-id',
       criticalPathSegmentsById: {},
       showCriticalPath: false,
-    });
+    } as unknown as TraceWaterfallContextProps);
     const { container } = render(
       <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
     );
@@ -139,8 +150,7 @@ describe('TraceItemRow', () => {
   });
 
   it('applies highlight background when isHighlighted is true', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+    mockUseTraceWaterfallContext.mockReturnValue({
       duration: 100,
       margin: { left: 20, right: 10 },
       showAccordion: true,
@@ -149,7 +159,7 @@ describe('TraceItemRow', () => {
       highlightedTraceId: 'span-1',
       criticalPathSegmentsById: {},
       showCriticalPath: false,
-    });
+    } as unknown as TraceWaterfallContextProps);
     const { getByTestId } = render(
       <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
     );
@@ -157,19 +167,17 @@ describe('TraceItemRow', () => {
   });
 
   describe('with critical path', () => {
-    beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('@elastic/eui'), 'useEuiTheme').mockReturnValue({
+    beforeEach(() => {
+      mockUseEuiTheme.mockReturnValue({
         euiTheme: {
           border: { thin: '1px solid #eee', width: { thick: '2px' } },
           colors: { danger: 'red', lightestShade: '#fafafa', accent: 'orange' },
         },
-      });
+      } as any);
     });
 
     it('renders without segments when criticalPathSegmentsById is undefined', () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -177,7 +185,7 @@ describe('TraceItemRow', () => {
         highlightedTraceId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {},
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
@@ -186,8 +194,7 @@ describe('TraceItemRow', () => {
     });
 
     it('renders without segments when criticalPathSegmentsById has no segments for item', () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -197,7 +204,7 @@ describe('TraceItemRow', () => {
         criticalPathSegmentsById: {
           'other-span': [],
         },
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
@@ -207,8 +214,7 @@ describe('TraceItemRow', () => {
 
     it('filters segments to only include self:true segments', () => {
       const item = { ...baseItem, offset: 10, duration: 100, skew: 0 };
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -222,7 +228,7 @@ describe('TraceItemRow', () => {
             { item, offset: 90, duration: 10, self: true },
           ],
         },
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
@@ -233,8 +239,7 @@ describe('TraceItemRow', () => {
 
     it('calculates segment left position correctly', () => {
       const item = { ...baseItem, offset: 10, duration: 100, skew: 5 };
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -246,7 +251,7 @@ describe('TraceItemRow', () => {
             { item, offset: 25, duration: 30, self: true }, // (25 - 10 - 5) / 100 = 0.1
           ],
         },
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
@@ -257,8 +262,7 @@ describe('TraceItemRow', () => {
 
     it('calculates segment width correctly', () => {
       const item = { ...baseItem, offset: 10, duration: 100, skew: 0 };
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -270,7 +274,7 @@ describe('TraceItemRow', () => {
             { item, offset: 20, duration: 30, self: true }, // 30 / 100 = 0.3
           ],
         },
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
@@ -281,8 +285,7 @@ describe('TraceItemRow', () => {
 
     it('preserves segment id and uses accent color', () => {
       const item = { ...baseItem, offset: 10, duration: 100, skew: 0 };
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 200,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -292,7 +295,7 @@ describe('TraceItemRow', () => {
         criticalPathSegmentsById: {
           'span-1': [{ item, offset: 20, duration: 30, self: true }],
         },
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={item} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
@@ -303,8 +306,7 @@ describe('TraceItemRow', () => {
     });
 
     it('applies transparent color when showCriticalPath is true', () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -312,7 +314,7 @@ describe('TraceItemRow', () => {
         highlightedTraceId: 'highlighted-id',
         showCriticalPath: true,
         criticalPathSegmentsById: {},
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
@@ -324,8 +326,7 @@ describe('TraceItemRow', () => {
     });
 
     it('applies normal color when showCriticalPath is false', () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      jest.spyOn(require('./trace_waterfall_context'), 'useTraceWaterfallContext').mockReturnValue({
+      mockUseTraceWaterfallContext.mockReturnValue({
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
@@ -333,7 +334,7 @@ describe('TraceItemRow', () => {
         highlightedTraceId: 'highlighted-id',
         showCriticalPath: false,
         criticalPathSegmentsById: {},
-      });
+      } as unknown as TraceWaterfallContextProps);
       const { getByTestId } = render(
         <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
       );
