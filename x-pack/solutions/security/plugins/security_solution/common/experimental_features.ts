@@ -202,7 +202,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Gap Auto Fill Scheduler feature.
    */
-  gapAutoFillSchedulerEnabled: false,
+  gapAutoFillSchedulerEnabled: true,
   /**
    * Enables DNS events toggle for Linux in Endpoint policy configuration.
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
