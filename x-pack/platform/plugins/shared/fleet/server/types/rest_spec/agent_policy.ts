@@ -121,3 +121,27 @@ export const GetK8sManifestRequestSchema = {
     enrolToken: schema.maybe(schema.string()),
   }),
 };
+
+export const RunAgentPolicyRevisionsCleanupTaskRequestSchema = {
+  body: schema.object({
+    maxRevisions: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'maximum revisions to keep per policy' },
+      })
+    ),
+    maxPolicies: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'maximum number of policies to process for this task' },
+      })
+    ),
+  }),
+};
+
+export const RunAgentPolicyRevisionsCleanupTaskResponseSchema = schema.object({
+  success: schema.boolean({ meta: { description: 'whether the cleanup task ran successfully' } }),
+  totalDeletedRevisions: schema.number({
+    meta: { description: 'total number of deleted policy revisions' },
+  }),
+});

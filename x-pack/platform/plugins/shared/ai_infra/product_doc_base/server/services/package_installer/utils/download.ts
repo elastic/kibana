@@ -30,7 +30,9 @@ export const downloadToDisk = async (fileUrl: string, filePath: string) => {
 
   await new Promise((resolve, reject) => {
     readStream.pipe(writeStream);
+    // @ts-expect-error upgrade typescript v5.9.3
     readStream.on('error', reject);
+    // @ts-expect-error upgrade typescript v5.9.3
     writeStream.on('finish', resolve);
   });
 };

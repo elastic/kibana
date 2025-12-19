@@ -104,6 +104,7 @@ describe('useChatComplete', () => {
     });
 
     await act(async () => {
+      // @ts-expect-error upgrade typescript v5.9.3
       await sendMessagePromise;
     });
 
