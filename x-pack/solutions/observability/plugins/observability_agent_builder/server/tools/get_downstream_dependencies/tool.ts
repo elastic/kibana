@@ -17,6 +17,7 @@ import type {
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
   'observability.get_downstream_dependencies';
@@ -61,10 +62,11 @@ export function createDownstreamDependenciesTool({
       const { request } = context;
 
       try {
-        const dependencies = await dataRegistry.getData('apmDownstreamDependencies', {
+        const { dependencies } = await getToolHandler({
           request,
+          dataRegistry,
           serviceName: args.serviceName,
-          serviceEnvironment: args.serviceEnvironment ?? '',
+          serviceEnvironment: args.serviceEnvironment,
           start: args.start,
           end: args.end,
         });
