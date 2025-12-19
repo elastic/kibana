@@ -5,11 +5,14 @@
  * 2.0.
  */
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { lazy } from 'react';
-import { map, of } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 const LazyIconBriefcase = lazy(() =>
   import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
@@ -27,6 +30,11 @@ const LazyIconProductCloudInfra = lazy(() =>
     default: iconProductCloudInfra,
   }))
 );
+const LazyAgentBuilderIcon = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconRobot }) => ({
+    default: iconRobot,
+  }))
+);
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -36,7 +44,15 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
-function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
+function createNavTree({
+  streamsAvailable,
+  showAiAssistant,
+  isCloudEnabled,
+}: {
+  streamsAvailable?: boolean;
+  showAiAssistant?: boolean;
+  isCloudEnabled?: boolean;
+}) {
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -241,14 +257,23 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           },
         ],
       },
-      {
-        id: 'aiAssistantContainer',
-        title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
-          defaultMessage: 'AI Assistant',
-        }),
-        icon: 'sparkles',
-        link: 'observabilityAIAssistant',
-      },
+      ...(showAiAssistant
+        ? [
+            {
+              id: 'aiAssistantContainer',
+              title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
+                defaultMessage: 'AI Assistant',
+              }),
+              icon: 'sparkles',
+              link: 'observabilityAIAssistant' as const,
+            },
+          ]
+        : [
+            {
+              link: 'agent_builder' as const,
+              icon: LazyAgentBuilderIcon,
+            },
+          ]),
       {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
@@ -456,6 +481,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 }),
                 breadcrumbStatus: 'hidden',
               },
+              // Only show Cloud Connect in on-prem deployments (not cloud)
+              ...(isCloudEnabled
+                ? []
+                : [
+                    {
+                      id: 'cloud_connect' as const,
+                      link: 'cloud_connect' as const,
+                    },
+                  ]),
               { link: 'monitoring' },
             ],
           },
@@ -581,14 +615,24 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
 }
 
 export const createDefinition = (
+  coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
 ): AddSolutionNavigationArg => ({
   id: 'oblt',
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: (
-    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const })
-  ).pipe(map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))),
+  navigationTree$: combineLatest([
+    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
+    coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
+  ]).pipe(
+    map(([{ status }, chatExperience]) =>
+      createNavTree({
+        streamsAvailable: status === 'enabled',
+        showAiAssistant: chatExperience !== AIChatExperience.Agent,
+        isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+      })
+    )
+  ),
   dataTestSubj: 'observabilitySideNav',
 });

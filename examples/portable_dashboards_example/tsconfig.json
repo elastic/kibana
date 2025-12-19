@@ -24,6 +24,7 @@
     "@kbn/controls-plugin",
     "@kbn/shared-ux-router",
     "@kbn/presentation-publishing",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/presentation-util-plugin"
   ]
 }

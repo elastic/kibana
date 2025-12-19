@@ -88,7 +88,7 @@ dependsOn:
   - '@kbn/embeddable-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/esql-utils'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/response-ops-alerts-delete'
   - '@kbn/content-management-plugin'
   - '@kbn/esql-types'
@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/router-utils'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/actions-types'
 tags:
   - plugin
   - prod

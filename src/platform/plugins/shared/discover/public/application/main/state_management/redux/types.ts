@@ -28,6 +28,7 @@ import type {
   DiscoverSession,
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
+import type { SerializedError } from '@reduxjs/toolkit';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 
@@ -115,7 +116,19 @@ export interface DiscoverAppState {
   density?: DataGridDensity;
 }
 
+export enum TabInitializationStatus {
+  NotStarted = 'NotStarted',
+  InProgress = 'InProgress',
+  Complete = 'Complete',
+  NoData = 'NoData',
+  Error = 'Error',
+}
+
 export interface TabState extends TabItem {
+  initializationState:
+    | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
+    | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;

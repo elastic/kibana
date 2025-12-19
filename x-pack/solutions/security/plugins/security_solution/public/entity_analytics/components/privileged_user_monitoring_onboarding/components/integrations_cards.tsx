@@ -44,7 +44,7 @@ export const IntegrationCards = ({
         path: addPathParamToUrl(
           `/detail/${id}-${version}/overview`,
           ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-          { prerelease: 'true' } // entityanalytics_ad is a technical preview package, delete this line when it is GA
+          { prerelease: 'true' } // entityanalytics_ad is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
         ),
         state,
       });
@@ -53,50 +53,56 @@ export const IntegrationCards = ({
   );
 
   useEffect(() => {
-    const installedIntegrations = integrations.filter(({ status }) => status === 'installed');
+    const installedIntegrations = integrations.filter(
+      ({ packageInfo }) => packageInfo.status === 'installed'
+    );
     if (installedIntegrations.length > 0) {
       onIntegrationInstalled?.(0); // We can't provide the number of users installed at this point because the integration run async.
     }
   }, [integrations, onIntegrationInstalled]);
 
   const hasInstallationStatus = integrations.some(
-    ({ status }) => status === 'installing' || status === 'install_failed' || status === 'installed'
+    ({ packageInfo: { status } }) =>
+      status === 'installing' || status === 'install_failed' || status === 'installed'
   );
 
   return (
     <EuiFlexGroup direction="row">
-      {integrations.map(({ name, title, icons, description, version, status }) => (
-        <EuiFlexItem
-          grow={maxCardWidth ? 0 : 1}
-          key={name}
-          data-test-subj="entity_analytics-integration-card"
-          css={css`
-            max-width: ${maxCardWidth}px;
-          `}
-        >
-          <LazyPackageCard
-            description={description ?? ''}
-            icons={icons ?? []}
-            minCardHeight={showInstallationStatus && hasInstallationStatus ? 144 : 84}
-            descriptionLineClamp={2}
-            titleLineClamp={1}
-            id={name}
-            name={name}
-            title={title}
-            titleSize={titleSize}
-            version={version}
-            onCardClick={() => {
-              navigateToIntegration(name, version);
-            }}
-            // Required values that don't make sense for this scenario
-            categories={[]}
-            integration={''}
-            url={''}
-            installStatus={status === 'not_installed' ? undefined : status}
-            showInstallationStatus={showInstallationStatus}
-          />
-        </EuiFlexItem>
-      ))}
+      {integrations.map(
+        ({ packageInfo: { name, title, icons, description, version, status }, hasDataStreams }) => (
+          <EuiFlexItem
+            grow={maxCardWidth ? 0 : 1}
+            key={name}
+            data-test-subj="entity_analytics-integration-card"
+            css={css`
+              max-width: ${maxCardWidth}px;
+            `}
+          >
+            <LazyPackageCard
+              description={description ?? ''}
+              icons={icons ?? []}
+              minCardHeight={showInstallationStatus && hasInstallationStatus ? 144 : 84}
+              descriptionLineClamp={2}
+              titleLineClamp={1}
+              id={name}
+              name={name}
+              title={title}
+              titleSize={titleSize}
+              version={version}
+              onCardClick={() => {
+                navigateToIntegration(name, version);
+              }}
+              // Required values that don't make sense for this scenario
+              categories={[]}
+              integration={''}
+              url={''}
+              installStatus={status === 'not_installed' ? undefined : status}
+              showInstallationStatus={showInstallationStatus}
+              hasDataStreams={hasDataStreams}
+            />
+          </EuiFlexItem>
+        )
+      )}
     </EuiFlexGroup>
   );
 };
