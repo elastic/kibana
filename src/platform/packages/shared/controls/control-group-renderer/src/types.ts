@@ -94,9 +94,7 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
 
 export type FlattenedStickyControlState = StickyControlLayoutState & StickyControlState['config'];
 
-export interface ControlGroupRuntimeState<
-  State extends FlattenedStickyControlState = FlattenedStickyControlState
-> {
+export interface ControlGroupRuntimeState<State extends {} = {}> {
   initialChildControlState: ControlPanelsState<State>;
   ignoreParentSettings?: LegacyIgnoreParentSettings; // these will be translated to panel-level settings
 }

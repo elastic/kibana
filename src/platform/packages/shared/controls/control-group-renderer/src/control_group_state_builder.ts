@@ -35,7 +35,7 @@ import type {
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<DataControlState & FlattenedStickyControlState, 'type'>,
+    controlState: Omit<DataControlState & Partial<FlattenedStickyControlState>, 'type'>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
