@@ -28,19 +28,19 @@ spec:
       provider_settings:
         trigger_mode: none
       schedules:
-        Daily run:
+        Daily run (main):
           branch: main
           cronline: "@daily"
-        Daily run:
+        Daily run (9.3):
           branch: '9.3'
           cronline: "@daily"
-        Daily run:
+        Daily run (9.2):
           branch: '9.2'
           cronline: "@daily"
-        Daily run:
+        Daily run (9.1):
           branch: '9.1'
           cronline: "@daily"
-        Daily run:
+        Daily run (8.19):
           branch: '8.19'
           cronline: "@daily"
       teams:

@@ -25,8 +25,6 @@ steps:
       preemptible: true
     key: build
     timeout_in_minutes: 60
-    env:
-      CI_FORCE_NODE_GLIBC_217: false
     retry:
       automatic:
         - exit_status: '*'
