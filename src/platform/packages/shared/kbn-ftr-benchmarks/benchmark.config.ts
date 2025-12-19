@@ -10,7 +10,6 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
-import path from 'path';
 
 const KIBANA_BUILD_VERSION = `kibana-${kibanaPackageJson.version}-SNAPSHOT-linux-${
   process.arch === 'arm64' ? 'aarch64' : 'x86_64'
@@ -20,11 +19,7 @@ function createBenchmark(name: string, config: string) {
   return {
     kind: 'script' as const,
     name,
-    run: `node scripts/functional_tests --config ${config} --kibana-install-dir ${path.resolve(
-      'build',
-      'default',
-      KIBANA_BUILD_VERSION
-    )}`,
+    run: `node scripts/functional_tests --config ${config} --kibana-install-dir "$(pwd)/build/default/${KIBANA_BUILD_VERSION}"`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
