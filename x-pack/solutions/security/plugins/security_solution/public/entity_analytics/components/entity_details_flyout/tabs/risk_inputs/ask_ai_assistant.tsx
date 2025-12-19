@@ -62,7 +62,7 @@ export const AskAiAssistant = <T extends EntityType>({
   const { showAssistantOverlay, disabled: aiAssistantDisable } = useAskAiAssistant({
     title: `Explain ${entityType} '${entityName}' Risk Score`,
     description: `Entity: ${entityName}`,
-    suggestedPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
+    suggestedPrompt: `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`,
     getPromptContext,
     replacements,
   });
@@ -74,7 +74,7 @@ export const AskAiAssistant = <T extends EntityType>({
         identifier: entityName,
         attachmentLabel: `${entityType}: ${entityName}`,
       },
-      attachmentPrompt: `Explain how inputs contributed to the risk score. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration the risk score inputs.`,
+      attachmentPrompt: `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`,
     }),
     [entityName, entityType]
   );
@@ -90,7 +90,13 @@ export const AskAiAssistant = <T extends EntityType>({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              telemetry={{
+                pathway: 'entity_risk_contribution',
+                attachments: ['entity'],
+              }}
+            />
           ) : (
             <EuiButton
               data-test-subj="explain-with-ai-button"

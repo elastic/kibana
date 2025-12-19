@@ -8,7 +8,7 @@
  */
 
 import { Parser, parse } from '..';
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 import { Walker } from '../../ast/walker';
 
 describe('function AST nodes', () => {

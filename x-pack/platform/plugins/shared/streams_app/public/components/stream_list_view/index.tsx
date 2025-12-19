@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -35,6 +36,7 @@ import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
 import { WelcomeTourCallout } from '../streams_tour';
+import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -47,6 +49,7 @@ export function StreamListView() {
     },
     core,
   } = context;
+  const { onPageReady } = usePerformanceContext();
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -76,9 +79,40 @@ export function StreamListView() {
     };
   }, [streamsListFetch.value?.streams]);
 
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
+      const streams = streamsListFetch.value.streams ?? [];
+      const classicStreamsCount = streams.filter((item) =>
+        Streams.ClassicStream.Definition.is(item.stream)
+      ).length;
+      const wiredStreamsCount = streams.filter((item) =>
+        Streams.WiredStream.Definition.is(item.stream)
+      ).length;
+      const groupStreamsCount = streams.filter((item) =>
+        Streams.GroupStream.Definition.is(item.stream)
+      ).length;
+
+      onPageReady({
+        customMetrics: {
+          key1: 'total_streams_count',
+          value1: streams.length,
+          key2: 'classic_streams_count',
+          value2: classicStreamsCount,
+          key3: 'wired_streams_count',
+          value3: wiredStreamsCount,
+          key4: 'group_streams_count',
+          value4: groupStreamsCount,
+        },
+      });
+    }
+  }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
+
   const overlayRef = React.useRef<OverlayRef | null>(null);
 
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
+  const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
+    React.useState(false);
 
   function openGroupStreamModificationFlyout() {
     overlayRef.current?.close();
@@ -122,7 +156,7 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
@@ -131,6 +165,7 @@ export function StreamListView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
+            <FeedbackButton />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="gear"
@@ -145,7 +180,13 @@ export function StreamListView() {
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <FeedbackButton />
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}>
+                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
+                  defaultMessage: 'Create classic stream',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
       />
@@ -174,7 +215,7 @@ export function StreamListView() {
               streams={streamsListFetch.value?.streams}
               canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
             />
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <>
                 <EuiSpacer size="l" />
                 <GroupStreamsCards streams={streamsListFetch.value?.streams} />
@@ -188,6 +229,9 @@ export function StreamListView() {
           onClose={() => setIsSettingsFlyoutOpen(false)}
           refreshStreams={streamsListFetch.refresh}
         />
+      )}
+      {isClassicStreamCreationFlyoutOpen && (
+        <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
       )}
     </>
   );

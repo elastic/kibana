@@ -26,9 +26,8 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
     text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
     kind: 'Operator',
-    detail: fn.description,
     documentation: {
-      value: '',
+      value: fn.description,
     },
     sortText: 'D',
   };
