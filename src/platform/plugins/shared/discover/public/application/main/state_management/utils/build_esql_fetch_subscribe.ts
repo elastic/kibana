@@ -134,7 +134,11 @@ export const buildEsqlFetchSubscribe = ({
       prevEsqlData.initialFetch = false;
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.allColumns = nextAllColumns;
-      prevEsqlData.defaultColumns = getCurrentTab().appState.columns ?? [];
+
+      const appStateColumns = getCurrentTab().appState.columns ?? [];
+      const shouldTriggerColumnsUpdate =
+        nextDefaultColumns.length > 0 && appStateColumns.length === 0;
+      prevEsqlData.defaultColumns = shouldTriggerColumnsUpdate ? [] : nextDefaultColumns;
     }
 
     const indexPatternChanged =

@@ -354,6 +354,34 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
+  test('should overwrite existing empty columns on initial fetch if transformational query', async () => {
+    const { replaceUrlState, stateContainer } = await setupTest(false, {
+      columns: [],
+    });
+    const documents$ = stateContainer.dataState.data$.documents$;
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
+    });
+
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: ['field1'] },
+      });
+    });
+  });
+
   test('it should not overwrite existing state columns on initial fetch and non transformational commands', async () => {
     const { replaceUrlState, stateContainer } = await setupTest(false, {
       columns: ['field1'],
