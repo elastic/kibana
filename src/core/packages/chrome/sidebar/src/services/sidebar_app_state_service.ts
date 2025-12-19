@@ -12,6 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export interface SidebarAppStateServiceApi {
   /** Get observable stream of app state */
   get$<T>(appId: string): Observable<T>;
@@ -40,34 +42,6 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
 
   constructor(private readonly registry: SidebarRegistryServiceApi) {}
 
-  /**
-   * Creates initial state from schema defaults with validation and error handling
-   */
-  private createInitialState<T>(appId: string): T {
-    const app = this.registry.getApp(appId);
-    if (!app) {
-      throw new Error(`[Sidebar] App not found: ${appId}`);
-    }
-
-    try {
-      const schema = app.getStateSchema();
-      return schema.parse({}) as T;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        throw new Error(`[Sidebar] Invalid schema for app '${appId}': ${z.treeifyError(error)}`);
-      }
-      throw error;
-    }
-  }
-
-  private getOrCreateState<T>(appId: string): BehaviorSubject<T> {
-    if (!this.appStates.has(appId)) {
-      const initialState = this.createInitialState<T>(appId);
-      this.appStates.set(appId, new BehaviorSubject<T>(initialState));
-    }
-    return this.appStates.get(appId)!;
-  }
-
   get$<T>(appId: string): Observable<T> {
     return this.getOrCreateState<T>(appId);
   }
@@ -80,11 +54,46 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   set<T>(appId: string, state: Partial<T>, merge?: true): void;
   set<T>(appId: string, state: T | Partial<T>, merge: boolean = true): void {
     const newState = merge ? { ...this.get<T>(appId), ...state } : state;
+
+    if (isDev) {
+      this.validateState(appId, newState as T);
+    }
+
     this.getOrCreateState<T>(appId).next(newState as T);
   }
 
   reset(appId: string): void {
     const initialState = this.createInitialState(appId);
     this.set(appId, initialState, false);
+  }
+
+  private getOrCreateState<T>(appId: string): BehaviorSubject<T> {
+    if (!this.appStates.has(appId)) {
+      const initialState = this.createInitialState<T>(appId);
+      this.appStates.set(appId, new BehaviorSubject<T>(initialState));
+    }
+    return this.appStates.get(appId)!;
+  }
+
+  /**
+   * Creates initial state from schema defaults with validation and error handling
+   */
+  private createInitialState<T>(appId: string): T {
+    return this.validateState(appId, {});
+  }
+
+  /**
+   * Validates state against app's schema
+   */
+  private validateState<T>(appId: string, state: unknown): T {
+    const schema = this.registry.getApp(appId).getStateSchema();
+    try {
+      return schema.parse(state) as T;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`[Sidebar] Invalid state for app '${appId}': ${z.prettifyError(error)}`);
+      }
+      throw error;
+    }
   }
 }

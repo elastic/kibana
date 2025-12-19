@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { ComponentType } from 'react';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarComponentProps<TState> {}
@@ -88,7 +88,7 @@ export interface SidebarRegistryServiceApi {
   apps$: Observable<SidebarApp[]>;
   getApps: () => SidebarApp[];
   registerApp<TAppState = {}>(app: SidebarApp<TAppState>): void;
-  getApp(appId: string): SidebarApp | undefined;
+  getApp(appId: string): SidebarApp;
   hasApp: (appId: string) => boolean;
 }
 
@@ -111,8 +111,12 @@ export class SidebarRegistryService implements SidebarRegistryServiceApi {
     return this._apps$.getValue();
   }
 
-  getApp(appId: string): SidebarApp | undefined {
-    return this.registeredApps.get(appId);
+  getApp(appId: string): SidebarApp {
+    const app = this.registeredApps.get(appId);
+    if (!app) {
+      throw new Error(`[Sidebar Registry] App not found: ${appId}`);
+    }
+    return app;
   }
 
   hasApp(appId: string): boolean {
