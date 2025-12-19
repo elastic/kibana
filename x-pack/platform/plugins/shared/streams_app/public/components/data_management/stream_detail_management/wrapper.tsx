@@ -145,7 +145,10 @@ export function Wrapper({
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     {Streams.ingest.all.GetResponse.is(definition) && (
-                      <DiscoverBadgeButton definition={definition} />
+                      <DiscoverBadgeButton
+                        definition={definition}
+                        isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
+                      />
                     )}
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
@@ -164,7 +167,7 @@ export function Wrapper({
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
-                {groupStreams?.enabled && Streams.GroupStream.GetResponse.is(definition) && (
+                {groupStreams.enabled && Streams.GroupStream.GetResponse.is(definition) && (
                   <GroupStreamControls />
                 )}
               </EuiFlexGroup>
