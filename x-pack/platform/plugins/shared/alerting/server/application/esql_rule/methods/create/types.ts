@@ -28,6 +28,7 @@ export interface CreateEsqlRuleParams {
 
 export interface EsqlRuleResponse extends CreateEsqlRuleData {
   id: string;
+  scheduledTaskId: string | null;
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;

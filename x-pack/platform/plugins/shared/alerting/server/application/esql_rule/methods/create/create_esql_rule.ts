@@ -15,6 +15,7 @@ import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawEsqlRule } from '../../../../saved_objects/schemas/raw_esql_rule';
 import type { CreateEsqlRuleParams, EsqlRuleResponse } from './types';
 import { createEsqlRuleDataSchema } from './schemas';
+import { ensureEsqlRuleTaskScheduled } from '../../../../rna_esql_task/schedule';
 
 export async function createEsqlRule(
   context: RulesClientContext,
@@ -77,8 +78,36 @@ export async function createEsqlRule(
     throw e;
   }
 
-  // Return without apiKey
+  let scheduledTaskId: string | null = null;
+  if (attributes.enabled) {
+    try {
+      const { id: taskId } = await ensureEsqlRuleTaskScheduled({
+        services: { taskManager: context.taskManager },
+        input: {
+          ruleId: id,
+          spaceId: context.spaceId,
+          schedule: { interval: attributes.schedule },
+        },
+      });
+      scheduledTaskId = taskId;
+      await context.unsecuredSavedObjectsClient.update<RawEsqlRule>(
+        ESQL_RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          scheduledTaskId,
+        }
+      );
+    } catch (e) {
+      // Best-effort cleanup: if scheduling fails, remove the SO we just created so the system doesn't
+      // end up with an enabled rule that never runs.
+      await context.unsecuredSavedObjectsClient
+        .delete(ESQL_RULE_SAVED_OBJECT_TYPE, id)
+        .catch(() => {});
+      throw e;
+    }
+  }
 
+  // Return without apiKey
   const { apiKey, ...rest } = attributes;
-  return { id, ...rest };
+  return { id, ...rest, scheduledTaskId };
 }
