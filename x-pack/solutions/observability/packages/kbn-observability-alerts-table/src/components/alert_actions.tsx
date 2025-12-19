@@ -46,7 +46,9 @@ const parseAlert =
     return {
       link: undefined,
       reason:
-        (alert['kibana.alert.reason'] as string) ?? (alert['kibana.alert.rule.name'] as string) ?? '',
+        (alert['kibana.alert.reason'] as string) ??
+        (alert['kibana.alert.rule.name'] as string) ??
+        '',
       ...formattedFields,
       fields: alert,
       active: alert['kibana.alert.status'] === 'active',
@@ -206,9 +208,12 @@ export function AlertActions(
       {!hideViewInApp && (
         <EuiFlexItem>
           <EuiToolTip
-            content={i18n.translate('xpack.observabilityAlertsTable.alertsTable.viewInAppTextLabel', {
-              defaultMessage: 'View in app',
-            })}
+            content={i18n.translate(
+              'xpack.observabilityAlertsTable.alertsTable.viewInAppTextLabel',
+              {
+                defaultMessage: 'View in app',
+              }
+            )}
             disableScreenReaderOutput
           >
             <EuiButtonIcon
@@ -277,7 +282,3 @@ const VIEW_DETAILS = i18n.translate(
 );
 
 export type AlertActionsType = typeof AlertActions;
-
-
-
-

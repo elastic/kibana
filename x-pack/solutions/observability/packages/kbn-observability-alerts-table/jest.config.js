@@ -10,7 +10,3 @@ module.exports = {
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/observability/packages/kbn-observability-alerts-table'],
 };
-
-
-
-

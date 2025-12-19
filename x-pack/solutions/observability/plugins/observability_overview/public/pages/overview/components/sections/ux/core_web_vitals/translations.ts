@@ -89,4 +89,3 @@ export const CLS_HELP_LABEL = i18n.translate('xpack.observabilityOverview.ux.cor
   defaultMessage:
     'Cumulative Layout Shift (CLS): measures visual stability. To provide a good user experience, pages should maintain a CLS of less than 0.1.',
 });
-

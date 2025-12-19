@@ -34,7 +34,11 @@ import { AlertSeverityBadge } from '../components/alert_severity_badge';
 import { AlertStatusIndicator } from '../components/alert_status_indicator';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import type { GetObservabilityAlertsTableProp, ObservabilityRuleTypeRegistry, TopAlert } from '../types';
+import type {
+  GetObservabilityAlertsTableProp,
+  ObservabilityRuleTypeRegistry,
+  TopAlert,
+} from '../types';
 
 const NOT_AVAILABLE_LABEL = i18n.translate('xpack.observabilityAlertsTable.notAvailable', {
   defaultMessage: 'N/A',
@@ -100,7 +104,9 @@ const parseAlert =
     const formatted = {
       link: undefined,
       reason:
-        (alert['kibana.alert.reason'] as string) ?? (alert['kibana.alert.rule.name'] as string) ?? '',
+        (alert['kibana.alert.reason'] as string) ??
+        (alert['kibana.alert.rule.name'] as string) ??
+        '',
       ...formattedFields,
     };
 
@@ -118,7 +124,7 @@ const parseAlert =
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-// eslint-disable-next-line react/function-component-definition
+
 export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = (props) => {
   const {
     columnId,
@@ -192,7 +198,3 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
 
   return cellRenderers[columnId] ? cellRenderers[columnId](val) : <>{val}</>;
 };
-
-
-
-
