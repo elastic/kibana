@@ -32,7 +32,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
   const spacesToCreate = [SPACES.SPACE_1, SPACES.SPACE_2];
   let savedObjectsManagementCredentials: RoleApiCredentials;
 
-  const createSpaces = async (kbnClient: KbnClient, log: ScoutLogger) => {
+  apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
     await Promise.all(
       spacesToCreate.map(async (space) => {
         log.debug(`Creating ${space.spaceId} for multi-space test suite`);
@@ -44,10 +44,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         });
       })
     );
-  };
 
-  apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
-    await createSpaces(kbnClient, log);
     savedObjectsManagementCredentials = await requestAuth.getSavedObjectsManagementApiKey();
   });
 
