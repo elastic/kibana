@@ -38,6 +38,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const bodyText = await pageObjects.common.getBodyText();
           expect(bodyText).to.contain("You don't have access to manage API keys");
         });
+
+        describe('Connection details flyout', function () {
+          it('should not show API Keys tab when user lacks permission', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+            // Endpoints tab should exist
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            // API Keys tab should NOT exist for viewer
+            await testSubjects.missingOrFail('connectionDetailsTabBtn-apiKeys');
+          });
+        });
       });
     });
 
@@ -129,6 +140,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('opens the connection flyout when the button is clicked', async () => {
             await testSubjects.click('viewConnectionDetailsLink');
             await testSubjects.existOrFail('connectionDetailsModalTitle');
+          });
+          it('should show API Keys tab when user has permission', async () => {
+            await testSubjects.click('viewConnectionDetailsLink');
+            await testSubjects.existOrFail('connectionDetailsModalTitle');
+            // Both tabs should exist for developer
+            await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
+            await testSubjects.existOrFail('connectionDetailsTabBtn-apiKeys');
           });
         });
 
