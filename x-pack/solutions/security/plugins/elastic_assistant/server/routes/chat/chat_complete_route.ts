@@ -213,7 +213,7 @@ export const chatCompleteRoute = (
             content: string,
             traceData: Message['traceData'] = {},
             isError = false,
-            refusal
+            refusal?: string
           ): Promise<void> => {
             if (conversationId && conversationsDataClient) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
