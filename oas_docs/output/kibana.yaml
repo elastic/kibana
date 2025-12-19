@@ -22692,6 +22692,8 @@ paths:
       summary: Create a maintenance window.
       tags:
         - maintenance-window
+      x-state: Generally available; added in 8.19.0
+            summary: Create a maintenance window.
   /api/maintenance_window/{id}:
     delete:
       description: |-
