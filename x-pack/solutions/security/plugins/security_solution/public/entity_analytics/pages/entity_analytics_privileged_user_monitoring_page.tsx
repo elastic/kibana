@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import {
   type InitMonitoringEngineResponse,
   PrivilegeMonitoringEngineStatusEnum,
@@ -311,7 +310,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
         {state.type === 'dashboard' && (
           <>
-            <HeaderPage       
+            <HeaderPage
               title={
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboards.pageTitle"

@@ -53,7 +53,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
                         />
                       </h2>
                     </EuiTitle>
-                  </EuiFlexItem>          
+                  </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m">
