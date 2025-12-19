@@ -50,6 +50,7 @@ import type {
 import {
   getActiveDataSourceSamplesFromParent,
   getStepsForSimulation,
+  hasEditingStepIncompleteCondition,
   spawnStep,
   type StepSpawner,
 } from './utils';
@@ -220,6 +221,11 @@ export const interactiveModeMachine = setup({
     sendStepsToSimulator: enqueueActions(({ context }) => {
       // Check parent for any errors (schema or validation) - don't simulate if there are errors
       if (hasErrorsInParentSnapshot(context.parentRef.getSnapshot())) {
+        return;
+      }
+
+      // Check if the editing step has an incomplete condition - don't simulate to preserve last stable result
+      if (hasEditingStepIncompleteCondition(context.stepRefs)) {
         return;
       }
 

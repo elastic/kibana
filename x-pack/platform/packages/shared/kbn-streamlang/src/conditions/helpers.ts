@@ -21,6 +21,8 @@ import {
   isFilterCondition,
   isOrCondition,
   isNotCondition,
+  isAlwaysCondition,
+  isNeverCondition,
 } from '../../types/conditions';
 
 export function getBinaryFilterOperator(
@@ -198,6 +200,13 @@ export function isConditionComplete(condition: Condition | undefined): boolean {
     return true;
   }
 
+  if (isAlwaysCondition(condition)) {
+    return true;
+  }
+  if (isNeverCondition(condition)) {
+    return true;
+  }
+
   // Handle logical conditions (and, or, not) by checking all nested conditions
   if (isAndCondition(condition)) {
     return condition.and.every(isConditionComplete);
@@ -250,6 +259,5 @@ export function isConditionComplete(condition: Condition | undefined): boolean {
     return false;
   }
 
-  // For other valid conditions (e.g., 'always'), pass through
-  return true;
+  return false;
 }

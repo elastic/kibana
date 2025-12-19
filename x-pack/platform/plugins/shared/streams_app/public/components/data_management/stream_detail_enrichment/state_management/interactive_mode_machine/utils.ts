@@ -8,6 +8,7 @@
 import {
   isActionBlock,
   isConditionBlock,
+  isConditionComplete,
   type StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
 import type { DataSourceSimulationMode } from '../data_source_state_machine';
@@ -119,4 +120,22 @@ export function getActiveDataSourceSamplesFromParent(
     dataSourceId: activeDataSourceSnapshot.context.dataSource.id,
     document: doc,
   }));
+}
+
+/**
+ * Checks if the step currently being edited has an incomplete condition.
+ */
+export function hasEditingStepIncompleteCondition(
+  stepRefs: InteractiveModeContext['stepRefs']
+): boolean {
+  for (const ref of stepRefs) {
+    const snapshot = ref.getSnapshot();
+    const step = snapshot.context.step;
+
+    if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+      return 'where' in step && !isConditionComplete(step.where);
+    }
+  }
+
+  return false;
 }
