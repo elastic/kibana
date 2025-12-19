@@ -11,6 +11,7 @@ import { within } from '../../../ast/location';
 import { suggestForExpression } from '../../definitions/utils';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
+import { type FullTextSearchFunctionName } from '../../definitions/constants';
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import {
   commaCompleteItem,
@@ -19,6 +20,13 @@ import {
 } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../types';
+
+const FUNCTIONS_TO_IGNORE = {
+  names: ['match_phrase'] as FullTextSearchFunctionName[],
+  allowedInsideFunctions: {
+    match_phrase: ['score'],
+  } as Record<FullTextSearchFunctionName, string[]>,
+};
 
 export async function autocomplete(
   query: string,
@@ -56,6 +64,7 @@ export async function autocomplete(
     callbacks,
     options: {
       preferredExpressionType: 'any',
+      functionsToIgnore: FUNCTIONS_TO_IGNORE,
     },
   });
 

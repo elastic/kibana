@@ -61,11 +61,15 @@ export interface ExpressionContextOptions {
   addSpaceAfterOperator?: boolean;
   openSuggestions?: boolean;
   isInsideInList?: boolean; // Flag to indicate we're inside an IN operator list
+  functionsToIgnore?: {
+    names: string[];
+    allowedInsideFunctions?: Record<string, string[]>;
+  };
+  parentFunctionNames?: string[];
 }
 
 export interface FunctionParameterContext {
   paramDefinitions: FunctionParameter[];
-  functionsToIgnore: string[];
   // Flag to suggest comma after function parameters when more mandatory args exist
   hasMoreMandatoryArgs?: boolean;
   // Function definition for function-specific parameter handling (e.g., CASE function)

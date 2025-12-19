@@ -7577,12 +7577,14 @@ const matchPhraseDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Field that the query will target.',
+          fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
+          constantOnly: true,
         },
         {
           name: 'options',
@@ -7592,6 +7594,7 @@ const matchPhraseDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) MatchPhrase additional options as <<esql-function-named-params,function named parameters>>. See [`match_phrase`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) for more information.',
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
@@ -7603,12 +7606,14 @@ const matchPhraseDefinition: FunctionDefinition = {
           type: 'text',
           optional: false,
           description: 'Field that the query will target.',
+          fieldsOnly: true,
         },
         {
           name: 'query',
           type: 'keyword',
           optional: false,
           description: 'Value to find in the provided field.',
+          constantOnly: true,
         },
         {
           name: 'options',
@@ -7618,24 +7623,13 @@ const matchPhraseDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) MatchPhrase additional options as <<esql-function-named-params,function named parameters>>. See [`match_phrase`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) for more information.',
+          constantOnly: true,
         },
       ],
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [
-    Location.EVAL,
-    Location.ROW,
-    Location.SORT,
-    Location.WHERE,
-    Location.STATS,
-    Location.STATS_BY,
-    Location.STATS_WHERE,
-    Location.STATS_TIMESERIES,
-    Location.COMPLETION,
-    Location.RERANK,
-    Location.JOIN,
-  ],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: ['FROM books\n| WHERE MATCH_PHRASE(author, "William Faulkner")'],
 };
 

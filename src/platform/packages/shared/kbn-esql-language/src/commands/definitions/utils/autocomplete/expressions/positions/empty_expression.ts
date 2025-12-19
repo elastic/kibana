@@ -17,27 +17,34 @@ import { SuggestionBuilder } from '../suggestion_builder';
 import { SignatureAnalyzer } from '../signature_analyzer';
 import { getControlSuggestion, getVariablePrefix } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
-import type {
-  FunctionDefinition,
-  FunctionParameter,
-  FunctionParameterType,
+import {
+  type FunctionDefinition,
+  type FunctionParameter,
+  type FunctionParameterType,
 } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
-import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
+import { FULL_TEXT_SEARCH_FUNCTIONS, type FullTextSearchFunctionName } from '../../../../constants';
 import {
   allStarConstant,
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
+  buildAddValuePlaceholder,
+  findConstantPlaceholderType,
 } from '../../../../../registry/complete_items';
 
-type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
+// functionDefinition is guaranteed by in_function.ts early return
+type FunctionParamContext = NonNullable<
+  ExpressionContext['options']['functionParameterContext']
+> & {
+  functionDefinition: FunctionDefinition;
+};
 
 /** Handles suggestions when starting a new expression (empty position) */
 export async function suggestForEmptyExpression(
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   const { options } = ctx;
-  const functionParamContext = options.functionParameterContext;
+  const functionParamContext = options.functionParameterContext as FunctionParamContext;
 
   if (functionParamContext) {
     return handleFunctionParameterContext(functionParamContext, ctx);
@@ -168,7 +175,9 @@ function buildLiteralSuggestions(
   // - FTS functions
   // - BUCKET first parameter (field) in STATS
   // - When constantOnly params exist (already added via getCompatibleLiterals)
-  const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(functionDefinition!.name);
+  const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(
+    functionDefinition!.name as FullTextSearchFunctionName
+  );
   const isBucketFirstParam =
     matchesSpecialFunction(functionDefinition!.name, 'bucket') &&
     command.name === 'stats' &&
@@ -230,8 +239,8 @@ async function buildFieldAndFunctionSuggestions(
   if (!hasFieldsOnlyParam && !hasConstantOnlyParam) {
     builder.addFunctions({
       types: config.acceptedTypes,
-      ignoredFunctions: functionParamContext.functionsToIgnore || [],
       addComma: config.shouldAddComma,
+      excludeParentFunctions: true,
     });
   }
 
@@ -267,7 +276,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     if (suggestFunctions) {
       builder.addFunctions({
         types: acceptedTypes,
-        ignoredFunctions: [],
         ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
@@ -404,5 +412,18 @@ function buildConstantOnlyLiteralSuggestions(
     constantGeneratingOnly: true,
   });
 
-  return builder.build();
+  const suggestions = builder.build();
+
+  // Add placeholder hint ONLY for explicit constantOnly parameters
+  const hasExplicitConstantOnly = paramDefinitions.some(({ constantOnly }) => constantOnly);
+
+  if (hasExplicitConstantOnly) {
+    const placeholderType = findConstantPlaceholderType(types);
+
+    if (placeholderType) {
+      suggestions.push(buildAddValuePlaceholder(placeholderType));
+    }
+  }
+
+  return suggestions;
 }

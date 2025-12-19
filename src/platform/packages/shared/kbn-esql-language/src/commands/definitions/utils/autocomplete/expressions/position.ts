@@ -90,5 +90,11 @@ export function getPosition(
     return 'after_complete';
   }
 
+  // Map expressions (e.g., {"key": "value"}) are complete expressions
+  // Like literals and columns, a closed map is a fully-formed value
+  if (expressionRoot.type === 'map') {
+    return 'after_complete';
+  }
+
   return 'empty_expression';
 }

@@ -13,6 +13,7 @@ import type {
   FunctionParameter,
   Signature,
 } from '../../../types';
+import { parseMapValues, type MapParameters } from '../map_expression';
 import { argMatchesParamType } from '../../expressions';
 import type { FunctionParameterContext } from './types';
 import { getValidSignaturesAndTypesToSuggestNext } from '../helpers';
@@ -442,5 +443,42 @@ export class SignatureAnalyzer {
     }
 
     return types;
+  }
+
+  // ============================================================================
+  // Static Utilities
+  // ============================================================================
+
+  /** Extracts mapParams string from function signatures (first found) */
+  public static extractMapParams(
+    signatures: Array<{ params: Array<{ mapParams?: string }> }>
+  ): string | undefined {
+    return signatures.flatMap(({ params }) => params).find(({ mapParams }) => mapParams)?.mapParams;
+  }
+
+  /**
+   * Parses a mapParams definition string into MapParameters.
+   * This format is specific to function signature definitions.
+   *
+   * E.g., "{name='boost', values=[2.5]}, {name='analyzer', values=[standard]}"
+   * → { boost: { type: 'number', suggestions: [...] }, analyzer: { type: 'string', suggestions: [...] } }
+   */
+  public static parseMapParams(mapParamsStr: string): MapParameters {
+    const paramRegex = /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*\}/g;
+
+    return [...mapParamsStr.matchAll(paramRegex)].reduce<MapParameters>(
+      (acc, [, name, valuesStr = '']) => {
+        // Parse and sanitize values (remove single quotes used in signature format)
+        const values = valuesStr
+          ? valuesStr
+              .split(',')
+              .map((val) => val.trim().replace(/^'|'$/g, ''))
+              .filter(Boolean)
+          : [];
+        acc[name] = parseMapValues(values);
+        return acc;
+      },
+      {}
+    );
   }
 }

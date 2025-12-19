@@ -44,8 +44,18 @@ import type {
 import { FunctionDefinitionTypes } from '../../commands/definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../../commands/definitions/utils';
-import { timeUnitsToSuggest } from '../../commands/definitions/constants';
+import {
+  timeUnitsToSuggest,
+  type FullTextSearchFunctionName,
+} from '../../commands/definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
+
+// Functions to ignore per location (e.g., match_phrase is only shown inside SCORE, not in EVAL)
+const HIDDEN_FTS_FUNCTIONS: FullTextSearchFunctionName[] = ['match_phrase'];
+
+export const IGNORED_FUNCTIONS_BY_LOCATION: { [K in Location]?: string[] } = {
+  eval: HIDDEN_FTS_FUNCTIONS,
+};
 
 export const DATE_DIFF_TIME_UNITS = (() => {
   const dateDiffDefinition = scalarFunctionDefinitions.find(
@@ -322,9 +332,13 @@ export function getFunctionSignaturesByReturnType(
       }
     )
     .filter(({ name }) => {
-      if (ignored?.length) {
-        return !ignored?.includes(name);
+      const locationIgnored = locations.flatMap((loc) => IGNORED_FUNCTIONS_BY_LOCATION[loc] ?? []);
+      const allIgnored = [...locationIgnored, ...(ignored ?? [])];
+
+      if (allIgnored.length) {
+        return !allIgnored.includes(name);
       }
+
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
