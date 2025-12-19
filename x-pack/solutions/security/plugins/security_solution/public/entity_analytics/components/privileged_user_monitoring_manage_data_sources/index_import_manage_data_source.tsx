@@ -19,7 +19,9 @@ export const IndexImportManageDataSource = ({
   setAddDataSourceResult: (result: AddDataSourceResult) => void;
 }) => {
   const [isIndexModalOpen, { on: showIndexModal, off: hideIndexModal }] = useBoolean(false);
-  const { data: { sources = [] } = {}, isFetching, refetch } = useFetchMonitoredIndices();
+  const { data, isFetching, refetch } = useFetchMonitoredIndices();
+  console.log('BADGER data', data);
+  const sources = data?.sources ?? [];
   const monitoredDataSource = sources[0];
   const monitoredIndices = monitoredDataSource?.indexPattern
     ? monitoredDataSource.indexPattern.split(',')
