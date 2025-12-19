@@ -18,19 +18,19 @@ import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import type { QueryAsset } from '../../../../common/assets';
 import type { StreamsClient } from '../../../lib/streams/client';
-import type { SigEventsQueryClient } from '../../../lib/streams/assets/sig_events_query/sig_events_query_client';
+import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
 
 async function getAssets({
   name,
-  sigEventsQueryClient,
+  queryClient,
   attachmentClient,
 }: {
   name: string;
-  sigEventsQueryClient: SigEventsQueryClient;
+  queryClient: QueryClient;
   attachmentClient: AttachmentClient;
 }): Promise<{ dashboards: string[]; queries: StreamQuery[]; rules: string[] }> {
   const [assets, attachments] = await Promise.all([
-    sigEventsQueryClient.getAssets(name),
+    queryClient.getAssets(name),
     attachmentClient.getAttachments(name),
   ]);
 
@@ -55,20 +55,20 @@ async function getAssets({
 
 async function updateWiredIngest({
   streamsClient,
-  sigEventsQueryClient,
+  queryClient,
   attachmentClient,
   name,
   ingest,
 }: {
   streamsClient: StreamsClient;
-  sigEventsQueryClient: SigEventsQueryClient;
+  queryClient: QueryClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: WiredIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
-    sigEventsQueryClient,
+    queryClient,
     attachmentClient,
   });
 
@@ -98,20 +98,20 @@ async function updateWiredIngest({
 
 async function updateClassicIngest({
   streamsClient,
-  sigEventsQueryClient,
+  queryClient,
   attachmentClient,
   name,
   ingest,
 }: {
   streamsClient: StreamsClient;
-  sigEventsQueryClient: SigEventsQueryClient;
+  queryClient: QueryClient;
   attachmentClient: AttachmentClient;
   name: string;
   ingest: ClassicIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
-    sigEventsQueryClient,
+    queryClient,
     attachmentClient,
   });
 
@@ -202,7 +202,7 @@ const upsertIngestRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, sigEventsQueryClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -218,7 +218,7 @@ const upsertIngestRoute = createServerRoute({
     if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
-        sigEventsQueryClient,
+        queryClient,
         attachmentClient,
         name,
         ingest,
@@ -227,7 +227,7 @@ const upsertIngestRoute = createServerRoute({
 
     return await updateClassicIngest({
       streamsClient,
-      sigEventsQueryClient,
+      queryClient,
       attachmentClient,
       name,
       ingest,

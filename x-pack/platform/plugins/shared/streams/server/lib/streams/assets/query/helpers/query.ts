@@ -10,7 +10,7 @@ import { v5 } from 'uuid';
 import type { QueryLink } from '../../../../../../common/assets';
 import { ASSET_UUID } from '../../fields';
 
-export function getRuleIdFromSigEventsQueryLink(query: QueryLink) {
+export function getRuleIdFromQueryLink(query: QueryLink) {
   const queryHash = objectHash([query[ASSET_UUID], query.query.kql.query]);
   return v5(queryHash, v5.DNS);
 }

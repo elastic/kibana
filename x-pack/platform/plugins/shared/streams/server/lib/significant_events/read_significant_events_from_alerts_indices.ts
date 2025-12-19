@@ -14,31 +14,29 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { SignificantEventsGetResponse, StreamQueryKql } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import type { SigEventsQueryClient } from '../streams/assets/sig_events_query/sig_events_query_client';
-import { getRuleIdFromSigEventsQueryLink } from '../streams/assets/sig_events_query/helpers/sig_events_query';
+import type { QueryClient } from '../streams/assets/query/query_client';
+import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
 import type { QueryLink } from '../../../common/assets';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string; query?: string },
   dependencies: {
-    sigEventsQueryClient: SigEventsQueryClient;
+    queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
-  const { sigEventsQueryClient, scopedClusterClient } = dependencies;
+  const { queryClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize, query } = params;
 
   const queryLinks = await (query
-    ? sigEventsQueryClient.findQueries(name, query)
-    : sigEventsQueryClient.getQueryLinks([name]).then(({ [name]: links }) => links));
+    ? queryClient.findQueries(name, query)
+    : queryClient.getQueryLinks([name]).then(({ [name]: links }) => links));
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
   }
 
-  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) =>
-    getRuleIdFromSigEventsQueryLink(queryLink)
-  );
+  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
   const ruleIds = Object.keys(queryLinkByRuleId);
 
   const response = await scopedClusterClient.asCurrentUser

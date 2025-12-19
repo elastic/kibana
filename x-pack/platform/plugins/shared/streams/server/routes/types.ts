@@ -15,7 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
-import type { SigEventsQueryClient } from '../lib/streams/assets/sig_events_query/sig_events_query_client';
+import type { QueryClient } from '../lib/streams/assets/query/query_client';
 import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
@@ -38,7 +38,7 @@ export interface RouteHandlerScopedClients {
   featureClient: FeatureClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
-  sigEventsQueryClient: SigEventsQueryClient;
+  queryClient: QueryClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;

@@ -75,7 +75,7 @@ const upsertGroupRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, context }) => {
-    const { streamsClient, sigEventsQueryClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, queryClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -98,7 +98,7 @@ const upsertGroupRoute = createServerRoute({
     }
 
     const [assets, attachments] = await Promise.all([
-      sigEventsQueryClient.getAssets(name),
+      queryClient.getAssets(name),
       attachmentClient.getAttachments(name),
     ]);
 
