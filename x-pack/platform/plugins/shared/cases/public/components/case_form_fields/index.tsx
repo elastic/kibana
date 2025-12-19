@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
+import type { Template } from '../../../common/templates';
 import { Title } from './title';
 import { Tags } from './tags';
 import { Category } from './category';
@@ -23,6 +24,7 @@ interface Props {
   setCustomFieldsOptional?: boolean;
   isEditMode?: boolean;
   draftStorageKey?: string;
+  template?: Template;
 }
 
 const CaseFormFieldsComponent: React.FC<Props> = ({
@@ -31,6 +33,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   setCustomFieldsOptional = false,
   isEditMode,
   draftStorageKey,
+  template,
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
@@ -42,6 +45,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
       <Category isLoading={isLoading} />
       <Severity isLoading={isLoading} />
       <Description isLoading={isLoading} draftStorageKey={draftStorageKey} />
+      {template && <>{`TODO fields from template "${template.name}" (${template.templateId})`}</>}
       <CustomFields
         isLoading={isLoading}
         setCustomFieldsOptional={setCustomFieldsOptional}

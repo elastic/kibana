@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiLoadingSpinner,
   EuiSteps,
@@ -25,11 +25,12 @@ import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
 import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../containers/types';
 import { removeEmptyFields } from '../utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { TemplateSelector } from './templates';
 import { getInitialCaseValue } from './utils';
 import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservablesToggle } from '../case_form_fields/observables_toggle';
+import { TemplateSelectorV2 } from '../templates_v2';
+import { Template } from '@kbn/cases-plugin/common/templates';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -76,6 +77,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
     const configurationOwner = configuration.owner;
 
+    const [caseTemplate, setCaseTemplate] = useState<undefined | Template>();
+
     /**
      * Changes the selected connector
      * when the user selects a solution.
@@ -98,34 +101,19 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       [configurationOwner, configuration.connector]
     );
 
-    const onTemplateChange = useCallback(
-      ({ caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
-        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(
-          configurationOwner,
-          caseFields
-        );
-
-        reset({
-          resetValues: true,
-          defaultValue: getInitialCaseValue({ owner: configurationOwner }),
-        });
-        updateFieldValues(caseFormFields);
-      },
-      [configurationOwner, reset, updateFieldValues]
-    );
-
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
         children: (
-          <TemplateSelector
-            isLoading={isSubmitting || isLoading}
-            templates={[defaultTemplate, ...configuration.templates]}
-            onTemplateChange={onTemplateChange}
-          />
+          <>
+            <TemplateSelectorV2
+              onSelectTemplate={setCaseTemplate}
+              selectedTemplateId={caseTemplate?.templateId}
+            />
+          </>
         ),
       }),
-      [configuration.templates, defaultTemplate, isLoading, isSubmitting, onTemplateChange]
+      [caseTemplate?.templateId]
     );
 
     const secondStep = useMemo(
@@ -133,6 +121,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         title: i18n.STEP_TWO_TITLE,
         children: (
           <CaseFormFields
+            template={caseTemplate}
             configurationCustomFields={configuration.customFields}
             isLoading={isSubmitting}
             setCustomFieldsOptional={false}
@@ -141,7 +130,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           />
         ),
       }),
-      [configuration.customFields, draftStorageKey, isSubmitting]
+      [caseTemplate, configuration.customFields, draftStorageKey, isSubmitting]
     );
     const showThirdStep = isSyncAlertsEnabled || canExtractObservables;
     const thirdStep = useMemo(

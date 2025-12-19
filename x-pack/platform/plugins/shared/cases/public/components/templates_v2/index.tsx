@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import type { EuiSelectOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiButtonIcon,
+  EuiSelect,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
@@ -411,6 +412,61 @@ const TemplateUpdateView = ({
   );
 };
 TemplateUpdateView.displayName = 'TemplateUpdateView';
+
+export const TemplateSelectorV2 = ({
+  onSelectTemplate,
+  selectedTemplateId,
+}: {
+  onSelectTemplate: (template?: Template) => void;
+  selectedTemplateId?: string;
+}) => {
+  const templates = useTemplates();
+
+  const templatesAsMap = useMemo(() => {
+    if (!templates.data) {
+      return {};
+    }
+
+    return Object.fromEntries(templates.data.map((t) => [t.templateId, t]));
+  }, [templates?.data]);
+
+  const options: EuiSelectOption[] = useMemo(() => {
+    return [
+      { text: 'Please select', value: undefined },
+      ...(templates.data?.map((t) => ({
+        text: t.name,
+        value: t.templateId,
+      })) ?? []),
+    ];
+  }, [templates.data]);
+
+  const onChange: React.ChangeEventHandler<HTMLSelectElement> = useCallback(
+    (e) => {
+      onSelectTemplate(templatesAsMap[e.target.value]);
+    },
+    [onSelectTemplate, templatesAsMap]
+  );
+
+  return (
+    <EuiFormRow
+      id="createCaseTemplateV2"
+      fullWidth
+      label={'Template'}
+      helpText={'Template governs case fields and layout'}
+    >
+      <EuiSelect
+        onChange={onChange}
+        options={options}
+        disabled={templates.isLoading}
+        isLoading={templates.isLoading}
+        data-test-subj="create-case-template-select"
+        fullWidth
+        value={selectedTemplateId}
+      />
+    </EuiFormRow>
+  );
+};
+TemplateSelectorV2.displayName = 'TemplateSelectorV2';
 
 export const TemplateFlyout = ({
   onClose,

@@ -271,6 +271,17 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      template: {
+        type: 'nested',
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          version: {
+            type: 'integer',
+          },
+        },
+      },
     },
   },
   migrations: caseMigrations,
