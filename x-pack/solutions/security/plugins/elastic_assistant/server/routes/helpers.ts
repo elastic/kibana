@@ -255,7 +255,7 @@ export interface LangChainExecuteParams {
     content: string,
     traceData?: Message['traceData'],
     isError?: boolean,
-    refusal?: string,
+    refusal?: string
   ) => Promise<void>;
   response: KibanaResponseFactory;
   responseLanguage?: string;
