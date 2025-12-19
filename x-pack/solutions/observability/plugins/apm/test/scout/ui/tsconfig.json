@@ -3,15 +3,12 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "**/*"
-  ],
+  "include": ["**/*"],
   "kbn_references": [
     "@kbn/synthtrace-client",
     "@kbn/scout-oblt",
     "@kbn/apm-types",
+    "@kbn/test-subj-selector"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
