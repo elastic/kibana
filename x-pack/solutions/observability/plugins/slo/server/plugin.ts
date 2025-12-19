@@ -30,7 +30,6 @@ import type { SLORoutesDependencies } from './routes/types';
 import {
   slo,
   sloSettings,
-  sloTemplate,
   SO_SLO_SETTINGS_TYPE,
   SO_SLO_TEMPLATE_TYPE,
   SO_SLO_TYPE,
@@ -144,7 +143,6 @@ export class SLOPlugin
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
-    core.savedObjects.registerType(sloTemplate);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,

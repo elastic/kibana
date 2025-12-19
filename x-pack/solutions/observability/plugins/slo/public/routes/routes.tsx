@@ -6,10 +6,6 @@
  */
 
 import React from 'react';
-import { SlosPage } from '../pages/slos/slos';
-import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
-import { SloDetailsPage } from '../pages/slo_details/slo_details';
-import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import {
   SLOS_MANAGEMENT_PATH,
   SLOS_PATH,
@@ -19,8 +15,12 @@ import {
   SLO_EDIT_PATH,
   SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
-import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
+import { SloDetailsPage } from '../pages/slo_details/slo_details';
+import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';
+import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
+import { SlosPage } from '../pages/slos/slos';
+import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 
 export const getRoutes = (): {
   [key: string]: {
@@ -37,16 +37,16 @@ export const getRoutes = (): {
       params: {},
       exact: true,
     },
-    [SLO_CREATE_PATH]: {
+    [SLOS_WELCOME_PATH]: {
       handler: () => {
-        return <SloEditPage />;
+        return <SlosWelcomePage />;
       },
       params: {},
       exact: true,
     },
-    [SLOS_WELCOME_PATH]: {
+    [SLO_CREATE_PATH]: {
       handler: () => {
-        return <SlosWelcomePage />;
+        return <SloEditPage />;
       },
       params: {},
       exact: true,
