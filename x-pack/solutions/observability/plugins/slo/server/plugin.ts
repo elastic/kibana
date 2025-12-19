@@ -27,13 +27,18 @@ import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/register_routes';
 import type { SLORoutesDependencies } from './routes/types';
-import { SO_SLO_TYPE, slo } from './saved_objects';
-import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
+import {
+  slo,
+  sloSettings,
+  SO_SLO_SETTINGS_TYPE,
+  SO_SLO_TEMPLATE_TYPE,
+  SO_SLO_TYPE,
+} from './saved_objects';
 import {
   DefaultResourceInstaller,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
+  DefaultSLODefinitionRepository,
 } from './services';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -48,6 +53,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -76,7 +82,7 @@ export class SLOPlugin
     const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
+    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE, SO_SLO_TEMPLATE_TYPE];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
@@ -168,7 +174,10 @@ export class SLOPlugin
           const internalSoClient = new SavedObjectsClient(
             coreStart.savedObjects.createInternalRepository()
           );
-          const soClient = coreStart.savedObjects.getScopedClient(request);
+
+          const soClient = coreStart.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE],
+          });
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
           const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
@@ -181,8 +190,9 @@ export class SLOPlugin
             pluginsStart.ruleRegistry.getRacClientWithRequest(request),
           ]);
 
-          const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+          const repository = new DefaultSLODefinitionRepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
+          const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless),
@@ -204,6 +214,7 @@ export class SLOPlugin
             spaceId,
             repository,
             settingsRepository,
+            templateRepository,
             transformManager,
             summaryTransformManager,
             racClient,

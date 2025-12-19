@@ -37,6 +37,7 @@ exports[`Latest Types that latest active component renders normally 1`] = `
       token="euiBasicTable.noItemsMessage"
     />
   }
+  tableCaption="Latest types"
   tableLayout="fixed"
 />
 `;
