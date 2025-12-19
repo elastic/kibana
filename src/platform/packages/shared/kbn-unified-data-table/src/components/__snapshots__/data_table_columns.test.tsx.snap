@@ -33,6 +33,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -89,6 +90,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -143,6 +145,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -432,6 +435,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -566,6 +570,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -703,6 +708,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -848,6 +854,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -1401,6 +1408,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -1534,6 +1542,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -1820,6 +1829,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },
@@ -1968,6 +1978,7 @@ Array [
         },
       ],
       "showHide": Object {
+        "data-test-subj": "unifiedDataTableRemoveColumn",
         "iconType": "cross",
         "label": "Remove column",
       },

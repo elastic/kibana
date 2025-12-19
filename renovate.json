@@ -2330,7 +2330,8 @@
     {
       "groupName": "search-ui ai dependency",
       "matchDepNames": [
-        "ai"
+        "ai",
+        "@ai-sdk/langchain"
       ],
       "reviewers": [
         "team:search-kibana"
@@ -4037,7 +4038,7 @@
         "cytoscape-dagre"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -4055,7 +4056,7 @@
         "hdr-histogram-js"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:obs-presentation-team"
       ],
       "matchBaseBranches": [
         "main"

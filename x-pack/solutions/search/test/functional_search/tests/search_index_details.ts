@@ -219,7 +219,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('page loading error', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/236363
+        describe.skip('page loading error', () => {
           before(async () => {
             // manually navigate to index detail page for an index that doesn't exist
             await browser.navigateTo(

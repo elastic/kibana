@@ -10,6 +10,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "tasks/**/*",
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
