@@ -24,15 +24,11 @@ export function Sidebar(props: SidebarProps) {
     return null;
   }
 
-  if (!currentAppId) {
+  if (!currentAppId || !sidebarService.registry.hasApp(currentAppId)) {
     return null;
   }
 
   const currentApp = sidebarService.registry.getApp(currentAppId);
-
-  if (!currentApp) {
-    return null;
-  }
 
   return (
     <SidebarPanel title={currentApp.title} onClose={close}>

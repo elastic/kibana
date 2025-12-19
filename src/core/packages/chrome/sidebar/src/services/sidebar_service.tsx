@@ -51,6 +51,8 @@ export class SidebarService {
   }
 
   start(): SidebarServiceStart {
+    // initialize state service on start to make sure all apps are registered
+    (this.state as SidebarStateService).start();
     return {
       ...this.registry,
       ...this.state,

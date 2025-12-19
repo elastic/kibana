@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line max-classes-per-file
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
 export interface SidebarStateServiceApi {
@@ -26,38 +27,54 @@ export interface SidebarStateServiceApi {
 }
 
 const DEFAULT_WIDTH = 400;
+const MIN_WIDTH = 200;
 
 export class SidebarStateService implements SidebarStateServiceApi {
-  private readonly _isOpen$ = new BehaviorSubject<boolean>(false);
   private readonly _currentAppId$ = new BehaviorSubject<string | null>(null);
   private readonly _width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
 
-  public readonly isOpen$ = this._isOpen$.asObservable();
   public readonly currentAppId$ = this._currentAppId$.asObservable();
+  public readonly isOpen$ = this._currentAppId$.pipe(map((appId) => appId !== null));
   public readonly width$ = this._width$.asObservable();
 
   constructor(private readonly registry: SidebarRegistryServiceApi) {}
+
+  start() {
+    const currentAppId = StorageHelper.get<string>('currentAppId') ?? null;
+
+    if (currentAppId && this.registry.hasApp(currentAppId)) {
+      this.open(currentAppId);
+    }
+
+    const width = StorageHelper.get<number>('width');
+    if (width) {
+      this.setWidth(width);
+    }
+  }
 
   open(appId: string): void {
     if (!this.registry.hasApp(appId)) {
       throw new Error(`[Sidebar State] Cannot open sidebar. App not registered: ${appId}`);
     }
     this._currentAppId$.next(appId);
-    this._isOpen$.next(true);
+
+    StorageHelper.set('currentAppId', appId);
   }
 
   close(): void {
-    this._isOpen$.next(false);
     this._currentAppId$.next(null);
+    StorageHelper.set('currentAppId', null);
   }
 
   isOpen(): boolean {
-    return this._isOpen$.getValue();
+    return this._currentAppId$.getValue() !== null;
   }
 
   setWidth(width: number): void {
-    // TODO: add width constraints
+    width = Math.max(MIN_WIDTH, width);
+
     this._width$.next(width);
+    StorageHelper.set('width', width);
   }
 
   getWidth(): number {
@@ -66,5 +83,40 @@ export class SidebarStateService implements SidebarStateServiceApi {
 
   getCurrentAppId(): string | null {
     return this._currentAppId$.getValue();
+  }
+}
+
+type StorageKeys = 'currentAppId' | 'width';
+
+class StorageHelper {
+  static PERSISTENCE: Record<StorageKeys, 'local' | 'session'> = {
+    currentAppId: 'session' as const,
+    width: 'local' as const,
+  };
+
+  static getStoragePrefix(key: string): string {
+    return `core.chrome.sidebar.state:${key}`;
+  }
+
+  static set<T>(key: StorageKeys, state: T): void {
+    try {
+      const storage = StorageHelper.PERSISTENCE[key] === 'local' ? localStorage : sessionStorage;
+      storage.setItem(StorageHelper.getStoragePrefix(key), JSON.stringify(state));
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  static get<T>(key: StorageKeys): T | null {
+    try {
+      const storage = StorageHelper.PERSISTENCE[key] === 'local' ? localStorage : sessionStorage;
+      const item = storage.getItem(StorageHelper.getStoragePrefix(key));
+      if (item) {
+        return JSON.parse(item) as T;
+      }
+    } catch (e) {
+      // Ignore
+    }
+    return null;
   }
 }

@@ -102,7 +102,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   }
 
   private getStorageKey(appId: string): string {
-    return `core.chrome.sidebar.${appId}`;
+    return `core.chrome.sidebar.app:${appId}`;
   }
 
   /**
