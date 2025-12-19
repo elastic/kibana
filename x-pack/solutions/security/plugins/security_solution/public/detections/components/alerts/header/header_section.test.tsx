@@ -59,7 +59,7 @@ describe('HeaderSection', () => {
   it('should render correctly with manage rules button', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={jest.fn()} />
+        <HeaderSection assignees={[]} setAssignees={jest.fn()} showManageRulesButton={true} />
       </TestProviders>
     );
 
@@ -68,16 +68,9 @@ describe('HeaderSection', () => {
   });
 
   it('should not render manage rules button when showManageRulesButton is false', () => {
-    mockUseUserPrivileges.mockReturnValueOnce({
-      rulesPrivileges: {
-        rules: {
-          read: false,
-        },
-      },
-    });
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={jest.fn()} />
+        <HeaderSection assignees={[]} setAssignees={jest.fn()} showManageRulesButton={false} />
       </TestProviders>
     );
 
@@ -98,7 +91,7 @@ describe('HeaderSection', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={setAssignees} />
+        <HeaderSection assignees={[]} setAssignees={setAssignees} showManageRulesButton={true} />
       </TestProviders>
     );
 
@@ -128,7 +121,11 @@ describe('HeaderSection', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[user.uid]} setAssignees={setAssignees} />
+        <HeaderSection
+          assignees={[user.uid]}
+          setAssignees={setAssignees}
+          showManageRulesButton={true}
+        />
       </TestProviders>
     );
 
