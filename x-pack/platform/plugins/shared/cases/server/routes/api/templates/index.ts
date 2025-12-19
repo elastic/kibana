@@ -12,8 +12,12 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { v4 } from 'uuid';
-import { fromKueryExpression } from '@kbn/es-query';
-import type { CreateTemplateInput, Template } from '../../../../common/templates';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import type {
+  CreateTemplateInput,
+  Template,
+  UpdateTemplateInput,
+} from '../../../../common/templates';
 import { CASE_TEMPLATE_SAVED_OBJECT, CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -31,23 +35,53 @@ export class TemplatesService {
     }
   ) {}
 
-  async getAllTemplates() {
-    const findResult = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
+  async getAllTemplates(filterById?: string) {
+    interface SearchResult {
+      aggregations: {
+        by_template: {
+          buckets: Array<{
+            latest_template: {
+              hits: {
+                hits: Array<{ _source: { [CASE_TEMPLATE_SAVED_OBJECT]: Template } }>;
+              };
+            };
+          }>;
+        };
+      };
+    }
+
+    const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
+      namespaces: ['*'],
       type: CASE_TEMPLATE_SAVED_OBJECT,
-      filter: fromKueryExpression(`NOT ${CASE_TEMPLATE_SAVED_OBJECT}.attributes.deletedAt: *`),
+      query: {
+        bool: {
+          filter: [
+            toElasticsearchQuery(
+              fromKueryExpression(`NOT ${CASE_TEMPLATE_SAVED_OBJECT}.deletedAt: *`)
+            ),
+            ...(filterById
+              ? [
+                  toElasticsearchQuery(
+                    fromKueryExpression(`${CASE_TEMPLATE_SAVED_OBJECT}.templateId: "${filterById}"`)
+                  ),
+                ]
+              : []),
+          ],
+        },
+      },
       aggs: {
         by_template: {
           terms: {
-            field: `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateId`,
+            field: `${CASE_TEMPLATE_SAVED_OBJECT}.templateId`,
             size: 10000,
           },
-          aggregations: {
+          aggs: {
             latest_template: {
               top_hits: {
                 size: 1,
                 sort: [
                   {
-                    [`${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateVersion`]: { order: 'desc' },
+                    [`${CASE_TEMPLATE_SAVED_OBJECT}.templateVersion`]: { order: 'desc' },
                   },
                 ],
               },
@@ -55,12 +89,20 @@ export class TemplatesService {
           },
         },
       },
-    });
+    })) as SearchResult;
 
-    return findResult.saved_objects.map(({ attributes }) => attributes);
+    const latestTemplateVersions = findResult.aggregations.by_template.buckets.flatMap((bucket) =>
+      bucket.latest_template.hits?.hits?.map((hit) => ({
+        ...hit._source[CASE_TEMPLATE_SAVED_OBJECT],
+      }))
+    );
+
+    return latestTemplateVersions;
   }
 
-  async getTemplate(templateId: string) {}
+  async getTemplate(templateId: string): Promise<Template | undefined> {
+    return (await this.getAllTemplates(templateId))[0];
+  }
 
   async createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>> {
     const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
@@ -71,15 +113,66 @@ export class TemplatesService {
         definition: input.definition,
         name: input.name,
         templateId: v4(),
-      } as Template
+      } as Template,
+      { refresh: true }
     );
 
     return templateSavedObject;
   }
 
-  async updateTemplate() {}
+  async updateTemplate(templateId: string, input: UpdateTemplateInput) {
+    const currentTemplate = await this.getTemplate(templateId);
 
-  async deleteTemplate() {}
+    if (!currentTemplate) {
+      throw new Error('template does not exist');
+    }
+
+    const templateSavedObject = await this.dependencies.unsecuredSavedObjectsClient.create(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      {
+        templateVersion: currentTemplate.templateVersion + 1,
+        definition: input.definition,
+        name: input.name,
+        templateId: currentTemplate.templateId,
+        deletedAt: null,
+      },
+      {
+        refresh: true,
+      }
+    );
+
+    return templateSavedObject;
+  }
+
+  // NOTE: marks all versions (snapshots) as deleted also
+  async deleteTemplate(templateId: string) {
+    const templateSnapshots = await this.dependencies.unsecuredSavedObjectsClient.find({
+      type: CASE_TEMPLATE_SAVED_OBJECT,
+      filter: fromKueryExpression(
+        `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.templateId: "${templateId}"`
+      ),
+      perPage: 10000,
+      page: 1,
+    });
+
+    const ids = templateSnapshots.saved_objects.map((so) => so.id);
+
+    console.log('ids', ids);
+
+    const updatedTemplateSnapshots = await this.dependencies.unsecuredSavedObjectsClient.bulkUpdate(
+      ids.map((id) => ({
+        id,
+        type: CASE_TEMPLATE_SAVED_OBJECT,
+        attributes: {
+          deletedAt: new Date().toISOString(),
+        },
+      })),
+      { refresh: true }
+    );
+
+    console.log('=============');
+    console.log(JSON.stringify(updatedTemplateSnapshots, null, 2));
+  }
 }
 
 // TODO:
@@ -150,17 +243,22 @@ export const getTemplateRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
   },
+  params: {
+    params: schema.object({
+      template_id: schema.string(),
+    }),
+  },
   handler: async ({ context, request, response }) => {
-    const templates: Template[] = [];
-
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      casesClient.templates.getAllTemplates();
+      console.log('templateVersion: ', (request.query as any).templateVersion);
+
+      const template = casesClient.templates.getTemplate(request.params.template_id);
 
       return response.ok({
-        body: templates,
+        body: template,
       });
     } catch (error) {
       throw createCaseError({
@@ -189,10 +287,12 @@ export const updateTemplateRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const templateId = request.params.template_id;
 
+      await casesClient.templates.updateTemplate(templateId, request.body as UpdateTemplateInput);
+
       return response.noContent();
     } catch (error) {
       throw createCaseError({
-        message: `Failed to delete template, id: ${request.params.template_id}: ${error}`,
+        message: `Failed to update template, id: ${request.params.template_id}: ${error}`,
         error,
       });
     }
@@ -217,6 +317,8 @@ export const deleteTemplateRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const templateId = request.params.template_id;
+
+      await casesClient.templates.deleteTemplate(templateId);
 
       return response.noContent();
     } catch (error) {

@@ -24,6 +24,7 @@ import {
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { Template } from '../../../common/templates';
 import type {
   CustomFieldConfiguration,
   TemplateConfiguration,
@@ -140,6 +141,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [observableTypeToEdit, setObservableTypeToEdit] =
     useState<ObservableTypeConfiguration | null>(null);
   const { euiTheme } = useEuiTheme();
+  const [templateV2ToEdit, setTemplateV2ToEdit] = useState<Template | null>(null);
 
   const {
     data: currentConfiguration,
@@ -437,6 +439,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const onCloseTemplatesV2Flyout = useCallback(() => {
     setFlyOutVisibility({ type: 'templatesV2', visible: false });
+    setTemplateV2ToEdit(null);
   }, [setFlyOutVisibility]);
 
   const onObservableTypeSave = useCallback(
@@ -637,7 +640,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   const TemplatesV2Flyout =
     flyOutVisibility?.type === 'templatesV2' && flyOutVisibility?.visible ? (
-      <TemplateFlyout onClose={onCloseTemplatesV2Flyout} />
+      <TemplateFlyout template={templateV2ToEdit} onClose={onCloseTemplatesV2Flyout} />
     ) : null;
 
   return (
@@ -758,6 +761,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
             <EuiFlexItem grow={false}>
               <TemplatesSection
                 onAddTemplate={() => setFlyOutVisibility({ type: 'templatesV2', visible: true })}
+                onEditTemplate={(template) => {
+                  setFlyOutVisibility({ type: 'templatesV2', visible: true });
+                  setTemplateV2ToEdit(template);
+                }}
               />
             </EuiFlexItem>
           </div>

@@ -36,3 +36,8 @@ export type CreateTemplateInput = Omit<
   Template,
   'id' | 'templateId' | 'templateVersion' | 'deletedAt'
 >;
+
+export type UpdateTemplateInput = Omit<
+  Template,
+  'id' | 'templateId' | 'templateVersion' | 'deletedAt'
+>;

@@ -38,6 +38,8 @@ const i18n = {
   TEMPLATE_DESCRIPTION: 'Create case blueprints, with customized display layout and fields',
   NO_TEMPLATES: 'No templates',
   ADD_TEMPLATE: 'Add template',
+  UPDATE_TEMPLATE: 'Update template',
+  CREATE_TEMPLATE: 'Create template',
 };
 
 // Api
@@ -127,9 +129,18 @@ const useDeleteTemplate = () => {
 
 interface TemplatesSectionProps {
   onAddTemplate: VoidFunction;
+  onEditTemplate: (template: Template) => void;
 }
 
-export const TemplateListItem = ({ template }: { template: Template }) => {
+export const TemplateListItem = ({
+  template,
+  onEditTemplate,
+  onDeleteTemplate,
+}: {
+  template: Template;
+  onEditTemplate: (template: Template) => void;
+  onDeleteTemplate: (templateId: string) => void;
+}) => {
   return (
     <EuiPanel paddingSize="s" data-test-subj={`template-${template.templateId}`} hasShadow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -152,7 +163,7 @@ export const TemplateListItem = ({ template }: { template: Template }) => {
                 aria-label={`${template.templateId}-template-edit`}
                 iconType="pencil"
                 color="primary"
-                onClick={() => {}}
+                onClick={() => onEditTemplate(template)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -161,7 +172,7 @@ export const TemplateListItem = ({ template }: { template: Template }) => {
                 aria-label={`${template.templateId}-template-delete`}
                 iconType="minusInCircle"
                 color="danger"
-                onClick={() => {}}
+                onClick={() => onDeleteTemplate(template.templateId)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -173,11 +184,15 @@ export const TemplateListItem = ({ template }: { template: Template }) => {
 
 TemplateListItem.displayName = 'TemplateListItem';
 
-export const TemplatesSection = ({ onAddTemplate }: TemplatesSectionProps) => {
+export const TemplatesSection = ({ onAddTemplate, onEditTemplate }: TemplatesSectionProps) => {
   const disabled = false;
   const error = undefined;
 
-  const { isFetching: isLoading, data: templates } = useTemplates();
+  const { isFetching, data: templates } = useTemplates();
+
+  const deleteTemplateMutation = useDeleteTemplate();
+
+  const isLoading = isFetching || deleteTemplateMutation.isLoading;
 
   return (
     <EuiDescribedFormGroup
@@ -197,11 +212,19 @@ export const TemplatesSection = ({ onAddTemplate }: TemplatesSectionProps) => {
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {templates?.length ? (
-          <EuiFlexGroup>
+          <>
             {templates.map((template) => (
-              <TemplateListItem template={template} />
+              <>
+                <TemplateListItem
+                  key={template.templateId}
+                  template={template}
+                  onEditTemplate={onEditTemplate}
+                  onDeleteTemplate={(templateId) => deleteTemplateMutation.mutateAsync(templateId)}
+                />
+                <EuiSpacer size="s" />
+              </>
             ))}
-          </EuiFlexGroup>
+          </>
         ) : null}
         <EuiSpacer size="s" />
         {!templates?.length ? (
@@ -264,7 +287,7 @@ export const TemplateFormFields = () => {
   const euiTheme = useEuiTheme();
 
   useEffect(() => {
-    console.log('parsed', parseYaml(sample));
+    const _parsed = parseYaml(sample);
   }, []);
 
   return (
@@ -309,7 +332,7 @@ export const TemplateFormFields = () => {
 
 TemplateFormFields.displayName = 'TemplateFormFields';
 
-export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
+const TemplateCreationView = ({ onClose }: { onClose: VoidFunction }) => {
   const createTemplateMutation = useCreateTemplate();
 
   const form = useForm<{ name: string; definition: string }>({
@@ -326,7 +349,7 @@ export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
         disabled={false}
         onCloseFlyout={onClose}
         onSaveField={noop}
-        renderHeader={() => <span>{'Create template'}</span>}
+        renderHeader={() => <span>{i18n.CREATE_TEMPLATE}</span>}
         footer={
           <CommonFlyoutFooter
             isLoading={form.formState.isSubmitting}
@@ -334,6 +357,7 @@ export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
             onCancel={onClose}
             onSave={form.handleSubmit(async (payload) => {
               await createTemplateMutation.mutateAsync(payload);
+              onClose();
             })}
           />
         }
@@ -341,6 +365,64 @@ export const TemplateFlyout = ({ onClose }: { onClose: VoidFunction }) => {
         {() => <TemplateFormFields />}
       </CommonFlyout>
     </FormProvider>
+  );
+};
+TemplateCreationView.displayName = 'TemplateCreationView';
+
+const TemplateUpdateView = ({
+  onClose,
+  defaultValues,
+}: {
+  onClose: VoidFunction;
+  defaultValues: Template;
+}) => {
+  const updateTemplateMutation = useUpdateTemplate();
+
+  const form = useForm<{ name: string; definition: string }>({
+    defaultValues,
+  });
+
+  return (
+    <FormProvider {...form}>
+      <CommonFlyout<FormData>
+        isLoading={false}
+        disabled={false}
+        onCloseFlyout={onClose}
+        onSaveField={noop}
+        renderHeader={() => <span>{i18n.UPDATE_TEMPLATE}</span>}
+        footer={
+          <CommonFlyoutFooter
+            isLoading={form.formState.isSubmitting}
+            disabled={!form.formState.isValid}
+            onCancel={onClose}
+            onSave={form.handleSubmit(async (payload) => {
+              await updateTemplateMutation.mutateAsync({
+                templateId: defaultValues.templateId,
+                template: payload,
+              });
+              onClose();
+            })}
+          />
+        }
+      >
+        {() => <TemplateFormFields />}
+      </CommonFlyout>
+    </FormProvider>
+  );
+};
+TemplateUpdateView.displayName = 'TemplateUpdateView';
+
+export const TemplateFlyout = ({
+  onClose,
+  template,
+}: {
+  onClose: VoidFunction;
+  template: Template | null;
+}) => {
+  return template ? (
+    <TemplateUpdateView defaultValues={template} onClose={onClose} />
+  ) : (
+    <TemplateCreationView onClose={onClose} />
   );
 };
 TemplateFlyout.displayName = 'TemplateFlyout';
