@@ -150,7 +150,6 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   dashboard: DashboardStart;
-  core: CoreStart;
   automaticImport?: AutomaticImportPluginStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
@@ -205,7 +204,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             : undefined;
 
         const startServices: FleetStartServices = {
-          core: coreStartServices,
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
@@ -249,7 +247,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             ? { ...deps.cloud, ...startDepsServices.cloud }
             : undefined;
         const startServices: FleetStartServices = {
-          core: coreStartServices,
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,

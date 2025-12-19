@@ -54,6 +54,7 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSections } from './application/management';
@@ -105,6 +106,7 @@ export interface MlStartDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   telemetry: ITelemetryClient;
   fieldsMetadata: FieldsMetadataPublicStart;
   fileUpload: FileUploadPluginStart;
@@ -219,6 +221,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             telemetry: telemetryClient,
             fieldsMetadata: pluginsStart.fieldsMetadata,
             fileUpload: pluginsStart.fileUpload,
+            kql: pluginsStart.kql,
             ...deps,
           },
           params,

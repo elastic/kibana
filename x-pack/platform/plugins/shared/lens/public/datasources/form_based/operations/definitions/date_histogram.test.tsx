@@ -24,9 +24,11 @@ import type {
   FormBasedLayer,
   IndexPattern,
 } from '@kbn/lens-common';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 const dataStart = dataPluginMock.createStartContract();
 const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();
+const kqlStart = kqlPluginMock.createStartContract();
 const dataViewsStart = dataViewPluginMocks.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
   (path: string) => {
@@ -109,6 +111,7 @@ const defaultOptions = {
   data: dataStart,
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchStart,
+  kql: kqlStart,
   dataViews: dataViewsStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,

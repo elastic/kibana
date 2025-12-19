@@ -141,7 +141,6 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     docLinks,
     uiSettings,
     usageCollection,
-    core,
   } = useStartServices();
 
   const [dataView, setDataView] = useState<DataView | undefined>();
@@ -200,7 +199,6 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
       deps={{
         autocomplete: kql.autocomplete,
-        core,
         notifications,
         http,
         docLinks,

@@ -25,6 +25,7 @@ import type {
   DateRange,
   FieldBasedIndexPatternColumn,
 } from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { OperationSupportMatrix } from './operation_support';
 import type { OperationType } from '../form_based';
 import type { RequiredReference, GenericOperationDefinition } from '../operations';
@@ -104,6 +105,7 @@ export interface ReferenceEditorProps {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
 }
 
