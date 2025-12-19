@@ -16,12 +16,15 @@ jest.mock('../span_links/get_linked_children');
 
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
+import { getTraceItemIcon } from './get_unified_trace_items';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AT_TIMESTAMP,
   EVENT_OUTCOME,
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   SPAN_DURATION,
   SPAN_ID,
@@ -126,6 +129,112 @@ describe('getUnifiedTraceItems', () => {
   });
 
   describe('basic functionality', () => {
+    it('should return trace items and unified trace without agent marks', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {},
+              fields: {
+                ...defaultSearchFields,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).toEqual({
+        traceItems: [
+          {
+            icon: 'merge',
+            id: 'span-1',
+            name: 'Test Span',
+            timestampUs: 1672531200000000,
+            traceId: 'test-trace-id',
+            duration: 1000,
+            status: undefined,
+            errors: [{ errorDocId: 'error-1' }],
+            parentId: undefined,
+            serviceName: 'test-service',
+            type: undefined,
+            spanLinksCount: {
+              incoming: 0,
+              outgoing: 0,
+            },
+          },
+        ],
+        agentMarks: {},
+        unifiedTraceErrors: mockUnifiedTraceErrors,
+      });
+    });
+    it('should return trace items and unified trace with agent marks', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              _source: {
+                transaction: {
+                  marks: {
+                    agent: {
+                      domInteractive: 117,
+                      timeToFirstByte: 10,
+                      domComplete: 118,
+                    },
+                  },
+                },
+              },
+              fields: {
+                ...defaultSearchFields,
+                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result).toEqual({
+        traceItems: [
+          {
+            icon: 'merge',
+            id: 'span-1',
+            name: 'Test Span',
+            timestampUs: 1672531200000000,
+            traceId: 'test-trace-id',
+            duration: 1000,
+            status: undefined,
+            errors: [{ errorDocId: 'error-1' }],
+            parentId: undefined,
+            serviceName: 'test-service',
+            type: undefined,
+            spanLinksCount: {
+              incoming: 0,
+              outgoing: 0,
+            },
+          },
+        ],
+        agentMarks: {
+          domInteractive: 117,
+          timeToFirstByte: 10,
+          domComplete: 118,
+        },
+        unifiedTraceErrors: mockUnifiedTraceErrors,
+      });
+    });
     it('should return trace items and unified trace errors', async () => {
       const mockSearchResponse = {
         hits: {
@@ -165,6 +274,7 @@ describe('getUnifiedTraceItems', () => {
             },
           },
         ],
+        agentMarks: {},
         unifiedTraceErrors: mockUnifiedTraceErrors,
       });
     });
@@ -632,6 +742,110 @@ describe('getUnifiedTraceItems', () => {
       const result = await getUnifiedTraceItems(defaultParams);
 
       expect(result.traceItems[0].errors).toEqual([]);
+    });
+  });
+});
+
+describe('getTraceItemIcon', () => {
+  describe('database icon', () => {
+    it('returns "database" when spanType starts with "db"', () => {
+      expect(getTraceItemIcon({ spanType: 'db' })).toBe('database');
+    });
+
+    it('returns "database" when spanType is "db.mysql"', () => {
+      expect(getTraceItemIcon({ spanType: 'db.mysql' })).toBe('database');
+    });
+
+    it('returns "database" when spanType is "db.elasticsearch"', () => {
+      expect(getTraceItemIcon({ spanType: 'db.elasticsearch' })).toBe('database');
+    });
+
+    it('returns "database" even when processorEvent is transaction', () => {
+      expect(
+        getTraceItemIcon({
+          spanType: 'db.redis',
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'nodejs',
+        })
+      ).toBe('database');
+    });
+  });
+
+  describe('non-transaction processor events', () => {
+    it('returns undefined when processorEvent is span', () => {
+      expect(getTraceItemIcon({ processorEvent: ProcessorEvent.span })).toBeUndefined();
+    });
+
+    it('returns undefined when processorEvent is undefined', () => {
+      expect(getTraceItemIcon({})).toBeUndefined();
+    });
+
+    it('returns undefined when processorEvent is error', () => {
+      expect(getTraceItemIcon({ processorEvent: ProcessorEvent.error })).toBeUndefined();
+    });
+  });
+
+  describe('transaction processor events', () => {
+    it('returns "globe" for RUM agent "js-base"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'js-base',
+        })
+      ).toBe('globe');
+    });
+
+    it('returns "globe" for RUM agent "rum-js"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'rum-js',
+        })
+      ).toBe('globe');
+    });
+
+    it('returns "globe" for RUM agent "opentelemetry/webjs"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'opentelemetry/webjs',
+        })
+      ).toBe('globe');
+    });
+
+    it('returns "merge" for non-RUM agent "nodejs"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'nodejs',
+        })
+      ).toBe('merge');
+    });
+
+    it('returns "merge" for non-RUM agent "java"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'java',
+        })
+      ).toBe('merge');
+    });
+
+    it('returns "merge" for non-RUM agent "python"', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+          agentName: 'python',
+        })
+      ).toBe('merge');
+    });
+
+    it('returns "merge" when agentName is undefined', () => {
+      expect(
+        getTraceItemIcon({
+          processorEvent: ProcessorEvent.transaction,
+        })
+      ).toBe('merge');
     });
   });
 });
