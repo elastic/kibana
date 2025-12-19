@@ -11,9 +11,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { counterAppId } from './counter_app';
-import { tabSelectionAppId, type TabSelectionSidebarState } from './tab_selection_app';
-import { textInputAppId, type TextInputSidebarState } from './text_input_app';
+import { counterAppId, getCounterStateSchema } from './counter_app';
+import { tabSelectionAppId, getTabSelectionStateSchema } from './tab_selection_app';
+import { textInputAppId, getTextInputStateSchema } from './text_input_app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -23,38 +23,26 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
-      button: {
-        iconType: 'editorAlignLeft',
-      },
-      app: {
-        title: 'Text Input Example',
-        loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
-        getInitialState: (): TextInputSidebarState => ({ userName: '' }),
-      },
+      iconType: 'editorAlignLeft',
+      title: 'Text Input Example',
+      getStateSchema: getTextInputStateSchema,
+      loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
     });
 
     core.chrome.sidebar.registerApp({
       appId: counterAppId,
-      button: {
-        iconType: 'number',
-      },
-      app: {
-        title: 'Counter Example',
-        loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
-        getInitialState: () => ({ counter: 0 }),
-      },
+      iconType: 'number',
+      title: 'Counter Example',
+      getStateSchema: getCounterStateSchema,
+      loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
 
     core.chrome.sidebar.registerApp({
       appId: tabSelectionAppId,
-      button: {
-        iconType: 'documents',
-      },
-      app: {
-        title: 'Tab Selection Example',
-        loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
-        getInitialState: (): TabSelectionSidebarState => ({ selectedTab: 'overview' }),
-      },
+      iconType: 'documents',
+      title: 'Tab Selection Example',
+      getStateSchema: getTabSelectionStateSchema,
+      loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
     });
 
     core.application.register({

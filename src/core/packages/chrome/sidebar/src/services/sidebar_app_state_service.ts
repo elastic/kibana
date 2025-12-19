@@ -9,6 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import { z } from '@kbn/zod/v4';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
 export interface SidebarAppStateServiceApi {
@@ -39,9 +40,29 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
 
   constructor(private readonly registry: SidebarRegistryServiceApi) {}
 
+  /**
+   * Creates initial state from schema defaults with validation and error handling
+   */
+  private createInitialState<T>(appId: string): T {
+    const app = this.registry.getApp(appId);
+    if (!app) {
+      throw new Error(`[Sidebar] App not found: ${appId}`);
+    }
+
+    try {
+      const schema = app.getStateSchema();
+      return schema.parse({}) as T;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`[Sidebar] Invalid schema for app '${appId}': ${z.treeifyError(error)}`);
+      }
+      throw error;
+    }
+  }
+
   private getOrCreateState<T>(appId: string): BehaviorSubject<T> {
     if (!this.appStates.has(appId)) {
-      const initialState = this.registry.getApp(appId)?.app?.getInitialState() as T;
+      const initialState = this.createInitialState<T>(appId);
       this.appStates.set(appId, new BehaviorSubject<T>(initialState));
     }
     return this.appStates.get(appId)!;
@@ -63,7 +84,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
   }
 
   reset(appId: string): void {
-    const initialState = this.registry.getApp(appId)?.app?.getInitialState();
+    const initialState = this.createInitialState(appId);
     this.set(appId, initialState, false);
   }
 }

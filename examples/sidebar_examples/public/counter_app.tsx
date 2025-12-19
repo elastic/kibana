@@ -19,13 +19,17 @@ import {
   EuiText,
   EuiFormRow,
 } from '@elastic/eui';
+import { z } from '@kbn/zod/v4';
 import { useSidebarApp } from '@kbn/core-chrome-sidebar';
 
 export const counterAppId = 'sidebarExampleCounter';
 
-export interface CounterSidebarState {
-  counter: number;
-}
+export const getCounterStateSchema = () =>
+  z.object({
+    counter: z.number().default(0),
+  });
+
+export type CounterSidebarState = z.infer<ReturnType<typeof getCounterStateSchema>>;
 
 export const useCounterSideBarApp = () => {
   const { open, setState, state } = useSidebarApp<CounterSidebarState>(counterAppId);

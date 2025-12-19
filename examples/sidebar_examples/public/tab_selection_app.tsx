@@ -9,13 +9,17 @@
 
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow } from '@elastic/eui';
+import { z } from '@kbn/zod/v4';
 import { useSidebarApp } from '@kbn/core-chrome-sidebar';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
 
-export interface TabSelectionSidebarState {
-  selectedTab: string;
-}
+export const getTabSelectionStateSchema = () =>
+  z.object({
+    selectedTab: z.string().default('overview'),
+  });
+
+export type TabSelectionSidebarState = z.infer<ReturnType<typeof getTabSelectionStateSchema>>;
 
 export const useTabSelectionSideBarApp = () => {
   const { open, setState, state } = useSidebarApp<TabSelectionSidebarState>(tabSelectionAppId);

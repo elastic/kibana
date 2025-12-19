@@ -9,14 +9,17 @@
 
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { z } from '@kbn/zod/v4';
 import { useSidebarApp } from '@kbn/core-chrome-sidebar';
 
 export const textInputAppId = 'sidebarExampleText';
 
-export interface TextInputSidebarState {
-  /** user name input */
-  userName: string;
-}
+export const getTextInputStateSchema = () =>
+  z.object({
+    userName: z.string().default(''),
+  });
+
+export type TextInputSidebarState = z.infer<ReturnType<typeof getTextInputStateSchema>>;
 
 export const useTextInputSideBarApp = () => {
   const { open, setState, state } = useSidebarApp<TextInputSidebarState>(textInputAppId);

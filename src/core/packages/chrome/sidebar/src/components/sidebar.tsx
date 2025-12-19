@@ -35,8 +35,8 @@ export function Sidebar(props: SidebarProps) {
   }
 
   return (
-    <SidebarPanel title={currentApp.app.title} onClose={close}>
-      <SidebarAppRenderer key={currentAppId} loadComponent={currentApp.app.loadComponent} />
+    <SidebarPanel title={currentApp.title} onClose={close}>
+      <SidebarAppRenderer key={currentAppId} loadComponent={currentApp.loadComponent} />
     </SidebarPanel>
   );
 }

@@ -10,20 +10,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { ComponentType } from 'react';
-
-/**
- * Button configuration for a sidebar app
- */
-export interface SidebarAppButton {
-  /**
-   * Type of icon to display on the sidebar button (e.g., 'search', 'settings', etc.)
-   */
-  iconType: string;
-  /**
-   * Optional title for the sidebar button (used for accessibility and tooltips), defaults to app title if not provided
-   */
-  title?: string;
-}
+import { z } from '@kbn/zod/v4';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarComponentProps<TState> {}
@@ -42,27 +29,59 @@ export interface SidebarAppContent<TState = unknown> {
    */
   loadComponent: () => Promise<SidebarComponentType<TState>>;
   /**
-   * Function to get the initial state for the sidebar app, accessible via SidebarAppStateService or useSidebarAppState hook
+   * Function that returns a Zod schema defining the state structure and default values.
+   *
+   * Initial state is created by calling `getStateSchema().parse({})`.
+   * Use `.default()` on schema fields to provide initial values.
+   *
+   * Lazy evaluation ensures schemas are only built when needed.
+   *
+   * Validation occurs on initialization and reset only (not on setState calls).
+   *
+   * @example
+   * ```typescript
+   * import { z } from '@kbn/zod/v4';
+   *
+   * const getMyStateSchema = () => z.object({
+   *   userName: z.string().default(''),
+   *   count: z.number().int().nonnegative().default(0),
+   * });
+   *
+   * type MyState = z.infer<ReturnType<typeof getMyStateSchema>>;
+   *
+   * registerApp({
+   *   getStateSchema: getMyStateSchema,
+   *   // ...
+   * });
+   * ```
    */
-  getInitialState: () => TState;
+  getStateSchema: () => z.ZodType<TState>;
+}
+
+/**
+ * Button configuration for a sidebar app
+ */
+export interface SidebarAppButton {
+  /**
+   * Type of icon to display on the sidebar button (e.g., 'search', 'settings', etc.)
+   */
+  iconType: string;
+  /**
+   * Optional title for the sidebar button (used for accessibility and tooltips), defaults to app title if not provided
+   */
+  buttonTitle?: string;
 }
 
 /**
  * Complete app definition for sidebar registration
  */
-export interface SidebarApp<TAppState = unknown> {
+export interface SidebarApp<TAppState = unknown>
+  extends SidebarAppButton,
+    SidebarAppContent<TAppState> {
   /**
    * Unique identifier for the sidebar app
    */
   appId: string;
-  /**
-   * Button configuration for the sidebar app
-   */
-  button: SidebarAppButton;
-  /**
-   * Content configuration for the sidebar app panel
-   */
-  app: SidebarAppContent<TAppState>;
 }
 
 export interface SidebarRegistryServiceApi {
