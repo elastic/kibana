@@ -278,8 +278,7 @@ export class SyntheticsPrivateLocation {
       this.buildNewPolicy(),
       this.getExistingPolicies(
         configs.map(({ config }) => config),
-        allPrivateLocations,
-        spaceId
+        allPrivateLocations
       ),
     ]);
 
@@ -289,18 +288,13 @@ export class SyntheticsPrivateLocation {
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
-      const allSpaces = this.getAllSpacesForMonitor(config, spaceId);
-
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-        const allPossiblePolicyIds = allSpaces.map((space) =>
-          this.getPolicyId(config, privateLocation.id, space)
-        );
         let currId = this.getPolicyId(config, privateLocation.id, spaceId);
         const hasPolicy = existingPolicies?.some((policy) => {
-          if (allPossiblePolicyIds.includes(policy.id)) {
+          if (policy.id.includes(config.id) && policy.id.includes(privateLocation.id)) {
             currId = policy.id;
             return true;
           }
@@ -369,21 +363,28 @@ export class SyntheticsPrivateLocation {
 
   async getExistingPolicies(
     configs: HeartbeatConfig[],
-    allPrivateLocations: SyntheticsPrivateLocations,
-    spaceId: string
+    allPrivateLocations: SyntheticsPrivateLocations
   ) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository(['space']);
+    // should consider using the max space config key instead, or using PIT finder with smaller page sizes
+    // just be sure not to keep all the objects in memory at once
+    // alternatively trying to use aggs as well with no success yet
+    const allSpacesResponse = await soClient.find({
+      type: 'space',
+      perPage: 1000,
+    });
+    const allSpaces = allSpacesResponse.saved_objects.map((space) => space.id);
 
     const listOfPolicies: string[] = [];
     for (const config of configs) {
-      const allSpaces = this.getAllSpacesForMonitor(config, spaceId);
-
       for (const privateLocation of allPrivateLocations) {
         allSpaces.forEach((space) => {
           listOfPolicies.push(this.getPolicyId(config, privateLocation.id, space));
         });
       }
     }
+
+    // what's the max number of policies we can request at once?
     return (
       (await this.server.fleet.packagePolicyService.getByIDs(soClient, listOfPolicies, {
         ignoreMissing: true,
@@ -486,10 +487,6 @@ export class SyntheticsPrivateLocation {
       return configNamespace;
     }
     return undefined;
-  }
-
-  getAllSpacesForMonitor(config: HeartbeatConfig, spaceId: string): string[] {
-    return Array.isArray(config.fields?.meta?.space_id) ? config.fields?.meta?.space_id : [spaceId];
   }
 }
 

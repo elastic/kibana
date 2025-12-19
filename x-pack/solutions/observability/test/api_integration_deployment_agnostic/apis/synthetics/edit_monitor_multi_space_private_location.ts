@@ -123,5 +123,61 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const newPolicy = allPolicies.items.find((p: PackagePolicy) => p.id === newPolicyId);
       expect(newPolicy).to.be(undefined);
     });
+
+    it('should update the original policy when the original space is removed', async () => {
+      const monitor = {
+        ...httpMonitorJson,
+        locations: [privateLocations[0]],
+        spaces: [space1, space2],
+      };
+
+      // Create monitor in space1, shared with space2
+      const createResponse = await supertest
+        .post(`/s/${space1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+        .set(superuser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(monitor);
+      monitorId = createResponse.body.id;
+
+      // Edit the monitor from space2, removing space1
+      const updatedMonitor = { ...monitor, name: 'Updated and Space Removed', spaces: [space2] };
+      await supertest
+        .put(`/s/${space2}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}?internal=true`)
+        .set(superuser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(updatedMonitor)
+        .expect(200);
+
+      const updatedMonitor2 = { ...monitor, name: 'Updated and Space Removed', spaces: [space2] };
+      await supertest
+        .put(`/s/${space2}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}?internal=true`)
+        .set(superuser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(updatedMonitor2)
+        .expect(200);
+
+      // Query all synthetics package policies
+      const { body: allPolicies } = await supertest
+        .get(
+          '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+        )
+        .set(superuser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      // There should still be only one policy
+      expect(allPolicies.total).to.be(1);
+
+      // The original policy should be the one that was updated
+      const originalPolicyId = `${monitorId}-${privateLocations[0].id}-${space1}`;
+      const updatedPolicy = allPolicies.items.find((p: PackagePolicy) => p.id === originalPolicyId);
+      expect(updatedPolicy).to.not.be(undefined);
+      expect(updatedPolicy.name).to.contain('Updated and Space Removed');
+
+      // No new policy should have been created
+      const newPolicyId = `${monitorId}-${privateLocations[0].id}-${space2}`;
+      const newPolicy = allPolicies.items.find((p: PackagePolicy) => p.id === newPolicyId);
+      expect(newPolicy).to.be(undefined);
+    });
   });
 }

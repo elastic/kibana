@@ -49,7 +49,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let testPolicyId: string;
     let testPrivateLocationName: string;
-    const testPolicyName = `Fleet test server policy ${uuidv4()}`;
     const testPrivateLocationsService = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
@@ -63,14 +62,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       viewerUser = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    beforeEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await supertestWithoutAuth
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      await testPrivateLocationsService.installSyntheticsPackage();
-
+      const formatLocations = (monitors: ProjectMonitorsRequest['monitors']) => {
+        return monitors.map((monitor) => {
+          return {
+            ...monitor,
+            locations: [],
+            privateLocations: [testPrivateLocationName],
+          };
+        });
+      };
+      const testPolicyName = `Fleet test server policy ${uuidv4()}`;
       const apiResponse = await testPrivateLocationsService.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       const testPrivateLocations = await testPrivateLocationsService.setTestLocations([
@@ -83,22 +98,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send({ key: 'testGlobalParam', value: 'testGlobalParamValue' })
         .expect(200);
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    beforeEach(() => {
-      const formatLocations = (monitors: ProjectMonitorsRequest['monitors']) => {
-        return monitors.map((monitor) => {
-          return {
-            ...monitor,
-            locations: [],
-            privateLocations: [testPrivateLocationName],
-          };
-        });
-      };
       projectMonitors = setUniqueIds({
         monitors: formatLocations(getFixtureJson('project_browser_monitor').monitors),
       });
@@ -1064,6 +1063,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           })),
         })
         .expect(200);
+
+      const apiResponsePolicy = await supertestWithAuth.get(
+        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      );
+      expect(apiResponsePolicy.body.total).to.eql(projectMonitors.monitors.length);
       // expect monitor not to have been deleted
       const getResponse = await supertestWithoutAuth
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
@@ -1107,6 +1111,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ],
         })
         .expect(200);
+
+      const apiResponsePolicyAfterEdit = await supertestWithAuth.get(
+        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      );
+      expect(apiResponsePolicyAfterEdit.body.total).to.eql(projectMonitors.monitors.length);
       const getResponseUpdated = await supertestWithoutAuth
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set(editorUser.apiKeyHeader)

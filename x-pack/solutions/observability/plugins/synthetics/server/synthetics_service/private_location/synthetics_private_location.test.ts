@@ -274,31 +274,51 @@ describe('SyntheticsPrivateLocation', () => {
     });
   });
 
-  describe('getAllSpacesForMonitor', () => {
-    it('should return spaces from config if they exist', () => {
-      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const config = {
-        fields: {
-          meta: {
-            space_id: ['space1', 'space2'],
+  describe('getExistingPolicies', () => {
+    it('should fetch all spaces and then get policies by ID', async () => {
+      const soClient = savedObjectsServiceMock.createStartContract().createInternalRepository();
+      soClient.find = jest.fn().mockResolvedValue({
+        total: 2,
+        per_page: 1000,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'space1',
+            type: 'space',
+            attributes: {},
+            references: [],
+            namespaces: ['default'],
           },
-        },
-      } as unknown as HeartbeatConfig;
-      // @ts-expect-error - testing private method
-      const spaces = syntheticsPrivateLocation.getAllSpacesForMonitor(config, 'current-space');
-      expect(spaces).toEqual(['space1', 'space2']);
-    });
+          {
+            id: 'space2',
+            type: 'space',
+            attributes: {},
+            references: [],
+            namespaces: ['default'],
+          },
+        ],
+      });
+      serverMock.coreStart.savedObjects.createInternalRepository = jest
+        .fn()
+        .mockReturnValue(soClient);
 
-    it('should fall back to the current spaceId if no spaces are in config', () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const config = {
-        fields: {
-          meta: {},
-        },
-      } as unknown as HeartbeatConfig;
-      // @ts-expect-error - testing private method
-      const spaces = syntheticsPrivateLocation.getAllSpacesForMonitor(config, 'current-space');
-      expect(spaces).toEqual(['current-space']);
+      await syntheticsPrivateLocation.getExistingPolicies([testConfig], [mockPrivateLocation]);
+
+      expect(soClient.find).toHaveBeenCalledWith({
+        type: 'space',
+        fields: [],
+        perPage: 1000,
+      });
+
+      const expectedPolicyIds = ['testId-policyId-space1', 'testId-policyId-space2'];
+      expect(serverMock.fleet.packagePolicyService.getByIDs).toHaveBeenCalledWith(
+        soClient,
+        expect.arrayContaining(expectedPolicyIds),
+        {
+          ignoreMissing: true,
+        }
+      );
     });
   });
 });
