@@ -12,10 +12,11 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
-import type { QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 import { ConnectionDetailsOptsProvider } from '../context';
 import type { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
+
+const SEARCH_API_KEYS_PATH = '/internal/search_api_keys';
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
@@ -72,12 +73,15 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         if (!http) return false;
 
         try {
-          const response = await http.post<QueryApiKeyResult>('/internal/security/api_key/_query', {
-            body: JSON.stringify({}),
-          });
-          return response.canManageOwnApiKeys ?? false;
-        } catch {
-          // Permission check failed - API keys may be disabled or user lacks privileges
+          await http.post(SEARCH_API_KEYS_PATH);
+          return true;
+        } catch (err) {
+          // 400 means user has permission but project already has API keys
+          if (err?.response?.status === 400) {
+            return true;
+          }
+          // 403 means user doesn't have permission to manage API keys
+          // Any other error, assume no permission
           return false;
         }
       },

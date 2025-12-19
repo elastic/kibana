@@ -43,10 +43,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should not show API Keys tab when user lacks permission', async () => {
             await testSubjects.click('viewConnectionDetailsLink');
             await testSubjects.existOrFail('connectionDetailsModalTitle');
-            // Endpoints tab should exist
+            // Wait for endpoints tab to exist (flyout is loaded)
             await testSubjects.existOrFail('connectionDetailsTabBtn-endpoints');
-            // API Keys tab should NOT exist for viewer
-            await testSubjects.missingOrFail('connectionDetailsTabBtn-apiKeys');
+            // API Keys tab should NOT exist for viewer - wait for permission check to complete
+            await retry.try(async () => {
+              await testSubjects.missingOrFail('connectionDetailsTabBtn-apiKeys');
+            });
           });
         });
       });
