@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/licensing-types'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

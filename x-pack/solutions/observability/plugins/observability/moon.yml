@@ -149,6 +149,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/onechat-plugin'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

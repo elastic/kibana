@@ -92,6 +92,7 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
   - '@kbn/expect'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

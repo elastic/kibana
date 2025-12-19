@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/autoops-promotion-callout'
   - '@kbn/react-query'
   - '@kbn/response-ops-rule-params'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

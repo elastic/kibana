@@ -148,6 +148,7 @@ dependsOn:
   - '@kbn/unified-tabs'
   - '@kbn/esql-composer'
   - '@kbn/cps'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
