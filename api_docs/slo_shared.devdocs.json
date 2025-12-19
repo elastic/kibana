@@ -1,0 +1,71 @@
+{
+  "id": "sloShared",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "sloShared",
+      "id": "def-server.SloSharedPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SloSharedPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/slo_shared/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "sloShared",
+      "id": "def-server.SloSharedPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SloSharedPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/slo_shared/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "sloShared",
+        "id": "def-common.SO_SLO_TEMPLATE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SO_SLO_TEMPLATE_TYPE",
+        "description": [],
+        "signature": [
+          "\"slo_template\""
+        ],
+        "path": "x-pack/platform/plugins/shared/slo_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
