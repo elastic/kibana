@@ -168,7 +168,6 @@ export function SloAlertsTable({
       consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
       query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
       columns={columns}
-      hideLazyLoader
       pageSize={ALERTS_PER_PAGE}
       onLoaded={() => {
         if (onLoaded) {

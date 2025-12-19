@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
+import type { ConfigSchema, ObservabilityOverviewPublicPluginsStart } from '../plugin';
 import { renderApp } from './application';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { createMemoryHistory } from 'history';
@@ -60,7 +60,7 @@ describe('renderApp', () => {
     },
     usageCollection: { reportUiCounter: noop },
     observabilityAIAssistant: { service: mockService },
-  } as unknown as ObservabilityPublicPluginsStart;
+  } as unknown as ObservabilityOverviewPublicPluginsStart;
 
   const core = {
     application: { currentAppId$: new Observable(), navigateToUrl: noop },
@@ -103,7 +103,6 @@ describe('renderApp', () => {
     expect(() => {
       const unmount = renderApp({
         core,
-        config,
         plugins,
         appMountParameters: params,
         ObservabilityPageTemplate: KibanaPageTemplate,
@@ -122,7 +121,6 @@ describe('renderApp', () => {
   it('should clear search sessions when unmounting', () => {
     const unmount = renderApp({
       core,
-      config,
       plugins,
       appMountParameters: params,
       ObservabilityPageTemplate: KibanaPageTemplate,

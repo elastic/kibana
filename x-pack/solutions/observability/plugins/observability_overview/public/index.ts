@@ -61,7 +61,6 @@ export type {
   UniversalProfilingDataResponse,
   ObservabilityFetchDataResponse,
   ObservabilityHasDataResponse,
-  Subset,
 } from './typings/fetch_overview_data';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';

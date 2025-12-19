@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { DatePicker } from '@kbn/observability-plugin/public';
+import { DatePicker } from '@kbn/observability-overview-plugin/public';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 import { useDateRangeRedirect } from '../../../../hooks/use_date_range_redirect';
 import { clearCache } from '../../../../services/rest/call_api';

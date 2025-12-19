@@ -7,12 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
-import { SERVICE_NAME, TRANSACTION_DURATION } from '@kbn/observability-shared-plugin/common';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
-import { UX_APP, type ObservabilityPublicPluginsStart } from '../../../../..';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
@@ -26,29 +22,11 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { services } = useKibana<ObservabilityPublicPluginsStart>();
 
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
-
-  const seriesList: AllSeries = [
-    {
-      name: PAGE_LOAD_DISTRIBUTION_TITLE,
-      time: {
-        from: relativeStart,
-        to: relativeEnd,
-      },
-      reportDefinitions: {
-        [SERVICE_NAME]: ['ALL_VALUES'],
-      },
-      breakdown: SERVICE_NAME,
-      dataType: UX_APP,
-      selectedMetricField: TRANSACTION_DURATION,
-      showPercentileAnnotations: false,
-    },
-  ];
 
   const { data, status } = useFetcher(
     () => {
@@ -76,10 +54,9 @@ export function UXSection({ bucketSize }: Props) {
     ]
   );
 
-  if (!uxHasDataResponse?.hasData || !services.exploratoryView) {
+  if (!uxHasDataResponse?.hasData) {
     return null;
   }
-  const ExploratoryViewEmbeddable = services.exploratoryView.ExploratoryViewEmbeddable;
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
@@ -98,15 +75,6 @@ export function UXSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
-      <div style={{ height: 320 }}>
-        <ExploratoryViewEmbeddable
-          attributes={seriesList}
-          reportType="data-distribution"
-          title={PAGE_LOAD_DISTRIBUTION_TITLE}
-          withActions={false}
-        />
-      </div>
-
       <EuiSpacer size="xl" />
       <CoreVitals
         data={coreWebVitals}
@@ -117,10 +85,3 @@ export function UXSection({ bucketSize }: Props) {
     </SectionContainer>
   );
 }
-
-const PAGE_LOAD_DISTRIBUTION_TITLE = i18n.translate(
-  'xpack.observabilityOverview.overview.ux.pageLoadDistribution.title',
-  {
-    defaultMessage: 'Page load distribution',
-  }
-);
