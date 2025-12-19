@@ -21,8 +21,8 @@ import {
   getAgentMarks,
   type AgentMark,
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
-import type { CriticalPathSegment } from '../../../../common/critical_path/types';
-import { getCriticalPath } from '../../../../common/critical_path/get_critical_path';
+import type { CriticalPathSegment } from './critical_path/types';
+import { getCriticalPath } from './critical_path/get_critical_path';
 import { groupBy } from './utils/group_by';
 
 export interface TraceWaterfallContextProps {

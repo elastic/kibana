@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CriticalPathSegment } from '../../../../common/critical_path/types';
+import type { CriticalPathSegment } from './critical_path/types';
 import { Bar, type BarSegment } from './bar';
 import { BarDetails } from './bar_details';
 import { TOGGLE_BUTTON_WIDTH, ToggleAccordionButton } from './toggle_accordion_button';

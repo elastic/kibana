@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IWaterfallSpanOrTransaction } from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import type { IWaterfallSpanOrTransaction } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 /**
  * Minimal interface that any item must implement to be used in critical path calculations
