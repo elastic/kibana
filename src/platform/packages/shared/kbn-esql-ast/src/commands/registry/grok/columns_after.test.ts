@@ -78,6 +78,28 @@ describe('GROK', () => {
           type: 'keyword',
         },
       ]);
+
+      const pattern7 = '^(?<url.domain>http?s://[^/]+/)';
+      const columns7 = extractSemanticsFromGrok(pattern7);
+      expect(columns7).toStrictEqual([
+        {
+          name: 'url.domain',
+          type: 'keyword',
+        },
+      ]);
+
+      const pattern8 = '%{IP:client.ip} %{WORD:request.method}';
+      const columns8 = extractSemanticsFromGrok(pattern8);
+      expect(columns8).toStrictEqual([
+        {
+          name: 'client.ip',
+          type: 'keyword',
+        },
+        {
+          name: 'request.method',
+          type: 'keyword',
+        },
+      ]);
     });
 
     describe('GROK column type extraction', () => {
