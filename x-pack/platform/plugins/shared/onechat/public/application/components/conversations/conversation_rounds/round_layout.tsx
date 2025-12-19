@@ -67,12 +67,18 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   useEffect(() => {
     // Pending rounds and error rounds should have a min-height to match the scroll container height
-    if ((isCurrentRound && isResponseLoading) || isErrorCurrentRound) {
+    if ((isCurrentRound && isResponseLoading) || isErrorCurrentRound || isAwaitingPrompt) {
       setRoundContainerMinHeight(scrollContainerHeight);
     } else {
       setRoundContainerMinHeight(0);
     }
-  }, [isCurrentRound, isResponseLoading, scrollContainerHeight, isErrorCurrentRound]);
+  }, [
+    isCurrentRound,
+    isResponseLoading,
+    scrollContainerHeight,
+    isErrorCurrentRound,
+    isAwaitingPrompt,
+  ]);
 
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
