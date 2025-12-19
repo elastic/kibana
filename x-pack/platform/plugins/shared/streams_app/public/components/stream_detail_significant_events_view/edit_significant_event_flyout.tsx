@@ -11,6 +11,7 @@ import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
@@ -29,6 +30,7 @@ export const EditSignificantEventFlyout = ({
   refresh,
   onFeatureIdentificationClick,
   generateOnMount,
+  aiFeatures,
 }: {
   refreshDefinition: () => void;
   refresh: () => void;
@@ -43,6 +45,7 @@ export const EditSignificantEventFlyout = ({
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onFeatureIdentificationClick: () => void;
   generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }) => {
   const {
     core: { notifications },
@@ -65,6 +68,7 @@ export const EditSignificantEventFlyout = ({
       onFeatureIdentificationClick={onFeatureIdentificationClick}
       definition={definition}
       query={queryToEdit}
+      aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
         const streamType = getStreamTypeFromDefinition(definition.stream);
 
