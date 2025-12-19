@@ -54,16 +54,19 @@ export const App = (props: {
       type: 'esql',
       query: 'from kibana_sample_data_logs | stats totalBytes = sum(bytes)',
     },
-    metric: {
-      operation: 'value',
-      column: 'totalBytes',
-      label: 'Total Bytes Value',
-      fit: false,
-      alignments: {
-        value: 'left',
-        labels: 'left',
+    metrics: [
+      {
+        type: 'primary',
+        operation: 'value',
+        column: 'totalBytes',
+        label: 'Total Bytes Value',
+        fit: false,
+        alignments: {
+          value: 'left',
+          labels: 'left',
+        },
       },
-    },
+    ],
     ignore_global_filters: true,
     sampling: 1,
   });

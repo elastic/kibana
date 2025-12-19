@@ -147,13 +147,16 @@ describe('buildDatasourceStates', () => {
           type: 'esql',
           query: 'from test | limit 10',
         },
-        metric: {
-          operation: 'value',
-          label: 'test',
-          column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
-        },
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'value',
+            label: 'test',
+            column: 'test',
+            fit: false,
+            alignments: { labels: 'left', value: 'left' },
+          },
+        ],
         sampling: 1,
         ignore_global_filters: false,
       },
@@ -415,13 +418,16 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
       filters: [
@@ -447,13 +453,16 @@ describe('filtersAndQueryToLensState', () => {
         type: 'esql',
         query: 'from test | limit 10',
       },
-      metric: {
-        operation: 'value',
-        label: 'test',
-        column: 'test',
-        fit: false,
-        alignments: { labels: 'left', value: 'left' },
-      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'value',
+          label: 'test',
+          column: 'test',
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      ],
       sampling: 1,
       ignore_global_filters: false,
     };
