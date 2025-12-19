@@ -83,7 +83,10 @@ export function Settings({
     () => Streams.ClassicStream.GetResponse.is(definition),
     [definition]
   );
-  const [settings, setSettings] = useState<Record<string, Setting>>({});
+  const [settings, setSettings] = useState<Record<string, Setting>>(() =>
+    toStringValues(definition.stream.ingest.settings, definition.effective_settings)
+  );
+
   const hasChanges = useMemo(() => {
     const keys = [...new Set([...Object.keys(originalSettings), ...Object.keys(settings)])];
     return keys.some((key) => originalSettings[key]?.value !== settings[key]?.value);
