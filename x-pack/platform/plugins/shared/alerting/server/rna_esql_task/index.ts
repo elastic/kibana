@@ -39,7 +39,6 @@ export function initializeEsqlRulesTaskDefinition(
         consumer: schema.maybe(schema.string()),
       }),
       createTaskRunner: createEsqlRulesTaskRunner({ logger, coreStartServices, config }),
-      // what should we do about cost? since it depends on the ES|QL query
     },
   });
 }
