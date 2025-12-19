@@ -19,7 +19,7 @@ import {
   FilterStateStore,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import type { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type {
   IKbnUrlStateStorage,
   INullableBaseStateContainer,
@@ -46,7 +46,7 @@ import {
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import type { DiscoverInternalState, InternalStateStore, TabActionInjector } from './redux';
-import { internalStateActions, selectTab } from './redux';
+import { fromSavedSearchToSavedObjectTab, internalStateActions, selectTab } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
@@ -87,6 +87,10 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
+  /*
+   * Get updated AppState when given a saved search
+   */
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
 export interface DiscoverAppState {
@@ -225,6 +229,19 @@ export const getDiscoverAppStateContainer = ({
 
   const hasChanged = () => {
     return !isEqualState(initialState, enhancedAppContainer.getState());
+  };
+
+  const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
+    return getInitialState({
+      initialUrlState: undefined,
+      persistedTab: fromSavedSearchToSavedObjectTab({
+        tab: selectTab(internalState.getState(), tabId),
+        savedSearch: newSavedSearch,
+        services,
+      }),
+      dataView: newSavedSearch.searchSource.getField('index'),
+      services,
+    });
   };
 
   const resetToState = (state: DiscoverAppState) => {
@@ -397,6 +414,7 @@ export const getDiscoverAppStateContainer = ({
     updateUrlWithCurrentState,
     replaceUrlState,
     update,
+    getAppStateFromSavedSearch,
   };
 };
 
