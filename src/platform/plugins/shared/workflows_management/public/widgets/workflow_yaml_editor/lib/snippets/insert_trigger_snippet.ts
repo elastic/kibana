@@ -8,7 +8,7 @@
  */
 
 import { type Document, isNode, parseDocument, type Range } from 'yaml';
-import { isSeq } from 'yaml';
+import { isMap, isPair, isScalar, isSeq } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { TriggerType } from '@kbn/workflows';
 import { generateTriggerSnippet } from './generate_trigger_snippet';
@@ -53,6 +53,154 @@ function createReplacementRange(model: monaco.editor.ITextModel, lineNumber: num
   return new monaco.Range(lineNumber, 1, lineNumber, lineEndColumn);
 }
 
+/**
+ * Checks if a line content represents an empty item
+ * An empty item is one that:
+ * - Has only trailing spaces after the dash or only the dash
+ * - Is null, undefined, or empty scalar
+ * - Is an empty map (no items or no 'type' field)
+ * - Has only comments (no actual content)
+ */
+function isLineContentEmpty(lineContent: string): boolean {
+  const trimmed = lineContent.trim();
+  
+  if (!trimmed) {
+    return true;
+  }
+  
+  const dashOnlyPattern = /^\s*-\s*(#.*)?$/;
+  if (dashOnlyPattern.test(trimmed)) {
+    return true;
+  }
+  
+  if (trimmed.startsWith('#')) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Checks if a YAML node represents an empty item
+ * An empty item is one that doesn't have a 'type' field, which is required for triggers
+ * This function checks the YAML structure, while isLineContentEmpty checks the raw line content
+ */
+function isEmptyItem(item: unknown, model?: monaco.editor.ITextModel): boolean {
+  if (!item) {
+    return true;
+  }
+  
+  if (model && isNode(item) && item.range) {
+    const itemRange = getMonacoRangeFromYamlRange(model, item.range as Range);
+    if (itemRange) {
+      const lineContent = model.getLineContent(itemRange.startLineNumber);
+      if (isLineContentEmpty(lineContent)) {
+        return true;
+      }
+    }
+  }
+  
+  if (isNode(item) && isMap(item)) {
+    if (!('items' in item) || !item.items || item.items.length === 0) {
+      return true;
+    }
+    const hasTypeField = item.items.some(
+      (pairItem) => isPair(pairItem) && isScalar(pairItem.key) && pairItem.key.value === 'type'
+    );
+    return !hasTypeField;
+  }
+  
+  if (isNode(item) && isScalar(item)) {
+    const value = item.value;
+    return value === null || value === undefined || value === '';
+  }
+  
+  return false;
+}
+
+/**
+ * Finds the first empty item in the triggers sequence
+ * This handles all cases: empty dashes, trailing spaces, comments, etc.
+ * Returns null if no empty items are found
+ */
+function findFirstEmptyItem(
+  model: monaco.editor.ITextModel,
+  triggersPair: ReturnType<typeof getTriggersPair>
+): { lineNumber: number; indentLevel: number } | null {
+  if (!triggersPair) {
+    return null;
+  }
+
+  if (!triggersPair.value || !isSeq(triggersPair.value)) {
+    return null;
+  }
+
+  const sequence = triggersPair.value;
+  if (!sequence.items || sequence.items.length === 0) {
+    return null;
+  }
+
+  for (const item of sequence.items) {
+    if (isEmptyItem(item, model)) {
+      if (isNode(item) && item.range) {
+        const itemRange = getMonacoRangeFromYamlRange(model, item.range as Range);
+        if (itemRange) {
+          const lineContent = model.getLineContent(itemRange.startLineNumber);
+          
+          if (isLineContentEmpty(lineContent)) {
+            const indentMatch = lineContent.match(/^(\s*)/);
+            const indentLevel = indentMatch ? indentMatch[1].length : 2;
+            return { lineNumber: itemRange.startLineNumber, indentLevel };
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Gets the line number after the last non-empty line in the triggers section
+ * This handles cases where triggers section exists but is empty or has only comments
+ */
+function getInsertLineAfterTriggersKey(
+  model: monaco.editor.ITextModel,
+  triggersKeyRange: monaco.Range,
+  expectedIndent: number
+): number {
+  let lineNumber = triggersKeyRange.endLineNumber;
+  const maxLines = model.getLineCount();
+  let lastCommentOrEmptyLine = lineNumber;
+  const triggersIndent = triggersKeyRange.startColumn - 1;
+
+  while (lineNumber < maxLines) {
+    lineNumber++;
+    const lineContent = model.getLineContent(lineNumber);
+    const trimmed = lineContent.trim();
+    const indentMatch = lineContent.match(/^(\s*)/);
+    const lineIndent = indentMatch ? indentMatch[1].length : 0;
+
+    if (trimmed && lineIndent <= triggersIndent) {
+      return lineNumber;
+    }
+
+    if (trimmed && !trimmed.startsWith('#')) {
+      return lineNumber;
+    }
+
+    if (!trimmed || trimmed.startsWith('#')) {
+      if (lineIndent > triggersIndent || !trimmed) {
+        lastCommentOrEmptyLine = lineNumber;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return lastCommentOrEmptyLine + 1;
+}
+
 // Algorithm:
 // 1. Check if triggers section exists (even if empty or has empty items)
 // 2. If triggers section exists, find the next line after the last trigger node range
@@ -91,42 +239,23 @@ export function insertTriggerSnippet(
       triggersPair
     );
 
-    // If triggers section is empty (no triggers with type field), replace the empty content
-    if (
-      triggerNodes.length === 0 &&
-      triggersPair.value &&
-      isSeq(triggersPair.value) &&
-      triggersPair.value.items.length > 0
-    ) {
-      const lastItem = triggersPair.value.items[triggersPair.value.items.length - 1];
-      let emptyItemLineNumber: number | null = null;
-
-      if (isNode(lastItem) && lastItem.range) {
-        const lastItemRange = getMonacoRangeFromYamlRange(model, lastItem.range as Range);
-        if (lastItemRange) {
-          emptyItemLineNumber = lastItemRange.startLineNumber;
-        }
-      }
-
-      if (emptyItemLineNumber !== null) {
-        replaceRange = createReplacementRange(model, emptyItemLineNumber);
-        const lineContent = model.getLineContent(emptyItemLineNumber);
-        const indentMatch = lineContent.match(/^(\s*)/);
-        indentLevel = indentMatch ? indentMatch[1].length : expectedIndent;
-      }
+    // First, check if there are any empty items to replace
+    const firstEmptyItem = findFirstEmptyItem(model, triggersPair);
+    if (firstEmptyItem) {
+      replaceRange = createReplacementRange(model, firstEmptyItem.lineNumber);
+      indentLevel = firstEmptyItem.indentLevel;
     } else if (triggerNodes.length > 0) {
       const lastTriggerRange = getMonacoRangeFromYamlNode(
         model,
         triggerNodes[triggerNodes.length - 1].node
       );
       if (lastTriggerRange) {
-        // add a newline after the last trigger
         insertAtLineNumber = lastTriggerRange.endLineNumber;
         indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
       }
     } else if (triggersKeyRange) {
-      // Triggers section exists but is completely empty, insert after triggers:
-      insertAtLineNumber = triggersKeyRange.endLineNumber + 1;
+       // Triggers section exists but is completely empty, insert after triggers:
+      insertAtLineNumber = getInsertLineAfterTriggersKey(model, triggersKeyRange, expectedIndent);
       indentLevel = expectedIndent;
     }
   }
