@@ -690,6 +690,7 @@ src/platform/packages/shared/shared-ux/file/image/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/mocks @elastic/appex-sharedux
