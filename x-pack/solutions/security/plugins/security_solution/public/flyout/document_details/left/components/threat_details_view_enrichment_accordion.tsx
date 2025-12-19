@@ -176,6 +176,7 @@ export const EnrichmentAccordion = memo(({ enrichment, index }: EnrichmentAccord
           height: ${euiTheme.size.xl};
           margin-bottom: ${euiTheme.size.s};
           padding-left: ${euiTheme.size.s};
+        }
       `}
     >
       <EuiInMemoryTable
