@@ -14,15 +14,15 @@ import type {
   StaticToolRegistration,
   ToolHandlerReturn,
 } from '@kbn/onechat-server';
-import type { CoreSetup, Logger, KibanaRequest } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_HOSTS_TOOL_ID = 'observability.get_hosts';
 
@@ -104,51 +104,22 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
       { request }
     ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
       try {
-        const startMs = parseDatemath(start);
-        const endMs = parseDatemath(end, { roundUp: true });
-
-        if (!startMs || !endMs) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: 'Invalid date range provided.',
-                },
-              },
-            ],
-          };
-        }
-
-        const result = await dataRegistry.getData('infraHosts', {
-          request: request as KibanaRequest,
-          from: new Date(startMs).toISOString(),
-          to: new Date(endMs).toISOString(),
+        const { hosts, total } = await getToolHandler({
+          request,
+          dataRegistry,
+          start,
+          end,
           limit,
           kqlFilter,
         });
-
-        if (!result) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message:
-                    'Host data is not available. The infra plugin may not be installed or configured.',
-                },
-              },
-            ],
-          };
-        }
 
         return {
           results: [
             {
               type: ToolResultType.other as const,
               data: {
-                hosts: result.nodes,
-                total: result.nodes.length,
+                hosts,
+                total,
               },
             },
           ],
