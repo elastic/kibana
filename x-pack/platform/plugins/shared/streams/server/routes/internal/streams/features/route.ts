@@ -17,10 +17,11 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { generateStreamDescription } from '@kbn/streams-ai';
+import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
-import { from, map } from 'rxjs';
-import { sumTokens } from '@kbn/streams-ai/src/helpers/sum_tokens';
+import { from, map, catchError } from 'rxjs';
+import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
+import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
@@ -109,9 +110,9 @@ export const deleteFeatureRoute = createServerRoute({
 
     const { name, featureName, featureType } = params.path;
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
     }
 
@@ -160,9 +161,9 @@ export const upsertFeatureRoute = createServerRoute({
       throw new StatusError(`Feature type and name must match the path parameters`, 400);
     }
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
@@ -223,7 +224,7 @@ export const bulkFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -267,9 +268,9 @@ export const bulkFeaturesRoute = createServerRoute({
       body: { operations },
     } = params;
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
@@ -316,6 +317,7 @@ export const identifyFeaturesRoute = createServerRoute({
       uiSettingsClient,
       streamsClient,
       inferenceClient,
+      soClient,
     } = await getScopedClients({
       request,
     });
@@ -327,11 +329,14 @@ export const identifyFeaturesRoute = createServerRoute({
       query: { connectorId, from: start, to: end },
     } = params;
 
-    const { write } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
 
-    if (!write) {
+    if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
+
+    // Get connector info for error enrichment
+    const connector = await inferenceClient.getConnectorById(connectorId);
 
     const [{ hits }, stream] = await Promise.all([
       featureClient.getFeatures(name),
@@ -343,6 +348,13 @@ export const identifyFeaturesRoute = createServerRoute({
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
     const signal = getRequestAbortSignal(request);
     const featureRegistry = getDefaultFeatureRegistry();
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    const { featurePromptOverride, descriptionPromptOverride } =
+      await promptsConfigService.getPrompt();
 
     return from(
       featureRegistry.identifyFeatures({
@@ -354,14 +366,19 @@ export const identifyFeaturesRoute = createServerRoute({
         stream,
         features: hits,
         signal,
+        featurePromptOverride,
+        descriptionPromptOverride,
       })
     ).pipe(
       map(({ features, tokensUsed }) => {
         return {
-          type: 'identified_features',
+          type: 'identified_features' as const,
           features,
           tokensUsed,
         };
+      }),
+      catchError((error: Error) => {
+        throw createConnectorSSEError(error, connector);
       })
     );
   },
@@ -394,10 +411,16 @@ export const describeStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Observable<StreamDescriptionEvent>> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+      streamsClient,
+      inferenceClient,
+      soClient,
+    } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -414,7 +437,17 @@ export const describeStreamRoute = createServerRoute({
       );
     }
 
+    // Get connector info for error enrichment
+    const connector = await inferenceClient.getConnectorById(connectorId);
+
     const stream = await streamsClient.getStream(name);
+
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
 
     return from(
       generateStreamDescription({
@@ -425,11 +458,12 @@ export const describeStreamRoute = createServerRoute({
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
         logger: logger.get('stream_description'),
+        systemPromptOverride: descriptionPromptOverride,
       })
     ).pipe(
       map((result) => {
         return {
-          type: 'stream_description',
+          type: 'stream_description' as const,
           description: result.description,
           tokensUsed: sumTokens(
             {
@@ -441,6 +475,9 @@ export const describeStreamRoute = createServerRoute({
             result.tokensUsed
           ),
         };
+      }),
+      catchError((error: Error) => {
+        throw createConnectorSSEError(error, connector);
       })
     );
   },

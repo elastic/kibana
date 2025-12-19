@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*", "public/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/onechat-common",
@@ -20,7 +20,7 @@
     "@kbn/datemath",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/rule-registry-plugin",
-    "@kbn/observability-plugin",
+    "@kbn/observability-shared-plugin",
     "@kbn/core-http-server",
     "@kbn/data-views-plugin",
     "@kbn/metrics-data-access-plugin",
@@ -30,10 +30,20 @@
     "@kbn/inference-plugin",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-utils",
-    "@kbn/inference-plugin",
+    "@kbn/std",
+    "@kbn/spaces-plugin",
+    "@kbn/management-settings-ids",
     "@kbn/logging",
-    "@kbn/inference-common",
-    "@kbn/management-settings-ids"
+    "@kbn/ai-assistant-common",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/discover-shared-plugin",
+    "@kbn/i18n",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
+    "@kbn/observability-nav-icons",
+    "@kbn/server-route-repository-client",
+    "@kbn/onechat-browser"
   ],
   "exclude": ["target/**/*"]
 }

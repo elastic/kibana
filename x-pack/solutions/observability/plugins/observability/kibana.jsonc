@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": [
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": ["@elastic/observability-ui"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "observability",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "alerting",
       "charts",
@@ -45,9 +40,10 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams",
+      "streams"
     ],
     "optionalPlugins": [
+      "observabilityAgentBuilder",
       "onechat",
       "aiops",
       "cases",
@@ -59,7 +55,7 @@
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate",
+      "investigate"
     ],
     "requiredBundles": [
       "aiops",
@@ -71,10 +67,9 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "observabilityAgentBuilder"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

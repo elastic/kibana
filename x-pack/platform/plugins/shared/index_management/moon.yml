@@ -73,6 +73,7 @@ dependsOn:
   - '@kbn/failure-store-modal'
   - '@kbn/react-query'
   - '@kbn/scout'
+  - '@kbn/deeplinks-management'
 tags:
   - plugin
   - prod
