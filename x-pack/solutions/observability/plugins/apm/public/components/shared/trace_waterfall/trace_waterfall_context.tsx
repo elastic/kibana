@@ -40,7 +40,7 @@ export interface TraceWaterfallContextProps {
   toggleAllAccordions: () => void;
   showCriticalPath: boolean;
   setShowCriticalPath: (value: boolean) => void;
-  showCriticalPathControl: boolean;
+  showCriticalPathControl?: boolean;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   highlightedTraceId?: string;
