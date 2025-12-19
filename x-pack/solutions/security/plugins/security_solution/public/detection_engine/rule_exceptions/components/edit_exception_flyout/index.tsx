@@ -68,7 +68,6 @@ import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/tran
 import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
-import * as headerI18n from '../flyout_components/header/translations';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 interface EditExceptionFlyoutProps {
@@ -112,7 +111,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
-  const { hasAlertsUpdate } = useAlertsPrivileges();
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   const [
     {
@@ -482,7 +481,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
             />
           </>
         )}
-        {hasAlertsUpdate && showAlertCloseOptions && (
+        {hasAlertsAll && showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions

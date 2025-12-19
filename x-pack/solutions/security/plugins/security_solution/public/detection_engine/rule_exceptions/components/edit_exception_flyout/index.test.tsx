@@ -68,7 +68,7 @@ describe('When the edit exception modal is opened', () => {
     });
     mockUseAddOrUpdateException.mockImplementation(() => [false, jest.fn()]);
     mockUseAlertsPrivileges.mockReturnValue({
-      hasAlertsUpdate: true,
+      hasAlertsAll: true,
       hasAlertsRead: true,
     });
     mockUseFetchIndex.mockImplementation(() => [
@@ -768,9 +768,9 @@ describe('When the edit exception modal is opened', () => {
   });
 
   describe('when user does not have alerts privileges', () => {
-    it('should NOT render bulk close alerts section when hasAlertsUpdate is false', async () => {
+    it('should NOT render bulk close alerts section when hasAlertsAll is false', async () => {
       mockUseAlertsPrivileges.mockReturnValue({
-        hasAlertsUpdate: false,
+        hasAlertsAll: false,
         hasAlertsRead: false,
       });
 
