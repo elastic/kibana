@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
-import type { ESQLFunction, ESQLMapEntry, FunctionSubtype } from '@kbn/esql-ast/src/types';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
+import type { ESQLFunction, ESQLMapEntry, FunctionSubtype } from '@kbn/esql-language/src/types';
 import type { CommonDatePreset } from '../../../../types/formats';
 import type { DateProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';

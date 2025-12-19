@@ -14,6 +14,7 @@ import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../common';
 const aiInsightAttachmentDataSchema = z.object({
   context: z.string(),
   summary: z.string(),
+  attachmentLabel: z.string().optional(),
 });
 
 type AiInsightAttachmentData = z.infer<typeof aiInsightAttachmentDataSchema>;
