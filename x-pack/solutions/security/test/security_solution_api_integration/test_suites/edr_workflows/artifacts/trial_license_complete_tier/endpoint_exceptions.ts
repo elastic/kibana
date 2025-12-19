@@ -220,8 +220,8 @@ export default function ({ getService }: FtrProviderContext) {
         return Buffer.from(
           `
   {"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${
-                      listInfo!.description
-                    }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
+    listInfo!.description
+  }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
             listInfo!.name
           }","namespace_type":"agnostic","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}
   ${JSON.stringify(createItem())}
