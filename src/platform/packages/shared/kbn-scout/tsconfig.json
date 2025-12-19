@@ -28,11 +28,11 @@
     "@kbn/test-subj-selector",
     "@kbn/scout-info",
     "@kbn/scout-reporting",
-    "@kbn/apm-synthtrace",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/projects-solutions-groups",
     "@kbn/zod",
     "@kbn/axe-config",
     "@kbn/core-http-common",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/projects-solutions-groups",
   ]
 }

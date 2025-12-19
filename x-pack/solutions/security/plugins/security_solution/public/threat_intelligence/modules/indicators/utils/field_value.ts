@@ -12,6 +12,14 @@ import {
   RawIndicatorFieldId,
 } from '../../../../../common/threat_intelligence/types/indicator';
 
+export type NormalizedValue = string | string[] | null;
+
+const normalize = (v: string | string[] | null): string | null => {
+  if (v == null) return null;
+  if (Array.isArray(v)) return v.length > 0 ? v[0] : null;
+  return v;
+};
+
 /**
  * Retrieves a field/value pair from an Indicator
  * @param data the {@link Indicator} to extract the value for the field
@@ -22,16 +30,18 @@ export const getIndicatorFieldAndValue = (
   data: Indicator,
   field: string
 ): { key: string; value: string | null } => {
-  const value = unwrapValue(data, field as RawIndicatorFieldId);
-  const key =
-    field === RawIndicatorFieldId.Name
-      ? (unwrapValue(data, RawIndicatorFieldId.NameOrigin) as string)
-      : field;
+  const rawValue = unwrapValue(data, field as RawIndicatorFieldId);
+  const value = normalize(rawValue);
 
-  return {
-    key,
-    value,
-  };
+  let key = field;
+  if (field === RawIndicatorFieldId.Name) {
+    const nameOrigin = normalize(unwrapValue(data, RawIndicatorFieldId.NameOrigin));
+    if (nameOrigin) {
+      key = nameOrigin;
+    }
+  }
+
+  return { key, value };
 };
 
 /**
@@ -40,5 +50,19 @@ export const getIndicatorFieldAndValue = (
  * @param value Indicator string|null value for the field
  * @returns true if correct, false if not
  */
-export const fieldAndValueValid = (field: string | null, value: string | null): boolean =>
-  !!value && value !== EMPTY_VALUE && !!field;
+export const fieldAndValueValid = (field: string | null, value: NormalizedValue): boolean => {
+  if (!field) return false;
+  if (value == null) return false;
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return false; // reject '' or whitespace
+    return trimmed !== EMPTY_VALUE;
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((v) => typeof v === 'string' && v.trim() && v !== EMPTY_VALUE);
+  }
+
+  return false;
+};
