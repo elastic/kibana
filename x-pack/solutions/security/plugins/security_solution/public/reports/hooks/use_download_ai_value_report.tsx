@@ -11,11 +11,12 @@ import { SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE } from '@kbn/management-se
 import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import type { AIValueReportParams } from '../../../common/locators/ai_value_report/locator';
+import type { TimeRange } from '../../common/store/inputs/model';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
 interface UseDownloadAIValueReportParams {
   anchorElement: HTMLElement | null;
-  timeRange: AIValueReportParams['timeRange'];
+  timeRange: TimeRange;
 }
 
 export const useDownloadAIValueReport = ({
@@ -27,13 +28,21 @@ export const useDownloadAIValueReport = ({
   const aiValueExportContext = useAIValueExportContext();
   const buildForwardedState = aiValueExportContext?.buildForwardedState;
 
+  const forwardedTimeRange: AIValueReportParams['timeRange'] = useMemo(() => {
+    if (timeRange.kind === 'relative') {
+      return { from: timeRange.fromStr, to: timeRange.toStr };
+    }
+
+    return { from: timeRange.from, to: timeRange.to };
+  }, [timeRange]);
+
   const forwardedState = useMemo(() => {
     if (!buildForwardedState) {
       return undefined;
     }
 
-    return buildForwardedState({ timeRange });
-  }, [timeRange, buildForwardedState]);
+    return buildForwardedState({ timeRange: forwardedTimeRange });
+  }, [forwardedTimeRange, buildForwardedState]);
 
   const isExportEnabled =
     forwardedState !== undefined &&

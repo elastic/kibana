@@ -17,14 +17,14 @@ export const PAGE_TITLE = i18n.translate(
 export const UPGRADE_CTA = i18n.translate(
   'xpack.securitySolutionEss.upselling.pages.aiValue.upgradeCTA',
   {
-    defaultMessage: 'See AI value delivered with reporting',
+    defaultMessage: "Measure the Time and Cost Savings of Elastic's AI Features",
   }
 );
 
 export const AVAILABILITY_MESSAGE = i18n.translate(
   'xpack.securitySolutionEss.upselling.pages.aiValue.availabilityMessage',
   {
-    defaultMessage: 'Your license does not support Value reports.',
+    defaultMessage: 'Your license does not include Value reports.',
   }
 );
 

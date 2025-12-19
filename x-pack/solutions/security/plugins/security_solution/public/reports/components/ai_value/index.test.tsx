@@ -223,6 +223,39 @@ describe('AIValueMetrics', () => {
     );
   });
 
+  describe('when exporting with a relative time range', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    beforeEach(() => {
+      jest.setSystemTime(new Date('2025-12-19T00:00:00.000Z'));
+      useAIValueExportContextMock.mockReturnValue({
+        forwardedState: {
+          timeRange: {
+            from: 'now-7d',
+            to: 'now',
+          },
+        },
+      });
+    });
+
+    it('returns an absolute time range for useValueMetrics', () => {
+      render(<AIValueMetrics {...defaultProps} />);
+
+      expect(mockUseValueMetrics).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: '2025-12-12T00:00:00.000Z',
+          to: '2025-12-19T00:00:00.000Z',
+        })
+      );
+    });
+  });
+
   it('should set the report input in the export context when the data is loaded', () => {
     const setReportInputMock = jest.fn();
     useAIValueExportContextMock.mockReturnValue({
