@@ -18,7 +18,7 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     await browserAuth.loginAsViewer();
   });
 
-  test('shows span links count on producer-internal-only Span A', async ({
+  test('shows span links for producer-internal-only Span A', async ({
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
@@ -36,45 +36,11 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(page.getByText('2 incoming')).toBeVisible();
       await expect(page.getByText('0 outgoing')).toBeVisible();
     });
-  });
 
-  test('shows span links count on producer-external-only Span B', async ({
-    page,
-    pageObjects: { transactionDetailsPage },
-  }) => {
-    await transactionDetailsPage.gotoServiceInventory('zzz-producer-external-only', timeRange);
-    await page.getByText('Transaction B').click();
-    await page.waitForLoadingIndicatorHidden();
-
-    await test.step('shows span links badge with correct count', async () => {
-      await expect(page.getByText('2 Span links')).toBeVisible();
-    });
-
-    await test.step('shows tooltip with incoming/outgoing links', async () => {
-      await page.getByRole('button', { name: 'Open span links details' }).hover();
-      await expect(page.getByText('2 Span links found')).toBeVisible();
-      await expect(page.getByText('1 incoming')).toBeVisible();
-      await expect(page.getByText('1 outgoing')).toBeVisible();
-    });
-  });
-
-  test('shows span links flyout details on producer-internal-only Span A', async ({
-    page,
-    pageObjects: { transactionDetailsPage },
-  }) => {
-    await transactionDetailsPage.gotoServiceInventory('zzz-producer-internal-only', timeRange);
-    await page.getByText('Transaction A').click();
-    await page.waitForLoadingIndicatorHidden();
-
-    await test.step('opens span flyout', async () => {
+    await test.step('opens span flyout and shows span links details', async () => {
       await page.getByText('Span A').click();
-    });
-
-    await test.step('clicks span links tab', async () => {
       await transactionDetailsPage.getSpanLinksTab().click();
-    });
 
-    await test.step('shows linked services and transactions', async () => {
       const producerConsumerLink = page.getByRole('link', { name: 'zzz-producer-consumer' });
       await expect(producerConsumerLink).toBeVisible();
       await expect(producerConsumerLink).toHaveAttribute(
@@ -94,11 +60,46 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
 
       const transactionDLink = page.getByRole('link', { name: 'Transaction D' });
       await expect(transactionDLink).toBeVisible();
-    });
 
-    await test.step('shows outgoing links select is empty', async () => {
       await expect(transactionDetailsPage.getSpanLinkTypeSelect()).toContainText(
         'Outgoing links (0)'
+      );
+    });
+  });
+
+  test('shows span links for producer-external-only Span B', async ({
+    page,
+    pageObjects: { transactionDetailsPage },
+  }) => {
+    await transactionDetailsPage.gotoServiceInventory('zzz-producer-external-only', timeRange);
+    await page.getByText('Transaction B').click();
+    await page.waitForLoadingIndicatorHidden();
+
+    await test.step('shows span links badge with correct count', async () => {
+      await expect(page.getByText('2 Span links')).toBeVisible();
+    });
+
+    await test.step('shows tooltip with incoming/outgoing links', async () => {
+      await page.getByRole('button', { name: 'Open span links details' }).hover();
+      await expect(page.getByText('2 Span links found')).toBeVisible();
+      await expect(page.getByText('1 incoming')).toBeVisible();
+      await expect(page.getByText('1 outgoing')).toBeVisible();
+    });
+
+    await test.step('opens span flyout and shows span links details', async () => {
+      await page.locator('button').filter({ hasText: 'Span B100 ms' }).click();
+      await transactionDetailsPage.getSpanLinksTab().click();
+
+      const consumerMultipleLink = page.getByRole('link', { name: 'zzz-consumer-multiple' });
+      await expect(consumerMultipleLink).toBeVisible();
+
+      const spanELink = page.getByRole('link', { name: 'Span E' });
+      await expect(spanELink).toBeVisible();
+
+      await transactionDetailsPage.getSpanLinkTypeSelect().selectOption('Outgoing links (1)');
+      // External links may not have service names, so we just verify the select shows the count
+      await expect(transactionDetailsPage.getSpanLinkTypeSelect()).toContainText(
+        'Outgoing links (1)'
       );
     });
   });
@@ -111,15 +112,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByText('Transaction C').click();
     await page.waitForLoadingIndicatorHidden();
 
-    await test.step('opens transaction flyout', async () => {
+    await test.step('opens transaction flyout and shows span links', async () => {
       await page.getByRole('button', { name: '1 View details for' }).click();
-    });
-
-    await test.step('clicks span links tab', async () => {
       await transactionDetailsPage.getSpanLinksTab().click();
-    });
 
-    await test.step('shows incoming linked services', async () => {
       const consumerMultipleLink = page.getByRole('link', { name: 'zzz-consumer-multiple' });
       await expect(consumerMultipleLink).toBeVisible();
 
@@ -146,15 +142,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByText('Transaction D').click();
     await page.waitForLoadingIndicatorHidden();
 
-    await test.step('opens transaction flyout', async () => {
+    await test.step('opens transaction flyout and shows span links', async () => {
       await page.getByRole('button', { name: '1 View details for' }).click();
-    });
-
-    await test.step('clicks span links tab', async () => {
       await transactionDetailsPage.getSpanLinksTab().click();
-    });
 
-    await test.step('shows outgoing linked services', async () => {
       const producerConsumerLink = page.getByRole('link', { name: 'zzz-producer-consumer' });
       await expect(producerConsumerLink).toBeVisible();
 
@@ -166,44 +157,9 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
 
       const spanALink = page.getByRole('link', { name: 'Span A' });
       await expect(spanALink).toBeVisible();
-    });
 
-    await test.step('shows incoming links select is empty', async () => {
       await expect(transactionDetailsPage.getSpanLinkTypeSelect()).toContainText(
         'Incoming links (0)'
-      );
-    });
-  });
-
-  test('shows span links flyout details on producer-external-only Span B', async ({
-    page,
-    pageObjects: { transactionDetailsPage },
-  }) => {
-    await transactionDetailsPage.gotoServiceInventory('zzz-producer-external-only', timeRange);
-    await page.getByText('Transaction B').click();
-    await page.waitForLoadingIndicatorHidden();
-
-    await test.step('opens span flyout', async () => {
-      await page.locator('button').filter({ hasText: 'Span B100 ms' }).click();
-    });
-
-    await test.step('clicks span links tab', async () => {
-      await transactionDetailsPage.getSpanLinksTab().click();
-    });
-
-    await test.step('shows incoming linked services', async () => {
-      const consumerMultipleLink = page.getByRole('link', { name: 'zzz-consumer-multiple' });
-      await expect(consumerMultipleLink).toBeVisible();
-
-      const spanELink = page.getByRole('link', { name: 'Span E' });
-      await expect(spanELink).toBeVisible();
-    });
-
-    await test.step('switches to outgoing links and shows external link', async () => {
-      await transactionDetailsPage.getSpanLinkTypeSelect().selectOption('Outgoing links (1)');
-      // External links may not have service names, so we just verify the select shows the count
-      await expect(transactionDetailsPage.getSpanLinkTypeSelect()).toContainText(
-        'Outgoing links (1)'
       );
     });
   });
@@ -216,15 +172,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByText('Transaction D').click();
     await page.waitForLoadingIndicatorHidden();
 
-    await test.step('opens span flyout', async () => {
+    await test.step('opens span flyout and shows span links', async () => {
       await page.getByText('Span E').click();
-    });
-
-    await test.step('clicks span links tab', async () => {
       await transactionDetailsPage.getSpanLinksTab().click();
-    });
 
-    await test.step('shows incoming links select is empty', async () => {
       await expect(transactionDetailsPage.getSpanLinkTypeSelect()).toContainText(
         'Incoming links (0)'
       );
