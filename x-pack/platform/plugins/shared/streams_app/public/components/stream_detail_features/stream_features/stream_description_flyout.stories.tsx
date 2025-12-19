@@ -49,7 +49,6 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
     <StreamFeaturesFlyout
       features={features}
       closeFlyout={() => {}}
-      isLoading={false}
       definition={{
         name: 'synthetics-http-default',
         description: '',
@@ -63,6 +62,8 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
         },
       }}
       setFeatures={() => {}}
+      onFeaturesAdded={() => {}}
+      onFeaturesDiscarded={() => {}}
     />
   );
 };
