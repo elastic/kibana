@@ -8,13 +8,18 @@
 import type { SetOptional } from 'type-fest';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 
-export interface ObservabilityRuleTypeRegistry {
-  getFormatter: (
-    ruleTypeId: string
-  ) =>
+// Using a generic with `any` default allows this interface to accept
+// registries with formatters that expect specific field types (like ParsedTechnicalFields)
+// without requiring type assertions at the call site.
+
+export interface ObservabilityRuleTypeRegistry<TFields = any> {
+  getFormatter: (ruleTypeId: string) =>
     | ((params: {
-        fields: Record<string, unknown>;
-        formatters: { asDuration: (value: unknown) => string; asPercent: (value: unknown) => string };
+        fields: TFields;
+        formatters: {
+          asDuration: (value: unknown) => string;
+          asPercent: (value: unknown) => string;
+        };
       }) => { link?: string; reason?: string; hasBasePath?: boolean })
     | undefined;
 }
@@ -84,7 +89,3 @@ export interface AlertsByGroupingAgg extends Record<string, unknown> {
     value: number;
   };
 }
-
-
-
-

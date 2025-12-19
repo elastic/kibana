@@ -13,14 +13,17 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table/types';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
+import {
+  AlertsTableCellValue,
+  type GetObservabilityAlertsTableProp,
+  type ObservabilityAlertsTableContext,
+} from '@kbn/observability-alerts-table';
 import { getRelatedColumns } from './get_related_columns';
 import { getBuildRelatedAlertsQuery } from '../../hooks/related_alerts/get_build_related_alerts_query';
 import type { AlertData } from '../../../../hooks/use_fetch_alert_detail';
-import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../../../..';
 import { observabilityFeatureId } from '../../../..';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useKibana } from '../../../../utils/kibana_react';
-import { AlertsTableCellValue } from '../../../../components/alerts_table/common/cell_value';
 import { casesFeatureIdV2 } from '../../../../../common';
 import { useFilterProximalParam } from '../../hooks/use_filter_proximal_param';
 import { RelatedAlertsTableFilter } from './related_alerts_table_filter';

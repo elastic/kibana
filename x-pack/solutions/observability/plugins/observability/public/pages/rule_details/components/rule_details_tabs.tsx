@@ -13,10 +13,12 @@ import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { BoolQuery, Filter } from '@kbn/es-query';
-import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table';
+import { ObservabilityAlertsTable, getColumns } from '@kbn/observability-alerts-table';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
+import { AlertsTableExpandedAlertView } from '../../../components/alerts_flyout/alerts_table_expanded_alert_view';
 import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_EXECUTION_TAB,
@@ -25,7 +27,6 @@ import {
   RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
 } from '../constants';
 import type { TabId } from '../rule_details';
-import { getColumns } from '../../../components/alerts_table/common/get_columns';
 
 interface Props {
   activeTabId: TabId;
@@ -69,6 +70,7 @@ export function RuleDetailsTabs({
     settings,
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
+  const { observabilityRuleTypeRegistry, config } = usePluginContext();
   const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
   const hasInitialControlLoadingFinished = useMemo(
     () => controlApi && Array.isArray(filterControls),
@@ -118,6 +120,9 @@ export function RuleDetailsTabs({
                   consumers={observabilityAlertFeatureIds}
                   query={esQuery}
                   columns={tableColumns}
+                  observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+                  config={config}
+                  renderExpandedAlertView={AlertsTableExpandedAlertView}
                   services={{
                     data,
                     http,

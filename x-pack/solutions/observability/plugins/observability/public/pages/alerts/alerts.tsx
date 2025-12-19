@@ -18,16 +18,19 @@ import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kb
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_window_callout';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
-
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
-import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
-import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
-import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
-import { DEFAULT_GROUPING_OPTIONS } from '../../components/alerts_table/grouping/constants';
-import type {
-  AlertsByGroupingAgg,
-  GetObservabilityAlertsTableProp,
-} from '../../components/alerts_table/types';
+import {
+  ObservabilityAlertsTable,
+  getColumns,
+  getGroupStats,
+  getAggregationsByGroupingField,
+  renderGroupPanel,
+  GroupingToolbarControls,
+  DEFAULT_GROUPING_OPTIONS,
+  type AlertsByGroupingAgg,
+  type GetObservabilityAlertsTableProp,
+} from '@kbn/observability-alerts-table';
+
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -44,14 +47,12 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { ALERTS_URL_STORAGE_KEY, observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
-import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
-import { getColumns } from '../../components/alerts_table/common/get_columns';
+import { AlertsTableExpandedAlertView } from '../../components/alerts_flyout/alerts_table_expanded_alert_view';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import type { RuleStatsState } from './components/rule_stats';
 import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
-import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
@@ -94,7 +95,7 @@ function InternalAlertsPage() {
       timefilter: { timefilter: timeFilterService },
     },
   } = data;
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry, config } = usePluginContext();
   const [filterControls, setFilterControls] = useState<Filter[]>();
   const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
@@ -368,10 +369,18 @@ function InternalAlertsPage() {
                       pageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
+                      observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+                      config={config}
+                      renderExpandedAlertView={AlertsTableExpandedAlertView}
                       renderAdditionalToolbarControls={() => (
                         <GroupingToolbarControls
                           groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                           ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                          services={{
+                            dataViews,
+                            http,
+                            notifications,
+                          }}
                         />
                       )}
                       showInspectButton
