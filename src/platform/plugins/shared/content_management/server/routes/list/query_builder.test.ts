@@ -132,6 +132,7 @@ describe('query_builder', () => {
 
     it('should map custom attribute fields to sortable_* runtime fields', () => {
       expect(buildSort('customField', 'asc')).toEqual([
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         { sortable_customField: { order: 'asc', unmapped_type: 'keyword' } },
       ]);
     });
