@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TabsBarMenu } from './tabs_bar_menu';
+import type { RecentlyClosedTabItem } from '../../types';
 
 const mockTabs = [
   { id: 'tab1', label: 'Tab 1' },
@@ -18,9 +19,9 @@ const mockTabs = [
   { id: 'tab3', label: 'Tab 3' },
 ];
 
-const mockRecentlyClosedTabs = [
-  { id: 'closed1', label: 'Closed Tab 1' },
-  { id: 'closed2', label: 'Closed Tab 2' },
+const mockRecentlyClosedTabs: RecentlyClosedTabItem[] = [
+  { id: 'closed1', label: 'Closed Tab 1', closedAt: 0 },
+  { id: 'closed2', label: 'Closed Tab 2', closedAt: 0 },
 ];
 
 const tabsBarMenuButtonTestId = 'unifiedTabs_tabsBarMenuButton';

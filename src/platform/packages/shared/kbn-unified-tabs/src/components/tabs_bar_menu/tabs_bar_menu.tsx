@@ -26,17 +26,14 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { RecentlyClosedTabItem } from '../../types';
-import { TabStatus, type TabItem } from '../../types';
+import type { RecentlyClosedTabItem, TabPreviewData } from '../../types';
+import type { TabItem } from '../../types';
 import { TabPreview } from '../tab_preview';
 
 interface OptionData {
-  closedAt: moment.Moment;
-  query: AggregateQuery | Query | undefined;
+  tabItem: RecentlyClosedTabItem;
+  momentClosedAt: moment.Moment;
 }
-
-type RecentlyClosedTabOption = EuiSelectableOption<OptionData>;
 
 const getOpenedTabsList = (
   tabItems: TabItem[],
@@ -51,22 +48,20 @@ const getOpenedTabsList = (
 
 const getRecentlyClosedTabsList = (
   tabItems: RecentlyClosedTabItem[]
-): RecentlyClosedTabOption[] => {
+): Array<EuiSelectableOption<OptionData>> => {
   return tabItems.map((tab) => {
     const momentClosedAt = moment(tab.closedAt);
-    const option = {
+    return {
       label: tab.label,
       title: `${tab.label}${
         momentClosedAt.isValid() ? ` (${momentClosedAt.format('LL LT')})` : ''
       }`,
       key: tab.id,
+      isGroupLabel: false,
       'data-test-subj': `unifiedTabs_tabsMenu_recentlyClosedTab_${tab.id}`,
-      data: {
-        closedAt: momentClosedAt,
-        query: tab.query,
-      },
+      tabItem: tab,
+      momentClosedAt,
     };
-    return option;
   });
 };
 
@@ -74,6 +69,7 @@ export interface TabsBarMenuProps {
   items: TabItem[];
   selectedItem: TabItem | null;
   recentlyClosedItems: RecentlyClosedTabItem[];
+  getPreviewData?: (item: TabItem) => TabPreviewData;
   onSelect: (item: TabItem) => Promise<void>;
   onSelectRecentlyClosed: (item: TabItem) => Promise<void>;
   onClearRecentlyClosed: () => void;
@@ -84,6 +80,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     items,
     selectedItem,
     recentlyClosedItems,
+    getPreviewData,
     onSelect,
     onSelectRecentlyClosed,
     onClearRecentlyClosed,
@@ -120,8 +117,23 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
 
     const renderRecentlyClosedOption = useCallback(
       (option: EuiSelectableOption<OptionData>) => {
-        const closedAt = option?.closedAt;
+        const closedAt = option?.momentClosedAt;
         const formattedTime = closedAt?.isValid() ? closedAt.fromNow() : '';
+
+        if (!getPreviewData) {
+          return (
+            <>
+              {option.label}
+              {formattedTime && (
+                <EuiText size="xs" color="subdued" className="eui-displayBlock">
+                  {formattedTime}
+                </EuiText>
+              )}
+            </>
+          );
+        }
+
+        const previewData = getPreviewData(option.tabItem);
 
         return (
           <TabPreview
@@ -130,10 +142,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               setPreviewTabId((prev) => (prev === option.key ? null : (option.key as string)))
             }
             tabItem={{ id: option.key as string, label: option.label }}
-            previewData={{
-              status: TabStatus.DEFAULT,
-              query: option?.query,
-            }}
+            previewData={previewData}
             previewDelay={0}
             position="left"
           >
@@ -148,7 +157,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           </TabPreview>
         );
       },
-      [previewTabId]
+      [previewTabId, getPreviewData]
     );
 
     return (

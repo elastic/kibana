@@ -21,7 +21,6 @@ export interface TabItem {
 
 export type RecentlyClosedTabItem = TabItem & {
   closedAt: number;
-  query?: AggregateQuery | Query; // TODO is this really optional?
 };
 
 export interface TabsSizeConfig {

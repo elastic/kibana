@@ -22,25 +22,30 @@ import {
   selectTabRuntimeState,
   useInternalStateSelector,
   selectAllTabs,
+  selectRecentlyClosedTabs,
 } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
   const allTabs = useInternalStateSelector(selectAllTabs);
+  const recentlyClosedTabs = useInternalStateSelector(selectRecentlyClosedTabs);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
 
   const previewDataMap$ = useMemo(
     () =>
       combineLatest(
-        allTabs.reduce<Record<string, Observable<TabPreviewData>>>((acc, tabState) => {
-          const tabId = tabState.id;
-          return {
-            ...acc,
-            [tabId]: getPreviewDataObservable(runtimeStateManager, tabState, savedDataViews),
-          };
-        }, {})
+        [...allTabs, ...recentlyClosedTabs].reduce<Record<string, Observable<TabPreviewData>>>(
+          (acc, tabState) => {
+            const tabId = tabState.id;
+            return {
+              ...acc,
+              [tabId]: getPreviewDataObservable(runtimeStateManager, tabState, savedDataViews),
+            };
+          },
+          {}
+        )
       ),
-    [allTabs, runtimeStateManager, savedDataViews]
+    [allTabs, recentlyClosedTabs, runtimeStateManager, savedDataViews]
   );
   const previewDataMap = useObservable(previewDataMap$);
   const getPreviewData = useCallback(
@@ -138,7 +143,22 @@ const getPreviewDataObservable = (
   tabState: TabState,
   savedDataViews: DataViewListItem[]
 ) => {
-  return selectTabRuntimeState(runtimeStateManager, tabState.id).stateContainer$.pipe(
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
+
+  if (!tabRuntimeState) {
+    // Recently closed tab, no runtime state, no updates expected
+    const derivedDataViewName = getDataViewNameFromInitialInternalState(
+      tabState.initialInternalState,
+      savedDataViews
+    );
+    return of({
+      status: TabStatus.DEFAULT,
+      query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+      title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
+    });
+  }
+
+  return tabRuntimeState.stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
         const derivedDataViewName = getDataViewNameFromInitialInternalState(

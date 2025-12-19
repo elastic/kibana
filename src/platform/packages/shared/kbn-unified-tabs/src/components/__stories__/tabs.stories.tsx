@@ -99,7 +99,6 @@ export const WithMultipleTabs: StoryObj<TabbedContentProps> = {
         id: '1',
         label: 'Closed Tab',
         closedAt: 123456789,
-        query: { query: 'extension.keyword : css', language: 'kuery' },
       },
     ],
   },
