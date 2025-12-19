@@ -23,7 +23,7 @@ import {
 import type { PublishesControlGroupApi, PublishesSavedSearch } from '../types';
 import { apiPublishesSavedSearch } from '../types';
 
-type ViewSavedSearchActionApi = CanAccessViewMode &
+export type ViewSavedSearchActionApi = CanAccessViewMode &
   HasType &
   PublishesSavedSearch &
   PublishesControlGroupApi;
