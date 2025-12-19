@@ -41,6 +41,7 @@ import {
 import { EndpointExceptionsForm } from './endpoint_exceptions_form';
 import { EndpointExceptionsApiClient } from '../../service/api_client';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS, getCreationErrorMessage } from '../../translations';
+import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 export type EndpointExceptionsFlyoutProps = Pick<
   AddExceptionFlyoutProps,
@@ -81,6 +82,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   const [bulkCloseAlerts, setBulkCloseAlerts] = useState(false);
   const [disableBulkClose, setDisableBulkCloseAlerts] = useState(false);
   const [bulkCloseIndex, setBulkCloseIndex] = useState<string[] | undefined>();
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   useEffect(() => {
     if (!isAlertDataLoading && alertData) {
@@ -181,22 +183,26 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
           />
         )}
 
-        <EuiHorizontalRule />
+        {hasAlertsAll && (
+          <>
+            <EuiHorizontalRule />
 
-        <ExceptionItemsFlyoutAlertsActions
-          exceptionListType="endpoint"
-          shouldCloseSingleAlert={closeSingleAlert}
-          onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
-          shouldBulkCloseAlert={bulkCloseAlerts}
-          onBulkCloseCheckboxChange={setBulkCloseAlerts}
-          disableBulkClose={disableBulkClose}
-          onDisableBulkClose={setDisableBulkCloseAlerts}
-          exceptionListItems={exceptionArrayWrapper}
-          onUpdateBulkCloseIndex={setBulkCloseIndex}
-          alertData={alertData}
-          isAlertDataLoading={isAlertDataLoading ?? false}
-          alertStatus={alertStatus}
-        />
+            <ExceptionItemsFlyoutAlertsActions
+              exceptionListType="endpoint"
+              shouldCloseSingleAlert={closeSingleAlert}
+              onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
+              shouldBulkCloseAlert={bulkCloseAlerts}
+              onBulkCloseCheckboxChange={setBulkCloseAlerts}
+              disableBulkClose={disableBulkClose}
+              onDisableBulkClose={setDisableBulkCloseAlerts}
+              exceptionListItems={exceptionArrayWrapper}
+              onUpdateBulkCloseIndex={setBulkCloseIndex}
+              alertData={alertData}
+              isAlertDataLoading={isAlertDataLoading ?? false}
+              alertStatus={alertStatus}
+            />
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
