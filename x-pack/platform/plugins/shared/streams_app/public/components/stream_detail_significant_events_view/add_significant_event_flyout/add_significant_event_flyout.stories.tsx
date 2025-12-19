@@ -55,13 +55,14 @@ const logsStreamDefinition: Streams.WiredStream.GetResponse = {
 export const Default: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
-      generateAutomatically={false}
+      generateOnMount={false}
       onFeatureIdentificationClick={() => {}}
       definition={logsStreamDefinition}
       initialSelectedFeatures={[]}
       onClose={() => {}}
       onSave={async (queries) => {}}
       refreshDefinition={() => {}}
+      aiFeatures={null}
       features={[
         {
           type: 'system',
@@ -80,13 +81,14 @@ export const Default: StoryFn<{}> = () => {
 export const Edit: StoryFn<{}> = () => {
   return (
     <AddSignificantEventFlyout
+      generateOnMount={false}
       refreshDefinition={() => {}}
-      generateAutomatically={false}
       onFeatureIdentificationClick={() => {}}
       initialSelectedFeatures={[]}
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      aiFeatures={null}
       features={[
         {
           type: 'system',
