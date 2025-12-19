@@ -323,11 +323,11 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       break;
     }
 
-    if (isFunctionExpression(groupFieldNode.definition)) {
-      const functionName = groupFieldNode.definition.name;
-      if (!isSupportedStatsFunction(functionName)) {
-        continue;
-      }
+    if (
+      isFunctionExpression(groupFieldNode.definition) &&
+      !isSupportedStatsFunction(groupFieldNode.definition.name)
+    ) {
+      continue;
     }
 
     groupByFields.push({
