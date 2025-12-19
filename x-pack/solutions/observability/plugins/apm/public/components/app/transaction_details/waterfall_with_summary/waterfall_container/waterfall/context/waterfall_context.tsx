@@ -9,8 +9,10 @@ import type { Dictionary } from 'lodash';
 import { groupBy } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CriticalPathSegment } from '../../../../../../shared/trace_waterfall/critical_path/types';
-import { getCriticalPath } from '../../../../../../shared/trace_waterfall/critical_path/get_critical_path';
+import {
+  getCriticalPath,
+  type CriticalPathSegment,
+} from '../../../../../../shared/trace_waterfall/critical_path';
 import type {
   IWaterfall,
   IWaterfallNode,

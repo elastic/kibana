@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { renderWithTheme } from '../../../utils/test_helpers';
+import { renderWithTheme } from '../../../../utils/test_helpers';
 import { CriticalPathToggle } from './critical_path_toggle';
 
 describe('CriticalPathToggle', () => {

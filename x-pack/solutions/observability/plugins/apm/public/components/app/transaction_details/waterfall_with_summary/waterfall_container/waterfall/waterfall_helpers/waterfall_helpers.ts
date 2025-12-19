@@ -13,7 +13,7 @@ import type { Error } from '@kbn/apm-types';
 import type { IWaterfallLegend } from '../../../../../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
-import type { CriticalPathSegment } from '../../../../../../shared/trace_waterfall/critical_path/types';
+import type { CriticalPathSegment } from '../../../../../../shared/trace_waterfall/critical_path';
 import type {
   WaterfallSpan,
   WaterfallTransaction,

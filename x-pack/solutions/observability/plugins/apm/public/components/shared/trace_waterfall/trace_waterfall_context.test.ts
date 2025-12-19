@@ -7,7 +7,7 @@
 
 import { groupByParent, filterMapByCriticalPath } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import type { CriticalPathSegment } from './critical_path/types';
+import type { CriticalPathSegment } from './critical_path';
 
 describe('groupByParent', () => {
   it('groups items by their parentId', () => {

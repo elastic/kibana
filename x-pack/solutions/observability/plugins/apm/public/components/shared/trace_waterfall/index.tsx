@@ -17,7 +17,7 @@ import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfal
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
-import { CriticalPathToggle } from './critical_path_toggle';
+import { CriticalPathToggle } from './critical_path';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
