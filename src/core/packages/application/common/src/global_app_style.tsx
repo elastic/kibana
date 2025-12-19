@@ -149,7 +149,7 @@ export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
   .chrHeaderBadge__wrapper {
     align-self: center;
-    margin-right: ${euiTheme.size.base};
+    margin-right: ${euiTheme.size.s};
   }
 
   .header__toggleNavButtonSection {

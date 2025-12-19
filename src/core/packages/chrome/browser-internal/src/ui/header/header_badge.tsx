@@ -54,6 +54,7 @@ export class HeaderBadge extends Component<Props, State> {
     return (
       <div className="chrHeaderBadge__wrapper">
         <EuiBetaBadge
+          alignment="middle"
           data-test-subj="headerBadge"
           data-test-badge-label={this.state.badge.text}
           tabIndex={0}
