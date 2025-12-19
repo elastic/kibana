@@ -12,8 +12,6 @@ import { BIGGER_TIMEOUT } from '../constants';
 export class TransactionDetailsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
-  // Locators
-
   async goToTransactionDetails(params: {
     serviceName: string;
     transactionName: string;

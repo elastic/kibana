@@ -6,7 +6,7 @@
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import type { SpanLink } from '../../../../../typings/es_schemas/raw/fields/span_links';
+import type { SpanLink } from '@kbn/apm-types/es_schemas_raw';
 
 /**
  * Data ingestion summary:
