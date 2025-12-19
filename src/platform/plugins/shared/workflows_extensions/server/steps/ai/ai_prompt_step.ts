@@ -22,7 +22,7 @@ export const aiPromptStepDefinition = (
       const [, { inference }] = await coreSetup.getStartServices();
 
       const resolvedConnectorId = await resolveConnectorId(
-        context.input.connectorId,
+        context.config['connector-id'],
         inference,
         context.contextManager.getFakeRequest()
       );

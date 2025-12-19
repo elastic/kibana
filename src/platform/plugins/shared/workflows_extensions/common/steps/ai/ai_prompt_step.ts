@@ -16,6 +16,10 @@ import type { CommonStepDefinition } from '../../step_registry/types';
  */
 export const AiPromptStepTypeId = 'ai.prompt';
 
+export const ConfigSchema = z.object({
+  'connector-id': z.string().optional(),
+});
+
 /**
  * Input schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
@@ -23,7 +27,6 @@ export const AiPromptStepTypeId = 'ai.prompt';
 export const InputSchema = z.object({
   prompt: z.string(),
   systemPrompt: z.string().optional(),
-  connectorId: z.string().optional(),
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
   outputSchema: z.any().optional(),
   temperature: z.number().min(0).max(1).optional(),
@@ -46,6 +49,7 @@ const stringOutputSchema = z.object({
  */
 export const OutputSchema = z.union([stringOutputSchema, getStructuredOutputSchema(z.unknown())]);
 
+export type AiPromptStepConfigSchema = typeof ConfigSchema;
 export type AiPromptStepInputSchema = typeof InputSchema;
 export type AiPromptStepOutputSchema = typeof OutputSchema;
 
@@ -56,11 +60,13 @@ export type AiPromptStepOutputSchema = typeof OutputSchema;
  */
 export const AiPromptStepCommonDefinition: CommonStepDefinition<
   AiPromptStepInputSchema,
-  AiPromptStepOutputSchema
+  AiPromptStepOutputSchema,
+  AiPromptStepConfigSchema
 > = {
   id: AiPromptStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
+  configSchema: ConfigSchema,
   dynamicOutputSchema: (input) => {
     if (input.outputSchema) {
       return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
