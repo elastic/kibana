@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticAgentName } from '@kbn/elastic-agent-utils/src/agent_names';
+import type { AgentName, ElasticAgentName } from '@kbn/elastic-agent-utils/src/agent_names';
 import {
   OPEN_TELEMETRY_AGENT_NAMES,
   EDOT_AGENT_NAMES,
@@ -54,18 +54,26 @@ export const agentsSyncMap = new Map<SyncBadgeAgentName, boolean>([
  * @param agentName - The agent name (e.g., 'nodejs', 'opentelemetry/java', 'otlp/python/elastic')
  * @returns true for sync agents, false for async agents, undefined if unknown
  */
-export function getAgentSyncValue(agentName: string): boolean | undefined {
-  const agentNameKey = agentName as SyncBadgeAgentName;
-  if (agentsSyncMap.has(agentNameKey)) {
-    return agentsSyncMap.get(agentNameKey);
+export function getAgentSyncValue(agentName: AgentName): boolean | undefined {
+  if (isSyncBadgeAgentName(agentName)) {
+    return agentsSyncMap.get(agentName);
   }
 
   if (knownOtelAgents.has(agentName)) {
     const lang = agentName.split('/')[1];
-    if (lang) {
-      return agentsSyncMap.get(lang as SyncBadgeAgentName);
+    if (lang && isSyncBadgeAgentName(lang)) {
+      return agentsSyncMap.get(lang);
     }
   }
 
   return undefined;
+}
+
+/**
+ * Type guard to check if an agentName is a valid SyncBadgeAgentName.
+ * @param name - The agent name to check (typed as string for flexibility with both AgentName and extracted language strings)
+ * @returns true if the name exists in agentsSyncMap, narrowing the type
+ */
+function isSyncBadgeAgentName(name: string): name is SyncBadgeAgentName {
+  return agentsSyncMap.has(name as SyncBadgeAgentName);
 }
