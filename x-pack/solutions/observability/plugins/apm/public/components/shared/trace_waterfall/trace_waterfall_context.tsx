@@ -6,7 +6,6 @@
  */
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { groupBy } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
@@ -24,6 +23,7 @@ import {
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import type { CriticalPathSegment } from '../../../../common/critical_path/types';
 import { getCriticalPath } from '../../../../common/critical_path/get_critical_path';
+import { groupBy } from './utils/group_by';
 
 export interface TraceWaterfallContextProps {
   duration: number;
