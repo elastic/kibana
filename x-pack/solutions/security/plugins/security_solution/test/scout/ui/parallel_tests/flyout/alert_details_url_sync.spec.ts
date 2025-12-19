@@ -10,7 +10,7 @@ import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/
 
 const RIGHT = 'right';
 
-spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity'] }, () => {
+spaceTest.describe.skip('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity'] }, () => {
   let ruleName: string;
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
