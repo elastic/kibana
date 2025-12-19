@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -44,7 +44,7 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        streams: { streamsRepositoryClient, getClassicStatus },
       },
     },
     core,
@@ -65,9 +65,28 @@ export function StreamListView() {
   );
 
   const {
-    ui: { manage: canManageStreams },
+    ui: { manage: canManageStreamsKibana },
     features: { groupStreams },
   } = useStreamsPrivileges();
+
+  const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchClassicStatus = async () => {
+      try {
+        const status = await getClassicStatus();
+        setCanManageClassicElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.streamsListView.fetchClassicStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching classic streams status',
+          }),
+        });
+      }
+    };
+    fetchClassicStatus();
+  }, [getClassicStatus, core.notifications.toasts]);
 
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
@@ -185,7 +204,7 @@ export function StreamListView() {
               <EuiButton
                 onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
                 size="s"
-                disabled={!canManageStreams}
+                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
               >
                 {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
                   defaultMessage: 'Create classic stream',
