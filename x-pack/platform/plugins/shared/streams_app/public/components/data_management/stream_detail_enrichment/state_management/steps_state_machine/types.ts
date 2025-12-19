@@ -18,7 +18,7 @@ export type StepToParentEvent =
   | { type: 'step.change'; id: string }
   | { type: 'step.parentChanged'; id: string }
   | { type: 'step.delete'; id: string }
-  | { type: 'step.edit' }
+  | { type: 'step.edit'; id: string }
   | { type: 'step.save'; id: string };
 
 export interface StepInput {
