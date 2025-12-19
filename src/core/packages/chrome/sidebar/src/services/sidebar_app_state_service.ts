@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV !== 'production';
 
 export interface SidebarAppStateServiceApi {
   /** Get observable stream of app state */
@@ -35,7 +35,7 @@ export interface SidebarAppStateServiceApi {
  * Service for managing app-specific state in the sidebar
  *
  * Each sidebar app can store its own state independently using a generic interface.
- * State is stored in-memory and isolated per app ID.
+ * State is stored in-memory and persisted to localStorage, isolated per app ID.
  */
 export class SidebarAppStateService implements SidebarAppStateServiceApi {
   private readonly appStates = new Map<string, BehaviorSubject<any>>();
@@ -60,6 +60,8 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
     }
 
     this.getOrCreateState<T>(appId).next(newState as T);
+
+    this.saveToStorage(appId, newState as T);
   }
 
   reset(appId: string): void {
@@ -69,7 +71,9 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
 
   private getOrCreateState<T>(appId: string): BehaviorSubject<T> {
     if (!this.appStates.has(appId)) {
-      const initialState = this.createInitialState<T>(appId);
+      const storedState = this.loadFromStorage<T>(appId);
+      const initialState = storedState ?? this.createInitialState<T>(appId);
+
       this.appStates.set(appId, new BehaviorSubject<T>(initialState));
     }
     return this.appStates.get(appId)!;
@@ -94,6 +98,43 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
         throw new Error(`[Sidebar] Invalid state for app '${appId}': ${z.prettifyError(error)}`);
       }
       throw error;
+    }
+  }
+
+  private getStorageKey(appId: string): string {
+    return `core.chrome.sidebar.${appId}`;
+  }
+
+  /**
+   * Loads state from localStorage and validates against schema.
+   * Returns null if not found, corrupted, or validation fails.
+   */
+  private loadFromStorage<T>(appId: string): T | null {
+    try {
+      const key = this.getStorageKey(appId);
+      const stored = localStorage.getItem(key);
+      if (!stored) return null;
+
+      const parsed = JSON.parse(stored);
+      // Validate against schema
+      return this.validateState(appId, parsed);
+    } catch (error) {
+      // Invalid data - drop it
+      return null;
+    }
+  }
+
+  /**
+   * Saves state to localStorage.
+   * Fails silently on errors (quota exceeded, unavailable, etc.)
+   */
+  private saveToStorage<T>(appId: string, state: T): void {
+    try {
+      const key = this.getStorageKey(appId);
+      localStorage.setItem(key, JSON.stringify(state));
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn(`[Sidebar] localStorage error for '${appId}':`, error);
     }
   }
 }
