@@ -37,7 +37,7 @@ import {
   STREAM_NAME,
 } from '../fields';
 import type { QueryAssetStorageSettings } from '../storage_settings';
-import { getRuleIdFromQueryLink } from './helpers/query';
+import { getRuleIdFromSigEventsQueryLink } from './helpers/sig_events_query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
@@ -83,7 +83,10 @@ function wildcardQuery<T extends string>(
   return [{ wildcard: { [field]: { value: `*${value}*`, case_insensitive: true } } }];
 }
 
-export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id' | 'asset.type'>) {
+export function getSigEventsQueryLinkUuid(
+  name: string,
+  asset: Pick<QueryLink, 'asset.id' | 'asset.type'>
+) {
   return objectHash({
     [STREAM_NAME]: name,
     [ASSET_ID]: asset[ASSET_ID],
@@ -97,7 +100,7 @@ function toQueryLink<TQueryLink extends QueryAssetLinkRequest>(
 ): TQueryLink & { [ASSET_UUID]: string } {
   return {
     ...asset,
-    [ASSET_UUID]: getQueryLinkUuid(name, asset),
+    [ASSET_UUID]: getSigEventsQueryLinkUuid(name, asset),
   };
 }
 
@@ -107,26 +110,28 @@ type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_SEVERITY_SCORE]?: number;
 };
 
-export type StoredQueryAssetLink = StoredQueryLink & {
+export type StoredSigEventsQueryAssetLink = StoredQueryLink & {
   [STREAM_NAME]: string;
 };
 
-interface QueryBulkIndexOperation {
+interface SigEventsQueryBulkIndexOperation {
   index: { asset: QueryAssetLinkRequest };
 }
-interface QueryBulkDeleteOperation {
+interface SigEventsQueryBulkDeleteOperation {
   delete: { asset: QueryAssetUnlinkRequest };
 }
 
-export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
+export type SigEventsQueryBulkOperation =
+  | SigEventsQueryBulkIndexOperation
+  | SigEventsQueryBulkDeleteOperation;
 
-function fromStorage(link: StoredQueryAssetLink): QueryLink {
+function fromStorage(link: StoredSigEventsQueryAssetLink): QueryLink {
   const storedQueryLink: StoredQueryLink & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
     [QUERY_FEATURE_TYPE]: FeatureType;
     [QUERY_EVIDENCE]?: string[];
-  } = link as StoredQueryAssetLink & {
+  } = link as StoredSigEventsQueryAssetLink & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
     [QUERY_FEATURE_TYPE]: FeatureType;
@@ -153,7 +158,7 @@ function fromStorage(link: StoredQueryAssetLink): QueryLink {
   } satisfies QueryLink;
 }
 
-function toStorage(name: string, request: QueryAssetLinkRequest): StoredQueryAssetLink {
+function toStorage(name: string, request: QueryAssetLinkRequest): StoredSigEventsQueryAssetLink {
   const link = toQueryLink(name, request);
   const { query, ...rest } = link;
   return {
@@ -166,7 +171,7 @@ function toStorage(name: string, request: QueryAssetLinkRequest): StoredQueryAss
     [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
-  } as unknown as StoredQueryAssetLink;
+  } as unknown as StoredSigEventsQueryAssetLink;
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
@@ -178,17 +183,20 @@ function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): b
 
 function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
   return {
-    'asset.uuid': getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id }),
+    'asset.uuid': getSigEventsQueryLinkUuid(stream, {
+      'asset.type': 'query',
+      'asset.id': query.id,
+    }),
     'asset.type': 'query',
     'asset.id': query.id,
     query,
   };
 }
 
-export class QueryClient {
+export class SigEventsQueryClient {
   constructor(
     private readonly dependencies: {
-      storageClient: IStorageClient<QueryAssetStorageSettings, StoredQueryAssetLink>;
+      storageClient: IStorageClient<QueryAssetStorageSettings, StoredSigEventsQueryAssetLink>;
       soClient: SavedObjectsClientContract;
       rulesClient: RulesClient;
       logger: Logger;
@@ -234,7 +242,7 @@ export class QueryClient {
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
     const queryLinksDeleted = existingQueryLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
 
-    const operations: QueryBulkOperation[] = [
+    const operations: SigEventsQueryBulkOperation[] = [
       ...queryLinksDeleted.map((asset) => ({ delete: { asset } })),
       ...nextQueryLinks.map((asset) => ({ index: { asset } })),
     ];
@@ -250,7 +258,7 @@ export class QueryClient {
   }
 
   async unlinkQuery(name: string, asset: QueryAssetUnlinkRequest): Promise<void> {
-    const id = getQueryLinkUuid(name, asset);
+    const id = getSigEventsQueryLinkUuid(name, asset);
 
     const { result } = await this.dependencies.storageClient.delete({ id });
     if (result === 'not_found') {
@@ -300,7 +308,9 @@ export class QueryClient {
             ...termQuery(ASSET_TYPE, 'query'),
             ...termsQuery(
               '_id',
-              ids.map((id) => getQueryLinkUuid(name, { [ASSET_TYPE]: 'query', [ASSET_ID]: id }))
+              ids.map((id) =>
+                getSigEventsQueryLinkUuid(name, { [ASSET_TYPE]: 'query', [ASSET_ID]: id })
+              )
             ),
           ],
         },
@@ -335,7 +345,7 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  private async bulkStorage(name: string, operations: QueryBulkOperation[]) {
+  private async bulkStorage(name: string, operations: SigEventsQueryBulkOperation[]) {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
@@ -351,7 +361,7 @@ export class QueryClient {
           };
         }
 
-        const id = getQueryLinkUuid(name, operation.delete.asset);
+        const id = getSigEventsQueryLinkUuid(name, operation.delete.asset);
         return {
           delete: {
             _id: id,
@@ -559,7 +569,10 @@ export class QueryClient {
 
     const { rulesClient } = this.dependencies;
     await rulesClient
-      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink), ignoreInternalRuleTypes: false })
+      .bulkDeleteRules({
+        ids: queries.map(getRuleIdFromSigEventsQueryLink),
+        ignoreInternalRuleTypes: false,
+      })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 400) {
           return;
@@ -569,7 +582,7 @@ export class QueryClient {
   }
 
   private toCreateRuleParams(query: QueryLink, stream: string) {
-    const ruleId = getRuleIdFromQueryLink(query);
+    const ruleId = getRuleIdFromSigEventsQueryLink(query);
 
     const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
@@ -595,7 +608,7 @@ export class QueryClient {
   }
 
   private toUpdateRuleParams(query: QueryLink, stream: string) {
-    const ruleId = getRuleIdFromQueryLink(query);
+    const ruleId = getRuleIdFromSigEventsQueryLink(query);
     const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       id: ruleId,

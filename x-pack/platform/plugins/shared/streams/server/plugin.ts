@@ -31,7 +31,7 @@ import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import { QueryService } from './lib/streams/assets/query/query_service';
+import { SigEventsQueryService } from './lib/streams/assets/sig_events_query/sig_events_query_service';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -110,7 +110,7 @@ export class StreamsPlugin
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger, getDefaultFeatureRegistry());
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger);
+    const sigEventsQueryService = new SigEventsQueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
 
     const getScopedClients = async ({
@@ -123,13 +123,13 @@ export class StreamsPlugin
         attachmentClient,
         featureClient,
         contentClient,
-        queryClient,
+        sigEventsQueryClient,
       ] = await Promise.all([
         core.getStartServices(),
         attachmentService.getClientWithRequest({ request }),
         featureService.getClientWithRequest({ request }),
         contentService.getClient(),
-        queryService.getClientWithRequest({ request }),
+        sigEventsQueryService.getClientWithRequest({ request }),
       ]);
 
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
@@ -150,7 +150,7 @@ export class StreamsPlugin
       const streamsClient = await streamsService.getClientWithRequest({
         request,
         attachmentClient,
-        queryClient,
+        sigEventsQueryClient,
         featureClient,
       });
 
@@ -162,7 +162,7 @@ export class StreamsPlugin
         featureClient,
         inferenceClient,
         contentClient,
-        queryClient,
+        sigEventsQueryClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,

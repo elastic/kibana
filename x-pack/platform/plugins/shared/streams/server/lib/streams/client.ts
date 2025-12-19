@@ -24,7 +24,7 @@ import {
   getAncestors,
   getParentId,
 } from '@kbn/streams-schema';
-import type { QueryClient } from './assets/query/query_client';
+import type { SigEventsQueryClient } from './assets/sig_events_query/sig_events_query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
@@ -72,7 +72,7 @@ export class StreamsClient {
       lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
       attachmentClient: AttachmentClient;
-      queryClient: QueryClient;
+      sigEventsQueryClient: SigEventsQueryClient;
       storageClient: StreamsStorageClient;
       featureClient: FeatureClient;
       logger: Logger;
@@ -218,8 +218,12 @@ export class StreamsClient {
         }
       );
 
-      const { attachmentClient, queryClient, storageClient } = this.dependencies;
-      await Promise.all([queryClient.clean(), attachmentClient.clean(), storageClient.clean()]);
+      const { attachmentClient, sigEventsQueryClient, storageClient } = this.dependencies;
+      await Promise.all([
+        sigEventsQueryClient.clean(),
+        attachmentClient.clean(),
+        storageClient.clean(),
+      ]);
     }
 
     if (elasticsearchStreamsEnabled) {
@@ -822,7 +826,7 @@ export class StreamsClient {
         })),
         'rule'
       ),
-      this.dependencies.queryClient.syncQueries(name, queries),
+      this.dependencies.sigEventsQueryClient.syncQueries(name, queries),
     ]);
   }
 }

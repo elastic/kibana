@@ -11,15 +11,22 @@ import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
 import { queryAssetStorageSettings, type QueryAssetStorageSettings } from '../storage_settings';
-import { QueryClient, type StoredQueryAssetLink } from './query_client';
+import {
+  SigEventsQueryClient,
+  type StoredSigEventsQueryAssetLink,
+} from './sig_events_query_client';
 
-export class QueryService {
+export class SigEventsQueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<QueryClient> {
+  async getClientWithRequest({
+    request,
+  }: {
+    request: KibanaRequest;
+  }): Promise<SigEventsQueryClient> {
     const [core, pluginStart] = await this.coreSetup.getStartServices();
 
     const soClient = core.savedObjects.getScopedClient(request);
@@ -30,13 +37,16 @@ export class QueryService {
     const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
     const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
-    const adapter = new StorageIndexAdapter<QueryAssetStorageSettings, StoredQueryAssetLink>(
+    const adapter = new StorageIndexAdapter<
+      QueryAssetStorageSettings,
+      StoredSigEventsQueryAssetLink
+    >(
       core.elasticsearch.client.asInternalUser,
       this.logger.get('queries'),
       queryAssetStorageSettings
     );
 
-    return new QueryClient(
+    return new SigEventsQueryClient(
       {
         storageClient: adapter.getClient(),
         soClient,

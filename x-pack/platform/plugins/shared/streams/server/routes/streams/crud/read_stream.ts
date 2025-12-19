@@ -19,7 +19,7 @@ import type {
   WiredIngestStreamEffectiveFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
-import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import type { SigEventsQueryClient } from '../../../lib/streams/assets/sig_events_query/sig_events_query_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
@@ -31,20 +31,20 @@ import { addAliasesForNamespacedFields } from '../../../lib/streams/component_te
 
 export async function readStream({
   name,
-  queryClient,
+  sigEventsQueryClient,
   attachmentClient,
   streamsClient,
   scopedClusterClient,
 }: {
   name: string;
-  queryClient: QueryClient;
+  sigEventsQueryClient: SigEventsQueryClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { [name]: queryLinks }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    queryClient.getQueryLinks([name]),
+    sigEventsQueryClient.getQueryLinks([name]),
     attachmentClient.getAttachments(name),
   ]);
 
