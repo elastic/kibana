@@ -65,6 +65,7 @@ export function StreamListView() {
   );
 
   const {
+    ui: { manage: canManageStreams },
     features: { groupStreams },
   } = useStreamsPrivileges();
 
@@ -181,7 +182,11 @@ export function StreamListView() {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setIsClassicStreamCreationFlyoutOpen(true)} size="s">
+              <EuiButton
+                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                size="s"
+                disabled={!canManageStreams}
+              >
                 {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
                   defaultMessage: 'Create classic stream',
                 })}
