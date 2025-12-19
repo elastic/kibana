@@ -6,38 +6,52 @@
  */
 
 import { convertSavedDashboardToPanels } from './helper';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
 
 describe('APM metrics static dashboard helpers', () => {
   describe('convertSavedDashboardToPanels', () => {
-    describe('when dashboard file does not exist', () => {
-      it('returns undefined', async () => {
-        const dataView = {
-          id: 'id-1',
-          name: 'apm-data-view',
-        } as unknown as any;
-        const panels = await convertSavedDashboardToPanels({}, dataView);
+    const dataView = {
+      id: 'id-1',
+      title: 'test-data-view:metrics*,metrics*',
+    } as unknown as DataView;
 
-        expect(panels).toBeUndefined();
-      });
+    it('returns undefined when dashboard file does not exist', async () => {
+      const panels = await convertSavedDashboardToPanels({ dataView });
+
+      expect(panels).toBeUndefined();
     });
 
-    it('replaces placeholders in JSON with index pattern values', async () => {
-      const dataView = {
-        id: 'id-1',
-        title: 'test-remote:metrics*,metrics*',
-      } as unknown as any;
+    it('replaces placeholders in JSON with index pattern values from data view', async () => {
+      const panels = await convertSavedDashboardToPanels({
+        agentName: 'opentelemetry/java/opentelemetry-java-instrumentation',
+        dataView,
+      });
+
+      expect(panels).toBeDefined();
+
+      const esqlQuery = (panels as Array<{ config?: { query?: { esql?: string } } }>)
+        .map((p) => p.config?.query?.esql)
+        .find(Boolean);
+
+      expect(esqlQuery).toContain('from test-data-view:metrics*,metrics*');
+    });
+
+    it('replaces placeholders in JSON with index pattern values from apm indices', async () => {
+      const apmIndices = {
+        metric: 'test-apm-indices:metrics*,metrics*',
+      } as unknown as APMIndices;
 
       const panels = await convertSavedDashboardToPanels(
-        {
-          agentName: 'opentelemetry/java/opentelemetry-java-instrumentation',
-        },
-        dataView
+        { dataView, agentName: 'opentelemetry/java/opentelemetry-java-instrumentation' },
+        apmIndices
       );
 
-      // Find a panel and check the ES|QL query
-      expect(
-        panels.find((panel) => panel.config?.query?.esql !== undefined)?.config?.query?.esql
-      ).toContain('from test-remote:metrics*,metrics*');
+      const esqlQuery = (panels as Array<{ config?: { query?: { esql?: string } } }>)
+        .map((p) => p.config?.query?.esql)
+        .find(Boolean);
+
+      expect(esqlQuery).toContain('from test-apm-indices:metrics*,metrics*');
     });
   });
 });

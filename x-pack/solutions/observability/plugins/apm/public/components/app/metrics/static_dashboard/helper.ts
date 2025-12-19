@@ -8,6 +8,7 @@
 import Mustache from 'mustache';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
 import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
@@ -20,6 +21,7 @@ interface DashboardFileProps {
 
 export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
+  apmIndices?: APMIndices;
 }
 
 function getDashboardFileNameFromProps({
@@ -47,8 +49,9 @@ const getAdhocDataView = (dataView: DataView) => {
 
 export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
-  dataView: DataView
+  apmIndices?: APMIndices
 ): Promise<DashboardState['panels'] | undefined> {
+  const { dataView } = props;
   const dashboardFilename = getDashboardFileNameFromProps(props);
   const unreplacedDashboardJSON = !!dashboardFilename
     ? await loadDashboardFile(dashboardFilename)
@@ -62,7 +65,7 @@ export async function convertSavedDashboardToPanels(
   const dashboardString = JSON.stringify(unreplacedDashboardJSON);
   // Replace indexPattern placeholder
   const dashboardStringWithReplacements = Mustache.render(dashboardString, {
-    indexPattern: dataView.title,
+    indexPattern: apmIndices?.metric ?? dataView.title,
   });
   // Convert to JSON object
   const dashboardJSON = JSON.parse(dashboardStringWithReplacements);
