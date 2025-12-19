@@ -158,7 +158,7 @@ const SearchBar: React.FC = () => {
       placeholder={i18n.translate(
         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.searchPlaceholder',
         {
-          defaultMessage: 'Search integrations, providers, tools, tags...',
+          defaultMessage: 'Search integrations',
         }
       )}
       value={searchTerms}
