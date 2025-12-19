@@ -6,27 +6,17 @@
  */
 
 import { z } from '@kbn/zod';
-import { omit } from 'lodash';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import {
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  AlertConsumers,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getRelevantAlertFields } from './get_relevant_alert_fields';
-import { getHitsTotal } from '../../utils/get_hits_total';
-import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
+import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_ALERTS_TOOL_ID = 'observability.get_alerts';
 
@@ -61,19 +51,6 @@ export const defaultFields = [
   'transaction.type',
   'transaction.name',
 ];
-
-const OMITTED_ALERT_FIELDS = [
-  'event.action',
-  'event.kind',
-  'kibana.alert.rule.execution.uuid',
-  'kibana.alert.rule.revision',
-  'kibana.alert.rule.tags',
-  'kibana.alert.rule.uuid',
-  'kibana.alert.workflow_status',
-  'kibana.space_ids',
-  'kibana.alert.time_range',
-  'kibana.version',
-] as const;
 
 const getAlertsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
@@ -120,67 +97,16 @@ export function createGetAlertsTool({
       { request }
     ) => {
       try {
-        const [coreStart, pluginStart] = await core.getStartServices();
-        const { inference, ruleRegistry } = pluginStart;
-
-        const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-
-        const connectorId = await getDefaultConnectorId({
-          coreStart,
-          inference,
+        const { alerts, selectedFields, total } = await getToolHandler({
+          core,
           request,
           logger,
-        });
-
-        const boundInferenceClient = inference.getClient({
-          request,
-          bindTo: { connectorId },
-        });
-
-        const selectedFields = await getRelevantAlertFields({
-          coreStart,
-          pluginStart,
-          request,
-          inferenceClient: boundInferenceClient,
-          logger,
+          start,
+          end,
           query,
+          kqlFilter,
+          includeRecovered,
         });
-
-        const response = await alertsClient.find({
-          ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-          consumers: [
-            AlertConsumers.APM,
-            AlertConsumers.INFRASTRUCTURE,
-            AlertConsumers.LOGS,
-            AlertConsumers.UPTIME,
-            AlertConsumers.SLO,
-            AlertConsumers.OBSERVABILITY,
-            AlertConsumers.ALERTS,
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    'kibana.alert.start': {
-                      gte: start,
-                      lte: end,
-                    },
-                  },
-                },
-                ...buildKqlFilter(kqlFilter),
-                ...(includeRecovered ? [] : [{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }]),
-              ],
-            },
-          },
-          size: 10,
-        });
-
-        const total = getHitsTotal(response);
-
-        const alerts = response.hits.hits.map((hit) =>
-          omit(hit._source ?? {}, ...OMITTED_ALERT_FIELDS)
-        );
 
         return {
           results: [

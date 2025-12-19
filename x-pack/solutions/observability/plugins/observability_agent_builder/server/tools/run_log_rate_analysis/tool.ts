@@ -11,15 +11,13 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
-import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
+import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
@@ -90,33 +88,23 @@ Do NOT use for:
       try {
         const esClient = context.esClient.asCurrentUser;
 
-        const windowParameters: WindowParameters = {
-          baselineMin: parseDatemath(baseline.start),
-          baselineMax: parseDatemath(baseline.end, { roundUp: true }),
-          deviationMin: parseDatemath(deviation.start),
-          deviationMax: parseDatemath(deviation.end, { roundUp: true }),
-        };
-
-        const response = await runLogRateAnalysis({
+        const { analysisType, items } = await getToolHandler({
           esClient,
-          arguments: {
-            index,
-            windowParameters,
-            timefield: timeFieldName,
-            searchQuery: searchQuery ?? { match_all: {} },
-          },
+          logger,
+          index,
+          timeFieldName,
+          baseline,
+          deviation,
+          searchQuery,
         });
-        logger.debug(
-          `Log rate analysis tool (index: "${index}") found ${response.significantItems.length} items of type ${response.logRateAnalysisType}.`
-        );
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                analysisType: response.logRateAnalysisType,
-                items: response.significantItems,
+                analysisType,
+                items,
               },
             },
           ],
