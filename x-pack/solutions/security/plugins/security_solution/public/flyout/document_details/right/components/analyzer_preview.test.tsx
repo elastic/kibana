@@ -45,8 +45,6 @@ const renderAnalyzerPreview = (contextValue: DocumentDetailsContext) =>
     </TestProviders>
   );
 
-const NO_DATA_MESSAGE = 'An error is preventing this alert from being analyzed.';
-
 const dataView: DataView = createStubDataView({
   spec: { title: '.alerts-security.alerts-default' },
 });
@@ -167,7 +165,7 @@ describe('<AnalyzerPreview />', () => {
     };
     const { getByText } = renderAnalyzerPreview(contextValue);
 
-    expect(getByText('An error is preventing this alert from being analyzed.')).toBeInTheDocument();
+    expect(getByText('Unable to retrieve the data view for analyzer.')).toBeInTheDocument();
   });
 
   it('should show error message if the data view is ready but no matched indices', () => {
@@ -185,7 +183,7 @@ describe('<AnalyzerPreview />', () => {
     };
     const { getByText } = renderAnalyzerPreview(contextValue);
 
-    expect(getByText('An error is preventing this alert from being analyzed.')).toBeInTheDocument();
+    expect(getByText('Unable to retrieve the data view for analyzer.')).toBeInTheDocument();
   });
 
   it('should show error message when there is an error fetching the process tree data', () => {
@@ -198,6 +196,6 @@ describe('<AnalyzerPreview />', () => {
 
     const { getByText } = renderAnalyzerPreview(mockContextValue);
 
-    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(getByText('An error is preventing this alert from being analyzed.')).toBeInTheDocument();
   });
 });

@@ -23,6 +23,20 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
+const DATAVIEW_ERROR = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.dataViewErrorDescription"
+    defaultMessage="Unable to retrieve the data view for analyzer."
+  />
+);
+
+const ANALYZER_ERROR = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
+    defaultMessage="An error is preventing this alert from being analyzed."
+  />
+);
+
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
 const DESCENDANT_LEVEL = 3;
@@ -102,17 +116,12 @@ export const AnalyzerPreview: React.FC = () => {
     );
   }
 
-  if (
-    status === 'error' ||
-    (status === 'ready' && !dataView.hasMatchedIndices()) ||
-    !showAnalyzerTree
-  ) {
-    return (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription"
-        defaultMessage="An error is preventing this alert from being analyzed."
-      />
-    );
+  if (status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices())) {
+    return DATAVIEW_ERROR;
+  }
+
+  if (!showAnalyzerTree) {
+    return ANALYZER_ERROR;
   }
 
   return (
