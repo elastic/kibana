@@ -19,6 +19,7 @@
       "visualizations",
       "dataViews",
       "unifiedSearch",
+      "kql",
       "kibanaUtils",
       "contentManagement"
     ],

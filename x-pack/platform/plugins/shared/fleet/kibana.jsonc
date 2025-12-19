@@ -23,6 +23,7 @@
       "share",
       "security",
       "unifiedSearch",
+      "kql",
       "savedObjectsTagging",
       "taskManager",
       "files",

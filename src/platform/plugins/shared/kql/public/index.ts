@@ -6,6 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { KqlPlugin } from './plugin';
+
 export type { KqlPluginStart, KqlPluginSetup } from './plugin';
 export type { QueryStringInputProps } from './components/query_string_input/query_string_input';
 export { QueryStringInput } from './components/query_string_input/query_string_input';
@@ -24,3 +27,7 @@ export { type SuggestionsAbstraction } from './components/typeahead/suggestions_
 export type { SuggestionsListSize } from './components/typeahead/suggestions_component';
 
 export { QuerySuggestionTypes } from './autocomplete/providers/query_suggestion_provider';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new KqlPlugin(initializerContext);
+}

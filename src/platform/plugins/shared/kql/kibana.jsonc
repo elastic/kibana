@@ -16,6 +16,8 @@
       "dataViews",
       "uiActions",
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
   }
 }
