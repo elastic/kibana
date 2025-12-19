@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with read rules and all exceptions role', () => {
+      describe('@skipInServerless with read rules and all exceptions role', () => {
         const role = ROLES.rules_read_exceptions_all;
 
         beforeEach(async () => {
@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
       });
-      describe('with read rules and read exceptions role', () => {
+      describe('@skipInServerless with read rules and read exceptions role', () => {
         const role = ROLES.rules_read_exceptions_read;
 
         beforeEach(async () => {
