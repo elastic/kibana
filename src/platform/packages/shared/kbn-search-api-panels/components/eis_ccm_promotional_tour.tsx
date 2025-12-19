@@ -74,7 +74,7 @@ export const EisCloudConnectPromoTour = ({
   } = useKibana();
   // Setting to enable hiding the tour for FTR tests
   const isEISTourEnabled = uiSettings?.get<boolean>(EIS_TOUR_ENABLED_FEATURE_FLAG_ID, true);
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}CloudConnectTour`,
   });
 
@@ -109,12 +109,12 @@ export const EisCloudConnectPromoTour = ({
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onDismissTour}
+      onFinish={onDismissPromo}
       footerAction={[
         <EuiButtonEmpty
           data-test-subj="eisCloudConnectPromoTourCloseBtn"
           data-telemetry-id={`${dataId}-dismiss-btn`}
-          onClick={onDismissTour}
+          onClick={onDismissPromo}
         >
           {EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,

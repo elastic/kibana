@@ -40,7 +40,7 @@ export const EisPromotionalCallout = ({
   isCloudEnabled,
   direction,
 }: EisPromotionalCalloutProps) => {
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}Callout`,
   });
 
@@ -67,7 +67,7 @@ export const EisPromotionalCallout = ({
           data-test-subj="eisPromoCalloutDismissBtn"
           iconType="cross"
           aria-label={EIS_CALLOUT_DISMISS_ARIA}
-          onClick={onDismissTour}
+          onClick={onDismissPromo}
           size="s"
         />
       </div>

@@ -66,7 +66,7 @@ export const EisUpdateCallout = ({
   hasUpdatePrivileges,
   addSpacer,
 }: EisUpdateCalloutProps) => {
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}UpdateCallout`,
   });
 
@@ -82,12 +82,11 @@ export const EisUpdateCallout = ({
       <EuiCallOut
         data-test-subj={dataId}
         css={({ euiTheme }) => ({
-          color: euiTheme.colors.primaryText,
           backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
           border: `${euiTheme.border.thin}`,
           borderRadius: `${euiTheme.border.radius.medium}`,
         })}
-        onDismiss={onDismissTour}
+        onDismiss={onDismissPromo}
       >
         <EuiFlexGroup direction={direction} alignItems="flexStart">
           <EuiImage src={searchRocketIcon} alt="" size="original" />

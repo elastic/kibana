@@ -55,7 +55,7 @@ export const EisTokenCostTour = ({
   children,
 }: EisTokenCostTourProps) => {
   const { euiTheme } = useEuiTheme();
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}Tour`,
   });
   const dataId = `${promoId}-eis-costs-tour`;
@@ -78,12 +78,12 @@ export const EisTokenCostTour = ({
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onDismissTour}
+      onFinish={onDismissPromo}
       footerAction={[
         <EuiButtonEmpty
           data-test-subj="tokenConsumptionCostTourCloseBtn"
           data-telemetry-id={`${dataId}-dismiss-btn`}
-          onClick={onDismissTour}
+          onClick={onDismissPromo}
           aria-label={i18n.EIS_COSTS_TOUR_DISMISS_ARIA}
         >
           {i18n.EIS_TOUR_DISMISS}
