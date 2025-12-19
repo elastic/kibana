@@ -153,6 +153,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/onechat-plugin'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/observability-overview-plugin'
 tags:
   - plugin
   - prod

@@ -53,7 +53,6 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/rule-registry-plugin'
   - '@kbn/alerts-grouping'
-  - '@kbn/grouping'
   - '@kbn/data-views-plugin'
   - '@kbn/visualization-ui-components'
   - '@kbn/event-annotation-components'
@@ -74,7 +73,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/lens-embeddable-utils'
-  - '@kbn/std'
   - '@kbn/actions-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/core-chrome-browser'
@@ -149,6 +147,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/onechat-plugin'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/observability-alerts-table'
 tags:
   - plugin
   - prod

@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/server-route-repository-utils'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-rendering-browser'
+  - '@kbn/observability-overview-plugin'
 tags:
   - plugin
   - prod

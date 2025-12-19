@@ -133,6 +133,7 @@ dependsOn:
   - '@kbn/esql-composer'
   - '@kbn/fleet-plugin'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/observability-overview-plugin'
 tags:
   - plugin
   - prod
