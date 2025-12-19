@@ -20,6 +20,17 @@ import {
 import { getFieldFromSchema, getFieldsFromSchema, renderField } from './field_builder';
 import type { FormConfig } from './form';
 import { addMeta } from './schema_connector_metadata';
+import { getWidgetComponent } from './widgets';
+
+jest.mock('./widgets', () => {
+  const module = jest.requireActual('./widgets');
+  return {
+    ...module,
+    getWidgetComponent: jest.fn(module.getWidgetComponent),
+  };
+});
+
+const getWidgetComponentMock = getWidgetComponent as jest.Mock;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -362,5 +373,59 @@ describe('Field Builder', () => {
 
       expect(screen.getByText('This is helpful text')).toBeDefined();
     });
+  });
+});
+
+describe('mocked getWidgetComponent', () => {
+  const formConfig: FormConfig = { isEdit: true };
+  const mockWidgetComponent = jest.fn((props) => {
+    return <div data-testid="mock-widget" />;
+  });
+
+  beforeAll(() => {
+    getWidgetComponentMock.mockReturnValue(mockWidgetComponent);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should pass correct props structure to WidgetComponent', () => {
+    const schema = z.string().default('default-value').meta({
+      label: 'Username Label',
+      placeholder: 'Enter your username',
+      helpText: 'This is help text',
+      disabled: true,
+    });
+
+    const path = 'username';
+
+    const field = getFieldFromSchema({ schema, path, formConfig });
+    render(renderField({ field }));
+
+    expect(mockWidgetComponent).toHaveBeenCalledTimes(1);
+
+    const receivedProps = mockWidgetComponent.mock.calls[0][0];
+
+    expect(receivedProps.path).toBe('username');
+    expect(receivedProps.formConfig).toBe(formConfig);
+
+    expect(receivedProps.fieldConfig).toBeDefined();
+    expect(receivedProps.fieldConfig.label).toBe('Username Label');
+    expect(receivedProps.fieldConfig.defaultValue).toBe('default-value');
+    expect(receivedProps.fieldConfig.validations).toHaveLength(1);
+    expect(typeof receivedProps.fieldConfig.validations[0].validator).toBe('function');
+
+    expect(receivedProps.fieldProps).toBeDefined();
+    expect(receivedProps.fieldProps.helpText).toBe('This is help text');
+    expect(receivedProps.fieldProps.fullWidth).toBe(true);
+    expect(receivedProps.fieldProps.labelAppend).toBeNull();
+
+    expect(receivedProps.fieldProps.euiFieldProps).toBeDefined();
+    expect(receivedProps.fieldProps.euiFieldProps.placeholder).toBe('Enter your username');
+    expect(receivedProps.fieldProps.euiFieldProps.disabled).toBe(true);
+    expect(receivedProps.fieldProps.euiFieldProps['data-test-subj']).toBe(
+      'generator-field-username'
+    );
   });
 });

@@ -38,8 +38,11 @@ import { useTabLabelWidth } from './use_tab_label_width';
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  selectedItemId?: string;
   isUnsaved?: boolean;
   isDragging?: boolean;
+  hideRightSeparator?: boolean;
+  onHoverChange?: (itemId: string, isHovered: boolean) => void;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
@@ -67,8 +70,11 @@ export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    selectedItemId,
     isUnsaved,
     isDragging,
+    hideRightSeparator,
+    onHoverChange,
     dragHandleProps,
     tabContentId,
     tabsSizeConfig,
@@ -89,6 +95,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
+  const prevSelectedItemIdRef = useRef<string | undefined>(selectedItemId);
   const previewData = useMemo(() => getPreviewData?.(item), [getPreviewData, item]);
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
@@ -188,6 +195,14 @@ export const Tab: React.FC<TabProps> = (props) => {
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
+  // dismisses action popover when the selected tab changes
+  useEffect(() => {
+    if (prevSelectedItemIdRef.current !== selectedItemId && !isSelected && isActionPopoverOpen) {
+      setActionPopover(false);
+    }
+    prevSelectedItemIdRef.current = selectedItemId;
+  }, [selectedItemId, isSelected, isActionPopoverOpen]);
+
   const mainTabContent = (
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
@@ -217,7 +232,16 @@ export const Tab: React.FC<TabProps> = (props) => {
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
               {previewData?.status === TabStatus.RUNNING && (
-                <EuiProgress size="xs" color="accent" position="absolute" />
+                <EuiProgress
+                  size="xs"
+                  color="accent"
+                  position="absolute"
+                  css={css`
+                    // we can't simply use overflow: hidden; because then curved notches are not visible
+                    border-top-left-radius: ${euiTheme.border.radius.small};
+                    border-top-right-radius: ${euiTheme.border.radius.small};
+                  `}
+                />
               )}
               <EuiFlexGroup
                 ref={tabLabelRef}
@@ -264,6 +288,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                     item={item}
                     getTabMenuItems={getTabMenuItems}
                     isPopoverOpen={isActionPopoverOpen}
+                    isSelected={isSelected}
                     setPopover={onToggleActionsMenu}
                     onEnterRenaming={onEnterRenaming}
                   />
@@ -273,14 +298,14 @@ export const Tab: React.FC<TabProps> = (props) => {
             )}
             {!disableCloseButton && !!onClose && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                <EuiToolTip content={closeButtonLabel}>
+                <EuiToolTip content={closeButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    // semantically role="tablist" does not allow other buttons in tabs
-                    aria-hidden={true}
+                    aria-label={closeButtonLabel}
                     color="text"
                     data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
                     iconType="cross"
                     onClick={onCloseEvent}
+                    tabIndex={isSelected ? 0 : -1}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -296,7 +321,10 @@ export const Tab: React.FC<TabProps> = (props) => {
       data-test-subj={`unifiedTabs_tab_${item.id}`}
       isSelected={isSelected}
       isDragging={isDragging}
+      hideRightSeparator={hideRightSeparator}
       services={services}
+      onMouseEnter={() => onHoverChange?.(item.id, true)}
+      onMouseLeave={() => onHoverChange?.(item.id, false)}
     >
       {mainTabContent}
     </TabWithBackground>

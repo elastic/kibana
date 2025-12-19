@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
-  RawRoundInput,
+  ConverseInput,
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
@@ -23,6 +23,8 @@ import type {
   ToolProvider,
   WritableToolResultStore,
   AttachmentsService,
+  PromptManager,
+  ConversationStateManager,
 } from '../runner';
 
 export type AgentHandlerFn = (
@@ -51,6 +53,10 @@ export interface AgentHandlerContext {
    */
   request: KibanaRequest;
   /**
+   * Id of the space associated with the request
+   */
+  spaceId: string;
+  /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
    */
@@ -76,6 +82,14 @@ export interface AgentHandlerContext {
    * Result store to access and add tool results during execution.
    */
   resultStore: WritableToolResultStore;
+  /**
+   * Used to manage interruptions.
+   */
+  promptManager: PromptManager;
+  /**
+   * Used to access and store state during interrupted executions.
+   */
+  stateManager: ConversationStateManager;
   /**
    * Event emitter that can be used to emits custom events
    */
@@ -105,7 +119,7 @@ export interface AgentParams {
   /**
    * The input triggering this round.
    */
-  nextInput: RawRoundInput;
+  nextInput: ConverseInput;
   /**
    * Agent capabilities to enable.
    */

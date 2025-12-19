@@ -89,9 +89,9 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
       '_g',
       cleanEmptyKeys({
-        time: params.timeRange,
+        time: params.time_range,
         filters: filters?.filter((f) => isFilterPinned(f)),
-        refreshInterval: params.refreshInterval,
+        refreshInterval: params.refresh_interval,
       }),
       { useHash },
       path

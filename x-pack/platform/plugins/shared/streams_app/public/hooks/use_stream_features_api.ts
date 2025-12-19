@@ -14,12 +14,8 @@ import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
-  upsertQuery: (feature: Feature) => Promise<void>;
-  identifyFeatures: (
-    connectorId: string,
-    to: string,
-    from: string
-  ) => Promise<IdentifiedFeaturesEvent>;
+  upsertFeature: (feature: Feature) => Promise<void>;
+  identifyFeatures: (connectorId: string) => Promise<IdentifiedFeaturesEvent>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (
     features: Pick<Feature, 'type' | 'name'>[]
@@ -40,7 +36,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    identifyFeatures: async (connectorId: string, to: string, from: string) => {
+    identifyFeatures: async (connectorId: string) => {
+      const now = Date.now();
       const events$ = streamsRepositoryClient.stream(
         'POST /internal/streams/{name}/features/_identify',
         {
@@ -49,8 +46,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
             path: { name: definition.name },
             query: {
               connectorId,
-              to,
-              from,
+              to: new Date(now).toISOString(),
+              from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
             },
           },
         }
@@ -80,15 +77,13 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     addFeaturesToStream: async (features: Feature[]) => {
       telemetryClient.trackFeaturesSaved({
         count: features.length,
-        count_by_type: features.reduce<Record<string, number>>(
+        count_by_type: features.reduce<Record<FeatureType, number>>(
           (acc, feature) => {
             acc[feature.type] = (acc[feature.type] || 0) + 1;
             return acc;
           },
           {
             system: 0,
-            technology: 0,
-            infrastructure: 0,
           }
         ),
         stream_name: definition.name,
@@ -114,10 +109,15 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     removeFeaturesFromStream: async (features: Pick<Feature, 'type' | 'name'>[]) => {
       telemetryClient.trackFeaturesDeleted({
         count: features.length,
-        count_by_type: features.reduce<Record<string, number>>((acc, feature) => {
-          acc[feature.type] = (acc[feature.type] || 0) + 1;
-          return acc;
-        }, {}),
+        count_by_type: features.reduce<Record<FeatureType, number>>(
+          (acc, feature) => {
+            acc[feature.type] = (acc[feature.type] || 0) + 1;
+            return acc;
+          },
+          {
+            system: 0,
+          }
+        ),
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
       });
@@ -141,7 +141,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         },
       });
     },
-    upsertQuery: async (feature) => {
+    upsertFeature: async (feature) => {
       await streamsRepositoryClient.fetch(
         'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
         {

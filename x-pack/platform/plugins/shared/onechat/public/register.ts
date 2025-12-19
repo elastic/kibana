@@ -9,10 +9,8 @@ import type { AppMountParameters } from '@kbn/core-application-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { AGENT_BUILDER_AGENTS_CREATE } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
-import { eventTypes } from '../common/events';
+import { agentBuilderPublicEbtEvents } from '@kbn/onechat-common/telemetry';
 import {
   AGENT_BUILDER_FULL_TITLE,
   AGENT_BUILDER_SHORT_TITLE,
@@ -54,13 +52,6 @@ export const registerApp = ({
         path: '/agents',
         title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
       },
-      {
-        id: AGENT_BUILDER_AGENTS_CREATE,
-        path: '/agents/new',
-        title: i18n.translate('xpack.onechat.agents.createTitle', {
-          defaultMessage: 'Create Agent',
-        }),
-      },
     ],
     async mount({ element, history, onAppLeave }: AppMountParameters) {
       const { mountApp } = await import('./application');
@@ -81,68 +72,8 @@ export const registerApp = ({
   });
 };
 
-export const registerManagementSection = ({
-  core,
-  management,
-}: {
-  core: CoreSetup<OnechatStartDependencies>;
-  management: ManagementSetup;
-}) => {
-  management.sections.section.ai.registerApp({
-    id: 'agentBuilder',
-    title: AGENT_BUILDER_FULL_TITLE,
-    order: 3,
-    mount: async (mountParams) => {
-      const { mountManagementSection } = await import('./management/mount_management_section');
-      return mountManagementSection({ core, mountParams });
-    },
-  });
-};
-
 export const registerAnalytics = ({ analytics }: { analytics: AnalyticsServiceSetup }) => {
-  analytics.registerEventType({
-    eventType: eventTypes.ONECHAT_CONVERSE_ERROR,
-    schema: {
-      error_type: {
-        type: 'keyword',
-        _meta: {
-          description: 'The type/name of the error that occurred during conversation',
-        },
-      },
-      error_message: {
-        type: 'text',
-        _meta: {
-          description: 'The error message describing what went wrong',
-        },
-      },
-      error_stack: {
-        type: 'text',
-        _meta: {
-          description: 'The error stack trace if available',
-          optional: true,
-        },
-      },
-      conversation_id: {
-        type: 'keyword',
-        _meta: {
-          description: 'The ID of the conversation where the error occurred',
-          optional: true,
-        },
-      },
-      agent_id: {
-        type: 'keyword',
-        _meta: {
-          description: 'The ID of the agent involved in the conversation',
-          optional: true,
-        },
-      },
-      connector_id: {
-        type: 'keyword',
-        _meta: {
-          description: 'The ID of the connector used for the conversation',
-          optional: true,
-        },
-      },
-    },
+  agentBuilderPublicEbtEvents.forEach((eventConfig) => {
+    analytics.registerEventType(eventConfig);
   });
 };

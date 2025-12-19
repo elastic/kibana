@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { ONECHAT_USAGE_DOMAIN, trackLLMUsage as trackLLMUsageCounter } from './usage_counters';
-import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
+import {
+  normalizeErrorType,
+  sanitizeForCounterName,
+  getAgentExecutionErrorCode,
+} from './error_utils';
 /**
  * Tool call source - identifies where the tool was called from
  */
@@ -180,7 +184,7 @@ export class TrackingService {
   trackError(error: unknown, conversationId?: string): void {
     try {
       const errorType = normalizeErrorType(error);
-      const sanitizedType = sanitizeForCounterName(errorType);
+      let sanitizedType = sanitizeForCounterName(errorType);
 
       this.usageCounter.incrementCounter({
         counterName: `${ONECHAT_USAGE_DOMAIN}_error_total`,
@@ -188,6 +192,10 @@ export class TrackingService {
         incrementBy: 1,
       });
 
+      const agentExecutionErrorCode = getAgentExecutionErrorCode(error);
+      if (agentExecutionErrorCode) {
+        sanitizedType = `agentExecutionError_${sanitizeForCounterName(agentExecutionErrorCode)}`;
+      }
       this.usageCounter.incrementCounter({
         counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_${sanitizedType}`,
         counterType: 'count',
@@ -202,8 +210,6 @@ export class TrackingService {
           incrementBy: 1,
         });
       }
-
-      this.logger.debug(`Tracked error: type=${sanitizedType}`);
     } catch (err) {
       this.logger.error(
         `Failed to track error: ${err instanceof Error ? err.message : String(err)}`

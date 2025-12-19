@@ -6,19 +6,23 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
 import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
+import { RoundResponseActions } from './round_response_actions';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
+  hasError: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
+  hasError,
   response: { message },
   steps,
   isLoading,
@@ -30,6 +34,9 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       defaultMessage: 'Assistant response',
     })}
     data-test-subj="agentBuilderRoundResponse"
+    css={css`
+      position: relative;
+    `}
   >
     <EuiFlexItem>
       {isLoading ? (
@@ -38,5 +45,10 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
         <ChatMessageText content={message} steps={steps} />
       )}
     </EuiFlexItem>
+    {!isLoading && !hasError && (
+      <EuiFlexItem grow={false}>
+        <RoundResponseActions content={message} isVisible />
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );

@@ -2,7 +2,7 @@
   "type": "shared-server",
   "id": "@kbn/synthtrace",
   "owner": [
-    "@elastic/obs-ux-infra_services-team",
+    "@elastic/obs-presentation-team",
     "@elastic/obs-onboarding-team",
     "@elastic/obs-exploration-team"
   ],

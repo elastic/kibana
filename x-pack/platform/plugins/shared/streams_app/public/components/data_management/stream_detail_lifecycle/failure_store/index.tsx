@@ -61,7 +61,6 @@ export const StreamDetailFailureStore = ({
     defaultRetentionPeriod,
     customRetentionPeriod,
     inheritOptions,
-    refreshDefaultRetention,
     retentionDisabled,
   } = failureStoreConfig;
 
@@ -74,7 +73,6 @@ export const StreamDetailFailureStore = ({
       await updateFailureStore(definition.stream.name, transformFailureStoreConfig(update));
 
       refreshDefinition();
-      refreshDefaultRetention();
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreSuccess', {

@@ -926,7 +926,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"debug\" | \"trace\" | \"warn\" | undefined"
+              "\"error\" | \"info\" | \"trace\" | \"debug\" | \"warn\" | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_execution_engine/server/repositories/logs_repository/data_stream.ts",
             "deprecated": false,
@@ -1064,26 +1064,6 @@
       "children": [
         {
           "parentPluginId": "workflowsExecutionEngine",
-          "id": "def-server.WorkflowsExecutionEnginePluginStart.workflowEventLoggerService",
-          "type": "Object",
-          "tags": [],
-          "label": "workflowEventLoggerService",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "workflowsExecutionEngine",
-              "scope": "server",
-              "docId": "kibWorkflowsExecutionEnginePluginApi",
-              "section": "def-server.IWorkflowEventLoggerService",
-              "text": "IWorkflowEventLoggerService"
-            }
-          ],
-          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "workflowsExecutionEngine",
           "id": "def-server.WorkflowsExecutionEnginePluginStart.executeWorkflow",
           "type": "Function",
           "tags": [],
@@ -1107,6 +1087,7 @@
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1126,8 +1107,7 @@
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1137,12 +1117,11 @@
               "label": "context",
               "description": [],
               "signature": [
-                "Record<string, any>"
+                "{ [x: string]: any; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1157,11 +1136,9 @@
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             }
-          ],
-          "returnComment": []
+          ]
         },
         {
           "parentPluginId": "workflowsExecutionEngine",
@@ -1188,6 +1165,7 @@
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1207,8 +1185,7 @@
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1217,13 +1194,9 @@
               "tags": [],
               "label": "stepId",
               "description": [],
-              "signature": [
-                "string"
-              ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1233,12 +1206,11 @@
               "label": "contextOverride",
               "description": [],
               "signature": [
-                "Record<string, any>"
+                "{ [x: string]: any; }"
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1253,11 +1225,9 @@
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": false
+              "trackAdoption": false
             }
-          ],
-          "returnComment": []
+          ]
         },
         {
           "parentPluginId": "workflowsExecutionEngine",
@@ -1272,6 +1242,7 @@
           "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1280,13 +1251,9 @@
               "tags": [],
               "label": "workflowExecutionId",
               "description": [],
-              "signature": [
-                "string"
-              ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             },
             {
               "parentPluginId": "workflowsExecutionEngine",
@@ -1295,16 +1262,109 @@
               "tags": [],
               "label": "spaceId",
               "description": [],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "workflowsExecutionEngine",
+          "id": "def-server.WorkflowsExecutionEnginePluginStart.workflowEventLoggerService",
+          "type": "Object",
+          "tags": [],
+          "label": "workflowEventLoggerService",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "workflowsExecutionEngine",
+              "scope": "server",
+              "docId": "kibWorkflowsExecutionEnginePluginApi",
+              "section": "def-server.IWorkflowEventLoggerService",
+              "text": "IWorkflowEventLoggerService"
+            }
+          ],
+          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "workflowsExecutionEngine",
+          "id": "def-server.WorkflowsExecutionEnginePluginStart.scheduleWorkflow",
+          "type": "Function",
+          "tags": [],
+          "label": "scheduleWorkflow",
+          "description": [],
+          "signature": [
+            "(workflow: ",
+            {
+              "pluginId": "@kbn/workflows",
+              "scope": "common",
+              "docId": "kibKbnWorkflowsPluginApi",
+              "section": "def-common.WorkflowExecutionEngineModel",
+              "text": "WorkflowExecutionEngineModel"
+            },
+            ", context: Record<string, any>, request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => Promise<",
+            "ExecuteWorkflowResponse",
+            ">"
+          ],
+          "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.scheduleWorkflow.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "workflow",
+              "description": [],
               "signature": [
-                "string"
+                {
+                  "pluginId": "@kbn/workflows",
+                  "scope": "common",
+                  "docId": "kibKbnWorkflowsPluginApi",
+                  "section": "def-common.WorkflowExecutionEngineModel",
+                  "text": "WorkflowExecutionEngineModel"
+                }
               ],
               "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.scheduleWorkflow.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "{ [x: string]: any; }"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "workflowsExecutionEngine",
+              "id": "def-server.WorkflowsExecutionEnginePluginStart.scheduleWorkflow.$3",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "src/platform/plugins/shared/workflows_execution_engine/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false
             }
-          ],
-          "returnComment": []
+          ]
         }
       ],
       "lifecycle": "start",

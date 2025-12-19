@@ -19,6 +19,7 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { ExecutionError } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -201,9 +202,10 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | string | undefined): void {
+  public setWorkflowError(error: Error | undefined): void {
+    const executionError = error ? ExecutionError.fromError(error) : undefined;
     this.workflowExecutionState.updateWorkflowExecution({
-      error: error ? String(error) : undefined,
+      error: executionError ? executionError.toSerializableObject() : undefined,
     });
   }
 

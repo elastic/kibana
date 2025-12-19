@@ -38,21 +38,21 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const { isResponseLoading, error, retry: retrySendMessage } = useSendMessage();
 
+  const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
+  const isErrorCurrentRound = Boolean(error) && isCurrentRound;
+
   useEffect(() => {
-    if (isCurrentRound && isResponseLoading) {
+    // Pending rounds and error rounds should have a min-height to match the scroll container height
+    if ((isCurrentRound && isResponseLoading) || isErrorCurrentRound) {
       setRoundContainerMinHeight(scrollContainerHeight);
-    } else if (!isCurrentRound) {
+    } else {
       setRoundContainerMinHeight(0);
     }
-  }, [isCurrentRound, isResponseLoading, scrollContainerHeight]);
+  }, [isCurrentRound, isResponseLoading, scrollContainerHeight, isErrorCurrentRound]);
 
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
   `;
-
-  const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
-  const isErrorCurrentRound = Boolean(error) && isCurrentRound;
-
   return (
     <EuiFlexGroup
       direction="column"
@@ -62,13 +62,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     >
       {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <RoundInput input={input.message} />
+        <RoundInput input={input.message} attachments={input.attachments} />
       </EuiFlexItem>
 
       {/* Thinking */}
       <EuiFlexItem grow={false}>
         {isErrorCurrentRound ? (
-          <RoundError error={error} onRetry={retrySendMessage} />
+          <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
         ) : (
           <RoundThinking steps={steps} isLoading={isLoadingCurrentRound} rawRound={rawRound} />
         )}
@@ -77,7 +77,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       {/* Response Message */}
       <EuiFlexItem grow={false}>
         <EuiFlexItem>
-          <RoundResponse response={response} steps={steps} isLoading={isLoadingCurrentRound} />
+          <RoundResponse
+            hasError={isErrorCurrentRound}
+            response={response}
+            steps={steps}
+            isLoading={isLoadingCurrentRound}
+          />
         </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>

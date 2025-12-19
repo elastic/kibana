@@ -14,7 +14,6 @@ test.describe(
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs');
       // Create a parent wired stream
@@ -97,10 +96,10 @@ test.describe(
       // Click the "Add field" button
       await page.getByTestId('streamsAppContentAddFieldButton').click();
 
-      // Verify the add field flyout opens
-      await expect(
-        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
-      ).toBeVisible();
+      // Wait `/fields_metadata` so that we are sure the ECS/Otel mapping recommendations are available
+      await page.waitForResponse(
+        (response) => response.url().includes('/fields_metadata') && response.ok()
+      );
 
       // Add an Otel field that should have type recommendation (IP type)
       const ecsFieldName = 'resource.attributes.host.ip';
@@ -108,11 +107,8 @@ test.describe(
       await page.keyboard.type(ecsFieldName);
       await page.keyboard.press('Enter');
 
-      // Wait a moment for ECS/Otel recommendation to load
-      await page.waitForTimeout(500);
-
-      // Check if IP type is pre-selected or recommended
-      expect(await pageObjects.streams.fieldTypeSuperSelect.getSelectedValue()).toBe('ip');
+      // Wait for ECS/Otel recommendation to load and field type to be pre-selected
+      await expect(pageObjects.streams.fieldTypeSuperSelect.valueInputLocator).toHaveValue('ip');
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await expect(

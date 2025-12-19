@@ -68,6 +68,10 @@ export const BEARER_AUTH_LABEL = i18n.translate('connectorSpecs.authType.bearerA
   defaultMessage: 'Bearer token',
 });
 
+export const BEARER_TOKEN_LABEL = i18n.translate('connectorSpecs.bearerAuth.token.label', {
+  defaultMessage: 'Token',
+});
+
 export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
   'connectorSpecs.bearerAuth.token.requiredMessage',
   {
@@ -78,3 +82,87 @@ export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
 export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.label', {
   defaultMessage: 'None',
 });
+
+export const OAUTH_LABEL = i18n.translate('connectorSpecs.oauth.label', {
+  defaultMessage: 'OAuth Client Credentials',
+});
+
+export const OAUTH_TOKEN_URL_LABEL = i18n.translate('connectorSpecs.oauthTokenUrl.label', {
+  defaultMessage: 'Token URL',
+});
+
+export const OAUTH_CLIENT_ID_LABEL = i18n.translate('connectorSpecs.oauthClientId.label', {
+  defaultMessage: 'Client ID',
+});
+
+export const OAUTH_CLIENT_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientId.requiredMessage',
+  {
+    defaultMessage: 'Client ID is required',
+  }
+);
+
+export const OAUTH_SCOPE_LABEL = i18n.translate('connectorSpecs.oauthScope.label', {
+  defaultMessage: 'Scope',
+});
+
+export const OAUTH_CLIENT_SECRET_LABEL = i18n.translate('connectorSpecs.oauthClientSecret.label', {
+  defaultMessage: 'Client secret',
+});
+
+export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientSecret.requiredMessage',
+  {
+    defaultMessage: 'Client secret is required',
+  }
+);
+
+export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
+  defaultMessage: 'SSL CRT and Key authentication',
+});
+
+export const CRT_AUTH_CERT_LABEL = i18n.translate('connectorSpecs.crtCert.label', {
+  defaultMessage: 'CRT file',
+});
+
+export const CRT_AUTH_KEY_LABEL = i18n.translate('connectorSpecs.crtKey.label', {
+  defaultMessage: 'KEY file',
+});
+
+export const CRT_AUTH_PASSPHRASE_LABEL = i18n.translate('connectorSpecs.crtPassphrase.label', {
+  defaultMessage: 'Passphrase',
+});
+
+export const CRT_AUTH_CA_LABEL = i18n.translate('connectorSpecs.crtCA.label', {
+  defaultMessage: 'CA file',
+});
+
+export const CRT_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.crtVerificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);
+
+export const PFX_AUTH_LABEL = i18n.translate('connectorSpecs.pfx.label', {
+  defaultMessage: 'SSL PFX authentication',
+});
+
+export const PFX_AUTH_CERT_LABEL = i18n.translate('connectorSpecs.crtCert.label', {
+  defaultMessage: 'PFX file',
+});
+
+export const PFX_AUTH_PASSPHRASE_LABEL = i18n.translate('connectorSpecs.pfxPassphrase.label', {
+  defaultMessage: 'Passphrase',
+});
+
+export const PFX_AUTH_CA_LABEL = i18n.translate('connectorSpecs.pfxCA.label', {
+  defaultMessage: 'CA file',
+});
+
+export const PFX_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
+  'connectorSpecs.pfxVerificationMode.label',
+  {
+    defaultMessage: 'Verification mode',
+  }
+);

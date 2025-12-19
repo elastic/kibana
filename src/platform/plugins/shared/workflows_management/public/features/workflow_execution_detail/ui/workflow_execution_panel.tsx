@@ -23,10 +23,9 @@ import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
+import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
-import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -95,25 +94,13 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
           <EuiPanel paddingSize="m" hasShadow={false} css={{ overflow: 'hidden' }}>
-            <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
-              <EuiFlexItem grow={false}>
-                <WorkflowExecutionListItem
-                  status={execution?.status ?? ExecutionStatus.PENDING}
-                  startedAt={execution?.startedAt ? new Date(execution.startedAt) : null}
-                  duration={execution?.duration ?? null}
-                  isTestRun={execution?.isTestRun ?? false}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem css={{ overflowY: 'auto' }}>
-                <WorkflowStepExecutionTree
-                  definition={definition}
-                  execution={execution ?? null}
-                  error={error}
-                  onStepExecutionClick={onStepExecutionClick}
-                  selectedId={selectedStepExecutionId ?? null}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <WorkflowStepExecutionTree
+              definition={definition}
+              execution={execution ?? null}
+              error={error}
+              onStepExecutionClick={onStepExecutionClick}
+              selectedId={selectedStepExecutionId ?? null}
+            />
           </EuiPanel>
         </EuiFlexItem>
 

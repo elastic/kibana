@@ -8,20 +8,37 @@
  */
 
 import React from 'react';
-import { EuiIconTip, euiButtonSizeMap, useEuiTheme, type IconColor } from '@elastic/eui';
+import {
+  EuiIconTip,
+  euiButtonSizeMap,
+  useEuiTheme,
+  type IconColor,
+  type IconSize,
+} from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { SplitButton, type SplitButtonProps } from './split_button';
 
 export type SplitButtonWithNotificationProps = SplitButtonProps & {
   showNotificationIndicator?: boolean;
   notificationIndicatorColor?: IconColor;
+  notificationIndicatorSize?: IconSize;
   notifcationIndicatorTooltipContent?: string;
+  notificationIndicatorPosition?: {
+    top?: number;
+    right?: number;
+    left?: number;
+    bottom?: number;
+  };
+  notificationIndicatorHasStroke?: boolean;
 };
 
 export const SplitButtonWithNotification = ({
   showNotificationIndicator = false,
-  notificationIndicatorColor,
+  notificationIndicatorColor = 'primary',
+  notificationIndicatorSize = 'l',
   notifcationIndicatorTooltipContent,
+  notificationIndicatorPosition,
+  notificationIndicatorHasStroke = true,
   ...splitButtonProps
 }: SplitButtonWithNotificationProps) => {
   const euiThemeContext = useEuiTheme();
@@ -34,9 +51,7 @@ export const SplitButtonWithNotification = ({
    * */
   const size = splitButtonProps?.size ?? 'm';
   const buttonSizes = euiButtonSizeMap(euiThemeContext);
-  const secondaryButtonWidth = buttonSizes[size].height;
-
-  const notificationColor = notificationIndicatorColor || euiThemeContext.euiTheme.colors.primary;
+  const secondaryButtonWidth = buttonSizes[size]?.height;
 
   return (
     <div css={styles.buttonWrapper}>
@@ -46,19 +61,29 @@ export const SplitButtonWithNotification = ({
           data-test-subj="split-button-notification-indicator"
           css={{
             position: 'absolute' as const,
-            top: '-10px',
-            right: secondaryButtonWidth,
+            top: notificationIndicatorPosition?.top ?? -10,
+            right: notificationIndicatorPosition?.right ?? secondaryButtonWidth,
+            left: notificationIndicatorPosition?.left,
+            bottom: notificationIndicatorPosition?.bottom,
             zIndex: 1,
+            pointerEvents: 'none',
+            ...(notificationIndicatorHasStroke && {
+              '& svg': {
+                stroke: 'white',
+                strokeWidth: '2px',
+                paintOrder: 'stroke fill',
+              },
+            }),
           }}
         >
-          <EuiIconTip
-            type="dot"
-            iconProps={{
-              color: notificationColor,
-            }}
-            size="l"
-            content={notifcationIndicatorTooltipContent}
-          />
+          <span css={{ pointerEvents: 'auto' }}>
+            <EuiIconTip
+              type="dot"
+              size={notificationIndicatorSize}
+              color={notificationIndicatorColor}
+              content={notifcationIndicatorTooltipContent}
+            />
+          </span>
         </div>
       )}
     </div>

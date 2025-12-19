@@ -25,6 +25,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
     const { inference, trackingService, ...otherDeps } = this.deps;
     return {
       ...otherDeps,
+      trackingService,
       modelProviderFactory: createModelProviderFactory({ inference, trackingService }),
     };
   }

@@ -130,7 +130,7 @@ export function ExportContentPackFlyout({
             <ContentPackObjectsList
               objects={exportResponse.contentPack.entries}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents?.available ?? false}
+              significantEventsAvailable={significantEvents?.enabled ?? false}
             />
           </>
         ) : null}

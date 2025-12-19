@@ -63,6 +63,7 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -78,7 +79,9 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "onechat",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -89,7 +92,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "onechat"
     ],
     "extraPublicDirs": [
       "common"

@@ -17,7 +17,7 @@ export class EuiSuperSelectWrapper {
   private readonly superSelectControlWrapper: Locator;
   private readonly button: Locator;
   private readonly dropdown: Locator;
-  private readonly selectedOption: Locator;
+  public readonly valueInputLocator: Locator;
 
   /**
    * Create a new EuiSuperSelectWrapper instance.
@@ -34,6 +34,8 @@ export class EuiSuperSelectWrapper {
       .locator('.euiSuperSelect')
       .filter({ has: initialLocator });
 
+    this.valueInputLocator = this.superSelectControlWrapper.locator('input[type="hidden"]');
+
     // EuiSuperSelect renders a button element that acts as the toggle
     // The initial locator should be the button, but also find it within wrapper as fallback
     this.button = initialLocator.or(
@@ -42,9 +44,6 @@ export class EuiSuperSelectWrapper {
 
     // The dropdown is a listbox that only appears when the button is clicked (opened)
     this.dropdown = this.page.locator('[role="listbox"]');
-
-    // role="option" with aria-selected="true" indicates the selected option
-    this.selectedOption = this.dropdown.locator('[role="option"][aria-selected="true"]');
   }
 
   toggleDropdown = async (): Promise<void> => {
@@ -56,45 +55,6 @@ export class EuiSuperSelectWrapper {
 
     return classes?.includes('-open') || false;
   };
-
-  /**
-   * Get the selected value from the super select.
-   * This extracts the actual value, not the display text.
-   * EuiSuperSelect stores the selected value in a hidden input element.
-   */
-  async getSelectedValue(): Promise<string> {
-    const hiddenInput = this.superSelectControlWrapper.locator('input[type="hidden"]');
-    const inputExists = (await hiddenInput.count()) > 0;
-
-    if (inputExists) {
-      const value = await hiddenInput.getAttribute('value');
-      if (value) {
-        return value;
-      }
-    }
-
-    // Fallback: extract the value from the id of the selected option
-    let isToggled = false;
-    if (!(await this.getIsDropdownOpened())) {
-      await this.toggleDropdown();
-      isToggled = true;
-    }
-
-    const selectedOptionExists = (await this.selectedOption.count()) > 0;
-    if (selectedOptionExists) {
-      const optionId = await this.selectedOption.getAttribute('id');
-      if (optionId) {
-        return optionId;
-      }
-    }
-
-    if (isToggled) {
-      await this.toggleDropdown();
-    }
-
-    // Return empty string if nothing found
-    return '';
-  }
 
   /**
    * Select an option by its value or test-subj identifier.

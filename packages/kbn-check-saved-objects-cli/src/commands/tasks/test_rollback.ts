@@ -35,6 +35,7 @@ export const testRollback: Task = async (ctx, task) => {
       title: `Ensure SO API-retrieved SOs match previous version fixtures`,
       task: checkDocuments({
         repository: savedObjectsRepository,
+        types: previousVersionTypes,
         fixtures: ctx.fixtures.previous,
       }),
     },

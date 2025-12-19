@@ -112,6 +112,14 @@ export const epmRouteService = {
     return EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN.replace('{taskId}', taskId);
   },
 
+  getRollbackAvailableCheckPath: (pkgName: string) => {
+    return EPM_API_ROUTES.ROLLBACK_AVAILABLE_CHECK_PATTERN.replace('{pkgName}', pkgName);
+  },
+
+  getBulkRollbackAvailableCheckPath: () => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN;
+  },
+
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)

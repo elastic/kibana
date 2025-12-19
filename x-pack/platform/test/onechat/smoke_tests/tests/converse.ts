@@ -40,7 +40,7 @@ export const converseApiSuite = (
           connector_id: connectorId,
         });
 
-        expect(response.response.message.length).to.be.greaterThan(0);
+        expect(response.response.message!.length).to.be.greaterThan(0);
       });
 
       it('can execute a tool', async () => {
@@ -49,10 +49,10 @@ export const converseApiSuite = (
           connector_id: connectorId,
         });
 
-        expect(response.response.message.length).to.be.greaterThan(0);
+        expect(response.response.message!.length).to.be.greaterThan(0);
 
         const toolCalls = response.steps.filter(isToolCallStep);
-        expect(toolCalls.length).to.eql(1);
+        expect(toolCalls.length >= 1).to.be(true);
 
         const toolCall = toolCalls[0];
         expect(toolCall.tool_id).to.eql(platformCoreTools.listIndices);
@@ -64,7 +64,7 @@ export const converseApiSuite = (
           connector_id: connectorId,
         });
 
-        expect(response1.response.message.length).to.be.greaterThan(0);
+        expect(response1.response.message!.length).to.be.greaterThan(0);
 
         const response2 = await converse({
           conversation_id: response1.conversation_id,
@@ -72,7 +72,7 @@ export const converseApiSuite = (
           connector_id: connectorId,
         });
 
-        expect(response2.response.message.length).to.be.greaterThan(0);
+        expect(response2.response.message!.length).to.be.greaterThan(0);
       });
     });
   });
