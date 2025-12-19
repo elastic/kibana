@@ -6,13 +6,25 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import { generateRulesData } from '../fixtures/generators';
+import { createDataView, generateLogsData, generateRulesData } from '../fixtures/generators';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apiServices, log }) => {
+  async ({ apiServices, log, logsSynthtraceEsClient, kbnClient }) => {
     log.info('Generating Observability data...');
     await generateRulesData(apiServices);
+
+    await generateLogsData({
+      from: Date.now() - 15 * 60 * 1000, // 15 minutes ago
+      to: Date.now(),
+      client: logsSynthtraceEsClient,
+    });
+
+    await createDataView(kbnClient, {
+      name: 'test-data-view-name_1',
+      id: 'test-data-view-id_1',
+      title: 'logs-*',
+    });
   }
 );

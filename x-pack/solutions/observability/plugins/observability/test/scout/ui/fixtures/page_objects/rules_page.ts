@@ -333,4 +333,12 @@ export class RulesPage {
     await this.editRuleFlyoutCancelButton.click();
     await expect(this.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
   }
+
+  public get observabilityCategory() {
+    return this.ruleTypeModal.locator('.euiFacetButton[title="Observability"]');
+  }
+
+  public get customThresholdRuleType() {
+    return this.page.testSubj.locator(RULE_TYPE_MODAL_TEST_SUBJECTS.CUSTOM_THRESHOLD_RULE_TYPE);
+  }
 }
