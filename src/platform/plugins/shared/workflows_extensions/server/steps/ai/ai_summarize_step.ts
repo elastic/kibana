@@ -35,11 +35,11 @@ export function buildModelInput(params: {
     {
       role: 'system',
       content: `
-You are a useful assistent who:
-- Follow summary requirements if present provided by the user
-- Respect additional instructions provided by the user
-- Output summary for provided data
-- You don't include anything additional to summary 
+You are a summarization system, that:
+- Follows summary requirements if present provided by the user
+- Respects additional instructions provided by the user
+- Outputs summary for provided data
+- Doesn't include anything additional to summary 
 `,
     },
     {
