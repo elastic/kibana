@@ -13,7 +13,6 @@ import { Parser } from '@kbn/esql-language';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
-import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createChartSection } from './accessor/chart_section';
 
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
@@ -21,29 +20,26 @@ export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvid
 export const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
 // FIXME: could kbn-esql-language provide a union type with existing commands?
 const SUPPORTED_ESQL_COMMANDS = new Set(['ts', 'limit', 'sort', 'where']);
-export const createMetricsDataSourceProfileProvider = (
-  services: ProfileProviderServices
-): MetricsExperienceDataSourceProfileProvider => ({
-  profileId: METRICS_DATA_SOURCE_PROFILE_ID,
-  restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
-  profile: {
-    getChartSectionConfiguration: createChartSection(
-      services.metricsContextService.getMetricsExperienceClient()
-    ),
-  },
-  resolve: async ({ query, rootContext }) => {
-    if (!isQuerySupported(query) || !isSolutionValid(rootContext.solutionType)) {
-      return { isMatch: false };
-    }
+export const createMetricsDataSourceProfileProvider =
+  (): MetricsExperienceDataSourceProfileProvider => ({
+    profileId: METRICS_DATA_SOURCE_PROFILE_ID,
+    restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
+    profile: {
+      getChartSectionConfiguration: createChartSection(),
+    },
+    resolve: async ({ query, rootContext }) => {
+      if (!isQuerySupported(query) || !isSolutionValid(rootContext.solutionType)) {
+        return { isMatch: false };
+      }
 
-    return {
-      isMatch: true,
-      context: {
-        category: DataSourceCategory.Metrics,
-      },
-    };
-  },
-});
+      return {
+        isMatch: true,
+        context: {
+          category: DataSourceCategory.Metrics,
+        },
+      };
+    },
+  });
 
 function isSolutionValid(solutionType: SolutionType) {
   return [

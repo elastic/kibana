@@ -245,11 +245,13 @@ async function getSuggestionsWithinCommandExpression(
     return findNewUserDefinedColumn(allUserDefinedColumns);
   };
 
+  // Get the context that might be needed by the command itself
   const additionalCommandContext = await getCommandContext(
-    astContext.command.name,
+    astContext.command,
     innerText,
     callbacks
   );
+
   const context = {
     ...references,
     ...additionalCommandContext,

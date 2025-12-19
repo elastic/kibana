@@ -38,6 +38,7 @@ export const EditModeToggle = () => {
         defaultMessage: 'Interactive',
       }),
       isDisabled: interactiveModeIsUnavailable || (hasErrors && !isInteractiveMode),
+      'data-test-subj': 'streamsAppEnrichmentEditModeInteractiveButton',
     },
     {
       id: 'yaml',
@@ -45,6 +46,7 @@ export const EditModeToggle = () => {
         defaultMessage: 'YAML',
       }),
       isDisabled: hasErrors && isInteractiveMode,
+      'data-test-subj': 'streamsAppEnrichmentEditModeYamlButton',
     },
   ];
 

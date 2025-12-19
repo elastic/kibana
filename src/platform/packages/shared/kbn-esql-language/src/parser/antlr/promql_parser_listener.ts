@@ -1,4 +1,4 @@
-// Generated from src/antlr/promql_parser.g4 by ANTLR 4.13.2
+// Generated from src/parser/antlr/promql_parser.g4 by ANTLR 4.13.2
 
 import {ParseTreeListener} from "antlr4";
 
