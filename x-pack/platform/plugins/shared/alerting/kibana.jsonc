@@ -24,6 +24,7 @@
       "management",
       "esUiShared",
       "unifiedSearch",
+      "kql",
       "embeddable"
     ],
     "optionalPlugins": [
