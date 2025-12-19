@@ -3619,6 +3619,63 @@
         },
         "total_filled_gap_duration_ms": {
           "type": "long"
+        },
+        "gap_auto_fill_scheduler_runs_per_day": {
+          "type": "long"
+        },
+        "gap_auto_fill_scheduler_runs_by_status_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "success": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            },
+            "skipped": {
+              "type": "long"
+            },
+            "no_gaps": {
+              "type": "long"
+            }
+          }
+        },
+        "gap_auto_fill_scheduler_duration_ms_per_day": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "sum": {
+              "type": "float"
+            }
+          }
+        },
+        "gap_auto_fill_scheduler_unique_rule_count_per_day": {
+          "type": "long"
+        },
+        "gap_auto_fill_scheduler_processed_gaps_total_per_day": {
+          "type": "long"
+        },
+        "gap_auto_fill_scheduler_results_by_status_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "success": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            }
+          }
         }
       }
     },
