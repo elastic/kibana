@@ -19,6 +19,7 @@ import {
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import type { MouseEvent, HTMLAttributes } from 'react';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import React, { useState, useEffect, useCallback } from 'react';
 import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -30,7 +31,6 @@ import { FilterView } from '../filter_view';
 import type { FilterPanelOption } from '../../types';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_editor';
-import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;

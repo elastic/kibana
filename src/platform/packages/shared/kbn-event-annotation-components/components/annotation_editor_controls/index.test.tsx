@@ -66,7 +66,6 @@ describe('AnnotationsPanel', () => {
     uiSettings: {},
     storage: {},
     dataViews: {},
-    unifiedSearch: {},
     docLinks: {},
     notifications: {},
     data: {},

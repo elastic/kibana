@@ -42,7 +42,6 @@ export function QueryBarWrapper({
     notifications,
     http,
     docLinks,
-    core,
     uiSettings,
     usageCollection,
   } = kibana.services;
@@ -81,7 +80,6 @@ export function QueryBarWrapper({
       appName={appName}
       deps={{
         autocomplete: kql.autocomplete,
-        core,
         notifications,
         http,
         docLinks,

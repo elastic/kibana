@@ -19,5 +19,4 @@ export { FilterItem } from './filter_bar/filter_item/filter_item';
 export { FilterItems } from './filter_bar/filter_item/filter_items';
 export { IndexPatternSelect } from './index_pattern_select/index_pattern_select';
 export { QueryBarTopRow } from './query_string_input/query_bar_top_row';
-export { SuggestionsComponent } from './typeahead/suggestions_component';
 export { default as SearchBar } from './search_bar/search_bar';

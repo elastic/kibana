@@ -51,15 +51,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput } from '@kbn/kql/public';
+import { FilterButtonGroup } from '@kbn/kql/public';
+import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
-import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
-import type {
-  SuggestionsAbstraction,
-  SuggestionsListSize,
-} from '../typeahead/suggestions_component';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 
@@ -321,7 +318,7 @@ export const QueryBarTopRow = React.memo(
       appName,
       data,
       usageCollection,
-      unifiedSearch,
+      kql,
       notifications,
       docLinks,
       http,
@@ -885,7 +882,7 @@ export const QueryBarTopRow = React.memo(
             submitOnBlur={props.submitOnBlur}
             bubbleSubmitEvent={props.bubbleSubmitEvent}
             deps={{
-              unifiedSearch,
+              autocomplete: kql.autocomplete,
               data,
               storage,
               usageCollection,

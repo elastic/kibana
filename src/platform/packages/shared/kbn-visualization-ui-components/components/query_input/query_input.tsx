@@ -11,7 +11,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
-import { type UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import { QueryStringInput } from '@kbn/kql/public';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -30,7 +29,6 @@ export interface QueryInputServices {
   data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   kql: KqlPluginStart;
   docLinks: DocLinksStart;
 }
@@ -45,7 +43,7 @@ export const QueryInput = ({
   ['data-test-subj']: dataTestSubj,
   placeholder,
   appName,
-  services: { data, uiSettings, http, notifications, docLinks, storage, kql, dataViews, core },
+  services: { data, uiSettings, http, notifications, docLinks, storage, kql, dataViews },
 }: {
   value: Query;
   onChange: (input: Query) => void;
@@ -95,7 +93,6 @@ export const QueryInput = ({
       appName={appName}
       deps={{
         autocomplete: kql.autocomplete,
-        core,
         notifications,
         http,
         docLinks,

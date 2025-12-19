@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QuerySuggestion } from '../autocomplete';
+import type { CoreStart } from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
-export type SuggestionOnClick = (suggestion: QuerySuggestion, index: number) => void;
-
-export type SuggestionOnMouseEnter = (suggestion: QuerySuggestion, index: number) => void;
+export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');

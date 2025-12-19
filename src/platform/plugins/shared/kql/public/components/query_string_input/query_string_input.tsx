@@ -56,6 +56,7 @@ import { onRaf } from '../utils';
 import { FilterButtonGroup } from './filter_button_group';
 import type { AutocompleteService, QuerySuggestion } from '../../autocomplete';
 import { QuerySuggestionTypes } from '../../autocomplete';
+import { getCoreStart } from '../../services';
 import { StyledDiv } from './query_string_input.styles';
 
 export const strings = {
@@ -98,7 +99,6 @@ export interface QueryStringInputDependencies {
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
   dataViews: DataViewsPublicPluginStart;
-  core: CoreStart;
 }
 
 export interface QueryStringInputProps {
@@ -564,7 +564,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>,
-            this.props.deps.core
+            getCoreStart()
           ),
         });
       }

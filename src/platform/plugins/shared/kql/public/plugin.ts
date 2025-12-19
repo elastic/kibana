@@ -20,6 +20,7 @@ import {
   type AutocompleteStart,
   type AutocompleteSetup,
 } from './autocomplete/autocomplete_service';
+import { setCoreStart } from './services';
 
 export interface KqlPluginSetupDependencies {
   data: DataPublicPluginSetup;
@@ -68,6 +69,7 @@ export class KqlPlugin implements Plugin<{}, KqlPluginStart> {
 
   public start(core: CoreStart, { data, dataViews }: KqlPluginStartDependencies): KqlPluginStart {
     const autocompleteStart = this.autocomplete.start();
+    setCoreStart(core);
 
     return {
       autocomplete: autocompleteStart,
@@ -80,7 +82,6 @@ export class KqlPlugin implements Plugin<{}, KqlPluginStart> {
         storage: this.storage,
         uiSettings: core.uiSettings,
         autocomplete: autocompleteStart,
-        core,
       }),
     };
   }
