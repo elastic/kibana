@@ -47,7 +47,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Memory Dump response actions support for Elastic Defend.
    * Release: v9.3
    */
-  responseActionsEndpointMemoryDump: false,
+  responseActionsEndpointMemoryDump: true,
 
   /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
@@ -108,7 +108,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForTrustedAppsEnabled: false,
+  filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
    * Enables the rule's bulk action to manage alert suppression
@@ -207,7 +207,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables DNS events toggle for Linux in Endpoint policy configuration.
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
-  linuxDnsEvents: false,
+  linuxDnsEvents: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
