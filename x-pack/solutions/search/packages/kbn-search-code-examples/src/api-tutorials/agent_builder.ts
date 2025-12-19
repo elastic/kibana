@@ -29,7 +29,7 @@ PUT /kibana_sample_data_agents
 POST /_bulk
 { "index" : { "_index" : "kibana_sample_data_agents" } }
 {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
-{ "index" : { "_index" : "kibana_sample_data_agentsj" } }
+{ "index" : { "_index" : "kibana_sample_data_agents" } }
 {"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585}
 { "index" : { "_index" : "kibana_sample_data_agents" } }
 {"name": "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328}
@@ -57,7 +57,44 @@ GET kbn://api/agent_builder/tools
 
 # TODO: explain the attributes in the response: tags, configuration, readonly
 
+# NEW STEP
+# Here we are using one of the built in tools to generate an ES|QL query against our sample data
 
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "platform.core.generate_esql",
+  "tool_params": {
+    "query": "Build an ES|QL query to get the book with the most pages",
+    "index": "kibana_sample_data_agents"
+  }
+}
+
+# The response includes the ES|QL query that can be used to create a custom tool:
+#"results": [
+#  {
+#    "type": "query",
+#    "data": {
+#      "esql": """FROM kibana_sample_data_agents
+#| SORT page_count DESC
+#| LIMIT 1"""
+#    },
+#    "tool_result_id": "cqoOIt"
+#  },
+#]
+
+# Tools can be created to best fit common use cases with your agent interactions.
+# Using the query from the previous step, we are creating a tool that gets the book with the most pages.
+
+POST kbn://api/agent_builder/tools
+{
+  "id": "most-pages-esql-tool",
+  "type": "esql",
+  "description": "An ES|QL query tool for getting the book with the most pages",
+  "tags": ["books", "analytics", "sample"],
+  "configuration": {
+    "query": "FROM kibana_sample_data_agents | SORT page_count DESC | LIMIT 1",
+  }
+}
 # -----------------------------------------------
 # Step 2: Create a custom ES|QL tool ✍️
 # -----------------------------------------------
