@@ -12,11 +12,9 @@ import type { DisableMonitoringEngineResponse } from '../../../../../common/api/
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_ENGINE_DISABLE_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../engine/status_service';
 
 export const disablePrivilegeMonitoringEngineRoute = (
@@ -52,11 +50,6 @@ export const disablePrivilegeMonitoringEngineRoute = (
       ): Promise<IKibanaResponse<DisableMonitoringEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
-
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
 
         try {
           const dataClient = secSol.getPrivilegeMonitoringDataClient();

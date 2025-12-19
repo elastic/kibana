@@ -13,7 +13,6 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
@@ -21,7 +20,6 @@ import {
   CreateEntitySourceRequestBody,
   type CreateEntitySourceResponse,
 } from '../../../../../../common/api/entity_analytics';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
@@ -54,11 +52,6 @@ export const createMonitoringEntitySourceRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
 
