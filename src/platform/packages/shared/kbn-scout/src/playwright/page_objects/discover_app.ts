@@ -254,14 +254,14 @@ export class DiscoverApp {
 
   async waitForDataGridRowWithRetry(
     rowLocator: Locator,
-    options?: { retryWithReload?: boolean; timeout?: number }
+    options?: { retryWithRefresh?: boolean; timeout?: number }
   ) {
-    const { retryWithReload = true, timeout = 30_000 } = options ?? {};
+    const { retryWithRefresh = true, timeout = 30_000 } = options ?? {};
     try {
       await rowLocator.waitFor({ state: 'visible', timeout: 10_000 });
     } catch {
-      if (retryWithReload) {
-        await this.page.reload();
+      if (retryWithRefresh) {
+        await this.page.testSubj.click('querySubmitButton');
         await this.waitUntilSearchingHasFinished();
         await rowLocator.waitFor({ state: 'visible', timeout });
       } else {
