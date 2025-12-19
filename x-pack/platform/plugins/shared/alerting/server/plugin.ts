@@ -676,7 +676,13 @@ export class AlertingPlugin {
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      return rulesClientFactory!.create(request, core.savedObjects, { useDefaultSpace: true });
+      return rulesClientFactory!.create(
+        request,
+        core.savedObjects,
+        plugins.spaces?.spacesService.getSpaceId(request) === DEFAULT_SPACE_ID
+          ? undefined
+          : { useDefaultSpace: true }
+      );
     };
 
     this.getRulesClientWithRequest = getRulesClientWithRequest;
