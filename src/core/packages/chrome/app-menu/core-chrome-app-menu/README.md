@@ -1,6 +1,6 @@
 # App Menu
 
-`AppMenu` is the replacement for the existing `TopNavMenu` component, providing an improved API and enhanced functionality for building app menu in your application.
+`AppMenu` is the replacement for the existing `TopNavMenu` component, providing an improved API and enhanced functionality.
 
 ## Usage
 

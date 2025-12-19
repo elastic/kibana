@@ -1,6 +1,6 @@
 # AppMenuComponent
 
-`AppMenuComponent` is the replacement for the existing `TopNavMenu` component, providing an improved API and enhanced functionality for building app menu in your application.
+`AppMenuComponent` is the standalone component used in chrome app menu.
 
 ## Usage
 
