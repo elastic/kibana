@@ -18,6 +18,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { SecurityAction } from '.';
 
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
+const UPDATE_ACTION = 'update';
 
 interface AccessControlServiceParams {
   typeRegistry?: ISavedObjectTypeRegistry;
@@ -130,40 +131,31 @@ export class AccessControlService {
     const { typeMap } = authorizationResult;
     const unauthorizedTypes: Set<string> = new Set();
 
+    const addUnauthorizedTypes = (type: string, action: A): void => {
+      const typeAuth = typeMap.get(type);
+      const actionAuth = typeAuth?.[action];
+      if (!actionAuth) {
+        unauthorizedTypes.add(type);
+      } else {
+        // Check if user has global authorization or authorization in the current space
+        if (
+          !actionAuth.isGloballyAuthorized &&
+          (!actionAuth.authorizedSpaces || !actionAuth.authorizedSpaces.includes(currentSpace))
+        ) {
+          unauthorizedTypes.add(type);
+        }
+      }
+    };
+
     for (const type of typesRequiringAccessControl) {
       if (!this.typeRegistry?.supportsAccessControl(type)) {
         continue;
       }
-      const typeAuth = typeMap.get(type);
-      const accessControlAuth = typeAuth?.[MANAGE_ACCESS_CONTROL_ACTION as A];
-      if (!accessControlAuth) {
-        unauthorizedTypes.add(type);
-      } else {
-        // Check if user has global authorization or authorization in the current space
-        if (
-          !accessControlAuth.isGloballyAuthorized &&
-          (!accessControlAuth.authorizedSpaces ||
-            !accessControlAuth.authorizedSpaces.includes(currentSpace))
-        ) {
-          unauthorizedTypes.add(type);
-        }
-      }
+      addUnauthorizedTypes(type, MANAGE_ACCESS_CONTROL_ACTION as A);
     }
 
     for (const type of typesRequiringRbac) {
-      const typeAuth = typeMap.get(type);
-      const rbacAuth = typeAuth?.['update' as A];
-      if (!rbacAuth) {
-        unauthorizedTypes.add(type);
-      } else {
-        // Check if user has global authorization or authorization in the current space
-        if (
-          !rbacAuth.isGloballyAuthorized &&
-          (!rbacAuth.authorizedSpaces || !rbacAuth.authorizedSpaces.includes(currentSpace))
-        ) {
-          unauthorizedTypes.add(type);
-        }
-      }
+      addUnauthorizedTypes(type, UPDATE_ACTION as A);
     }
 
     // If we found unauthorized types, throw an error
