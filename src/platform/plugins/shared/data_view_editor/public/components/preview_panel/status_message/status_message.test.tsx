@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { StatusMessage } from '.';
-import { shallow } from 'enzyme';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { StatusMessage } from '.';
 
 const tagsPartial = {
   tags: [],
@@ -27,17 +28,32 @@ const matchedIndices = {
 };
 
 describe('StatusMessage', () => {
-  it('should render without a query', () => {
-    const component = shallow(
+  it('should render normally', () => {
+    const { container } = renderWithI18n(
       <StatusMessage
+        isIncludingSystemIndices={false}
         matchedIndices={matchedIndices}
         query={''}
-        isIncludingSystemIndices={false}
         showSystemIndices={false}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('should render without a query', () => {
+    renderWithI18n(
+      <StatusMessage
+        isIncludingSystemIndices={false}
+        matchedIndices={matchedIndices}
+        query={''}
+        showSystemIndices={false}
+      />
+    );
+
+    expect(
+      screen.getByText(`Your index pattern can match ${matchedIndices.allIndices.length} sources.`)
+    ).toBeVisible();
   });
 
   it('should render with exact matches', () => {
@@ -46,29 +62,31 @@ describe('StatusMessage', () => {
       exactMatchedIndices: [{ name: 'kibana', ...tagsPartial }] as unknown as MatchedItem[],
     };
 
-    const component = shallow(
+    renderWithI18n(
       <StatusMessage
+        isIncludingSystemIndices={false}
         matchedIndices={localMatchedIndices}
         query={'k*'}
-        isIncludingSystemIndices={false}
         showSystemIndices={false}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Your index pattern matches 1 source.')).toBeVisible();
   });
 
   it('should render with partial matches', () => {
-    const component = shallow(
+    renderWithI18n(
       <StatusMessage
+        isIncludingSystemIndices={false}
         matchedIndices={matchedIndices}
         query={'k'}
-        isIncludingSystemIndices={false}
         showSystemIndices={false}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByTestId('createIndexPatternStatusMessage')).toHaveTextContent(
+      /Your index pattern doesn't match any data streams, indices, or index aliases, but source is similar\./
+    );
   });
 
   it('should render with no partial matches', () => {
@@ -77,51 +95,57 @@ describe('StatusMessage', () => {
       partialMatchedIndices: [],
     };
 
-    const component = shallow(
+    renderWithI18n(
       <StatusMessage
+        isIncludingSystemIndices={false}
         matchedIndices={localMatchedIndices}
         query={'k'}
-        isIncludingSystemIndices={false}
         showSystemIndices={false}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByTestId('createIndexPatternStatusMessage')).toHaveTextContent(
+      /The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match 2 sources./
+    );
   });
 
   it('should show that system indices exist', () => {
-    const component = shallow(
+    renderWithI18n(
       <StatusMessage
+        isIncludingSystemIndices={false}
         matchedIndices={{
           allIndices: [],
           exactMatchedIndices: [],
           partialMatchedIndices: [],
           visibleIndices: [],
         }}
-        isIncludingSystemIndices={false}
         query={''}
         showSystemIndices={false}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(
+      screen.getByText('No data streams, indices, or index aliases match your index pattern.')
+    ).toBeVisible();
   });
 
   it('should show that no indices exist', () => {
-    const component = shallow(
+    renderWithI18n(
       <StatusMessage
+        isIncludingSystemIndices={true}
         matchedIndices={{
           allIndices: [],
           exactMatchedIndices: [],
           partialMatchedIndices: [],
           visibleIndices: [],
         }}
-        isIncludingSystemIndices={true}
         query={''}
         showSystemIndices={false}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(
+      screen.getByText('No data streams, indices, or index aliases match your index pattern.')
+    ).toBeVisible();
   });
 });
