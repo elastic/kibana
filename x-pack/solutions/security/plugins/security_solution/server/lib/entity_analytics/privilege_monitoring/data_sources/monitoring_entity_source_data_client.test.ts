@@ -53,6 +53,7 @@ describe('MonitoringEntitySourceDataClient', () => {
 
   describe('create', () => {
     it('should create a Monitoring Entity Source successfully ', async () => {
+      const testSourceWithManaged = { ...testSource, managed: false };
       defaultOpts.soClient.update.mockImplementation(() => {
         const err = new Error('Not found');
         // Simulate Kibana-style 404 error
@@ -68,7 +69,7 @@ describe('MonitoringEntitySourceDataClient', () => {
       defaultOpts.soClient.create.mockResolvedValue({
         id: 'abcdefg',
         type: monitoringEntitySourceTypeName,
-        attributes: testSource,
+        attributes: testSourceWithManaged,
         references: [],
       });
 
@@ -76,11 +77,11 @@ describe('MonitoringEntitySourceDataClient', () => {
 
       expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        testSource,
+        testSourceWithManaged,
         { refresh: 'wait_for' }
       );
 
-      expect(result).toEqual({ ...testSource, managed: false, id: 'abcdefg' });
+      expect(result).toEqual({ ...testSourceWithManaged, id: 'abcdefg' });
     });
 
     it('should not create Monitoring Entity Source Sync Config when a SO already exist with the same name', async () => {
