@@ -11,7 +11,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   AGENT_BUILDER_EVENT_TYPES,
   agentBuilderServerEbtEvents,
-  ConversationRoundStatus,
   ConversationRoundStepType,
   oneChatDefaultAgentId,
   type ConversationRound,
@@ -74,7 +73,6 @@ describe('AnalyticsService', () => {
         output_tokens: 5,
         model: 'gpt-97q',
       },
-      status: ConversationRoundStatus.completed,
       trace_id: 'trace-1',
     };
 
