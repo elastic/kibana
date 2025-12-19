@@ -11,7 +11,7 @@ import { test } from '../../fixtures';
 test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { dependencyDetailsPage } }) => {
     await browserAuth.loginAsViewer();
-    await dependencyDetailsPage.gotoOperationDetail();
+    await dependencyDetailsPage.operationDetailSubpage.goToPage();
   });
 
   test('Renders expected content', async ({ page, pageObjects: { dependencyDetailsPage } }) => {
@@ -19,11 +19,15 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
       await expect(
         page.getByRole('heading', { name: dependencyDetailsPage.SPAN_NAME })
       ).toBeVisible();
-      await expect(dependencyDetailsPage.operationDetailLatencyChart).toBeVisible();
-      await expect(dependencyDetailsPage.operationDetailThroughputChart).toBeVisible();
-      await expect(dependencyDetailsPage.operationDetailFailedTransactionRateChart).toBeVisible();
-      await expect(dependencyDetailsPage.operationDetailCorrelationsChart).toBeVisible();
-      await expect(dependencyDetailsPage.operationDetailWaterfallInvestigateButton).toBeVisible();
+      await expect(dependencyDetailsPage.operationDetailSubpage.latencyChart).toBeVisible();
+      await expect(dependencyDetailsPage.operationDetailSubpage.throughputChart).toBeVisible();
+      await expect(
+        dependencyDetailsPage.operationDetailSubpage.failedTransactionRateChart
+      ).toBeVisible();
+      await expect(dependencyDetailsPage.operationDetailSubpage.correlationsChart).toBeVisible();
+      await expect(
+        dependencyDetailsPage.operationDetailSubpage.waterfallInvestigateButton
+      ).toBeVisible();
     });
   });
 
@@ -32,9 +36,11 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Click breadcrumb link to go back to dependency operations list', async () => {
-      await expect(dependencyDetailsPage.operationDetailBreadcrumb).toBeVisible();
-      await expect(dependencyDetailsPage.operationDetailBreadcrumb).toHaveText('All operations');
-      await dependencyDetailsPage.operationDetailBreadcrumb.click();
+      await expect(dependencyDetailsPage.operationDetailSubpage.breadcrumb).toBeVisible();
+      await expect(dependencyDetailsPage.operationDetailSubpage.breadcrumb).toHaveText(
+        'All operations'
+      );
+      await dependencyDetailsPage.operationDetailSubpage.breadcrumb.click();
     });
 
     await test.step("Verify we're on the dependency operations list page", () => {
@@ -48,11 +54,13 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step("Click 'Investigate trace' button", async () => {
-      await dependencyDetailsPage.operationDetailWaterfallInvestigateButton.click();
+      await dependencyDetailsPage.operationDetailSubpage.waterfallInvestigateButton.click();
     });
 
     await test.step('Verify investigate trace popup is visible', async () => {
-      await expect(dependencyDetailsPage.operationDetailWaterfallInvestigatePopup).toBeVisible();
+      await expect(
+        dependencyDetailsPage.operationDetailSubpage.waterfallInvestigatePopup
+      ).toBeVisible();
     });
   });
 
@@ -61,8 +69,8 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step("Click 'Span links' button", async () => {
-      await dependencyDetailsPage.operationDetailWaterfallPaginationLastButton.click();
-      await dependencyDetailsPage.operationDetailWaterfallSpanLinksBadge.click();
+      await dependencyDetailsPage.operationDetailSubpage.waterfallPaginationLastButton.click();
+      await dependencyDetailsPage.operationDetailSubpage.waterfallSpanLinksBadge.click();
     });
 
     await test.step('Verify span link flyout is visible', async () => {

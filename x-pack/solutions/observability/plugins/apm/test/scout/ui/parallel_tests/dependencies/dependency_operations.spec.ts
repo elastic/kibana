@@ -24,13 +24,13 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     });
 
     await test.step('Navigate to operations tab', async () => {
-      await expect(dependencyDetailsPage.getOperationsTab()).toBeVisible();
-      await dependencyDetailsPage.clickOperationsTab();
+      await expect(dependencyDetailsPage.operationsTab.tab).toBeVisible();
+      await dependencyDetailsPage.operationsTab.goToTab();
     });
 
     await test.step('Land on operations tab', async () => {
       expect(page.url()).toContain(`/dependencies`);
-      await expect(dependencyDetailsPage.getOperationsTab()).toHaveAttribute(
+      await expect(dependencyDetailsPage.operationsTab.tab).toHaveAttribute(
         'aria-selected',
         'true'
       );
@@ -39,13 +39,13 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
 
   test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
     await test.step('Land on operations tab', async () => {
-      await dependencyDetailsPage.goToOperationsTab();
+      await dependencyDetailsPage.operationsTab.goToTab();
     });
 
     await test.step('Renders operations content', async () => {
-      await expect(dependencyDetailsPage.operationsTabOperationsTable).toBeVisible();
+      await expect(dependencyDetailsPage.operationsTab.operationsTable).toBeVisible();
       await expect(
-        dependencyDetailsPage.getOperationInOperationsTabOperationsTable(SPAN_NAME)
+        dependencyDetailsPage.operationsTab.getOperationInOperationsTable(SPAN_NAME)
       ).toBeVisible();
     });
   });
@@ -55,11 +55,11 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on operations tab', async () => {
-      await dependencyDetailsPage.goToOperationsTab();
+      await dependencyDetailsPage.operationsTab.goToTab();
     });
 
     await test.step('Click on operation in operations table', async () => {
-      await dependencyDetailsPage.clickOperationInOperationsTable(SPAN_NAME);
+      await dependencyDetailsPage.operationsTab.clickOperationInOperationsTable(SPAN_NAME);
     });
 
     await test.step('Land on dependency operation page', async () => {
@@ -74,7 +74,7 @@ test.describe('Dependency Operations Tab', { tag: ['@ess', '@svlOblt'] }, () => 
     pageObjects: { dependencyDetailsPage },
   }) => {
     await test.step('Land on operations tab', async () => {
-      await dependencyDetailsPage.goToOperationsTab();
+      await dependencyDetailsPage.operationsTab.goToTab();
     });
 
     await test.step('Check a11y', async () => {
