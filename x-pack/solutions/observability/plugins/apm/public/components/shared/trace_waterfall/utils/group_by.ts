@@ -21,10 +21,19 @@
  * const grouped = groupBy(items, item => item.type);
  * // Result: { A: [{ id: '1', type: 'A' }, { id: '3', type: 'A' }], B: [{ id: '2', type: 'B' }] }
  */
-export function groupBy<T>(collection: T[], keyGetter: (item: T) => string): Record<string, T[]> {
+export function groupBy<T, K extends PropertyKey>(
+  collection: T[],
+  keyGetter: (item: T) => K
+): Record<K, T[]> {
   return collection.reduce((acc, item) => {
     const key = keyGetter(item);
-    (acc[key] ??= []).push(item);
+
+    if (acc[key] === undefined) {
+      acc[key] = [];
+    }
+
+    acc[key].push(item);
+
     return acc;
-  }, {} as Record<string, T[]>);
+  }, {} as Record<K, T[]>);
 }

@@ -120,4 +120,39 @@ describe('groupBy', () => {
       '2': [{ id: '2', value: 200 }],
     });
   });
+
+  it('works with number keys', () => {
+    const items = [
+      { name: 'Alice', age: 25 },
+      { name: 'Bob', age: 30 },
+      { name: 'Charlie', age: 25 },
+    ];
+    const result = groupBy(items, (item) => item.age);
+
+    expect(result).toEqual({
+      25: [
+        { name: 'Alice', age: 25 },
+        { name: 'Charlie', age: 25 },
+      ],
+      30: [{ name: 'Bob', age: 30 }],
+    });
+  });
+
+  it('works with symbol keys', () => {
+    const symbolA = Symbol('A');
+    const symbolB = Symbol('B');
+
+    const items = [
+      { id: '1', symbol: symbolA },
+      { id: '2', symbol: symbolB },
+      { id: '3', symbol: symbolA },
+    ];
+    const result = groupBy(items, (item) => item.symbol);
+
+    expect(result[symbolA]).toEqual([
+      { id: '1', symbol: symbolA },
+      { id: '3', symbol: symbolA },
+    ]);
+    expect(result[symbolB]).toEqual([{ id: '2', symbol: symbolB }]);
+  });
 });
