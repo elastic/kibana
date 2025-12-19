@@ -13,7 +13,7 @@ import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/pu
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { groupBy, times, zipObject } from 'lodash';
+import { chunk, groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
   type Observable,
@@ -55,6 +55,9 @@ import type { IndexEditorTelemetryService } from './telemetry/telemetry_service'
 const DOCS_PER_FETCH = 1000;
 
 const MAX_COLUMN_PLACEHOLDERS = 4;
+
+// Update operations will be split in chunks of this size.
+export const BULK_UPDATE_CHUNK_SIZE = 500;
 
 interface DocUpdate {
   id: string;
@@ -924,15 +927,31 @@ export class IndexUpdateService {
       throw new Error('empty operations');
     }
 
-    const body = JSON.stringify({
-      operations: operations.flat(),
-    });
+    // Split the request on chunks to not exceed the maximum payload size
+    const chunks = chunk(operations, BULK_UPDATE_CHUNK_SIZE);
+    const responses: BulkResponse[] = [];
 
-    const bulkResponse = await this.http.post<BulkResponse>(
-      `/internal/esql/lookup_index/${this.getIndexName()}/update`,
-      {
-        body,
-      }
+    for (const chunkOperations of chunks) {
+      const body = JSON.stringify({
+        operations: chunkOperations.flat(),
+      });
+
+      const response = await this.http.post<BulkResponse>(
+        `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+        {
+          body,
+        }
+      );
+      responses.push(response);
+    }
+
+    const bulkResponse: BulkResponse = responses.reduce(
+      (acc, res) => ({
+        took: acc.took + res.took,
+        errors: acc.errors || res.errors,
+        items: [...acc.items, ...res.items],
+      }),
+      { took: 0, errors: false, items: [] }
     );
 
     return {
