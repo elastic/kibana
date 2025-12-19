@@ -27,6 +27,7 @@ import {
 } from '../../constants';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { formatChangePoint } from './utils/change_point';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -41,6 +42,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
+  const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
     return niceTimeFormatter([timeState.start, timeState.end]);
