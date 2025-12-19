@@ -24,6 +24,7 @@ import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -75,7 +76,7 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  controlsState?: ControlPanelsState;
+  controlsState?: ControlPanelsState<ESQLControlVariable>;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;

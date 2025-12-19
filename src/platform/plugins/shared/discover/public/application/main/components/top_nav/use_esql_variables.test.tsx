@@ -8,23 +8,31 @@
  */
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { BehaviorSubject, Observable, skip } from 'rxjs';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { useESQLVariables } from './use_esql_variables';
-import type { ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type {
+  ESQLControlState,
+  ESQLControlVariable,
+  ESQLVariableType,
+  EsqlControlType,
+} from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import React from 'react';
-import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
-  inputSubject: BehaviorSubject<Record<string, ControlPanelsState> | null>;
+  inputSubject: BehaviorSubject<Record<string, ControlPanelsState<ESQLControlState>> | null>;
   addNewPanel: jest.Mock;
 
   constructor() {
-    this.inputSubject = new BehaviorSubject<Record<string, ControlPanelsState> | null>(null);
+    this.inputSubject = new BehaviorSubject<Record<
+      string,
+      ControlPanelsState<ESQLControlState>
+    > | null>(null);
     this.addNewPanel = jest.fn();
   }
 
@@ -33,7 +41,7 @@ class MockControlGroupRendererApi {
   }
 
   // Method to simulate new input coming from the API
-  simulateInput(input: Record<string, ControlPanelsState>) {
+  simulateInput(input: Record<string, ControlPanelsState<ESQLControlState>>) {
     this.inputSubject.next(input);
   }
 }
@@ -106,7 +114,7 @@ describe('useESQLVariables', () => {
         mockControlGroupAPI.simulateInput({
           initialChildControlState: {
             '123': { type: 'esqlControl' },
-          } as unknown as ControlPanelsState,
+          } as unknown as ControlPanelsState<ESQLControlState>,
         });
       });
 
@@ -272,7 +280,7 @@ describe('useESQLVariables', () => {
         mockControlGroupAPI.simulateInput({
           initialChildControlState: {
             '123': { type: 'esqlControl' },
-          } as unknown as ControlPanelsState,
+          } as unknown as ControlPanelsState<ESQLControlState>,
         });
       });
 
@@ -318,7 +326,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      } as unknown as ControlPanelsState;
+      } as unknown as ControlPanelsState<ESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({
@@ -358,7 +366,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      } as unknown as ControlPanelsState;
+      } as unknown as ControlPanelsState<ESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({

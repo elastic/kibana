@@ -8,13 +8,13 @@
  */
 
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
-import type { EsqlControlType } from '@kbn/esql-types';
+import type { ESQLControlState, EsqlControlType } from '@kbn/esql-types';
 
-export const mockControlState: ControlPanelsState = {
+export const mockControlState: ControlPanelsState<ESQLControlState> = {
   panel1: {
     type: 'esqlControl',
     availableOptions: ['bar', 'baz'],
-    variableType: 'values',
+    variableType: 'values' as ESQLControlState['variableType'],
     variableName: 'foo',
     title: 'Panel 1',
     selectedOptions: ['bar'],

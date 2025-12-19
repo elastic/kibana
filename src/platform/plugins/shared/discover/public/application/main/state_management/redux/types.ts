@@ -13,7 +13,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
   DiscoverSession,
@@ -141,7 +141,7 @@ export interface TabState extends TabItem {
   globalState: TabStateGlobalState;
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
-  controlGroupState: ControlPanelsState | undefined;
+  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   /**
    * ESQL query variables
    */

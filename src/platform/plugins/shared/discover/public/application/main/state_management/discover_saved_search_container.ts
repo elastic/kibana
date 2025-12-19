@@ -13,6 +13,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlState } from '@kbn/esql-types';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './redux';
@@ -96,7 +97,7 @@ export interface DiscoverSavedSearchContainer {
    * Updates the current value of controlState in saved search
    * @param params
    */
-  updateControlState: (params: { nextControlState: ControlPanelsState }) => void;
+  updateControlState: (params: { nextControlState: ControlPanelsState<ESQLControlState> }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -213,7 +214,7 @@ export function getSavedSearchContainer({
   const updateControlState = ({
     nextControlState,
   }: {
-    nextControlState: ControlPanelsState | undefined;
+    nextControlState: ControlPanelsState<ESQLControlState> | undefined;
   }) => {
     const previousSavedSearch = getState();
     const nextSavedSearch: SavedSearch = {

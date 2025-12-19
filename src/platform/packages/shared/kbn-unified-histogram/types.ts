@@ -34,7 +34,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 
 /**
@@ -218,7 +218,7 @@ export interface UnifiedHistogramFetchParamsExternal {
   /**
    * The controls state to use for the chart
    */
-  controlsState?: ControlPanelsState;
+  controlsState?: ControlPanelsState<ESQLControlState>;
   /**
    * The current columns
    */

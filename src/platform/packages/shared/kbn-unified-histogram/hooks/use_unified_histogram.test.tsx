@@ -8,7 +8,12 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { type ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import {
+  type ESQLControlState,
+  type ESQLControlVariable,
+  ESQLVariableType,
+  EsqlControlType,
+} from '@kbn/esql-types';
 import { act } from 'react-dom/test-utils';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -31,7 +36,7 @@ describe('useUnifiedHistogram', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlQuery: 'FROM logstash* | STATS BY field',
         title: 'field',
-      } as ControlPanelState,
+      } as ControlPanelState<ESQLControlState>,
     };
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       dataView: dataViewWithTimefieldMock,
