@@ -2134,6 +2134,23 @@
             "returnComment": [
               "A Playwright `Locator` for the current error markers."
             ]
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaCodeEditorWrapper.getCodeEditorSuggestWidget",
+            "type": "Function",
+            "tags": [],
+            "label": "getCodeEditorSuggestWidget",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Locator"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
