@@ -251,4 +251,22 @@ export class DiscoverApp {
       await this.waitForDocTableRendered();
     }
   }
+
+  async waitForDataGridRowWithRetry(
+    rowLocator: Locator,
+    options?: { retryWithReload?: boolean; timeout?: number }
+  ) {
+    const { retryWithReload = true, timeout = 30_000 } = options ?? {};
+    try {
+      await rowLocator.waitFor({ state: 'visible', timeout: 10_000 });
+    } catch {
+      if (retryWithReload) {
+        await this.page.reload();
+        await this.waitUntilSearchingHasFinished();
+        await rowLocator.waitFor({ state: 'visible', timeout });
+      } else {
+        throw new Error('Data grid row not visible after timeout');
+      }
+    }
+  }
 }

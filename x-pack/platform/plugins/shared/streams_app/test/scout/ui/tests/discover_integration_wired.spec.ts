@@ -52,15 +52,8 @@ test.describe(
       );
 
       // Wait for the row to be rendered before clicking
-      // Stream routing may take time, so we retry with page refresh if needed
-      try {
-        await expandButton.waitFor({ state: 'visible', timeout: 10_000 });
-      } catch {
-        // Data may not be routed yet, refresh and try again
-        await page.reload();
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
-      }
+      // Stream routing may take time, so we use retry with page refresh
+      await pageObjects.discover.waitForDataGridRowWithRetry(expandButton);
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
