@@ -115,6 +115,10 @@ export class Root {
     }
   }
 
+  public getConfigService() {
+    return this.server.configService;
+  }
+
   private setupApmLabelSync() {
     const { configService } = this.server;
 

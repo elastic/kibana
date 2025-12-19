@@ -1530,6 +1530,7 @@
     "@kbn/cache-cli": "link:src/platform/packages/shared/kbn-cache-cli",
     "@kbn/capture-oas-snapshot-cli": "link:packages/kbn-capture-oas-snapshot-cli",
     "@kbn/chart-test-jest-helpers": "link:src/platform/packages/shared/chart-test-jest-helpers",
+    "@kbn/check-kibana-settings-cli": "link:packages/kbn-check-kibana-settings-cli",
     "@kbn/check-prod-native-modules-cli": "link:packages/kbn-check-prod-native-modules-cli",
     "@kbn/check-saved-objects-cli": "link:packages/kbn-check-saved-objects-cli",
     "@kbn/ci-stats-core": "link:src/platform/packages/private/kbn-ci-stats-core",

@@ -331,6 +331,21 @@ export class ConfigService {
     return globalOverrides;
   }
 
+  public listAllSettings(): Array<{ setting: string; type: string }> {
+    const configPaths = [...this.handledPaths.values()].map(pathToString);
+    const allSettings: Array<{ setting: string; type: string }> = configPaths.flatMap(
+      (namespace) => {
+        const schema = this.schemas.get(namespace);
+        const structure = schema?.getSchemaStructure() ?? [];
+        return structure.map(({ path, type }) => ({
+          setting: [namespace, ...path].join('.'),
+          type,
+        }));
+      }
+    );
+    return allSettings;
+  }
+
   private async logDeprecation() {
     const rawConfig = await firstValueFrom(this.rawConfigProvider.getConfig$());
     const deprecations = await firstValueFrom(this.deprecations);
