@@ -305,15 +305,24 @@ export function LensEditConfigurationFlyout({
   }, [textBasedMode]);
 
   const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip } = useMemo(() => {
+    const disabled = (tooltip: string = 'The visualization cannot be converted') => ({
+      isConvertToEsqlButtonDisabled: true,
+      convertToEsqlButtonTooltip: tooltip,
+    });
+
+    const enabled = () => ({
+      isConvertToEsqlButtonDisabled: false,
+      convertToEsqlButtonTooltip: 'Switch to query mode',
+    });
+
+    // Guard: prerequisites
     if (!showConvertToEsqlButton || !activeVisualization || !visualization.state) {
-      return {
-        isConvertToEsqlButtonDisabled: true,
-        convertToEsqlButtonTooltip: '',
-      };
+      return disabled('');
     }
 
     const { state } = visualization;
 
+    // Guard: trendline check
     if (
       state &&
       typeof state === 'object' &&
@@ -324,63 +333,39 @@ export function LensEditConfigurationFlyout({
       state.trendlineMetricAccessor &&
       state.trendlineTimeAccessor
     ) {
-      return {
-        isConvertToEsqlButtonDisabled: true,
-        convertToEsqlButtonTooltip: 'Metric visualization with trend lines',
-      };
+      return disabled('Metric visualization with a trend line are not supported in query mode');
     }
 
+    // Guard: layer count
     if (layerIds.length > 1) {
-      return {
-        isConvertToEsqlButtonDisabled: true,
-        convertToEsqlButtonTooltip: 'The visualization has more than one layer',
-      };
+      return disabled('Multi-layer visualizations cannot be converted to query mode');
     }
 
-    // One layer
-
-    const datasourceState = datasourceStates[datasourceId].state;
-
-    if (textBasedMode || !datasourceState) {
-      return {
-        isConvertToEsqlButtonDisabled: true,
-        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
-      };
-    }
-
-    // Validate datasourceState structure
+    // Guard: datasource state exists and has layers
+    const datasourceState = datasourceStates[datasourceId]?.state;
     if (
+      !datasourceState ||
       typeof datasourceState !== 'object' ||
       datasourceState === null ||
       !('layers' in datasourceState) ||
       !datasourceState.layers
     ) {
-      return {
-        isConvertToEsqlButtonDisabled: true,
-        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
-      };
+      return disabled('The visualization cannot be converted');
     }
 
-    // Access the single layer safely
-    const layers = datasourceState.layers as Record<string, FormBasedLayer>;
+    // Guard: layer access
     const layerId = layerIds[0];
-
-    if (!layerId || !(layerId in layers)) {
-      return {
-        isConvertToEsqlButtonDisabled: true,
-        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
-      };
+    const layers = datasourceState.layers as Record<string, FormBasedLayer>;
+    if (!layerId || !layers[layerId]) {
+      return disabled('');
     }
 
     const singleLayer = layers[layerId];
-    if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
-      return {
-        isConvertToEsqlButtonDisabled: true,
-        convertToEsqlButtonTooltip: 'The visualization cannot be converted',
-      };
+    if (!singleLayer?.columnOrder || !singleLayer?.columns) {
+      return disabled('');
     }
 
-    // Get the esAggEntries
+    // Main logic: compute esqlLayer
     const { columnOrder } = singleLayer;
     const columns = { ...singleLayer.columns };
     const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
@@ -400,10 +385,9 @@ export function LensEditConfigurationFlyout({
       startDependencies.data.nowProvider.get()
     );
 
-    return {
-      isConvertToEsqlButtonDisabled: !esqlLayer,
-      convertToEsqlButtonTooltip: 'Switch to query mode',
-    };
+    return esqlLayer
+      ? enabled()
+      : disabled('The visualization has unsupported settings for query mode');
   }, [
     coreStart.uiSettings,
     datasourceId,
@@ -412,10 +396,9 @@ export function LensEditConfigurationFlyout({
     framePublicAPI.dateRange,
     layerIds,
     startDependencies.data.nowProvider,
-    textBasedMode,
     activeVisualization,
     showConvertToEsqlButton,
-    visualization.state,
+    visualization,
   ]);
 
   if (isLoading) return null;
