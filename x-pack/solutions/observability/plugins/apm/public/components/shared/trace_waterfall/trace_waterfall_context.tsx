@@ -260,10 +260,12 @@ export function filterMapByCriticalPath(
   map: Record<string, TraceWaterfallItem[]>,
   criticalPathSegmentsById: Record<string, CriticalPathSegment<TraceWaterfallItem>[]>
 ): Record<string, TraceWaterfallItem[]> {
-  return Object.fromEntries(
-    Object.entries(map).map(([parentId, children]) => [
-      parentId,
-      children.filter((child) => criticalPathSegmentsById[child.id]?.length),
-    ])
-  );
+  const validChildIds = new Set(Object.keys(criticalPathSegmentsById));
+
+  const result: Record<string, TraceWaterfallItem[]> = {};
+  for (const parentId of Object.keys(map)) {
+    result[parentId] = map[parentId].filter((child) => validChildIds.has(child.id));
+  }
+
+  return result;
 }
