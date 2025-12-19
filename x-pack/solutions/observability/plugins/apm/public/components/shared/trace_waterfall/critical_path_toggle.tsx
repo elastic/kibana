@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import React from 'react';
+import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -15,11 +15,8 @@ interface Props {
 }
 
 export function CriticalPathToggle({ checked, onChange }: Props) {
-  const htmlId = useMemo(() => htmlIdGenerator(), []);
-
   return (
     <EuiSwitch
-      id={htmlId('showCriticalPath')}
       label={i18n.translate('xpack.apm.traceWaterfall.showCriticalPath', {
         defaultMessage: 'Show critical path',
       })}
