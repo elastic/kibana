@@ -509,18 +509,23 @@ function getUnifiedHistogramTableForEsql({
   documentsValue: DataDocumentsMsg | undefined;
   isEsqlMode: boolean;
 }) {
-  if (!isEsqlMode) {
+  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
+
+  if (
+    !isEsqlMode ||
+    !documentsValue?.result ||
+    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
+  ) {
     return {
       table: undefined,
-      esqlQueryColumns: EMPTY_ESQL_COLUMNS,
+      esqlQueryColumns,
     };
   }
 
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
   return {
     table: {
       type: 'datatable' as const,
-      rows: documentsValue?.result?.map((r) => r.raw) || [],
+      rows: documentsValue.result.map((r) => r.raw),
       columns: esqlQueryColumns,
       meta: { type: ESQL_TABLE_TYPE },
     },
