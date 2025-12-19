@@ -67,6 +67,7 @@ import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';
 import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`
@@ -113,6 +114,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
+  const { hasAlertsAll } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
@@ -619,7 +621,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             />
           </>
         )}
-        {showAlertCloseOptions && (
+        {hasAlertsAll && showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions
