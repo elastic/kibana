@@ -12,6 +12,7 @@ import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
@@ -25,6 +26,7 @@ import { WaterfallAccordionButton } from './waterfall_accordion_button';
 
 export interface Props {
   traceItems: TraceItem[];
+  errors?: Error[];
   showAccordion?: boolean;
   highlightedTraceId?: string;
   onClick?: OnNodeClick;
@@ -35,10 +37,12 @@ export interface Props {
   showLegend?: boolean;
   serviceName?: string;
   isFiltered?: boolean;
+  agentMarks?: Record<string, number>;
 }
 
 export function TraceWaterfall({
   traceItems,
+  errors,
   showAccordion = true,
   highlightedTraceId,
   onClick,
@@ -49,6 +53,7 @@ export function TraceWaterfall({
   showLegend = false,
   serviceName,
   isFiltered,
+  agentMarks,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -63,6 +68,8 @@ export function TraceWaterfall({
       showLegend={showLegend}
       serviceName={serviceName}
       isFiltered={isFiltered}
+      errors={errors}
+      agentMarks={agentMarks}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -81,10 +88,16 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
+    errorMarks,
     showAccordion,
     isAccordionOpen,
     toggleAllAccordions,
+    agentMarks,
   } = useTraceWaterfallContext();
+
+  const marks = useMemo(() => {
+    return [...agentMarks, ...errorMarks];
+  }, [agentMarks, errorMarks]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -117,6 +130,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
+              marks={marks}
             />
           </div>
           <VerticalLinesContainer
@@ -127,6 +141,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
+            marks={marks}
           />
           <div
             css={css`
