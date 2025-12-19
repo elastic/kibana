@@ -23,12 +23,14 @@ import { useCloseAlertsFromExceptions } from '../../../../../detection_engine/ru
 import type { AlertData } from '../../../../../detection_engine/rule_exceptions/utils/types';
 import type { Rule } from '../../../../../detection_engine/rule_management/logic';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../hooks/artifacts/use_create_artifact');
 jest.mock('../../../../../detection_engine/rule_exceptions/logic/use_close_alerts');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 describe('Endpoint exceptions flyout', () => {
   let mockedContext: AppContextTestRender;
@@ -104,6 +106,10 @@ describe('Endpoint exceptions flyout', () => {
       signalIndexName: 'mock-signal-index',
       signalIndexMappingOutdated: false,
       createDeSignalIndex: jest.fn(),
+    });
+
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+      hasAlertsAll: true,
     });
 
     render = (props) => {
