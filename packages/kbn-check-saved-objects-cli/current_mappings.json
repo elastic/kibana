@@ -315,16 +315,6 @@
       },
       "description": {
         "type": "text"
-      },
-      "artifacts": {
-        "properties": {
-           "dashboards": { "type": "keyword" },
-           "investigation_guide": {
-              "properties": {
-                 "blob": { "type": "text" }
-              }
-           }
-        }
       }
     }
   },

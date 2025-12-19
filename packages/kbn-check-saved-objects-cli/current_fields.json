@@ -92,11 +92,7 @@
     "name",
     "ruleTypeId",
     "tags",
-    "description",
-    "artifacts",
-    "artifacts.investigation_guide",
-    "artifacts.investigation_guide.blob",
-    "artifacts.dashboards"
+    "description"
   ],
   "api_key_pending_invalidation": [
     "apiKeyId",
