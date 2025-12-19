@@ -59,7 +59,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['globalSearch'],
             };
           }
           return null;
