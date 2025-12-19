@@ -72,6 +72,24 @@ spaceTest.describe(
         const integrationName = `aws-cspm-direct-${Date.now()}`;
         let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
+        // Mock the package policy list API (GET request needed for form initialization)
+        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+          if (request.method() === 'GET') {
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [],
+                total: 0,
+                page: 1,
+                perPage: 1000,
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
         // Set up route interception for agentless policies API
         // Use regex to match URL with query parameters and space prefixes
         await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
@@ -154,6 +172,24 @@ spaceTest.describe(
       async ({ pageObjects, page }) => {
         const integrationName = `azure-cspm-sp-${Date.now()}`;
         let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
+
+        // Mock the package policy list API (GET request needed for form initialization)
+        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+          if (request.method() === 'GET') {
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [],
+                total: 0,
+                page: 1,
+                perPage: 1000,
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
 
         // Set up route interception for agentless policies API
         await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
@@ -260,9 +296,21 @@ spaceTest.describe(
           }
         });
 
-        // Intercept package policy API - capture and mock response
+        // Intercept package policy API - handle GET for form init and POST for save
         await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
+          if (request.method() === 'GET') {
+            // Mock empty list for form initialization
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [],
+                total: 0,
+                page: 1,
+                perPage: 1000,
+              }),
+            });
+          } else if (request.method() === 'POST') {
             packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
             await route.fulfill({
               status: 200,
@@ -368,9 +416,21 @@ spaceTest.describe(
           }
         });
 
-        // Intercept package policy API - capture and mock response
+        // Intercept package policy API - handle GET for form init and POST for save
         await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
+          if (request.method() === 'GET') {
+            // Mock empty list for form initialization
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [],
+                total: 0,
+                page: 1,
+                perPage: 1000,
+              }),
+            });
+          } else if (request.method() === 'POST') {
             packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
             await route.fulfill({
               status: 200,

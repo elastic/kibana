@@ -85,6 +85,24 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
 
       let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
+      // Mock the package policy list API (GET request needed for form initialization)
+      await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+        if (request.method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              items: [],
+              total: 0,
+              page: 1,
+              perPage: 1000,
+            }),
+          });
+        } else {
+          await route.continue();
+        }
+      });
+
       // Set up route interception for agentless policies API
       // Only capture data in handler - assertions moved to main test body
       await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
@@ -112,9 +130,7 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
 
       // Cloud connectors is selected by default when agentless + cloud connectors are enabled
       await pageObjects.cspmIntegrationPage.fillCloudConnectorName(connectorName);
-      await pageObjects.cspmIntegrationPage.fillCloudConnectorRoleArn(roleArn);
-      // External ID is optional - fill if field is present
-      await pageObjects.cspmIntegrationPage.fillAwsCloudConnectorExternalId(externalId);
+      await pageObjects.cspmIntegrationPage.fillAwsCloudConnectorDetails(roleArn, externalId);
       await pageObjects.cspmIntegrationPage.fillIntegrationName(integrationName);
 
       // Wait for the save button to be enabled before clicking
@@ -172,6 +188,24 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
       const connectorName = 'test-connector-name';
       const credentialsId = 'test-credentials-id';
       let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
+
+      // Mock the package policy list API (GET request needed for form initialization)
+      await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+        if (request.method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              items: [],
+              total: 0,
+              page: 1,
+              perPage: 1000,
+            }),
+          });
+        } else {
+          await route.continue();
+        }
+      });
 
       // Set up route interception for agentless policies API
       // Only capture data in handler - assertions moved to main test body

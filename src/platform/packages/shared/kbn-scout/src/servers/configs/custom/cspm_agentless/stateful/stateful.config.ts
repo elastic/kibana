@@ -55,6 +55,10 @@ export const servers: ScoutServerConfig = {
       '--xpack.cloud.base_url=https://cloud.elastic.co',
       '--xpack.cloud.deployment_url=/deployments/scout-cspm-test',
 
+      // Pre-install cloud_security_posture package at startup
+      '--xpack.fleet.packages.0.name=cloud_security_posture',
+      '--xpack.fleet.packages.0.version=3.1.2',
+
       // Enable debug logging for troubleshooting
       `--logging.loggers=${JSON.stringify([
         {

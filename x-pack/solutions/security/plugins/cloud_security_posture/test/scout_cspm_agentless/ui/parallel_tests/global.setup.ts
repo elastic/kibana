@@ -8,5 +8,6 @@
 import { globalSetupHook } from '@kbn/scout-security';
 
 globalSetupHook('Agentless CSPM setup', async ({ log }) => {
-  log.debug('[setup] Setting up Agentless CSPM');
+  log.info('[setup] Agentless CSPM setup complete');
+  log.info('[setup] cloud_security_posture package is pre-installed via server config');
 });

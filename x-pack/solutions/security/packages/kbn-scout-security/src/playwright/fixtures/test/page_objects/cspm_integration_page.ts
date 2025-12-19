@@ -58,28 +58,40 @@ export class CspmIntegrationPage {
   }
 
   async fillCloudConnectorName(name: string) {
-    await this.page.getByTestId(CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ).fill(name);
+    const input = this.page.getByTestId(CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ);
+    await input.waitFor({ state: 'visible' });
+    await input.fill(name);
   }
 
-  async fillCloudConnectorRoleArn(roleArn: string) {
-    await this.page.getByTestId(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN).fill(roleArn);
-  }
+  async fillAwsCloudConnectorDetails(roleArn: string, externalId?: string) {
+    const roleArnInput = this.page.getByTestId(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN);
+    await roleArnInput.waitFor({ state: 'visible' });
+    await roleArnInput.fill(roleArn);
 
-  async fillAwsCloudConnectorExternalId(externalId: string) {
     // External ID field is optional and may not be present
-    const externalIdField = this.page.getByTestId(AWS_INPUT_TEST_SUBJECTS.EXTERNAL_ID);
-    const isVisible = await externalIdField.isVisible().catch(() => false);
-    if (isVisible) {
-      await externalIdField.fill(externalId);
+    if (externalId) {
+      const externalIdField = this.page.getByTestId(AWS_INPUT_TEST_SUBJECTS.EXTERNAL_ID);
+      const isVisible = await externalIdField.isVisible().catch(() => false);
+      if (isVisible) {
+        await externalIdField.fill(externalId);
+      }
     }
   }
 
   async fillAzureCloudConnectorDetails(tenantId: string, clientId: string, credentialsId: string) {
-    await this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID).fill(tenantId);
-    await this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID).fill(clientId);
-    await this.page
-      .getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
-      .fill(credentialsId);
+    const tenantIdInput = this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+    await tenantIdInput.waitFor({ state: 'visible' });
+    await tenantIdInput.fill(tenantId);
+
+    const clientIdInput = this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+    await clientIdInput.waitFor({ state: 'visible' });
+    await clientIdInput.fill(clientId);
+
+    const connectorIdInput = this.page.getByTestId(
+      AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID
+    );
+    await connectorIdInput.waitFor({ state: 'visible' });
+    await connectorIdInput.fill(credentialsId);
   }
 
   async selectExistingCloudConnector(provider: 'aws' | 'azure', connectorName: string) {
@@ -101,7 +113,9 @@ export class CspmIntegrationPage {
   }
 
   async fillIntegrationName(name: string) {
-    await this.page.locator('input[id="name"]').fill(name);
+    const input = this.page.locator('input[id="name"]');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(name);
   }
 
   async saveIntegration() {

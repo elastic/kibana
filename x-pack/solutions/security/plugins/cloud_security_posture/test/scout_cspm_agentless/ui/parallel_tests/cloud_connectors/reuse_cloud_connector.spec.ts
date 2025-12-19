@@ -144,6 +144,24 @@ spaceTest.describe(
         const existingConnectorName = 'My Existing AWS Connector';
         let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
+        // Mock the package policy list API (GET request needed for form initialization)
+        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+          if (request.method() === 'GET') {
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [],
+                total: 0,
+                page: 1,
+                perPage: 1000,
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
+
         // Intercept cloud connectors API to return mock existing connectors
         await page.route(/\/api\/fleet\/cloud_connectors/, async (route, request) => {
           if (request.method() === 'GET') {
@@ -248,6 +266,24 @@ spaceTest.describe(
         const existingConnectorId = 'existing-azure-connector-id';
         const existingConnectorName = 'My Existing Azure Connector';
         let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
+
+        // Mock the package policy list API (GET request needed for form initialization)
+        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
+          if (request.method() === 'GET') {
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                items: [],
+                total: 0,
+                page: 1,
+                perPage: 1000,
+              }),
+            });
+          } else {
+            await route.continue();
+          }
+        });
 
         // Intercept cloud connectors API to return mock existing connectors
         await page.route(/\/api\/fleet\/cloud_connectors/, async (route, request) => {
