@@ -178,7 +178,7 @@ export function getDataStateContainer({
   const getInitialFetchStatus = () => {
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearchContainer.getState().id !== undefined ||
+      internalState.getState().persistedDiscoverSession?.id !== undefined ||
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
@@ -236,7 +236,6 @@ export function getDataStateContainer({
     data,
     main$: dataSubjects.main$,
     refetch$,
-    searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
@@ -291,7 +290,8 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
+            const fetchMoreTracker =
+              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
 
             // Calculate query range in seconds
             const timeRange = timefilter.getAbsoluteTime();
@@ -303,8 +303,8 @@ export function getDataStateContainer({
             });
 
             fetchMoreTracker.reportEvent({
-              key1: 'query_range_secs',
-              value1: queryRangeSeconds,
+              queryRangeSeconds,
+              requests: inspectorAdapters.requests?.getRequestsSince(fetchMoreTracker.startTime),
             });
 
             return;
@@ -324,7 +324,7 @@ export function getDataStateContainer({
           await scopedProfilesManager.resolveDataSourceProfile(
             {
               dataSource: getCurrentTab().appState.dataSource,
-              dataView: savedSearchContainer.getState().searchSource.getField('index'),
+              dataView: currentDataView$.getValue(),
               query: getCurrentTab().appState.query,
             },
             resetFetchChart$
@@ -361,7 +361,7 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
 
           // Calculate query range in seconds
           const timeRange = timefilter.getAbsoluteTime();
@@ -414,8 +414,8 @@ export function getDataStateContainer({
           });
 
           fetchAllTracker.reportEvent({
-            key1: 'query_range_secs',
-            value1: queryRangeSeconds,
+            queryRangeSeconds,
+            requests: inspectorAdapters.requests?.getRequestsSince(fetchAllTracker.startTime),
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
@@ -437,7 +437,8 @@ export function getDataStateContainer({
 
   const fetchQuery = async () => {
     const query = getCurrentTab().appState.query;
-    const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+    const currentDataView = currentDataView$.getValue();
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);

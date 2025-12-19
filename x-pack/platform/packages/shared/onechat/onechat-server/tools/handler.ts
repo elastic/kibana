@@ -10,12 +10,15 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
 import type {
   ToolEventEmitter,
   ModelProvider,
   ScopedRunner,
   ToolProvider,
   ToolResultStore,
+  ToolPromptManager,
+  ToolStateManager,
 } from '../runner';
 
 /**
@@ -26,12 +29,35 @@ export type ToolHandlerResult<TResult extends ToolResult = ToolResult> = Omit<
   'tool_result_id'
 > & { tool_result_id?: string };
 
+export interface ToolHandlerPromptReturn {
+  prompt: PromptRequest;
+}
+
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
-export interface ToolHandlerReturn<TResult extends ToolResult = ToolResult> {
+export interface ToolHandlerStandardReturn<TResult extends ToolResult = ToolResult> {
   results: Array<ToolHandlerResult<TResult>>;
 }
+
+/**
+ * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
+ */
+export type ToolHandlerReturn<TResult extends ToolResult = ToolResult> =
+  | ToolHandlerStandardReturn<TResult>
+  | ToolHandlerPromptReturn;
+
+export const isToolHandlerInterruptReturn = (
+  toolReturn: ToolHandlerReturn
+): toolReturn is ToolHandlerPromptReturn => {
+  return 'prompt' in toolReturn;
+};
+
+export const isToolHandlerStandardReturn = (
+  toolReturn: ToolHandlerReturn
+): toolReturn is ToolHandlerStandardReturn => {
+  return 'results' in toolReturn;
+};
 
 /**
  * Tool handler function for {@link BuiltinToolDefinition} handlers.
@@ -85,4 +111,12 @@ export interface ToolHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Service used to send and read interruptions.
+   */
+  prompts: ToolPromptManager;
+  /**
+   * Manager to store/load tool state during interrupted executions.
+   */
+  stateManager: ToolStateManager;
 }
