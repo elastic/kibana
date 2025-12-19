@@ -74,6 +74,8 @@ export const useLensProps = ({
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
+    if (!chartLayers.length) return null;
+
     const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -82,6 +84,7 @@ export const useLensProps = ({
         esql: (lensParams.dataset as LensESQLDataset).esql,
       },
     })) as LensAttributes;
+
     return result;
   });
 
@@ -137,7 +140,8 @@ export const useLensProps = ({
       discoverFetch$
     ).pipe(
       // any new emission cancels previous load to avoid race conditions
-      switchMap(() => from(buildAttributesFn.current()))
+      switchMap(() => from(buildAttributesFn.current())),
+      filter((attributes): attributes is LensAttributes => attributes !== null)
     );
 
     // Update Lens props when new attributes load AND chart is visible
