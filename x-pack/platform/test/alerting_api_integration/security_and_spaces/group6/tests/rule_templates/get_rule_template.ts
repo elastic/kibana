@@ -44,20 +44,19 @@ export default (ftrProvider: FtrProviderContext): void => {
     });
 
     it('should return rule template with description and artifacts', async () => {
-      const myArtifacts = { dashboards: ['dash-1'] };
-      const myDescription = 'Test Description';
+      const myArtifacts = { 
+        dashboards: [{ refId: 'dash-1' }],
+        investigation_guide: { blob: 'text' }
+      };
 
-      await createRuleTemplateSO(ftrProvider, { 
-        description: myDescription,
-        artifacts: myArtifacts
-      });
+      await createRuleTemplateSO(ftrProvider);
 
       const response = await getRuleTemplate({ supertest, templateId: 'sample-alerting-rule' });
 
       expect(response.body).to.eql({
         ...getRuleTemplateResponse('sample-alerting-rule'),
-        description: myDescription,
-        artifacts: myArtifacts
+        description: 'This is a sample alerting rule template description',
+        artifacts: myArtifacts,
       });
 });
 
