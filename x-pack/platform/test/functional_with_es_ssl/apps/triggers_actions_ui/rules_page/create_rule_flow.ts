@@ -7,17 +7,31 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { ObjectRemover } from '../../../lib/object_remover';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const browser = getService('browser');
   const retry = getService('retry');
+  const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
 
   describe('Create Rule Flow', () => {
+    const getRuleIdByName = async (name: string) => {
+      const response = await supertest
+        .get(`/api/alerting/rules/_find?search=${name}&search_fields=name`)
+        .expect(200);
+      return response.body.data[0].id;
+    };
+
     before(async () => {
       await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      await objectRemover.removeAll();
     });
 
     it('create rule button is visible and enabled', async () => {
@@ -79,6 +93,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(foundRule).to.not.be(undefined);
         expect(foundRule?.name).to.contain(ruleName);
       });
+
+      // Track the created rule for cleanup
+      const ruleId = await getRuleIdByName(ruleName);
+      objectRemover.add(ruleId, 'rule', 'alerting');
     });
 
     it('return path is set correctly after rule creation', async () => {
