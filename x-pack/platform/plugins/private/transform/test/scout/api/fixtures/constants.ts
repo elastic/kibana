@@ -30,15 +30,6 @@ export const TRANSFORM_USERS = {
         { names: ['*'], privileges: ['read', 'view_index_metadata'] },
         // Destination index privileges
         { names: ['user-*'], privileges: ['read', 'index', 'manage', 'delete'] },
-        // Transform notifications indices
-        {
-          names: [
-            '.transform-notifications-*',
-            '.data-frame-notifications-*',
-            '.transform-notifications-read',
-          ],
-          privileges: ['view_index_metadata', 'read'],
-        },
       ],
     },
   } as KibanaRole,
@@ -46,28 +37,16 @@ export const TRANSFORM_USERS = {
   transformViewerUser: {
     kibana: [
       {
-        base: [],
-        feature: {
-          discover: ['read'],
-          transform: ['read'],
-        },
+        base: ['all'],
+        feature: {},
         spaces: ['*'],
       },
     ],
     elasticsearch: {
       cluster: ['monitor_transform'],
       indices: [
-        // Source index privileges
-        { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] },
-        // Transform notifications indices
-        {
-          names: [
-            '.transform-notifications-*',
-            '.data-frame-notifications-*',
-            '.transform-notifications-read',
-          ],
-          privileges: ['view_index_metadata', 'read'],
-        },
+        // Destination index read-only access
+        { names: ['user-*'], privileges: ['read'] },
       ],
     },
   } as KibanaRole,
