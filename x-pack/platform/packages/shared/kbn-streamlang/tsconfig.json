@@ -20,5 +20,7 @@
     "@kbn/esql-ast",
     "@kbn/tinymath",
     "@kbn/datemath"
+    "@kbn/esql-language",
+    "@kbn/tinymath"
   ]
 }
