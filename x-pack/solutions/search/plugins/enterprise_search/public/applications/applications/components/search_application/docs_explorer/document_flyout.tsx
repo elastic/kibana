@@ -111,7 +111,17 @@ export const DocumentFlyout: React.FC = () => {
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiInMemoryTable columns={columns} items={items} />
+        <EuiInMemoryTable
+          columns={columns}
+          items={items}
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.documentFlyout.tableCaption',
+            {
+              defaultMessage: 'Fields for document {id}',
+              values: { id },
+            }
+          )}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
