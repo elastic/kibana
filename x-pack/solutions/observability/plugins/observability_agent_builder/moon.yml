@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/observability-nav-icons'
   - '@kbn/server-route-repository-client'
+  - '@kbn/onechat-browser'
 tags:
   - plugin
   - prod

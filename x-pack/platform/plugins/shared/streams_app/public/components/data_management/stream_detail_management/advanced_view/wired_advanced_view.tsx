@@ -11,13 +11,14 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { Streams } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { StreamFeatureConfiguration } from '../../stream_detail_features/stream_feature_configuration';
-import { StreamDescription } from '../../stream_detail_features/stream_description';
-import { IndexConfiguration } from './advanced_view/index_configuration';
-import { DeleteStreamPanel } from './advanced_view/delete_stream';
-import { ImportExportPanel } from './advanced_view/import_export';
-import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
+import { StreamFeatureConfiguration } from '../../../stream_detail_features/stream_feature_configuration';
+import { StreamDescription } from '../../../stream_detail_features/stream_description';
+import { IndexConfiguration } from './index_configuration';
+import { DeleteStreamPanel } from './delete_stream';
+import { ImportExportPanel } from './import_export';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useAIFeatures } from '../../../../hooks/use_ai_features';
 
 export function WiredAdvancedView({
   definition,
@@ -29,6 +30,7 @@ export function WiredAdvancedView({
   const {
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
+  const aiFeatures = useAIFeatures();
 
   const { onPageReady } = usePerformanceContext();
 
@@ -46,21 +48,23 @@ export function WiredAdvancedView({
 
   return (
     <>
-      {contentPacks?.enabled && (
+      {contentPacks.enabled && (
         <>
           <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />
         </>
       )}
-
       {significantEvents?.enabled && (
         <>
-          <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+          <StreamDescription
+            definition={definition}
+            refreshDefinition={refreshDefinition}
+            aiFeatures={aiFeatures}
+          />
           <EuiSpacer />
-          <StreamFeatureConfiguration definition={definition.stream} />
+          <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
         </>
       )}
-      <EuiSpacer />
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
           iconType="warning"
@@ -75,14 +79,12 @@ export function WiredAdvancedView({
         />
         <EuiSpacer size="l" />
       </IndexConfiguration>
-
       {!isRoot(definition.stream.name) && (
         <>
           <EuiSpacer />
           <DeleteStreamPanel definition={definition} />
         </>
       )}
-
       <EuiSpacer />
     </>
   );
