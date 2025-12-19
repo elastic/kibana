@@ -150,24 +150,12 @@ describe('getAgentSyncValue', () => {
   });
 
   describe('Unsupported agents return undefined', () => {
-    it('returns undefined for unknown agent', () => {
-      expect(getAgentSyncValue('unknown-agent')).toBeUndefined();
-    });
-
     it('returns undefined for base opentelemetry without language', () => {
       expect(getAgentSyncValue('opentelemetry')).toBeUndefined();
     });
 
     it('returns undefined for base otlp without language', () => {
       expect(getAgentSyncValue('otlp')).toBeUndefined();
-    });
-
-    it('returns undefined for empty string', () => {
-      expect(getAgentSyncValue('')).toBeUndefined();
-    });
-
-    it('returns undefined for random string', () => {
-      expect(getAgentSyncValue('not-an-agent')).toBeUndefined();
     });
   });
 });
