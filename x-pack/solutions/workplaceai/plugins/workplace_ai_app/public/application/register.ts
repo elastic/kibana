@@ -21,14 +21,14 @@ export const registerApp = ({
   core.application.register({
     id: WORKPLACE_AI_APP_ID,
     appRoute: `/app/${WORKPLACE_AI_APP_ID}`,
-    category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+    category: DEFAULT_APP_CATEGORIES.workplaceAI,
     euiIconType: 'logoElasticsearch',
     status: AppStatus.accessible,
     title: i18n.translate('xpack.workplaceai.appTitle', {
       defaultMessage: 'Workplace AI',
     }),
     updater$: undefined,
-    visibleIn: ['sideNav', 'globalSearch'],
+    visibleIn: ['home', 'sideNav', 'globalSearch'],
     async mount({ element, history }) {
       const [coreStart, startPluginDeps] = await core.getStartServices();
       const services = getServices();

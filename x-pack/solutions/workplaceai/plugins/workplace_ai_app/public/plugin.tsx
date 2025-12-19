@@ -7,6 +7,7 @@
 
 import type { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { i18n } from '@kbn/i18n';
 import type {
   WorkplaceAIAppPluginSetup,
   WorkplaceAIAppPluginStart,
@@ -15,6 +16,7 @@ import type {
 } from './types';
 import { registerApp } from './application';
 import { type WorkplaceAIServices } from './services';
+import { WORKPLACE_AI_APP_ID } from '../common/features';
 
 export class WorkplaceAIAppPlugin
   implements
@@ -35,7 +37,7 @@ export class WorkplaceAIAppPlugin
 
   public setup(
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies, WorkplaceAIAppPluginStart>,
-    { dataSourcesRegistry }: WorkplaceAIAppPluginSetupDependencies
+    { dataSourcesRegistry, home }: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
     registerApp({
       core,
@@ -46,6 +48,23 @@ export class WorkplaceAIAppPlugin
         return this.services;
       },
     });
+
+    // Register Workplace AI solution on home page
+    if (home) {
+      home.featureCatalogue.registerSolution({
+        id: 'workplaceAI', // Must match the category ID from DEFAULT_APP_CATEGORIES.workplaceAI
+        title: i18n.translate('xpack.workplaceai.solution.title', {
+          defaultMessage: 'Workplace AI',
+        }),
+        description: i18n.translate('xpack.workplaceai.solution.description', {
+          defaultMessage:
+            'Build intelligent workplace experiences with AI-powered search, chat, and automation.',
+        }),
+        icon: 'logoElasticsearch',
+        path: `/app/${WORKPLACE_AI_APP_ID}`,
+        order: 400,
+      });
+    }
 
     return {};
   }

@@ -11,6 +11,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginSetup {}
@@ -20,6 +21,7 @@ export interface WorkplaceAIAppPluginStart {}
 
 export interface WorkplaceAIAppPluginSetupDependencies {
   dataSourcesRegistry: DataSourcesRegistryPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export interface WorkplaceAIAppPluginStartDependencies {
