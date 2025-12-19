@@ -17,7 +17,7 @@ export PATH=$PATH:./node_modules/.bin
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
   desc="node scripts/eslint_all_files --no-cache --fix"
-  node scripts/eslint_all_files --no-cache --fix
+  node scripts/eslint_all_files --no-cache
 else
   desc="node scripts/eslint_all_files --no-cache"
   node scripts/eslint_all_files --no-cache
