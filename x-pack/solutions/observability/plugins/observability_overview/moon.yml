@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/ui-theme'
   - '@kbn/datemath'
   - '@kbn/logs-shared-plugin'
-  - '@kbn/exploratory-view-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/serverless'
