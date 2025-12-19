@@ -21,11 +21,5 @@ interface RepairResult {
   error?: string;
 }
 
-interface RepairStatusResponse {
-  isDone: boolean;
-  results?: RepairResult[];
-  error?: string;
-}
-
-export type { RepairParams, RepairResult, RepairStatusResponse };
+export type { RepairParams, RepairResult };
 export { repairParamsSchema };

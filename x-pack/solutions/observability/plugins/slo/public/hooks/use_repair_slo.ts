@@ -43,11 +43,9 @@ export function useRepairSlo({ name }: { name: string }) {
             values: { name },
           }),
         });
-        queryClient.invalidateQueries({ queryKey: [...sloKeys.all, 'health'], exact: false });
       },
       onSuccess: (response) => {
         const foundSLO = response.find((result) => result.success && result.id);
-
         if (!foundSLO) {
           toasts.addError(new Error('Unknown error occurred while repairing SLO'), {
             title: i18n.translate('xpack.slo.repair.unknownError', {
@@ -56,16 +54,16 @@ export function useRepairSlo({ name }: { name: string }) {
             }),
           });
           return;
-        } else {
-          toasts.addSuccess(
-            i18n.translate('xpack.slo.repair.successNotification', {
-              defaultMessage: 'Repaired {name}',
-              values: { name },
-            })
-          );
         }
 
-        queryClient.invalidateQueries({ queryKey: [...sloKeys.all, 'health'], exact: false });
+        toasts.addSuccess(
+          i18n.translate('xpack.slo.repair.successNotification', {
+            defaultMessage: 'Repaired {name}',
+            values: { name },
+          })
+        );
+
+        queryClient.invalidateQueries({ queryKey: sloKeys.allHealth(), exact: false });
       },
     }
   );

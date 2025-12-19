@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { RepairParams } from '@kbn/slo-schema';
+import { type Logger } from '@kbn/core/server';
+import type { RepairParams, RepairResult } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
-import { computeHealth, type SLOHealth } from '../domain/services/compute_health';
-import { getSLOTransformId, getSLOSummaryTransformId } from '../../common/constants';
-import type { DefaultTransformManager } from './transform_manager';
-import type { DefaultSummaryTransformManager } from './summay_transform_manager';
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import type { SLODefinition } from '../domain/models/slo';
-import type { SLORepository } from './slo_repository';
+import { computeHealth, type SLOHealth } from '../domain/services/compute_health';
+import type { SLODefinitionRepository } from './slo_definition_repository';
+import type { DefaultSummaryTransformManager } from './summay_transform_manager';
+import type { DefaultTransformManager } from './transform_manager';
 
 interface RepairAction {
   action: 'recreate-transform' | 'start-transform' | 'stop-transform';
@@ -22,17 +22,11 @@ interface RepairAction {
   enabled: boolean | undefined;
 }
 
-interface RepairResult {
-  id: string;
-  success: boolean;
-  error?: string;
-}
-
 export class RepairSLO {
   constructor(
     private logger: Logger,
     private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: DefaultTransformManager,
     private summaryTransformManager: DefaultSummaryTransformManager
   ) {}
@@ -41,7 +35,7 @@ export class RepairSLO {
     if (params.list.length > 100) {
       throw new Error('Cannot repair more than 100 SLOs at once');
     }
-    const allResults: Array<RepairResult> = [];
+    const allResults: RepairResult[] = [];
     const definitions = await this.repository.findAllByIds(params.list);
 
     let successCount = 0;
@@ -56,7 +50,6 @@ export class RepairSLO {
     await Promise.all(
       definitions.map(async (definition, i) => {
         const repairActions = this.identifyRepairActions(health[i], definition.enabled);
-        this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
 
         if (repairActions.length === 0) {
           this.logger.debug('No repair actions needed');
@@ -64,6 +57,7 @@ export class RepairSLO {
           return;
         }
 
+        this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
         return headLimiter(async () => {
           for (const action of repairActions) {
             try {

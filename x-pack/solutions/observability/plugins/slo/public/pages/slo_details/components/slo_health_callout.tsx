@@ -11,12 +11,11 @@ import { i18n } from '@kbn/i18n';
 import kbnRison from '@kbn/rison';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-
+import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
-import { useRepairSlo } from '../../../hooks/use_repair_slo';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
+import { useRepairSlo } from '../../../hooks/use_repair_slo';
 import { ContentWithInspectCta } from './health_callout/content_with_inspect_cta';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
@@ -126,9 +125,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                     textSize="s"
                     content={`${transformName} (${i18n.translate(
                       'xpack.slo.sloDetails.healthCallout.transformStatus.unhealthy',
-                      {
-                        defaultMessage: 'unhealthy',
-                      }
+                      { defaultMessage: 'unhealthy' }
                     )})`}
                   />
                 </EuiFlexItem>
@@ -141,13 +138,9 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             <EuiButton
               data-test-subj="sloSloHealthCalloutRepairButton"
               iconSide="left"
-              iconType={'wrench'}
+              iconType="wrench"
               color="accent"
-              onClick={() =>
-                repairSlo({
-                  sloId: slo.id,
-                })
-              }
+              onClick={() => repairSlo({ sloId: slo.id })}
             >
               {i18n.translate('xpack.slo.sloDetails.sloHealthCallout.repairButtonLabel', {
                 defaultMessage: 'Repair',
