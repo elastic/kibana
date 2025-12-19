@@ -219,16 +219,16 @@ export default function ({ getService }: FtrProviderContext) {
 
         return Buffer.from(
           `
-{"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${
-            listInfo!.description
-          }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
+  {"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${
+                      listInfo!.description
+                    }","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${
             listInfo!.name
           }","namespace_type":"agnostic","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}
-${JSON.stringify(createItem())}
-${JSON.stringify(createItem())}
-${JSON.stringify(createItem())}
-{"exported_exception_list_count":1,"exported_exception_list_item_count":3,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
-`,
+  ${JSON.stringify(createItem())}
+  ${JSON.stringify(createItem())}
+  ${JSON.stringify(createItem())}
+  {"exported_exception_list_count":1,"exported_exception_list_item_count":3,"missing_exception_list_item_count":0,"missing_exception_list_items":[],"missing_exception_lists":[],"missing_exception_lists_count":0}
+  `,
           'utf8'
         );
       };
