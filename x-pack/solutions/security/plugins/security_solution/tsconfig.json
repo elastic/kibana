@@ -270,6 +270,7 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/onechat-browser",
     "@kbn/ai-assistant-common",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-common",
+    "@kbn/kql"
   ]
 }

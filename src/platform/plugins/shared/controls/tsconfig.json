@@ -17,7 +17,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/data-plugin",
-    "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/data-views-plugin",
     "@kbn/kibana-utils-plugin",
@@ -43,7 +42,8 @@
     "@kbn/search-types",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }

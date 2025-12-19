@@ -25,9 +25,6 @@
     "@kbn/datemath",
     "@kbn/monaco",
     "@kbn/field-types",
-    "@kbn/config",
-    "@kbn/config-schema",
-    "@kbn/utility-types-jest",
     "@kbn/react-field",
     "@kbn/ui-theme",
     "@kbn/saved-objects-management-plugin",
@@ -51,6 +48,7 @@
     "@kbn/split-button",
     "@kbn/cps",
     "@kbn/css-utils",
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

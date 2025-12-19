@@ -135,6 +135,7 @@
     "@kbn/unified-tabs",
     "@kbn/esql-composer",
     "@kbn/cps",
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

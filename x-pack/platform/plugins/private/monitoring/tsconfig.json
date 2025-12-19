@@ -60,7 +60,8 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/autoops-promotion-callout",
     "@kbn/react-query",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }

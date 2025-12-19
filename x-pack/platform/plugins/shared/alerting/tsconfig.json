@@ -84,7 +84,8 @@
     "@kbn/react-query",
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
-    "@kbn/expect"
+    "@kbn/expect",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }
