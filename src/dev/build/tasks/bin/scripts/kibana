@@ -61,4 +61,3 @@ if [ "$ELASTIC_CONTAINER" = "true" ] && ! printf '%s' "$ALL_NODE_OPTIONS" | grep
 fi
 
 NODE_OPTIONS="$ALL_NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/kibana/dist" "${@}"
-q
