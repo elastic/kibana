@@ -10,10 +10,9 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiImage,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -22,7 +21,6 @@ import searchRocketIcon from '../assets/search-rocket.svg';
 import {
   EIS_CALLOUT_DOCUMENTATION_BTN,
   EIS_PROMO_CALLOUT_DESCRIPTION,
-  EIS_CALLOUT_DISMISS_ARIA,
   EIS_CALLOUT_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
@@ -51,37 +49,29 @@ export const EisPromotionalCallout = ({
   }
 
   return (
-    <EuiPanel
-      grow={false}
+    <EuiCallOut
       data-test-subj={dataId}
       css={({ euiTheme }) => ({
-        color: euiTheme.colors.primaryText,
-        border: `1px ${euiTheme.colors.borderBaseSubdued} solid`,
-        position: 'relative',
+        backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
+        border: `${euiTheme.border.thin}`,
+        borderRadius: `${euiTheme.border.radius.medium}`,
       })}
-      paddingSize="m"
-      color="subdued"
+      onDismiss={onDismissPromo}
     >
-      <div style={{ position: 'absolute', top: 8, right: 8 }}>
-        <EuiButtonIcon
-          data-test-subj="eisPromoCalloutDismissBtn"
-          iconType="cross"
-          aria-label={EIS_CALLOUT_DISMISS_ARIA}
-          onClick={onDismissPromo}
-          size="s"
-        />
-      </div>
-      <EuiFlexGroup direction={direction} alignItems="flexStart">
-        <EuiImage src={searchRocketIcon} alt="" size="original" />
+      <EuiFlexGroup
+        direction={direction}
+        alignItems="flexStart"
+        gutterSize={direction === 'row' ? 'l' : 'm'}
+      >
+        <EuiImage src={searchRocketIcon} alt="" />
         <div>
-          <EuiTitle size="xxs">
-            <h2>{EIS_CALLOUT_TITLE}</h2>
+          <EuiTitle>
+            <h4>{EIS_CALLOUT_TITLE}</h4>
           </EuiTitle>
-          <EuiSpacer size="xs" />
           <EuiText color="subdued" size="s">
             <p>{EIS_PROMO_CALLOUT_DESCRIPTION}</p>
           </EuiText>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiButton
             fullWidth={false}
             color="text"
@@ -97,6 +87,6 @@ export const EisPromotionalCallout = ({
           </EuiButton>
         </div>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCallOut>
   );
 };

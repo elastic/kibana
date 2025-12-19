@@ -65,7 +65,7 @@ describe('EisPromotionalCallout', () => {
   it('calls onDismissPromo when dismiss button is clicked', () => {
     renderEisPromotionalCallout();
 
-    const dismissButton = screen.getByTestId('eisPromoCalloutDismissBtn');
+    const dismissButton = screen.getByTestId('euiDismissCalloutButton');
     fireEvent.click(dismissButton);
 
     expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
