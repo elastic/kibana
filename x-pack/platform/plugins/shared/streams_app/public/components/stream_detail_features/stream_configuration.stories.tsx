@@ -31,6 +31,7 @@ export const StreamConfigurationStory: StoryFn<{}> = () => {
           failure_store: { inherit: {} },
         },
       }}
+      aiFeatures={null}
     />
   );
 };

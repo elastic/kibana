@@ -10,6 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { StreamFeatureConfiguration } from '../../stream_detail_features/stream_feature_configuration';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
@@ -47,6 +48,7 @@ export function UnmanagedElasticsearchAssets({
   const {
     features: { significantEvents },
   } = useStreamsPrivileges();
+  const aiFeatures = useAIFeatures();
 
   const unmanagedAssetsDetailsFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -132,7 +134,7 @@ export function UnmanagedElasticsearchAssets({
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>
           {significantEvents?.enabled && (
-            <StreamFeatureConfiguration definition={definition.stream} />
+            <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           )}
         </EuiFlexItem>
         <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
