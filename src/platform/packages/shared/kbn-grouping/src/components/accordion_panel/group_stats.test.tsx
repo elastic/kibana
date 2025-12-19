@@ -119,7 +119,7 @@ describe('Additional action buttons', () => {
         Button 1
       </button>,
     ];
-    const { getByTestId, container } = render(
+    const { getByTestId } = render(
       <GroupStats {...testProps} additionalActionButtons={additionalButtons} />
     );
 

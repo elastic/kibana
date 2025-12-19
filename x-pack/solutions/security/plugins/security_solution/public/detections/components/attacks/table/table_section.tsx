@@ -184,7 +184,7 @@ export const TableSection = React.memo(
               />,
             ];
       },
-      []
+      [openAttackDetailsFlyout]
     );
 
     return (
