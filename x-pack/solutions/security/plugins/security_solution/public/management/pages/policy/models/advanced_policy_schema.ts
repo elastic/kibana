@@ -479,6 +479,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.populate_file_data',
+    first_supported_version: '9.3.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
+      {
+        defaultMessage:
+          'Enable collection of entropy and header bytes on file events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -1214,7 +1225,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          "Control whether kprobes or eBPF are used to gather data. Options are 'kprobe', 'ebpf', or 'auto'. 'auto' uses eBPF if possible, otherwise it uses 'kprobe'. Default: auto.",
+          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto' uses 'quark' if possible (and supported), then tries legacy 'ebpf', and otherwise it uses 'kprobe'. 'quark' is supported by Endpoint versions 9.3 and newer. Default: auto.",
       }
     ),
   },

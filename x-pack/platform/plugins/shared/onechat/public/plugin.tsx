@@ -15,9 +15,8 @@ import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { docLinks } from '../common/doc_links';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import { registerAnalytics, registerApp } from './register';
 import { OnechatNavControlInitiator } from './components/nav_control/lazy_onechat_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -31,7 +30,7 @@ import {
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
-import { registerStepDefinitions } from './step_types';
+import { registerWorkflowSteps } from './step_types';
 import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
@@ -39,11 +38,11 @@ import type {
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
+  ConversationFlyoutRef,
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
-import type { ConversationFlyoutRef } from './types';
 
 export class OnechatPlugin
   implements
@@ -90,20 +89,7 @@ export class OnechatPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    if (deps.workflowsExtensions) {
-      registerStepDefinitions(deps.workflowsExtensions);
-    }
-
-    try {
-      core.getStartServices().then(([coreStart]) => {
-        const { capabilities } = coreStart.application;
-        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
-          registerManagementSection({ core, management: deps.management });
-        }
-      });
-    } catch (error) {
-      this.logger.error('Error registering Agent Builder management section', error);
-    }
+    registerWorkflowSteps(deps.workflowsExtensions);
 
     return {};
   }
@@ -141,6 +127,33 @@ export class OnechatPlugin
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
 
+    const openFlyoutInternal = (options?: OpenConversationFlyoutOptions) => {
+      const config = options ?? this.conversationFlyoutActiveConfig;
+
+      // If a flyout is already open, update its props instead of creating a new one
+      if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+        this.updateFlyoutPropsCallback(config);
+        return { flyoutRef: this.activeFlyoutRef };
+      }
+
+      // Create new flyout and set up prop updates
+      const { flyoutRef } = openConversationFlyout(config, {
+        coreStart: core,
+        services: internalServices,
+        onPropsUpdate: (callback) => {
+          this.updateFlyoutPropsCallback = callback;
+        },
+        onClose: () => {
+          this.activeFlyoutRef = null;
+          this.updateFlyoutPropsCallback = null;
+        },
+      });
+
+      this.activeFlyoutRef = flyoutRef;
+
+      return { flyoutRef };
+    };
+
     const onechatService: OnechatPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
@@ -158,30 +171,20 @@ export class OnechatPlugin
         this.conversationFlyoutActiveConfig = {};
       },
       openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
-        const config = options ?? this.conversationFlyoutActiveConfig;
-
-        // If a flyout is already open, update its props instead of creating a new one
-        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
-          this.updateFlyoutPropsCallback(config);
-          return { flyoutRef: this.activeFlyoutRef };
+        return openFlyoutInternal(options);
+      },
+      toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
+        if (this.activeFlyoutRef) {
+          const flyoutRef = this.activeFlyoutRef;
+          // Be defensive: clear local references immediately in case the underlying overlay doesn't
+          // synchronously invoke our onClose callback.
+          this.activeFlyoutRef = null;
+          this.updateFlyoutPropsCallback = null;
+          flyoutRef.close();
+          return;
         }
 
-        // Create new flyout and set up prop updates
-        const { flyoutRef } = openConversationFlyout(config, {
-          coreStart: core,
-          services: internalServices,
-          onPropsUpdate: (callback) => {
-            this.updateFlyoutPropsCallback = callback;
-          },
-          onClose: () => {
-            this.activeFlyoutRef = null;
-            this.updateFlyoutPropsCallback = null;
-          },
-        });
-
-        this.activeFlyoutRef = flyoutRef;
-
-        return { flyoutRef };
+        openFlyoutInternal(options);
       },
     };
 

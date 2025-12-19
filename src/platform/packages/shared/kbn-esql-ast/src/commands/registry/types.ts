@@ -19,7 +19,7 @@ import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../../types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
-import type { SuggestionCategory } from '../../sorting/types';
+import type { SuggestionCategory } from '../../shared/sorting/types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -58,7 +58,7 @@ export interface ISuggestionItem {
   /**
    * A very short description for the suggestion entry that can be shown on the UI next to the label
    */
-  detail: string;
+  detail?: string;
   /**
    * A longer description for the suggestion entry that can be shown on demand on the UI.
    */

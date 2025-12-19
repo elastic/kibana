@@ -118,8 +118,8 @@ export function TableGrid({
   }, [onRemoveColumn, onAddColumn, columns]);
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
-    [rows, isEsqlMode, filter, onToggleColumn]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
+    [rows, isEsqlMode, filter, onToggleColumn, columns]
   );
   const fieldValueCellActions = useMemo(
     () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
@@ -190,11 +190,12 @@ export function TableGrid({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={isDetails}
+          isESQLMode={isEsqlMode}
           onFindSearchTermMatch={onFindSearchTermMatch}
         />
       );
     },
-    [searchTerm, rows, onFindSearchTermMatch]
+    [searchTerm, rows, isEsqlMode, onFindSearchTermMatch]
   );
 
   const renderCellPopover = useCallback(
