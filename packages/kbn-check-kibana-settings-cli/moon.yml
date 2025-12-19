@@ -17,7 +17,12 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: packages/kbn-check-kibana-settings-cli
-dependsOn: []
+dependsOn:
+  - '@kbn/core-root-server-internal'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-plugins-server-internal'
+  - '@kbn/tooling-log'
 tags:
   - shared-common
   - package
