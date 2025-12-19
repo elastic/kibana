@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
-import { OnboardingTopicId } from '../../constants';
+import type { OnboardingTopicId } from '../../constants';
 import { useOnboardingContext } from '../onboarding_context';
 import { useUrlDetail } from '../hooks/use_url_detail';
 
