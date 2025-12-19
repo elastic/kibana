@@ -1,0 +1,151 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type {
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../types';
+import { getLogsIndices } from '../../utils/get_logs_indices';
+import { parseDatemath } from '../../utils/time';
+import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_LOG_SOURCE_FIELDS } from './constants';
+import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
+import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
+import type { LogSequence } from './types';
+
+function getNoResultsMessage({
+  sequences,
+  logId,
+  logsFilter,
+  interestingEventFilter,
+  correlationFields,
+  start,
+  end,
+}: {
+  sequences: LogSequence[];
+  logId: string | undefined;
+  logsFilter: string | undefined;
+  interestingEventFilter: string | undefined;
+  correlationFields: string[];
+  start: string;
+  end: string;
+}): string | undefined {
+  if (sequences.length > 0) {
+    return undefined;
+  }
+
+  const isUsingDefaultCorrelationFields =
+    correlationFields === DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
+
+  const correlationFieldsDescription = isUsingDefaultCorrelationFields
+    ? 'Matching logs exist but lack the default correlation fields (trace.id, request.id, transaction.id, etc.). Try using `correlationFields` for specifying custom correlation fields.'
+    : `Matching logs exist but lack the custom correlation fields: ${correlationFields.join(', ')}`;
+
+  const isUsingDefaultEventFilter = !interestingEventFilter;
+  const eventFilterDescription = isUsingDefaultEventFilter
+    ? 'The default `interestingEventFilter` (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.) did not match any documents.'
+    : `The 
+interestingEventFilter" option "${interestingEventFilter}" did not match any documents.`;
+
+  if (logId) {
+    return `The log ID "${logId}" was not found, or the log does not have any of the ${correlationFieldsDescription}.`;
+  }
+
+  const suggestions = [
+    `No matching logs exist in this time range (${start} to ${end})`,
+    ...(logsFilter ? ['`logsFilter` is too restrictive'] : []),
+    eventFilterDescription,
+    correlationFieldsDescription,
+  ];
+
+  return `No log sequences found. Possible reasons: ${suggestions
+    .map((s, i) => `(${i + 1}) ${s}`)
+    .join(', ')}.`;
+}
+
+export async function getToolHandler({
+  core,
+  logger,
+  esClient,
+  start,
+  end,
+  logsFilter,
+  interestingEventFilter,
+  index,
+  correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+  logId,
+  logSourceFields = DEFAULT_LOG_SOURCE_FIELDS,
+  maxSequences = 10,
+  maxLogsPerSequence = 200,
+}: {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  logger: Logger;
+  esClient: IScopedClusterClient;
+  start: string;
+  end: string;
+  logsFilter?: string;
+  interestingEventFilter?: string;
+  index?: string;
+  correlationFields?: string[];
+  logId?: string;
+  logSourceFields?: string[];
+  maxSequences?: number;
+  maxLogsPerSequence?: number;
+}) {
+  const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
+  const startTime = parseDatemath(start);
+  const endTime = parseDatemath(end, { roundUp: true });
+
+  const anchorLogs = await getAnchorLogs({
+    esClient,
+    logsIndices,
+    startTime,
+    endTime,
+    logsFilter,
+    interestingEventFilter,
+    correlationFields,
+    logger,
+    logId,
+    maxSequences,
+  });
+
+  // For each anchor log, find the correlated logs
+  const sequences = await Promise.all(
+    anchorLogs.map(async (anchorLog) => {
+      const { logs, isTruncated } = await getCorrelatedLogsForAnchor({
+        esClient,
+        anchorLog,
+        logsIndices,
+        logger,
+        logSourceFields,
+        maxLogsPerSequence,
+      });
+
+      return {
+        correlation: anchorLog.correlation,
+        logs,
+        isTruncated,
+      };
+    })
+  );
+
+  const message = getNoResultsMessage({
+    sequences,
+    logId,
+    logsFilter,
+    interestingEventFilter,
+    correlationFields,
+    start,
+    end,
+  });
+
+  return { sequences, message };
+}

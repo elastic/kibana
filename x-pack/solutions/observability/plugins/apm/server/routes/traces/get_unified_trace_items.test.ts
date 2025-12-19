@@ -19,6 +19,7 @@ import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { getTraceItemIcon } from './get_unified_trace_items';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
+  AGENT_NAME,
   AT_TIMESTAMP,
   EVENT_OUTCOME,
   KIND,
@@ -31,6 +32,7 @@ import {
   SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
   SPAN_SUBTYPE,
+  SPAN_SYNC,
   SPAN_TYPE,
   STATUS_CODE,
   TIMESTAMP_US,
@@ -552,6 +554,131 @@ describe('getUnifiedTraceItems', () => {
 
       // 2023-01-01T00:00:00.000Z in microseconds
       expect(result.traceItems[0].timestampUs).toBe(1672531200000000);
+    });
+
+    it('should include agentName when present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [AGENT_NAME]: ['nodejs'],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].agentName).toBe('nodejs');
+    });
+
+    it('should return undefined agentName when not present (OTEL without processing)', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].agentName).toBeUndefined();
+    });
+
+    it('should include sync field when present', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+                [SPAN_SYNC]: [true],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].sync).toBe(true);
+    });
+
+    it('should return undefined sync when not present (OTEL without processing)', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['span-1'],
+                [SPAN_NAME]: ['Test Span'],
+                [SPAN_DURATION]: [1000],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0].sync).toBeUndefined();
+    });
+
+    it('should handle OTEL documents without agentName and sync fields', async () => {
+      const mockSearchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: {
+                ...defaultSearchFields,
+                [SPAN_ID]: ['otel-span-1'],
+                [SPAN_NAME]: ['OTEL Unprocessed Span'],
+                [SPAN_DURATION]: [1500],
+                [KIND]: ['client'],
+              },
+            },
+          ],
+        },
+      };
+
+      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
+
+      const result = await getUnifiedTraceItems(defaultParams);
+
+      expect(result.traceItems[0]).toMatchObject({
+        id: 'otel-span-1',
+        name: 'OTEL Unprocessed Span',
+        duration: 1500,
+        type: 'client',
+        agentName: undefined,
+        sync: undefined,
+      });
     });
   });
 
