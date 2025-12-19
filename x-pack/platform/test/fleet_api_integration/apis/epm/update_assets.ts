@@ -587,8 +587,8 @@ export default function (providerContext: FtrProviderContext) {
               type: 'epm-packages-assets',
             },
             {
-              id: 'cf050fd1-4a35-50e7-b98c-4a48dfca5724',
-              path: 'all_assets-0.2.0/kibana/slo_template/nginx-availability.json',
+              id: 'c5eaf69c-2dab-5678-a6e5-e586db4f3728',
+              path: 'all_assets-0.2.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
               type: 'epm-packages-assets',
             },
             {
@@ -607,8 +607,8 @@ export default function (providerContext: FtrProviderContext) {
               type: 'epm-packages-assets',
             },
             {
-              id: 'c5eaf69c-2dab-5678-a6e5-e586db4f3728',
-              path: 'all_assets-0.2.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
+              id: 'cf050fd1-4a35-50e7-b98c-4a48dfca5724',
+              path: 'all_assets-0.2.0/kibana/slo_template/nginx-availability.json',
               type: 'epm-packages-assets',
             },
             {
