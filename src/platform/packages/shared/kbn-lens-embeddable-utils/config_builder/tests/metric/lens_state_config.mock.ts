@@ -171,6 +171,168 @@ export const breakdownMetricAttributes: LensAttributes = {
 } satisfies LensAttributes;
 
 /**
+ * Complex metric generated from kibana
+ */
+export const complexMetricAttributes: LensAttributes = {
+  title: 'Metric - Complex',
+  description: 'Complex Lens Metric',
+  visualizationType: 'lnsMetric',
+  state: {
+    visualization: {
+      layerId: '73144967-199a-451f-a407-e5e5e543cb9e',
+      layerType: 'data',
+      metricAccessor: '594aa5e9-9163-4b22-a19d-89b3546561d9',
+      secondaryMetricAccessor: 'c6c134aa-e1eb-4484-a5da-f864b2ed5095',
+      maxAccessor: 'f041d9d0-db1d-4648-8320-a58449159841',
+      color: '#FFf',
+      showBar: true,
+      secondaryTrend: {
+        type: 'none',
+      },
+      secondaryLabelPosition: 'before',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '73144967-199a-451f-a407-e5e5e543cb9e': {
+            columns: {
+              '594aa5e9-9163-4b22-a19d-89b3546561d9': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error why is this type erroring?
+                  emptyAsNull: true,
+                },
+              },
+              'c6c134aa-e1eb-4484-a5da-f864b2ed5095': {
+                label: 'Average of bytes',
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error why is this type erroring?
+                  emptyAsNull: true,
+                },
+              },
+              'f041d9d0-db1d-4648-8320-a58449159841': {
+                label: 'Maximum of bytes',
+                dataType: 'number',
+                operationType: 'max',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error why is this type erroring?
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: [
+              '594aa5e9-9163-4b22-a19d-89b3546561d9',
+              'c6c134aa-e1eb-4484-a5da-f864b2ed5095',
+              'f041d9d0-db1d-4648-8320-a58449159841',
+            ],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      // @ts-expect-error why is this type erroring?
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: 1,
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-73144967-199a-451f-a407-e5e5e543cb9e',
+    },
+  ],
+} satisfies LensAttributes;
+
+/**
+ * Simple metric generated from kibana
+ */
+export const simpleMetricAttributes: LensAttributes = {
+  title: 'Lens Metric - By Ref',
+  description: '',
+  visualizationType: 'lnsMetric',
+  state: {
+    visualization: {
+      layerId: '2821bd27-b805-4dea-a7d4-123c248e63b1',
+      layerType: 'data',
+      metricAccessor: '812a7944-731e-4967-8b84-1c8bba4ff04b',
+      secondaryTrend: {
+        type: 'none',
+      },
+      secondaryLabelPosition: 'before',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '2821bd27-b805-4dea-a7d4-123c248e63b1': {
+            columns: {
+              '812a7944-731e-4967-8b84-1c8bba4ff04b': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error why is this type erroring?
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['812a7944-731e-4967-8b84-1c8bba4ff04b'],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      // @ts-expect-error why is this type erroring?
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  version: 1,
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-2821bd27-b805-4dea-a7d4-123c248e63b1',
+    },
+  ],
+} satisfies LensAttributes;
+
+/**
  * Metric with formula reference columns and rank_by in the terms bucket operation
  */
 export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
