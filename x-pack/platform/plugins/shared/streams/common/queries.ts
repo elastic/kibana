@@ -16,13 +16,11 @@ export interface QueryLink {
 
 type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
 
-export type QueryAssetLinkRequest = OmitFrom<QueryLink, 'asset.uuid'>;
+export type QueryLinkRequest = OmitFrom<QueryLink, 'asset.uuid'>;
 
-export type QueryAssetUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
+export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
 
-export type QueryAsset = QueryLink & {
+export type Query = QueryLink & {
   title: string;
   query: StreamQuery;
 };
-
-export type QueryAssetWithoutUuid = Omit<QueryLink, 'asset.uuid'>;
