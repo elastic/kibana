@@ -74,18 +74,20 @@ export function getConnectorTypeSuggestions(
         ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
         : connectorType;
 
+    const genericDocumentation = connectorType.startsWith('elasticsearch.')
+      ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
+      : connectorType.startsWith('kibana.')
+      ? `Kibana API - ${connectorType.replace('kibana.', '')}`
+      : connector?.description || `Workflow connector - ${connectorType}`;
+
     return {
-      label: displayName, // Show display name for dynamic connectors, technical name for ES/Kibana
+      label: connectorType, // Show the actual type as label
       kind: getConnectorCompletionKind(connectorType), // Use appropriate kind for icons
       insertText: simpleText, // Still insert the actual actionTypeId
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: extendedRange,
-      detail: connectorType, // Show the actual type as detail
-      documentation: connectorType.startsWith('elasticsearch.')
-        ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
-        : connectorType.startsWith('kibana.')
-        ? `Kibana API - ${connectorType.replace('kibana.', '')}`
-        : connector?.description || `Workflow connector - ${connectorType}`,
+      detail: displayName, // Show display name for dynamic connectors, technical name for ES/Kibana
+      documentation: connector?.summary || genericDocumentation,
       filterText: connectorType,
       sortText: `!${connectorType}`, // Priority prefix to sort before default suggestions
       preselect: false,
