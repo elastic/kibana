@@ -398,6 +398,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  trim: {
+    type: 'trim' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.trimInputDisplay',
+      {
+        defaultMessage: 'Trim',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.trimHelpText"
+          defaultMessage="{trimLink} If the field is an array of strings, all members of the array will be trimmed."
+          values={{
+            trimLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsTrimLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.trim}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.trimLinkLabel', {
+                  defaultMessage: 'Trims whitespace from field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -440,6 +471,7 @@ const PROCESSOR_GROUP_MAP: Record<
   manual_ingest_pipeline: 'other',
   uppercase: 'set',
   lowercase: 'set',
+  trim: 'set',
 };
 
 const getProcessorDescription =

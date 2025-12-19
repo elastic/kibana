@@ -19,6 +19,7 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
+  TrimProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -54,6 +55,7 @@ import type {
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
+  TrimFormState,
   UppercaseFormState,
 } from './types';
 
@@ -71,6 +73,7 @@ export const SPECIALISED_TYPES = [
   'drop_document',
   'uppercase',
   'lowercase',
+  'trim',
 ];
 
 interface FormStateDependencies {
@@ -236,6 +239,14 @@ const defaultLowercaseProcessorFormState = (): LowercaseFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultTrimProcessorFormState = (): TrimFormState => ({
+  action: 'trim' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -266,6 +277,7 @@ const defaultProcessorFormStateByType: Record<
   replace: defaultReplaceProcessorFormState,
   uppercase: defaultUppercaseProcessorFormState,
   lowercase: defaultLowercaseProcessorFormState,
+  trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -308,7 +320,8 @@ export const getFormStateFromActionStep = (
     step.action === 'replace' ||
     step.action === 'math' ||
     step.action === 'uppercase' ||
-    step.action === 'lowercase'
+    step.action === 'lowercase' ||
+    step.action === 'trim'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -543,6 +556,21 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as LowercaseProcessor,
+      };
+    }
+
+    if (formState.action === 'trim') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'trim',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as TrimProcessor,
       };
     }
 

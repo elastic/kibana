@@ -63,6 +63,16 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'trim') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.trimProcessorDescription',
+        {
+          defaultMessage: 'Trims whitespace from "{from}"',
+          values: {
+            from: step.from,
+          },
+        }
+      );
     } else if (step.action === 'rename') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.renameProcessorDescription',

@@ -203,16 +203,9 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       break;
 
     case 'uppercase':
-      // Uppercase processor can have optional 'to' field, defaults to modifying 'from' in place
-      if (processor.to) {
-        fields.push(processor.to);
-      } else if (processor.from) {
-        fields.push(processor.from);
-      }
-      break;
-
     case 'lowercase':
-      // Lowercase processor can have optional 'to' field, defaults to modifying 'from' in place
+    case 'trim':
+      // Uppercase, lowercase, and trim processors can have optional 'to' field, defaults to modifying 'from' in place
       if (processor.to) {
         fields.push(processor.to);
       } else if (processor.from) {
@@ -346,7 +339,8 @@ function getProcessorOutputType(
     case 'replace':
     case 'uppercase':
     case 'lowercase':
-      // Dissect, replace, uppercase, and lowercase always produce string output
+    case 'trim':
+      // Dissect, replace, uppercase, lowercase, and trim always produce string output
       return 'string';
 
     case 'date':
@@ -446,7 +440,8 @@ function getExpectedInputType(
 
     case 'uppercase':
     case 'lowercase':
-      // Uppercase & lowercase require string input
+    case 'trim':
+      // Uppercase, lowercase, and trim require string input
       if (processor.from === fieldName) {
         return ['string'];
       }
@@ -514,6 +509,7 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'dissect':
       case 'uppercase':
       case 'lowercase':
+      case 'trim':
         if (step.from) fieldsUsed.push(step.from);
         break;
       case 'rename':
@@ -748,6 +744,7 @@ function validateProcessorValues(
     case 'drop_document':
     case 'uppercase':
     case 'lowercase':
+    case 'trim':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

@@ -24,6 +24,7 @@ import type {
   ReplaceProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
+  TrimProcessor,
   UppercaseProcessor,
 } from '@kbn/streamlang';
 import {
@@ -160,6 +161,12 @@ const actionStepValidators: {
     }
   },
   lowercase: (step: LowercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  trim: (step: TrimProcessor) => {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
       checkFieldName(step.to);
