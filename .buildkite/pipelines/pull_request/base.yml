@@ -59,10 +59,10 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/lint.sh
+  - command: .buildkite/scripts/steps/lint.sh && exit 1
     label: 'Linting'
     agents:
-      machineType: n2-standard-16
+      machineType: n2-standard-32
       preemptible: true
       diskSizeGb: 105
     key: linting
