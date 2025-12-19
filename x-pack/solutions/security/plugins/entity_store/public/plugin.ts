@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { AppPluginSetupDependencies } from './types';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+
+export class EntityStorePlugin implements Plugin {
+  public setup(core: CoreSetup, deps: AppPluginSetupDependencies) {
+    // Register an application into the side navigation menu
+    core.application.register({
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      visibleIn: [],
+      async mount(params: AppMountParameters) {
+        // Load application bundle
+        const { renderApp } = await import('./application');
+        // Get start services as specified in kibana.json
+        const [coreStart] = await core.getStartServices();
+        // Render the application
+        return renderApp(coreStart, params);
+      },
+    });
+  }
+
+  public start(core: CoreStart) {}
+
+  public stop() {}
+}
