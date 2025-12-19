@@ -59,7 +59,6 @@ export const aiPromptStepDefinition = (
         const modelResponse = await runnable.invoke(modelInput, {
           signal: context.abortSignal,
         });
-
         return {
           // We modify the output to match the expected schema
           // For now, structured output flow does not output response_metadata,
