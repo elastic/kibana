@@ -2154,6 +2154,8 @@
       "@kbn/slo-plugin/*": ["x-pack/solutions/observability/plugins/slo/*"],
       "@kbn/slo-schema": ["x-pack/platform/packages/shared/kbn-slo-schema"],
       "@kbn/slo-schema/*": ["x-pack/platform/packages/shared/kbn-slo-schema/*"],
+      "@kbn/slo-shared-plugin": ["x-pack/platform/plugins/shared/slo_shared"],
+      "@kbn/slo-shared-plugin/*": ["x-pack/platform/plugins/shared/slo_shared/*"],
       "@kbn/snapshot-restore-plugin": ["x-pack/platform/plugins/private/snapshot_restore"],
       "@kbn/snapshot-restore-plugin/*": ["x-pack/platform/plugins/private/snapshot_restore/*"],
       "@kbn/some-dev-log": ["src/platform/packages/private/kbn-some-dev-log"],

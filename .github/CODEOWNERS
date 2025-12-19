@@ -1083,6 +1083,7 @@ x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
+x-pack/platform/plugins/shared/slo_shared @elastic/actionable-obs-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
 x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
@@ -2209,6 +2210,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
+/.github/instructions/security.instructions.md @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
