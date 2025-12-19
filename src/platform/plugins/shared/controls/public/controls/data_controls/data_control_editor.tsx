@@ -414,47 +414,45 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="s">
-              <EuiButton
-                aria-label={`save-${editorState.title ?? editorState.fieldName}`}
-                data-test-subj="control-editor-save"
-                fill
-                color="primary"
-                disabled={!(controlOptionsValid && Boolean(selectedControlType))}
-                onClick={() => {
-                  const transformedState: Partial<State> | undefined =
-                    selectedControlType && editorConfig && editorConfig.controlStateTransform
-                      ? (editorConfig.controlStateTransform(
-                          editorState,
-                          selectedControlType
-                        ) as Partial<State>)
-                      : undefined;
+            <EuiButton
+              aria-label={`save-${editorState.title ?? editorState.fieldName}`}
+              data-test-subj="control-editor-save"
+              fill
+              color="primary"
+              disabled={!(controlOptionsValid && Boolean(selectedControlType))}
+              onClick={() => {
+                const transformedState: Partial<State> | undefined =
+                  selectedControlType && editorConfig && editorConfig.controlStateTransform
+                    ? (editorConfig.controlStateTransform(
+                        editorState,
+                        selectedControlType
+                      ) as Partial<State>)
+                    : undefined;
 
-                  if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
-                    // we need to create a new control from scratch
-                    try {
-                      controlActionRegistry[selectedControlType]?.execute({
-                        trigger: addControlMenuTrigger,
-                        embeddable: parentApi,
-                        state: transformedState ?? editorState,
-                        controlId,
-                        isPinned,
-                      });
-                    } catch (e) {
-                      coreServices.notifications.toasts.addError(e, {
-                        title: DataControlEditorStrings.manageControl.getOnSaveError(),
-                      });
-                    }
-                  } else {
-                    // the control already exists with the expected type, so just update it
-                    onUpdate(transformedState ?? editorState);
+                if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
+                  // we need to create a new control from scratch
+                  try {
+                    controlActionRegistry[selectedControlType]?.execute({
+                      trigger: addControlMenuTrigger,
+                      embeddable: parentApi,
+                      state: transformedState ?? editorState,
+                      controlId,
+                      isPinned,
+                    });
+                  } catch (e) {
+                    coreServices.notifications.toasts.addError(e, {
+                      title: DataControlEditorStrings.manageControl.getOnSaveError(),
+                    });
                   }
-                  onSave(editorState.dataViewId);
-                }}
-              >
-                {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
-              </EuiButton>
-            </EuiFlexGroup>
+                } else {
+                  // the control already exists with the expected type, so just update it
+                  onUpdate(transformedState ?? editorState);
+                }
+                onSave(editorState.dataViewId);
+              }}
+            >
+              {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
