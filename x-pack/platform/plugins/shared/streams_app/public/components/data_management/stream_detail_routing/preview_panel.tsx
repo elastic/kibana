@@ -61,11 +61,11 @@ export function PreviewPanel() {
 
   return (
     <>
-      <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
+      <EuiFlexItem grow={false} data-test-subj="streamsAppRoutingPreviewPanel">
         <EuiFlexGroup justifyContent="spaceBetween" wrap>
           <EuiFlexGroup component="span" gutterSize="s">
             <EuiIcon type="inspect" />
-            <strong>
+            <strong data-test-subj="streamsAppRoutingPreviewPanelHeader">
               {i18n.translate('xpack.streams.streamDetail.preview.header', {
                 defaultMessage: 'Data Preview',
               })}
@@ -81,10 +81,11 @@ export function PreviewPanel() {
 
 const EditingPanel = () => (
   <EuiEmptyPrompt
+    data-test-subj="streamsAppRoutingPreviewEditingPanel"
     icon={<AssetImage />}
     titleSize="xxs"
     title={
-      <h2>
+      <h2 data-test-subj="streamsAppRoutingPreviewEditingPanelTitle">
         {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
           defaultMessage: 'Preview is not available while editing or reordering streams',
         })}
@@ -93,13 +94,13 @@ const EditingPanel = () => (
     body={
       <>
         <EuiText size="xs">
-          <p>
+          <p data-test-subj="streamsAppRoutingPreviewEditingPanelBodyMessage">
             {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
               defaultMessage:
                 'Once you save your changes, the results of your conditions will appear here.',
             })}
           </p>
-          <p>
+          <p data-test-subj="streamsAppRoutingPreviewEditingPanelReorderingWarning">
             {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
               defaultMessage:
                 'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
@@ -191,10 +192,11 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   } else if (!hasDocuments || !isProcessedCondition) {
     content = (
       <EuiEmptyPrompt
+        data-test-subj="streamsAppRoutingPreviewEmptyPrompt"
         icon={<AssetImage type="noResults" />}
         titleSize="xxs"
         title={
-          <h2>
+          <h2 data-test-subj="streamsAppRoutingPreviewEmptyPromptTitle">
             {i18n.translate('xpack.streams.streamDetail.preview.empty', {
               defaultMessage: 'No documents to preview',
             })}
@@ -204,7 +206,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     );
   } else if (hasDocuments) {
     content = (
-      <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
+      <EuiFlexItem grow data-test-subj="streamsAppRoutingPreviewPanelWithResults">
         <RowSelectionContext.Provider value={rowSelectionContextValue}>
           <MemoPreviewTable
             documents={documents}

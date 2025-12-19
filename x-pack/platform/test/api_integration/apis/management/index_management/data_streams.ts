@@ -77,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
           failureStoreEnabled: false,
           failureStoreRetention: {
             defaultRetentionPeriod: '30d',
+            retentionDisabled: false,
           },
           indexMode: 'standard',
         });
@@ -130,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
           failureStoreEnabled: false,
           failureStoreRetention: {
             defaultRetentionPeriod: '30d',
+            retentionDisabled: false,
           },
           indexMode: 'standard',
         });
@@ -174,6 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           failureStoreEnabled: false,
           failureStoreRetention: {
             defaultRetentionPeriod: '30d',
+            retentionDisabled: false,
           },
           indexMode: 'standard',
         });

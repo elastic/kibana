@@ -11,6 +11,11 @@
           "id": "admin@example.com"
         }
       },
+      "user": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
       "client": {
         "user": {
           "email": "admin@example.com"
@@ -117,6 +122,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -137,6 +147,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin2@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin2@example.com"
         }
@@ -247,6 +262,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -267,6 +287,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin3@example.com"
         }
@@ -377,6 +402,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -397,6 +427,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin3@example.com"
         }
@@ -507,6 +542,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -527,6 +567,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin4@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin4@example.com"
         }
@@ -646,6 +691,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -666,6 +716,11 @@
     "source": {
       "@timestamp": "2024-09-01T12:34:56.789Z",
       "actor": {
+        "entity": {
+          "id": "admin6@example.com"
+        }
+      },
+      "user": {
         "entity": {
           "id": "admin6@example.com"
         }
@@ -785,12 +840,670 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "NewSchemaEventDoc123",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:55:00.000Z",
+      "user": {
+        "entity": {
+          "id": "serviceaccount@example.com"
+        },
+        "email": "serviceaccount@example.com",
+        "name": "Service Account"
+      },
+      "client": {
+        "user": {
+          "email": "serviceaccount@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.UpdateServiceAccount",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "new-schema-event-id",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.serviceAccounts.update",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-new-schema-123"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.UpdateServiceAccountRequest",
+            "parent": "projects/your-project-id",
+            "serviceAccount": {
+              "displayName": "Updated Service Account",
+              "email": "api-service@your-project-id.iam.gserviceaccount.com"
+            }
+          },
+          "resource_name": "projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.ServiceAccount",
+            "displayName": "Updated Service Account",
+            "email": "api-service@your-project-id.iam.gserviceaccount.com"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.5",
+          "serviceaccount@example.com",
+          "api-service@your-project-id.iam.gserviceaccount.com",
+          "projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com"
+        ],
+        "ip": [
+          "10.0.0.5"
+        ],
+        "user": [
+          "serviceaccount@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com"
+        }
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/350.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "NewSchemaEventDoc456",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:56:00.000Z",
+      "user": {
+        "entity": {
+          "id": "serviceaccount@example.com"
+        },
+        "email": "serviceaccount@example.com",
+        "name": "Service Account"
+      },
+      "client": {
+        "user": {
+          "email": "serviceaccount@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateServiceAccount",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "new-schema-event-id-2",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "creation",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.serviceAccounts.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-new-schema-456"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateServiceAccountRequest",
+            "parent": "projects/your-project-id",
+            "serviceAccount": {
+              "displayName": "New Service Account",
+              "email": "new-service@your-project-id.iam.gserviceaccount.com"
+            }
+          },
+          "resource_name": "projects/your-project-id/serviceAccounts/new-service@your-project-id.iam.gserviceaccount.com",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.ServiceAccount",
+            "displayName": "New Service Account",
+            "email": "new-service@your-project-id.iam.gserviceaccount.com"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.5",
+          "serviceaccount@example.com",
+          "new-service@your-project-id.iam.gserviceaccount.com",
+          "projects/your-project-id/serviceAccounts/new-service@your-project-id.iam.gserviceaccount.com"
+        ],
+        "ip": [
+          "10.0.0.5"
+        ],
+        "user": [
+          "serviceaccount@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/serviceAccounts/new-service@your-project-id.iam.gserviceaccount.com"
+        }
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/350.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "MultiTargetEventDoc789",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+    "source": {
+      "@timestamp": "2024-09-01T13:10:00.000Z",
+      "service": {
+        "entity": {
+          "id": "api-service@your-project-id.iam.gserviceaccount.com"
+        },
+        "name": "iam.googleapis.com"
+      },
+      "client": {
+        "user": {
+          "email": "api-service@your-project-id.iam.gserviceaccount.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "agent_id_status": "missing",
+        "category": [
+          "process",
+          "host"
+        ],
+        "id": "multi-target-event-id",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "start",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "compute.instances.start",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-multi-target-123"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.compute.v1.StartInstanceRequest",
+            "parent": "projects/your-project-id/zones/us-central1-a"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "host": {
+        "target": {
+          "entity": {
+            "id": ["host-instance-1", "host-instance-2"]
+          }
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.6",
+          "api-service@your-project-id.iam.gserviceaccount.com",
+          "host-instance-1",
+          "host-instance-2"
+        ],
+        "ip": [
+          "10.0.0.6"
+        ]
+      },
+      "source": {
+        "ip": "10.0.0.6"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/350.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "multivalue-ui-test",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:40:00.000Z",
+      "user": {
+        "entity": {
+          "id": [
+            "admin-user1@example.com",
+            "admin-user2@example.com"
+          ]
+        },
+        "target": {
+          "entity": {
+            "id": [
+              "projects/your-project-id/roles/customRole1",
+              "projects/your-project-id/roles/customRole2",
+              "projects/your-project-id/roles/customRole3"
+            ]
+          }
+        }
+      },
+      "client": {
+        "user": {
+          "email": [
+            "admin-user1@example.com",
+            "admin-user2@example.com"
+          ]
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "multivalue-ui-test",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-multivalue-test"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "Multi-value test role",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": [
+                "projects/your-project-id/roles/customRole1",
+                "projects/your-project-id/roles/customRole2",
+                "projects/your-project-id/roles/customRole3"
+              ],
+              "title": "Multi-Value Custom Role"
+            },
+            "roleId": [
+              "customRole1",
+              "customRole2",
+              "customRole3"
+            ]
+          },
+          "resource_name": [
+            "projects/your-project-id/roles/customRole1",
+            "projects/your-project-id/roles/customRole2",
+            "projects/your-project-id/roles/customRole3"
+          ],
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "Multi-value test role",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": [
+              "projects/your-project-id/roles/customRole1",
+              "projects/your-project-id/roles/customRole2",
+              "projects/your-project-id/roles/customRole3"
+            ],
+            "stage": "GA",
+            "title": "Multi-Value Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "host": {
+        "hostname": "multivalue-test-host",
+        "ip": "192.168.1.10",
+        "os": {
+          "name": "Linux",
+          "version": "5.4.0-42-generic"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.10",
+          "projects/your-project-id/roles/customRole1",
+          "projects/your-project-id/roles/customRole2",
+          "projects/your-project-id/roles/customRole3",
+          "admin-user1@example.com",
+          "admin-user2@example.com"
+        ],
+        "ip": [
+          "10.0.0.10"
+        ],
+        "user": [
+          "admin-user1@example.com",
+          "admin-user2@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.10"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "MultiActorMultiTargetEvent123",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+    "source": {
+      "@timestamp": "2024-09-01T14:00:00.000Z",
+      "user": {
+        "entity": {
+          "id": [
+            "multi-actor-1@example.com",
+            "multi-actor-2@example.com"
+          ]
+        },
+        "email": [
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com"
+        ],
+        "name": [
+          "Multi Actor 1",
+          "Multi Actor 2"
+        ]
+      },
+      "client": {
+        "user": {
+          "email": [
+            "multi-actor-1@example.com",
+            "multi-actor-2@example.com"
+          ]
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.ManageMultipleResources",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "multi-actor-multi-target-event",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.resources.manage",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-multi-actor-target-123"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.ManageResourcesRequest",
+            "parent": "projects/your-project-id"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": [
+            "projects/your-project-id/buckets/target-bucket-1",
+            "projects/your-project-id/buckets/target-bucket-2"
+          ]
+        }
+      },
+      "service": {
+        "name": "iam.googleapis.com",
+        "target": {
+          "entity": {
+            "id": [
+              "projects/your-project-id/serviceAccounts/target-multi-service-1@your-project-id.iam.gserviceaccount.com",
+              "projects/your-project-id/serviceAccounts/target-multi-service-2@your-project-id.iam.gserviceaccount.com"
+            ]
+          }
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.20",
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com",
+          "projects/your-project-id/buckets/target-bucket-1",
+          "projects/your-project-id/buckets/target-bucket-2",
+          "projects/your-project-id/serviceAccounts/target-multi-service-1@your-project-id.iam.gserviceaccount.com",
+          "projects/your-project-id/serviceAccounts/target-multi-service-2@your-project-id.iam.gserviceaccount.com"
+        ],
+        "ip": [
+          "10.0.0.20"
+        ],
+        "user": [
+          "multi-actor-1@example.com",
+          "multi-actor-2@example.com"
+        ]
+      },
+      "source": {
+        "ip": "10.0.0.20"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/360.0.0"
       }
     }
   }

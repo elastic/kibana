@@ -18,7 +18,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { getGeneration } from './helpers/get_generation';
@@ -70,8 +69,6 @@ export const getAttackDiscoveryGenerationRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const { execution_uuid: executionUuid } = request.params;
           const enableFieldRendering = request.query?.enable_field_rendering ?? false; // public APIs default to NOT rendering fields as a convenience to non-Kibana clients
           const withReplacements = request.query?.with_replacements ?? true; // public APIs default to applying replacements in responses as a convenience to non-Kibana clients

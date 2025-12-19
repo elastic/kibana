@@ -52,13 +52,15 @@ export const SecondaryMenuSectionComponent = ({
   `;
 
   return (
-    <nav css={wrapperStyles} aria-labelledby={sectionId || undefined}>
+    <div css={wrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
       {label && (
         <EuiText id={sectionId} css={labelStyles} component="span">
           {label}
         </EuiText>
       )}
-      <ul css={listStyles}>{children}</ul>
-    </nav>
+      <ul css={listStyles} role="none">
+        {children}
+      </ul>
+    </div>
   );
 };

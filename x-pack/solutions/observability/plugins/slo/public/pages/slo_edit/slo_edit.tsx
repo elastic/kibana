@@ -18,6 +18,8 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloEditForm } from './components/slo_edit_form';
+import { useParseUrlState } from './hooks/use_parse_url_state';
+import { transformSloResponseToFormState } from './helpers/process_slo_form_values';
 
 export function SloEditPage() {
   const {
@@ -26,13 +28,16 @@ export function SloEditPage() {
     serverless,
   } = useKibana().services;
   const { sloId } = useParams<{ sloId: string | undefined }>();
-  const { data: slo, isLoading: isLoadingSlo } = useFetchSloDetails({ sloId });
+  const { data: slo, isLoading: isLoading } = useFetchSloDetails({ sloId });
   const isEditMode = Boolean(sloId);
 
   const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+
+  const sloFormValuesFromUrlState = useParseUrlState();
+  const sloFormValuesFromSloResponse = transformSloResponseToFormState(slo);
 
   useBreadcrumbs(
     [
@@ -52,7 +57,7 @@ export function SloEditPage() {
           ]
         : []),
       {
-        text: sloId
+        text: isEditMode
           ? i18n.translate('xpack.slo.breadcrumbs.sloEditLabel', {
               defaultMessage: 'Edit',
             })
@@ -77,7 +82,7 @@ export function SloEditPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: slo
+        pageTitle: isEditMode
           ? i18n.translate('xpack.slo.sloEditPageTitle', {
               defaultMessage: 'Edit SLO',
             })
@@ -86,13 +91,17 @@ export function SloEditPage() {
             }),
         bottomBorder: false,
       }}
-      data-test-subj="slosEditPage"
+      data-test-subj="sloEditPage"
     >
       <HeaderMenu />
-      {isEditMode && isLoadingSlo ? (
+      {isEditMode && isLoading ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
       ) : (
-        <SloEditForm slo={slo} />
+        <SloEditForm
+          slo={slo}
+          isEditMode={isEditMode}
+          initialValues={isEditMode ? sloFormValuesFromSloResponse : sloFormValuesFromUrlState}
+        />
       )}
     </ObservabilityPageTemplate>
   );

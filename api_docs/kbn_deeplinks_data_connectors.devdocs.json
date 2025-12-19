@@ -24,6 +24,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/deeplinks-data-connectors",
+        "id": "def-common.DATA_CONNECTORS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_CONNECTORS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"data_connectors\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/data_connectors/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-data-connectors",
         "id": "def-common.DeepLinkId",
         "type": "Type",
         "tags": [],

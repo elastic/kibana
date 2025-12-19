@@ -85,6 +85,7 @@ export {
   AgentExecutionErrorCode,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
   type AgentAnswerStepConfiguration,
@@ -93,7 +94,7 @@ export {
 } from './agents';
 export {
   type RoundInput,
-  type RawRoundInput,
+  type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,
   type ConversationRound,
@@ -108,6 +109,7 @@ export {
   isToolCallStep,
   isReasoningStep,
   ChatEventType,
+  ConversationRoundStatus,
   type ChatEventBase,
   type ChatEvent,
   type ConversationCreatedEvent,
@@ -147,4 +149,6 @@ export {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isToolProgressEvent,
+  isPromptRequestEvent,
 } from './chat';
+export * from './telemetry';

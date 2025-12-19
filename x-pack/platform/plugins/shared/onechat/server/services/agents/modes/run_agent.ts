@@ -9,7 +9,7 @@ import type {
   AgentCapabilities,
   Conversation,
   ConversationRound,
-  RawRoundInput,
+  ConverseInput,
   AgentConfiguration,
 } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
@@ -20,7 +20,7 @@ export interface RunAgentParams {
   /**
    * The next message in this conversation that the agent should respond to.
    */
-  nextInput: RawRoundInput;
+  nextInput: ConverseInput;
   /**
    * Current conversation.
    */
@@ -49,6 +49,15 @@ export interface RunAgentParams {
    * Browser API tools to make available to the agent
    */
   browserApiTools?: BrowserApiToolMetadata[];
+  /**
+   * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
+   */
+  structuredOutput?: boolean;
+  /**
+   * Optional JSON schema for structured output. Only used when structuredOutput is true.
+   * If not provided, uses a default schema.
+   */
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface RunAgentResponse {

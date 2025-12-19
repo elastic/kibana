@@ -5,108 +5,109 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, type ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import type { FindSLODefinitionsWithHealthResponse } from '@kbn/slo-schema';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  type ScopedClusterClientMock,
+} from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/logging';
+import * as computeHealth from '../domain/services/compute_health';
+import { FindSLODefinitions } from './find_slo_definitions';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
-import type { SLORepository } from './slo_repository';
-import { FindSLODefinitions } from './find_slo_definitions';
-import { GetSLOHealth } from './get_slo_health';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 
-jest.mock('./get_slo_health');
-
-const MockedGetSLOHealth = GetSLOHealth as jest.MockedClass<typeof GetSLOHealth>;
+jest.spyOn(computeHealth, 'computeHealth');
 
 describe('FindSLODefinitions with Health validation', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let findSLODefinitions: FindSLODefinitions;
   let mockScopedClusterClient: ScopedClusterClientMock;
-  let mockGetSLOHealth: jest.Mocked<GetSLOHealth>;
+  let mockLogger: jest.Mocked<Logger>;
 
-  const slo = createSLO();
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    findSLODefinitions = new FindSLODefinitions(mockRepository, mockScopedClusterClient);
-    mockGetSLOHealth = {
-      execute: jest.fn(),
-    } as unknown as jest.Mocked<GetSLOHealth>;
-
-    MockedGetSLOHealth.mockImplementation(() => mockGetSLOHealth);
-    mockGetSLOHealth.execute.mockResolvedValue([
-      {
-        sloId: slo.id,
-        sloInstanceId: 'irrelevant',
-        sloRevision: slo.revision,
-        sloName: slo.name,
-        health: {
-          overall: 'healthy',
-          rollup: { status: 'healthy' },
-          summary: { status: 'healthy' },
-        },
-        state: 'running',
-      },
-    ]);
+    mockLogger = loggingSystemMock.createLogger();
+    findSLODefinitions = new FindSLODefinitions(
+      mockRepository,
+      mockScopedClusterClient,
+      mockLogger
+    );
   });
 
-  const results = {
-    page: 1,
-    perPage: 10,
-    total: 1,
-    results: [slo],
-  };
+  describe('default behavior', () => {
+    it('calls the repository with the correct parameters', async () => {
+      const slo = createSLO();
+      mockRepository.search.mockResolvedValueOnce({
+        results: [slo],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
 
-  describe('validate health response', () => {
-    it('calls the repository with includeHealth', async () => {
-      mockRepository.search.mockResolvedValueOnce(results);
+      await findSLODefinitions.execute({
+        search: 'some search',
+        page: '2',
+        perPage: '50',
+        includeOutdatedOnly: false,
+        tags: 'tag1,tag2',
+      });
 
-      const result: FindSLODefinitionsWithHealthResponse = await findSLODefinitions.execute({
+      expect(mockRepository.search).toHaveBeenCalledWith({
+        search: 'some search',
+        pagination: { page: 2, perPage: 50 },
+        filters: { includeOutdatedOnly: false, tags: ['tag1', 'tag2'] },
+      });
+
+      expect(computeHealth.computeHealth).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with includeHealth', () => {
+    it('calls computeHealth with the correct parameters', async () => {
+      const slo = createSLO();
+      mockRepository.search.mockResolvedValueOnce({
+        results: [slo],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+        transforms: [],
+        count: 0,
+      });
+
+      await findSLODefinitions.execute({
         includeHealth: true,
       });
 
-      expect(mockRepository.search).toHaveBeenCalledWith(
-        '',
-        { page: 1, perPage: 100 },
-        {
-          includeOutdatedOnly: false,
-          tags: [],
-        }
-      );
-
-      expect(mockGetSLOHealth.execute).toHaveBeenCalledWith({
-        list: [
-          {
-            sloId: slo.id,
-            sloInstanceId: '*',
-          },
-        ],
-      });
-
-      expect(result.results[0].health).toEqual({
-        overall: 'healthy',
-        rollup: { status: 'healthy' },
-        summary: { status: 'healthy' },
+      expect(computeHealth.computeHealth).toHaveBeenCalledWith([slo], {
+        scopedClusterClient: mockScopedClusterClient,
       });
     });
 
-    it('does not call getSLOHealth without includeHealth', async () => {
-      mockRepository.search.mockResolvedValueOnce(results);
+    it('returns definitions without health when computeHealth fails', async () => {
+      const slo = createSLO();
+      mockRepository.search.mockResolvedValueOnce({
+        results: [slo],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+      jest
+        .spyOn(computeHealth, 'computeHealth')
+        .mockRejectedValueOnce(new Error('Failed to compute health'));
 
-      const result: FindSLODefinitionsWithHealthResponse = await findSLODefinitions.execute({
-        includeHealth: false,
+      const result = await findSLODefinitions.execute({
+        includeHealth: true,
       });
 
-      expect(mockGetSLOHealth.execute).not.toHaveBeenCalled();
-      expect(mockRepository.search).toHaveBeenCalledWith(
-        '',
-        { page: 1, perPage: 100 },
-        {
-          includeOutdatedOnly: false,
-          tags: [],
-        }
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Failed to compute SLO health: Error: Failed to compute health'
       );
-
-      expect(result.results[0].health).toEqual(undefined);
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0]).not.toHaveProperty('health');
     });
   });
 });

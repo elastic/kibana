@@ -18,9 +18,8 @@ import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import {
   AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
   AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
-  ORGANIZATION_ACCOUNT,
-  SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -124,7 +123,7 @@ const getCloudFormationConfig = (
 
   return {
     isSupported,
-    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink> || '',
+    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink>,
     templateUrl: automationCredentialTemplate || '',
   };
 };

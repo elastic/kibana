@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -20,6 +19,7 @@ import {
   upsertDataStream,
   updateDefaultIngestPipeline,
   putDataStreamsSettings,
+  updateDataStreamsFailureStore,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -53,6 +53,7 @@ import type {
   UnlinkAssetsAction,
   UnlinkFeaturesAction,
   UpdateIngestSettingsAction,
+  UpdateFailureStoreAction,
 } from './types';
 
 /**
@@ -75,6 +76,7 @@ export class ExecutionPlan {
       delete_index_template: [],
       upsert_ingest_pipeline: [],
       delete_ingest_pipeline: [],
+      update_failure_store: [],
       append_processor_to_ingest_pipeline: [],
       delete_processor_from_ingest_pipeline: [],
       upsert_datastream: [],
@@ -175,6 +177,7 @@ export class ExecutionPlan {
         upsert_dot_streams_document,
         delete_dot_streams_document,
         update_data_stream_mappings,
+        update_failure_store,
         delete_queries,
         unlink_assets,
         unlink_features,
@@ -205,6 +208,7 @@ export class ExecutionPlan {
         this.updateLifecycle(update_lifecycle),
         this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
         this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
+        this.updateFailureStore(update_failure_store),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -389,6 +393,20 @@ export class ExecutionPlan {
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
+        })
+      )
+    );
+  }
+
+  private async updateFailureStore(actions: UpdateFailureStoreAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDataStreamsFailureStore({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          failureStore: action.request.failure_store,
+          stream: action.request.definition,
+          isServerless: this.dependencies.isServerless,
         })
       )
     );

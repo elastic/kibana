@@ -18,14 +18,12 @@ import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
-import { rebuildAttachmentMapFromConversation } from '../context/conversation/rebuild_attachment_map_from_conversation';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
-  const { setAttachmentMap } = useConversationContext();
 
   const {
     data: conversation,
@@ -42,11 +40,6 @@ export const useConversation = () => {
         return Promise.reject(new Error('Invalid conversation id'));
       }
       return conversationsService.get({ conversationId });
-    },
-    onSuccess: (data) => {
-      if (setAttachmentMap) {
-        setAttachmentMap(rebuildAttachmentMapFromConversation(data));
-      }
     },
   });
 
@@ -103,16 +96,20 @@ export const useConversationTitle = () => {
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const { pendingMessage, error } = useSendMessage();
+  const { pendingMessage, error, errorSteps } = useSendMessage();
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
-      const pendingRound = createNewRound({ userMessage: pendingMessage, roundId: '' });
+      const pendingRound = createNewRound({
+        userMessage: pendingMessage,
+        roundId: '',
+        steps: errorSteps,
+      });
       return [...rounds, pendingRound];
     }
     return rounds;
-  }, [conversation?.rounds, error, pendingMessage]);
+  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
 
   return conversationRounds;
 };
@@ -129,7 +126,12 @@ export const useStepsFromPrevRounds = () => {
 };
 
 export const useHasActiveConversation = () => {
-  const conversationId = useConversationId();
+  const hasPersistedConversation = useHasPersistedConversation();
   const conversationRounds = useConversationRounds();
-  return Boolean(conversationId || conversationRounds.length > 0);
+  return hasPersistedConversation || conversationRounds.length > 0;
+};
+
+export const useHasPersistedConversation = () => {
+  const conversationId = useConversationId();
+  return Boolean(conversationId);
 };

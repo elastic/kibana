@@ -9,10 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ConversationInputForm } from './conversation_input/conversation_input_form';
-import { conversationElementWidthStyles } from './conversation.styles';
+import { ConversationInput } from './conversation_input/conversation_input';
+import {
+  conversationElementPaddingStyles,
+  conversationElementWidthStyles,
+} from './conversation.styles';
 import { useConversationContext } from '../../context/conversation/conversation_context';
-import { TechPreviewBadge } from '../common/tech_preview';
 
 const titleStyles = css`
   font-weight: 400;
@@ -39,7 +41,6 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       data-test-subj="agentBuilderWelcomePage"
     >
       <EuiFlexItem grow={isEmbeddedContext ? true : false} css={centerFlexItemStyles}>
-        <TechPreviewBadge />
         <EuiTitle size="m" css={titleStyles}>
           <h2>
             {i18n.translate('xpack.onechat.conversations.newConversationPrompt', {
@@ -48,7 +49,12 @@ export const NewConversationPrompt: React.FC<{}> = () => {
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <ConversationInputForm />
+      <EuiFlexItem
+        grow={false}
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+      >
+        <ConversationInput />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

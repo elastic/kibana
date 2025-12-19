@@ -17,13 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 
 export interface AISummaryProps {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
+  aiFeatures: AIFeatures | null;
 }
 
 const STREAM_DESCRIPTION_PANEL_TITLE = i18n.translate(
@@ -83,7 +85,11 @@ const CANCEL_LABEL = i18n.translate(
   }
 );
 
-export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refreshDefinition }) => {
+export const StreamDescription: React.FC<AISummaryProps> = ({
+  definition,
+  refreshDefinition,
+  aiFeatures,
+}) => {
   const {
     isGenerating,
     description,
@@ -95,7 +101,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
     onSaveDescription,
     onStartEditing,
     areButtonsDisabled,
-  } = useStreamDescriptionApi({ definition, refreshDefinition });
+  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures });
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -132,13 +138,14 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                           isLoading={isUpdating}
                           isDisabled={areButtonsDisabled}
                           onClick={onCancelEdit}
+                          data-test-subj="stream_description_cancel_edit_button"
                         >
                           {CANCEL_LABEL}
                         </EuiButtonEmpty>
                       </EuiFlexItem>
                     )}
                     <EuiFlexItem grow={false}>
-                      <ConnectorListButton
+                      <ConnectorListButtonBase
                         buttonProps={{
                           size: 's',
                           iconType: 'sparkles',
@@ -146,7 +153,9 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                           onClick: onGenerateDescription,
                           isDisabled: areButtonsDisabled,
                           isLoading: isGenerating,
+                          'data-test-subj': 'stream_description_generate_button',
                         }}
+                        aiFeatures={aiFeatures}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -164,6 +173,11 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                             onSaveDescription();
                           }
                         }}
+                        data-test-subj={
+                          isEditing
+                            ? 'stream_description_edit_button'
+                            : 'stream_description_save_button'
+                        }
                       >
                         {isEditing ? SAVE_DESCRIPTION_BUTTON_LABEL : EDIT_DESCRIPTION_BUTTON_LABEL}
                       </EuiButton>
@@ -189,21 +203,23 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                     isLoading={isUpdating}
                     isDisabled={areButtonsDisabled}
                     onClick={onStartEditing}
+                    data-test-subj="stream_description_manual_entry_button"
                   >
                     {MANUAL_ENTRY_BUTTON_LABEL}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ConnectorListButton
+                  <ConnectorListButtonBase
                     buttonProps={{
-                      fill: true,
                       size: 'm',
                       iconType: 'sparkles',
                       children: GENERATE_DESCRIPTION_BUTTON_LABEL,
                       onClick: onGenerateDescription,
                       isDisabled: areButtonsDisabled,
                       isLoading: isGenerating,
+                      'data-test-subj': 'stream_description_generate_button',
                     }}
+                    aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

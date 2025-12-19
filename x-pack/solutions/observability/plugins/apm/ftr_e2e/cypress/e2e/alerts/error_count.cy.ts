@@ -32,7 +32,8 @@ function deleteAllRules() {
   });
 }
 
-describe('Alerts', () => {
+// Failing: See https://github.com/elastic/kibana/issues/244847
+describe.skip('Alerts', () => {
   beforeEach(() => {
     deleteAllRules();
   });

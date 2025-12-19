@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 // Import SUB_ACTION enums from all stack connectors
 import {
   CONNECTOR_ID as BEDROCK_CONNECTOR_ID,
@@ -48,6 +47,8 @@ import {
   CONNECTOR_ID as XSOAR_CONNECTOR_ID,
   SUB_ACTION as XSOAR_SUB_ACTION,
 } from '@kbn/connector-schemas/xsoar/constants';
+
+import { connectorsSpecs } from '@kbn/connector-specs';
 
 // Helper function to format sub-action names for display
 function formatSubActionName(action: string): string {
@@ -130,6 +131,13 @@ function createSubActionsMapping() {
 
   connectorSubActions.forEach(({ id, actions }) => {
     mapping[id] = Object.values(actions).map((action) => ({
+      name: action,
+      displayName: formatSubActionName(action),
+    }));
+  });
+
+  Object.values(connectorsSpecs).forEach((connectorSpec) => {
+    mapping[connectorSpec.metadata.id] = Object.keys(connectorSpec.actions).map((action) => ({
       name: action,
       displayName: formatSubActionName(action),
     }));

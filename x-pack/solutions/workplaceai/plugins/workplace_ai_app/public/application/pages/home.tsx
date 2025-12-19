@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
-import { WorkplaceAIHomeView } from '../components/home/home_view';
+import { WorkplaceAIHomeView } from '../components/home_view';
 
 export const WorkplaceAIHomePage: React.FC<{}> = () => {
   useBreadcrumb([]);

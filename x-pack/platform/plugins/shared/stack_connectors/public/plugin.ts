@@ -48,6 +48,7 @@ export class StackConnectorsPublicPlugin
     if (ExperimentalFeaturesService.get().connectorsFromSpecs) {
       registerConnectorTypesFromSpecs({
         connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
+        uiSettingsPromise: core.getStartServices().then(([coreStart]) => coreStart.uiSettings),
       });
     }
   }

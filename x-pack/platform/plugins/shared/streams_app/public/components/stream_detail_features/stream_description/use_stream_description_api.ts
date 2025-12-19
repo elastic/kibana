@@ -10,7 +10,9 @@ import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
-import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { firstValueFrom } from 'rxjs';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -19,20 +21,22 @@ import { useTimefilter } from '../../../hooks/use_timefilter';
 export const useStreamDescriptionApi = ({
   definition,
   refreshDefinition,
+  aiFeatures,
 }: {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
+  aiFeatures: AIFeatures | null;
 }) => {
   const { signal } = useAbortController();
 
   const updateStream = useUpdateStreams(definition.stream.name);
-  const aiFeatures = useAIFeatures();
 
   const {
     core: { notifications },
     dependencies: {
       start: { streams },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const { timeState } = useTimefilter();
@@ -47,13 +51,29 @@ export const useStreamDescriptionApi = ({
   const save = useCallback(
     async (nextDescription: string) => {
       setIsUpdating(true);
-      updateStream(
+
+      let stream;
+      if (Streams.GroupStream.Definition.is(definition.stream)) {
+        stream = omit(definition.stream, ['name', 'updated_at']);
+      } else {
+        stream = {
+          ...omit(definition.stream, ['name', 'updated_at']),
+          ingest: {
+            ...definition.stream.ingest,
+            processing: {
+              ...omit(definition.stream.ingest.processing, ['updated_at']),
+            },
+          },
+        };
+      }
+
+      return updateStream(
         Streams.all.UpsertRequest.parse({
           dashboards: definition.dashboards,
           queries: definition.queries,
           rules: definition.rules,
           stream: {
-            ...omit(definition.stream, 'name'),
+            ...stream,
             description: nextDescription,
           },
         })
@@ -95,52 +115,63 @@ export const useStreamDescriptionApi = ({
     ]
   );
 
-  const generate = useCallback(() => {
+  const generate = useCallback(async () => {
     if (!aiFeatures?.genAiConnectors.selectedConnector) {
       return;
     }
 
     setIsGenerating(true);
 
-    streams.streamsRepositoryClient
-      .stream('POST /internal/streams/{name}/_describe_stream', {
-        signal,
-        params: {
-          path: {
-            name: definition.stream.name,
+    try {
+      const { description: generatedDescription, tokensUsed } = await firstValueFrom(
+        streams.streamsRepositoryClient.stream('POST /internal/streams/{name}/_describe_stream', {
+          signal,
+          params: {
+            path: {
+              name: definition.stream.name,
+            },
+            query: {
+              connectorId: aiFeatures.genAiConnectors.selectedConnector,
+              from: timeState.asAbsoluteTimeRange.from,
+              to: timeState.asAbsoluteTimeRange.to,
+            },
           },
-          query: {
-            connectorId: aiFeatures.genAiConnectors.selectedConnector,
-            from: timeState.asAbsoluteTimeRange.from,
-            to: timeState.asAbsoluteTimeRange.to,
-          },
-        },
-      })
-      .subscribe({
-        next({ description: generatedDescription }) {
-          setDescription(generatedDescription);
-        },
-        complete() {
-          setIsGenerating(false);
-        },
-        error(error) {
-          setIsGenerating(false);
-          notifications.toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',
-              { defaultMessage: 'Failed to generate description' }
-            ),
-            toastMessage: getFormattedError(error).message,
-          });
-        },
+        })
+      );
+
+      setDescription(generatedDescription);
+
+      telemetryClient.trackStreamDescriptionGenerated({
+        stream_name: definition.stream.name,
+        stream_type: getStreamTypeFromDefinition(definition.stream),
+        input_tokens_used: tokensUsed.prompt,
+        output_tokens_used: tokensUsed.completion,
       });
+
+      return generatedDescription;
+    } catch (error) {
+      setIsGenerating(false);
+      if (error.name === 'AbortError') {
+        return;
+      }
+      notifications.toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',
+          { defaultMessage: 'Failed to generate description' }
+        ),
+        toastMessage: getFormattedError(error).message,
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   }, [
-    definition.stream.name,
+    aiFeatures?.genAiConnectors.selectedConnector,
     streams.streamsRepositoryClient,
+    signal,
+    definition.stream,
     timeState.asAbsoluteTimeRange.from,
     timeState.asAbsoluteTimeRange.to,
-    aiFeatures?.genAiConnectors.selectedConnector,
-    signal,
+    telemetryClient,
     notifications.toasts,
   ]);
 
@@ -149,21 +180,26 @@ export const useStreamDescriptionApi = ({
     setIsEditing(false);
   }, [setIsEditing, setDescription, definition.stream.description]);
 
-  const onGenerateDescription = useCallback(() => {
-    generate();
+  const onGenerateDescription = useCallback(async () => {
+    const result = await generate();
     setIsEditing(true);
+    return result;
   }, [generate, setIsEditing]);
 
   const onStartEditing = useCallback(() => {
     setIsEditing(true);
   }, [setIsEditing]);
 
-  const onSaveDescription = useCallback(() => {
-    if (description !== definition.stream.description) {
-      save(description);
-    }
-    setIsEditing(false);
-  }, [description, definition.stream.description, save, setIsEditing]);
+  const onSaveDescription = useCallback(
+    (desc?: string) => {
+      const generatedDescription = desc ?? description;
+      if (generatedDescription !== definition.stream.description) {
+        return save(generatedDescription).then(() => setIsEditing(false));
+      }
+      setIsEditing(false);
+    },
+    [description, definition.stream.description, save, setIsEditing]
+  );
 
   const areButtonsDisabled = isUpdating || isGenerating;
 

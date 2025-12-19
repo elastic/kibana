@@ -10,6 +10,7 @@ export {
   oneChatDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationOverrides,
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
@@ -20,3 +21,14 @@ export {
   getKibanaDefaultAgentCapabilities,
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
+export {
+  type ConfirmPromptDefinition,
+  type ConfirmationPrompt,
+  type ConfirmationPromptResponse,
+  type PromptRequest,
+  type ToolCallPromptRequestSource,
+  type PromptRequestSource,
+  AgentPromptType,
+  AgentPromptRequestSourceType,
+  isConfirmationPrompt,
+} from './prompts';

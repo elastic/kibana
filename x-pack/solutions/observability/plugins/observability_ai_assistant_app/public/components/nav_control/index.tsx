@@ -15,6 +15,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { useAIAssistantAppService, ChatFlyout, FlyoutPositionMode } from '@kbn/ai-assistant';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 import { SharedProviders } from '../../utils/shared_providers';
@@ -120,8 +121,8 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
 
   useEffect(() => {
-    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((event) => {
-      if (event.assistant === 'observability') {
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
+      if (selection === AIAssistantType.Observability) {
         service.conversations.openNewConversation({ messages: [] });
         aiAssistantManagementSelection.completeOpenChat();
       }

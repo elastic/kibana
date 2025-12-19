@@ -12,11 +12,14 @@ import {
   fromLensStateToAPI,
   LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT,
 } from './metric';
-import { lensApiStateSchema } from '../../schema';
 import type { MetricState } from '../../schema';
 import { has, merge } from 'lodash';
+import { metricStateSchema } from '../../schema/charts/metric';
 
-type InputTypeMetricChart = Omit<MetricState, 'sampling' | 'ignore_global_filters' | 'metric'> & {
+type InputTypeMetricChart = Omit<
+  MetricState,
+  'sampling' | 'ignore_global_filters' | 'metric' | 'filters' | 'query'
+> & {
   ignore_global_filters?: MetricState['ignore_global_filters'];
   sampling?: MetricState['sampling'];
   metric: Omit<MetricState['metric'], 'fit' | 'alignments'> &
@@ -40,7 +43,6 @@ const defaultValues = [
     path: 'breakdown_by',
     value: {
       breakdown_by: {
-        other_bucket: { include_documents_without_field: false },
         rank_by: { direction: 'asc', type: 'alphabetical' },
       },
     } as const,
@@ -61,9 +63,16 @@ const defaultValues = [
  * Mind that this won't include query/filters validation/defaults
  */
 function validateAndApiToApiTransforms(originalObject: InputTypeMetricChart) {
-  return fromLensStateToAPI(
-    fromAPItoLensState(lensApiStateSchema.validate(originalObject) as MetricState)
-  );
+  const apiConverted = fromAPItoLensState(metricStateSchema.validate(originalObject));
+  const apiCovertedWithFiltersAndQuery = {
+    ...apiConverted,
+    state: {
+      ...apiConverted.state,
+      filters: [],
+      query: { query: '', language: 'kuery' },
+    },
+  };
+  return fromLensStateToAPI(apiCovertedWithFiltersAndQuery);
 }
 
 function mergeWithDefaults(originalObject: InputTypeMetricChart) {

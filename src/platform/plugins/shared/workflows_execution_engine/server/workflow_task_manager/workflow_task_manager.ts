@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 } from 'uuid';
+import type { KibanaRequest } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionParams } from './types';
@@ -18,20 +20,26 @@ export class WorkflowTaskManager {
   async scheduleResumeTask({
     workflowExecution,
     resumeAt,
+    fakeRequest,
   }: {
     workflowExecution: EsWorkflowExecution;
     resumeAt: Date;
+    fakeRequest: KibanaRequest;
   }): Promise<{ taskId: string }> {
-    const task = await this.taskManager.schedule({
-      taskType: 'workflow:resume',
-      params: {
-        workflowRunId: workflowExecution.id,
-        spaceId: workflowExecution.spaceId,
-      } as ResumeWorkflowExecutionParams,
-      state: {},
-      runAt: resumeAt,
-      scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
-    });
+    const task = await this.taskManager.schedule(
+      {
+        id: v4(),
+        taskType: 'workflow:resume',
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } as ResumeWorkflowExecutionParams,
+        state: {},
+        runAt: resumeAt,
+        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+      },
+      { request: fakeRequest }
+    );
 
     return {
       taskId: task.id,
