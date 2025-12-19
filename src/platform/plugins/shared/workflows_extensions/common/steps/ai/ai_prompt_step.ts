@@ -22,6 +22,7 @@ export const AiPromptStepTypeId = 'ai.prompt';
  */
 export const InputSchema = z.object({
   prompt: z.string(),
+  systemPrompt: z.string().optional(),
   connectorId: z.string().optional(),
   // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
   outputSchema: z.any().optional(),

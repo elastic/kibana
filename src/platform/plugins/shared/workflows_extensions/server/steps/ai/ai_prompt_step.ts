@@ -36,6 +36,9 @@ export const aiPromptStepDefinition = (
         },
       });
       const modelInput = [
+        ...(context.input.systemPrompt
+          ? [{ role: 'system', content: context.input.systemPrompt }]
+          : []),
         {
           role: 'user',
           content: context.input.prompt,

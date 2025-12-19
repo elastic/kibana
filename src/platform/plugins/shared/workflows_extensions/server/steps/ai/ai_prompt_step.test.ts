@@ -139,7 +139,7 @@ describe('aiPromptStepDefinition', () => {
         };
 
         mockChatModel.invoke.mockResolvedValue(mockResponse);
-
+        mockContext.input.systemPrompt = 'You are a helpful assistant.';
         const result = await handler(mockContext);
 
         expect(mockCoreSetup.getStartServices).toHaveBeenCalledTimes(1);
@@ -157,14 +157,17 @@ describe('aiPromptStepDefinition', () => {
           },
         });
         expect(mockChatModel.invoke).toHaveBeenCalledWith(
-          [{ role: 'user', content: 'Test prompt' }],
+          [
+            { role: 'system', content: 'You are a helpful assistant.' },
+            { role: 'user', content: 'Test prompt' },
+          ],
           { signal: mockAbortController.signal }
         );
 
         expect(result).toEqual({
           output: {
             content: 'AI generated response',
-            response_metadata: { model: 'gpt-3.5-turbo', usage: { tokens: 100 } },
+            metadata: { model: 'gpt-3.5-turbo', usage: { tokens: 100 } },
           },
         });
       });
