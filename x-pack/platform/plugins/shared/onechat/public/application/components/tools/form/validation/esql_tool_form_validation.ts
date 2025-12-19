@@ -6,7 +6,7 @@
  */
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { validateQuery } from '@kbn/esql-ast';
+import { validateQuery } from '@kbn/esql-language';
 import { i18n } from '@kbn/i18n';
 import type { EsqlToolFieldTypes } from '@kbn/onechat-common/tools';
 import { EsqlToolFieldType, ToolType } from '@kbn/onechat-common/tools';
