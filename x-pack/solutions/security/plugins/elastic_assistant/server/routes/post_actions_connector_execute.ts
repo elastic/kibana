@@ -143,7 +143,7 @@ export const postActionsConnectorExecuteRoute = (
             content: string,
             traceData: Message['traceData'] = {},
             isError = false,
-            refusal
+            refusal?: string
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
