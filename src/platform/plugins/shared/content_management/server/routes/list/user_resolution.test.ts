@@ -15,6 +15,11 @@ import {
   resolveCreatedByFilter,
   fetchUserProfiles,
 } from './user_resolution';
+import {
+  disableUserProfileCache,
+  enableUserProfileCache,
+  clearUserProfileCache,
+} from './user_profile_cache';
 
 describe('user_resolution', () => {
   describe('isUserProfileUid', () => {
@@ -278,6 +283,17 @@ describe('user_resolution', () => {
         },
       } as unknown as CoreStart);
 
+    beforeEach(() => {
+      // Disable cache to ensure tests are deterministic.
+      disableUserProfileCache();
+      clearUserProfileCache();
+    });
+
+    afterAll(() => {
+      // Re-enable cache after tests.
+      enableUserProfileCache();
+    });
+
     it('should fetch and map user profiles', async () => {
       const mockLogger = createMockLogger();
       const mockCoreStart = createMockCoreStart([
@@ -336,6 +352,80 @@ describe('user_resolution', () => {
       expect(mockCoreStart.userProfile.bulkGet).toHaveBeenCalledWith({
         uids: new Set(['u_user1_0', 'u_user2_0']),
         dataPath: 'avatar',
+      });
+    });
+
+    describe('with caching enabled', () => {
+      beforeEach(() => {
+        enableUserProfileCache();
+        clearUserProfileCache();
+      });
+
+      afterEach(() => {
+        disableUserProfileCache();
+        clearUserProfileCache();
+      });
+
+      it('should return cached profiles without calling API', async () => {
+        const mockLogger = createMockLogger();
+        const mockCoreStart = createMockCoreStart([
+          {
+            uid: 'u_user1_0',
+            user: { username: 'user1', email: 'user1@example.com' },
+            data: {},
+          },
+        ]);
+
+        // First call should fetch from API.
+        const result1 = await fetchUserProfiles(['u_user1_0'], mockCoreStart, mockLogger);
+        expect(result1.size).toBe(1);
+        expect(mockCoreStart.userProfile.bulkGet).toHaveBeenCalledTimes(1);
+
+        // Second call should use cache.
+        const result2 = await fetchUserProfiles(['u_user1_0'], mockCoreStart, mockLogger);
+        expect(result2.size).toBe(1);
+        expect(result2.get('u_user1_0')).toEqual(result1.get('u_user1_0'));
+        // bulkGet should NOT have been called again.
+        expect(mockCoreStart.userProfile.bulkGet).toHaveBeenCalledTimes(1);
+      });
+
+      it('should only fetch uncached profiles', async () => {
+        const mockLogger = createMockLogger();
+        const mockCoreStart = createMockCoreStart([
+          {
+            uid: 'u_user1_0',
+            user: { username: 'user1' },
+            data: {},
+          },
+        ]);
+
+        // First call caches u_user1_0.
+        await fetchUserProfiles(['u_user1_0'], mockCoreStart, mockLogger);
+        expect(mockCoreStart.userProfile.bulkGet).toHaveBeenCalledWith({
+          uids: new Set(['u_user1_0']),
+          dataPath: 'avatar',
+        });
+
+        // Update mock to return a different profile.
+        (mockCoreStart.userProfile.bulkGet as jest.Mock).mockResolvedValue([
+          {
+            uid: 'u_user2_0',
+            user: { username: 'user2' },
+            data: {},
+          },
+        ]);
+
+        // Second call with both UIDs should only fetch the uncached one.
+        const result = await fetchUserProfiles(
+          ['u_user1_0', 'u_user2_0'],
+          mockCoreStart,
+          mockLogger
+        );
+        expect(result.size).toBe(2);
+        expect(mockCoreStart.userProfile.bulkGet).toHaveBeenLastCalledWith({
+          uids: new Set(['u_user2_0']),
+          dataPath: 'avatar',
+        });
       });
     });
   });

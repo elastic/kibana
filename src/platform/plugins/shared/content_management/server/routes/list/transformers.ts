@@ -99,29 +99,23 @@ export const transformHits = (
 };
 
 /**
- * Enriches list response items with user profile information for creators and updaters.
+ * Converts a user info map to a plain object for JSON serialization.
  *
- * Looks up `createdBy` and `updatedBy` UIDs in the provided user info map and adds
- * corresponding `createdByUser` and `updatedByUser` objects containing username,
- * email, full name, and avatar data.
- *
- * @param items - Array of list response items to enrich.
  * @param userInfoMap - Map of user profile UIDs to user info objects.
- * @returns New array of items with `createdByUser` and `updatedByUser` fields populated.
+ * @returns Plain object mapping UIDs to user info, or undefined if the map is empty.
  *
  * @example
  * const userInfoMap = new Map([
  *   ['u_abc123', { username: 'john.doe', email: 'john@example.com' }],
  * ]);
- * const enrichedItems = enrichItemsWithUserInfo(items, userInfoMap);
+ * const users = userInfoMapToRecord(userInfoMap);
+ * // { 'u_abc123': { username: 'john.doe', email: 'john@example.com' } }
  */
-export const enrichItemsWithUserInfo = (
-  items: ListResponseItem[],
+export const userInfoMapToRecord = (
   userInfoMap: Map<string, UserInfo>
-): ListResponseItem[] => {
-  return items.map((item) => ({
-    ...item,
-    createdByUser: item.createdBy ? userInfoMap.get(item.createdBy) : undefined,
-    updatedByUser: item.updatedBy ? userInfoMap.get(item.updatedBy) : undefined,
-  }));
+): Record<string, UserInfo> | undefined => {
+  if (userInfoMap.size === 0) {
+    return undefined;
+  }
+  return Object.fromEntries(userInfoMap);
 };

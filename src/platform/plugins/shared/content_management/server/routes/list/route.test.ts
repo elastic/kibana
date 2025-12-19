@@ -238,7 +238,7 @@ describe('registerListRoute', () => {
       });
     });
 
-    it('should transform and enrich results with user info', async () => {
+    it('should transform results and return user info in users map', async () => {
       const { mockRouter, mockVersionedRouter } = createMockRouter();
       const mockLogger = createMockLogger();
       const { coreSetup, coreStart } = createMockCoreSetup();
@@ -299,14 +299,16 @@ describe('registerListRoute', () => {
               id: 'test-id',
               type: 'dashboard',
               createdBy: 'u_creator_0',
-              createdByUser: {
-                username: 'creator',
-                email: 'creator@example.com',
-                fullName: undefined,
-                avatar: undefined,
-              },
             }),
           ]),
+          users: {
+            u_creator_0: {
+              username: 'creator',
+              email: 'creator@example.com',
+              fullName: undefined,
+              avatar: undefined,
+            },
+          },
           total: 1,
         }),
       });

@@ -8,8 +8,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { transformHits, enrichItemsWithUserInfo } from './transformers';
-import type { ListResponseItem, UserInfo } from './types';
+import { transformHits, userInfoMapToRecord } from './transformers';
+import type { UserInfo } from './types';
 
 describe('transformers', () => {
   describe('transformHits', () => {
@@ -184,19 +184,8 @@ describe('transformers', () => {
     });
   });
 
-  describe('enrichItemsWithUserInfo', () => {
-    const createMockItem = (overrides: Partial<ListResponseItem> = {}): ListResponseItem => ({
-      id: 'test-id',
-      type: 'dashboard',
-      createdBy: 'u_creator',
-      updatedBy: 'u_updater',
-      references: [],
-      attributes: { title: 'Test' },
-      ...overrides,
-    });
-
-    it('should enrich items with user info when available', () => {
-      const items = [createMockItem()];
+  describe('userInfoMapToRecord', () => {
+    it('should convert a map to a record', () => {
       const userInfoMap = new Map<string, UserInfo>([
         [
           'u_creator',
@@ -216,65 +205,37 @@ describe('transformers', () => {
         ],
       ]);
 
-      const result = enrichItemsWithUserInfo(items, userInfoMap);
+      const result = userInfoMapToRecord(userInfoMap);
 
-      expect(result[0].createdByUser).toEqual({
-        username: 'creator_user',
-        email: 'creator@example.com',
-        fullName: 'Creator User',
+      expect(result).toEqual({
+        u_creator: {
+          username: 'creator_user',
+          email: 'creator@example.com',
+          fullName: 'Creator User',
+        },
+        u_updater: {
+          username: 'updater_user',
+          email: 'updater@example.com',
+          fullName: 'Updater User',
+        },
       });
-      expect(result[0].updatedByUser).toEqual({
-        username: 'updater_user',
-        email: 'updater@example.com',
-        fullName: 'Updater User',
+    });
+
+    it('should return undefined for an empty map', () => {
+      const userInfoMap = new Map<string, UserInfo>();
+      const result = userInfoMapToRecord(userInfoMap);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle a single entry', () => {
+      const userInfoMap = new Map<string, UserInfo>([['u_single', { username: 'single_user' }]]);
+
+      const result = userInfoMapToRecord(userInfoMap);
+
+      expect(result).toEqual({
+        u_single: { username: 'single_user' },
       });
-    });
-
-    it('should leave user fields undefined when not in map', () => {
-      const items = [createMockItem()];
-      const userInfoMap = new Map<string, UserInfo>();
-
-      const result = enrichItemsWithUserInfo(items, userInfoMap);
-
-      expect(result[0].createdByUser).toBeUndefined();
-      expect(result[0].updatedByUser).toBeUndefined();
-    });
-
-    it('should handle items without createdBy or updatedBy', () => {
-      const items = [
-        createMockItem({
-          createdBy: undefined,
-          updatedBy: undefined,
-        }),
-      ];
-      const userInfoMap = new Map<string, UserInfo>();
-
-      const result = enrichItemsWithUserInfo(items, userInfoMap);
-
-      expect(result[0].createdByUser).toBeUndefined();
-      expect(result[0].updatedByUser).toBeUndefined();
-    });
-
-    it('should handle empty items array', () => {
-      const result = enrichItemsWithUserInfo([], new Map());
-      expect(result).toEqual([]);
-    });
-
-    it('should preserve all original item properties', () => {
-      const items = [
-        createMockItem({
-          updatedAt: '2024-01-01',
-          managed: true,
-        }),
-      ];
-      const userInfoMap = new Map<string, UserInfo>([['u_creator', { username: 'user' }]]);
-
-      const result = enrichItemsWithUserInfo(items, userInfoMap);
-
-      expect(result[0].id).toBe('test-id');
-      expect(result[0].type).toBe('dashboard');
-      expect(result[0].updatedAt).toBe('2024-01-01');
-      expect(result[0].managed).toBe(true);
     });
   });
 });

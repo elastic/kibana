@@ -191,9 +191,10 @@ describe('query_builder', () => {
         tags: { include: ['tag1', 'tag2'] },
       });
 
+      // Uses OR logic (should + minimum_should_match) to match documents with ANY of the specified tags.
       expect(query.bool?.filter).toContainEqual({
         bool: {
-          must: [
+          should: [
             {
               nested: {
                 path: 'references',
@@ -221,6 +222,7 @@ describe('query_builder', () => {
               },
             },
           ],
+          minimum_should_match: 1,
         },
       });
     });

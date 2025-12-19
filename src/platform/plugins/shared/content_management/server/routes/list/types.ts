@@ -41,8 +41,9 @@ export interface UserInfo {
 /**
  * Individual item in the list response, representing a saved object with enriched metadata.
  *
- * Includes all baseline fields required by the `ContentListItem` interface on the client,
- * plus optional user profile information for creators and updaters.
+ * Includes all baseline fields required by the `ContentListItem` interface on the client.
+ * User profile information is provided separately in the `users` map of the response to
+ * avoid duplicating user data across multiple items.
  */
 export interface ListResponseItem {
   id: string;
@@ -51,10 +52,6 @@ export interface ListResponseItem {
   updatedBy?: string;
   createdAt?: string;
   createdBy?: string;
-  /** User profile for the creator. */
-  createdByUser?: UserInfo;
-  /** User profile for the updater. */
-  updatedByUser?: UserInfo;
   managed?: boolean;
   references: Reference[]; // Always included, filtered to tags only.
   attributes: {
@@ -82,6 +79,12 @@ export interface ResolvedFilters {
 export interface ListResponse {
   items: ListResponseItem[];
   total: number;
+  /**
+   * Map of user profile UIDs to user info. Contains entries for all unique
+   * `createdBy` and `updatedBy` values found in the items array. Clients should
+   * look up user info from this map using the UID from item fields.
+   */
+  users?: Record<string, UserInfo>;
   /** Maps raw filter inputs to their resolved canonical values. */
   resolvedFilters?: ResolvedFilters;
 }

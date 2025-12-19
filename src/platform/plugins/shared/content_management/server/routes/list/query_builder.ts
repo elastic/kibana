@@ -258,10 +258,12 @@ export const buildSearchQuery = ({
   }
 
   // Tag include filter (has_reference equivalent).
+  // Uses OR logic (should + minimum_should_match) to match documents with ANY of the specified tags.
+  // This matches Saved Objects `hasReference` behavior when passed an array.
   if (tags?.include && tags.include.length > 0) {
     filter.push({
       bool: {
-        must: tags.include.map((tagId) => ({
+        should: tags.include.map((tagId) => ({
           nested: {
             path: 'references',
             query: {
@@ -274,6 +276,7 @@ export const buildSearchQuery = ({
             },
           },
         })),
+        minimum_should_match: 1,
       },
     });
   }

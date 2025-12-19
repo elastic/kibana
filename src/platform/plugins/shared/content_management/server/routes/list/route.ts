@@ -8,9 +8,13 @@
  */
 
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers, SECURITY_EXTENSION_ID } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  getFavoritesForTypes,
+  favoritesSavedObjectName,
+} from '@kbn/content-management-favorites-server';
 
 import type { ListResponse, ResolvedFilters } from './types';
 import {
@@ -19,7 +23,7 @@ import {
   buildSort,
   buildSearchQuery,
 } from './query_builder';
-import { transformHits, enrichItemsWithUserInfo } from './transformers';
+import { transformHits, userInfoMapToRecord } from './transformers';
 import {
   isUserProfileUid,
   getDistinctCreators,
@@ -52,8 +56,6 @@ const responseValidation = () => {
     updatedBy: schema.maybe(schema.string()),
     createdAt: schema.maybe(schema.string()),
     createdBy: schema.maybe(schema.string()),
-    createdByUser: schema.maybe(userInfoSchema),
-    updatedByUser: schema.maybe(userInfoSchema),
     managed: schema.maybe(schema.boolean()),
     references: schema.arrayOf(referenceSchema, { maxSize: 1000 }),
     attributes: schema.object(
@@ -68,6 +70,7 @@ const responseValidation = () => {
   return schema.object({
     items: schema.arrayOf(listResponseItemSchema, { maxSize: 10000 }),
     total: schema.number(),
+    users: schema.maybe(schema.recordOf(schema.string(), userInfoSchema)),
     resolvedFilters: schema.maybe(
       schema.object({
         createdBy: schema.maybe(schema.recordOf(schema.string(), schema.string())),
@@ -219,52 +222,47 @@ export const registerListRoute = ({ coreSetup, router, logger }: RegisterListRou
           const namespaces = [savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING];
 
           /**
+           * Fetches favorite IDs and converts them to raw document IDs for ES filtering.
+           *
            * Favorites are stored in a hidden single-namespace saved object type, keyed by `{type}:{userId}`.
-           * To filter *content* documents via `savedObjectsClient.search`, we must convert favorite IDs into
+           * To filter content documents via `savedObjectsClient.search`, we convert favorite IDs into
            * raw document IDs (`{namespace?:}{type}:{id}`), respecting the current space for single-namespace types.
            */
-          const getFavoriteRawIds = async (): Promise<string[] | undefined> => {
+          const getFavoriteRawDocumentIds = async (): Promise<string[] | undefined> => {
             if (!favoritesOnly || !userId) {
               return undefined;
             }
 
             const favoritesSoClient = coreContext.savedObjects.getClient({
-              includedHiddenTypes: ['favorites'],
+              includedHiddenTypes: [favoritesSavedObjectName],
               excludedExtensions: [SECURITY_EXTENSION_ID],
             });
 
             const types = Array.isArray(type) ? type : [type];
             const namespace = savedObjectsClient.getCurrentNamespace();
 
-            const rawIds = new Set<string>();
+            // Fetch favorites for all requested types.
+            const favoritesByType = await getFavoritesForTypes(types, userId, {
+              savedObjectClient: favoritesSoClient,
+              logger,
+            });
 
-            for (const t of types) {
-              try {
-                const favoritesSo = await favoritesSoClient.get<{ favoriteIds?: string[] }>(
-                  'favorites',
-                  `${t}:${userId}`
-                );
+            // Convert favorite IDs to raw document IDs for ES filtering.
+            // Raw IDs include the namespace prefix for single-namespace types.
+            const rawIds: string[] = [];
+            for (const [t, favoriteIds] of favoritesByType) {
+              const rawIdPrefix =
+                namespace && typeRegistry.isSingleNamespace(t) ? `${namespace}:` : '';
 
-                const favoriteIds = favoritesSo.attributes.favoriteIds ?? [];
-                const rawIdPrefix =
-                  namespace && typeRegistry.isSingleNamespace(t) ? `${namespace}:` : '';
-
-                for (const favoriteId of favoriteIds) {
-                  rawIds.add(`${rawIdPrefix}${t}:${favoriteId}`);
-                }
-              } catch (e) {
-                if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-                  // No favorites saved object exists for this type in this space.
-                  continue;
-                }
-                throw e;
+              for (const favoriteId of favoriteIds) {
+                rawIds.push(`${rawIdPrefix}${t}:${favoriteId}`);
               }
             }
 
-            return Array.from(rawIds);
+            return rawIds;
           };
 
-          const favoriteRawIds = await getFavoriteRawIds();
+          const favoriteRawIds = await getFavoriteRawDocumentIds();
 
           // If favoritesOnly was requested but there are no favorites, return early with an empty result.
           if (favoritesOnly && (!favoriteRawIds || favoriteRawIds.length === 0)) {
@@ -351,9 +349,9 @@ export const registerListRoute = ({ coreSetup, router, logger }: RegisterListRou
             if (item.updatedBy) userIds.add(item.updatedBy);
           }
 
-          // Fetch user profiles and enrich items.
+          // Fetch user profiles.
           const userInfoMap = await fetchUserProfiles(Array.from(userIds), coreStart, logger);
-          const items = enrichItemsWithUserInfo(transformedItems, userInfoMap);
+          const users = userInfoMapToRecord(userInfoMap);
 
           // Build resolved filters for client deduplication.
           const resolvedFilters: ResolvedFilters | undefined =
@@ -362,8 +360,9 @@ export const registerListRoute = ({ coreSetup, router, logger }: RegisterListRou
               : undefined;
 
           const listResponse: ListResponse = {
-            items,
+            items: transformedItems,
             total,
+            users,
             resolvedFilters,
           };
 

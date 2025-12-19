@@ -21,6 +21,9 @@ export type {
   RemoveFavoriteResponse,
 } from './favorites_routes';
 
+export { getFavoritesForTypes } from './get_favorites_for_types';
+export { favoritesSavedObjectName } from './favorites_saved_object';
+
 /**
  * @public
  * Setup contract for the favorites feature.
