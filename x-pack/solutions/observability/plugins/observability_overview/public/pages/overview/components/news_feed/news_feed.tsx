@@ -40,7 +40,7 @@ export function NewsFeed({ items }: Props) {
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4>
-              {i18n.translate('xpack.observability.news.title', {
+              {i18n.translate('xpack.observabilityOverview.news.title', {
                 defaultMessage: "What's new",
               })}
             </h4>
@@ -86,7 +86,7 @@ function NewsItem({ item }: { item: INewsItem }) {
                       target="_blank"
                       external
                     >
-                      {i18n.translate('xpack.observability.news.readFullStory', {
+                      {i18n.translate('xpack.observabilityOverview.news.readFullStory', {
                         defaultMessage: 'Read full story',
                       })}
                     </EuiLink>

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../src/dev/tsconfig-base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -19,10 +19,6 @@
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/alerts-grouping",
-    "@kbn/alerts-ui-shared",
+    "@kbn/alerts-ui-shared"
   ]
 }
-
-
-
-

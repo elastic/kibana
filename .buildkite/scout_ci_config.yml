@@ -8,6 +8,7 @@ plugins:
     - infra
     - maps
     - observability
+    - observability_overview
     - observability_onboarding
     - painless_lab
     - profiling
