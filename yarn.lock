@@ -6559,14 +6559,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast-inspector-plugin@link:examples/esql_ast_inspector":
-  version "0.0.0"
-  uid ""
-
-"@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
-  version "0.0.0"
-  uid ""
-
 "@kbn/esql-composer@link:src/platform/packages/shared/kbn-esql-composer":
   version "0.0.0"
   uid ""
@@ -6576,6 +6568,14 @@
   uid ""
 
 "@kbn/esql-editor@link:src/platform/packages/private/kbn-esql-editor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-language-inspector-plugin@link:examples/esql_ast_inspector":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-language@link:src/platform/packages/shared/kbn-esql-language":
   version "0.0.0"
   uid ""
 
@@ -8684,6 +8684,10 @@
   uid ""
 
 "@kbn/shared-ux-file-util@link:src/platform/packages/shared/shared-ux/file/util":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-label-formatter@link:src/platform/packages/shared/shared-ux/label_formatter":
   version "0.0.0"
   uid ""
 

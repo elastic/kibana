@@ -504,8 +504,8 @@ src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-query-constants @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-query-server @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
-src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-presentation-team @elastic/obs-ai-team
+src/platform/packages/shared/kbn-esql-language @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
@@ -690,6 +690,7 @@ src/platform/packages/shared/shared-ux/file/image/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/mocks @elastic/appex-sharedux
