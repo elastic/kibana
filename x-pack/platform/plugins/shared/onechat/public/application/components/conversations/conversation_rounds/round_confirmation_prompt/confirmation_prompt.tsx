@@ -11,13 +11,15 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiIcon,
   EuiText,
   useEuiTheme,
+  useEuiShadow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConfirmPromptDefinition } from '@kbn/onechat-common/agents';
+import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const defaultLabels = {
   title: i18n.translate('xpack.onechat.confirmationPrompt.defaultTitle', {
@@ -54,10 +56,18 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
   const confirmText = prompt.confirm_text ?? defaultLabels.confirmText;
   const cancelText = prompt.cancel_text ?? defaultLabels.cancelText;
 
-  const panelStyles = css`
-    border: 1px solid #d4af37;
-    background-color: #fdf8e8;
-    border-radius: ${euiTheme.border.radius.medium};
+  const containerStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    ${borderRadiusXlStyles}
+    border: 1px solid ${euiTheme.colors.borderStrongWarning};
+    padding: ${euiTheme.size.base};
+    ${useEuiShadow('s')};
+  `;
+
+  const headerStyles = css`
+    padding-bottom: ${euiTheme.size.s};
+    border-bottom: 1px solid ${euiTheme.colors.lightShade};
+    margin-bottom: ${euiTheme.size.s};
   `;
 
   const titleStyles = css`
@@ -66,59 +76,78 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
     color: ${euiTheme.colors.textParagraph};
   `;
 
+  const iconContainerStyles = css`
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: ${euiTheme.colors.backgroundLightWarning};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  `;
+
   return (
-    <EuiPanel
-      css={panelStyles}
-      paddingSize="m"
-      hasShadow={false}
+    <EuiFlexGroup
+      direction="column"
+      responsive={false}
+      css={containerStyles}
+      gutterSize="none"
       data-test-subj="agentBuilderConfirmationPrompt"
     >
-      <EuiFlexGroup direction="column" gutterSize="s">
+      {/* Header with icon and title */}
+      <EuiFlexGroup
+        direction="row"
+        alignItems="center"
+        gutterSize="m"
+        responsive={false}
+        css={headerStyles}
+      >
         <EuiFlexItem grow={false}>
+          <div css={iconContainerStyles}>
+            <EuiIcon type="help" color="warning" size="m" />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <span css={titleStyles}>{title}</span>
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <p style={{ margin: 0 }}>{message}</p>
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onCancel}
-                disabled={isLoading}
-                size="s"
-                data-test-subj="agentBuilderConfirmationPromptCancelButton"
-              >
-                {cancelText}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={onConfirm}
-                isLoading={isLoading}
-                fill
-                size="s"
-                css={css`
-                  background-color: #d4af37;
-                  border-color: #d4af37;
-                  &:hover:not(:disabled) {
-                    background-color: #c9a432;
-                    border-color: #c9a432;
-                  }
-                `}
-                data-test-subj="agentBuilderConfirmationPromptConfirmButton"
-              >
-                {confirmText}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+
+      {/* Message */}
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          <p style={{ margin: 0, marginBottom: euiTheme.size.m }}>{message}</p>
+        </EuiText>
+      </EuiFlexItem>
+
+      {/* Action buttons */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onCancel}
+              disabled={isLoading}
+              size="s"
+              color="text"
+              data-test-subj="agentBuilderConfirmationPromptCancelButton"
+            >
+              {cancelText}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={onConfirm}
+              isLoading={isLoading}
+              fill
+              size="s"
+              color="warning"
+              data-test-subj="agentBuilderConfirmationPromptConfirmButton"
+            >
+              {confirmText}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
-
