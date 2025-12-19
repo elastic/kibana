@@ -224,6 +224,7 @@ export const ConfirmTemplateDetailsSection = ({
 
     const abortController = new AbortController();
     setIsLoadingIlmPolicy(true);
+    setHasErrorLoadingIlmPolicy(false);
 
     getIlmPolicy(ilmPolicyName, abortController.signal)
       .then((policy) => {
