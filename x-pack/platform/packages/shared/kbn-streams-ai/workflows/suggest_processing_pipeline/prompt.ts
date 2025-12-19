@@ -36,7 +36,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     tools: {
       simulate_pipeline: {
         description:
-          'Simulate a complete ingest pipeline design with processors, stages, and routing rules. The tool first validates structural integrity and schema compliance. If validation passes, it then automatically simulates the pipeline against the entire data stream to validate parsing coverage, field extraction, error rates, and type correctness. Returns validation results and simulation results with detailed metrics.',
+          'Test your pipeline against sample data. Use this iteratively: simulate → read errors → fix → simulate again. Returns validation errors and simulation metrics. Keep calling until errors are resolved.',
         schema: {
           type: 'object',
           properties: {
@@ -51,7 +51,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
       },
       commit_pipeline: {
         description:
-          'Finalize and commit the validated pipeline. Call this after successful validation when the pipeline meets all acceptance criteria.',
+          'Finalize the pipeline after simulate_pipeline passes with acceptable metrics. Only call this when your eval/dev loop is complete.',
         schema: {
           type: 'object',
           properties: {

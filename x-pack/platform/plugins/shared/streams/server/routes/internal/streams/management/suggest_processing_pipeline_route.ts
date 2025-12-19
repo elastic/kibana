@@ -238,7 +238,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           definition: stream,
           inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
           parsingProcessor,
-          maxSteps: 4, // Limit reasoning steps for latency and token cost
+          maxSteps: 6, // Limit reasoning steps for latency and token cost
           signal: abortController.signal,
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
