@@ -19,11 +19,11 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { dependencyDetailsPage },
   }) => {
-    await test.step('Land on dependency details page', async () => {
+    await test.step('land on dependency details page', async () => {
       await dependencyDetailsPage.goToPage();
     });
 
-    await test.step('Verify overview tab is selected', async () => {
+    await test.step('verify overview tab is selected', async () => {
       await expect(dependencyDetailsPage.overviewTab.tab).toBeVisible();
       await expect(dependencyDetailsPage.overviewTab.tab).toHaveAttribute('aria-selected', 'true');
 
@@ -33,11 +33,11 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('Renders expected content', async ({ pageObjects: { dependencyDetailsPage } }) => {
-    await test.step('Land on overview tab', async () => {
+    await test.step('land on overview tab', async () => {
       await dependencyDetailsPage.overviewTab.goToTab();
     });
 
-    await test.step('Renders overview content', async () => {
+    await test.step('renders overview content', async () => {
       await expect(dependencyDetailsPage.overviewTab.latencyChart).toBeVisible();
       await expect(dependencyDetailsPage.overviewTab.throughputChart).toBeVisible();
       await expect(dependencyDetailsPage.overviewTab.failedTransactionRateChart).toBeVisible();
@@ -57,15 +57,15 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { dependencyDetailsPage },
   }) => {
-    await test.step('Land on overview tab', async () => {
+    await test.step('land on overview tab', async () => {
       await dependencyDetailsPage.overviewTab.goToTab();
     });
 
-    await test.step('Click on a service in upstream services table', async () => {
+    await test.step('click on a service in upstream services table', async () => {
       await dependencyDetailsPage.overviewTab.clickServiceInUpstreamServicesTable(SERVICE_NAME);
     });
 
-    await test.step('Lands on the service overview page', async () => {
+    await test.step('lands on the service overview page', async () => {
       const url = new URL(page.url());
       expect(url.pathname).toContain(`/services/${SERVICE_NAME}/overview`);
     });
@@ -75,11 +75,11 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { dependencyDetailsPage },
   }) => {
-    await test.step('Land on dependencies tab', async () => {
+    await test.step('land on dependencies tab', async () => {
       await dependencyDetailsPage.overviewTab.goToTab();
     });
 
-    await test.step('Check a11y', async () => {
+    await test.step('check a11y', async () => {
       const { violations } = await page.checkA11y({ include: ['main'] });
       expect(violations).toHaveLength(0);
     });

@@ -15,7 +15,7 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
   });
 
   test('Renders expected content', async ({ page, pageObjects: { dependencyDetailsPage } }) => {
-    await test.step('Renders operation detail content', async () => {
+    await test.step('renders operation detail content', async () => {
       await expect(
         page.getByRole('heading', { name: dependencyDetailsPage.SPAN_NAME })
       ).toBeVisible();
@@ -35,7 +35,7 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { dependencyDetailsPage },
   }) => {
-    await test.step('Click breadcrumb link to go back to dependency operations list', async () => {
+    await test.step('click breadcrumb link to go back to dependency operations list', async () => {
       await expect(dependencyDetailsPage.operationDetailSubpage.breadcrumb).toBeVisible();
       await expect(dependencyDetailsPage.operationDetailSubpage.breadcrumb).toHaveText(
         'All operations'
@@ -43,7 +43,7 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
       await dependencyDetailsPage.operationDetailSubpage.breadcrumb.click();
     });
 
-    await test.step("Verify we're on the dependency operations list page", () => {
+    await test.step("verify we're on the dependency operations list page", () => {
       const url = new URL(page.url());
       expect(url.pathname).toContain(`/dependencies/operations`);
       expect(url.searchParams.get('dependencyName')).toBe(dependencyDetailsPage.DEPENDENCY_NAME);
@@ -53,11 +53,11 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
   test("Investigate trace popup opens when clicking 'Investigate trace' button", async ({
     pageObjects: { dependencyDetailsPage },
   }) => {
-    await test.step("Click 'Investigate trace' button", async () => {
+    await test.step("click 'Investigate trace' button", async () => {
       await dependencyDetailsPage.operationDetailSubpage.waterfallInvestigateButton.click();
     });
 
-    await test.step('Verify investigate trace popup is visible', async () => {
+    await test.step('verify investigate trace popup is visible', async () => {
       await expect(
         dependencyDetailsPage.operationDetailSubpage.waterfallInvestigatePopup
       ).toBeVisible();
@@ -68,12 +68,12 @@ test.describe('Dependency Operation Detail Page', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { dependencyDetailsPage },
   }) => {
-    await test.step("Click 'Span links' button", async () => {
+    await test.step("click 'Span links' button", async () => {
       await dependencyDetailsPage.operationDetailSubpage.waterfallPaginationLastButton.click();
       await dependencyDetailsPage.operationDetailSubpage.waterfallSpanLinksBadge.click();
     });
 
-    await test.step('Verify span link flyout is visible', async () => {
+    await test.step('verify span link flyout is visible', async () => {
       const flyoutLocator = page.getByRole('dialog');
       await expect(flyoutLocator).toBeVisible();
       await expect(flyoutLocator.getByRole('heading', { name: 'Span details' })).toBeVisible();
