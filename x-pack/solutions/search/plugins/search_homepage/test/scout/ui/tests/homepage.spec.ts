@@ -84,40 +84,35 @@ test.describe('Homepage', { tag: ['@svlSearch'] }, () => {
     await expect(page).toHaveURL(new RegExp('getting_started'));
   });
 
-  test('Cloud resources cards should have billing and autoops', async ({
-    pageObjects,
-    browserAuth,
-    esClient,
-  }) => {
-    const EXPECTED_BILLING_URL = 'https://fake-cloud.elastic.co/billing/overview/';
-    const EXPECTED_AUTOOPS_URL = 'https://cloud.elastic.co';
-
-    await esClient.security.putRoleMapping({
-      name: 'cloud-billing-admin',
-      roles: ['superuser', '_ec_billing_admin'],
-      enabled: true,
-      rules: { field: { 'realm.name': 'cloud-saml-kibana' } },
-    });
-
+  test('Should open connection details flyout', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.homepage.skipGettingStarted();
 
-    const cloudResourceCards = await pageObjects.homepage.getCloudResourceCards();
-    await expect(cloudResourceCards).toHaveCount(2);
+    await pageObjects.homepage.clickConnectionDetailsButton();
 
-    const cloudResourceLinks = [
-      { cardId: 'cloudResourceCard-billing', expectedLink: EXPECTED_BILLING_URL },
-      { cardId: 'cloudResourceCard-autoops', expectedLink: EXPECTED_AUTOOPS_URL },
-    ];
+    const flyout = await pageObjects.homepage.getConnectionDetailsFlyout();
+    await expect(flyout).toBeVisible();
 
-    for (const { cardId, expectedLink } of cloudResourceLinks) {
-      await expect(await pageObjects.homepage.getCloudResourceCardLink(cardId)).toHaveAttribute(
-        'href',
-        expectedLink
-      );
-    }
+    const flyoutTitle = await pageObjects.homepage.getConnectionDetailsFlyoutTitle();
+    await expect(flyoutTitle).toBeVisible();
+  });
 
-    // Clean up role mapping
-    await esClient.security.deleteRoleMapping({ name: 'cloud-billing-admin' });
+  test('Should create API key through the modal', async ({ pageObjects, browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.homepage.skipGettingStarted();
+
+    await pageObjects.homepage.clickApiKeysButton();
+
+    const flyout = await pageObjects.homepage.getConnectionDetailsFlyout();
+    await expect(flyout).toBeVisible();
+
+    await pageObjects.homepage.fillApiKeyName('Test API Key');
+    await pageObjects.homepage.clickCreateApiKeySubmitButton();
+
+    const successForm = await pageObjects.homepage.getApiKeySuccessForm();
+    await expect(successForm).toBeVisible();
+
+    const apiKeyValueRow = await pageObjects.homepage.getApiKeyValueRow();
+    await expect(apiKeyValueRow).toBeVisible();
   });
 });

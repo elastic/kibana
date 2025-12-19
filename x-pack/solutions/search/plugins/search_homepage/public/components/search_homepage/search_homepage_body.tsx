@@ -21,7 +21,7 @@ export const SearchHomepageBody = () => {
   const {
     services: { cloud },
   } = useKibana();
-  const { isAdmin } = useAuthenticatedUser();
+  const { isAdmin, isBillingAdmin } = useAuthenticatedUser();
   return (
     <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow paddingSize="none">
       <EuiFlexGroup gutterSize="l" direction="column">
@@ -29,7 +29,7 @@ export const SearchHomepageBody = () => {
           <EuiSpacer size="l" />
           <MetricPanels />
         </EuiFlexItem>
-        {cloud?.isServerlessEnabled && !isAdmin ? null : (
+        {cloud?.isServerlessEnabled && (!isAdmin || !isBillingAdmin) ? null : (
           <EuiFlexItem>
             <EuiSpacer size="l" />
             <CloudResources />

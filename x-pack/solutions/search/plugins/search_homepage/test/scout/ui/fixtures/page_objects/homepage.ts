@@ -55,4 +55,36 @@ export class Homepage {
   async getCloudResourceCardLink(cardId: string) {
     return this.page.testSubj.locator(cardId).getByRole('link');
   }
+
+  async clickApiKeysButton() {
+    await this.page.testSubj.locator('searchHomepageConnectToElasticsearchApiKeysButton').click();
+  }
+
+  async getConnectionDetailsFlyout() {
+    return this.page.testSubj.locator('connectionDetailsModalBody');
+  }
+
+  async getConnectionDetailsFlyoutTitle() {
+    return this.page.testSubj.locator('connectionDetailsModalTitle');
+  }
+
+  async clickConnectionDetailsButton() {
+    await this.page.testSubj.locator('search-homepage-context-menu-button').click();
+  }
+
+  async fillApiKeyName(name: string) {
+    await this.page.testSubj.locator('connectionDetailsApiKeyNameInput').fill(name);
+  }
+
+  async clickCreateApiKeySubmitButton() {
+    await this.page.testSubj.locator('connectionDetailsApiKeySubmitBtn').click();
+  }
+
+  async getApiKeySuccessForm() {
+    return this.page.testSubj.locator('connectionDetailsApiKeySuccessForm');
+  }
+
+  async getApiKeyValueRow() {
+    return this.page.testSubj.locator('connectionDetailsApiKeyValueRow');
+  }
 }
