@@ -15,6 +15,7 @@ import type {
   LAST_USED_LOGS_VIEWER_APP_ID,
   OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
+  OBSERVABILITY_APP_ID,
   SYNTHETICS_APP_ID,
   UPTIME_APP_ID,
   SLO_APP_ID,
@@ -29,6 +30,7 @@ type LogsApp = typeof LOGS_APP_ID;
 type ObservabilityLogsExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
 type LastUsedLogsViewerApp = typeof LAST_USED_LOGS_VIEWER_APP_ID;
 type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
+type ObservabilityApp = typeof OBSERVABILITY_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
 type SyntheticsApp = typeof SYNTHETICS_APP_ID;
@@ -46,6 +48,7 @@ export type AppId =
   | ObservabilityLogsExplorerApp
   | LastUsedLogsViewerApp
   | ObservabilityOverviewApp
+  | ObservabilityApp
   | ObservabilityOnboardingApp
   | ApmApp
   | MetricsApp
@@ -62,12 +65,9 @@ export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
 export type InventoryLinkId = 'datastreams';
 
-export type ObservabilityOverviewLinkId =
-  | 'alerts'
-  | 'cases'
-  | 'cases_configure'
-  | 'cases_create'
-  | 'rules';
+export type ObservabilityLinkId = 'alerts' | 'cases' | 'cases_configure' | 'cases_create' | 'rules';
+
+export type ObservabilityOverviewLinkId = 'overview';
 
 export type MetricsLinkId =
   | 'inventory'
@@ -96,6 +96,7 @@ export type StreamsLinkId = 'overview';
 export type LinkId =
   | LogsLinkId
   | ObservabilityOverviewLinkId
+  | ObservabilityLinkId
   | MetricsLinkId
   | ApmLinkId
   | SyntheticsLinkId
@@ -107,6 +108,7 @@ export type DeepLinkId =
   | AppId
   | `${LogsApp}:${LogsLinkId}`
   | `${ObservabilityOverviewApp}:${ObservabilityOverviewLinkId}`
+  | `${ObservabilityApp}:${ObservabilityLinkId}`
   | `${MetricsApp}:${MetricsLinkId}`
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`

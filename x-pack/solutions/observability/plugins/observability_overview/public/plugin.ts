@@ -14,13 +14,16 @@ import type {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -28,13 +31,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { registerDataHandler } from './context/has_data_context/data_handler';
-
-export type ObservabilityOverviewPublicSetup = ReturnType<Plugin['setup']>;
-export type ObservabilityOverviewPublicStart = ReturnType<Plugin['start']>;
-export interface ObservabilityOverviewPublicPluginsSetup {
-  serverless?: ServerlessPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-}
 
 export interface ConfigSchema {
   unsafe: {
@@ -44,6 +40,14 @@ export interface ConfigSchema {
   };
 
   managedOtlpServiceUrl: string;
+}
+
+export type ObservabilityOverviewPublicSetup = ReturnType<Plugin['setup']>;
+export type ObservabilityOverviewPublicStart = ReturnType<Plugin['start']>;
+export interface ObservabilityOverviewPublicPluginsSetup {
+  serverless?: ServerlessPluginSetup;
+  usageCollection?: UsageCollectionSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
 }
 
 export interface ObservabilityOverviewPublicPluginsStart {
@@ -99,10 +103,10 @@ export class Plugin
     };
 
     coreSetup.application.register({
-      appRoute: '/app/observability-overview',
+      appRoute: '/app/observabilityOverview',
       category,
       euiIconType,
-      id: 'observability-overview-app',
+      id: 'observabilityOverview',
       mount,
       order: 8000,
       title: i18n.translate('xpack.observabilityOverview.overviewLinkTitle', {

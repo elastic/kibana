@@ -208,17 +208,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
-      deepLinks: [
-        {
-          id: 'rules',
-          title: i18n.translate('xpack.observability.rulesLinkTitle', {
-            defaultMessage: 'Rules',
-          }),
-          path: RULES_PATH,
-          visibleIn: [],
-        },
-      ],
+      visibleIn: ['sideNav'],
       keywords: ['alerts', 'rules'],
     },
   ];
@@ -306,10 +296,11 @@ export class Plugin
       deepLinks: this.deepLinks,
       euiIconType,
       id: observabilityAppId,
+      defaultPath: '/alerts',
       mount,
       order: 8000,
-      title: i18n.translate('xpack.observability.overviewLinkTitle', {
-        defaultMessage: 'Overview',
+      title: i18n.translate('xpack.observability.alertsLinkTitle', {
+        defaultMessage: 'Alerts',
       }),
       updater$: appUpdater$,
       keywords: [
