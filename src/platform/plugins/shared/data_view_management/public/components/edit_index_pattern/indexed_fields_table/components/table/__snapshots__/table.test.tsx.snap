@@ -331,15 +331,46 @@ exports[`Table should render normally 1`] = `
 />
 `;
 
-exports[`Table should render the boolean template (false) 1`] = `<span />`;
+exports[`Table should render the boolean template (false) 1`] = `
+<Fragment>
+  <EuiToolTipAnchor
+    display="inlineBlock"
+    id="generated-id"
+    isVisible={false}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onKeyDown={[Function]}
+    onMouseOut={[Function]}
+    onMouseOver={[Function]}
+  >
+    <EuiIcon
+      aria-label="Not searchable"
+      color="danger"
+      type="cross"
+    />
+  </EuiToolTipAnchor>
+</Fragment>
+`;
 
 exports[`Table should render the boolean template (true) 1`] = `
-<span
-  color="success"
-  data-euiicon-type="dot"
->
-  Is searchable
-</span>
+<Fragment>
+  <EuiToolTipAnchor
+    display="inlineBlock"
+    id="generated-id"
+    isVisible={false}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onKeyDown={[Function]}
+    onMouseOut={[Function]}
+    onMouseOver={[Function]}
+  >
+    <EuiIcon
+      aria-label="Searchable"
+      color="success"
+      type="checkInCircleFilled"
+    />
+  </EuiToolTipAnchor>
+</Fragment>
 `;
 
 exports[`Table should render timestamp field name 1`] = `
