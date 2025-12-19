@@ -14,7 +14,6 @@ import type { TableId } from '@kbn/securitysolution-data-table';
 import type {
   AlertsTableProps,
   BulkActionsPanelConfig,
-  ItemsPanelConfig,
 } from '@kbn/response-ops-alerts-table/types';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
@@ -69,7 +68,7 @@ export const useBulkActionsByTableType = (
   tableId: TableId,
   query: AlertsTableProps['query'],
   refresh: () => void
-): [ItemsPanelConfig, ...BulkActionsPanelConfig[]] => {
+): BulkActionsPanelConfig[] => {
   const { from, to } = useGlobalTime();
   const filters = useMemo(() => {
     return getFiltersForDSLQuery(query);
