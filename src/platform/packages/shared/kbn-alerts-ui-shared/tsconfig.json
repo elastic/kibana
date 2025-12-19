@@ -37,5 +37,6 @@
     "@kbn/controls-constants",
     "@kbn/es-ui-shared-plugin",
     "@kbn/react-query",
+    "@kbn/kql",
   ]
 }
