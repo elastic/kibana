@@ -15,11 +15,5 @@ const repairParamsSchema = t.type({
 
 type RepairParams = t.TypeOf<typeof repairParamsSchema.props.body>;
 
-interface RepairResult {
-  id: string;
-  success: boolean;
-  error?: string;
-}
-
-export type { RepairParams, RepairResult };
 export { repairParamsSchema };
+export type { RepairParams };

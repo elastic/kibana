@@ -7,7 +7,8 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { type Logger } from '@kbn/core/server';
-import type { RepairParams, RepairResult } from '@kbn/slo-schema';
+import type { RepairParams } from '@kbn/slo-schema';
+import { keyBy } from 'lodash';
 import pLimit from 'p-limit';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import type { SLODefinition } from '../domain/models/slo';
@@ -16,10 +17,25 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { DefaultSummaryTransformManager } from './summay_transform_manager';
 import type { DefaultTransformManager } from './transform_manager';
 
+interface RepairActionsGroup {
+  slo: SLODefinition;
+  actions: RepairAction[];
+}
+
 interface RepairAction {
-  action: 'recreate-transform' | 'start-transform' | 'stop-transform';
+  type: 'recreate-transform' | 'start-transform' | 'stop-transform';
   transformType: 'rollup' | 'summary';
-  enabled: boolean | undefined;
+}
+
+interface RepairActionsGroupResult {
+  id: string;
+  results: RepairActionResult[];
+}
+
+interface RepairActionResult {
+  action: RepairAction;
+  status: 'success' | 'failure';
+  error?: any;
 }
 
 export class RepairSLO {
@@ -31,127 +47,113 @@ export class RepairSLO {
     private summaryTransformManager: DefaultSummaryTransformManager
   ) {}
 
-  public async execute(params: RepairParams): Promise<RepairResult[]> {
-    if (params.list.length > 100) {
-      throw new Error('Cannot repair more than 100 SLOs at once');
+  public async execute(params: RepairParams): Promise<RepairActionsGroupResult[]> {
+    if (params.list.length > 10) {
+      throw new Error('Cannot repair more than 10 SLOs at once');
     }
-    const allResults: RepairResult[] = [];
+
     const definitions = await this.repository.findAllByIds(params.list);
-
-    let successCount = 0;
-    let errorCount = 0;
-
-    const headLimiter = pLimit(10);
-
     const health = await computeHealth(definitions, {
       scopedClusterClient: this.scopedClusterClient,
     });
 
+    const healthById = keyBy(health, (h) => h.id);
+    const repairActionsGroup = definitions.map((definition) =>
+      this.identifyRepairActionsGroup(healthById[definition.id], definition)
+    );
+
+    const allResults: RepairActionsGroupResult[] = [];
+    const limiter = pLimit(3);
     await Promise.all(
-      definitions.map(async (definition, i) => {
-        const repairActions = this.identifyRepairActions(health[i], definition.enabled);
-
-        if (repairActions.length === 0) {
-          this.logger.debug('No repair actions needed');
-          allResults.push({ id: definition.id, success: true });
-          return;
-        }
-
-        this.logger.debug(`Identified ${repairActions.length} repair actions needed`);
-        return headLimiter(async () => {
-          for (const action of repairActions) {
-            try {
-              await this.executeRepairAction(
-                action,
-                definition,
-                this.transformManager,
-                this.summaryTransformManager
-              );
-              successCount++;
-              allResults.push({ id: definition.id, success: true });
-            } catch (err) {
-              this.logger.debug(
-                `Failed to execute repair action [${action.action}] for SLO [${definition.id}] transform [${action.transformType}]: ${err}`
-              );
-              errorCount++;
-              allResults.push({
-                id: definition.id,
-                success: false,
-                error: err instanceof Error ? err.message : String(err),
-              });
-            }
-          }
-        });
-      })
+      repairActionsGroup.map((actionGroup) =>
+        limiter(() =>
+          this.executeRepairActionsGroup(actionGroup).then((result) => {
+            allResults.push({
+              id: actionGroup.slo.id,
+              results: result,
+            });
+          })
+        )
+      )
     );
 
-    this.logger.debug(
-      `Repairs completed: ${successCount} successful repairs, ${errorCount} errors`
-    );
     return allResults;
   }
 
-  private identifyRepairActions(healthData: SLOHealth, enabled: boolean): RepairAction[] {
-    const actions: RepairAction[] = [];
-
+  private identifyRepairActionsGroup(
+    healthData: SLOHealth,
+    slo: SLODefinition
+  ): RepairActionsGroup {
+    const group: RepairActionsGroup = { slo, actions: [] };
     const { health } = healthData;
 
     if (health.rollup.missing) {
-      actions.push({
-        action: 'recreate-transform',
+      group.actions.push({
+        type: 'recreate-transform',
         transformType: 'rollup',
-        enabled,
       });
     } else if (health.rollup.stateMatches === false) {
-      actions.push({
-        action: enabled ? 'start-transform' : 'stop-transform',
+      group.actions.push({
+        type: slo.enabled ? 'start-transform' : 'stop-transform',
         transformType: 'rollup',
-        enabled,
       });
     }
 
     if (health.summary.missing) {
-      actions.push({
-        action: 'recreate-transform',
+      group.actions.push({
+        type: 'recreate-transform',
         transformType: 'summary',
-        enabled,
       });
     } else if (health.summary.stateMatches === false) {
-      actions.push({
-        action: enabled ? 'start-transform' : 'stop-transform',
+      group.actions.push({
+        type: slo.enabled ? 'start-transform' : 'stop-transform',
         transformType: 'summary',
-        enabled,
       });
     }
 
-    return actions;
+    return group;
   }
 
-  private async executeRepairAction(
-    action: RepairAction,
-    slo: SLODefinition,
-    transformManager: DefaultTransformManager,
-    summaryTransformManager: DefaultSummaryTransformManager
-  ): Promise<void> {
+  private async executeRepairActionsGroup(
+    group: RepairActionsGroup
+  ): Promise<RepairActionResult[]> {
+    const { slo, actions } = group;
+    return Promise.all(
+      actions.map((action) =>
+        this.executeRepairAction(action, slo)
+          .then(() => ({
+            action,
+            status: 'success' as const,
+          }))
+          .catch((error) => ({
+            action,
+            status: 'failure' as const,
+            error,
+          }))
+      )
+    );
+  }
+
+  private async executeRepairAction(action: RepairAction, slo: SLODefinition): Promise<void> {
     const transformId =
       action.transformType === 'rollup'
         ? getSLOTransformId(slo.id, slo.revision)
         : getSLOSummaryTransformId(slo.id, slo.revision);
 
-    const manager = action.transformType === 'rollup' ? transformManager : summaryTransformManager;
+    const manager =
+      action.transformType === 'rollup' ? this.transformManager : this.summaryTransformManager;
 
-    switch (action.action) {
+    switch (action.type) {
       case 'recreate-transform':
         this.logger.debug(
           `Recreating ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
         await manager.install(slo);
-        if (action.enabled) {
-          return manager.start(transformId);
+        if (!slo.enabled) {
+          return manager.stop(transformId);
         }
-        // For disabled SLOs, ensure the transform is stopped after recreation
-        return manager.stop(transformId);
 
+        return manager.start(transformId);
       case 'start-transform':
         this.logger.debug(
           `Starting ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`

@@ -8,7 +8,6 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { RepairResult } from '@kbn/slo-schema';
 
 import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
