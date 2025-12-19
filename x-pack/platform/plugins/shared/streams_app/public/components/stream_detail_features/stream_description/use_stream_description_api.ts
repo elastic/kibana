@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { firstValueFrom } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
-import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -21,14 +21,15 @@ import { useTimefilter } from '../../../hooks/use_timefilter';
 export const useStreamDescriptionApi = ({
   definition,
   refreshDefinition,
+  aiFeatures,
 }: {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
+  aiFeatures: AIFeatures | null;
 }) => {
   const { signal } = useAbortController();
 
   const updateStream = useUpdateStreams(definition.stream.name);
-  const aiFeatures = useAIFeatures();
 
   const {
     core: { notifications },
