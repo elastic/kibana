@@ -72,7 +72,7 @@ async function handleFunctionParameterContext(
   }
 
   // Try exclusive suggestions first (COUNT(*), enum values)
-  const exclusiveSuggestions = await tryExclusiveSuggestions(functionParamContext, ctx);
+  const exclusiveSuggestions = tryExclusiveSuggestions(functionParamContext, ctx);
 
   if (exclusiveSuggestions.length > 0) {
     return exclusiveSuggestions;
@@ -83,10 +83,10 @@ async function handleFunctionParameterContext(
 }
 
 /** Try suggestions that are exclusive (if present, return only these) */
-async function tryExclusiveSuggestions(
+function tryExclusiveSuggestions(
   functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
-): Promise<ISuggestionItem[]> {
+): ISuggestionItem[] {
   const { functionDefinition, paramDefinitions } = functionParamContext;
   const { options } = ctx;
 
@@ -102,7 +102,7 @@ async function tryExclusiveSuggestions(
   }
 
   // Some parameters suggests special values that are deduced from the hints object provided by ES.
-  const itemsFromHints = await buildSuggestionsFromHints(paramDefinitions, ctx);
+  const itemsFromHints = buildSuggestionsFromHints(paramDefinitions, ctx);
   if (itemsFromHints.length > 0) {
     return itemsFromHints;
   }
@@ -381,10 +381,10 @@ function buildEnumValueSuggestions(
   });
 }
 
-async function buildSuggestionsFromHints(
+function buildSuggestionsFromHints(
   paramDefinitions: FunctionParameter[],
   ctx: ExpressionContext
-): Promise<ISuggestionItem[]> {
+): ISuggestionItem[] {
   // Keep the hints that are unique by entityType + constraints
   const hints: ParameterHint[] = uniqWith(
     paramDefinitions.flatMap(({ hint }) => hint ?? []),
