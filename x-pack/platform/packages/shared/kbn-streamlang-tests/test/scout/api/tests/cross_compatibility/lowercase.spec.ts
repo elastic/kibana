@@ -35,11 +35,11 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
         },
       ];
 
-      await testBed.ingest('ingest-e2e-test-drop-basic', docs, processors);
-      const ingestResult = await testBed.getDocs('ingest-e2e-test-drop-basic');
+      await testBed.ingest('ingest-e2e-test-lowercase-basic', docs, processors);
+      const ingestResult = await testBed.getDocs('ingest-e2e-test-lowercase-basic');
 
-      await testBed.ingest('esql-e2e-test-drop-basic', docs);
-      const esqlResult = await esql.queryOnIndex('esql-e2e-test-drop-basic', query);
+      await testBed.ingest('esql-e2e-test-lowercase-basic', docs);
+      const esqlResult = await esql.queryOnIndex('esql-e2e-test-lowercase-basic', query);
 
       expect(ingestResult).toHaveLength(2);
       expect(ingestResult[0]).toHaveProperty('message', 'test message 1');
@@ -66,11 +66,11 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
     const { query } = transpileEsql(streamlangDSL);
 
     const docs = [{ message: 'TEST MESSAGE 1' }, { message: 'TEST MESSAGE 2' }];
-    await testBed.ingest('ingest-e2e-test-drop-basic', docs, processors);
-    const ingestResult = await testBed.getDocs('ingest-e2e-test-drop-basic');
+    await testBed.ingest('ingest-e2e-test-lowercase-basic', docs, processors);
+    const ingestResult = await testBed.getDocs('ingest-e2e-test-lowercase-basic');
 
-    await testBed.ingest('esql-e2e-test-drop-basic', docs);
-    const esqlResult = await esql.queryOnIndex('esql-e2e-test-drop-basic', query);
+    await testBed.ingest('esql-e2e-test-lowercase-basic', docs);
+    const esqlResult = await esql.queryOnIndex('esql-e2e-test-lowercase-basic', query);
 
     expect(ingestResult).toHaveLength(2);
     expect(ingestResult[0]).toHaveProperty('message_lowercase', 'test message 1');
@@ -102,11 +102,11 @@ apiTest.describe('Cross-compatibility - Lowercase Processor', { tag: ['@ess', '@
       { message: 'TEST MESSAGE 1', should_lowercase: 'yes' },
       { message: 'TEST MESSAGE 2', should_lowercase: 'no' },
     ];
-    await testBed.ingest('ingest-e2e-test-drop-basic', docs, processors);
-    const ingestResult = await testBed.getDocs('ingest-e2e-test-drop-basic');
+    await testBed.ingest('ingest-e2e-test-lowercase-basic', docs, processors);
+    const ingestResult = await testBed.getDocs('ingest-e2e-test-lowercase-basic');
 
-    await testBed.ingest('esql-e2e-test-drop-basic', docs);
-    const esqlResult = await esql.queryOnIndex('esql-e2e-test-drop-basic', query);
+    await testBed.ingest('esql-e2e-test-lowercase-basic', docs);
+    const esqlResult = await esql.queryOnIndex('esql-e2e-test-lowercase-basic', query);
 
     expect(ingestResult).toHaveLength(2);
     expect(ingestResult[0]).toHaveProperty('message', 'test message 1');
