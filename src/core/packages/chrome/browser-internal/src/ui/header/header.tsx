@@ -17,8 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
-import React, { createRef, useState, useLayoutEffect } from 'react';
+import React, { createRef, useState, useMemo } from 'react';
 import type { Observable } from 'rxjs';
+import { map, EMPTY } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
@@ -76,7 +78,7 @@ export interface HeaderProps {
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
   isFixed: boolean;
-  appMenu$?: Observable<AppMenuConfig | undefined>;
+  appMenu$: Observable<AppMenuConfig | undefined>;
 }
 
 export function Header({
@@ -95,17 +97,16 @@ export function Header({
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
-  const [hasBetaConfig, setHasBetaConfig] = useState(false);
   const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
 
-  useLayoutEffect(() => {
-    if (observables.appMenu$) {
-      const subscription = observables.appMenu$.subscribe((config) => {
-        setHasBetaConfig(!!config && !!config.items && config.items.length > 0);
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [observables.appMenu$]);
+  const hasBeta$ = useMemo(
+    () =>
+      observables.appMenu$?.pipe(
+        map((config) => !!config && !!config.items && config.items.length > 0)
+      ) ?? EMPTY,
+    [observables.appMenu$]
+  );
+  const hasBetaConfig = useObservable(hasBeta$, false);
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');

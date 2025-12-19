@@ -8,10 +8,12 @@
  */
 
 import type { Observable } from 'rxjs';
+import { map, EMPTY } from 'rxjs';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import React, { useMemo, useLayoutEffect, useState } from 'react';
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { HeaderAppMenu } from '../header/header_app_menu';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
@@ -19,7 +21,7 @@ import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_a
 interface AppMenuBarProps {
   // TODO: get rid of observable
   appMenuActions$?: Observable<MountPoint | undefined> | null;
-  appMenu$?: Observable<AppMenuConfig | undefined> | null;
+  appMenu$: Observable<AppMenuConfig | undefined>;
 
   /**
    * Whether the menu bar should be fixed (sticky) or static.
@@ -59,20 +61,18 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   }, [euiTheme]);
 
 export const AppMenuBar = ({ appMenuActions$, appMenu$, isFixed = true }: AppMenuBarProps) => {
-  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$!);
+  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$ ?? EMPTY);
   const { euiTheme } = useEuiTheme();
-  const [hasBetaConfig, setHasBetaConfig] = useState(false);
 
   const styles = useAppMenuBarStyles(euiTheme);
 
-  useLayoutEffect(() => {
-    if (appMenu$) {
-      const subscription = appMenu$.subscribe((config) => {
-        setHasBetaConfig(!!config && !!config.items && config.items.length > 0);
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [appMenu$]);
+  const hasBeta$ = useMemo(
+    () =>
+      appMenu$?.pipe(map((config) => !!config && !!config.items && config.items.length > 0)) ??
+      EMPTY,
+    [appMenu$]
+  );
+  const hasBetaConfig = useObservable(hasBeta$, false);
 
   if (!headerActionMenuMounter.mount && !hasBetaConfig) return null;
 

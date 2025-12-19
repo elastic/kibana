@@ -8,8 +8,9 @@
  */
 
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import React, { lazy, Suspense, useLayoutEffect, useState } from 'react';
+import React, { lazy, Suspense } from 'react';
 import type { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
 const AppMenu = lazy(async () => {
   const { AppMenuComponent } = await import('@kbn/core-chrome-app-menu-components');
@@ -17,20 +18,11 @@ const AppMenu = lazy(async () => {
 });
 
 interface Props {
-  config?: Observable<AppMenuConfig | undefined> | null;
+  config: Observable<AppMenuConfig | undefined>;
 }
 
 export const HeaderAppMenu = ({ config }: Props) => {
-  const [menuConfig, setMenuConfig] = useState<AppMenuConfig | undefined>(undefined);
-
-  useLayoutEffect(() => {
-    if (config) {
-      const subscription = config.subscribe((value) => {
-        setMenuConfig(value);
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [config]);
+  const menuConfig = useObservable(config, undefined);
 
   if (menuConfig) {
     return (
