@@ -10,10 +10,7 @@ import { createSelector } from 'reselect';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { SimulationContext } from './types';
-import {
-  collectActiveDocumentsForSelectedCondition,
-  getFilterSimulationDocumentsFn,
-} from './utils';
+import { getFilterSimulationDocumentsFn } from './utils';
 
 /**
  * Selects the simulated documents with applied filtering by
@@ -36,7 +33,10 @@ export const selectPreviewRecords = createSelector(
           doc.processed_by?.includes(selectedConditionId) ?? false
       : (_doc: (typeof documents)[number]) => true;
 
-    return documents.filter(conditionFilterFn).filter(filterFn).map((doc) => doc.value);
+    return documents
+      .filter(conditionFilterFn)
+      .filter(filterFn)
+      .map((doc) => doc.value);
   }
 );
 

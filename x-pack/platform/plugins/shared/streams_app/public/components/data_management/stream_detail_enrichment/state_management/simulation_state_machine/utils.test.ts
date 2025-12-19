@@ -86,9 +86,7 @@ describe('Simulation utils', () => {
     ] as unknown as Simulation['documents'];
 
     it('returns all documents when no condition is selected', () => {
-      expect(collectActiveDocumentsForSelectedCondition(documents, undefined)).toEqual(
-        documents
-      );
+      expect(collectActiveDocumentsForSelectedCondition(documents, undefined)).toEqual(documents);
     });
 
     it('returns only documents touched by processors in the selected condition', () => {

@@ -65,7 +65,7 @@ export const simulationMachine = setup({
     storeSimulation: assign(({ context }, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
       baseSimulation: context.selectedConditionId
-        ? (context.baseSimulation ?? params.simulation)
+        ? context.baseSimulation ?? params.simulation
         : params.simulation,
     })),
     storeExplicitlyEnabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
