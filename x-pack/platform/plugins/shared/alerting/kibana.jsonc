@@ -20,9 +20,7 @@
       "kibanaUtils",
       "licensing",
       "taskManager",
-      "kibanaReact",
       "management",
-      "esUiShared",
       "unifiedSearch",
       "embeddable"
     ],
@@ -34,7 +32,6 @@
       "serverless",
       "maintenanceWindows"
     ],
-    "requiredBundles": ["maintenanceWindows"],
     "extraPublicDirs": ["common", "common/parse_duration"]
   }
 }
