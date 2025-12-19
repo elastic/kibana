@@ -24,7 +24,7 @@ export const ConfigSchema = z.object({
  */
 export const InputSchema = z.object({
   input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
-  instructions: z.array(z.string()).optional(),
+  instructions: z.string().optional(),
   maxLength: z.number().int().positive().optional(),
   temperature: z.number().min(0).max(1).optional(),
 });

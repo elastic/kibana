@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import type { MessageFieldWithRole } from '@langchain/core/messages';
 import type { CoreSetup } from '@kbn/core/server';
 import { resolveConnectorId } from './utils/resolve_connector_id';
@@ -15,46 +14,29 @@ import { AiSummarizeStepCommonDefinition } from '../../../common/steps/ai';
 import { createServerStepDefinition } from '../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../types';
 
-/**
- * Builds a summarization prompt based on the input type and optional parameters
- */
-export function buildModelInput(params: {
-  input: unknown;
-  instructions?: string[];
-  maxLength?: number;
-}): BaseLanguageModelInput {
-  const { input, instructions, maxLength } = params;
-  const inputType = typeof input === 'object' ? 'json' : 'text';
-  let resolvedInput = input;
-
-  if (inputType === 'json') {
-    resolvedInput = JSON.stringify(input);
-  }
-
-  const modelInput: MessageFieldWithRole[] = [
+export function buildSystemPart(): MessageFieldWithRole[] {
+  return [
     {
       role: 'system',
       content: `
-You are a summarization system, that:
-- Follows summary requirements if present provided by the user
-- Respects additional instructions provided by the user
-- Outputs summary for provided data
-- Doesn't include anything additional to summary 
-`,
-    },
-    {
-      role: 'user',
-      content: `
-# Data to summarize:
-\`\`\`${inputType}
-${resolvedInput}
-\`\`\`
-# Requirements:  
-`,
+You are a specialized summarization engine that produces concise, factual summaries.
+
+CRITICAL RULES:
+- Output ONLY the summary text itself
+- Do NOT include any preambles, introductions, or phrases like "Here is the summary:", "Based on the data:", "The summary is:", etc.
+- Do NOT engage in conversation or ask questions
+- Do NOT add explanations, commentary, or meta-statements about the summary
+- Do NOT use markdown formatting unless explicitly instructed
+- Do NOT start responses with conversational phrases
+- If you cannot summarize, output only: "Unable to generate summary"
+
+Your response must be the raw summary text with no additional content.`,
     },
   ];
+}
 
-  let requirementsPart = '';
+export function buildRequirementsPart(params: { maxLength?: number }): MessageFieldWithRole[] {
+  const { maxLength } = params;
   const summaryRequirements: string[] = [];
 
   if (typeof maxLength === 'number') {
@@ -62,29 +44,55 @@ ${resolvedInput}
   }
 
   if (summaryRequirements.length) {
-    requirementsPart += `
+    return [
+      {
+        role: 'user',
+        content: `
+# Requirements:
 ${summaryRequirements.map((req) => `- ${req}`).join('\n')}
-`;
+`,
+      },
+    ];
   }
 
-  if (requirementsPart) {
-    modelInput.push({
+  return [];
+}
+
+export function buildDataPart(input: unknown): MessageFieldWithRole[] {
+  const inputType = typeof input === 'object' ? 'json' : 'text';
+  let resolvedInput = input;
+
+  if (inputType === 'json') {
+    resolvedInput = JSON.stringify(input);
+  }
+
+  return [
+    {
       role: 'user',
-      content: requirementsPart,
-    });
+      content: `
+# Data to summarize:
+\`\`\`${inputType}
+${resolvedInput}
+\`\`\`
+`,
+    },
+  ];
+}
+
+export function buildInstructionsPart(instructions: string | undefined): MessageFieldWithRole[] {
+  if (!instructions) {
+    return [];
   }
 
-  if (instructions?.length) {
-    modelInput.push({
+  return [
+    {
       role: 'user',
       content: `
 # Additional instructions:
-${instructions.map((text) => `- ${text}`).join('\n')}
-        `,
-    });
-  }
-
-  return modelInput;
+${instructions}
+`,
+    },
+  ];
 }
 
 export const aiSummarizeStepDefinition = (
@@ -110,11 +118,12 @@ export const aiSummarizeStepDefinition = (
         },
       });
 
-      const modelInput = buildModelInput({
-        input: context.input.input,
-        instructions: context.input.instructions,
-        maxLength: context.input.maxLength,
-      });
+      const modelInput: MessageFieldWithRole[] = [
+        ...buildSystemPart(),
+        ...buildDataPart(context.input.input),
+        ...buildRequirementsPart({ maxLength: context.input.maxLength }),
+        ...buildInstructionsPart(context.input.instructions),
+      ];
 
       const modelResponse = await chatModel.invoke(modelInput, {
         signal: context.abortSignal,
