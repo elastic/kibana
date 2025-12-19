@@ -63,7 +63,7 @@ export const aiPromptStepDefinition = (
         return {
           // We modify the output to match the expected schema
           // For now, structured output flow does not output response_metadata,
-          // so we only return the response here, but looking ahead we might have response_metadata returned,
+          // so we only return the content here, but looking ahead we might have response_metadata returned,
           // so we keep the same output structure with potential response_metadata addition in the future.
           output: {
             content: modelResponse.response,
