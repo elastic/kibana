@@ -12,7 +12,7 @@ import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { useLocation, useParams } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';

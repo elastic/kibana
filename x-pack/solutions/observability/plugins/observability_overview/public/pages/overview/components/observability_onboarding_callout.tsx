@@ -19,11 +19,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback } from 'react';
-import type { ObservabilityPublicPluginsStart } from '../../../plugin';
+import type { ObservabilityOverviewPublicPluginsStart } from '../../../plugin';
 import { useObservabilityOnboarding } from '../../../hooks/use_observability_onboarding';
 
 export function ObservabilityOnboardingCallout() {
-  const { application, share } = useKibana<ObservabilityPublicPluginsStart>().services;
+  const { application, share } = useKibana<ObservabilityOverviewPublicPluginsStart>().services;
   const onboardingHref = share?.url.locators
     .get<ObservabilityOnboardingLocatorParams>('OBSERVABILITY_ONBOARDING_LOCATOR')
     ?.useUrl({ category: 'host' });

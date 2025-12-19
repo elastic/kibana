@@ -7,9 +7,9 @@
 
 import type { TimeBuckets } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
-import { getAbsoluteTime } from '../../../utils/date';
-import { getBucketSize } from '../../../utils/get_bucket_size';
 import { DEFAULT_INTERVAL } from '../../../constants';
+import { getAbsoluteTime } from './date';
+import { getBucketSize } from './get_bucket_size';
 
 export type BucketSize =
   | { bucketSize: number; intervalString: string; dateFormat: string }

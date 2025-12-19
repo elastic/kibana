@@ -54,7 +54,7 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { paths } from '../../../common/locators/paths';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import type { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';

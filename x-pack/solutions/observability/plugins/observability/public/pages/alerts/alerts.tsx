@@ -39,14 +39,14 @@ import {
   Provider,
   useAlertSearchBarStateContainer,
 } from '../../components/alert_search_bar/containers';
-import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
+import { calculateTimeRangeBucketSize } from './helpers/calculate_bucket_size';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { ALERTS_URL_STORAGE_KEY, observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import { getColumns } from '../../components/alerts_table/common/get_columns';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import type { RuleStatsState } from './components/rule_stats';
 import { renderRuleStats } from './components/rule_stats';

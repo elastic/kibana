@@ -36,7 +36,7 @@ import {
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
 import { useKibana } from '../../utils/kibana_react';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { HeaderActions } from './components/header_actions';
 import { NoRuleFoundPanel } from './components/no_rule_found_panel';

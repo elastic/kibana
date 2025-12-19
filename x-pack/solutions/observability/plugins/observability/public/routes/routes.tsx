@@ -8,13 +8,10 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AnnotationsPage } from '../pages/annotations/annotations';
-import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
 import { AlertDetails } from '../pages/alert_details/alert_details';
 import { CasesPage } from '../pages/cases/cases';
-import { LandingPage } from '../pages/landing/landing';
-import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import { RulePage } from '../pages/rules/rule';
@@ -39,7 +36,6 @@ import {
   RULES_LOGS_PATH,
   RULES_PATH,
 } from '../../common/locators/paths';
-import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -66,20 +62,14 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
 const completeRoutes = {
   [ROOT_PATH]: {
     handler: () => {
-      return <SimpleRedirect to={OVERVIEW_PATH} />;
+      return <SimpleRedirect to="/" redirectToApp="observability-overview-app" />;
     },
     params: {},
     exact: true,
   },
   [OVERVIEW_PATH]: {
     handler: () => {
-      return (
-        <HasDataContextProvider>
-          <DatePickerContextProvider>
-            <OverviewPage />
-          </DatePickerContextProvider>
-        </HasDataContextProvider>
-      );
+      return <SimpleRedirect to="/" redirectToApp="observability-overview-app" />;
     },
     params: {},
     exact: true,
@@ -111,9 +101,7 @@ const routes = {
   [LANDING_PATH]: {
     handler: () => {
       return (
-        <HasDataContextProvider>
-          <LandingPage />
-        </HasDataContextProvider>
+        <SimpleRedirect to="/app/observability/landing" redirectToApp="observability-overview" />
       );
     },
     params: {},

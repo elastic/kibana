@@ -15,7 +15,7 @@ import { AnnotationsList } from './annotations_list';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { paths } from '../../../common/locators/paths';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 
 export const ANNOTATIONS_PAGE_ID = 'annotations-container';
 

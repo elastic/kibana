@@ -49,9 +49,7 @@ export {
 } from '@kbn/deeplinks-observability';
 
 export type { RulesLocatorParams } from '@kbn/deeplinks-observability';
-export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
-export { DatePicker } from './pages/overview/components/date_picker';
 
 export type {
   Stat,
@@ -108,7 +106,6 @@ export { DatePickerContextProvider } from './context/date_picker_context/date_pi
 
 export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
-export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate_bucket_size';
 export type { render } from './utils/test_helper';
 
 export { convertTo } from '../common/utils/formatters/duration';

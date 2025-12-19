@@ -84,7 +84,6 @@ import {
   ALERTS_PATH,
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
-  OVERVIEW_PATH,
   RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
@@ -371,18 +370,6 @@ export class Plugin
             switchMap(([coreStart, pluginsStart]) => {
               const deepLinks = value(app)?.deepLinks ?? [];
 
-              const overviewLink = !Boolean(pluginsSetup.serverless)
-                ? [
-                    {
-                      label: i18n.translate('xpack.observability.overviewLinkTitle', {
-                        defaultMessage: 'Overview',
-                      }),
-                      app: observabilityAppId,
-                      path: OVERVIEW_PATH,
-                    },
-                  ]
-                : [];
-
               const isAiAssistantEnabled =
                 pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
@@ -452,13 +439,7 @@ export class Plugin
                     {
                       label: '',
                       sortKey: 100,
-                      entries: [
-                        ...overviewLink,
-                        ...alertsLink,
-                        ...sloLink,
-                        ...casesLink,
-                        ...aiAssistantLink,
-                      ],
+                      entries: [...alertsLink, ...sloLink, ...casesLink, ...aiAssistantLink],
                     },
                   ];
                 })

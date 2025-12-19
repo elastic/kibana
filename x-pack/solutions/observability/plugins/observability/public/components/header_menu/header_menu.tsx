@@ -11,8 +11,8 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { useKibana } from '../../../../utils/kibana_react';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { share, theme } = useKibana().services;

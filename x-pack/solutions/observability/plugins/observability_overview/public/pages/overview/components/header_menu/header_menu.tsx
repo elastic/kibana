@@ -33,7 +33,7 @@ export function HeaderMenu(): React.ReactElement | null {
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
             <EuiHeaderLink color="primary" href={href}>
-              {i18n.translate('xpack.observability.home.addData', {
+              {i18n.translate('xpack.observabilityOverview.home.addData', {
                 defaultMessage: 'Add data',
               })}
             </EuiHeaderLink>
