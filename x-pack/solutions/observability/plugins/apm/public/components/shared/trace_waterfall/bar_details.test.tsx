@@ -38,6 +38,13 @@ describe('BarDetails', () => {
     spanLinksCount: { incoming: 0, outgoing: 0 },
   } as unknown as TraceWaterfallItem;
 
+  it('renders icon', () => {
+    const { getByTestId } = render(
+      <BarDetails item={{ ...mockItem, icon: 'database' }} left={10} />
+    );
+    expect(getByTestId('apmBarDetailsIcon')).toBeInTheDocument();
+  });
+
   it('renders the span name and formatted duration', () => {
     const { getByText } = render(<BarDetails item={mockItem} left={10} />);
     expect(getByText('Test Span')).toBeInTheDocument();
