@@ -37,6 +37,7 @@ export interface Props {
   showLegend?: boolean;
   serviceName?: string;
   isFiltered?: boolean;
+  agentMarks?: Record<string, number>;
 }
 
 export function TraceWaterfall({
@@ -52,6 +53,7 @@ export function TraceWaterfall({
   showLegend = false,
   serviceName,
   isFiltered,
+  agentMarks,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -67,6 +69,7 @@ export function TraceWaterfall({
       serviceName={serviceName}
       isFiltered={isFiltered}
       errors={errors}
+      agentMarks={agentMarks}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -89,7 +92,12 @@ function TraceWaterfallComponent() {
     showAccordion,
     isAccordionOpen,
     toggleAllAccordions,
+    agentMarks,
   } = useTraceWaterfallContext();
+
+  const marks = useMemo(() => {
+    return [...agentMarks, ...errorMarks];
+  }, [agentMarks, errorMarks]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -122,7 +130,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
-              marks={errorMarks}
+              marks={marks}
             />
           </div>
           <VerticalLinesContainer
@@ -133,7 +141,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
-            marks={errorMarks}
+            marks={marks}
           />
           <div
             css={css`
