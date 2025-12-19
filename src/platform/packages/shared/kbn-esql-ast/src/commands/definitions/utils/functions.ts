@@ -254,15 +254,15 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const labels = [];
 
   if (fn.preview) {
-    labels.push(techPreviewLabel);
+    labels.push(`**[${techPreviewLabel}]**`);
   }
 
   if (fn.license) {
-    labels.push(fn.license);
+    labels.push(`**[${fn.license}]**`);
   }
 
   if (labels.length > 0) {
-    detail = `[${labels.join('] [')}] ${detail}`;
+    detail = `${labels} ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   const hasNoArguments = fn.signatures.every((sig) => sig.params.length === 0);
@@ -297,9 +297,9 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     text,
     asSnippet: true,
     kind: 'Function',
-    detail,
     documentation: {
       value: buildFunctionDocumentation(
+        detail,
         fullSignatures.map((sig, index) => ({
           declaration: sig.declaration,
           license:
