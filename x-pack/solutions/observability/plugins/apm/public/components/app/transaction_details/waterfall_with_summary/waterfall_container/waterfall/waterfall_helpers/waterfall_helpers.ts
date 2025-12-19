@@ -565,7 +565,7 @@ function getChildren({
   waterfallItemId: string;
   waterfall: IWaterfall;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
   rootId: string;
@@ -587,7 +587,7 @@ function buildTree({
   waterfall: IWaterfall;
   maxLevelOpen: number;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
 }) {
@@ -655,7 +655,7 @@ export function buildTraceTree({
   maxLevelOpen: number;
   isOpen: boolean;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
 }): IWaterfallNode | null {
@@ -711,7 +711,7 @@ export const updateTraceTreeNode = ({
   updatedNode: IWaterfallNodeFlatten;
   waterfall: IWaterfall;
   path: {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
   };
 }) => {

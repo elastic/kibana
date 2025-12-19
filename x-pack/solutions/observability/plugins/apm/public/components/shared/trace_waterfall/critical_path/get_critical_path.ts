@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CriticalPath, CriticalPathItemLike, CriticalPathSegment } from './types';
+import type { CriticalPath, CriticalPathBase, CriticalPathSegment } from './types';
 
-export function getCriticalPath<T extends CriticalPathItemLike>(
+export function getCriticalPath<T extends CriticalPathBase>(
   root: T | undefined,
   childrenByParentId: Record<string, T[]>
 ): CriticalPath<T> {

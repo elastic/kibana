@@ -17,6 +17,7 @@ import type {
   IWaterfall,
   IWaterfallNode,
   IWaterfallNodeFlatten,
+  IWaterfallSpanOrTransaction,
 } from '../waterfall_helpers/waterfall_helpers';
 import {
   buildTraceTree,
@@ -34,7 +35,7 @@ export interface WaterfallContextProps {
 
 export const WaterfallContext = React.createContext<
   {
-    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>;
     showCriticalPath: boolean;
     traceList: IWaterfallNodeFlatten[];
     getErrorCount: (waterfallItemId: string) => number;
@@ -42,7 +43,7 @@ export const WaterfallContext = React.createContext<
     isEmbeddable: boolean;
   } & Pick<WaterfallContextProps, 'showCriticalPath'>
 >({
-  criticalPathSegmentsById: {} as Dictionary<CriticalPathSegment[]>,
+  criticalPathSegmentsById: {} as Dictionary<CriticalPathSegment<IWaterfallSpanOrTransaction>[]>,
   showCriticalPath: false,
   traceList: [],
   getErrorCount: () => 0,
