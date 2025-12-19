@@ -75,6 +75,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           }
         `}
       >
+        {item.icon && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem
           grow={false}
           css={css`
