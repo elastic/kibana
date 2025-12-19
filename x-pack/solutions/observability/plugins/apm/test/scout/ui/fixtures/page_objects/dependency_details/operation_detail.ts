@@ -11,15 +11,15 @@ import { testData } from '../..';
 import { waitForChartToLoad } from '../utils';
 
 export class OperationDetailSubpage {
-  readonly breadcrumb: Locator;
-  readonly latencyChart: Locator;
-  readonly throughputChart: Locator;
-  readonly failedTransactionRateChart: Locator;
-  readonly correlationsChart: Locator;
-  readonly waterfallInvestigateButton: Locator;
-  readonly waterfallInvestigatePopup: Locator;
-  readonly waterfallPaginationLastButton: Locator;
-  readonly waterfallSpanLinksBadge: Locator;
+  public readonly breadcrumb: Locator;
+  public readonly latencyChart: Locator;
+  public readonly throughputChart: Locator;
+  public readonly failedTransactionRateChart: Locator;
+  public readonly correlationsChart: Locator;
+  public readonly waterfallInvestigateButton: Locator;
+  public readonly waterfallInvestigatePopup: Locator;
+  public readonly waterfallPaginationLastButton: Locator;
+  public readonly waterfallSpanLinksBadge: Locator;
 
   constructor(
     private readonly page: ScoutPage,

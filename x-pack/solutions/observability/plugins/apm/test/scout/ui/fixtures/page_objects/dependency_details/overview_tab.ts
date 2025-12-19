@@ -15,10 +15,10 @@ export class OverviewTab extends DependencyDetailsTab {
   public readonly tabName: DependencyDetailsPageTabName = 'overview';
   public readonly tab: Locator;
 
-  readonly latencyChart: Locator;
-  readonly throughputChart: Locator;
-  readonly failedTransactionRateChart: Locator;
-  readonly upstreamServicesTable: Locator;
+  public readonly latencyChart: Locator;
+  public readonly throughputChart: Locator;
+  public readonly failedTransactionRateChart: Locator;
+  public readonly upstreamServicesTable: Locator;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultDependencyName: string) {
     super(page, kbnUrl, defaultDependencyName);

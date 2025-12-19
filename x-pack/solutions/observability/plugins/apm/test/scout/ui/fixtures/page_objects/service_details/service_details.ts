@@ -10,7 +10,7 @@ import { testData } from '../..';
 import { DependenciesTab } from './dependencies_tab';
 
 export class ServiceDetailsPage {
-  readonly SERVICE_NAME = 'opbeans-java';
+  public readonly SERVICE_NAME = 'opbeans-java';
 
   public readonly dependenciesTab: DependenciesTab;
 
@@ -23,7 +23,9 @@ export class ServiceDetailsPage {
     );
   }
 
-  async goToPage(overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}) {
+  public async goToPage(
+    overrides: { serviceName?: string; rangeFrom?: string; rangeTo?: string } = {}
+  ) {
     const urlServiceName = encodeURIComponent(overrides.serviceName ?? this.SERVICE_NAME);
 
     await this.page.goto(

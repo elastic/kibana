@@ -12,8 +12,8 @@ import { OperationsTab } from './operations_tab';
 import { OperationDetailSubpage } from './operation_detail';
 
 export class DependencyDetailsPage {
-  readonly DEPENDENCY_NAME = 'postgresql';
-  readonly SPAN_NAME = 'SELECT * FROM product';
+  public readonly DEPENDENCY_NAME = 'postgresql';
+  public readonly SPAN_NAME = 'SELECT * FROM product';
 
   public readonly overviewTab: OverviewTab;
   public readonly operationsTab: OperationsTab;
@@ -41,7 +41,11 @@ export class DependencyDetailsPage {
     );
   }
 
-  async goToPage(overrides?: { dependencyName?: string; rangeFrom?: string; rangeTo?: string }) {
+  public async goToPage(overrides?: {
+    dependencyName?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+  }) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies?${new URLSearchParams({
         dependencyName: this.DEPENDENCY_NAME,

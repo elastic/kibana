@@ -15,7 +15,7 @@ export class OperationsTab extends DependencyDetailsTab {
   public readonly tabName: DependencyDetailsPageTabName = 'operations';
   public readonly tab: Locator;
 
-  readonly operationsTable: Locator;
+  public readonly operationsTable: Locator;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultDependencyName: string) {
     super(page, kbnUrl, defaultDependencyName);
