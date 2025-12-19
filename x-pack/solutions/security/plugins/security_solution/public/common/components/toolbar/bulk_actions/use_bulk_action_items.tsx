@@ -24,6 +24,7 @@ import type { AlertWorkflowStatus } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useBulkAlertClosingReasonItems } from './use_bulk_alert_closing_reason_items';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -51,6 +52,7 @@ export const useBulkActionItems = ({
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
@@ -160,7 +162,7 @@ export const useBulkActionItems = ({
 
   const items = useMemo(() => {
     const actionItems: AlertTableContextMenuItem[] = [];
-    if (showAlertStatusActions) {
+    if (showAlertStatusActions && hasAlertsAll) {
       if (currentStatus !== FILTER_OPEN) {
         actionItems.push({
           key: 'open',
@@ -204,6 +206,7 @@ export const useBulkActionItems = ({
 
     return [...actionItems, ...additionalItems];
   }, [
+    hasAlertsAll,
     alertClosingReasonItem,
     currentStatus,
     customBulkActions,

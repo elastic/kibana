@@ -23,6 +23,7 @@ import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { TakeAction } from '.';
 
 const defaultAgentBuilderAvailability = {
@@ -73,6 +74,10 @@ jest.mock('../../utils/is_attack_discovery_alert', () => ({
     ad?.alertWorkflowStatus !== undefined,
 }));
 
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
 
@@ -122,6 +127,8 @@ describe('TakeAction', () => {
     mockUseAssistantAvailability.mockReturnValue({
       hasSearchAILakeConfigurations: false, // EASE is not configured
     });
+
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
   });
 
   it('renders the Add to new case action', () => {
@@ -608,6 +615,41 @@ describe('TakeAction', () => {
       const viewInAiAssistantButton = screen.getByTestId('viewInAiAssistant');
 
       expect(viewInAiAssistantButton).toBeDisabled();
+    });
+  });
+
+  describe('when the user does not have alert edit privileges', () => {
+    beforeEach(() => {
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
+    });
+
+    it('does not render mark as open action', () => {
+      const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'closed', id: 'id1' };
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
+        </TestProviders>
+      );
+
+      openPopover();
+
+      expect(screen.queryByTestId('markAsOpen')).not.toBeInTheDocument();
+    });
+
+    it('does not render mark as closed/acknowledged action', () => {
+      const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'open', id: 'id1' };
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
+        </TestProviders>
+      );
+
+      openPopover();
+
+      expect(screen.queryByTestId('markAsAcknowledged')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('markAsClosed')).not.toBeInTheDocument();
     });
   });
 });

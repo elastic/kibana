@@ -37,6 +37,7 @@ import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
@@ -76,6 +77,8 @@ const TakeActionComponent: React.FC<Props> = ({
   const { onAddToExistingCase } = useAddToExistingCase({
     canUserCreateAndReadCases,
   });
+
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   // boilerplate for the take action popover:
   const takeActionContextMenuPopoverId = useGeneratedHtmlId({
@@ -325,44 +328,47 @@ const TakeActionComponent: React.FC<Props> = ({
     const isAcknowledged = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'acknowledged';
     const isClosed = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'closed';
 
-    const markAsOpenItem = !isOpen
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsOpen"
-            key="markAsOpen"
-            onClick={() => onUpdateWorkflowStatus('open')}
-          >
-            {i18n.MARK_AS_OPEN}
-          </EuiContextMenuItem>,
-        ]
-      : [];
+    const markAsOpenItem =
+      !isOpen && hasAlertsAll
+        ? [
+            <EuiContextMenuItem
+              data-test-subj="markAsOpen"
+              key="markAsOpen"
+              onClick={() => onUpdateWorkflowStatus('open')}
+            >
+              {i18n.MARK_AS_OPEN}
+            </EuiContextMenuItem>,
+          ]
+        : [];
 
-    const markAsAcknowledgedItem = !isAcknowledged
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsAcknowledged"
-            key="markAsAcknowledged"
-            onClick={() => onUpdateWorkflowStatus('acknowledged')}
-          >
-            {i18n.MARK_AS_ACKNOWLEDGED}
-          </EuiContextMenuItem>,
-        ]
-      : [];
+    const markAsAcknowledgedItem =
+      !isAcknowledged && hasAlertsAll
+        ? [
+            <EuiContextMenuItem
+              data-test-subj="markAsAcknowledged"
+              key="markAsAcknowledged"
+              onClick={() => onUpdateWorkflowStatus('acknowledged')}
+            >
+              {i18n.MARK_AS_ACKNOWLEDGED}
+            </EuiContextMenuItem>,
+          ]
+        : [];
 
-    const markAsClosedItem = !isClosed
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="markAsClosed"
-            key="markAsClosed"
-            onClick={() => onUpdateWorkflowStatus('closed')}
-          >
-            {i18n.MARK_AS_CLOSED}
-          </EuiContextMenuItem>,
-        ]
-      : [];
+    const markAsClosedItem =
+      !isClosed && hasAlertsAll
+        ? [
+            <EuiContextMenuItem
+              data-test-subj="markAsClosed"
+              key="markAsClosed"
+              onClick={() => onUpdateWorkflowStatus('closed')}
+            >
+              {i18n.MARK_AS_CLOSED}
+            </EuiContextMenuItem>,
+          ]
+        : [];
 
     return [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem, ...items].flat();
-  }, [attackDiscoveries, items, onUpdateWorkflowStatus]);
+  }, [attackDiscoveries, items, onUpdateWorkflowStatus, hasAlertsAll]);
 
   const onCloseOrCancel = useCallback(() => {
     setPendingAction(null);

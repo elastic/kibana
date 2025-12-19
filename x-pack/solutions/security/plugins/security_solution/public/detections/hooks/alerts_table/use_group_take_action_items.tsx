@@ -38,6 +38,7 @@ import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/teleme
 import type { StartServices } from '../../../types';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
 import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 const getTelemetryEvent = {
   groupedAlertsTakeAction: ({
@@ -78,6 +79,7 @@ export const useGroupTakeActionsItems = ({
   const {
     services: { telemetry },
   } = useKibana<StartServices>();
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
 
@@ -206,7 +208,7 @@ export const useGroupTakeActionsItems = ({
     ({ query, tableId, groupNumber, selectedGroup }) => {
       const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-      if (!showAlertStatusActions) {
+      if (!hasAlertsAll ||!showAlertStatusActions) {
         return;
       }
 
@@ -335,6 +337,7 @@ export const useGroupTakeActionsItems = ({
       getAlertClosingReasonPanels,
       onClickUpdate,
       showAlertStatusActions,
+      hasAlertsAll,
     ]
   );
 };

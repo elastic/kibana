@@ -73,7 +73,7 @@ describe('useBulkAlertAssigneesItems', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: true });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
@@ -231,7 +231,7 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should return 0 items for the VIEWER role', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: false });
 
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,

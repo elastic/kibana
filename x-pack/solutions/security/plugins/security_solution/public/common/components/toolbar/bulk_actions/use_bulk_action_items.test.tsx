@@ -9,18 +9,17 @@ import { renderHook } from '@testing-library/react';
 import type { BulkActionsProps } from './use_bulk_action_items';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../hooks/use_app_toasts');
 jest.mock('../../../lib/kibana');
-jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
-  })
-);
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
+
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+
 (useAppToasts as jest.Mock).mockReturnValue({
   addSuccess: jest.fn(),
   addError: jest.fn(),
@@ -38,18 +37,25 @@ function renderUseBulkActionItems(props?: Partial<BulkActionsProps>) {
 }
 
 describe('useBulkActionItems', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
+  });
+
   it('should return "mark as open" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
       result.current.items.find((item) => item['data-test-subj'] === 'open-alert-status')
     ).not.toBeUndefined();
   });
+
   it('should return "mark as acknowledged" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
       result.current.items.find((item) => item['data-test-subj'] === 'acknowledged-alert-status')
     ).not.toBeUndefined();
   });
+
   it('should return "mark as closed" option by default', () => {
     const { result } = renderUseBulkActionItems();
     expect(
@@ -57,5 +63,23 @@ describe('useBulkActionItems', () => {
         (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
       )
     ).not.toBeUndefined();
+  });
+
+  it('should not return alert status actions when user does not have alerts privileges', () => {
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
+
+    const { result } = renderUseBulkActionItems();
+
+    expect(
+      result.current.items.find((item) => item['data-test-subj'] === 'open-alert-status')
+    ).toBeUndefined();
+    expect(
+      result.current.items.find((item) => item['data-test-subj'] === 'acknowledged-alert-status')
+    ).toBeUndefined();
+    expect(
+      result.current.items.find(
+        (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
+      )
+    ).toBeUndefined();
   });
 });

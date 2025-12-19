@@ -15,15 +15,13 @@ import type {
 import { useBulkAlertTagsItems } from './use_bulk_alert_tags_items';
 import { useSetAlertTags } from './use_set_alert_tags';
 import { useUiSetting$ } from '../../../lib/kibana';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('./use_set_alert_tags');
 jest.mock('../../../lib/kibana');
-jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
-  })
-);
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 const defaultProps: UseBulkAlertTagsItemsProps = {
   refetch: () => {},
@@ -50,10 +48,7 @@ describe('useBulkAlertTagsItems', () => {
   beforeEach(() => {
     (useSetAlertTags as jest.Mock).mockReturnValue(jest.fn());
     (useUiSetting$ as jest.Mock).mockReturnValue([['default-test-tag-1']]);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
   });
 
   it('should render alert tagging actions', () => {
@@ -100,5 +95,16 @@ describe('useBulkAlertTagsItems', () => {
       fireEvent.click(wrapper.getByTestId('alert-tags-update-button'));
     });
     expect(mockSetAlertTags).toHaveBeenCalled();
+  });
+
+  it('should return empty arrays when user does not have alerts privileges', () => {
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
+
+    const { result } = renderHook(() => useBulkAlertTagsItems(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.alertTagsItems.length).toEqual(0);
+    expect(result.current.alertTagsPanels.length).toEqual(0);
   });
 });
