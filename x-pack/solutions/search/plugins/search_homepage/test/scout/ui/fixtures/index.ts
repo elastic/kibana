@@ -27,7 +27,6 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     {
       pageObjects,
       page,
-      kbnUrl,
     }: {
       pageObjects: ExtendedScoutTestFixtures['pageObjects'];
       page: ExtendedScoutTestFixtures['page'];
@@ -37,7 +36,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      homepage: createLazyPageObject(Homepage, page, kbnUrl),
+      homepage: createLazyPageObject(Homepage, page),
     };
     await use(extendedPageObjects);
   },
