@@ -25,9 +25,8 @@ export interface SidebarAppButton {
   title?: string;
 }
 
-export interface SidebarComponentProps<TState> {
-  state: TState;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SidebarComponentProps<TState> {}
 export type SidebarComponentType<TState> = ComponentType<SidebarComponentProps<TState>>;
 
 /**

@@ -9,35 +9,35 @@
 
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow } from '@elastic/eui';
-import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
+import { useSidebarApp } from '@kbn/core-chrome-sidebar';
 
 export const tabSelectionAppId = 'sidebarExampleTabs';
-
-export interface TabSelectionProps {
-  state: TabSelectionSidebarState;
-}
 
 export interface TabSelectionSidebarState {
   selectedTab: string;
 }
 
-const useTabSelectionAppState = () => {
-  return useSidebarAppState<TabSelectionSidebarState>(tabSelectionAppId);
-};
-
 export const useTabSelectionSideBarApp = () => {
-  const { open } = useSidebar();
-  const [, { reset }] = useTabSelectionAppState();
+  const { open, setState, state } = useSidebarApp<TabSelectionSidebarState>(tabSelectionAppId);
   return {
-    open: () => open(tabSelectionAppId),
-    reset: () => reset(),
+    // business state
+    selectedTab: state.selectedTab,
+    // Awesome business logic goes here
+    openTab: (tab: string) => {
+      setState({ selectedTab: tab });
+      open();
+    },
+    open: () => {
+      open();
+    },
+    reset: () => {
+      setState({ selectedTab: 'overview' });
+    },
   };
 };
 
-export function TabSelectionApp(props: TabSelectionProps) {
-  const [state, { update }] = useTabSelectionAppState();
-
-  const selectedTab = state.selectedTab;
+export function TabSelectionApp() {
+  const { selectedTab, openTab } = useTabSelectionSideBarApp();
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -66,7 +66,7 @@ export function TabSelectionApp(props: TabSelectionProps) {
             label: tab.label,
           }))}
           idSelected={selectedTab}
-          onChange={(id) => update({ selectedTab: id })}
+          onChange={(id) => openTab(id)}
         />
       </EuiFormRow>
 

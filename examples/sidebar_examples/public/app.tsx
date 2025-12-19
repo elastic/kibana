@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useSidebar } from '@kbn/core-chrome-sidebar';
+import { useSidebar, useSidebarWidth } from '@kbn/core-chrome-sidebar';
 import React from 'react';
 import { useCounterSideBarApp } from './counter_app';
 import { useTextInputSideBarApp } from './text_input_app';
@@ -29,7 +29,8 @@ import { useTabSelectionSideBarApp } from './tab_selection_app';
 export interface Props {}
 
 export function App({}: Props) {
-  const { close, setWidth } = useSidebar();
+  const { close } = useSidebar();
+  const { setWidth } = useSidebarWidth();
   const { open: openCounterApp, reset: resetCounter } = useCounterSideBarApp();
   const { open: openTextInputApp, reset: resetTextInput } = useTextInputSideBarApp();
   const { open: openTabsApp, reset: resetTabs } = useTabSelectionSideBarApp();

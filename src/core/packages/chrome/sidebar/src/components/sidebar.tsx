@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { SidebarPanel } from './sidebar_panel';
-import { useSidebar } from './use_sidebar';
-import { useSidebarService } from './sidebar_provider';
 import { SidebarAppRenderer } from './sidebar_app_renderer';
+import { useSidebar } from '../hooks';
+import { useSidebarService } from '../providers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SidebarProps {}
@@ -34,15 +34,9 @@ export function Sidebar(props: SidebarProps) {
     return null;
   }
 
-  const currentState = sidebarService.appState.getAppState(currentAppId);
-
   return (
     <SidebarPanel title={currentApp.app.title} onClose={close}>
-      <SidebarAppRenderer
-        key={currentAppId}
-        loadComponent={currentApp.app.loadComponent}
-        state={currentState}
-      />
+      <SidebarAppRenderer key={currentAppId} loadComponent={currentApp.app.loadComponent} />
     </SidebarPanel>
   );
 }

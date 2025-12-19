@@ -19,46 +19,50 @@ import {
   EuiText,
   EuiFormRow,
 } from '@elastic/eui';
-import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
+import { useSidebarApp } from '@kbn/core-chrome-sidebar';
 
 export const counterAppId = 'sidebarExampleCounter';
-
-export interface CounterProps {
-  /** state passed from sidebar state store */
-  state: CounterSidebarState;
-}
 
 export interface CounterSidebarState {
   counter: number;
 }
 
-const useCounterAppState = () => {
-  return useSidebarAppState<CounterSidebarState>(counterAppId);
-};
-
 export const useCounterSideBarApp = () => {
-  const { open } = useSidebar();
-  const [, { reset }] = useCounterAppState();
+  const { open, setState, state } = useSidebarApp<CounterSidebarState>(counterAppId);
   return {
-    open: () => open(counterAppId),
-    reset: () => reset(),
+    // business state
+    counter: state.counter,
+    // Awesome business logic goes here
+    increment: () => {
+      setState({ counter: state.counter + 1 });
+    },
+    decrement: () => {
+      setState({ counter: state.counter - 1 });
+    },
+    incrementBy: (amount: number) => {
+      setState({ counter: state.counter + amount });
+    },
+    open: () => {
+      open();
+    },
+    reset: () => {
+      setState({ counter: 0 });
+    },
   };
 };
 
-export function CounterApp(props: CounterProps) {
-  const [state, { update }] = useCounterAppState();
-
-  const counter = state.counter;
+export function CounterApp() {
+  const { counter, increment, decrement, incrementBy } = useCounterSideBarApp();
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
       <EuiTitle size="s">
-        <h2>Counter Example</h2>
+        <h2>Counter Example (Custom Actions)</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
 
       <EuiText size="s" color="subdued">
-        <p>Simple counter with state persistence.</p>
+        <p>Counter with custom increment/decrement actions.</p>
       </EuiText>
 
       <EuiSpacer size="l" />
@@ -66,16 +70,21 @@ export function CounterApp(props: CounterProps) {
       <EuiFormRow label="Counter">
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => update({ counter: counter - 1 })}>
+            <EuiButton size="s" onClick={decrement}>
               -
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{counter || 0}</EuiBadge>
+            <EuiBadge color="primary">{counter}</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={() => update({ counter: counter + 1 })}>
+            <EuiButton size="s" onClick={increment}>
               +
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" onClick={() => incrementBy(5)}>
+              +5
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

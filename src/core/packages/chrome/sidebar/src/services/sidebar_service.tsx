@@ -14,7 +14,7 @@ import {
   SidebarAppStateService,
   type SidebarAppStateServiceApi,
 } from './sidebar_app_state_service';
-import { SidebarServiceProvider } from '../components';
+import { SidebarServiceProvider } from '../providers';
 
 export interface SidebarServiceSetup {
   registerApp: SidebarRegistryServiceApi['registerApp'];

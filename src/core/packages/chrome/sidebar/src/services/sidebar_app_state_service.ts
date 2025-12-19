@@ -13,19 +13,19 @@ import type { SidebarRegistryServiceApi } from './sidebar_registry_service';
 
 export interface SidebarAppStateServiceApi {
   /** Get observable stream of app state */
-  getAppState$<T>(appId: string): Observable<T>;
+  get$<T>(appId: string): Observable<T>;
 
   /** Get current app state synchronously */
-  getAppState<T>(appId: string): T;
+  get<T>(appId: string): T;
 
-  /** Set complete app state (replaces existing) */
-  setAppState<T>(appId: string, state: T): void;
+  /** Set complete app state (no merge) */
+  set<T>(appId: string, state: T, merge: false): void;
 
-  /** Update app state partially (shallow merge) */
-  updateAppState<T extends Record<string, any>>(appId: string, partial: Partial<T>): void;
+  /** Merge partial state with existing state (default) */
+  set<T>(appId: string, state: Partial<T>, merge?: true): void;
 
-  /** Reset app state */
-  resetAppState(appId: string): void;
+  /** Reset app state back to the initial state */
+  reset(appId: string): void;
 }
 
 /**
@@ -39,7 +39,7 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
 
   constructor(private readonly registry: SidebarRegistryServiceApi) {}
 
-  private getOrCreateSubject<T>(appId: string): BehaviorSubject<T> {
+  private getOrCreateState<T>(appId: string): BehaviorSubject<T> {
     if (!this.appStates.has(appId)) {
       const initialState = this.registry.getApp(appId)?.app?.getInitialState() as T;
       this.appStates.set(appId, new BehaviorSubject<T>(initialState));
@@ -47,25 +47,23 @@ export class SidebarAppStateService implements SidebarAppStateServiceApi {
     return this.appStates.get(appId)!;
   }
 
-  getAppState$<T>(appId: string): Observable<T> {
-    return this.getOrCreateSubject<T>(appId).asObservable();
+  get$<T>(appId: string): Observable<T> {
+    return this.getOrCreateState<T>(appId);
   }
 
-  getAppState<T>(appId: string): T {
-    return this.getOrCreateSubject<T>(appId).getValue();
+  get<T>(appId: string): T {
+    return this.getOrCreateState<T>(appId).getValue();
   }
 
-  setAppState<T>(appId: string, state: T): void {
-    this.getOrCreateSubject<T>(appId).next(state);
+  set<T>(appId: string, state: T, merge: false): void;
+  set<T>(appId: string, state: Partial<T>, merge?: true): void;
+  set<T>(appId: string, state: T | Partial<T>, merge: boolean = true): void {
+    const newState = merge ? { ...this.get<T>(appId), ...state } : state;
+    this.getOrCreateState<T>(appId).next(newState as T);
   }
 
-  updateAppState<T extends Record<string, any>>(appId: string, partial: Partial<T>): void {
-    const current = this.getAppState<T>(appId) || ({} as T);
-    this.setAppState(appId, { ...current, ...partial });
-  }
-
-  resetAppState(appId: string): void {
+  reset(appId: string): void {
     const initialState = this.registry.getApp(appId)?.app?.getInitialState();
-    this.setAppState(appId, initialState);
+    this.set(appId, initialState, false);
   }
 }

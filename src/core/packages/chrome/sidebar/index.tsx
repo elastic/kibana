@@ -31,5 +31,7 @@ export type {
   SidebarServiceStart,
   SidebarServiceSetup,
 } from './src/services';
-export { Sidebar, SidebarServiceProvider, useSidebar, useSidebarAppState } from './src/components';
-export type { SidebarProviderProps, UseSidebarHook, SidebarProps } from './src/components';
+export { Sidebar } from './src/components';
+export type { SidebarProps } from './src/components';
+export { useSidebar, useSidebarApp, useSidebarWidth } from './src/hooks';
+export type { UseSidebarAppResult, UseSidebarWidthResult, UseSidebarResult } from './src/hooks';

@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export { Sidebar } from './sidebar';
-export type { SidebarProps } from './sidebar';
-export { SidebarAppRenderer } from './sidebar_app_renderer';
+export { useSidebar, useSidebarWidth } from './use_sidebar';
+export type { UseSidebarWidthResult, UseSidebarResult } from './use_sidebar';
+export { useSidebarApp, type UseSidebarAppResult } from './use_sidebar_app';

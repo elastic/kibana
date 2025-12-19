@@ -40,3 +40,17 @@ function useSidebarContext(): SidebarContextValue {
 export function useSidebarService(): SidebarService {
   return useSidebarContext().sidebar;
 }
+
+/**
+ * @internal
+ */
+export function useSidebarStateService(): SidebarService['state'] {
+  return useSidebarService().state;
+}
+
+/**
+ * @internal
+ */
+export function useSidebarAppStateService(): SidebarService['appState'] {
+  return useSidebarService().appState;
+}

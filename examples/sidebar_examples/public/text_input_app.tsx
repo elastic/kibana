@@ -9,14 +9,9 @@
 
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
-import { useSidebarAppState, useSidebar } from '@kbn/core-chrome-sidebar';
+import { useSidebarApp } from '@kbn/core-chrome-sidebar';
 
 export const textInputAppId = 'sidebarExampleText';
-
-export interface TextInputProps {
-  /** state passed from sidebar state store */
-  state: TextInputSidebarState;
-}
 
 export interface TextInputSidebarState {
   /** user name input */
@@ -24,22 +19,25 @@ export interface TextInputSidebarState {
 }
 
 export const useTextInputSideBarApp = () => {
-  const { open } = useSidebar();
-  const [, { reset }] = useTextInputAppState();
+  const { open, setState, state } = useSidebarApp<TextInputSidebarState>(textInputAppId);
   return {
-    open: () => open(textInputAppId),
-    reset: () => reset(),
+    // business state
+    userName: state.userName,
+    // Awesome business logic goes here
+    setUserName: (userName: string) => {
+      setState({ userName });
+    },
+    open: () => {
+      open();
+    },
+    reset: () => {
+      setState({ userName: '' });
+    },
   };
 };
 
-const useTextInputAppState = () => {
-  return useSidebarAppState<TextInputSidebarState>(textInputAppId);
-};
-
-export function TextInputApp(props: TextInputProps) {
-  const [state, { update }] = useTextInputAppState();
-
-  const userName = state.userName;
+export function TextInputApp() {
+  const { userName, setUserName } = useTextInputSideBarApp();
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
@@ -57,8 +55,8 @@ export function TextInputApp(props: TextInputProps) {
       <EuiFormRow label="User Name">
         <EuiFieldText
           placeholder="Enter your name"
-          value={userName}
-          onChange={(e) => update({ userName: e.target.value })}
+          value={userName || ''}
+          onChange={(e) => setUserName(e.target.value)}
         />
       </EuiFormRow>
 

@@ -13,13 +13,9 @@ import type { SidebarComponentType } from '../services';
 
 interface SidebarAppRendererProps<TState> {
   loadComponent: () => Promise<SidebarComponentType<TState>>;
-  state: TState;
 }
 
-export function SidebarAppRenderer<TState>({
-  loadComponent,
-  state,
-}: SidebarAppRendererProps<TState>) {
+export function SidebarAppRenderer<TState>({ loadComponent }: SidebarAppRendererProps<TState>) {
   const LazyComponent = useMemo(
     () => lazy(() => loadComponent().then((c) => ({ default: c }))),
     [loadComponent]
@@ -27,7 +23,7 @@ export function SidebarAppRenderer<TState>({
 
   return (
     <Suspense fallback={<Fallback />}>
-      <LazyComponent state={state} />
+      <LazyComponent />
     </Suspense>
   );
 }
