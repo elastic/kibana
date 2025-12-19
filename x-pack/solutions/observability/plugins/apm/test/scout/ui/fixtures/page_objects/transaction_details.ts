@@ -13,9 +13,6 @@ export class TransactionDetailsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   // Locators
-  public get waterfallSizeWarning() {
-    return this.page.getByTestId('apmWaterfallSizeWarning');
-  }
 
   async goToTransactionDetails(params: {
     serviceName: string;
@@ -98,19 +95,6 @@ export class TransactionDetailsPage {
     const searchBar = this.page.getByTestId('apmUnifiedSearchBar');
     await searchBar.fill(query);
     await searchBar.press('Enter');
-  }
-
-  // Waterfall methods
-
-  /**
-   * Get all waterfall accordion items
-   */
-  async getWaterfallItems() {
-    await this.page
-      .getByRole('switch', { name: 'Show critical path' })
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
-
-    return this.page.getByTestId('accordionWaterfall');
   }
 
   // Span links methods
