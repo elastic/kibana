@@ -6,11 +6,11 @@
  */
 
 import type { KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
-import type { ServiceDetailsPageTabName } from './tab';
-import { Tab } from './tab';
+import type { ServiceDetailsPageTabName } from './service_details_tab';
+import { ServiceDetailsTab } from './service_details_tab';
 import { waitForChartToLoad, waitForTableToLoad } from '../utils';
 
-export class DependenciesTab extends Tab {
+export class DependenciesTab extends ServiceDetailsTab {
   public readonly tabName: ServiceDetailsPageTabName = 'dependencies';
   public readonly tab: Locator;
 

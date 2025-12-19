@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { testData } from '../..';
+import { Tab } from '../tab';
 
 export type ServiceDetailsPageTabName =
   | 'overview'
@@ -20,17 +21,12 @@ export type ServiceDetailsPageTabName =
   | 'alerts'
   | 'dashboards';
 
-export abstract class Tab {
+export abstract class ServiceDetailsTab extends Tab {
   public abstract readonly tabName: ServiceDetailsPageTabName;
-  public abstract readonly tab: Locator;
 
-  constructor(
-    protected readonly page: ScoutPage,
-    protected readonly kbnUrl: KibanaUrl,
-    protected readonly defaultServiceName: string
-  ) {}
-
-  protected abstract waitForTabLoad(): Promise<void>;
+  constructor(page: ScoutPage, kbnUrl: KibanaUrl, protected readonly defaultServiceName: string) {
+    super(page, kbnUrl);
+  }
 
   public async goToTab(
     overrides: {
@@ -48,17 +44,5 @@ export abstract class Tab {
       })}`
     );
     await this.waitForTabLoad();
-  }
-
-  public getTab(): Locator {
-    return this.tab;
-  }
-
-  public async clickTab(opts: { waitForLoad?: boolean } = { waitForLoad: true }) {
-    await this.tab.click();
-
-    if (opts.waitForLoad) {
-      await this.waitForTabLoad();
-    }
   }
 }
