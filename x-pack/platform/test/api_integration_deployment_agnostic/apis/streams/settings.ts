@@ -422,7 +422,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         afterEach(async () => {
           try {
             await deleteStream(apiClient, classicStreamName);
-          } catch {}
+          } catch {
+            // Stream may not exist if test failed early
+          }
           try {
             await esClient.indices.deleteDataStream({ name: classicStreamName });
           } catch {
