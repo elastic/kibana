@@ -17,8 +17,8 @@ import {
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { parseExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-alerts-table';
+import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import type { TopAlert } from '../../../typings/alerts';
 
 export const parseAlert =
