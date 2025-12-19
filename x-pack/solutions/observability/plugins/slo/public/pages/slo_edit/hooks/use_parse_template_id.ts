@@ -6,25 +6,25 @@
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { CreateSLOInput } from '@kbn/slo-schema';
-import type { RecursivePartial } from '@kbn/utility-types';
-import { useHistory } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useFetchSloTemplate } from '../../../hooks/use_fetch_slo_template';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
-import type { CreateSLOForm } from '../types';
 
-export function useParseUrlState(): CreateSLOForm | undefined {
+export function useParseTemplateId() {
   const history = useHistory();
 
-  return useMemo(() => {
+  const templateId = useMemo(() => {
     const urlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: false,
       useHashQuery: false,
     });
 
-    const urlState = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a') ?? undefined;
-
-    return transformPartialSLODataToFormState(urlState);
+    return urlStateStorage.get<string>('fromTemplateId') ?? undefined;
   }, [history]);
+
+  const { data: template, isInitialLoading } = useFetchSloTemplate(templateId);
+
+  return { isInitialLoading, data: transformPartialSLODataToFormState(template) };
 }
