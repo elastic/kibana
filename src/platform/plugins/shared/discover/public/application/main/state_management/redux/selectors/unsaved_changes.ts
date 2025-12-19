@@ -28,6 +28,7 @@ import {
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
+import { getSerializedSearchSourceDataViewDetails } from '../utils';
 
 export interface HasUnsavedChangesResult {
   hasUnsavedChanges: boolean;
@@ -73,13 +74,18 @@ export const selectHasUnsavedChanges = (
       continue;
     }
 
+    // Ensure the persisted tab accounts for default app state values when comparing,
+    // otherwise initializing a tab could automatically trigger unsaved changes.
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
         initialAppState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab,
-          dataView: undefined,
+          dataView: getSerializedSearchSourceDataViewDetails(
+            persistedTab.serializedSearchSource,
+            state.savedDataViews
+          ),
           services,
         }),
       }),
@@ -225,6 +231,7 @@ const TAB_COMPARATORS: TabComparators = {
   refreshInterval: fieldComparator('refreshInterval', { pause: true, value: 0 }),
   rowsPerPage: fieldComparator('rowsPerPage', 0),
   sampleSize: fieldComparator('sampleSize', 0),
+  chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,

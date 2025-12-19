@@ -35,11 +35,12 @@ import { createCustomizationService } from '../customizations/customization_serv
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
+import { updateSavedSearch } from '../application/main/state_management/utils/update_saved_search';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 
@@ -414,8 +415,26 @@ export function getDiscoverStateMock({
   tabRuntimeState.stateContainer$.next(container);
 
   if (finalSavedSearch) {
-    container.savedSearchState.set(finalSavedSearch);
+    const currentTab = selectTab(internalState.getState(), container.getCurrentTab().id);
+    const dataView = finalSavedSearch.searchSource.getField('index');
+
+    container.savedSearchState.set(
+      updateSavedSearch({
+        savedSearch: finalSavedSearch,
+        dataView,
+        initialInternalState: undefined,
+        appState: currentTab.appState,
+        globalState: currentTab.globalState,
+        services,
+      })
+    );
     tabRuntimeState.currentDataView$.next(finalSavedSearch.searchSource.getField('index'));
+
+    if (dataView) {
+      internalState.dispatch(
+        internalStateActions.loadDataViewList.fulfilled([dataView as DataViewListItem], 'requestId')
+      );
+    }
   }
 
   return container;

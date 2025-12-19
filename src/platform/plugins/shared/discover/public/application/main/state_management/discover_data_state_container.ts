@@ -290,7 +290,8 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
+            const fetchMoreTracker =
+              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
 
             // Calculate query range in seconds
             const timeRange = timefilter.getAbsoluteTime();
@@ -302,8 +303,8 @@ export function getDataStateContainer({
             });
 
             fetchMoreTracker.reportEvent({
-              key1: 'query_range_secs',
-              value1: queryRangeSeconds,
+              queryRangeSeconds,
+              requests: inspectorAdapters.requests?.getRequestsSince(fetchMoreTracker.startTime),
             });
 
             return;
@@ -360,7 +361,7 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
 
           // Calculate query range in seconds
           const timeRange = timefilter.getAbsoluteTime();
@@ -413,8 +414,8 @@ export function getDataStateContainer({
           });
 
           fetchAllTracker.reportEvent({
-            key1: 'query_range_secs',
-            value1: queryRangeSeconds,
+            queryRangeSeconds,
+            requests: inspectorAdapters.requests?.getRequestsSince(fetchAllTracker.startTime),
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

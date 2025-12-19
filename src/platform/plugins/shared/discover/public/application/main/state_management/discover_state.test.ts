@@ -561,6 +561,7 @@ describe('Discover state', () => {
       const { searchSource, ...savedSearch } = state.savedSearchState.getState();
       expect(savedSearch).toMatchInlineSnapshot(`
               Object {
+                "chartInterval": "auto",
                 "columns": Array [
                   "default_column",
                 ],

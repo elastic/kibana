@@ -38,7 +38,7 @@ export function getInitialAppState({
 }: {
   initialUrlState: DiscoverAppState | undefined;
   persistedTab: DiscoverSessionTab | undefined;
-  dataView: DataView | undefined;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
 }) {
   const defaultAppState = getDefaultAppState({
@@ -77,16 +77,19 @@ function getDefaultAppState({
   services,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
-  dataView: DataView | undefined;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
 }) {
   const { data, uiSettings, storage } = services;
   const query =
     persistedTab?.serializedSearchSource.query || data.query.queryString.getDefaultQuery();
   const isEsqlQuery = isOfAggregateQueryType(query);
-  const sort = dataView
-    ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery)
-    : persistedTab?.sort ?? [];
+  // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
+  // we assume the sort array is valid since we can't know for sure
+  const sort =
+    dataView && 'getFieldByName' in dataView
+      ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery)
+      : persistedTab?.sort ?? [];
   const columns = getDefaultColumns(persistedTab, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
   const dataSource = createDataSource({
@@ -150,6 +153,9 @@ function getDefaultAppState({
   }
   if (persistedTab?.breakdownField) {
     defaultState.breakdownField = persistedTab.breakdownField;
+  }
+  if (persistedTab?.chartInterval) {
+    defaultState.interval = persistedTab.chartInterval;
   }
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
