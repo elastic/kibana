@@ -161,6 +161,7 @@ describe('filterMapByCriticalPath', () => {
     color: '#fff',
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
+    serviceName: 'test-service',
   });
 
   const mockSegment = (item: TraceWaterfallItem): CriticalPathSegment<TraceWaterfallItem> => ({
