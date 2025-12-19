@@ -19,10 +19,11 @@ run(
   async ({ log, flags }) => {
     const bail = !!(flags.bail || false);
 
-    const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
-    const moonCommand = IS_CI ? ['ci', ':eslint-fix'] : ['run', ':eslint'];
+    const moonCommand = IS_CI ? 'ci' : 'run';
+    const lintCommand = flags.fix ? ':eslint-fix' : ':eslint';
+    const cacheFlag = flags.cache ? [] : ['-u'];
 
-    const fullArgs = [...moonCommand, '--', ...eslintArgs].concat(flags._);
+    const fullArgs = [moonCommand, lintCommand, ...cacheFlag];
 
     log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);
 
