@@ -61,6 +61,7 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { adjustSuggestWidget } from '../lib/adjust_suggest_widget';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
@@ -346,38 +347,7 @@ export const WorkflowYAMLEditor = ({
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 
-        // Hack to make suggestions details visible by default
-        // https://github.com/microsoft/monaco-editor/issues/2241#issuecomment-997339142
-        const contribution = editor.getContribution('editor.contrib.suggestController');
-        if (contribution) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const widget = (contribution as any).widget;
-          const suggestWidget = widget.value;
-          if (suggestWidget && suggestWidget._setDetailsVisible) {
-            // This will default to visible details. But when user switches it off
-            // they will remain switched off:
-            suggestWidget._setDetailsVisible(true);
-          }
-          // I also wanted my widget to be shorter by default:
-          if (suggestWidget && suggestWidget._persistedSize) {
-            suggestWidget._persistedSize.store({ width: 500, height: 500 });
-          }
-
-          // Set the details overlay user size
-          if (suggestWidget && suggestWidget._details) {
-            const detailsOverlay = suggestWidget._details;
-            // This is what gets used in _placeAtAnchor as "this._userSize ?? this.widget.size"
-            // detailsOverlay._userSize = { width: 500, height: 300 };
-            // Override placeAtAnchor to always pass true for preferAlignAtTop
-            const originalPlaceAtAnchor = detailsOverlay.placeAtAnchor.bind(detailsOverlay);
-            detailsOverlay.placeAtAnchor = function (
-              anchor: HTMLElement,
-              preferAlignAtTop: boolean
-            ) {
-              originalPlaceAtAnchor(anchor, true); // Always force true
-            };
-          }
-        }
+        adjustSuggestWidget(editor);
 
         // Create unified providers with template expression support
         const providerConfig = {
