@@ -11,7 +11,7 @@ import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
 export interface UseFetchSloTemplateResponse {
-  isLoading: boolean;
+  isInitialLoading: boolean;
   isError: boolean;
   data: GetSLOTemplateResponse | undefined;
 }
@@ -19,7 +19,7 @@ export interface UseFetchSloTemplateResponse {
 export function useFetchSloTemplate(templateId?: string): UseFetchSloTemplateResponse {
   const { sloClient } = usePluginContext();
 
-  const { isLoading, isError, data } = useQuery({
+  const { isInitialLoading, isError, data } = useQuery({
     queryKey: sloKeys.template(templateId!),
     queryFn: async ({ signal }) => {
       return await sloClient.fetch('GET /api/observability/slo_templates/{templateId}', {
@@ -30,12 +30,13 @@ export function useFetchSloTemplate(templateId?: string): UseFetchSloTemplateRes
     keepPreviousData: true,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
+    retry: false,
     enabled: Boolean(templateId),
   });
 
   return {
     data,
-    isLoading,
+    isInitialLoading,
     isError,
   };
 }

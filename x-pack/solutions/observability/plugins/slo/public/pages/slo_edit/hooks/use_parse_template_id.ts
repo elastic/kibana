@@ -24,7 +24,7 @@ export function useParseTemplateId() {
     return urlStateStorage.get<string>('fromTemplateId') ?? undefined;
   }, [history]);
 
-  const { data: template } = useFetchSloTemplate(templateId);
+  const { data: template, isInitialLoading } = useFetchSloTemplate(templateId);
 
-  return transformPartialSLODataToFormState(template);
+  return { isInitialLoading, data: transformPartialSLODataToFormState(template) };
 }

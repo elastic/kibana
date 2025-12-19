@@ -12,15 +12,12 @@ import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloEditForm } from './components/slo_edit_form';
-import { transformSloResponseToFormState } from './helpers/process_slo_form_values';
-import { useParseUrlState } from './hooks/use_parse_url_state';
-import { useParseTemplateId } from './hooks/use_parse_template_id';
+import { useSloFormValues } from './hooks/use_slo_form_values';
 
 export function SloEditPage() {
   const {
@@ -29,17 +26,12 @@ export function SloEditPage() {
     serverless,
   } = useKibana().services;
   const { sloId } = useParams<{ sloId: string | undefined }>();
-  const { data: slo, isLoading: isLoading } = useFetchSloDetails({ sloId });
-  const isEditMode = Boolean(sloId);
+  const { initialValues, isLoading, isEditMode, slo } = useSloFormValues(sloId);
 
   const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
-
-  const sloFormValuesFromUrlState = useParseUrlState();
-  const sloFormValuesFromTemplateId = useParseTemplateId();
-  const sloFormValuesFromSloResponse = transformSloResponseToFormState(slo);
 
   useBreadcrumbs(
     [
@@ -96,18 +88,10 @@ export function SloEditPage() {
       data-test-subj="sloEditPage"
     >
       <HeaderMenu />
-      {isEditMode && isLoading ? (
+      {isLoading ? (
         <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
       ) : (
-        <SloEditForm
-          slo={slo}
-          isEditMode={isEditMode}
-          initialValues={
-            isEditMode
-              ? sloFormValuesFromSloResponse
-              : sloFormValuesFromUrlState ?? sloFormValuesFromTemplateId
-          }
-        />
+        <SloEditForm slo={slo} isEditMode={isEditMode} initialValues={initialValues} />
       )}
     </ObservabilityPageTemplate>
   );
