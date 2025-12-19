@@ -192,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getLayerType()).to.eql('Pie');
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
-      expect(sliceByText).to.be('Top 5 values of geo.src');
+      expect(sliceByText).to.be('Top 9 values of geo.src');
       expect(sizeByText).to.be('Average of machine.ram');
     });
 
@@ -364,7 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.assertLayerCount(1);
       expect(await lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
-        'Top 5 values of geo.dest'
+        'Top 9 values of geo.dest'
       );
       expect(await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'

@@ -208,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.closeDimensionEditor();
 
           expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
-            'Top 5 values of geo.src'
+            'Top 9 values of geo.src'
           );
 
           const data = await lens.getCurrentChartDebugState('xyVisChart');
