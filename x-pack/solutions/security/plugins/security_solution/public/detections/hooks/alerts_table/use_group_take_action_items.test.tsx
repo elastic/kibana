@@ -9,9 +9,13 @@ import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useGroupTakeActionsItems } from './use_group_take_action_items';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
+
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+  useAlertsPrivileges: jest.fn(),
 }));
+
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 describe('useGroupTakeActionsItems', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
@@ -22,6 +26,11 @@ describe('useGroupTakeActionsItems', () => {
     groupNumber: 0,
     selectedGroup: 'test',
   };
+
+  beforeEach(() => {
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
+  });
+
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
     const { result } = renderHook(
       () =>
@@ -163,5 +172,24 @@ describe('useGroupTakeActionsItems', () => {
     const buttons = await queryAllByRole('button');
 
     expect(buttons.length).toBe(3);
+  });
+
+  describe('when the user does not have alert edit privileges', () => {
+    beforeEach(() => {
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
+    });
+
+    it('returns empty take actions items', async () => {
+      const { result } = renderHook(
+        () =>
+          useGroupTakeActionsItems({
+            showAlertStatusActions: true,
+          }),
+        {
+          wrapper: wrapperContainer,
+        }
+      );
+      await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(0));
+    });
   });
 });
