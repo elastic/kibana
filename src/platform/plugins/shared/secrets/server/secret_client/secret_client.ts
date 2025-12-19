@@ -41,6 +41,7 @@ export class SecretClient implements ISecretClient {
   async create(command: CreateSecretCommand): Promise<SecretDto> {
     const createdAtDate = new Date();
     try {
+      await this.requireUniqueName(command.name);
       const savedObject = await this.soClient.create<SecretAttributes>(SECRET_SAVED_OBJECT_TYPE, {
         name: command.name,
         description: command.description,
@@ -59,6 +60,18 @@ export class SecretClient implements ISecretClient {
     } catch (error) {
       this.logger.error(`Error creating secret: ${error.message}`, { error });
       throw error;
+    }
+  }
+
+  private async requireUniqueName(name: string): Promise<void> {
+    const response = await this.soClient.find<SecretAttributes>({
+      type: SECRET_SAVED_OBJECT_TYPE,
+      filter: `${SECRET_SAVED_OBJECT_TYPE}.attributes.name: "${name}"`,
+      perPage: 1,
+    });
+
+    if (response.saved_objects.length > 0) {
+      throw new Error(`Secret with name "${name}" already exists`);
     }
   }
 
