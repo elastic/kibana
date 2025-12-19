@@ -682,8 +682,8 @@ export class ScheduledReportsService {
     updatedScheduledReportIds: Set<string>;
   }) {
     const resultFromUpdatingTasks = shouldEnable
-      ? await this.taskManager.bulkEnable(taskIdsToUpdate, false)
-      : await this.taskManager.bulkDisable(taskIdsToUpdate);
+      ? await this.taskManager.bulkEnable(taskIdsToUpdate, false, { request: this.request })
+      : await this.taskManager.bulkDisable(taskIdsToUpdate, false, { request: this.request });
 
     for (const error of resultFromUpdatingTasks.errors) {
       bulkErrors.push({
