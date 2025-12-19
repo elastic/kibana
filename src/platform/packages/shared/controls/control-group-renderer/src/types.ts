@@ -13,6 +13,7 @@ import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type {
   DataControlState,
   LegacyIgnoreParentSettings,
+  StickyControlLayoutState,
   StickyControlState,
 } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -91,8 +92,7 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
  * ----------------------------------------------------------------
  */
 
-export type FlattenedStickyControlState = Omit<StickyControlState, 'config'> &
-  StickyControlState['config'];
+export type FlattenedStickyControlState = StickyControlLayoutState & StickyControlState['config'];
 
 export interface ControlGroupRuntimeState<
   State extends FlattenedStickyControlState = FlattenedStickyControlState
@@ -108,13 +108,11 @@ export interface ControlGroupCreationOptions {
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
 
-export interface ControlPanelsState<
-  State extends FlattenedStickyControlState = FlattenedStickyControlState
-> {
-  [panelId: string]: ControlPanelState<State>;
+export interface ControlPanelsState<ControlState extends {} = {}> {
+  [panelId: string]: ControlPanelState<ControlState>;
 }
 
-export type ControlPanelState<ControlState extends object = object> = ControlState &
+export type ControlPanelState<ControlState extends {} = {}> = ControlState &
   FlattenedStickyControlState & {
     type: string; // prevents having to cast to the literal type
     order: number;

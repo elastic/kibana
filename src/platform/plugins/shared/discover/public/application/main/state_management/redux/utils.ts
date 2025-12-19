@@ -119,7 +119,9 @@ export const getSerializedSearchSourceDataViewDetails = (
  * @returns A ControlPanelsState object or an empty object if parsing fails.
  */
 
-export const parseControlGroupJson = (jsonString?: string | null): ControlPanelsState => {
+export const parseControlGroupJson = (
+  jsonString?: string | null
+): ControlPanelsState<ESQLControlState> => {
   try {
     return jsonString ? JSON.parse(jsonString) : {};
   } catch (e) {
