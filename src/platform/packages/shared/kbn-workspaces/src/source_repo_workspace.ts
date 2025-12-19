@@ -40,6 +40,11 @@ export class SourceRepoWorkspace extends AbstractWorkspace {
     const hash = createHash('sha256');
     hash.update(baseCommitSha, 'utf8');
     if (combinedDiff) {
+      const { stdout: changedFiles } = await execa('git', ['diff', 'HEAD', '--name-only'], {
+        cwd: directory,
+      });
+      this.context.log.debug(`[getCacheKey] Changed files:\n${changedFiles}`);
+
       hash.update('\0', 'utf8');
       hash.update(combinedDiff, 'utf8');
     }
