@@ -207,7 +207,7 @@ describe('Streams Plugin', () => {
       const result = await getClassicStatus();
 
       expect(mockRepositoryClient.fetch).toHaveBeenCalledWith(
-        'GET /api/streams/_classic_status',
+        'GET /internal/streams/_classic_status',
         expect.objectContaining({
           signal: expect.any(AbortSignal),
         })

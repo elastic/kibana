@@ -68,7 +68,7 @@ export class Plugin implements StreamsPluginClass {
       },
       getClassicStatus: async () => {
         try {
-          return await this.repositoryClient.fetch('GET /api/streams/_classic_status', {
+          return await this.repositoryClient.fetch('GET /internal/streams/_classic_status', {
             signal: new AbortController().signal,
           });
         } catch (error) {

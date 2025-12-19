@@ -103,7 +103,7 @@ export const getStreamsStatusRoute = createServerRoute({
 });
 
 export const getClassicStreamsStatusRoute = createServerRoute({
-  endpoint: 'GET /api/streams/_classic_status',
+  endpoint: 'GET /internal/streams/_classic_status',
   options: {
     access: 'internal',
   },
