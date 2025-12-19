@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Document, parseDocument, type Range } from 'yaml';
+import { type Document, isNode, parseDocument, type Range } from 'yaml';
 import { isSeq } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { TriggerType } from '@kbn/workflows';
@@ -30,10 +30,7 @@ function getTriggersKeyInfo(
 
   const triggersKey = triggersPair.key;
   const triggersKeyRange =
-    typeof triggersKey === 'object' &&
-    triggersKey !== null &&
-    'range' in triggersKey &&
-    triggersKey.range
+    isNode(triggersKey) && triggersKey.range
       ? getMonacoRangeFromYamlRange(model, triggersKey.range as Range)
       : null;
 
@@ -66,7 +63,13 @@ export function insertTriggerSnippet(
   triggerType: TriggerType,
   editor?: monaco.editor.IStandaloneCodeEditor
 ) {
-  const document = yamlDocument || parseDocument(model.getValue());
+  let document: Document;
+  try {
+    document = yamlDocument || parseDocument(model.getValue());
+  } catch (error) {
+    // If YAML is malformed, we can't insert the trigger snippet
+    return;
+  }
 
   const triggerNodes = getTriggerNodes(document);
   const triggerNode = triggerNodes.find((node) => node.triggerType === triggerType);
@@ -98,20 +101,10 @@ export function insertTriggerSnippet(
       const lastItem = triggersPair.value.items[triggersPair.value.items.length - 1];
       let emptyItemLineNumber: number | null = null;
 
-      if (lastItem && typeof lastItem === 'object' && 'range' in lastItem && lastItem.range) {
+      if (isNode(lastItem) && lastItem.range) {
         const lastItemRange = getMonacoRangeFromYamlRange(model, lastItem.range as Range);
         if (lastItemRange) {
           emptyItemLineNumber = lastItemRange.startLineNumber;
-        }
-      } else if (triggersKeyRange) {
-        const totalLines = model.getLineCount();
-        for (let line = totalLines; line >= triggersKeyRange.startLineNumber; line--) {
-          const lineContent = model.getLineContent(line);
-          const trimmedContent = lineContent.trim();
-          if (trimmedContent === '-' || trimmedContent === '- ') {
-            emptyItemLineNumber = line;
-            break;
-          }
         }
       }
 
@@ -131,6 +124,10 @@ export function insertTriggerSnippet(
         insertAtLineNumber = lastTriggerRange.endLineNumber;
         indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
       }
+    } else if (triggersKeyRange) {
+      // Triggers section exists but is completely empty, insert after triggers:
+      insertAtLineNumber = triggersKeyRange.endLineNumber + 1;
+      indentLevel = expectedIndent;
     }
   }
 

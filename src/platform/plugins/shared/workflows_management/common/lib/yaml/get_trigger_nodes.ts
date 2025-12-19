@@ -19,7 +19,12 @@ export function getTriggersPair(yamlDocument: Document): Pair | null {
     return null;
   }
 
-  const triggersPair = yamlDocument.contents.items.find(
+  const contents = yamlDocument.contents;
+  if (!('items' in contents) || !contents.items) {
+    return null;
+  }
+
+  const triggersPair = contents.items.find(
     (item) => isPair(item) && isScalar(item.key) && item.key.value === 'triggers'
   );
 
