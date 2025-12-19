@@ -65,8 +65,28 @@ const isLicenseValid = (
   if (!currentLicenseType) {
     return true;
   }
-  // Check if current license is in the valid list
+
   return validLicenseTypes.includes(currentLicenseType);
+};
+
+const formatLicenseList = (licenses: string[]): string => {
+  const formatted = licenses.map((license) =>
+    license.toLowerCase() === 'trial' ? 'trial' : capitalize(license)
+  );
+
+  if (formatted.length === 1) {
+    return formatted[0];
+  }
+
+  if (formatted.length === 2) {
+    return `${formatted[0]} or ${formatted[1]}`;
+  }
+
+  // For 3 or more items: "trial, Basic or Enterprise"
+  const allButLast = formatted.slice(0, -1).join(', ');
+  const last = formatted[formatted.length - 1];
+
+  return `${allButLast} or ${last}`;
 };
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({
@@ -156,7 +176,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     }
 
     if (!isLicenseValid(validLicenseTypes, currentLicenseType) && !supported) {
-      const formattedLicenses = validLicenseTypes!.map(capitalize).join(', ');
+      const formattedLicenses = formatLicenseList(validLicenseTypes!);
 
       return (
         <EuiFlexGroup
@@ -169,7 +189,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.service.requiresDifferentLicense"
-                defaultMessage="Requires different license"
+                defaultMessage="Requires {licenses} license"
+                values={{ licenses: formattedLicenses }}
               />
             </EuiText>
           </EuiFlexItem>
@@ -198,15 +219,24 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 <EuiText size="s">
                   <FormattedMessage
                     id="xpack.cloudConnect.connectedServices.service.licenseInfo"
-                    defaultMessage="This service requires one of the following licenses: {licenses}. Learn how to {extendTrialLink} or view subscription options."
+                    defaultMessage="{viewSubscriptionLink} or {extendTrialLink}."
                     values={{
-                      licenses: <strong>{formattedLicenses}</strong>,
                       extendTrialLink: (
                         <EuiLink href="https://www.elastic.co/trialextension" target="_blank">
                           {i18n.translate(
                             'xpack.cloudConnect.connectedServices.service.extendTrial',
                             {
                               defaultMessage: 'extend your trial',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                      viewSubscriptionLink: (
+                        <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                          {i18n.translate(
+                            'xpack.cloudConnect.connectedServices.service.viewSubscriptionOptions',
+                            {
+                              defaultMessage: 'View subscription options',
                             }
                           )}
                         </EuiLink>
