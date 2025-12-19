@@ -109,7 +109,7 @@ export const waitForPackageInstalled = (
   const startTime = Date.now();
 
   const checkStatus = (): Cypress.Chainable<void> => {
-    return checkPackageInstalled(packageName).then((isInstalled) => {
+    return checkPackageInstalled(packageName).then((isInstalled): Cypress.Chainable<void> => {
       if (isInstalled) {
         cy.log(`Package ${packageName} is now installed`);
         return cy.then<void>(() => {
@@ -138,7 +138,7 @@ export const waitForPackageInstalled = (
         )}s elapsed)`
       );
       return cy.wait(interval).then<void>(() => checkStatus());
-    }) as Cypress.Chainable<void>;
+    });
   };
 
   return checkStatus();
