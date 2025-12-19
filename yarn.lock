@@ -4871,6 +4871,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/check-kibana-settings-cli@link:packages/kbn-check-kibana-settings-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
   version "0.0.0"
   uid ""
