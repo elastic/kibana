@@ -83,7 +83,7 @@ export const MetricInsightsFlyout = ({
         onKeyDown={onKeyDown}
         data-test-subj="metricsExperienceFlyout"
         aria-label={i18n.translate(
-          'undefined.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
+          'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
           { defaultMessage: 'Metric Insights Flyout' }
         )}
         ownFocus
@@ -117,7 +117,7 @@ export const MetricInsightsFlyout = ({
                 `}
               >
                 <h2>
-                  {i18n.translate('undefined.metricInsightsFlyout.strong.metricLabel', {
+                  {i18n.translate('metricsExperience.metricInsightsFlyout.strong.metricLabel', {
                     defaultMessage: 'Metric',
                   })}
                 </h2>
@@ -136,11 +136,11 @@ export const MetricInsightsFlyout = ({
           <EuiButtonEmpty
             iconType="cross"
             onClick={onClose}
-            aria-label={i18n.translate('undefined.metricInsightsFlyout.close.ariaLabel', {
+            aria-label={i18n.translate('metricsExperience.metricInsightsFlyout.close.ariaLabel', {
               defaultMessage: 'Close metric insights flyout',
             })}
           >
-            {i18n.translate('undefined.metricInsightsFlyout.close.label', {
+            {i18n.translate('metricsExperience.metricInsightsFlyout.close.label', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>
