@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Field, FieldType } from '../../../common/types';
+import type { Field } from '../../../common/types';
 
 export interface MappingsOptionData {
   name: string;
@@ -35,7 +35,7 @@ export interface NormalizedField extends FieldMeta {
 export type ChildFieldName = 'properties' | 'fields';
 
 export interface MappingNode {
-  type?: FieldType;
+  type?: 'semantic_text' | 'object';
   inference_id?: string;
   properties?: Record<string, MappingNode>;
 }

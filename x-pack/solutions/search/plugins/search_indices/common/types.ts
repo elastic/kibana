@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { MappingFieldType } from '@elastic/elasticsearch/lib/api/types';
+
 export interface Field {
   name: string;
-  type: FieldType;
+  type: MappingFieldType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: Fields;
   inference_id?: string | undefined;
@@ -16,8 +18,6 @@ export interface Field {
 export interface Fields {
   [key: string]: Omit<Field, 'name'>;
 }
-
-export type FieldType = 'object' | 'semantic_text';
 
 export interface IndicesStatusResponse {
   indexNames: string[];

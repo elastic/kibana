@@ -79,7 +79,7 @@ function isMappingNode(node: MappingProperty): node is MappingNode {
 export const prepareFieldsForEisUpdate = (
   selectedMappings: EuiSelectableOption<MappingsOptionData>[],
   flattenedMappings: NormalizedFields['byId']
-) => {
+): NormalizedFields => {
   const selectedIds = selectedMappings.flatMap((item) => item.key ?? []);
 
   const resultById: NormalizedFields['byId'] = {};
