@@ -369,22 +369,17 @@ export function getDataStateContainer({
             isEsqlQuery && hasTransformationalCommand(query.esql);
 
           if (isEsqlQuery) {
-            try {
-              const esqlQueryColumns = await getESQLQueryColumns({
-                esqlQuery: query.esql,
-                search: services.data.search.search,
-                variables: currentTab.esqlVariables,
-                signal: abortController.signal,
-                timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
-              });
-              dataSubjects.documents$.next({
-                ...dataSubjects.documents$.getValue(),
-                esqlQueryColumns,
-              });
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.warn('Error fetching ES|QL query columns', e);
-            }
+            const esqlQueryColumns = await getESQLQueryColumns({
+              esqlQuery: query.esql,
+              search: services.data.search.search,
+              variables: currentTab.esqlVariables,
+              signal: abortController.signal,
+              timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+            });
+            dataSubjects.documents$.next({
+              ...dataSubjects.documents$.getValue(),
+              esqlQueryColumns,
+            });
           }
 
           if (!isEsqlQueryWithTransformationalCommand) {
