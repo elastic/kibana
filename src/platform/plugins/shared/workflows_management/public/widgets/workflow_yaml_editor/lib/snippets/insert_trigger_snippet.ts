@@ -63,20 +63,20 @@ function createReplacementRange(model: monaco.editor.ITextModel, lineNumber: num
  */
 function isLineContentEmpty(lineContent: string): boolean {
   const trimmed = lineContent.trim();
-  
+
   if (!trimmed) {
     return true;
   }
-  
+
   const dashOnlyPattern = /^\s*-\s*(#.*)?$/;
   if (dashOnlyPattern.test(trimmed)) {
     return true;
   }
-  
+
   if (trimmed.startsWith('#')) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -89,7 +89,7 @@ function isEmptyItem(item: unknown, model?: monaco.editor.ITextModel): boolean {
   if (!item) {
     return true;
   }
-  
+
   if (model && isNode(item) && item.range) {
     const itemRange = getMonacoRangeFromYamlRange(model, item.range as Range);
     if (itemRange) {
@@ -99,7 +99,7 @@ function isEmptyItem(item: unknown, model?: monaco.editor.ITextModel): boolean {
       }
     }
   }
-  
+
   if (isNode(item) && isMap(item)) {
     if (!('items' in item) || !item.items || item.items.length === 0) {
       return true;
@@ -109,12 +109,12 @@ function isEmptyItem(item: unknown, model?: monaco.editor.ITextModel): boolean {
     );
     return !hasTypeField;
   }
-  
+
   if (isNode(item) && isScalar(item)) {
     const value = item.value;
     return value === null || value === undefined || value === '';
   }
-  
+
   return false;
 }
 
@@ -146,7 +146,7 @@ function findFirstEmptyItem(
         const itemRange = getMonacoRangeFromYamlRange(model, item.range as Range);
         if (itemRange) {
           const lineContent = model.getLineContent(itemRange.startLineNumber);
-          
+
           if (isLineContentEmpty(lineContent)) {
             const indentMatch = lineContent.match(/^(\s*)/);
             const indentLevel = indentMatch ? indentMatch[1].length : 2;
@@ -254,7 +254,7 @@ export function insertTriggerSnippet(
         indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
       }
     } else if (triggersKeyRange) {
-       // Triggers section exists but is completely empty, insert after triggers:
+      // Triggers section exists but is completely empty, insert after triggers:
       insertAtLineNumber = getInsertLineAfterTriggersKey(model, triggersKeyRange, expectedIndent);
       indentLevel = expectedIndent;
     }
