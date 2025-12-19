@@ -37,8 +37,10 @@ export function injectReferences(
   id: string | undefined,
   state: StoredDataControlState,
   refNames: string[],
-  references: Reference[] = []
+  panelReferences: Reference[] = [],
+  containerReferences: Reference[] = []
 ): DataControlState {
+  const references = [...containerReferences, ...panelReferences];
   let { dataViewRefName } = state;
   let dataViewRef: Reference | undefined;
   if (!dataViewRefName && id) {
