@@ -163,5 +163,3 @@ describe('getFavoritesForTypes', () => {
     expect(result.size).toBe(0);
   });
 });
-
-

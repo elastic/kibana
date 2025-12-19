@@ -70,5 +70,3 @@ export const getFavoritesForTypes = async (
 
   return result;
 };
-
-
