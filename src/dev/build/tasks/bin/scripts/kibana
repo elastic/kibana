@@ -53,11 +53,12 @@ if [ "$ELASTIC_CONTAINER" = "true" ] && ! printf '%s' "$ALL_NODE_OPTIONS" | grep
   max_old_space_percentage=75
   heap_mb=
   cgroup_memory_limit_bytes=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null)
-  mem_available_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo 2>/dev/null)
+  mem_total_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null)
   case "$cgroup_memory_limit_bytes" in ''|*[!0-9]*) ;; *) heap_mb=$(( (cgroup_memory_limit_bytes / 1024 / 1024) * max_old_space_percentage / 100 )) ;; esac
-  [ -n "$heap_mb" ] || case "$mem_available_kb" in ''|*[!0-9]*) ;; *) heap_mb=$(( (mem_available_kb / 1024) * max_old_space_percentage / 100 )) ;; esac
+  [ -n "$heap_mb" ] || case "$mem_total_kb" in ''|*[!0-9]*) ;; *) heap_mb=$(( (mem_total_kb / 1024) * max_old_space_percentage / 100 )) ;; esac
   [ "$heap_mb" -gt 4096 ] 2>/dev/null && heap_mb=4096
   [ "$heap_mb" -gt 0 ] 2>/dev/null && ALL_NODE_OPTIONS="$ALL_NODE_OPTIONS --max-old-space-size=$heap_mb"
 fi
 
 NODE_OPTIONS="$ALL_NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/kibana/dist" "${@}"
+q
