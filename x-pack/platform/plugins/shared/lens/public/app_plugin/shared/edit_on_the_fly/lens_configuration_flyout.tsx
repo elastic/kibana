@@ -305,19 +305,25 @@ export function LensEditConfigurationFlyout({
   }, [textBasedMode]);
 
   const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip } = useMemo(() => {
-    const disabled = (tooltip: string = 'The visualization cannot be converted') => ({
+    const disabled = (
+      tooltip: string = i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltip', {
+        defaultMessage: 'This visualization cannot be converted to ES|QL',
+      })
+    ) => ({
       isConvertToEsqlButtonDisabled: true,
       convertToEsqlButtonTooltip: tooltip,
     });
 
     const enabled = () => ({
       isConvertToEsqlButtonDisabled: false,
-      convertToEsqlButtonTooltip: 'Switch to query mode',
+      convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
+        defaultMessage: 'Convert visualization to ES|QL',
+      }),
     });
 
     // Guard: prerequisites
     if (!showConvertToEsqlButton || !activeVisualization || !visualization.state) {
-      return disabled('');
+      return disabled();
     }
 
     const { state } = visualization;
@@ -333,12 +339,20 @@ export function LensEditConfigurationFlyout({
       state.trendlineMetricAccessor &&
       state.trendlineTimeAccessor
     ) {
-      return disabled('Metric visualization with a trend line are not supported in query mode');
+      return disabled(
+        i18n.translate('xpack.lens.config.cannotConvertToEsqlMetricWithTrendlineTooltip', {
+          defaultMessage: 'Metric visualization with a trend line are not supported in query mode',
+        })
+      );
     }
 
     // Guard: layer count
     if (layerIds.length > 1) {
-      return disabled('Multi-layer visualizations cannot be converted to query mode');
+      return disabled(
+        i18n.translate('xpack.lens.config.cannotConvertToEsqlMultilayerTooltip', {
+          defaultMessage: 'Multi-layer visualizations cannot be converted to query mode',
+        })
+      );
     }
 
     // Guard: datasource state exists and has layers
@@ -350,19 +364,19 @@ export function LensEditConfigurationFlyout({
       !('layers' in datasourceState) ||
       !datasourceState.layers
     ) {
-      return disabled('The visualization cannot be converted');
+      return disabled();
     }
 
     // Guard: layer access
     const layerId = layerIds[0];
     const layers = datasourceState.layers as Record<string, FormBasedLayer>;
     if (!layerId || !layers[layerId]) {
-      return disabled('');
+      return disabled();
     }
 
     const singleLayer = layers[layerId];
     if (!singleLayer?.columnOrder || !singleLayer?.columns) {
-      return disabled('');
+      return disabled();
     }
 
     // Main logic: compute esqlLayer
@@ -387,7 +401,11 @@ export function LensEditConfigurationFlyout({
 
     return esqlLayer
       ? enabled()
-      : disabled('The visualization has unsupported settings for query mode');
+      : disabled(
+          i18n.translate('xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip', {
+            defaultMessage: 'The visualization has unsupported settings for query mode',
+          })
+        );
   }, [
     coreStart.uiSettings,
     datasourceId,
