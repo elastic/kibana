@@ -90,7 +90,7 @@ export async function getSuggestionsForHint(
   const resolversEntry = parametersFromHintsResolvers[hint.entityType];
 
   if (!resolversEntry) {
-    return;
+    throw new Error(`No resolvers found for hint type: ${hint.entityType}`);
   }
 
   const { suggestionResolver, contextResolver } = resolversEntry;
