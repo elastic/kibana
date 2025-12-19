@@ -75,24 +75,17 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   useEffect(() => {
     if (showPreview && tabRef.current) {
       const rect = tabRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
 
       setTabPreviewData(previewData);
 
       if (position === 'left') {
         // Position to the left of the element
         let leftPosition = rect.left + window.scrollX - PREVIEW_WIDTH - euiTheme.base;
-        let topPosition = rect.top + window.scrollY;
+        const topPosition = rect.top + window.scrollY;
 
         // Ensure preview doesn't go off left edge
         if (leftPosition < window.scrollX) {
           leftPosition = window.scrollX + euiTheme.base;
-        }
-
-        // Ensure preview doesn't go off bottom edge
-        const previewHeight = 200; // Approximate height — revisit
-        if (topPosition + previewHeight > windowHeight + window.scrollY) {
-          topPosition = windowHeight + window.scrollY - previewHeight - euiTheme.base;
         }
 
         setTabPosition({
