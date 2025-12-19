@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { EuiBadgeProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiLink,
@@ -31,13 +30,13 @@ import type { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasti
 import type { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
 import { usePhaseColors } from '../../application/lib';
-interface Props {
+
+interface IndexLifecycleSummaryProps {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
-  euiTheme: EuiThemeComputed;
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+export const IndexLifecycleSummary = ({ index, getUrlForApp }: IndexLifecycleSummaryProps) => {
   const { ilm: ilmData } = index;
   // only ILM managed indices render the ILM tab
   const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
@@ -256,7 +255,9 @@ export const indexLifecycleTab: IndexDetailsTab = {
     />
   ),
   order: 50,
-  renderTabContent: IndexLifecycleSummary,
+  renderTabContent: ({ index, getUrlForApp }) => (
+    <IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />
+  ),
   shouldRenderTab: ({ index }) => {
     return !!index.ilm && index.ilm.managed;
   },

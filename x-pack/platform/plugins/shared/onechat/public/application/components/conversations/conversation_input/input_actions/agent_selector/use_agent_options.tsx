@@ -9,7 +9,6 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHighlight,
   EuiIconTip,
   EuiText,
   EuiTextColor,
@@ -26,7 +25,6 @@ type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
 
 interface AgentOptionProps {
   agent?: AgentDefinition;
-  searchValue: string;
 }
 
 const usePaddingStyles = () => {
@@ -52,7 +50,7 @@ const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => 
   );
 };
 
-const AgentOption: React.FC<AgentOptionProps> = ({ agent, searchValue }) => {
+const AgentOption: React.FC<AgentOptionProps> = ({ agent }) => {
   const optionStyles = usePaddingStyles();
   if (!agent) {
     return null;
@@ -64,7 +62,7 @@ const AgentOption: React.FC<AgentOptionProps> = ({ agent, searchValue }) => {
         <h4>
           <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem component="span" grow={false}>
-              <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
+              {agent.name}
             </EuiFlexItem>
             {agent.readonly && (
               <EuiFlexItem component="span" grow={false}>
@@ -86,9 +84,7 @@ const AgentOption: React.FC<AgentOptionProps> = ({ agent, searchValue }) => {
       </EuiText>
       <EuiText size="s" css={lineClampStyles(3)}>
         <p>
-          <EuiTextColor color="subdued">
-            <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
-          </EuiTextColor>
+          <EuiTextColor color="subdued">{agent.description}</EuiTextColor>
         </p>
       </EuiText>
     </>

@@ -11,10 +11,15 @@ import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import { useCallback, useMemo } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableProps,
+  BulkActionsPanelConfig,
+  ItemsPanelConfig,
+} from '@kbn/response-ops-alerts-table/types';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
@@ -64,7 +69,7 @@ export const useBulkActionsByTableType = (
   tableId: TableId,
   query: AlertsTableProps['query'],
   refresh: () => void
-) => {
+): [ItemsPanelConfig, ...BulkActionsPanelConfig[]] => {
   const { from, to } = useGlobalTime();
   const filters = useMemo(() => {
     return getFiltersForDSLQuery(query);
@@ -112,7 +117,15 @@ export const useBulkActionsByTableType = (
     };
   }, [refresh]);
 
-  const timelineAction = useAddBulkToTimelineAction(timelineActionParams);
+  const {
+    timelinePrivileges: { read: hasTimelineReadPrivilege },
+  } = useUserPrivileges();
+  const addBulkToTimelineAction = useAddBulkToTimelineAction(timelineActionParams);
+
+  const timelineActions = useMemo(
+    () => (hasTimelineReadPrivilege ? [addBulkToTimelineAction] : []),
+    [hasTimelineReadPrivilege, addBulkToTimelineAction]
+  );
 
   const { items: alertActions, panels: alertActionsPanels } =
     useBulkAlertActionItems(alertActionParams);
@@ -120,8 +133,8 @@ export const useBulkActionsByTableType = (
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
   const items = useMemo(() => {
-    return [...alertActions, timelineAction, ...alertTagsItems, ...alertAssigneesItems];
-  }, [alertActions, alertTagsItems, timelineAction, alertAssigneesItems]);
+    return [...alertActions, ...timelineActions, ...alertTagsItems, ...alertAssigneesItems];
+  }, [alertActions, alertTagsItems, timelineActions, alertAssigneesItems]);
   return useMemo(() => {
     return [{ id: 0, items }, ...alertActionsPanels, ...alertTagsPanels, ...alertAssigneesPanels];
   }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels]);

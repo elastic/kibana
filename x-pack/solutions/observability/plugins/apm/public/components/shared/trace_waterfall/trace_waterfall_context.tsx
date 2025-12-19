@@ -7,6 +7,7 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { EuiAccordionProps } from '@elastic/eui';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
@@ -15,6 +16,11 @@ import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
+import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import {
+  getAgentMarks,
+  type AgentMark,
+} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
 export interface TraceWaterfallContextProps {
   duration: number;
@@ -39,6 +45,8 @@ export interface TraceWaterfallContextProps {
   showLegend: boolean;
   serviceName?: string;
   message?: string;
+  errorMarks: ErrorMark[];
+  agentMarks: AgentMark[];
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -58,6 +66,8 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
+  errorMarks: [],
+  agentMarks: [],
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -81,6 +91,8 @@ interface Props {
   showLegend: boolean;
   serviceName?: string;
   isFiltered?: boolean;
+  errors?: Error[];
+  agentMarks?: Record<string, number>;
 }
 
 export function TraceWaterfallContextProvider({
@@ -96,12 +108,25 @@ export function TraceWaterfallContextProvider({
   showLegend,
   serviceName,
   isFiltered,
+  errors,
+  agentMarks,
 }: Props) {
-  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState, message } =
-    useTraceWaterfall({
-      traceItems,
-      isFiltered,
-    });
+  const {
+    duration,
+    traceWaterfall,
+    maxDepth,
+    rootItem,
+    legends,
+    colorBy,
+    traceState,
+    message,
+    errorMarks,
+  } = useTraceWaterfall({
+    traceItems,
+    isFiltered,
+    errors,
+    onErrorClick,
+  });
 
   const [isAccordionOpen, setAccordionOpen] = useState(true);
   const [accordionStatesMap, setAccordionStateMap] = useState<
@@ -164,6 +189,8 @@ export function TraceWaterfallContextProvider({
         showLegend,
         serviceName,
         message,
+        errorMarks,
+        agentMarks: getAgentMarks(agentMarks),
       }}
     >
       {children}

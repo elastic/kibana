@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
 import img from './portable_dashboard_image.png';
 
@@ -25,6 +26,7 @@ export interface StartDeps {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export class PortableDashboardsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -54,7 +56,7 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
   }
 
   public async start(core: CoreStart, deps: StartDeps) {
-    deps.dashboard.registerDashboardPanelSettings(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
+    deps.presentationUtil.registerPanelPlacementSettings(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
       placementSettings: {
         width: 48,
         height: 12,

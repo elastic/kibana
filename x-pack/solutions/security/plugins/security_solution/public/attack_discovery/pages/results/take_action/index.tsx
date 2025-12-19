@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
@@ -210,11 +211,15 @@ const TakeActionComponent: React.FC<Props> = ({
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
-
+  const reportAddToChatClick = useReportAddToChat();
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
+    reportAddToChatClick({
+      pathway: 'attack_discovery_take_action',
+      attachments: ['alert'],
+    });
     openAgentBuilderFlyout();
-  }, [closePopover, openAgentBuilderFlyout]);
+  }, [closePopover, openAgentBuilderFlyout, reportAddToChatClick]);
 
   // button for the popover:
   const button = useMemo(

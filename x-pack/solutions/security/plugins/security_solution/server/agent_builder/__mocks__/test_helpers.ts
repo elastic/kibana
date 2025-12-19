@@ -16,6 +16,8 @@ import type {
   ScopedRunner,
   ToolResultStore,
   ToolEventEmitter,
+  ToolPromptManager,
+  ToolStateManager,
 } from '@kbn/onechat-server';
 
 /**
@@ -84,6 +86,18 @@ const createMockToolEventEmitter = (): ToolEventEmitter =>
     reportProgress: jest.fn(),
   } as unknown as ToolEventEmitter);
 
+const createMockToolPromptManager = (): ToolPromptManager =>
+  ({
+    checkConfirmationStatus: jest.fn(),
+    askForConfirmation: jest.fn(),
+  } as unknown as ToolPromptManager);
+
+const createMockToolStateManager = (): ToolStateManager =>
+  ({
+    getState: jest.fn(),
+    setState: jest.fn(),
+  } as unknown as ToolStateManager);
+
 /**
  * Creates a tool handler context object
  */
@@ -103,6 +117,8 @@ export const createToolHandlerContext = (
     runner: additionalContext.runner ?? createMockScopedRunner(),
     resultStore: additionalContext.resultStore ?? createMockToolResultStore(),
     events: additionalContext.events ?? createMockToolEventEmitter(),
+    prompts: additionalContext.prompts ?? createMockToolPromptManager(),
+    stateManager: additionalContext.stateManager ?? createMockToolStateManager(),
   };
 };
 

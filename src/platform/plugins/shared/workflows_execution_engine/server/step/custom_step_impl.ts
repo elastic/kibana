@@ -75,6 +75,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   private createHandlerContext(input: unknown): StepHandlerContext {
     return {
       input,
+      config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
       contextManager: {
         getContext: () => {
           return this.stepExecutionRuntime.contextManager.getContext();

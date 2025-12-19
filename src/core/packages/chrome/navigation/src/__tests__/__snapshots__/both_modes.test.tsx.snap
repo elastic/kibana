@@ -8,7 +8,7 @@ exports[`Both modes should render the side navigation 1`] = `
     id="kbnChromeNav-root"
   >
     <div
-      class="kbnChromeNav-root css-1rb2acp-getWrapperStyles"
+      class="kbnChromeNav-root css-17cpa09-getWrapperStyles"
     >
       <div
         class="css-1aomi1g-wrapperStyles"
@@ -33,7 +33,7 @@ exports[`Both modes should render the side navigation 1`] = `
             />
           </div>
           <div
-            class="euiText emotion-euiText-xs-euiTextAlign-center-textStyles-labelStyles"
+            class="euiText emotion-euiText-m-euiTextAlign-center-textStyles-labelStyles"
           >
             Solution
           </div>
@@ -81,7 +81,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Dashboards
               </div>
@@ -117,7 +117,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Discover
               </div>
@@ -161,7 +161,7 @@ exports[`Both modes should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-xs-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Apps
               </div>

@@ -17,7 +17,7 @@ import {
   type ESQLAstQueryExpression,
   type ESQLSingleAstItem,
   type ESQLSource,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import type { monaco } from '@kbn/monaco';
 
 interface SelectedJoin {

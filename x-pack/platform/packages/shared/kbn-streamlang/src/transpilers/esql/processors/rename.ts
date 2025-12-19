@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import type { RenameProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildOverrideFilter } from './common';

@@ -40,6 +40,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
 
   return deepFreeze({
     settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference`,
+    aiAssistantSettings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/ai-assistant-settings`,
     elasticStackGetStarted: isServerless
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,
@@ -857,9 +858,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lowercase: `${ELASTIC_DOCS}reference/enrich-processor/lowercase-processor`,
       network: `${ELASTIC_DOCS}reference/enrich-processor/network-direction-processor`,
       pipeline: `${ELASTIC_DOCS}reference/enrich-processor/pipeline-processor`,
-      pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines`,
+      pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/readable-maintainable-ingest-pipelines`,
+      pipelineCreate: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/readable-maintainable-ingest-pipelines`,
       csvPipelines: `${ELASTIC_DOCS}reference/ecs/ecs-converting`,
-      pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#handling-pipeline-failures`,
+      pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/error-handling`,
       conditionalProcessor: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#conditionally-run-processor`,
       processors: `${ELASTIC_DOCS}reference/enrich-processor`,
       arrayOrJson: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-array-json-handling`,
@@ -1059,6 +1061,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mcpServer: `${ELASTIC_DOCS}solutions/search/agent-builder/mcp-server`,
       a2aServer: `${ELASTIC_DOCS}solutions/search/agent-builder/a2a-server`,
       limitationsKnownIssues: `${ELASTIC_DOCS}solutions/search/agent-builder/limitations-known-issues`,
+      learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-agent-or-ai-assistant`,
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless

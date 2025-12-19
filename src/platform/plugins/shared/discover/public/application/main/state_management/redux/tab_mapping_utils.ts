@@ -44,6 +44,7 @@ export const fromSavedObjectTabToTabState = ({
     rowsPerPage: tab.rowsPerPage,
     sampleSize: tab.sampleSize,
     breakdownField: tab.breakdownField,
+    interval: tab.chartInterval,
     density: tab.density,
   };
 
@@ -101,6 +102,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   rowsPerPage: tab.rowsPerPage,
   sampleSize: tab.sampleSize,
   breakdownField: tab.breakdownField,
+  chartInterval: tab.chartInterval,
   density: tab.density,
   visContext: tab.visContext,
   controlGroupJson: tab.controlGroupJson,
@@ -140,6 +142,7 @@ export const fromTabStateToSavedObjectTab = ({
         ? tab.appState.sampleSize
         : undefined,
     breakdownField: tab.appState.breakdownField,
+    chartInterval: tab.appState.interval,
     density: tab.appState.density,
     visContext: tab.initialInternalState?.visContext,
     controlGroupJson: tab.initialInternalState?.controlGroupJson,
@@ -180,6 +183,7 @@ export const fromSavedSearchToSavedObjectTab = ({
         ? savedSearch.sampleSize
         : undefined,
     breakdownField: savedSearch.breakdownField,
+    chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
     visContext: savedSearch.visContext,
     controlGroupJson: savedSearch.controlGroupJson,

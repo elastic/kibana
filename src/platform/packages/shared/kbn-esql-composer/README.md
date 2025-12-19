@@ -1,6 +1,6 @@
 # ESQL Composer for Kibana
 
-This package provides a high-level, functional ESQL composer for safely and programmatically building Elasticsearch queries. It serves as a user-friendly abstraction over the `@kbn/esql-ast` package.
+This package provides a high-level, functional ESQL composer for safely and programmatically building Elasticsearch queries. It serves as a user-friendly abstraction over the `@kbn/esql-language` package.
 
 This ESQL composer is designed to be used by importing individual command functions (`from`, `where`, `stats`, etc.) and chaining them together to form a query pipeline.
 

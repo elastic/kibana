@@ -36,6 +36,12 @@ export type {
   OnExpressionInputEditorDidMount,
 } from './components/types';
 
+export {
+  PanelPlacementStrategy,
+  type PanelSettings,
+  type PanelResizeSettings,
+} from './registries/panel_placement';
+
 /**
  * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows
  * the Monaco Editor to understand the functions and their arguments.

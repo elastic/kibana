@@ -157,7 +157,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
               <EuiFlexItem grow={false}>
                 {canDelete && (
                   <EuiButton
-                    data-test-subj="streamsAppProcessorConfigurationButton"
+                    data-test-subj="streamsAppProcessorConfigurationDeleteButton"
                     data-stream-type={streamType}
                     color="danger"
                     onClick={handleDelete}

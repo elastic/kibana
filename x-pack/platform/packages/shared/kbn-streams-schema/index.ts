@@ -141,6 +141,7 @@ export {
   type SystemFeature,
   type FeatureWithFilter,
   type FeatureType,
+  isFeature,
   featureSchema,
   featureTypeSchema,
   featureWithFilterSchema,

@@ -7,7 +7,11 @@
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { PutSLOSettingsParams, PutSLOSettingsResponse } from '@kbn/slo-schema';
+import type {
+  PutServerlessSLOSettingsParams,
+  PutSLOSettingsParams,
+  PutSLOSettingsResponse,
+} from '@kbn/slo-schema';
 import { useMutation } from '@kbn/react-query';
 import { paths } from '../../../../common/locators/paths';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -23,7 +27,11 @@ export function usePutSloSettings() {
   } = useKibana().services;
   const { sloClient } = usePluginContext();
 
-  return useMutation<PutSLOSettingsResponse, ServerError, { settings: PutSLOSettingsParams }>(
+  return useMutation<
+    PutSLOSettingsResponse,
+    ServerError,
+    { settings: PutSLOSettingsParams | PutServerlessSLOSettingsParams }
+  >(
     ['putSloSettings'],
     ({ settings }) => {
       return sloClient.fetch(`PUT /internal/slo/settings`, {

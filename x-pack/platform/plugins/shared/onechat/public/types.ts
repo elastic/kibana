@@ -26,6 +26,7 @@ import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plu
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
@@ -48,7 +49,7 @@ export interface OnechatSetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
-  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -61,6 +62,7 @@ export interface OnechatStartDependencies {
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface OnechatPluginSetup {}
@@ -99,6 +101,12 @@ export interface OnechatPluginStart {
    * ```
    */
   openConversationFlyout: (options?: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  /**
+   * Toggles the conversation flyout.
+   *
+   * If the flyout is open, it will be closed. Otherwise, it will be opened.
+   */
+  toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => void;
   setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
 }

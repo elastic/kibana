@@ -90,7 +90,7 @@ describe('AIAssistantHeaderButton', () => {
     });
 
     it('should render modal title and description', () => {
-      expect(screen.getByText('Select an AI chat experience')).toBeInTheDocument();
+      expect(screen.getByText('Select a chat experience')).toBeInTheDocument();
       expect(screen.getByText(/Choose which chat experience/i)).toBeInTheDocument();
     });
 

@@ -21,6 +21,14 @@ import type {
   ListWorkflowsResponse,
   GetWorkflowResponse,
   GetToolTypeInfoResponse,
+  ListConnectorsResponse,
+  ListMcpToolsResponse,
+  GetConnectorResponse,
+  GetToolHealthResponse,
+  ListToolHealthResponse,
+  ListMcpToolsHealthResponse,
+  BulkCreateMcpToolsResponse,
+  ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -100,5 +108,70 @@ export class ToolsService {
       `${internalApiPath}/tools/_types_info`
     );
     return response.toolTypes;
+  }
+
+  async listConnectors({ type }: { type?: string }) {
+    return await this.http.get<ListConnectorsResponse>(
+      `${internalApiPath}/tools/_list_connectors`,
+      { query: { type } }
+    );
+  }
+
+  async getConnector({ connectorId }: { connectorId: string }) {
+    return await this.http.get<GetConnectorResponse>(
+      `${internalApiPath}/tools/_get_connector/${connectorId}`
+    );
+  }
+
+  async listMcpTools({ connectorId }: { connectorId: string }) {
+    return await this.http.get<ListMcpToolsResponse>(`${internalApiPath}/tools/_list_mcp_tools`, {
+      query: { connectorId },
+    });
+  }
+
+  async listToolsHealth() {
+    return await this.http.get<ListToolHealthResponse>(`${internalApiPath}/tools/_health`);
+  }
+
+  async getToolHealth({ toolId }: { toolId: string }) {
+    return await this.http.get<GetToolHealthResponse>(`${internalApiPath}/tools/${toolId}/_health`);
+  }
+
+  async listMcpToolsHealth() {
+    return await this.http.get<ListMcpToolsHealthResponse>(`${internalApiPath}/tools/_mcp_health`);
+  }
+
+  async bulkCreateMcpTools({
+    connectorId,
+    tools,
+    namespace,
+    tags,
+    skipExisting = true,
+  }: {
+    connectorId: string;
+    tools: Array<{ name: string; description?: string }>;
+    namespace?: string;
+    tags?: string[];
+    skipExisting?: boolean;
+  }) {
+    return await this.http.post<BulkCreateMcpToolsResponse>(
+      `${internalApiPath}/tools/_bulk_create_mcp`,
+      {
+        body: JSON.stringify({
+          connector_id: connectorId,
+          tools,
+          namespace,
+          tags,
+          skip_existing: skipExisting,
+        }),
+      }
+    );
+  }
+
+  async validateNamespace({ namespace }: { namespace: string }) {
+    return await this.http.get<ValidateNamespaceResponse>(
+      `${internalApiPath}/tools/_validate_namespace`,
+      { query: { namespace } }
+    );
   }
 }

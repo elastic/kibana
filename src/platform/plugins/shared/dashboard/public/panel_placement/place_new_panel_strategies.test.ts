@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import { getMockLayout, getMockLayoutWithSections } from '../mocks';
-import { PanelPlacementStrategy } from '../plugin_constants';
 import { runPanelPlacementStrategy } from './place_new_panel_strategies';
 
 describe('new panel placement strategies', () => {

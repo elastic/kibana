@@ -17,6 +17,16 @@
 import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
+export type Matcher = z.infer<typeof Matcher>;
+export const Matcher = z.object({
+  fields: z.array(z.string()),
+  /** 
+      * Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
+ 
+      */
+  values: z.union([z.array(z.string()), z.array(z.boolean())]),
+});
+
 export type Integrations = z.infer<typeof Integrations>;
 export const Integrations = z.object({
   /**
@@ -49,14 +59,7 @@ export const CreateMonitoringEntitySource = z.object({
   enabled: z.boolean().optional(),
   error: z.string().optional(),
   integrationName: z.string().optional(),
-  matchers: z
-    .array(
-      z.object({
-        fields: z.array(z.string()),
-        values: z.array(z.string()),
-      })
-    )
-    .optional(),
+  matchers: z.array(Matcher).optional(),
   filter: z
     .object({
       kuery: z.union([z.string(), z.object({})]).optional(),
@@ -74,26 +77,13 @@ export const UpdatedMonitoringEntitySource = z.object({
   enabled: z.boolean().optional(),
   error: z.string().optional(),
   integrationName: z.string().optional(),
-  matchers: z
-    .array(
-      z.object({
-        fields: z.array(z.string()),
-        values: z.array(z.string()),
-      })
-    )
-    .optional(),
+  matchers: z.array(Matcher).optional(),
   filter: z
     .object({
       kuery: z.union([z.string(), z.object({})]).optional(),
     })
     .optional(),
   integrations: Integrations.optional(),
-});
-
-export type Matcher = z.infer<typeof Matcher>;
-export const Matcher = z.object({
-  fields: z.array(z.string()),
-  values: z.array(z.string()),
 });
 
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;

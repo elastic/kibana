@@ -19,6 +19,7 @@ import type { EmbeddableConversationProps } from '../embeddable/types';
 const htmlId = htmlIdGenerator('onechat-conversation-flyout');
 
 const FLYOUT_SIZE = 600;
+const FLYOUT_MIN_WIDTH = 400;
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
@@ -86,6 +87,7 @@ export function openConversationFlyout(
       maxWidth: 1200, // Maximum width for resizable flyout to prevent NaN error
       css: css`
         z-index: ${euiThemeVars.euiZFlyout + 3};
+        min-width: ${FLYOUT_MIN_WIDTH}px;
       `,
     }
   );

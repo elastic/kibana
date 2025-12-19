@@ -228,7 +228,7 @@ const searchFieldQuery: estypes.QueryDslQueryContainer[] = [
     nested: {
       path: 'cases.observables',
       query: {
-        term: { 'cases.observables.value': search },
+        term: { 'cases.observables.value': { value: search, case_insensitive: true } },
       },
     },
   },
@@ -236,7 +236,7 @@ const searchFieldQuery: estypes.QueryDslQueryContainer[] = [
     nested: {
       path: 'cases.customFields',
       query: {
-        term: { 'cases.customFields.value': search },
+        term: { 'cases.customFields.value': { value: search, case_insensitive: true } },
       },
     },
   },

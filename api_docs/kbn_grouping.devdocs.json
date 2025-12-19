@@ -250,6 +250,22 @@
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grouping",
+            "id": "def-common.GroupSettings.enforcedGroups",
+            "type": "Array",
+            "tags": [],
+            "label": "enforcedGroups",
+            "description": [
+              "\nArray of group keys that are enforced and cannot be deselected by users.\nEnforced groups are automatically added to activeGroups on initialization.\nConstraints:\n- 'none' cannot be in enforcedGroups\n- enforcedGroups cannot be used when maxGroupingLevels === 1 (toggle mode)\n- enforcedGroups.length must be <= maxGroupingLevels"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

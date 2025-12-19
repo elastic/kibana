@@ -120,12 +120,12 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.services.title"
             defaultMessage="Services"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       {serviceCards.map((service, index) => (

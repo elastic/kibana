@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction } from '@kbn/esql-ast';
-import { Parser, Walker } from '@kbn/esql-ast';
+import type { ESQLFunction } from '@kbn/esql-language';
+import { Parser, Walker } from '@kbn/esql-language';
 import { sanitazeESQLInput } from '../sanitaze_input';
 import {
   getOperator,

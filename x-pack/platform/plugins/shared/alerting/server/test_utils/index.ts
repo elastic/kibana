@@ -72,7 +72,6 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
       },
     },
     rulesSettings: { enabled: true, cacheInterval: 60000 },
-    maintenanceWindow: { enabled: true },
     ...overwrites,
   };
 }

@@ -13,3 +13,4 @@ export { OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID } from './get_anomaly_
 export { OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/get_services';
 export { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from './get_downstream_dependencies/get_downstream_dependencies';
 export { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from './get_correlated_logs/get_correlated_logs';
+export { OBSERVABILITY_GET_HOSTS_TOOL_ID } from './get_hosts/get_hosts';

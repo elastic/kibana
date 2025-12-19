@@ -39,7 +39,8 @@
       "savedObjectsTaggingOss",
       "serverless",
       "noDataPage",
-      "embeddableEnhanced"
+      "embeddableEnhanced",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaUtils",

@@ -55,7 +55,7 @@ const exportContentRoute = createServerRoute({
   async handler({ params, request, response, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { queryClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -67,10 +67,10 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const queryLinks = await assetClient.getAssetLinks(
-      [params.path.name, ...descendants.map((stream) => stream.name)],
-      ['query']
-    );
+    const queryLinks = await queryClient.getQueryLinks([
+      params.path.name,
+      ...descendants.map((stream) => stream.name),
+    ]);
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
 
     const exportedTree = asTree({
@@ -162,7 +162,7 @@ const importContentRoute = createServerRoute({
   async handler({ params, request, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { queryClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -172,10 +172,10 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const queryLinks = await assetClient.getAssetLinks(
-      [params.path.name, ...descendants.map(({ name }) => name)],
-      ['query']
-    );
+    const queryLinks = await queryClient.getQueryLinks([
+      params.path.name,
+      ...descendants.map(({ name }) => name),
+    ]);
 
     const existingTree = asTree({
       root: params.path.name,

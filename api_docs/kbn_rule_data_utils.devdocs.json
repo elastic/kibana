@@ -21,6 +21,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.getCreateRuleFromTemplateRoute",
+        "type": "Function",
+        "tags": [],
+        "label": "getCreateRuleFromTemplateRoute",
+        "description": [],
+        "signature": [
+          "(templateId: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.getCreateRuleFromTemplateRoute.$1",
+            "type": "string",
+            "tags": [],
+            "label": "templateId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.getCreateRuleRoute",
         "type": "Function",
         "tags": [],

@@ -43,32 +43,9 @@ export const ACTION_TYPE_TITLE = i18n.translate(
 export const ALLOWED_CHANNELS = i18n.translate(
   'xpack.stackConnectors.components.slack_api.allowedChannelsLabel',
   {
-    defaultMessage: 'Channel IDs',
+    defaultMessage: 'Allowed channel names',
   }
 );
-export const SUCCESS_FETCH_CHANNELS = i18n.translate(
-  'xpack.stackConnectors.components.slack_api.successFetchChannelsText',
-  {
-    defaultMessage: 'Fetch all channels',
-  }
-);
-
-export const ERROR_VALID_CHANNELS = i18n.translate(
-  'xpack.stackConnectors.components.slack_api.errorValidChannelsText',
-  {
-    defaultMessage:
-      'Cannot valid channels, please check the validity of your token or your channel',
-  }
-);
-
-export const ERROR_INVALID_CHANNELS = (invalidChannels: string[]) =>
-  i18n.translate('xpack.stackConnectors.components.slack_api.errorInvalidChannelsText', {
-    defaultMessage:
-      'Cannot validate channel ID "{channels}", please check the validity of your token and/or the channel ID',
-    values: {
-      channels: invalidChannels.join(', '),
-    },
-  });
 
 export const JSON_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.slack_api.error.slackBlockkitJsonRequired',
@@ -81,5 +58,19 @@ export const BLOCKS_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.slack_api.error.slackBlockkitBlockRequired',
   {
     defaultMessage: `JSON must contain field "blocks".`,
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const CHANNEL_NAME_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.channelNameError',
+  {
+    defaultMessage: 'Channel name must start with a #',
   }
 );

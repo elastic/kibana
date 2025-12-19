@@ -29,5 +29,18 @@ export const queryKeys = {
       byId: (workflowId?: string) => ['tools', 'workflows', workflowId],
       list: () => ['tools', 'workflows', 'list'] as const,
     },
+    connectors: {
+      list: (type?: string) => ['tools', 'connectors', 'list', type],
+      get: (connectorId: string) => ['tools', 'connectors', 'get', connectorId],
+      listMcpTools: (connectorId: string) => ['tools', 'connectors', 'listMcpTools', connectorId],
+    },
+    health: {
+      list: () => ['tools', 'health', 'list'] as const,
+      byId: (toolId: string) => ['tools', 'health', toolId],
+      mcp: () => ['tools', 'health', 'mcp'] as const,
+    },
+    namespace: {
+      validate: (namespace: string) => ['tools', 'namespace', 'validate', namespace] as const,
+    },
   },
 };

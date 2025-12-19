@@ -95,6 +95,7 @@
     "@kbn/onechat-common",
     "@kbn/onechat-plugin",
     "@kbn/aiops-log-rate-analysis",
-    "@kbn/observability-agent-builder-plugin"
+    "@kbn/observability-agent-builder-plugin",
+    "@kbn/product-doc-common"
   ]
 }

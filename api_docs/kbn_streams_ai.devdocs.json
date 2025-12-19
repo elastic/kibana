@@ -1238,7 +1238,7 @@
           "\nGenerate a natural-language description"
         ],
         "signature": [
-          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n}: { stream: ",
+          "({\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n  systemPromptOverride,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -1272,7 +1272,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => Promise<{ description: string; tokensUsed?: ",
+          "; systemPromptOverride?: string | undefined; }) => Promise<{ description: string; tokensUsed?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1291,7 +1291,7 @@
             "id": "def-server.generateStreamDescription.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n}",
+            "label": "{\n  stream,\n  feature,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  signal,\n  logger,\n  systemPromptOverride,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
             "deprecated": false,
@@ -2410,6 +2410,20 @@
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.generateStreamDescription.$1.systemPromptOverride",
+                "type": "string",
+                "tags": [],
+                "label": "systemPromptOverride",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/description/generate_description.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2427,7 +2441,7 @@
           "\nIdentifies features in a stream, by:\n- describing the dataset (via sampled documents)\n- clustering docs together on similarity\n- asking the LLM to identify features by creating\nqueries and validating the resulting clusters"
         ],
         "signature": [
-          "({\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  analysis,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n  systemPromptOverride,\n}: ",
+          "({\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  analysis,\n  featurePromptOverride,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n}: ",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
@@ -2462,7 +2476,7 @@
             "id": "def-server.identifySystemFeatures.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  analysis,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n  systemPromptOverride,\n}",
+            "label": "{\n  stream,\n  features,\n  start,\n  end,\n  esClient,\n  inferenceClient,\n  logger,\n  signal,\n  analysis,\n  featurePromptOverride,\n  dropUnmapped = false,\n  maxSteps: initialMaxSteps,\n}",
             "description": [],
             "signature": [
               {
@@ -6158,10 +6172,24 @@
           },
           {
             "parentPluginId": "@kbn/streams-ai",
-            "id": "def-server.IdentifyFeaturesOptions.systemPromptOverride",
+            "id": "def-server.IdentifyFeaturesOptions.featurePromptOverride",
             "type": "string",
             "tags": [],
-            "label": "systemPromptOverride",
+            "label": "featurePromptOverride",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.IdentifyFeaturesOptions.descriptionPromptOverride",
+            "type": "string",
+            "tags": [],
+            "label": "descriptionPromptOverride",
             "description": [],
             "signature": [
               "string | undefined"

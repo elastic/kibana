@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-language';
 import type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParamValue } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { getESQLQueryVariables } from '@kbn/esql-utils';

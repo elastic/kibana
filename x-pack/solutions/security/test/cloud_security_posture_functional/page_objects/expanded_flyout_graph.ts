@@ -34,6 +34,7 @@ const {
   GRAPH_IPS_POPOVER_IP_ID,
   PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
+  GRAPH_CALLOUT_TEST_ID,
   GRAPH_NODE_ENTITY_DETAILS_ID,
   GRAPH_NODE_ENTITY_TAG_TEXT_ID,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
@@ -245,6 +246,19 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       const ipText = await popoverContent.getVisibleText();
       expect(ipText).to.contain(expectedIp);
     }
+  }
+
+  async assertCalloutVisible(): Promise<void> {
+    await this.testSubjects.existOrFail(GRAPH_CALLOUT_TEST_ID, {
+      timeout: 10000,
+    });
+  }
+
+  async dismissCallout(): Promise<void> {
+    const callout = await this.testSubjects.find(GRAPH_CALLOUT_TEST_ID);
+    const dismissButton = await callout.findByTestSubject('euiDismissCalloutButton');
+    await dismissButton.click();
+    await this.testSubjects.missingOrFail(GRAPH_CALLOUT_TEST_ID);
   }
 
   async assertNodeEntityTag(nodeId: string, expectedTagValue: string): Promise<void> {

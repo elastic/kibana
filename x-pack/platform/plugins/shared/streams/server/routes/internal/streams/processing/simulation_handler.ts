@@ -495,6 +495,7 @@ const computePipelineSimulationResult = (
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
     const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
+    const processedBy = collectProcessedByProcessorIds(pipelineDocResult.processor_results);
 
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
@@ -539,6 +540,7 @@ const computePipelineSimulationResult = (
     return {
       detected_fields: diff.detected_fields,
       errors,
+      processed_by: processedBy,
       status,
       value,
     };
@@ -725,6 +727,22 @@ const computeSimulationDocDiff = (
   }
 
   return diffResult;
+};
+
+const collectProcessedByProcessorIds = (
+  processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results']
+) => {
+  const processedBy = new Set<string>();
+
+  processorResults.forEach((processor) => {
+    if (!processor.tag || isSkippedProcessor(processor)) {
+      return;
+    }
+
+    processedBy.add(processor.tag);
+  });
+
+  return Array.from(processedBy);
 };
 
 const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {

@@ -30,6 +30,6 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'onechat.runAgent',
-    handlerHash: '4f61ed4415041b7423c43fb4a2ef0d19032360092cef14b99587c2003ba7667e',
+    handlerHash: '601727d71e669530e8ba222ae72d3c8a549145d3ea2e8f6a3dd5109d93e1ceff',
   },
 ];

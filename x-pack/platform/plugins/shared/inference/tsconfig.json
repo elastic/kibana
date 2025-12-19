@@ -19,8 +19,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-language",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/babel-register",

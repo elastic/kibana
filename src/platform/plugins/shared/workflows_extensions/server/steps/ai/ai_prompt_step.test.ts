@@ -77,6 +77,7 @@ describe('aiPromptStepDefinition', () => {
 
     // Mock step handler context
     mockContext = {
+      config: {},
       input: {
         prompt: 'Test prompt',
         connectorId: 'test-connector-id',

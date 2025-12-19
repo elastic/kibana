@@ -39,7 +39,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/licensing-plugin'
   - '@kbn/projects-solutions-groups'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/presentation-util'
   - '@kbn/content-management-plugin'
   - '@kbn/index-editor'

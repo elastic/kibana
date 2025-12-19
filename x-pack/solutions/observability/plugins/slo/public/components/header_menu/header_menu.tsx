@@ -17,7 +17,7 @@ import { FeedbackButton } from '../../pages/slos/components/common/feedback_butt
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme, docLinks } = useKibana().services;
 
-  const { appMountParameters, isServerless } = usePluginContext();
+  const { appMountParameters } = usePluginContext();
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
@@ -40,16 +40,14 @@ export function HeaderMenu(): React.ReactElement | null {
                 defaultMessage: 'SLO documentation',
               })}
             </EuiHeaderLink>
-            {!isServerless && (
-              <EuiHeaderLink
-                color="primary"
-                href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
-              >
-                {i18n.translate('xpack.slo.headerMenu.settings', {
-                  defaultMessage: 'Settings',
-                })}
-              </EuiHeaderLink>
-            )}
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
+            >
+              {i18n.translate('xpack.slo.headerMenu.settings', {
+                defaultMessage: 'Settings',
+              })}
+            </EuiHeaderLink>
             <EuiHeaderLink color="primary" href={http.basePath.prepend('/app/slos/management')}>
               {i18n.translate('xpack.slo.home.manage', {
                 defaultMessage: 'Manage SLOs',

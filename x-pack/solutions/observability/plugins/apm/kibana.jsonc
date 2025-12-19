@@ -37,8 +37,7 @@
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared",
-      "observabilityAgentBuilder"
+      "discoverShared"
     ],
     "optionalPlugins": [
       "actions",
@@ -64,6 +63,14 @@
       "share",
       "onechat"
     ],
-    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
+    "requiredBundles": [
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "ml",
+      "observability",
+      "maps",
+      "observabilityAgentBuilder"
+    ]
   }
 }

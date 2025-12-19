@@ -68,7 +68,6 @@ export const getNavigationTreeDefinition = ({
               link: 'dashboards',
             },
             {
-              badgeType: 'techPreview',
               icon: LazyIconAgents,
               link: 'agent_builder',
             },

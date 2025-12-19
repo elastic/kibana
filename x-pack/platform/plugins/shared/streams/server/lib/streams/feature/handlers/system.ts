@@ -65,6 +65,7 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
             inferenceClient: options.inferenceClient,
             signal: options.signal,
             logger: options.logger,
+            systemPromptOverride: options.descriptionPromptOverride,
           });
 
           totalTokensUsed = sumTokens(totalTokensUsed, tokensUsed);

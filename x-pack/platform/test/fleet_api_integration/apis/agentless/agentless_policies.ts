@@ -448,6 +448,54 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Side effects', () => {
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+        mockApiServer.close();
+      });
+      it('should not allow to update related agent policy', async () => {
+        const agentlessPolicy = await apiClient.createAgentlessPolicy({
+          id: uuidv4(),
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: `Test ${Date.now()}`,
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.putAgentPolicy(agentlessPolicy.item.id, {
+              name: 'tata',
+              namespace: 'default',
+              description: 'tata',
+            }),
+          /400 "Bad Request" To update agentless agent policies, use the Fleet agentless policies API./
+        );
+      });
+    });
+
     describe.skip('Agentless Policy with Cloud Connectors', () => {
       // See individual tests for more details
       // Will be resolved in https://github.com/elastic/security-team/issues/14864

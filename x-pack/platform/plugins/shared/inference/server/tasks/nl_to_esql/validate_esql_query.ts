@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-language';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { trace } from '@opentelemetry/api';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
 import { formatQueryWithErrors } from './format_query_with_errors';
 
 export interface QueryValidateRunOutput {

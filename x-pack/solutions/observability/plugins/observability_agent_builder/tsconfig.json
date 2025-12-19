@@ -35,13 +35,15 @@
     "@kbn/management-settings-ids",
     "@kbn/logging",
     "@kbn/ai-assistant-common",
-    "@kbn/ai-insights",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/discover-shared-plugin",
     "@kbn/i18n",
     "@kbn/licensing-types",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/observability-nav-icons",
+    "@kbn/server-route-repository-client",
+    "@kbn/onechat-browser"
   ],
   "exclude": ["target/**/*"]
 }

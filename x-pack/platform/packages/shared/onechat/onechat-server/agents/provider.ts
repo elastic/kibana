@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
-  RawRoundInput,
+  ConverseInput,
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
@@ -23,6 +23,8 @@ import type {
   ToolProvider,
   WritableToolResultStore,
   AttachmentsService,
+  PromptManager,
+  ConversationStateManager,
 } from '../runner';
 
 export type AgentHandlerFn = (
@@ -81,6 +83,14 @@ export interface AgentHandlerContext {
    */
   resultStore: WritableToolResultStore;
   /**
+   * Used to manage interruptions.
+   */
+  promptManager: PromptManager;
+  /**
+   * Used to access and store state during interrupted executions.
+   */
+  stateManager: ConversationStateManager;
+  /**
    * Event emitter that can be used to emits custom events
    */
   events: AgentEventEmitter;
@@ -109,7 +119,7 @@ export interface AgentParams {
   /**
    * The input triggering this round.
    */
-  nextInput: RawRoundInput;
+  nextInput: ConverseInput;
   /**
    * Agent capabilities to enable.
    */

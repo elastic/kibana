@@ -6,29 +6,29 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import type { Streams } from '@kbn/streams-schema';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GrokCollection } from '@kbn/grok-ui';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
+  FieldType,
   StreamlangConditionBlock,
-  StreamlangProcessorDefinition,
   StreamlangDSL,
+  StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangValidationError,
-  FieldType,
 } from '@kbn/streamlang';
-import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { Streams } from '@kbn/streams-schema';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+import type { MappedSchemaField } from '../../../schema_editor/types';
+import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
+import type { InteractiveModeActorRef } from '../interactive_mode_machine';
 import type {
   PreviewDocsFilterOption,
   SimulationActorRef,
   SimulationContext,
 } from '../simulation_state_machine';
-import type { MappedSchemaField } from '../../../schema_editor/types';
-import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
-import type { InteractiveModeActorRef } from '../interactive_mode_machine';
 import type { YamlModeActorRef } from '../yaml_mode_machine';
 
 export interface StreamPrivileges {
@@ -105,6 +105,8 @@ export type StreamEnrichmentEvent =
   | { type: 'mode.resetSimulator' }
   | { type: 'simulation.reset' }
   | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.filterByCondition'; conditionId: string }
+  | { type: 'simulation.clearConditionFilter' }
   // Step events forwarded to interactive mode machine
   | {
       type: 'step.addProcessor';

@@ -48,6 +48,10 @@ export type Feature = SystemFeature;
 
 export const featureSchema: z.Schema<Feature> = systemFeatureSchema;
 
+export function isFeature(feature: any): feature is Feature {
+  return featureSchema.safeParse(feature).success;
+}
+
 export function isFeatureWithFilter(feature: Feature): feature is SystemFeature {
   return 'filter' in feature && isCondition(feature.filter);
 }

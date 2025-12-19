@@ -19,6 +19,7 @@ import type {
 
 const alertDataSchema = z.object({
   alertId: z.string(),
+  attachmentLabel: z.string().optional(),
 });
 
 export type AlertAttachmentData = z.infer<typeof alertDataSchema>;

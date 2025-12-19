@@ -94,6 +94,12 @@ export const useStreamEnrichmentEvents = () => {
       refreshSimulation: () => {
         service.send({ type: 'simulation.refresh' });
       },
+      filterSimulationByCondition: (conditionId: string) => {
+        service.send({ type: 'simulation.filterByCondition', conditionId });
+      },
+      clearSimulationConditionFilter: () => {
+        service.send({ type: 'simulation.clearConditionFilter' });
+      },
       viewSimulationPreviewData: () => {
         service.send({ type: 'simulation.viewDataPreview' });
       },

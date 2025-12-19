@@ -11,6 +11,7 @@ import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import type { OnechatInternalService } from '../../../../../services/types';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../../../../common/http_api/tools';
 import type { ToolFormData } from '../types/tool_form_types';
+import type { ToolFormMode } from '../tool_form';
 
 export const commonToolFormDefaultValues = {
   toolId: '',
@@ -18,9 +19,13 @@ export const commonToolFormDefaultValues = {
   labels: [],
 };
 
+interface ConfigurationComponentProps {
+  mode: ToolFormMode;
+}
+
 export interface ToolTypeRegistryEntry<TFormData extends ToolFormData = ToolFormData> {
   label: string;
-  getConfigurationComponent: () => React.ComponentType;
+  getConfigurationComponent: () => React.ComponentType<ConfigurationComponentProps>;
   defaultValues: TFormData;
   toolToFormData: (tool: ToolDefinitionWithSchema) => TFormData;
   formDataToCreatePayload: (data: TFormData) => CreateToolPayload;

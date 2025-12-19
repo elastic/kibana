@@ -41,7 +41,7 @@ export const initMetricExplorerRoute = (framework: KibanaFramework) => {
           );
         }
 
-        const client = await createSearchClient(requestContext, framework);
+        const client = createSearchClient(requestContext, framework);
         const interval = await findIntervalForMetrics(client, options);
 
         const optionsWithInterval = options.forceInterval

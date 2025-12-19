@@ -27,12 +27,12 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.overview.title"
             defaultMessage="Overview"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" responsive={false}>

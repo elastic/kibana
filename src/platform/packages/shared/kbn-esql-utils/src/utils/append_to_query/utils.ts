@@ -6,13 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isColumn, isStringLiteral } from '@kbn/esql-ast';
+import { isColumn, isStringLiteral } from '@kbn/esql-language';
 import type {
   BinaryExpressionComparisonOperator,
   ESQLColumn,
   ESQLFunction,
   ESQLStringLiteral,
-} from '@kbn/esql-ast/src/types';
+} from '@kbn/esql-language/src/types';
 
 export type SupportedOperation = '+' | '-' | 'is_not_null' | 'is_null';
 

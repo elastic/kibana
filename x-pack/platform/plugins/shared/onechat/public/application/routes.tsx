@@ -7,6 +7,8 @@
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { OnechatAgentsCreate } from './pages/agent_create';
 import { OnechatAgentsEdit } from './pages/agent_edit';
 import { OnechatAgentsPage } from './pages/agents';
@@ -14,8 +16,10 @@ import { OnechatConversationsPage } from './pages/conversations';
 import { OnechatToolCreatePage } from './pages/tool_create';
 import { OnechatToolDetailsPage } from './pages/tool_details';
 import { OnechatToolsPage } from './pages/tools';
+import { OnechatBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
 
 export const OnechatRoutes: React.FC<{}> = () => {
+  const mcpEnabled = useUiSetting(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false);
   return (
     <Routes>
       <Route path="/conversations/:conversationId">
@@ -37,6 +41,12 @@ export const OnechatRoutes: React.FC<{}> = () => {
       <Route path="/tools/new">
         <OnechatToolCreatePage />
       </Route>
+
+      {mcpEnabled && (
+        <Route path="/tools/bulk_import_mcp">
+          <OnechatBulkImportMcpToolsPage />
+        </Route>
+      )}
 
       <Route path="/tools/:toolId">
         <OnechatToolDetailsPage />

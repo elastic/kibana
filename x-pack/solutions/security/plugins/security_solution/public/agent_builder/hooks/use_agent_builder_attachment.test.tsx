@@ -40,6 +40,7 @@ const createWrapper = (onechatService?: OnechatPluginStart) => {
 const mockOnechatService: OnechatPluginStart = {
   openConversationFlyout:
     mockOpenConversationFlyout as OnechatPluginStart['openConversationFlyout'],
+  toggleConversationFlyout: jest.fn(),
   agents: {} as OnechatPluginStart['agents'],
   tools: {} as OnechatPluginStart['tools'],
   attachments: {} as OnechatPluginStart['attachments'],

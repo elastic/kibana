@@ -18,7 +18,7 @@ const createMockedTypeRegistry = ({
   isNamespaceAgnostic,
   isSingleNamespace,
   isMultiNamespace,
-  accessControlEnabled = false, // default to false
+  accessControlEnabled = true, // default to true
 }: {
   isNamespaceAgnostic: boolean;
   isSingleNamespace: boolean;

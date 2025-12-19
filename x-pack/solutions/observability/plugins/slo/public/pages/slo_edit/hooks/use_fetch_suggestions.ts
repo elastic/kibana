@@ -14,13 +14,9 @@ export function useFetchSLOSuggestions() {
   const { isLoading, isError, isSuccess, data } = useQuery({
     queryKey: ['fetchSLOSuggestions'],
     queryFn: async ({ signal }) => {
-      try {
-        return await sloClient.fetch('GET /internal/observability/slos/suggestions', {
-          signal,
-        });
-      } catch (error) {
-        // ignore error
-      }
+      return sloClient.fetch('GET /internal/observability/slos/suggestions', {
+        signal,
+      });
     },
     refetchOnWindowFocus: false,
     keepPreviousData: true,

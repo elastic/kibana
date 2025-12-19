@@ -7,16 +7,10 @@
 
 import { EuiFlexGroup, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
-import type { RecursivePartial } from '@kbn/utility-types';
+import type { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
-import {
-  transformPartialSLOStateToFormState,
-  transformSloResponseToCreateSloForm,
-} from '../helpers/process_slo_form_values';
-import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 import type { CreateSLOForm } from '../types';
@@ -26,32 +20,18 @@ import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
+  initialValues?: CreateSLOForm;
   slo?: GetSLOResponse;
-  initialValues?: RecursivePartial<CreateSLOInput>;
-  onSave?: () => void;
+  isEditMode: boolean;
+  onFlyoutClose?: () => void;
 }
 
-export function SloEditForm({ slo, initialValues, onSave }: Props) {
-  const isEditMode = slo !== undefined;
-  const isFlyoutMode = initialValues !== undefined && onSave !== undefined;
-
-  const sloFormValuesFromFlyoutState = isFlyoutMode
-    ? transformPartialSLOStateToFormState(initialValues)
-    : undefined;
-  const sloFormValuesFromUrlState = useParseUrlState();
-  const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
+export function SloEditForm({ slo, initialValues, onFlyoutClose, isEditMode }: Props) {
+  assertValidProps({ isEditMode, slo, onFlyoutClose });
 
   const form = useForm<CreateSLOForm>({
-    defaultValues: isFlyoutMode
-      ? sloFormValuesFromFlyoutState
-      : sloFormValuesFromUrlState
-      ? sloFormValuesFromUrlState
-      : sloFormValuesFromSloResponse ?? SLO_EDIT_FORM_DEFAULT_VALUES,
-    values: isFlyoutMode
-      ? sloFormValuesFromFlyoutState
-      : sloFormValuesFromUrlState
-      ? sloFormValuesFromUrlState
-      : sloFormValuesFromSloResponse,
+    defaultValues: initialValues ?? SLO_EDIT_FORM_DEFAULT_VALUES,
+    values: initialValues,
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState } = form;
@@ -101,8 +81,19 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
           ]}
         />
 
-        <SloEditFormFooter slo={slo} onSave={onSave} />
+        <SloEditFormFooter slo={slo} onFlyoutClose={onFlyoutClose} isEditMode={isEditMode} />
       </EuiFlexGroup>
     </FormProvider>
   );
+}
+
+function assertValidProps({ slo, onFlyoutClose, isEditMode }: Props) {
+  const isFlyout = Boolean(onFlyoutClose);
+  if ((isEditMode || !!slo) && isFlyout) {
+    throw new Error('SLO Form cannot be in edit mode within a flyout');
+  }
+
+  if (isEditMode && !slo) {
+    throw new Error('SLO must be provided when in edit mode');
+  }
 }

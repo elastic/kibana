@@ -436,6 +436,29 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.getProjectPickerAccess",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectPickerAccess",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.ProjectRoutingAccess",
+                "text": "ProjectRoutingAccess"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -804,7 +827,7 @@
         "label": "ProjectRoutingValue",
         "description": [],
         "signature": [
-          "\"ALL\" | \"_alias:_origin\""
+          "\"_alias:*\" | \"_alias:_origin\""
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
         "deprecated": false,
@@ -823,7 +846,7 @@
           "\nProject routing constants for cross-project search\nThese are stored as strings in saved objects to explicitly override parent values"
         ],
         "signature": [
-          "{ readonly ALL: \"ALL\"; readonly ORIGIN: \"_alias:_origin\"; }"
+          "{ readonly ALL: \"_alias:*\"; readonly ORIGIN: \"_alias:_origin\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
         "deprecated": false,

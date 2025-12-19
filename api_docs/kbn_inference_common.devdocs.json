@@ -1977,7 +1977,7 @@
             "section": "def-common.ChatCompletionTokenCount",
             "text": "ChatCompletionTokenCount"
           },
-          "; } & { type: ",
+          "; model?: string | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5907,7 +5907,7 @@
             "section": "def-common.ChatCompletionTokenCount",
             "text": "ChatCompletionTokenCount"
           },
-          "; } & { type: ",
+          "; model?: string | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6053,7 +6053,7 @@
             "section": "def-common.ChatCompletionTokenCount",
             "text": "ChatCompletionTokenCount"
           },
-          "; } & { type: ",
+          "; model?: string | undefined; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

@@ -14,7 +14,6 @@ import { timerange } from './timerange';
 import { toggleMetricsExperienceFeature } from './utils/helpers';
 
 const ENDPOINT = '/internal/metrics_experience/fields';
-const SEARCH_ENDPOINT = '/internal/metrics_experience/fields/_search';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,9 +21,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   const sendRequest = (query: object) =>
     supertest.get(ENDPOINT).set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana').query(query);
-
-  const sendSearchRequest = (body: object) =>
-    supertest.post(SEARCH_ENDPOINT).set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana').send(body);
 
   describe('Fields API', () => {
     before(async () => {
@@ -90,107 +86,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST /internal/metrics_experience/fields/_search', () => {
-      it('should return filtered fields with empty filters', async () => {
-        const { body, status } = await sendSearchRequest({
-          index: 'fieldsense-station-metrics',
-          from: timerange.min,
-          to: timerange.max,
-          filters: {},
-        });
-
-        expect(status).to.be(200);
-        expect(body.fields.length).to.be.greaterThan(0);
-        expect(body.total).to.be.greaterThan(0);
-        expect(body.page).to.be(1);
-      });
-
-      it('should filter fields by specific dimension values', async () => {
-        const { body, status } = await sendSearchRequest({
-          index: 'fieldsense-station-metrics',
-          from: timerange.min,
-          to: timerange.max,
-          fields: ['fieldsense.energy.battery.charge_level'],
-          filters: {
-            'station.id': ['station-01'],
-          },
-        });
-
-        expect(status).to.be(200);
-        expect(body.fields).to.have.length(1);
-        expect(body.fields[0]).to.eql({
-          name: 'fieldsense.energy.battery.charge_level',
-          index: 'fieldsense-station-metrics',
-          dimensions: [
-            {
-              name: 'station.id',
-              type: 'keyword',
-            },
-          ],
-          type: 'double',
-          instrument: 'gauge',
-          unit: 'percent',
-          noData: false,
-        });
-        expect(body.total).to.be.greaterThan(0);
-        expect(body.page).to.be(1);
-      });
-
-      it('should handle multiple dimension filters', async () => {
-        const { body, status } = await sendSearchRequest({
-          index: 'fieldsense-station-metrics',
-          from: timerange.min,
-          to: timerange.max,
-          fields: ['fieldsense.energy.battery.charge_level'],
-          filters: {
-            'station.id': ['station-01'],
-            'station.location.country': ['AU'],
-          },
-        });
-
-        expect(status).to.be(200);
-        expect(body.fields).to.have.length(1);
-        expect(body.fields[0]).to.eql({
-          name: 'fieldsense.energy.battery.charge_level',
-          index: 'fieldsense-station-metrics',
-          dimensions: [
-            {
-              name: 'station.id',
-              type: 'keyword',
-            },
-            {
-              name: 'station.location.country',
-              type: 'keyword',
-            },
-          ],
-          type: 'double',
-          instrument: 'gauge',
-          unit: 'percent',
-          noData: false,
-        });
-        expect(body.total).to.be.greaterThan(0);
-        expect(body.page).to.be(1);
-      });
-
-      // TODO: see https://github.com/elastic/kibana/pull/243499
-      it.skip('should return empty results if no fields match the filters', async () => {
-        const { body, status } = await sendSearchRequest({
-          index: 'fieldsense-station-metrics',
-          from: timerange.min,
-          to: timerange.max,
-          fields: ['fieldsense.energy.battery.charge_level'],
-          filters: {
-            'station.id': ['station-199'],
-          },
-        });
-
-        expect(status).to.be(200);
-        expect(body.fields.length).to.equal(0);
-        expect(body.total).to.equal(0);
-        expect(body.page).to.equal(1);
-      });
-    });
-
     describe('disabled feature flag', () => {
       before(async () => {
         await toggleMetricsExperienceFeature(supertest, false);
@@ -208,22 +103,6 @@ export default function ({ getService }: FtrProviderContext) {
           from: timerange.min,
           to: timerange.max,
         });
-        expect(status).to.be(404);
-      });
-
-      it('POST /internal/metrics_experience/fields/_search should return 404 if feature flag is disabled', async () => {
-        await toggleMetricsExperienceFeature(supertest, false);
-
-        const { status } = await sendSearchRequest({
-          index: 'fieldsense-station-metrics',
-          from: timerange.min,
-          to: timerange.max,
-          fields: ['fieldsense.energy.battery.charge_level'],
-          filters: {
-            'station.id': ['station-01'],
-          },
-        });
-
         expect(status).to.be(404);
       });
     });

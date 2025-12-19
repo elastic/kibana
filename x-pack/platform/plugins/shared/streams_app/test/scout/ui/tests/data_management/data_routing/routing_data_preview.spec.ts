@@ -138,6 +138,10 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeVisible();
     await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeVisible();
 
+    // Wait until the percentages are computed/rendered so selection state is stable
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('%');
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('%');
+
     await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toHaveAttribute(
       'aria-pressed',
       'true'
@@ -146,9 +150,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       'aria-pressed',
       'false'
     );
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('%');
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('%');
   });
 
   test('should maintain filter state when condition changes', async ({ page, pageObjects }) => {

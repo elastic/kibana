@@ -17,18 +17,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DocLinks } from '@kbn/doc-links';
 
 export interface AIAgentConfirmationModalProps {
   onConfirm: () => void;
   onCancel: () => void;
+  docLinks: DocLinks;
 }
 
 export const AIAgentConfirmationModal: React.FC<AIAgentConfirmationModalProps> = ({
   onConfirm,
   onCancel,
+  docLinks,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'aiAgentConfirmModalTitle' });
-
   return (
     <EuiConfirmModal
       title={
@@ -75,9 +77,8 @@ export const AIAgentConfirmationModal: React.FC<AIAgentConfirmationModalProps> =
             br: <br />,
             bold: (str) => <strong>{str}</strong>,
             learnMoreLink: (
-              // TODO: Update link when documentation is ready
               <EuiLink
-                href="#"
+                href={docLinks.agentBuilder.learnMore}
                 target="_blank"
                 data-test-subj="AIAgentConfirmationModalLearnMoreLink"
               >

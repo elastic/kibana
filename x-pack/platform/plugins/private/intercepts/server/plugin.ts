@@ -15,6 +15,10 @@ import {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { InterceptsTriggerOrchestrator } from './orchestrator';
 import type { ServerConfigSchema } from '../common/config';
+import {
+  interceptTriggerRecordSavedObject,
+  interceptInteractionUserRecordSavedObject,
+} from './saved_objects';
 
 interface InterceptsServerSetupDeps {
   usageCollection?: UsageCollectionSetup;
@@ -37,6 +41,11 @@ export class InterceptsServerPlugin
   }
 
   public setup(core: CoreSetup, { usageCollection }: InterceptsServerSetupDeps) {
+    // Always register saved objects unconditionally to ensure mappings are created
+    // during setup, regardless of plugin configuration or node roles
+    core.savedObjects.registerType(interceptTriggerRecordSavedObject);
+    core.savedObjects.registerType(interceptInteractionUserRecordSavedObject);
+
     this.interceptsOrchestrator?.setup(core, {
       logger: this.logger,
       kibanaVersion: this.initContext.env.packageInfo.version,

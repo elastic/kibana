@@ -12,6 +12,8 @@ import type {
   CreateSLOInput,
   FindSLODefinitionsResponse,
   FindSLOInstancesResponse,
+  FindSLOTemplatesResponse,
+  GetSLOTemplateResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -141,33 +143,6 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-    async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
-      const { body } = await supertestWithoutAuth
-        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send()
-        .expect(200);
-
-      return body;
-    },
-
-    async updateSavedObject(
-      roleAuthc: RoleCredentials,
-      slo: StoredSLODefinition,
-      id: string
-    ): Promise<SavedObjectResponse> {
-      const { body } = await supertestWithoutAuth
-        .put(`/api/saved_objects/slo/${id}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          attributes: slo,
-        })
-        .expect(200);
-      return body;
-    },
-
     async deleteAllSLOs(roleAuthc: RoleCredentials) {
       const response = await supertestWithoutAuth
         .get(`/api/observability/slos/_definitions`)
@@ -267,6 +242,70 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .send(settings)
         .expect(200);
 
+      return body;
+    },
+
+    async getTemplate(
+      templateId: string,
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<GetSLOTemplateResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_templates/${templateId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+
+      return body;
+    },
+
+    async findTemplates(
+      params: { search?: string; tags?: string[]; page?: number; perPage?: number },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<FindSLOTemplatesResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params.search) queryParams.search = params.search;
+      if (params.tags && params.tags.length > 0) queryParams.tags = params.tags.join(',');
+      if (params.page !== undefined) queryParams.page = params.page;
+      if (params.perPage !== undefined) queryParams.perPage = params.perPage;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slo_templates`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+
+      return body;
+    },
+
+    async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async updateSavedObject(
+      roleAuthc: RoleCredentials,
+      slo: StoredSLODefinition,
+      id: string
+    ): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/saved_objects/slo/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          attributes: slo,
+        })
+        .expect(200);
       return body;
     },
   };

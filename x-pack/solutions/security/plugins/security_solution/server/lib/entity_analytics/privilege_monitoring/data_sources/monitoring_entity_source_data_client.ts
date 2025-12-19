@@ -10,6 +10,7 @@ import type {
   CreateMonitoringEntitySource,
   MonitoringEntitySource,
   ListEntitySourcesRequestQuery,
+  Matcher,
 } from '../../../../../common/api/entity_analytics';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
 
@@ -49,7 +50,7 @@ export class MonitoringEntitySourceDataClient {
 
     const sanitizedUpdate = {
       ...update,
-      matchers: update.matchers?.map((matcher: { fields: string[]; values: string[] }) => ({
+      matchers: update.matchers?.map((matcher: Matcher) => ({
         fields: matcher.fields ?? [],
         values: matcher.values ?? [],
       })),

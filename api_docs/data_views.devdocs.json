@@ -13729,6 +13729,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
               },
               {

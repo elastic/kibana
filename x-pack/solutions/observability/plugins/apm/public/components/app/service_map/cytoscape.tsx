@@ -49,9 +49,9 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
 }
 
 function CytoscapeComponent({ children, elements, height, serviceName, style }: CytoscapeProps) {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(euiTheme),
+    ...getCytoscapeOptions(euiTheme, colorMode),
     elements,
   });
   useCytoscapeEventHandlers({ cy, serviceName, euiTheme });

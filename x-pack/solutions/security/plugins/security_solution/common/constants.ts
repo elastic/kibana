@@ -534,6 +534,13 @@ export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
 export const MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
+/**
+ * Max number of rule IDs to request when filtering rules by gap fill status.
+ * This protects from exceeding Elasticsearch's max clause count
+ */
+export const MAX_RULES_WITH_GAPS_TO_FETCH = 1000;
+export const MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE =
+  'max_rules_with_gaps_limit_reached' as const;
 
 /*
  * Whether it is a Jest environment

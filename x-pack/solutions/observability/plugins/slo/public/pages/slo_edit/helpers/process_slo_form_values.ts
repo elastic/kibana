@@ -24,7 +24,7 @@ import {
 } from '../constants';
 import type { CreateSLOForm } from '../types';
 
-export function transformSloResponseToCreateSloForm(
+export function transformSloResponseToFormState(
   values?: GetSLOResponse
 ): CreateSLOForm | undefined {
   if (!values) return undefined;

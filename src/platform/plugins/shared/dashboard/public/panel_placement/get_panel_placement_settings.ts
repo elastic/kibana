@@ -8,18 +8,15 @@
  */
 
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
-import { getRegistryItem } from './panel_placement_registry';
-import type { PanelSettings } from './types';
+import type { PanelSettings } from '@kbn/presentation-util-plugin/public';
+import { presentationUtilService } from '../services/kibana_services';
 
 export async function getPanelSettings(
   embeddableType: string,
   serializedState?: SerializedPanelState<object>
 ): Promise<undefined | PanelSettings> {
-  const registryItem = getRegistryItem(embeddableType);
-  if (!registryItem) return;
-
   try {
-    return await registryItem(serializedState);
+    return await presentationUtilService.getPanelPlacementSettings(embeddableType, serializedState);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn(

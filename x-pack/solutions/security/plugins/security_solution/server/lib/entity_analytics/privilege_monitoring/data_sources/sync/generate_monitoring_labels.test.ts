@@ -24,6 +24,19 @@ describe('generateMonitoringLabels', () => {
     expect(labels).toEqual([{ field: 'user.role', value: 'Admin', source }]);
   });
 
+  it('matches a single boolean field value', () => {
+    const matchers = [
+      { fields: ['entityanalytics_ad.user.privileged_group_member'], values: [true] },
+    ];
+    const doc = { entityanalytics_ad: { user: { privileged_group_member: true } } };
+
+    const labels = generateMonitoringLabels(source, matchers, doc);
+
+    expect(labels).toEqual([
+      { field: 'entityanalytics_ad.user.privileged_group_member', value: true, source },
+    ]);
+  });
+
   it('matches multiple values in an array field', () => {
     const matchers = [
       {

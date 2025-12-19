@@ -34,6 +34,7 @@ export const dataConnectorSchemaV1 = schema.object({
 });
 
 export const dataConnectorMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     name: {
       type: 'text',

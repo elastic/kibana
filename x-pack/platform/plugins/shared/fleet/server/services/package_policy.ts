@@ -199,6 +199,7 @@ import {
 } from './spaces/policy_namespaces';
 import {
   getSpaceForPackagePolicy,
+  getSpaceForPackagePolicySO,
   isSpaceAwarenessEnabled,
   isSpaceAwarenessMigrationPending,
 } from './spaces/helpers';
@@ -2834,7 +2835,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Create temporary SOs with id `id:copy` to allow cancellation in case rollback fails.
     const policiesToCreate: Record<
       string,
-      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes> & { initialNamespaces?: string[] }>
     > = {};
     const policiesToUpdate: Record<
       string,
@@ -2846,36 +2847,36 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     > = {};
 
     packagePolicies.forEach((policy) => {
-      const namespace = policy.namespaces?.[0] || policy.attributes.namespace;
-      if (namespace) {
-        if (!policy.id.endsWith(':prev')) {
-          const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
-          if (previousRevision?.attributes) {
-            if (!policiesToCreate[namespace]) {
-              policiesToCreate[namespace] = [];
-            }
-            policiesToCreate[namespace].push({
-              ...policy,
-              id: `${policy.id}:copy`,
-            });
-            if (!policiesToUpdate[namespace]) {
-              policiesToUpdate[namespace] = [];
-            }
-            policiesToUpdate[namespace].push({
-              ...policy,
-              attributes: {
-                ...previousRevision?.attributes,
-                revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
-                latest_revision: true,
-              },
-            });
+      const namespace = getSpaceForPackagePolicySO(policy);
+
+      if (!policy.id.endsWith(':prev')) {
+        const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
+        if (previousRevision?.attributes) {
+          if (!policiesToCreate[namespace]) {
+            policiesToCreate[namespace] = [];
           }
-        } else {
-          if (!previousVersionPolicies[namespace]) {
-            previousVersionPolicies[namespace] = [];
+          policiesToCreate[namespace].push({
+            ...policy,
+            id: `${policy.id}:copy`,
+            initialNamespaces: policy.namespaces,
+          });
+          if (!policiesToUpdate[namespace]) {
+            policiesToUpdate[namespace] = [];
           }
-          previousVersionPolicies[namespace].push(policy);
+          policiesToUpdate[namespace].push({
+            ...policy,
+            attributes: {
+              ...previousRevision?.attributes,
+              revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
+              latest_revision: true,
+            },
+          });
         }
+      } else {
+        if (!previousVersionPolicies[namespace]) {
+          previousVersionPolicies[namespace] = [];
+        }
+        previousVersionPolicies[namespace].push(policy);
       }
     });
 
@@ -2884,6 +2885,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await soClient
         .bulkCreate<PackagePolicySOAttributes>(policies, { namespace })
         .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
+
       for (const policy of policies) {
         auditLoggingService.writeCustomSoAuditLog({
           action: 'create',
@@ -2924,7 +2926,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(copiedPolicies)) {
       // Update policies with copied data.
       const policiesToUpdate = policies.map((policy) => ({
-        ...policy,
+        ...omit(policy, 'initialNamespaces'),
         id: policy.id.replace(':copy', ''),
       }));
       await soClient

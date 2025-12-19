@@ -9,7 +9,7 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type { SLORepository } from '.';
+import type { SLODefinitionRepository } from '.';
 import { GetSLOGroupings } from '.';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
@@ -22,7 +22,7 @@ const DEFAULT_SETTINGS = {
 };
 
 describe('Get SLO Instances', () => {
-  let repositoryMock: jest.Mocked<SLORepository>;
+  let repositoryMock: jest.Mocked<SLODefinitionRepository>;
   let esClientMock: ElasticsearchClientMock;
   let definitionClient: SloDefinitionClient;
 

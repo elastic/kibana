@@ -6,17 +6,17 @@
  */
 
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiButton,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiPopoverFooter,
   EuiSelectable,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
-import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
@@ -26,7 +26,6 @@ import { RobotIcon } from '../../../../common/icons/robot';
 import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
-import { SelectorListHeader } from '../selector_list_header';
 import { AgentAvatar } from '../../../../common/agent_avatar';
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
@@ -53,10 +52,6 @@ const manageAgentsAriaLabel = i18n.translate(
     defaultMessage: 'Manage agents',
   }
 );
-const agentSearchPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.search.placeholder',
-  { defaultMessage: 'Search agents' }
-);
 
 const agentSelectId = 'agentBuilderAgentSelect';
 const agentListId = `${agentSelectId}_listbox`;
@@ -82,36 +77,36 @@ const AgentSelectPopoverButton: React.FC<{
   );
 };
 
-const AgentListHeader: React.FC<{ search: ReactNode }> = ({ search }) => {
+const AgentListFooter: React.FC = () => {
   const { createOnechatUrl } = useNavigation();
   const createAgentHref = createOnechatUrl(appPaths.agents.new);
   const manageAgentsHref = createOnechatUrl(appPaths.agents.list);
   return (
-    <SelectorListHeader>
-      <EuiFlexItem grow={true}>{search}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          iconType="plus"
-          color="text"
-          aria-label={createAgentAriaLabel}
-          href={createAgentHref}
-        >
-          <FormattedMessage
-            id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
-            defaultMessage="New"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          size="m"
-          iconType="gear"
-          color="text"
-          aria-label={manageAgentsAriaLabel}
-          href={manageAgentsHref}
-        />
-      </EuiFlexItem>
-    </SelectorListHeader>
+    <EuiPopoverFooter paddingSize="s">
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiButton
+            iconType="gear"
+            color="text"
+            aria-label={manageAgentsAriaLabel}
+            href={manageAgentsHref}
+          >
+            <FormattedMessage
+              id="xpack.onechat.conversationInput.agentSelector.manageAgents"
+              defaultMessage="Manage"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton iconType="plus" aria-label={createAgentAriaLabel} href={createAgentHref}>
+            <FormattedMessage
+              id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
+              defaultMessage="New"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverFooter>
   );
 };
 
@@ -147,7 +142,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
 
   const listItemsHeight = agentOptions.length * AGENT_OPTION_ROW_HEIGHT;
   // Calculate height based on item count, capped at max rows
-  const listHeight = Math.min(listItemsHeight, getMaxListHeight({ withHeader: true }));
+  const listHeight = Math.min(listItemsHeight, getMaxListHeight({ withFooter: true }));
 
   return (
     <EuiPopover
@@ -167,8 +162,6 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       <EuiSelectable
         id={agentSelectId}
         aria-label={selectAgentAriaLabel}
-        searchable
-        searchProps={{ placeholder: agentSearchPlaceholder }}
         options={agentOptions}
         onChange={(_options, _event, changedOption) => {
           const { checked, key: agentId } = changedOption;
@@ -179,9 +172,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
           }
         }}
         singleSelection
-        renderOption={(option, searchValue) =>
-          renderAgentOption({ agent: option.agent, searchValue })
-        }
+        renderOption={(option) => renderAgentOption({ agent: option.agent })}
         height={listHeight}
         listProps={{
           id: agentListId,
@@ -191,11 +182,11 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
           css: selectorListStyles,
         }}
       >
-        {(list, search) => (
-          <div>
-            <AgentListHeader search={search} />
+        {(list) => (
+          <>
             {list}
-          </div>
+            <AgentListFooter />
+          </>
         )}
       </EuiSelectable>
     </EuiPopover>

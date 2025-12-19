@@ -11,7 +11,7 @@ import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { IndicatorTypes } from '../../../domain/models';
 import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
 import { DeleteSLO } from '../../delete_slo';
-import { KibanaSavedObjectsSLORepository } from '../../slo_repository';
+import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
 import { DefaultSummaryTransformGenerator } from '../../summary_transform_generator/summary_transform_generator';
 import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
 import type { TransformGenerator } from '../../transform_generators';
@@ -71,7 +71,7 @@ export class BulkDeleteTask {
               const scopedSoClient = coreStart.savedObjects.getScopedClient(fakeRequest);
               const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
-              const repository = new KibanaSavedObjectsSLORepository(scopedSoClient, this.logger);
+              const repository = new DefaultSLODefinitionRepository(scopedSoClient, this.logger);
               const transformManager = new DefaultTransformManager(
                 {} as Record<IndicatorTypes, TransformGenerator>,
                 scopedClusterClient,

@@ -70,8 +70,6 @@ import {
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
-import type { GetPanelPlacementSettings } from './panel_placement';
-import { registerDashboardPanelSettings } from './panel_placement';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
@@ -125,10 +123,6 @@ interface DashboardSetup {}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelSettings: <SerializedState extends object = object>(
-    embeddableType: string,
-    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
-  ) => void;
 }
 
 export class DashboardPlugin
@@ -302,7 +296,6 @@ export class DashboardPlugin
     });
 
     return {
-      registerDashboardPanelSettings,
       findDashboardsService: async () => {
         const { findService } = await import('./dashboard_client');
         return findService;

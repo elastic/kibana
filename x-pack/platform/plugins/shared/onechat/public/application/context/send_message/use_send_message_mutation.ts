@@ -14,7 +14,6 @@ import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
-import { useReportConverseError } from '../../hooks/use_report_error';
 import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
@@ -27,7 +26,6 @@ interface UseSendMessageMutationProps {
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { services } = useKibana();
-  const { reportConverseError } = useReportConverseError();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
     useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
@@ -130,7 +128,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       }
     },
     onError: (err) => {
-      reportConverseError(err, { connectorId });
       setError(err);
       const steps = conversation?.rounds?.at(-1)?.steps;
       if (steps) {

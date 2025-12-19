@@ -23,7 +23,6 @@ import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
 import { SeverityBadge } from '../../severity_badge';
-import { NO_FEATURE } from '../utils/default_query';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -148,12 +147,7 @@ export function SignificantEventsGeneratedTable({
         defaultMessage: 'Feature',
       }),
       render: (_, item: StreamQueryKql) => {
-        const effectiveFeature = item.feature
-          ? item.feature.name === NO_FEATURE.name
-            ? undefined
-            : item.feature
-          : undefined;
-        return <EuiBadge color="hollow">{effectiveFeature?.name ?? '--'}</EuiBadge>;
+        return <EuiBadge color="hollow">{item.feature?.name ?? '--'}</EuiBadge>;
       },
     },
     {

@@ -48,7 +48,7 @@ export function ChatActionsMenu({
   isConversationApp: boolean;
   navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
-  const { application, http, triggersActionsUi } = useKibana().services;
+  const { application, http, triggersActionsUi, docLinks } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
@@ -244,10 +244,11 @@ export function ChatActionsMenu({
         />
       )}
 
-      {isAgentBuilderConfirmationModalOpen && (
+      {isAgentBuilderConfirmationModalOpen && docLinks?.links && (
         <AIAgentConfirmationModal
           onConfirm={confirmAgentBuilderOptIn}
           onCancel={closeAgentBuilderConfirmationModal}
+          docLinks={docLinks.links}
         />
       )}
     </>

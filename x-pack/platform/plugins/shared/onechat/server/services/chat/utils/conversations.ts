@@ -65,10 +65,15 @@ export const updateConversation$ = ({
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
+      const { round, resumed = false } = roundCompletedEvent.data;
+      const updatedRound = resumed
+        ? [...conversation.rounds.slice(0, -1), round]
+        : [...conversation.rounds, round];
+
       return conversationClient.update({
         id: conversation.id,
         title,
-        rounds: [...conversation.rounds, roundCompletedEvent.data.round],
+        rounds: updatedRound,
       });
     }),
     switchMap((updatedConversation) => {

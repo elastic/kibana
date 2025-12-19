@@ -11,7 +11,7 @@ import type {
   ESQLFunction,
   ESQLLiteral,
   ESQLColumn,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import type {
   ESQLStringLiteral,
   ESQLDateTruncFunction,
