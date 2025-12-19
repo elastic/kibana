@@ -101,13 +101,6 @@ const searchableDescription = i18n.translate(
   { defaultMessage: 'These fields can be used in the filter bar' }
 );
 
-const isSearchableAriaLabel = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.isSearchableAria',
-  {
-    defaultMessage: 'Is searchable',
-  }
-);
-
 const aggregatableLabel = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.aggregatableLabel',
   {
@@ -120,10 +113,59 @@ const aggregatableDescription = i18n.translate(
   { defaultMessage: 'These fields can be used in visualization aggregations' }
 );
 
-const isAggregatableAriaLabel = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.isAggregatableAria',
+const searchableYesAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.searchableYesAria',
   {
-    defaultMessage: 'Is aggregatable',
+    defaultMessage: 'Searchable',
+  }
+);
+
+const searchableNoAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.searchableNoAria',
+  {
+    defaultMessage: 'Not searchable',
+  }
+);
+
+const searchableYesTooltip = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.searchableYesTooltip',
+  {
+    defaultMessage: 'This field can be used in the filter bar',
+  }
+);
+
+const searchableNoTooltip = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.searchableNoTooltip',
+  {
+    defaultMessage: 'This field cannot be used in the filter bar',
+  }
+);
+
+const aggregatableYesAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.aggregatableYesAria',
+  {
+    defaultMessage: 'Aggregatable',
+  }
+);
+
+const aggregatableNoAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.aggregatableNoAria',
+  {
+    defaultMessage: 'Not aggregatable',
+  }
+);
+
+const aggregatableYesTooltip = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.aggregatableYesTooltip',
+  {
+    defaultMessage: 'This field can be used in visualization aggregations',
+  }
+);
+
+const aggregatableNoTooltip = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.aggregatableNoTooltip',
+  {
+    defaultMessage: 'This field cannot be used in visualization aggregations',
   }
 );
 
@@ -394,6 +436,30 @@ class TableClass extends PureComponent<
     return value ? <EuiIcon type="dot" color="success" aria-label={arialLabel} /> : <span />;
   }
 
+  renderSearchableColumn(value: boolean) {
+    return value ? (
+      <EuiToolTip content={searchableYesTooltip}>
+        <EuiIcon type="checkInCircleFilled" color="success" aria-label={searchableYesAriaLabel} />
+      </EuiToolTip>
+    ) : (
+      <EuiToolTip content={searchableNoTooltip}>
+        <EuiIcon type="cross" color="danger" aria-label={searchableNoAriaLabel} />
+      </EuiToolTip>
+    );
+  }
+
+  renderAggregatableColumn(value: boolean) {
+    return value ? (
+      <EuiToolTip content={aggregatableYesTooltip}>
+        <EuiIcon type="checkInCircleFilled" color="success" aria-label={aggregatableYesAriaLabel} />
+      </EuiToolTip>
+    ) : (
+      <EuiToolTip content={aggregatableNoTooltip}>
+        <EuiIcon type="cross" color="danger" aria-label={aggregatableNoAriaLabel} />
+      </EuiToolTip>
+    );
+  }
+
   renderFieldType(type: string, field: IndexedFieldItem) {
     const conflictDescription =
       field.conflictDescriptions && field.conflictDescriptions[field.name];
@@ -460,7 +526,7 @@ class TableClass extends PureComponent<
         description: searchableDescription,
         dataType: 'boolean',
         sortable: true,
-        render: (value: string) => this.renderBooleanTemplate(value, isSearchableAriaLabel),
+        render: (value: boolean) => this.renderSearchableColumn(value),
       },
       {
         field: 'aggregatable',
@@ -468,7 +534,7 @@ class TableClass extends PureComponent<
         description: aggregatableDescription,
         dataType: 'boolean',
         sortable: true,
-        render: (value: string) => this.renderBooleanTemplate(value, isAggregatableAriaLabel),
+        render: (value: boolean) => this.renderAggregatableColumn(value),
       },
       {
         field: 'excluded',
