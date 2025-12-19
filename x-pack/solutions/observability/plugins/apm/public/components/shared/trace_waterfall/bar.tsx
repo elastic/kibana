@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import styled from '@emotion/styled';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 export interface BarSegment {
@@ -26,57 +27,47 @@ export function Bar({
   color: string;
   segments?: BarSegment[];
 }) {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <ItemBar width={width} left={left} color={color}>
+    <div
+      css={css`
+        position: relative;
+        height: ${euiTheme.size.base};
+        background-color: ${color};
+        width: ${width}%;
+        margin-left: ${left}%;
+      `}
+    >
       {segments?.length ? (
-        <CriticalPathItemBar>
+        <div
+          css={css`
+            box-sizing: border-box;
+            position: relative;
+            height: ${euiTheme.size.s};
+            top: ${euiTheme.size.s};
+            min-width: 2px;
+            background-color: transparent;
+            display: flex;
+            flex-direction: row;
+          `}
+        >
           {segments.map((segment) => (
-            <CriticalPathItemSegment
+            <div
               key={segment.id}
-              color={segment.color}
-              left={segment.left}
-              width={segment.width}
+              css={css`
+                box-sizing: border-box;
+                position: absolute;
+                height: ${euiTheme.size.s};
+                left: ${segment.left * 100}%;
+                width: ${segment.width * 100}%;
+                min-width: 2px;
+                background-color: ${segment.color};
+              `}
             />
           ))}
-        </CriticalPathItemBar>
+        </div>
       ) : null}
-    </ItemBar>
+    </div>
   );
 }
-
-const ItemBar = styled.div<{
-  width: number;
-  left: number;
-  color: string;
-}>`
-  position: relative;
-  height: ${({ theme }) => theme.euiTheme.size.base};
-  background-color: ${(props) => props.color};
-  width: ${(props) => props.width}%;
-  margin-left: ${(props) => props.left}%;
-`;
-
-const CriticalPathItemBar = styled.div`
-  box-sizing: border-box;
-  position: relative;
-  height: ${({ theme }) => theme.euiTheme.size.s};
-  top: ${({ theme }) => theme.euiTheme.size.s};
-  min-width: 2px;
-  background-color: transparent;
-  display: flex;
-  flex-direction: row;
-`;
-
-const CriticalPathItemSegment = styled.div<{
-  left: number;
-  width: number;
-  color: string;
-}>`
-  box-sizing: border-box;
-  position: absolute;
-  height: ${({ theme }) => theme.euiTheme.size.s};
-  left: ${(props) => props.left * 100}%;
-  width: ${(props) => props.width * 100}%;
-  min-width: 2px;
-  background-color: ${(props) => props.color};
-`;
