@@ -37,6 +37,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   } = useKibana();
 
   const router = useStreamsAppRouter();
+  const isIlmAvailable = !!indexLifecycleManagement?.apiService;
 
   const templatesListFetch = useStreamsAppFetch(async () => {
     const response = await indexManagement.apiService.getIndexTemplates({ signal });
@@ -53,11 +54,14 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
   const getIlmPolicy = useCallback(
     async (policyName: string) => {
+      if (!isIlmAvailable) {
+        return null;
+      }
       // Errors are handled in the flyout component
       const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
       return policies.find((policy) => policy.name === policyName) ?? null;
     },
-    [indexLifecycleManagement.apiService, signal]
+    [indexLifecycleManagement.apiService, isIlmAvailable, signal]
   );
 
   const getSimulatedTemplate = useCallback(
@@ -184,7 +188,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       hasErrorLoadingTemplates={!!templatesListFetch.error}
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}
-      getIlmPolicy={getIlmPolicy}
+      getIlmPolicy={isIlmAvailable ? getIlmPolicy : undefined}
       getSimulatedTemplate={getSimulatedTemplate}
     />
   );
