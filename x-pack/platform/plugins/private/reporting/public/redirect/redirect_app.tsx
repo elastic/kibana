@@ -23,6 +23,8 @@ import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LocatorParams, BaseParamsV2 } from '@kbn/reporting-common/types';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { RedirectOptions } from '@kbn/share-plugin/public';
+import type { Serializable } from '@kbn/utility-types';
 
 import type { SharePluginSetup } from '../shared_imports';
 
@@ -51,7 +53,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
   useEffect(() => {
     (async () => {
       try {
-        let locatorParams: undefined | LocatorParams;
+        let locatorParams: undefined | RedirectOptions;
         let isUserRedirect = false;
 
         const { jobId, scheduledReportId, page, perPage } = parse(window.location.search);
@@ -68,11 +70,11 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
         } else if (jobId) {
           isUserRedirect = true;
           const result = await apiClient.getInfo(jobId as string);
-          locatorParams = result?.locatorParams?.[0];
+          locatorParams = result?.locatorParams?.[0] as LocatorParams | undefined;
         } else {
           locatorParams = screenshotMode.getScreenshotContext<LocatorParams>(
             REPORTING_REDIRECT_LOCATOR_STORE_KEY
-          );
+          ) as LocatorParams | undefined;
         }
 
         if (!locatorParams) {
@@ -92,10 +94,10 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
         // export-only fields (insight + reportDataHash) that would otherwise force the destination
         // page into an "export mode" UI. Strip these for user navigation.
         if (isUserRedirect && locatorParams.id === AI_VALUE_REPORT_LOCATOR) {
-          const params = locatorParams.params as { timeRange?: unknown } | undefined;
+          const timeRange = (locatorParams.params as { timeRange?: Serializable } | undefined)?.timeRange;
           locatorParams = {
             ...locatorParams,
-            params: params?.timeRange ? { timeRange: params.timeRange } : {},
+            params: timeRange ? { timeRange } : {},
           };
         }
 

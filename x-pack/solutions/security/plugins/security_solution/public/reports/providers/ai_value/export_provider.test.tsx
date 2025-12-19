@@ -15,6 +15,7 @@ import { webcrypto } from 'crypto';
 import { AIValueExportProvider, useAIValueExportContext } from './export_provider';
 import { useKibana } from '../../../common/lib/kibana';
 import { AIValueReportEventTypes } from '../../../common/lib/telemetry/events/ai_value_report/types';
+import type { AIValueReportParams } from '../../../../common/locators/ai_value_report/locator';
 
 jest.mock('react-router', () => {
   return {
@@ -63,7 +64,7 @@ const timeRange = {
   kind: 'absolute',
   to: '2025-11-18T13:18:59.691Z',
   from: '2025-10-18T12:18:59.691Z',
-};
+} satisfies AIValueReportParams['timeRange'];
 
 const TestComponent = ({ contextValueFn }: { contextValueFn: (context: ContextValue) => void }) => {
   const context = useAIValueExportContext();

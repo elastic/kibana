@@ -39,9 +39,11 @@ export const AIValueMetrics: React.FC<Props> = (props) => {
   const { from, to } = useMemo(() => {
     if (exportContext?.forwardedState) {
       const { timeRange } = exportContext.forwardedState;
+      const fromValue = timeRange.kind === 'absolute' ? timeRange.from : timeRange.fromStr;
+      const toValue = timeRange.kind === 'absolute' ? timeRange.to : timeRange.toStr;
       return {
-        from: dateMath.parse(timeRange.from, { forceNow })?.toISOString() ?? timeRange.from,
-        to: dateMath.parse(timeRange.to, { forceNow, roundUp: true })?.toISOString() ?? timeRange.to,
+        from: dateMath.parse(fromValue, { forceNow })?.toISOString() ?? fromValue,
+        to: dateMath.parse(toValue, { forceNow, roundUp: true })?.toISOString() ?? toValue,
       };
     }
     return {

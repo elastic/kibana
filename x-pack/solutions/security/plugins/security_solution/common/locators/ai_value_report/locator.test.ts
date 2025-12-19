@@ -9,6 +9,7 @@ import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import { AIValueReportLocatorDefinition, parseLocationState } from './locator';
 import { AI_VALUE_PATH, APP_UI_ID } from '../../constants';
 import { encode } from '@kbn/rison';
+import type { AIValueReportParams } from './locator';
 
 describe('AIValueReportLocatorDefinition', () => {
   const locator = new AIValueReportLocatorDefinition();
@@ -21,7 +22,7 @@ describe('AIValueReportLocatorDefinition', () => {
     },
     insight: 'Some valuable insight!',
     reportDataHash: 'abc123',
-  };
+  } satisfies AIValueReportParams;
 
   test('id should match constant', () => {
     expect(locator.id).toBe(AI_VALUE_REPORT_LOCATOR);
