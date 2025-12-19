@@ -20,11 +20,15 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useHasActiveConversation, useAgentId } from '../../../hooks/use_conversation';
+import {
+  useHasActiveConversation,
+  useAgentId,
+  useHasPersistedConversation,
+} from '../../../hooks/use_conversation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
-import { DeleteConversationModal } from './delete_conversation_modal';
+import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { RobotIcon } from '../../common/icons/robot';
@@ -110,6 +114,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
+  const hasPersistedConversation = useHasPersistedConversation();
   const agentId = useAgentId();
   const isAgentReadOnly = useIsAgentReadOnly(agentId);
   const { createOnechatUrl } = useNavigation();
@@ -130,7 +135,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   };
 
   const menuItems = [
-    ...(hasActiveConversation
+    ...(hasPersistedConversation
       ? [
           <MenuSectionTitle
             key="conversation-title"

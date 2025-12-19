@@ -31,8 +31,8 @@ const LazyIconProductCloudInfra = lazy(() =>
   }))
 );
 const LazyAgentBuilderIcon = lazy(() =>
-  import('@kbn/ai-insights/src/icons/robot_icon').then(({ RobotIcon }) => ({
-    default: RobotIcon,
+  import('@kbn/observability-nav-icons').then(({ iconRobot }) => ({
+    default: iconRobot,
   }))
 );
 
@@ -272,7 +272,6 @@ function createNavTree({
             {
               link: 'agent_builder' as const,
               icon: LazyAgentBuilderIcon,
-              badgeType: 'techPreview' as const,
             },
           ]),
       {

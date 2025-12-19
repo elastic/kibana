@@ -9,25 +9,25 @@ import { i18n } from '@kbn/i18n';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
-import { useAIFeatures } from '../../hooks/use_ai_features';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { StreamFeaturesFlyout } from './stream_features/stream_features_flyout';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import { useKibana } from '../../hooks/use_kibana';
 
 interface StreamConfigurationProps {
   definition: Streams.all.Definition;
+  aiFeatures: AIFeatures | null;
 }
 
-export function StreamFeatureConfiguration({ definition }: StreamConfigurationProps) {
+export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamConfigurationProps) {
   const {
     core: { notifications },
   } = useKibana();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const { identifyFeatures, abort } = useStreamFeaturesApi(definition);
-  const aiFeatures = useAIFeatures();
   const [features, setFeatures] = useState<Feature[]>([]);
   const {
     features: existingFeatures,
@@ -63,18 +63,14 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
             right={
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <ConnectorListButton
+                  <ConnectorListButtonBase
                     buttonProps={{
                       size: 'm',
                       iconType: 'sparkles',
                       onClick: () => {
                         setIsLoading(true);
                         setIsFlyoutVisible(!isFlyoutVisible);
-                        identifyFeatures(
-                          aiFeatures?.genAiConnectors.selectedConnector!,
-                          'now',
-                          'now-24h'
-                        )
+                        identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!)
                           .then((data) => {
                             setFeatures(data.features);
                           })
@@ -101,6 +97,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                         }
                       ),
                     }}
+                    aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -114,6 +111,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
                 features={existingFeatures}
                 loading={featuresLoading}
                 refresh={refreshFeatures}
+                aiFeatures={aiFeatures}
               />
             </>
           )}
