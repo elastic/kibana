@@ -49,8 +49,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
+  // Don't show prompt if we're already resuming (user already clicked confirm/cancel)
+  // This prevents the prompt from reappearing when server data is refetched
   const isAwaitingPrompt =
-    isCurrentRound && status === ConversationRoundStatus.awaitingPrompt && pendingPrompt;
+    isCurrentRound &&
+    status === ConversationRoundStatus.awaitingPrompt &&
+    pendingPrompt &&
+    !isResuming;
 
   const handleConfirm = useCallback(() => {
     resumeRound({ confirm: true });
