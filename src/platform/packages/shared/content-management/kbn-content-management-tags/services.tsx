@@ -93,6 +93,24 @@ const ContentManagementTagsContext = createContext<Services | null>(null);
  * @param tags - The list of available tags to resolve names against.
  * @returns Parsed query with extracted tag IDs and cleaned search text.
  */
+/**
+ * Resolves tag names to tag IDs using the provided tag list.
+ *
+ * @param tagNames - Array of tag names to resolve.
+ * @param tags - The list of available tags to match against.
+ * @returns Array of resolved tag IDs.
+ */
+const resolveTagNamesToIds = (tagNames: string[], tags: Tag[]): string[] => {
+  const tagIds: string[] = [];
+  tagNames.forEach((tagName) => {
+    const tag = tags.find((t) => t.name === tagName);
+    if (tag?.id) {
+      tagIds.push(tag.id);
+    }
+  });
+  return tagIds;
+};
+
 const parseSearchQueryCore = (searchQuery: string, tags: Tag[]): ParsedQuery => {
   // Parse the EUI Query syntax with a schema that recognises the tag field.
   // Use strict: false to allow other field clauses (createdBy, is:favorite, etc.)
@@ -108,34 +126,54 @@ const parseSearchQueryCore = (searchQuery: string, tags: Tag[]): ParsedQuery => 
     },
   });
 
-  // Extract tag clauses from the parsed query.
-  const tagClauses = query.ast.getFieldClauses('tag');
-
   // Resolve tag names to IDs.
   const tagIds: string[] = [];
   const tagIdsToExclude: string[] = [];
 
+  // Handle regular field clauses (e.g., `tag:value`).
+  const tagClauses = query.ast.getFieldClauses('tag');
   if (tagClauses) {
     tagClauses.forEach((clause) => {
       const tagNames = Array.isArray(clause.value) ? clause.value : [clause.value];
+      // Cast to string[] since tag field is defined as type: 'string' in schema.
+      const resolvedIds = resolveTagNamesToIds(tagNames as string[], tags);
 
-      tagNames.forEach((tagName) => {
-        // Find tag by name in the cached tag list.
-        const tag = tags.find((t) => t.name === tagName);
-        if (tag && tag.id) {
-          if (clause.match === 'must') {
-            tagIds.push(tag.id);
-          } else if (clause.match === 'must_not') {
-            tagIdsToExclude.push(tag.id);
-          }
-        }
-      });
+      if (clause.match === 'must') {
+        tagIds.push(...resolvedIds);
+      } else if (clause.match === 'must_not') {
+        tagIdsToExclude.push(...resolvedIds);
+      }
     });
   }
 
+  // Handle OR-field clauses (e.g., `tag:(value)` or `tag:(value1 or value2)`).
+  // EUI Query treats parenthesis syntax differently from simple field syntax.
+  const includeOrClause = query.ast.getOrFieldClause('tag', undefined, true, 'eq');
+  if (includeOrClause) {
+    const tagNames = Array.isArray(includeOrClause.value)
+      ? includeOrClause.value
+      : [includeOrClause.value];
+    const resolvedIds = resolveTagNamesToIds(tagNames as string[], tags);
+    tagIds.push(...resolvedIds);
+  }
+
+  const excludeOrClause = query.ast.getOrFieldClause('tag', undefined, false, 'eq');
+  if (excludeOrClause) {
+    const tagNames = Array.isArray(excludeOrClause.value)
+      ? excludeOrClause.value
+      : [excludeOrClause.value];
+    const resolvedIds = resolveTagNamesToIds(tagNames as string[], tags);
+    tagIdsToExclude.push(...resolvedIds);
+  }
+
+  // Deduplicate tag IDs since the same tag may be matched by both
+  // getFieldClauses and getOrFieldClause for certain query formats.
+  const uniqueTagIds = [...new Set(tagIds)];
+  const uniqueTagIdsToExclude = [...new Set(tagIdsToExclude)];
+
   // Remove tag clauses from search query to get clean search term.
   const cleanQuery = query.removeOrFieldClauses('tag');
-  const hasResolvedTags = tagIds.length > 0 || tagIdsToExclude.length > 0;
+  const hasResolvedTags = uniqueTagIds.length > 0 || uniqueTagIdsToExclude.length > 0;
 
   if (!hasResolvedTags) {
     // If no tag IDs could be resolved, fall back to the original query text.
@@ -148,8 +186,8 @@ const parseSearchQueryCore = (searchQuery: string, tags: Tag[]): ParsedQuery => 
 
   return {
     searchQuery: cleanQuery.text,
-    tagIds: tagIds.length > 0 ? tagIds : undefined,
-    tagIdsToExclude: tagIdsToExclude.length > 0 ? tagIdsToExclude : undefined,
+    tagIds: uniqueTagIds.length > 0 ? uniqueTagIds : undefined,
+    tagIdsToExclude: uniqueTagIdsToExclude.length > 0 ? uniqueTagIdsToExclude : undefined,
   };
 };
 
