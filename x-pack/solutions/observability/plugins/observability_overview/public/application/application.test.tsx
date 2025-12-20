@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { ConfigSchema, ObservabilityOverviewPublicPluginsStart } from '../plugin';
+import type { ObservabilityOverviewPublicPluginsStart } from '../plugin';
 import { renderApp } from './application';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { createMemoryHistory } from 'history';
