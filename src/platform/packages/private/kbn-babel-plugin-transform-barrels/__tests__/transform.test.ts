@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
 import * as babel from '@babel/core';
-import type { BarrelIndex } from '../types';
+import type { BarrelIndex, BarrelFileEntry } from '../types';
 
 /**
  * Create a mock barrel index for testing.
@@ -199,6 +200,152 @@ describe('barrel transform plugin', () => {
       const serialized = JSON.stringify(barrelIndex);
       const deserialized = JSON.parse(serialized) as BarrelIndex;
       expect(deserialized).toEqual(barrelIndex);
+    });
+  });
+});
+
+describe('package barrel transforms', () => {
+  // Get real resolved paths for packages that exist in node_modules
+  const rxjsBarrelPath = require.resolve('rxjs');
+  const rxjsPackageRoot = Path.dirname(rxjsBarrelPath);
+
+  /**
+   * Create a barrel index using real resolved paths from node_modules.
+   * This mirrors what the scanner does when it finds barrel files.
+   */
+  function createPackageBarrelIndex(): BarrelIndex {
+    return {
+      [rxjsBarrelPath]: {
+        packageName: 'rxjs',
+        packageRoot: rxjsPackageRoot,
+        exports: {
+          Observable: {
+            path: Path.join(rxjsPackageRoot, 'dist/cjs/internal/Observable.js'),
+            type: 'named',
+            localName: 'Observable',
+            importedName: 'Observable',
+          },
+          firstValueFrom: {
+            path: Path.join(rxjsPackageRoot, 'dist/cjs/internal/firstValueFrom.js'),
+            type: 'named',
+            localName: 'firstValueFrom',
+            importedName: 'firstValueFrom',
+          },
+        },
+      },
+    };
+  }
+
+  /**
+   * Helper to compute expected output path from barrel index entry.
+   */
+  function getExpectedOutputPath(entry: BarrelFileEntry, exportName: string): string {
+    const exportInfo = entry.exports[exportName];
+    const packageRoot = entry.packageRoot!;
+    const packageName = entry.packageName!;
+    // Get relative path from package root, strip extension
+    const relativePath = exportInfo.path
+      .slice(packageRoot.length + 1)
+      .replace(/\.(ts|tsx|js|jsx)$/, '');
+    return `${packageName}/${relativePath}`;
+  }
+
+  const packageIndex = createPackageBarrelIndex();
+
+  describe('real package import transformations', () => {
+    // Use a real path in the repo for the test file
+    const testFilePath = Path.join(process.cwd(), 'src/test-file.ts');
+
+    it('transforms import from rxjs to direct subpath', () => {
+      const input = `import { Observable } from 'rxjs';`;
+      const result = transform(input, testFilePath, packageIndex);
+
+      const entry = packageIndex[rxjsBarrelPath];
+      const expectedPath = getExpectedOutputPath(entry, 'Observable');
+      expect(result?.code).toContain(expectedPath);
+      expect(result?.code).not.toMatch(/from ['"]rxjs['"]/);
+    });
+
+    it('transforms multiple imports from rxjs', () => {
+      const input = `import { Observable, firstValueFrom } from 'rxjs';`;
+      const result = transform(input, testFilePath, packageIndex);
+
+      const entry = packageIndex[rxjsBarrelPath];
+      expect(result?.code).toContain(getExpectedOutputPath(entry, 'Observable'));
+      expect(result?.code).toContain(getExpectedOutputPath(entry, 'firstValueFrom'));
+    });
+
+    it('leaves imports not in barrel index unchanged', () => {
+      const input = `import { Observable, SomeOtherThing } from 'rxjs';`;
+      const result = transform(input, testFilePath, packageIndex);
+
+      const entry = packageIndex[rxjsBarrelPath];
+      // Observable should be transformed
+      expect(result?.code).toContain(getExpectedOutputPath(entry, 'Observable'));
+      // SomeOtherThing should stay with original import
+      expect(result?.code).toContain('SomeOtherThing');
+      expect(result?.code).toMatch(/from ['"]rxjs['"]/);
+    });
+  });
+
+  describe('package barrel entry structure', () => {
+    it('uses real resolved paths as barrel index keys', () => {
+      expect(packageIndex[rxjsBarrelPath]).toBeDefined();
+      expect(packageIndex[rxjsBarrelPath].packageName).toBe('rxjs');
+    });
+
+    it('packageRoot matches directory of resolved barrel path', () => {
+      const entry = packageIndex[rxjsBarrelPath];
+      expect(entry.packageRoot).toBe(rxjsPackageRoot);
+    });
+
+    it('barrel entries are serializable', () => {
+      const serialized = JSON.stringify(packageIndex);
+      const deserialized = JSON.parse(serialized) as BarrelIndex;
+
+      expect(deserialized[rxjsBarrelPath].packageName).toBe(
+        packageIndex[rxjsBarrelPath].packageName
+      );
+      expect(deserialized[rxjsBarrelPath].packageRoot).toBe(
+        packageIndex[rxjsBarrelPath].packageRoot
+      );
+    });
+  });
+
+  describe('relative vs package path output', () => {
+    it('uses relative paths for barrels without packageName', () => {
+      const testFilePath = '/test/file.ts';
+      const standardBarrelIndex: BarrelIndex = {
+        '/test/lib/index.ts': {
+          exports: {
+            helper: {
+              path: '/test/lib/utils/helper.ts',
+              type: 'named',
+              localName: 'helper',
+              importedName: 'helper',
+            },
+          },
+        },
+      };
+
+      const input = `import { helper } from './lib';`;
+      const result = transform(input, testFilePath, standardBarrelIndex);
+
+      // Without packageName, output uses relative path
+      expect(result?.code).toContain('./lib/utils/helper');
+    });
+
+    it('uses package subpath when packageName is present', () => {
+      const entry = packageIndex[rxjsBarrelPath];
+      const testFilePath = Path.join(process.cwd(), 'src/test-file.ts');
+
+      const input = `import { Observable } from 'rxjs';`;
+      const result = transform(input, testFilePath, packageIndex);
+
+      // With packageName, output uses package subpath style
+      expect(result?.code).toContain(entry.packageName);
+      expect(result?.code).not.toContain('./node_modules');
+      expect(result?.code).not.toContain('../node_modules');
     });
   });
 });
