@@ -74,7 +74,11 @@ const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
   return render(<MigrationReadyPanel migrationStats={migrationStats} />, {
     wrapper: ({ children }) => (
       <TestProviders>
-        <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+        <MigrationDataInputContextProvider
+          openFlyout={jest.fn()}
+          closeFlyout={jest.fn()}
+          isFlyoutOpen={false}
+        >
           {children}
         </MigrationDataInputContextProvider>
       </TestProviders>
@@ -114,11 +118,16 @@ describe('MigrationReadyPanel', () => {
       useStartMigrationMock.mockReturnValue({
         startMigration: mockStartMigration,
         isLoading: true,
+        isFlyoutOpen: false,
       });
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />, {
         wrapper: ({ children }) => (
           <TestProviders>
-            <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+            <MigrationDataInputContextProvider
+              openFlyout={jest.fn()}
+              closeFlyout={jest.fn()}
+              isFlyoutOpen={false}
+            >
               {children}
             </MigrationDataInputContextProvider>
           </TestProviders>

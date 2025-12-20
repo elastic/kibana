@@ -9,15 +9,15 @@ import { useCallback, useState } from 'react';
 import type { SiemMigrationResourceBase } from '../../../../../../../common/siem_migrations/model/common.gen';
 import type {
   HandleMissingResourcesIndexed,
-  MigrationSource,
   MissingResourcesIndexed,
 } from '../../../../../common/types';
+import { MigrationSource } from '../../../../../common/types';
 
 export const useMissingResources = ({
   handleMissingResourcesIndexed,
   migrationSource,
 }: {
-  handleMissingResourcesIndexed: HandleMissingResourcesIndexed;
+  handleMissingResourcesIndexed?: HandleMissingResourcesIndexed;
   migrationSource: MigrationSource;
 }) => {
   const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
@@ -36,7 +36,7 @@ export const useMissingResources = ({
           return acc;
         },
         { macros: [], lookups: [] }
-      ) ?? { macros: [], lookups: [] };
+      );
       setMissingResourcesIndexed(newMissingResourcesIndexed);
 
       handleMissingResourcesIndexed?.({
@@ -47,5 +47,11 @@ export const useMissingResources = ({
     [handleMissingResourcesIndexed, migrationSource]
   );
 
-  return { missingResourcesIndexed, onMissingResourcesFetched };
+  const missingResourceCount =
+    migrationSource === MigrationSource.QRADAR
+      ? missingResourcesIndexed?.lookups.length ?? 0
+      : (missingResourcesIndexed?.macros.length ?? 0) +
+        (missingResourcesIndexed?.lookups.length ?? 0);
+
+  return { missingResourcesIndexed, onMissingResourcesFetched, missingResourceCount };
 };

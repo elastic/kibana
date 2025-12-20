@@ -8,19 +8,13 @@
 import { useState } from 'react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { useMigrationSourceOptions } from './use_migration_source_options';
-import type {
-  HandleMissingResourcesIndexed,
-  MigrationSource,
-  MissingResourcesIndexed,
-} from '../../../common/types';
+import type { MigrationSource } from '../../../common/types';
 
 export interface MigrationSourceDropdownProps {
   migrationSource: MigrationSource;
   setMigrationSource: (migrationSource: MigrationSource) => void;
   disabled: boolean;
   migrationSourceOptions: Array<EuiSuperSelectOption<MigrationSource>>;
-  missingResourcesIndexed?: MissingResourcesIndexed;
-  handleMissingResourcesIndexed?: HandleMissingResourcesIndexed;
 }
 
 export const useMigrationSourceStep = (initialMigrationSource: MigrationSource) => {

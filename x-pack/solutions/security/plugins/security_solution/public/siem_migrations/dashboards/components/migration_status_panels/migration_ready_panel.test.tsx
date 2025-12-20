@@ -74,7 +74,11 @@ jest.spyOn(useStartMigrationModule, 'useStartMigration').mockReturnValue({
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>
-    <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+    <MigrationDataInputContextProvider
+      openFlyout={jest.fn()}
+      closeFlyout={jest.fn()}
+      isFlyoutOpen={false}
+    >
       {children}
     </MigrationDataInputContextProvider>
   </TestProviders>

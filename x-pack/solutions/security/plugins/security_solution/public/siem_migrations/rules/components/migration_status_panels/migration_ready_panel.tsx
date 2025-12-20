@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/use_kibana';
@@ -24,6 +23,7 @@ import { StartTranslationButton } from '../../../common/components/start_transla
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { MigrationSource } from '../../../common/types';
+import { useMissingResources } from '../data_input_flyout/steps/hooks/use_missing_resources';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -35,22 +35,40 @@ const RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION: Record<MigrationSource
 };
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
-  const { openFlyout } = useMigrationDataInputContext();
+  const { openFlyout, isFlyoutOpen } = useMigrationDataInputContext();
+  const [flyoutMigrationId, setFlyoutMigrationId] = useState<string | undefined>();
+  const handleMissingResourcesIndexed = useCallback(() => {
+    setFlyoutMigrationId(undefined);
+  }, []);
   const { telemetry } = useKibana().services.siemMigrations.rules;
-  const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
-  const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
+  const { missingResourceCount, onMissingResourcesFetched } = useMissingResources({
+    migrationSource: migrationStats.vendor,
+    handleMissingResourcesIndexed,
+  });
+  const { getMissingResources, isLoading } = useGetMissingResources(
+    'rule',
+    onMissingResourcesFetched
+  );
 
   useEffect(() => {
     getMissingResources(migrationStats.id);
   }, [getMissingResources, migrationStats.id]);
 
+  // Check for missing resources when the flyout is closed
+  useEffect(() => {
+    if (!isFlyoutOpen && flyoutMigrationId && migrationStats.id === flyoutMigrationId) {
+      getMissingResources(migrationStats.id);
+    }
+  }, [getMissingResources, flyoutMigrationId, migrationStats.id, isFlyoutOpen]);
+
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout(migrationStats);
+    setFlyoutMigrationId(migrationStats.id);
     telemetry.reportSetupMigrationOpenResources({
       migrationId: migrationStats.id,
-      missingResourcesCount: missingResources.length,
+      missingResourcesCount: missingResourceCount,
     });
-  }, [openFlyout, migrationStats, telemetry, missingResources.length]);
+  }, [openFlyout, migrationStats, telemetry, missingResourceCount]);
 
   const isStopped = useMemo(
     () => migrationStats.status === SiemMigrationTaskStatus.STOPPED,
@@ -91,7 +109,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
               <EuiFlexItem>
                 <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                   <span>{migrationPanelDescription}</span>
-                  {!isLoading && missingResources.length > 0 && (
+                  {!isLoading && missingResourceCount > 0 && (
                     <span>
                       {RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION[migrationStats.vendor]}
                     </span>
@@ -104,7 +122,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
             <CenteredLoadingSpinner />
           ) : (
             <>
-              {missingResources.length > 0 && (
+              {missingResourceCount > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="ruleMigrationMissingResourcesButton"

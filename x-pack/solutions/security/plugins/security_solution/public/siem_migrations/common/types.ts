@@ -56,10 +56,7 @@ export interface MissingResourcesIndexed {
   lookups: string[];
 }
 
-export type OnMissingResourcesFetched = (
-  missingResources: SiemMigrationResourceBase[],
-  migrationSource: MigrationSource
-) => void;
+export type OnMissingResourcesFetched = (missingResources: SiemMigrationResourceBase[]) => void;
 
 export enum MigrationSource {
   SPLUNK = 'splunk',

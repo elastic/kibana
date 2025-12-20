@@ -177,8 +177,6 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                   setMigrationSource={setMigrationSource}
                   disabled={!!migrationStats?.id || migrationSourceDisabled}
                   migrationSourceOptions={migrationSourceOptions}
-                  missingResourcesIndexed={missingResourcesIndexed}
-                  handleMissingResourcesIndexed={setMissingResourcesStep}
                 />
               </EuiFlexItem>
               <>

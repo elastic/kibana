@@ -159,10 +159,10 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
     // Check missing resources step
     const onMissingResourcesFetchedStep = useCallback<OnMissingResourcesFetched>(
       (missingResources) => {
-        onMissingResourcesFetched(missingResources, migrationSource);
+        onMissingResourcesFetched(missingResources);
         setSubStep(END);
       },
-      [onMissingResourcesFetched, migrationSource]
+      [onMissingResourcesFetched]
     );
     const resourcesStep = useCheckResourcesStep({
       status: getEuiStepStatus(4, subStep),

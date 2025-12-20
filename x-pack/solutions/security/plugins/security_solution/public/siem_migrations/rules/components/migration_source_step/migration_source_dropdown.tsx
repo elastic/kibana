@@ -11,23 +11,12 @@ import type { MigrationSourceDropdownProps } from './use_migration_source_step';
 import type { MigrationSource } from '../../../common/types';
 
 export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
-  ({
-    migrationSource,
-    setMigrationSource,
-    disabled,
-    migrationSourceOptions,
-    missingResourcesIndexed,
-    handleMissingResourcesIndexed,
-  }) => {
+  ({ migrationSource, setMigrationSource, disabled, migrationSourceOptions }) => {
     const handleMigrationSourceChange = useCallback(
       (selectedVendor: MigrationSource) => {
         setMigrationSource(selectedVendor);
-        handleMissingResourcesIndexed?.({
-          migrationSource: selectedVendor,
-          newMissingResourcesIndexed: missingResourcesIndexed,
-        });
       },
-      [handleMissingResourcesIndexed, missingResourcesIndexed, setMigrationSource]
+      [setMigrationSource]
     );
 
     return (
