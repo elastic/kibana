@@ -99,6 +99,13 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
     }
 
+    // Temporary EuiFlyout style override when pushAnimation = false to fix the issue
+    // with rendering the Monaco editor suggestions list
+    // https://github.com/elastic/eui/issues/9287
+    .euiFlyout[class*='noAnimation'] {
+      animation-fill-mode: none;
+    }
+
     // overlay mask "belowHeader" should only cover the application area
     .euiOverlayMask[class*='belowHeader'] {
       ${logicalCSS('top', layoutVar('application.top', '0px'))};
