@@ -15,6 +15,13 @@ const traverse = require('@babel/traverse').default;
 const fs = require('fs');
 
 /**
+ * @typedef {Object} ExportsReverseMapEntry
+ * @property {string} subpathPattern - The public subpath pattern (e.g., './internal/*')
+ * @property {RegExp} fileRegex - Regex to match file paths
+ * @property {boolean} hasWildcard - Whether the pattern contains a wildcard
+ */
+
+/**
  * Get parser plugins based on file extension.
  * TypeScript files use 'typescript' plugin, JS files use 'flow' for compatibility.
  *
@@ -66,6 +73,10 @@ async function buildBarrelIndex(repoRoot) {
   /** @type {import('./types').BarrelIndex} */
   const index = {};
 
+  // Cache for package exports reverse maps to avoid re-reading package.json
+  /** @type {Map<string, ExportsReverseMapEntry[] | null>} */
+  const exportsReverseMapCache = new Map();
+
   // Process all barrel files in parallel
   await Promise.all(
     barrelFiles.map(async (barrelPath) => {
@@ -87,6 +98,25 @@ async function buildBarrelIndex(repoRoot) {
               0,
               nodeModulesIdx + 'node_modules/'.length + nodeModulesMatch[1].length
             );
+
+            // Get or build the exports reverse map for this package
+            let reverseMap = exportsReverseMapCache.get(entry.packageRoot);
+            if (reverseMap === undefined) {
+              const pkgExports = readPackageExports(entry.packageRoot);
+              reverseMap = pkgExports ? buildExportsReverseMap(pkgExports) : null;
+              exportsReverseMapCache.set(entry.packageRoot, reverseMap);
+            }
+
+            // If package has exports field, compute publicSubpath for each export
+            if (reverseMap && reverseMap.length > 0) {
+              for (const exportInfo of Object.values(entry.exports)) {
+                const relativePath = path.relative(entry.packageRoot, exportInfo.path);
+                const publicSubpath = resolvePublicSubpath(relativePath, reverseMap);
+                if (publicSubpath !== null) {
+                  exportInfo.publicSubpath = publicSubpath;
+                }
+              }
+            }
           }
 
           index[barrelPath] = entry;
@@ -418,4 +448,141 @@ function resolveModulePath(modulePath, fromDir) {
   return null;
 }
 
-module.exports = { buildBarrelIndex };
+/**
+ * Read and parse the exports field from a package's package.json.
+ *
+ * @param {string} packageRoot - Absolute path to the package root
+ * @returns {Record<string, any> | null} - The exports field or null if not found
+ */
+function readPackageExports(packageRoot) {
+  const pkgJsonPath = path.join(packageRoot, 'package.json');
+  try {
+    const content = fs.readFileSync(pkgJsonPath, 'utf-8');
+    const pkgJson = JSON.parse(content);
+    return pkgJson.exports || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extract the file target from a conditional exports value.
+ * Handles both string values and conditional objects like { node: "./path", require: "./path" }
+ *
+ * @param {string | Record<string, any>} exportValue - The export value
+ * @returns {string | null} - The file path target or null
+ */
+function extractFileTarget(exportValue) {
+  if (typeof exportValue === 'string') {
+    return exportValue;
+  }
+
+  if (typeof exportValue === 'object' && exportValue !== null) {
+    // Prefer 'node' or 'require' conditions for CJS builds
+    // Order of preference: node, require, default
+    for (const condition of ['node', 'require', 'default']) {
+      if (typeof exportValue[condition] === 'string') {
+        return exportValue[condition];
+      }
+      // Handle nested conditions
+      if (typeof exportValue[condition] === 'object') {
+        const nested = extractFileTarget(exportValue[condition]);
+        if (nested) return nested;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Build a reverse mapping from file paths to public subpaths.
+ *
+ * @param {Record<string, any>} exportsField - The package.json exports field
+ * @returns {ExportsReverseMapEntry[]} - Array of reverse mapping entries
+ */
+function buildExportsReverseMap(exportsField) {
+  /** @type {ExportsReverseMapEntry[]} */
+  const reverseMap = [];
+
+  for (const [subpathPattern, exportValue] of Object.entries(exportsField)) {
+    // Skip package.json export
+    if (subpathPattern === './package.json') continue;
+
+    const fileTarget = extractFileTarget(exportValue);
+    if (!fileTarget) continue;
+
+    const hasWildcard = subpathPattern.includes('*') && fileTarget.includes('*');
+
+    if (hasWildcard) {
+      // Convert file pattern to regex
+      // e.g., "./dist/cjs/internal/*.js" -> /^dist\/cjs\/internal\/(.*)\.js$/
+      const regexPattern = fileTarget
+        .replace(/^\.\//, '') // Remove leading ./
+        .replace(/\*/g, '___WILDCARD___') // Temporarily replace * to preserve it
+        .replace(/[.+?^${}()|[\]\\]/g, '\\$&') // Escape special regex chars
+        .replace(/___WILDCARD___/g, '(.*)'); // Replace placeholder with capture group
+
+      reverseMap.push({
+        subpathPattern,
+        fileRegex: new RegExp(`^${regexPattern}$`),
+        hasWildcard: true,
+      });
+    } else {
+      // Exact match - convert file target to regex
+      const regexPattern = fileTarget.replace(/^\.\//, '').replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+
+      reverseMap.push({
+        subpathPattern,
+        fileRegex: new RegExp(`^${regexPattern}$`),
+        hasWildcard: false,
+      });
+    }
+  }
+
+  return reverseMap;
+}
+
+/**
+ * Resolve a file path to its public subpath using the exports reverse map.
+ *
+ * @param {string} filePath - Relative file path from package root (e.g., "dist/cjs/internal/Observable.js")
+ * @param {ExportsReverseMapEntry[]} reverseMap - The reverse mapping entries
+ * @returns {string | null} - The public subpath (without leading ./ or package name) or null
+ */
+function resolvePublicSubpath(filePath, reverseMap) {
+  // Normalize the file path - remove leading ./ if present
+  const normalizedPath = filePath.replace(/^\.\//, '');
+
+  for (const entry of reverseMap) {
+    const match = normalizedPath.match(entry.fileRegex);
+    if (match) {
+      if (entry.hasWildcard) {
+        // Substitute the captured wildcard value into the subpath pattern
+        const wildcardValue = match[1];
+        // Remove leading ./ and the extension from the subpath
+        let subpath = entry.subpathPattern.replace(/^\.\//, '').replace('*', wildcardValue);
+        // Remove trailing file extension if present in the result
+        subpath = subpath.replace(/\.(js|ts|tsx|jsx)$/, '');
+        return subpath;
+      } else {
+        // Exact match - return the subpath without ./
+        const subpath = entry.subpathPattern.replace(/^\.\//, '');
+        // Handle '.' (root) export
+        if (subpath === '.') {
+          return '';
+        }
+        return subpath;
+      }
+    }
+  }
+
+  return null;
+}
+
+module.exports = {
+  buildBarrelIndex,
+  readPackageExports,
+  buildExportsReverseMap,
+  resolvePublicSubpath,
+};

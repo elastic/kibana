@@ -19,6 +19,8 @@ export interface ExportInfo {
   localName: string;
   /** The name the export was originally exported as (may differ from localName for re-exports) */
   importedName: string;
+  /** For packages with exports field: the public import subpath (without package name) */
+  publicSubpath?: string;
 }
 
 /**

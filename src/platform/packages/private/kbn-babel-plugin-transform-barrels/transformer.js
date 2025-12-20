@@ -42,7 +42,8 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   const { exports, packageName, packageRoot } = barrelEntry;
 
   // Collect new imports grouped by target path
-  /** @type {Map<string, ImportSpecifierInfo[]>} */
+  // Key is path, value includes specifiers and optional publicSubpath
+  /** @type {Map<string, { specifiers: ImportSpecifierInfo[], publicSubpath?: string }>} */
   const newImports = new Map();
 
   /** @type {Array<import('@babel/types').ImportSpecifier | import('@babel/types').ImportDefaultSpecifier | import('@babel/types').ImportNamespaceSpecifier>} */
@@ -57,9 +58,12 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
 
       if (exportInfo) {
         if (!newImports.has(exportInfo.path)) {
-          newImports.set(exportInfo.path, []);
+          newImports.set(exportInfo.path, {
+            specifiers: [],
+            publicSubpath: exportInfo.publicSubpath,
+          });
         }
-        newImports.get(exportInfo.path)?.push({
+        newImports.get(exportInfo.path)?.specifiers.push({
           localName,
           importedName: exportInfo.localName,
           isDefault: exportInfo.type === 'default',
@@ -73,9 +77,12 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
 
       if (exportInfo) {
         if (!newImports.has(exportInfo.path)) {
-          newImports.set(exportInfo.path, []);
+          newImports.set(exportInfo.path, {
+            specifiers: [],
+            publicSubpath: exportInfo.publicSubpath,
+          });
         }
-        newImports.get(exportInfo.path)?.push({
+        newImports.get(exportInfo.path)?.specifiers.push({
           localName,
           importedName: 'default',
           isDefault: true,
@@ -96,9 +103,15 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   /** @type {import('@babel/types').ImportDeclaration[]} */
   const newNodes = [];
 
-  for (const [targetPath, specifiers] of newImports) {
+  for (const [targetPath, { specifiers, publicSubpath }] of newImports) {
     // Convert absolute path to importable path
-    const outputPath = toImportPath(targetPath, currentFileDir, packageName, packageRoot);
+    const outputPath = toImportPath(
+      targetPath,
+      currentFileDir,
+      packageName,
+      packageRoot,
+      publicSubpath
+    );
     newNodes.push(createImportDeclaration(t, specifiers, outputPath));
   }
 
@@ -159,10 +172,21 @@ function resolveToBarrelEntry(importSource, fromDir, barrelIndex) {
  * @param {string} fromDir - Directory of the importing file
  * @param {string} [packageName] - Package name if this is a node_modules import
  * @param {string} [packageRoot] - Package root path if this is a node_modules import
+ * @param {string} [publicSubpath] - Pre-computed public subpath from package exports field
  * @returns {string} - Importable path
  */
-function toImportPath(absolutePath, fromDir, packageName, packageRoot) {
-  // For package imports: convert to package subpath
+function toImportPath(absolutePath, fromDir, packageName, packageRoot, publicSubpath) {
+  // For package imports with public subpath from exports field
+  if (packageName && publicSubpath !== undefined) {
+    // publicSubpath is already the correct subpath (e.g., "internal/Observable")
+    // Return empty string check for root exports
+    if (publicSubpath === '') {
+      return packageName;
+    }
+    return `${packageName}/${publicSubpath}`;
+  }
+
+  // For package imports without exports field: compute from file path
   if (packageName && packageRoot) {
     let subPath = path.relative(packageRoot, absolutePath);
     subPath = subPath.replace(/\.(ts|tsx|js|jsx)$/, '');

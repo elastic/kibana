@@ -12,4 +12,3 @@ module.exports = {
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/private/kbn-babel-plugin-transform-barrels'],
 };
-

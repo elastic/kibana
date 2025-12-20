@@ -70,7 +70,8 @@ describe('barrel transform build integration', () => {
     expect(testFileContent).toMatch(/require\(['"]\.\/logging\/get_response_log['"]\)/);
 
     // Original: import { firstValueFrom, pairwise, take } from 'rxjs';
+    // With package exports field, the import is transformed to use the public subpath
     expect(testFileContent).not.toMatch(/require\(['"]rxjs['"]\)/);
-    expect(testFileContent).toMatch(/require\(['"]rxjs\/dist\/cjs\/internal\/firstValueFrom['"]\)/);
+    expect(testFileContent).toMatch(/require\(['"]rxjs\/internal\/firstValueFrom['"]\)/);
   });
 });
