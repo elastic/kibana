@@ -21,7 +21,7 @@ import { Build } from '../../../../../dev/build/lib/build';
 const TEST_PACKAGE_PATH = 'src/core/packages/http/server-internal';
 const TEST_PACKAGE_MANIFEST = Path.join(REPO_ROOT, TEST_PACKAGE_PATH, 'kibana.jsonc');
 
-// We allow extra time due to building shared packages.
+// We allow extra time due to building packages. Runtime is about 2min.
 jest.setTimeout(300 * 1000);
 
 describe('barrel transform build integration', () => {
@@ -62,12 +62,15 @@ describe('barrel transform build integration', () => {
 
     const outputSrcDir = Path.join(outputDir, 'src');
 
-    const httpConfigPath = Path.join(outputSrcDir, 'http_config.js');
-    const httpConfigContent = await Fsp.readFile(httpConfigPath, 'utf-8');
+    const testFilePath = Path.join(outputSrcDir, 'http_server.js');
+    const testFileContent = await Fsp.readFile(testFilePath, 'utf-8');
 
-    // Assert barrel imports were transformed to direct paths
-    // Original: import { CspConfig } from './csp'
-    expect(httpConfigContent).not.toMatch(/require\(['"]\.\/csp['"]\)/);
-    expect(httpConfigContent).toMatch(/require\(['"]\.\/csp\/csp_config['"]\)/);
+    // Original: import { getEcsResponseLog } from './logging';
+    expect(testFileContent).not.toMatch(/require\(['"]\.\/logging['"]\)/);
+    expect(testFileContent).toMatch(/require\(['"]\.\/logging\/get_response_log['"]\)/);
+
+    // Original: import { firstValueFrom, pairwise, take } from 'rxjs';
+    expect(testFileContent).not.toMatch(/require\(['"]\.\/rxjs['"]\)/);
+    expect(testFileContent).toMatch(/require\(['"]\.\/rxjs\/firstValueFrom['"]\)/);
   });
 });
