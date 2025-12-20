@@ -6,7 +6,7 @@
  */
 
 import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
-import { networkTrafficWithInterfacesWithFilter } from '../../../shared/metrics/snapshot/network_traffic';
+import { networkTrafficSnapshotWithFilter } from '../../../shared/metrics/snapshot/network_traffic';
 
 export const rxV2: SchemaBasedAggregations = {
   ecs: {
@@ -40,7 +40,7 @@ export const rxV2: SchemaBasedAggregations = {
       },
     },
   },
-  semconv: networkTrafficWithInterfacesWithFilter('rxV2', 'system.network.io', 'device', {
+  semconv: networkTrafficSnapshotWithFilter('rxV2', 'system.network.io', 'device.keyword', {
     term: {
       direction: 'receive',
     },

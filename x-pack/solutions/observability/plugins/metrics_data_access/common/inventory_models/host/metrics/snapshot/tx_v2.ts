@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { networkTrafficWithInterfacesWithFilter } from '../../../shared/metrics/snapshot/network_traffic';
+import { networkTrafficSnapshotWithFilter } from '../../../shared/metrics/snapshot/network_traffic';
 import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
 
 export const txV2: SchemaBasedAggregations = {
@@ -40,7 +40,7 @@ export const txV2: SchemaBasedAggregations = {
       },
     },
   },
-  semconv: networkTrafficWithInterfacesWithFilter('txV2', 'system.network.io', 'device', {
+  semconv: networkTrafficSnapshotWithFilter('txV2', 'system.network.io', 'device.keyword', {
     term: {
       direction: 'transmit',
     },

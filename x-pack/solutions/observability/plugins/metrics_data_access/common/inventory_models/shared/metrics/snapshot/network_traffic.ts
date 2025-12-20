@@ -88,18 +88,63 @@ export const networkTrafficWithInterfacesWithFilter = (
       },
     },
   },
-  [`${id}_deriv`]: {
-    derivative: {
-      buckets_path: `${id}_dimension>${id}_sum_of_interfaces`,
-      gap_policy: 'skip',
-      unit: '1s',
-    },
-  },
   [id]: {
     bucket_script: {
       buckets_path: { value: `${id}_deriv[normalized_value]` },
       script: {
         source: 'params.value > 0.0 ? params.value : 0.0',
+        lang: 'painless',
+      },
+      gap_policy: 'skip',
+    },
+  },
+});
+
+export const networkTrafficSnapshotWithFilter = (
+  id: string,
+  metricField: string,
+  interfaceField: string,
+  filter: estypes.QueryDslQueryContainer
+): MetricsUIAggregation => ({
+  [`${id}_dimension`]: {
+    filter,
+    aggs: {
+      [`${id}_interfaces`]: {
+        terms: { field: interfaceField },
+        aggregations: {
+          [`${id}_interface_max`]: { max: { field: metricField } },
+          [`${id}_interface_min`]: { min: { field: metricField } },
+          [`${id}_interface_diff`]: {
+            bucket_script: {
+              buckets_path: { max: `${id}_interface_max`, min: `${id}_interface_min` },
+              script: 'params.max - params.min',
+            },
+          },
+        },
+      },
+      [`${id}_sum_of_diffs`]: {
+        sum_bucket: {
+          buckets_path: `${id}_interfaces>${id}_interface_diff`,
+        },
+      },
+    },
+  },
+  [`${id}_min_timestamp`]: {
+    min: { field: '@timestamp' },
+  },
+  [`${id}_max_timestamp`]: {
+    max: { field: '@timestamp' },
+  },
+  [id]: {
+    bucket_script: {
+      buckets_path: {
+        totalDiff: `${id}_dimension>${id}_sum_of_diffs`,
+        minTime: `${id}_min_timestamp`,
+        maxTime: `${id}_max_timestamp`,
+      },
+      script: {
+        source:
+          'if (params.maxTime == params.minTime) return 0; return params.totalDiff / ((params.maxTime - params.minTime) / 1000)',
         lang: 'painless',
       },
       gap_policy: 'skip',
