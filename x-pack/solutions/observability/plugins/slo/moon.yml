@@ -121,6 +121,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/react-query'
   - '@kbn/deeplinks-observability'
+  - '@kbn/observability-overview-plugin'
 tags:
   - plugin
   - prod
