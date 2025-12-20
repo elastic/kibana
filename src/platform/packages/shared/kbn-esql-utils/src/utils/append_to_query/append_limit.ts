@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
 
 export const appendLimitToQuery = (queryString: string, limit: number) => {
   const { root } = Parser.parse(queryString);
