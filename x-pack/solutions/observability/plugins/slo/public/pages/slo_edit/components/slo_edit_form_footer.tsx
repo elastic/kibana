@@ -8,10 +8,10 @@
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
-import React, { useCallback } from 'react';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { paths } from '../../../../common/locators/paths';
 import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -47,11 +47,6 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
   const { mutate: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
     useCreateRule<BurnRateRuleParams>();
 
-  const navigate = useCallback(
-    (url: string) => setTimeout(() => navigateToUrl(url)),
-    [navigateToUrl]
-  );
-
   const handleSubmit = async () => {
     const isValid = await trigger();
     if (!isValid) {
@@ -63,7 +58,7 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
     if (isEditMode && !!slo) {
       const processedValues = transformValuesToUpdateSLOInput(values);
       await updateSlo({ sloId: slo.id, slo: processedValues });
-      navigate(basePath.prepend(paths.slos));
+      navigateToUrl(basePath.prepend(paths.slos));
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
       const resp = await createSlo({ slo: processedValues });
@@ -73,7 +68,7 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
       if (onFlyoutClose) {
         onFlyoutClose();
       } else {
-        navigate(basePath.prepend(paths.slos));
+        navigateToUrl(basePath.prepend(paths.slos));
       }
     }
   };
