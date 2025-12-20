@@ -83,13 +83,20 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
  */
 function getRegisteredStepDefinitions(): BaseConnectorContract[] {
   return stepSchemas.getAllRegisteredStepDefinitions().map((stepDefinition) => {
+    const definition = {
+      type: stepDefinition.id,
+      paramsSchema: stepDefinition.inputSchema,
+      outputSchema: stepDefinition.outputSchema,
+      configSchema: stepDefinition.configSchema,
+      summary: null,
+      description: null,
+    };
+
     if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
       // Only public step definitions have documentation and examples
       return {
-        type: stepDefinition.id,
-        paramsSchema: stepDefinition.inputSchema,
-        outputSchema: stepDefinition.outputSchema,
-        summary: stepDefinition.label ?? null,
+        ...definition,
+        summary: stepDefinition.label,
         description: stepDefinition.description ?? null,
         documentation: stepDefinition.documentation?.url,
         examples: stepDefinition.documentation?.examples
@@ -97,14 +104,7 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
           : undefined,
       };
     }
-    return {
-      type: stepDefinition.id,
-      paramsSchema: stepDefinition.inputSchema,
-      outputSchema: stepDefinition.outputSchema,
-      summary: null,
-      description: null,
-      documentation: undefined,
-    };
+    return definition;
   });
 }
 
