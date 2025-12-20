@@ -36,7 +36,7 @@ export function useStreamsDetailManagementTabs({
         defaultMessage: 'Processing',
       }),
     },
-    ...(groupStreams?.enabled
+    ...(groupStreams.enabled
       ? {
           references: {
             content: <StreamDetailReferencesView definition={definition} />,
