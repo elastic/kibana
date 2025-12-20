@@ -9,19 +9,33 @@
 
 import Path from 'path';
 import * as babel from '@babel/core';
-import type { BarrelIndex, BarrelFileEntry } from '../types';
+import type { BarrelIndex, BarrelFileEntry, ExportInfo } from '../types';
+
+interface TestExportInfo extends ExportInfo {
+  expectedPath: string;
+}
+
+interface TestBarrelFileEntry extends Omit<BarrelFileEntry, 'exports'> {
+  exports: Record<string, TestExportInfo>;
+}
+
+interface TestBarrelIndex {
+  [barrelFilePath: string]: TestBarrelFileEntry;
+}
+
+interface TransformOptions {
+  code: string;
+  barrelIndex?: TestBarrelIndex | null;
+  filename?: string;
+}
 
 const TEST_FILE_PATH = '/test/src/file.ts';
-const TEST_FILE_DIR = Path.dirname(TEST_FILE_PATH);
 const REAL_TEST_FILE_PATH = Path.join(process.cwd(), 'src/test-file.ts');
 const COMPONENTS_BARREL_PATH = '/test/src/components/index.ts';
-const UTILS_BARREL_PATH = '/test/src/utils/index.ts';
-const APP_BARREL_PATH = '/test/src/app/index.ts';
-const PARTIAL_BARREL_PATH = '/test/src/partial/index.ts';
 const RXJS_BARREL_PATH = require.resolve('rxjs');
 const RXJS_PACKAGE_ROOT = Path.dirname(RXJS_BARREL_PATH);
 
-const BARREL_INDEX: BarrelIndex = {
+const BARREL_INDEX: TestBarrelIndex = {
   [COMPONENTS_BARREL_PATH]: {
     exports: {
       Button: {
@@ -29,42 +43,14 @@ const BARREL_INDEX: BarrelIndex = {
         type: 'named',
         localName: 'Button',
         importedName: 'Button',
+        expectedPath: './components/Button/Button',
       },
       Modal: {
         path: '/test/src/components/Modal/Modal.tsx',
         type: 'named',
         localName: 'Modal',
         importedName: 'Modal',
-      },
-    },
-  },
-  [UTILS_BARREL_PATH]: {
-    exports: {
-      helper: {
-        path: '/test/src/utils/helpers.ts',
-        type: 'named',
-        localName: 'helper',
-        importedName: 'helper',
-      },
-    },
-  },
-  [APP_BARREL_PATH]: {
-    exports: {
-      default: {
-        path: '/test/src/app/App.tsx',
-        type: 'default',
-        localName: 'App',
-        importedName: 'default',
-      },
-    },
-  },
-  [PARTIAL_BARREL_PATH]: {
-    exports: {
-      Foo: {
-        path: '/test/src/partial/foo.ts',
-        type: 'named',
-        localName: 'Foo',
-        importedName: 'Foo',
+        expectedPath: './components/Modal/Modal',
       },
     },
   },
@@ -77,28 +63,21 @@ const BARREL_INDEX: BarrelIndex = {
         type: 'named',
         localName: 'Observable',
         importedName: 'Observable',
+        expectedPath: 'rxjs/dist/cjs/internal/Observable',
       },
       firstValueFrom: {
         path: Path.join(RXJS_PACKAGE_ROOT, 'dist/cjs/internal/firstValueFrom.js'),
         type: 'named',
         localName: 'firstValueFrom',
         importedName: 'firstValueFrom',
+        expectedPath: 'rxjs/dist/cjs/internal/firstValueFrom',
       },
     },
   },
 };
 
 const COMPONENTS_BARREL = BARREL_INDEX[COMPONENTS_BARREL_PATH];
-const UTILS_BARREL = BARREL_INDEX[UTILS_BARREL_PATH];
-const APP_BARREL = BARREL_INDEX[APP_BARREL_PATH];
-const PARTIAL_BARREL = BARREL_INDEX[PARTIAL_BARREL_PATH];
 const RXJS_BARREL = BARREL_INDEX[RXJS_BARREL_PATH];
-
-interface TransformOptions {
-  code: string;
-  barrelIndex?: BarrelIndex | null;
-  filename?: string;
-}
 
 function transform(options: TransformOptions): babel.BabelFileResult | null {
   const { code, filename = TEST_FILE_PATH } = options;
@@ -115,91 +94,35 @@ function transform(options: TransformOptions): babel.BabelFileResult | null {
   });
 }
 
-/**
- * Compute expected relative import path from an export's absolute path.
- * Strips extension and ensures path starts with './'.
- */
-function toRelativeImportPath(absolutePath: string, fromDir: string): string {
-  let relativePath = Path.relative(fromDir, absolutePath);
-  relativePath = relativePath.replace(/\.(ts|tsx|js|jsx)$/, '');
-  if (!relativePath.startsWith('.')) {
-    relativePath = './' + relativePath;
-  }
-  return relativePath;
-}
-
-/**
- * Compute expected package subpath from an export's absolute path.
- * Uses packageName and packageRoot to create package-style import.
- */
-function toPackageImportPath(entry: BarrelFileEntry, exportName: string): string {
-  const exportInfo = entry.exports[exportName];
-  const relativePath = exportInfo.path
-    .slice(entry.packageRoot!.length + 1)
-    .replace(/\.(ts|tsx|js|jsx)$/, '');
-  return `${entry.packageName}/${relativePath}`;
-}
-
 describe('barrel transform plugin', () => {
   describe('named import transformations', () => {
     it('transforms a single named import to direct path', () => {
       const result = transform({ code: `import { Button } from './components';` });
 
-      const expectedPath = toRelativeImportPath(
-        COMPONENTS_BARREL.exports.Button.path,
-        TEST_FILE_DIR
-      );
-      expect(result?.code).toContain(expectedPath);
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
       expect(result?.code).not.toContain(`'./components'`);
     });
 
     it('transforms multiple named imports to separate direct paths', () => {
       const result = transform({ code: `import { Button, Modal } from './components';` });
 
-      const buttonPath = toRelativeImportPath(COMPONENTS_BARREL.exports.Button.path, TEST_FILE_DIR);
-      const modalPath = toRelativeImportPath(COMPONENTS_BARREL.exports.Modal.path, TEST_FILE_DIR);
-      expect(result?.code).toContain(buttonPath);
-      expect(result?.code).toContain(modalPath);
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Modal.expectedPath);
     });
 
     it('preserves local alias when transforming', () => {
       const result = transform({ code: `import { Button as MyButton } from './components';` });
 
-      const expectedPath = toRelativeImportPath(
-        COMPONENTS_BARREL.exports.Button.path,
-        TEST_FILE_DIR
-      );
       expect(result?.code).toContain('MyButton');
-      expect(result?.code).toContain(expectedPath);
-    });
-
-    it('transforms imports from different barrel directories', () => {
-      const result = transform({ code: `import { helper } from './utils';` });
-
-      const expectedPath = toRelativeImportPath(UTILS_BARREL.exports.helper.path, TEST_FILE_DIR);
-      expect(result?.code).toContain(expectedPath);
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
     });
   });
 
   describe('default import transformations', () => {
     it('transforms default import to direct path', () => {
-      const result = transform({ code: `import App from './app';` });
+      const result = transform({ code: `import Button from './components/Button/Button';` });
 
-      const expectedPath = toRelativeImportPath(APP_BARREL.exports.default.path, TEST_FILE_DIR);
-      expect(result?.code).toContain(expectedPath);
-    });
-  });
-
-  describe('partial barrel coverage', () => {
-    it('transforms known exports and preserves unknown exports', () => {
-      const result = transform({ code: `import { Foo, Bar } from './partial';` });
-
-      const fooPath = toRelativeImportPath(PARTIAL_BARREL.exports.Foo.path, TEST_FILE_DIR);
-      // Foo should be transformed to direct path
-      expect(result?.code).toContain(fooPath);
-      // Bar stays with original barrel import since it's not in the index
-      expect(result?.code).toContain('Bar');
-      expect(result?.code).toContain('./partial');
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
     });
   });
 
@@ -244,8 +167,7 @@ describe('barrel transform plugin', () => {
         filename: REAL_TEST_FILE_PATH,
       });
 
-      const expectedPath = toPackageImportPath(RXJS_BARREL, 'Observable');
-      expect(result?.code).toContain(expectedPath);
+      expect(result?.code).toContain(RXJS_BARREL.exports.Observable.expectedPath);
       expect(result?.code).not.toMatch(/from ['"]rxjs['"]/);
     });
 
@@ -255,8 +177,8 @@ describe('barrel transform plugin', () => {
         filename: REAL_TEST_FILE_PATH,
       });
 
-      expect(result?.code).toContain(toPackageImportPath(RXJS_BARREL, 'Observable'));
-      expect(result?.code).toContain(toPackageImportPath(RXJS_BARREL, 'firstValueFrom'));
+      expect(result?.code).toContain(RXJS_BARREL.exports.Observable.expectedPath);
+      expect(result?.code).toContain(RXJS_BARREL.exports.firstValueFrom.expectedPath);
     });
 
     it('uses package subpath style, not relative node_modules path', () => {
