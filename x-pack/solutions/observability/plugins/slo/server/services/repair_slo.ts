@@ -53,13 +53,13 @@ export class RepairSLO {
 
     const allResults: RepairActionsGroupResult[] = [];
     const limiter = pLimit(3);
-    await Promise.all(
+    await Promise.allSettled(
       repairActionsGroup.map((actionGroup) =>
         limiter(() =>
-          this.executeRepairActionsGroup(actionGroup).then((result) => {
+          this.executeRepairActionsGroup(actionGroup).then((results) => {
             allResults.push({
               id: actionGroup.slo.id,
-              results: result,
+              results,
             });
           })
         )
@@ -75,6 +75,11 @@ export class RepairSLO {
   ): RepairActionsGroup {
     const group: RepairActionsGroup = { slo, actions: [] };
     const { health } = healthData;
+
+    if (health.isProblematic === false) {
+      group.actions.push({ type: 'noop' });
+      return group;
+    }
 
     if (health.rollup.missing) {
       group.actions.push({
@@ -124,6 +129,11 @@ export class RepairSLO {
   }
 
   private async executeRepairAction(action: RepairAction, slo: SLODefinition): Promise<void> {
+    if (action.type === 'noop') {
+      this.logger.debug(`No repair action needed for SLO [${slo.id}]`);
+      return;
+    }
+
     const transformId =
       action.transformType === 'rollup'
         ? getSLOTransformId(slo.id, slo.revision)

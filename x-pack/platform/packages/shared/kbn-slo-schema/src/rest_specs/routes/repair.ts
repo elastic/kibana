@@ -13,34 +13,23 @@ const repairParamsSchema = t.type({
   }),
 });
 
-const repairActionSchema = t.type({
-  type: t.union([
-    t.literal('recreate-transform'),
-    t.literal('start-transform'),
-    t.literal('stop-transform'),
-  ]),
-  transformType: t.union([t.literal('rollup'), t.literal('summary')]),
-});
-
-const repairActionResultSchema = t.intersection([
-  t.type({
-    action: repairActionSchema,
-    status: t.union([t.literal('success'), t.literal('failure')]),
-  }),
-  t.partial({
-    error: t.unknown,
-  }),
-]);
-
-const repairActionsGroupResultSchema = t.type({
-  id: sloIdSchema,
-  results: t.array(repairActionResultSchema),
-});
-
 type RepairParams = t.TypeOf<typeof repairParamsSchema.props.body>;
-type RepairAction = t.TypeOf<typeof repairActionSchema>;
-type RepairActionResult = t.TypeOf<typeof repairActionResultSchema>;
-type RepairActionsGroupResult = t.TypeOf<typeof repairActionsGroupResultSchema>;
 
-export { repairParamsSchema, repairActionsGroupResultSchema };
+interface RepairAction {
+  type: 'recreate-transform' | 'start-transform' | 'stop-transform' | 'noop';
+  transformType?: 'rollup' | 'summary';
+}
+
+interface RepairActionResult {
+  action: RepairAction;
+  status: 'success' | 'failure';
+  error?: unknown;
+}
+
+interface RepairActionsGroupResult {
+  id: string;
+  results: RepairActionResult[];
+}
+
+export { repairParamsSchema };
 export type { RepairParams, RepairAction, RepairActionResult, RepairActionsGroupResult };
