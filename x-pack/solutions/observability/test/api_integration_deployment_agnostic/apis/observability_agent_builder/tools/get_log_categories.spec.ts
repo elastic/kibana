@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetLogCategoriesToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_categories/get_log_categories';
+import type { GetLogCategoriesToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_categories/tool';
 import { first } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';

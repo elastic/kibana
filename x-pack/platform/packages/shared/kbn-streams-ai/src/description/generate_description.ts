@@ -10,7 +10,7 @@ import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/infere
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { Streams, SystemFeature } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
-import { GenerateStreamDescriptionPrompt } from './prompt';
+import { createGenerateStreamDescriptionPrompt } from './prompt';
 
 /**
  * Generate a natural-language description
@@ -24,6 +24,7 @@ export async function generateStreamDescription({
   inferenceClient,
   signal,
   logger,
+  systemPromptOverride,
 }: {
   stream: Streams.all.Definition;
   feature?: SystemFeature;
@@ -33,6 +34,7 @@ export async function generateStreamDescription({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  systemPromptOverride?: string;
 }): Promise<{ description: string; tokensUsed?: ChatCompletionTokenCount }> {
   logger.debug(
     `Generating stream description for stream ${stream.name}${
@@ -61,6 +63,10 @@ export async function generateStreamDescription({
     )
   );
 
+  const prompt = createGenerateStreamDescriptionPrompt({
+    systemPromptOverride,
+  });
+
   logger.trace('Generating stream description via inference client');
   const response = await withSpan('generate_stream_description', () =>
     inferenceClient.prompt({
@@ -68,7 +74,7 @@ export async function generateStreamDescription({
         name: feature?.name || stream.name,
         dataset_analysis: JSON.stringify(formattedAnalysis),
       },
-      prompt: GenerateStreamDescriptionPrompt,
+      prompt,
       abortSignal: signal,
     })
   );

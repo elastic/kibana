@@ -252,80 +252,170 @@ describe('AccessControlService', () => {
       typeMap: new Map(Object.entries(typeMap)),
     });
 
-    it('throws if authorizationResult.status is "unauthorized"', () => {
-      const authorizationResult = makeAuthResult('unauthorized');
-      expect(() =>
-        service.enforceAccessControl({
-          authorizationResult,
-          typesRequiringAccessControl: new Set(['dashboard']),
-          currentSpace: 'default',
-        })
-      ).toThrow(/Access denied/);
-    });
-
-    it('throws if not globally authorized and not authorized in current space', () => {
-      const authorizationResult = makeAuthResult('partially_authorized', {
-        dashboard: {
-          manage_access_control: {
-            isGloballyAuthorized: false,
-            authorizedSpaces: ['foo'],
-          },
-        },
+    describe(`non-owner scenarios`, () => {
+      it('throws if authorizationResult.status is "unauthorized"', () => {
+        const authorizationResult = makeAuthResult('unauthorized');
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(['dashboard']),
+            typesRequiringRbac: new Set(),
+            currentSpace: 'default',
+          })
+        ).toThrow(/Access denied/);
       });
-      expect(() =>
-        service.enforceAccessControl({
-          authorizationResult,
-          typesRequiringAccessControl: new Set(['dashboard']),
-          currentSpace: 'default',
-        })
-      ).toThrow(/Access denied/);
-    });
 
-    it('does not throw if globally authorized', () => {
-      const authorizationResult = makeAuthResult('fully_authorized', {
-        dashboard: {
-          manage_access_control: {
-            isGloballyAuthorized: true,
-            authorizedSpaces: [],
+      it('throws if not globally authorized and not authorized in current space', () => {
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: ['foo'],
+            },
           },
-        },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(['dashboard']),
+            typesRequiringRbac: new Set(),
+            currentSpace: 'default',
+          })
+        ).toThrow(/Access denied/);
       });
-      expect(() =>
-        service.enforceAccessControl({
-          authorizationResult,
-          typesRequiringAccessControl: new Set(['dashboard']),
-          currentSpace: 'default',
-        })
-      ).not.toThrow();
-    });
 
-    it('does not throw if authorized in current space', () => {
-      const authorizationResult = makeAuthResult('fully_authorized', {
-        dashboard: {
-          manage_access_control: {
-            isGloballyAuthorized: false,
-            authorizedSpaces: ['default'],
+      it('does not throw if globally authorized', () => {
+        const authorizationResult = makeAuthResult('fully_authorized', {
+          dashboard: {
+            manage_access_control: {
+              isGloballyAuthorized: true,
+              authorizedSpaces: [],
+            },
           },
-        },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(['dashboard']),
+            typesRequiringRbac: new Set(),
+            currentSpace: 'default',
+          })
+        ).not.toThrow();
       });
-      expect(() =>
-        service.enforceAccessControl({
-          authorizationResult,
-          typesRequiringAccessControl: new Set(['dashboard']),
-          currentSpace: 'default',
-        })
-      ).not.toThrow();
+
+      it('does not throw if authorized in current space', () => {
+        const authorizationResult = makeAuthResult('fully_authorized', {
+          dashboard: {
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: ['default'],
+            },
+          },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(['dashboard']),
+            typesRequiringRbac: new Set(),
+            currentSpace: 'default',
+          })
+        ).not.toThrow();
+      });
+
+      it('does not throw if typesRequiringAccessControl is empty', () => {
+        const authorizationResult = makeAuthResult('fully_authorized', {});
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(),
+            typesRequiringRbac: new Set(),
+            currentSpace: 'default',
+          })
+        ).not.toThrow();
+      });
     });
 
-    it('does not throw if typesRequiringAccessControl is empty', () => {
-      const authorizationResult = makeAuthResult('fully_authorized', {});
-      expect(() =>
-        service.enforceAccessControl({
-          authorizationResult,
-          typesRequiringAccessControl: new Set(),
-          currentSpace: 'default',
-        })
-      ).not.toThrow();
+    describe(`owner scenarios`, () => {
+      it('throws if authorizationResult.status is "unauthorized"', () => {
+        const authorizationResult = makeAuthResult('unauthorized');
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(),
+            typesRequiringRbac: new Set(['dashboard']),
+            currentSpace: 'default',
+          })
+        ).toThrow(/Access denied/);
+      });
+
+      it('throws if not globally authorized and not authorized in current space', () => {
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: ['foo'],
+            },
+          },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(),
+            typesRequiringRbac: new Set(['dashboard']),
+            currentSpace: 'default',
+          })
+        ).toThrow(/Access denied/);
+      });
+
+      it('does not throw if globally authorized', () => {
+        const authorizationResult = makeAuthResult('fully_authorized', {
+          dashboard: {
+            update: {
+              isGloballyAuthorized: true,
+              authorizedSpaces: [],
+            },
+          },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(),
+            typesRequiringRbac: new Set(['dashboard']),
+            currentSpace: 'default',
+          })
+        ).not.toThrow();
+      });
+
+      it('does not throw if authorized in current space', () => {
+        const authorizationResult = makeAuthResult('fully_authorized', {
+          dashboard: {
+            update: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: ['default'],
+            },
+          },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(),
+            typesRequiringRbac: new Set(['dashboard']),
+            currentSpace: 'default',
+          })
+        ).not.toThrow();
+      });
+
+      it('does not throw if typesRequiringAccessControl is empty', () => {
+        const authorizationResult = makeAuthResult('fully_authorized', {});
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            typesRequiringAccessControl: new Set(),
+            typesRequiringRbac: new Set(),
+            currentSpace: 'default',
+          })
+        ).not.toThrow();
+      });
     });
   });
 });
