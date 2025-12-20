@@ -10,21 +10,21 @@ import type { IRouter } from '@kbn/core/server';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
-import { createEsqlRuleDataSchema } from '../../../../application/esql_rule/methods/create/schemas';
+import { updateEsqlRuleDataSchema } from '../../../../application/esql_rule/methods/update/schemas';
 import type { ILicenseState } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 
-const createEsqlRuleParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+const updateEsqlRuleParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
 });
 
-export const createEsqlRuleRoute = (
+export const updateEsqlRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.post(
+  router.put(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/esql_rule/{id?}`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/esql_rule/{id}`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
@@ -32,8 +32,8 @@ export const createEsqlRuleRoute = (
       },
       validate: {
         request: {
-          body: createEsqlRuleDataSchema,
-          params: createEsqlRuleParamsSchema,
+          body: updateEsqlRuleDataSchema,
+          params: updateEsqlRuleParamsSchema,
         },
       },
     },
@@ -43,12 +43,12 @@ export const createEsqlRuleRoute = (
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
 
-          const created = await rulesClient.createEsqlRule({
+          const updated = await rulesClient.updateEsqlRule({
+            id: req.params.id,
             data: req.body,
-            options: { id: req.params.id },
           });
 
-          return res.ok({ body: created });
+          return res.ok({ body: updated });
         })
       )
     )

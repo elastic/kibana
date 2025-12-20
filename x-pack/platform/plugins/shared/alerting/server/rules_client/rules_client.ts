@@ -13,6 +13,8 @@ import type {
   EsqlRuleResponse,
 } from '../application/esql_rule/methods/create';
 import { createEsqlRule } from '../application/esql_rule/methods/create';
+import type { UpdateEsqlRuleData } from '../application/esql_rule/methods/update';
+import { updateEsqlRule } from '../application/esql_rule/methods/update';
 import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import type { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
@@ -311,4 +313,8 @@ export class RulesClient {
    */
   public createEsqlRule = (params: CreateEsqlRuleParams): Promise<EsqlRuleResponse> =>
     createEsqlRule(this.context, params);
+  public updateEsqlRule = (params: {
+    id: string;
+    data: UpdateEsqlRuleData;
+  }): Promise<EsqlRuleResponse> => updateEsqlRule(this.context, params);
 }

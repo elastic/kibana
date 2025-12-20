@@ -81,6 +81,7 @@ import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/
 import {
   setupSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
+  ESQL_RULE_SAVED_OBJECT_TYPE,
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
 } from './saved_objects';
@@ -607,6 +608,7 @@ export class AlertingPlugin {
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [
         RULE_SAVED_OBJECT_TYPE,
+        ESQL_RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ],
@@ -632,6 +634,7 @@ export class AlertingPlugin {
       securityPluginStart: plugins.security,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
+        ESQL_RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ]),

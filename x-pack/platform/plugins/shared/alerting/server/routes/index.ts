@@ -53,6 +53,7 @@ import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';
 import { bulkUntrackAlertsByQueryRoute } from './rule/apis/bulk_untrack_by_query';
 import { createEsqlRuleRoute } from './esql_rule/apis/create/create_esql_rule_route';
+import { updateEsqlRuleRoute } from './esql_rule/apis/update/update_esql_rule_route';
 
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
@@ -151,7 +152,8 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
 
   // ES|QL rules APIs
-  createEsqlRuleRoute(opts);
+  createEsqlRuleRoute(router, licenseState);
+  updateEsqlRuleRoute(router, licenseState);
 
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
