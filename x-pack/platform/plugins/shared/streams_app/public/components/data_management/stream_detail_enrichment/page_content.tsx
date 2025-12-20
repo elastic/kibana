@@ -265,7 +265,7 @@ export function StreamDetailEnrichmentContentImpl() {
             <>
               <EuiResizablePanel
                 initialSize={40}
-                minSize="480px"
+                minSize="300px"
                 tabIndex={0}
                 paddingSize="l"
                 css={verticalFlexCss}

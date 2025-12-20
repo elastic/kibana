@@ -87,16 +87,37 @@ export const ProcessorMetricBadges = ({
   const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {parsedRate && (
         <EuiFlexItem>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.parsedRate', {
-              defaultMessage:
-                '{parsedRate} of the sampled documents were successfully parsed by this processor',
-              values: { parsedRate },
-            })}
+            content={
+              <>
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.processorMetricBadges.euiBadge.parsedRate',
+                    {
+                      defaultMessage:
+                        '{parsedRate} of the sampled documents were successfully parsed by this processor',
+                      values: { parsedRate },
+                    }
+                  )}
+                </p>
+                {detectedFieldsCount > 0 && (
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.processorMetricBadges.detectedFields.tooltip',
+                      {
+                        defaultMessage:
+                          '{count, plural, one {# field was extracted} other {# fields were extracted}}',
+                        values: { count: detectedFieldsCount },
+                      }
+                    )}
+                  </p>
+                )}
+              </>
+            }
           >
             <EuiTextColor color="success">
               <EuiFlexGroup gutterSize="xs">
@@ -144,23 +165,6 @@ export const ProcessorMetricBadges = ({
           >
             <EuiTextColor color="default">{skippedRate}</EuiTextColor>
           </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {detectedFieldsCount > 0 && (
-        <EuiFlexItem>
-          <EuiBadge
-            color="hollow"
-            title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.detectedFields', {
-              defaultMessage:
-                '{detectedFieldsCount, plural, one {# field was parsed on the sampled documents: } other {# fields were parsed on the sampled documents:\n}}{detectedFields}',
-              values: { detectedFieldsCount, detectedFields: detected_fields.join('\n') },
-            })}
-          >
-            {i18n.translate('xpack.streams.processorMetricBadges.fieldsBadgeLabel', {
-              defaultMessage: '{detectedFieldsCount, plural, one {# field } other {# fields}}',
-              values: { detectedFieldsCount },
-            })}
-          </EuiBadge>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
