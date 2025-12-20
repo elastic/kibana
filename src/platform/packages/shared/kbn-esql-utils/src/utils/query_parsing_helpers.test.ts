@@ -8,8 +8,8 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-ast';
-import { Parser, walk } from '@kbn/esql-ast';
+import type { ESQLColumn } from '@kbn/esql-language';
+import { Parser, walk } from '@kbn/esql-language';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
