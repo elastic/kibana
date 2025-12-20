@@ -115,6 +115,7 @@
     "@kbn/dashboards-selector",
     "@kbn/deeplinks-management",
     "@kbn/react-query",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/observability-overview-plugin"
   ]
 }
