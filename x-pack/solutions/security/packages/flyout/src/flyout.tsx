@@ -65,17 +65,7 @@ export const Flyout: React.FC<FlyoutProps> = React.memo(({ overlays, registeredP
     [childSection, child]
   );
 
-  const mainFlyoutOnActive = useCallback(() => {
-    console.log('activate main flyout with overlays', main?.id);
-  }, [main?.id]);
-
-  const childFlyoutOnActive = useCallback(() => {
-    console.log('activate child flyout with overlays', child?.id);
-  }, [child?.id]);
-
   const mainFlyoutOnClose = useCallback(() => {
-    console.log('close main flyout with overlays', main?.id);
-
     if (childFlyoutRef.current) {
       childFlyoutRef.current.close();
       childFlyoutRef.current = null;
@@ -83,18 +73,16 @@ export const Flyout: React.FC<FlyoutProps> = React.memo(({ overlays, registeredP
 
     flyoutRef.current = null;
     closeFlyout();
-  }, [closeFlyout, main?.id]);
+  }, [closeFlyout]);
 
   const childFlyoutOnClose = useCallback(() => {
-    console.log('close child flyout with overlays', child?.id);
-
     if (childFlyoutRef.current) {
       childFlyoutRef.current.close();
       childFlyoutRef.current = null;
     }
 
     closeChildPanel();
-  }, [child?.id, closeChildPanel]);
+  }, [closeChildPanel]);
 
   const flyoutContent = useMemo(
     () => (
@@ -114,7 +102,6 @@ export const Flyout: React.FC<FlyoutProps> = React.memo(({ overlays, registeredP
   useEffect(() => {
     if (showMain) {
       flyoutRef.current = overlays.openSystemFlyout(<>{flyoutContent}</>, {
-        // title: `${main?.id} - Main`,
         maxWidth: true,
         // @ts-ignore
         resizable: true,
@@ -122,25 +109,14 @@ export const Flyout: React.FC<FlyoutProps> = React.memo(({ overlays, registeredP
         session: 'start',
         ownFocus: false,
         size: mainSize,
-        onActive: mainFlyoutOnActive,
         onClose: mainFlyoutOnClose,
       });
     }
-  }, [
-    flyoutContent,
-    main?.id,
-    mainFlyoutOnActive,
-    mainFlyoutOnClose,
-    mainSize,
-    overlays,
-    showMain,
-    type,
-  ]);
+  }, [flyoutContent, mainFlyoutOnClose, mainSize, overlays, showMain, type]);
 
   useEffect(() => {
     if (showMain && showChild) {
       childFlyoutRef.current = overlays.openSystemFlyout(<>{childFlyoutContent}</>, {
-        // title: `${child?.id} - Child`,
         session: 'inherit',
         hasChildBackground,
         // @ts-ignore
@@ -148,15 +124,12 @@ export const Flyout: React.FC<FlyoutProps> = React.memo(({ overlays, registeredP
         maxWidth: true,
         ownFocus: false,
         size: childSize,
-        onActive: childFlyoutOnActive,
         onClose: childFlyoutOnClose,
       });
     }
   }, [
-    child?.id,
     childFlyoutContent,
     childSize,
-    childFlyoutOnActive,
     childFlyoutOnClose,
     overlays,
     showChild,

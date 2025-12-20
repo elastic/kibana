@@ -262,7 +262,7 @@ export const TableTab = memo(() => {
         onTogglePinned,
         isChild,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned, isChild]
   );
 
   const search = useMemo(() => {

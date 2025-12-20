@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo, useState } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
@@ -20,7 +20,7 @@ import { FlyoutBody } from '../../../shared/components/flyout_body';
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
 export interface AssetDocumentPanelProps extends FlyoutPanelProps {
-  path?: PanelPath;
+  path?: string;
   params?: {
     id: string;
     indexName: string;

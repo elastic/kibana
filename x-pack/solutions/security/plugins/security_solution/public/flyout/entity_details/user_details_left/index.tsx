@@ -10,7 +10,6 @@ import type { FlyoutPanelProps } from '@kbn/flyout';
 import { useFlyoutApi } from '@kbn/flyout';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useTabs } from './tabs';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,
@@ -63,8 +62,6 @@ export const UserDetailsPanel = ({
     hasMisconfigurationFindings,
     hasNonClosedAlerts
   );
-
-  if (managedUser.isLoading) return <FlyoutLoading />;
 
   if (!selectedTabId) {
     return null;

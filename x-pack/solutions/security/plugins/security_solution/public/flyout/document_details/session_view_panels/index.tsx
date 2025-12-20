@@ -18,7 +18,7 @@ import { DocumentDetailsSessionViewPanelKey } from '../shared/constants/panel_ke
 import { SESSION_VIEWER_BANNER } from '../session_view';
 
 export const allTabs = [tabs.processTab, tabs.metadataTab, tabs.alertsTab];
-export type SessionViewstrings = 'process' | 'metadata' | 'alerts';
+export type SessionViewPanelPaths = 'process' | 'metadata' | 'alerts';
 
 export interface SessionViewPanelProps extends FlyoutPanelProps {
   key: typeof DocumentDetailsSessionViewPanelKey;
@@ -69,9 +69,7 @@ export const SessionViewPanel: FC<Partial<SessionViewPanelProps>> = memo(({ path
       openChildPanel(
         {
           id: DocumentDetailsSessionViewPanelKey,
-          path: {
-            tab: tabId,
-          },
+          path: tabId,
           params: {
             eventId,
             indexName,

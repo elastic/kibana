@@ -65,8 +65,6 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
   params: GenericEntityPanelProps;
 }
 
-export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
-
 export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
   const { isChild, scopeId, isEngineMetadataExist } = params;
 

@@ -238,9 +238,7 @@ export class ProcessImpl implements Process {
   // to be used as a source for the most up to date details
   // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
-    const filtered = events.filter((processEvent) => {
-      const action = processEvent?.event?.action;
-
+    const filtered = events.filter(() => {
       return true;
     });
 

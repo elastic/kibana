@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize, isArray } from 'lodash/fp';
 import { EuiBadge, type EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/flyout';
 import { i18n } from '@kbn/i18n';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -127,7 +127,6 @@ const getActionsColumn = (openMainPanel: (props: FlyoutPanelProps) => void) => (
   width: COLUMN_WIDTHS.actions,
 });
 
-type OpenRightPanelType = (props: FlyoutPanelProps) => void;
 type OpenMainPanelType = (props: FlyoutPanelProps) => void;
 export const buildGrantedRightsColumns = (
   openMainPanel: OpenMainPanelType
@@ -149,10 +148,9 @@ export const buildGrantedRightsColumns = (
 ];
 
 export const buildAccountSwitchesColumns = (
-  openRightPanel: OpenRightPanelType,
   openMainPanel: OpenMainPanelType
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel, openMainPanel),
+  getActionsColumn(openMainPanel),
   timestampColumn,
   getPrivilegedUserColumn(),
   {
@@ -186,10 +184,9 @@ export const buildAccountSwitchesColumns = (
 ];
 
 export const buildAuthenticationsColumns = (
-  openRightPanel: OpenRightPanelType,
   openMainPanel: OpenMainPanelType
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel, openMainPanel),
+  getActionsColumn(openMainPanel),
   timestampColumn,
   getPrivilegedUserColumn(),
   {

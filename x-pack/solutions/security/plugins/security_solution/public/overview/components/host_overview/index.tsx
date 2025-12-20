@@ -298,7 +298,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [firstColumn, data, contextID, scopeId, getDefaultRenderer, isFlyoutOpen]
+      [firstColumn, data, contextID, scopeId, getDefaultRenderer]
     );
     return (
       <>

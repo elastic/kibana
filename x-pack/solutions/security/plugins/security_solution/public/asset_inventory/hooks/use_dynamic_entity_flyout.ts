@@ -20,7 +20,6 @@ import {
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
 import { useKibana } from '../../common/lib/kibana';
-import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 interface InventoryFlyoutProps {
   entityDocId?: string;
@@ -33,7 +32,6 @@ interface InventoryFlyoutProps {
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
   const { openFlyout, closeFlyout } = useFlyoutApi();
   const { notifications } = useKibana().services;
-  useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
   const openDynamicFlyout = ({
     entityDocId,

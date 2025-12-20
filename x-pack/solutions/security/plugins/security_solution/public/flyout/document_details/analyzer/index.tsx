@@ -14,7 +14,6 @@ import { OpenInvestigatedDocument } from '../shared/components/open_investigated
 import { PageScope } from '../../../data_view_manager/constants';
 import { PREFIX } from '../../shared/test_ids';
 import type { DocumentDetailsProps } from '../shared/types';
-import { useWhichFlyout } from '../shared/hooks/use_which_flyout';
 import { useDocumentDetailsContext } from '../shared/context';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
@@ -44,7 +43,7 @@ export const AnalyzerMainPanel: FC<Partial<DocumentDetailsProps>> = memo(() => {
   const { eventId, indexName, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
-  const key = useWhichFlyout() ?? 'memory';
+  const key = 'memory';
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const filters = useMemo(() => ({ from, to }), [from, to]);
 

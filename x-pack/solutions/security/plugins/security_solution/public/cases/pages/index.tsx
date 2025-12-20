@@ -35,7 +35,6 @@ import * as timelineMarkdownPlugin from '../../common/components/markdown_editor
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
-import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { EaseAlertsTable } from '../components/ease/wrapper';
 import { EventsTableForCases } from '../components/case_events/table';
 import { CASES_FEATURES } from '..';
@@ -44,7 +43,6 @@ const CaseContainerComponent: React.FC = () => {
   const {
     application: { capabilities },
     cases,
-    telemetry,
   } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
@@ -84,13 +82,9 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
         });
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: TimelineId.casePage,
-          panel: 'right',
-        });
       }
     },
-    [EASE, openFlyout, telemetry]
+    [EASE, openFlyout]
   );
 
   const renderAlertsTable = useCallback(

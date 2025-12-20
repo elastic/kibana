@@ -23,7 +23,6 @@ import type {
 import { useFlyoutApi } from '@kbn/flyout';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
-import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
@@ -50,7 +49,6 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 
 export const SAMPLE_SIZE_SETTING = 500;
@@ -132,7 +130,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         storage,
         dataViewFieldEditor,
         notifications: { toasts: toastsService },
-        telemetry,
         theme,
         data: dataPluginContract,
       },
@@ -140,12 +137,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
-    const onCloseExpandableFlyout = useCallback((id: string) => {
-      setExpandedDoc((prev) => (!prev ? prev : undefined));
-    }, []);
-
     const { openFlyout, closeFlyout } = useFlyoutApi();
-    useOnExpandableFlyoutClose({ callback: onCloseExpandableFlyout });
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
@@ -185,12 +177,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             },
           },
         });
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: timelineId,
-          panel: 'right',
-        });
       },
-      [telemetry, timelineId, openFlyout]
+      [timelineId, openFlyout]
     );
 
     const onSetExpandedDoc = useCallback(

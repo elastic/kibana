@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import type { Action, Store } from 'redux';
 import type {
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
   FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
@@ -130,8 +131,9 @@ const GraphGroupedNodePreviewPanel = React.lazy(() =>
 export const SecuritySolutionFlyout = memo(() => {
   const services = useKibana().services;
   const { overlays, uiActions, upselling } = services;
-  const store = getStore();
+  const store = getStore() as Store<never, Action<never>>;
 
+  // @ts-ignore
   const FlyoutProviders = ({ children }) => (
     <KibanaContextProvider services={services}>
       <EuiThemeProvider>
@@ -232,7 +234,7 @@ export const SecuritySolutionFlyout = memo(() => {
       component: (props) => (
         <FlyoutProviders>
           <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
-            <AnalyzerMainPanel {...(props as DocumentDetailsProps['path']).params} />
+            <AnalyzerMainPanel />
           </DocumentDetailsProvider>
         </FlyoutProviders>
       ),

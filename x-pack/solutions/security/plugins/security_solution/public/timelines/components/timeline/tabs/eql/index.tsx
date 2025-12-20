@@ -23,7 +23,6 @@ import {
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineSelectors } from '../../../../store';
@@ -43,7 +42,6 @@ import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
@@ -70,7 +68,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
    *
    */
   const [pageIndex, setPageIndex] = useState(0);
-  const { telemetry } = useKibana().services;
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
@@ -197,15 +194,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         },
         { mainSize: 'm' }
       );
-      telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-        location: timelineId,
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: timelineId,
-        panel: 'left',
-      });
     },
-    [selectedPatterns, telemetry, timelineId, openFlyout]
+    [selectedPatterns, timelineId, openFlyout]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

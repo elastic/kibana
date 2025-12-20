@@ -49,7 +49,6 @@ import { isTimerangeSame } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -123,7 +122,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
    */
   const [pageIndex, setPageIndex] = useState(0);
 
-  const { uiSettings, telemetry, timelineDataService } = useKibana().services;
+  const { uiSettings, timelineDataService } = useKibana().services;
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
@@ -279,15 +278,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         },
         { mainSize: 'm' }
       );
-      telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-        location: timelineId,
-      });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: timelineId,
-        panel: 'left',
-      });
     },
-    [selectedPatterns, telemetry, timelineId, openFlyout]
+    [selectedPatterns, timelineId, openFlyout]
   );
 
   const leadingControlColumns = useTimelineControlColumn({

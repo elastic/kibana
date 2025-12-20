@@ -7,17 +7,17 @@
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import {
-  useMisconfigurationFindings,
   MISCONFIGURATION,
+  useMisconfigurationFindings,
 } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
 import type { CspFindingResult } from '@kbn/cloud-security-posture-common';
 import {
-  MISCONFIGURATION_STATUS,
   buildMisconfigurationEntityFlyoutPreviewQuery,
+  MISCONFIGURATION_STATUS,
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -261,6 +261,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                     backgroundColor: 'warning',
                     textColor: 'warning',
                   },
+                  isPreviewMode: true,
                 },
               };
 

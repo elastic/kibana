@@ -104,6 +104,7 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
         contextID={contextID}
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
+        isChild={false}
       />
     </>
   );

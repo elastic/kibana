@@ -21,6 +21,7 @@ import {
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useFlyoutApi } from '@kbn/flyout';
+import { PREFIX } from '../../shared/test_ids';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';

@@ -35,20 +35,21 @@ export interface PreviewPanelFooterProps {
 export const PreviewPanelFooter: FC<PreviewPanelFooterProps> = ({ ip, flowTarget, scopeId }) => {
   const { openFlyout } = useFlyoutApi();
 
-  const openNetworkFlyout = useCallback(() => {
-    debugger;
-    openFlyout({
-      main: {
-        id: NetworkPanelKey,
-        params: {
-          ip,
-          flowTarget,
-          scopeId,
-          isChild: false,
+  const openNetworkFlyout = useCallback(
+    () =>
+      openFlyout({
+        main: {
+          id: NetworkPanelKey,
+          params: {
+            ip,
+            flowTarget,
+            scopeId,
+            isChild: false,
+          },
         },
-      },
-    });
-  }, [ip, flowTarget, scopeId, openFlyout]);
+      }),
+    [ip, flowTarget, scopeId, openFlyout]
+  );
 
   const fullDetailsLink = useMemo(
     () => (

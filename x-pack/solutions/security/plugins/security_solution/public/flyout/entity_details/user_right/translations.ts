@@ -11,20 +11,6 @@ export const USER = i18n.translate('xpack.securitySolution.flyout.entityDetails.
   defaultMessage: 'User',
 });
 
-export const VALUES_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.user.valuesColumnTitle',
-  {
-    defaultMessage: 'Values',
-  }
-);
-
-export const FIELD_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.user.fieldColumnTitle',
-  {
-    defaultMessage: 'Field',
-  }
-);
-
 export const CLOSE_BUTTON = i18n.translate('xpack.securitySolution.flyout.user.closeButton', {
   defaultMessage: 'close',
 });

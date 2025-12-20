@@ -6,7 +6,6 @@
  */
 
 import { PREFIX } from '../../../shared/test_ids';
-import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 /* Table */
 
@@ -39,9 +38,6 @@ export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
 export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
-export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
-export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
-export const AGENT_ATTACHMENT_BUTTON_TEST_ID = 'newAgentBuilderAttachment' as const;
 
 export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
 export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
@@ -60,8 +56,6 @@ export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAd
 /* About section */
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
-export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
-export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
 
 export const RULE_SUMMARY_BUTTON_TEST_ID = `${PREFIX}RuleSummaryButton` as const;
 const ALERT_DESCRIPTION_TEST_ID = `${PREFIX}AlertDescription` as const;
@@ -92,9 +86,6 @@ export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Detail
 /* Investigation section */
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
-export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_ID + HEADER_TEST_ID;
-export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
-  INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
 
 export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as const;
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
@@ -134,15 +125,6 @@ export const HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID =
 /* Insights section */
 
 export const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
-export const INSIGHTS_HEADER_TEST_ID = INSIGHTS_TEST_ID + HEADER_TEST_ID;
-export const INSIGHTS_CONTENT_TEST_ID = INSIGHTS_TEST_ID + CONTENT_TEST_ID;
-
-/* Summary row */
-
-export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
-export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
-export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
-export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
 
 /* Entities */
 
@@ -210,8 +192,6 @@ export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
 /* Visualizations section */
 
 export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
-export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = VISUALIZATIONS_TEST_ID + HEADER_TEST_ID;
-export const VISUALIZATIONS_SECTION_CONTENT_TEST_ID = VISUALIZATIONS_TEST_ID + CONTENT_TEST_ID;
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;
 export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Loading` as const;
 
@@ -226,7 +206,4 @@ export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` a
 
 const RESPONSE_TEST_ID = `${PREFIX}Response` as const;
 export const RESPONSE_SECTION_TEST_ID = `${RESPONSE_TEST_ID}Section` as const;
-export const RESPONSE_SECTION_HEADER_TEST_ID = RESPONSE_SECTION_TEST_ID + HEADER_TEST_ID;
-export const RESPONSE_SECTION_CONTENT_TEST_ID = RESPONSE_SECTION_TEST_ID + CONTENT_TEST_ID;
 export const RESPONSE_BUTTON_TEST_ID = `${RESPONSE_TEST_ID}Button` as const;
-export const RESPONSE_EMPTY_TEST_ID = `${RESPONSE_TEST_ID}Empty` as const;

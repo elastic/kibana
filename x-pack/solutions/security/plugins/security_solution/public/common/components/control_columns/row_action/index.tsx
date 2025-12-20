@@ -12,7 +12,6 @@ import {
   DocumentDetailsNotesPanelKey,
   DocumentDetailsRightPanelKey,
 } from '../../../../flyout/document_details/shared/constants/panel_keys';
-import { useKibana } from '../../../lib/kibana';
 import type {
   ControlColumnProps,
   SetEventsDeleted,
@@ -20,7 +19,6 @@ import type {
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 
@@ -67,8 +65,6 @@ const RowActionComponent = ({
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-  const services = useKibana().services;
-  const { telemetry } = services;
   const { openFlyout, openMainPanel } = useFlyoutApi();
 
   const columnValues = useMemo(
@@ -104,11 +100,7 @@ const RowActionComponent = ({
       },
       's'
     );
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: tableId,
-      panel: 'right',
-    });
-  }, [eventId, indexName, tableId, telemetry, openMainPanel]);
+  }, [eventId, indexName, tableId, openMainPanel]);
 
   const toggleShowNotes = useCallback(() => {
     openFlyout(
@@ -132,14 +124,7 @@ const RowActionComponent = ({
       },
       { mainSize: 'm' }
     );
-    telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-      location: tableId,
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: tableId,
-      panel: 'left',
-    });
-  }, [eventId, indexName, openMainPanel, tableId, telemetry]);
+  }, [eventId, indexName, openFlyout, tableId]);
 
   const Action = controlColumn.rowCellRender;
 

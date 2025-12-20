@@ -122,7 +122,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isChild }: UserPanelPr
     isChild,
   });
 
-  if (observedUser.isLoading || managedUser.isLoading) {
+  if (observedUser.isLoading) {
     return <FlyoutLoading />;
   }
 

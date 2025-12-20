@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback } from 'react';
 import { useFlyoutApi } from '@kbn/flyout';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
@@ -17,17 +18,6 @@ interface UseNavigateToServiceDetailsParams {
   contextID: string;
   isRiskScoreExist: boolean;
   isChild?: boolean;
-}
-
-interface UseNavigateToServiceDetailsResult {
-  /**
-   * Opens the service details panel
-   */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
-  /**
-   * Whether the link is enabled
-   */
-  isLinkEnabled: boolean;
 }
 
 export const useNavigateToServiceDetails = ({

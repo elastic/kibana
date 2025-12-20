@@ -15,8 +15,6 @@ import { PageScope } from '../../data_view_manager/constants';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useKibana } from '../../common/lib/kibana';
-import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
@@ -57,7 +55,6 @@ export const OpenFlyoutButtonIcon = memo(
       ? experimentalSelectedPatterns
       : oldSelectedPatterns;
 
-    const { telemetry } = useKibana().services;
     const { openFlyout } = useFlyoutApi();
 
     const handleClick = useCallback(() => {
@@ -71,11 +68,7 @@ export const OpenFlyoutButtonIcon = memo(
           },
         },
       });
-      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-        location: timelineId,
-        panel: 'right',
-      });
-    }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
+    }, [eventId, openFlyout, selectedPatterns]);
 
     return (
       <EuiButtonIcon

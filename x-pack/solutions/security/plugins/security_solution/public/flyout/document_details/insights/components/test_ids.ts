@@ -39,7 +39,6 @@ export const PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID =
 
 export const ENTITIES_DETAILS_TEST_ID = `${PREFIX}EntitiesDetails` as const;
 export const USER_DETAILS_TEST_ID = `${PREFIX}UsersDetails` as const;
-export const USER_DETAILS_LINK_TEST_ID = `${USER_DETAILS_TEST_ID}TitleLink` as const;
 export const USER_DETAILS_ALERT_COUNT_TEST_ID = `${USER_DETAILS_TEST_ID}AlertCount` as const;
 export const USER_DETAILS_MISCONFIGURATIONS_TEST_ID =
   `${USER_DETAILS_TEST_ID}Misconfigurations` as const;
@@ -49,10 +48,8 @@ export const USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID =
   `${USER_DETAILS_TEST_ID}RelatedHostsLink` as const;
 export const USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID =
   `${USER_DETAILS_TEST_ID}RelatedHostsIPLink` as const;
-export const USER_DETAILS_INFO_TEST_ID = 'user-overview' as const;
 
 export const HOST_DETAILS_TEST_ID = `${PREFIX}HostsDetails` as const;
-export const HOST_DETAILS_LINK_TEST_ID = `${HOST_DETAILS_TEST_ID}TitleLink` as const;
 export const HOST_DETAILS_ALERT_COUNT_TEST_ID = `${HOST_DETAILS_TEST_ID}AlertCount` as const;
 export const HOST_DETAILS_MISCONFIGURATIONS_TEST_ID =
   `${HOST_DETAILS_TEST_ID}Misconfigurations` as const;
@@ -64,7 +61,6 @@ export const HOST_DETAILS_RELATED_USERS_LINK_TEST_ID =
   `${HOST_DETAILS_TEST_ID}RelatedUsersLink` as const;
 export const HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID =
   `${HOST_DETAILS_TEST_ID}RelatedUsersIPLink` as const;
-export const HOST_DETAILS_INFO_TEST_ID = 'host-overview' as const;
 
 /* Threat Intelligence */
 
@@ -98,16 +94,10 @@ export const CORRELATIONS_DETAILS_TEST_ID = `${PREFIX}CorrelationsDetails` as co
 
 export const CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}AlertsByAncestrySection` as const;
-export const CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID =
-  `${CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}Table` as const;
 export const CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}AlertsBySourceSection` as const;
-export const CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID =
-  `${CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}Table` as const;
 export const CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}AlertsBySessionSection` as const;
-export const CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID =
-  `${CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}Table` as const;
 export const CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID =
   `${CORRELATIONS_DETAILS_TEST_ID}CasesSection` as const;
 export const CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID =

@@ -16,12 +16,12 @@ import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type {
   FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutFooterProps,
-  FindingsVulnerabilityFlyoutContentProps,
-  FindingsVulnerabilityFlyoutFooterProps,
-  FindingsVulnerabilityFlyoutHeaderProps,
   FindingsMisconfigurationFlyoutContentProps,
   FindingsMisconfigurationFlyoutHeaderProps,
   FindingsMisconfigurationPanelExpandableFlyoutProps,
+  FindingsVulnerabilityFlyoutContentProps,
+  FindingsVulnerabilityFlyoutFooterProps,
+  FindingsVulnerabilityFlyoutHeaderProps,
   FindingsVulnerabilityPanelExpandableFlyoutProps,
   FindingVulnerabilityFullFlyoutContentProps,
 } from '@kbn/cloud-security-posture';
@@ -91,7 +91,6 @@ export interface CspSecuritySolutionContext {
     state?: Record<string, string | undefined>;
   }>;
   useExpandableFlyoutApi?: () => ExpandableFlyoutApi;
-  useOnExpandableFlyoutClose?: ({ callback }: UseOnCloseParams) => void;
 }
 
 export type CloudSecurityPostureStartServices = Pick<

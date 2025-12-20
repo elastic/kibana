@@ -279,16 +279,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [
-        data,
-        indexPatterns,
-        getDefaultRenderer,
-        contextID,
-        scopeId,
-        userName,
-        firstColumn,
-        isFlyoutOpen,
-      ]
+      [data, indexPatterns, getDefaultRenderer, contextID, scopeId, userName, firstColumn]
     );
     return (
       <>

@@ -144,19 +144,20 @@ export const DocumentDetailsProvider = memo(
             }
           : undefined,
       [
-        browserFields,
-        dataAsNestedObject,
-        dataFormattedForFieldBrowser,
-        getFieldsData,
         id,
         indexName,
-        isChild,
-        jumpToCursor,
-        jumpToEntityId,
-        refetchFlyoutData,
         scopeId,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
         searchHit,
-        maybeRule,
+        browserFields,
+        maybeRule?.investigation_fields?.field_names,
+        refetchFlyoutData,
+        getFieldsData,
+        isChild,
+        jumpToEntityId,
+        jumpToCursor,
+        isPreview,
       ]
     );
 
