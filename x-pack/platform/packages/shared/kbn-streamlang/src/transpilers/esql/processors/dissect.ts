@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-language';
 import type { DissectProcessor } from '../../../../types/processors';
 import { parseMultiDissectPatterns } from '../../../../types/utils/dissect_patterns';
 import { conditionToESQLAst } from '../condition_to_esql';
@@ -58,8 +58,8 @@ import { buildIgnoreMissingFilter, castFieldsToString, buildWhereCondition } fro
 export function convertDissectProcessorToESQL(processor: DissectProcessor): ESQLAstCommand[] {
   const {
     from,
-    pattern, // eslint-disable-next-line @typescript-eslint/naming-convention
-    append_separator, // eslint-disable-next-line @typescript-eslint/naming-convention
+    pattern,
+    append_separator,
     ignore_missing = false, // default same as ES Dissect Enrich Processor
     where,
   } = processor;

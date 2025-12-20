@@ -189,7 +189,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'src/platform/packages/shared/kbn-esql-ast/scripts/**/*',
+  'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -1955,30 +1955,6 @@ module.exports = {
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
-      },
-    },
-    /**
-     * Allows snake_case variables in the server, because that's how we return API properties
-     */
-    {
-      files: ['x-pack/solutions/search/plugins/enterprise_search/server/**/*.{ts,tsx}'],
-      rules: {
-        '@typescript-eslint/naming-convention': [
-          'error',
-          {
-            selector: 'variable',
-            modifiers: ['destructured'],
-            format: null,
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-          {
-            selector: 'variable',
-            format: ['camelCase', 'UPPER_CASE'],
-            leadingUnderscore: 'allow',
-            trailingUnderscore: 'allow',
-          },
-        ],
       },
     },
     {

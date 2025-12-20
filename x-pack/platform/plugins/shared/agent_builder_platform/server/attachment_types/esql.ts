@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { validateQuery } from '@kbn/esql-language';
 import type { EsqlAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common/tools';
