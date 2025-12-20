@@ -205,12 +205,13 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
     },
 
     async repair(list: string[], roleAuthc: RoleCredentials) {
-      await supertestWithoutAuth
+      const { body } = await supertestWithoutAuth
         .post(`/api/observability/slos/_repair`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ list })
         .expect(207);
+      return body;
     },
 
     async purgeInstances(

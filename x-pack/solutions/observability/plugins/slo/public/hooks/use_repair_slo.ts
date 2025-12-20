@@ -16,7 +16,7 @@ import { sloKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useRepairSlo({ name }: { name: string }) {
+export function useRepairSlo({ id, name }: { id: string; name: string }) {
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -24,13 +24,13 @@ export function useRepairSlo({ name }: { name: string }) {
   const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
-  return useMutation<RepairActionsGroupResult[], ServerError, { sloId: string }>(
+  return useMutation<RepairActionsGroupResult[], ServerError>(
     ['repairSlo'],
-    ({ sloId }) => {
+    () => {
       return sloClient.fetch('POST /api/observability/slos/_repair', {
         params: {
           body: {
-            list: [sloId],
+            list: [id],
           },
         },
       });
@@ -65,6 +65,7 @@ export function useRepairSlo({ name }: { name: string }) {
           })
         );
 
+        queryClient.invalidateQueries({ queryKey: sloKeys.allDefinitions(), exact: false });
         queryClient.invalidateQueries({ queryKey: sloKeys.allHealth(), exact: false });
       },
     }

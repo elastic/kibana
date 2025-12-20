@@ -28,9 +28,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   } = useKibana().services;
 
   const { data: permissions } = usePermissions();
-  const { mutate: repairSlo } = useRepairSlo({
-    name: slo.name,
-  });
+  const { mutate: repairSlo } = useRepairSlo({ id: slo.id, name: slo.name });
 
   const health = data?.[0]?.health;
   const managementLocator = locators.get(MANAGEMENT_APP_LOCATOR);
@@ -86,8 +84,6 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     return null;
   }
 
-  // Show repair button if any transform is missing or is out of sync with SLO
-  // Only show if user has edit SLO capabilities
   const showRepairButton =
     !!permissions?.hasAllWriteRequested &&
     (health.rollup.missing ||
@@ -140,7 +136,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               iconSide="left"
               iconType="wrench"
               color="accent"
-              onClick={() => repairSlo({ sloId: slo.id })}
+              onClick={() => repairSlo()}
             >
               {i18n.translate('xpack.slo.sloDetails.sloHealthCallout.repairButtonLabel', {
                 defaultMessage: 'Repair',
