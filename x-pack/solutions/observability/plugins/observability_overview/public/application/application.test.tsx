@@ -82,15 +82,6 @@ describe('renderApp', () => {
     theme$: themeServiceMock.createTheme$(),
   } as unknown as AppMountParameters;
 
-  const config: ConfigSchema = {
-    unsafe: {
-      alertDetails: {
-        uptime: { enabled: false },
-      },
-    },
-    managedOtlpServiceUrl: '',
-  };
-
   beforeEach(() => {
     pricingStart = pricingServiceMock.createStartContract();
   });

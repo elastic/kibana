@@ -64,5 +64,6 @@ export type {
 } from './typings/fetch_overview_data';
 
 export { useTimeBuckets } from './hooks/use_time_buckets';
-
+export { calculateBucketSize } from './utils/calculate_bucket_size';
+export { calculateTimeRangeBucketSize } from './utils/calculate_bucket_size';
 export { DatePickerContextProvider } from './context/date_picker_context/date_picker_context';
