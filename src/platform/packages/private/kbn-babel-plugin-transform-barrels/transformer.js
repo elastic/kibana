@@ -31,27 +31,15 @@ const { createImportDeclaration } = require('./ast_utils');
 function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   const node = nodePath.node;
   const importSource = node.source.value;
-
-  // Skip non-relative imports (node_modules, aliases handled elsewhere)
-  if (!importSource.startsWith('.') && !importSource.startsWith('/')) {
-    return;
-  }
-
-  // Resolve the import source to absolute path
   const currentFileDir = path.dirname(state.filename);
-  const resolvedSource = resolveToBarrelPath(importSource, currentFileDir, barrelIndex);
 
-  if (!resolvedSource) {
-    // Not a barrel file, leave import unchanged
-    return;
-  }
-
-  const barrelEntry = barrelIndex[resolvedSource];
+  // Resolve the import source to absolute path and get barrel entry
+  const barrelEntry = resolveToBarrelEntry(importSource, currentFileDir, barrelIndex);
   if (!barrelEntry) {
     return;
   }
 
-  const { exports } = barrelEntry;
+  const { exports, packageName, packageRoot } = barrelEntry;
 
   // Collect new imports grouped by target path
   /** @type {Map<string, ImportSpecifierInfo[]>} */
@@ -62,42 +50,32 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
 
   for (const specifier of node.specifiers) {
     if (specifier.type === 'ImportSpecifier') {
-      // import { Foo } from './barrel' or import { Foo as Bar } from './barrel'
       const imported = specifier.imported;
       const importedName = imported.type === 'Identifier' ? imported.name : imported.value;
       const localName = specifier.local.name;
-
       const exportInfo = exports[importedName];
 
       if (exportInfo) {
-        const targetPath = exportInfo.path;
-
-        if (!newImports.has(targetPath)) {
-          newImports.set(targetPath, []);
+        if (!newImports.has(exportInfo.path)) {
+          newImports.set(exportInfo.path, []);
         }
-
-        newImports.get(targetPath)?.push({
+        newImports.get(exportInfo.path)?.push({
           localName,
           importedName: exportInfo.localName,
           isDefault: exportInfo.type === 'default',
         });
       } else {
-        // Export not found in barrel, keep original specifier
         unchangedSpecifiers.push(specifier);
       }
     } else if (specifier.type === 'ImportDefaultSpecifier') {
-      // import Foo from './barrel'
       const localName = specifier.local.name;
       const exportInfo = exports.default;
 
       if (exportInfo) {
-        const targetPath = exportInfo.path;
-
-        if (!newImports.has(targetPath)) {
-          newImports.set(targetPath, []);
+        if (!newImports.has(exportInfo.path)) {
+          newImports.set(exportInfo.path, []);
         }
-
-        newImports.get(targetPath)?.push({
+        newImports.get(exportInfo.path)?.push({
           localName,
           importedName: 'default',
           isDefault: true,
@@ -106,35 +84,28 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
         unchangedSpecifiers.push(specifier);
       }
     } else if (specifier.type === 'ImportNamespaceSpecifier') {
-      // import * as Foo from './barrel'
-      // Cannot transform namespace imports, keep as-is
+      // Cannot transform namespace imports
       unchangedSpecifiers.push(specifier);
     }
   }
 
-  // If nothing to transform, leave unchanged
   if (newImports.size === 0) {
     return;
   }
 
-  // Build new import declarations
   /** @type {import('@babel/types').ImportDeclaration[]} */
   const newNodes = [];
 
   for (const [targetPath, specifiers] of newImports) {
-    const relativePath = absoluteToRelative(targetPath, currentFileDir);
-
-    const importNode = createImportDeclaration(t, specifiers, relativePath);
-    newNodes.push(importNode);
+    // Convert absolute path to importable path
+    const outputPath = toImportPath(targetPath, currentFileDir, packageName, packageRoot);
+    newNodes.push(createImportDeclaration(t, specifiers, outputPath));
   }
 
-  // If there are unchanged specifiers, keep a modified original import
   if (unchangedSpecifiers.length > 0) {
-    const remainingImport = t.importDeclaration(unchangedSpecifiers, t.stringLiteral(importSource));
-    newNodes.push(remainingImport);
+    newNodes.push(t.importDeclaration(unchangedSpecifiers, t.stringLiteral(importSource)));
   }
 
-  // Replace the original import with new imports
   if (newNodes.length === 1) {
     nodePath.replaceWith(newNodes[0]);
   } else {
@@ -143,56 +114,68 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
 }
 
 /**
- * Resolve an import source to a barrel file path.
+ * Resolve an import source to its barrel entry.
  *
  * @param {string} importSource - The import path
  * @param {string} fromDir - Directory of the importing file
  * @param {import('./types').BarrelIndex} barrelIndex
- * @returns {string | null} - Absolute barrel path or null
+ * @returns {import('./types').BarrelFileEntry | null}
  */
-function resolveToBarrelPath(importSource, fromDir, barrelIndex) {
-  const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
+function resolveToBarrelEntry(importSource, fromDir, barrelIndex) {
+  // For relative imports, resolve manually
+  if (importSource.startsWith('.') || importSource.startsWith('/')) {
+    const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
+    const basePath = path.resolve(fromDir, importSource);
 
-  const basePath = path.resolve(fromDir, importSource);
-
-  for (const ext of extensions) {
-    const fullPath = basePath + ext;
-    if (barrelIndex[fullPath]) {
-      return fullPath;
+    for (const ext of extensions) {
+      if (barrelIndex[basePath + ext]) {
+        return barrelIndex[basePath + ext];
+      }
+      const indexPath = path.join(basePath, 'index' + ext);
+      if (barrelIndex[indexPath]) {
+        return barrelIndex[indexPath];
+      }
     }
+    return null;
+  }
 
-    const indexPath = path.join(basePath, 'index' + ext);
-    if (barrelIndex[indexPath]) {
-      return indexPath;
+  // For package imports, use require.resolve
+  try {
+    const resolved = require.resolve(importSource, { paths: [fromDir] });
+    if (barrelIndex[resolved]) {
+      return barrelIndex[resolved];
     }
+  } catch {
+    // Package not found or not resolvable
   }
 
   return null;
 }
 
 /**
- * Convert an absolute path to a relative path from a directory.
+ * Convert an absolute file path to an importable path.
  *
- * The barrel index stores absolute paths for reliable lookups across the codebase.
- * However, import statements in source code must use relative paths from the
- * current file's location. This function converts an absolute target path to
- * a relative path suitable for use in an import statement.
- *
- * @param {string} absolutePath - Absolute target path
- * @param {string} fromDir - Directory to make relative from
- * @returns {string} - Relative path (always starts with ./ or ../)
+ * @param {string} absolutePath - Absolute path to the target file
+ * @param {string} fromDir - Directory of the importing file
+ * @param {string} [packageName] - Package name if this is a node_modules import
+ * @param {string} [packageRoot] - Package root path if this is a node_modules import
+ * @returns {string} - Importable path
  */
-function absoluteToRelative(absolutePath, fromDir) {
+function toImportPath(absolutePath, fromDir, packageName, packageRoot) {
+  // For package imports: convert to package subpath
+  if (packageName && packageRoot) {
+    let subPath = path.relative(packageRoot, absolutePath);
+    subPath = subPath.replace(/\.(ts|tsx|js|jsx)$/, '');
+    subPath = subPath.replace(/\/index$/, '');
+    return `${packageName}/${subPath}`;
+  }
+
+  // For relative imports: convert to relative path
   let relativePath = path.relative(fromDir, absolutePath);
-
-  // Remove extension for cleaner imports
   relativePath = relativePath.replace(/\.(ts|tsx|js|jsx)$/, '');
-
-  // Ensure it starts with ./ or ../
   if (!relativePath.startsWith('.')) {
     relativePath = './' + relativePath;
   }
-
   return relativePath;
 }
 

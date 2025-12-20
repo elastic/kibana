@@ -27,6 +27,10 @@ export interface ExportInfo {
 export interface BarrelFileEntry {
   /** Map of export name to export info */
   exports: Record<string, ExportInfo>;
+  /** For node_modules barrels: the package name (e.g., 'rxjs', '@kbn/std') */
+  packageName?: string;
+  /** For node_modules barrels: absolute path to package root */
+  packageRoot?: string;
 }
 
 /**
@@ -45,4 +49,3 @@ export interface PluginOptions {
   /** Pre-built barrel index, if not provided the plugin is a no-op */
   barrelIndex?: BarrelIndex;
 }
-

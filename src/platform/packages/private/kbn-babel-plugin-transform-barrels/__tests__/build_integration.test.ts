@@ -70,7 +70,7 @@ describe('barrel transform build integration', () => {
     expect(testFileContent).toMatch(/require\(['"]\.\/logging\/get_response_log['"]\)/);
 
     // Original: import { firstValueFrom, pairwise, take } from 'rxjs';
-    expect(testFileContent).not.toMatch(/require\(['"]\.\/rxjs['"]\)/);
-    expect(testFileContent).toMatch(/require\(['"]\.\/rxjs\/firstValueFrom['"]\)/);
+    expect(testFileContent).not.toMatch(/require\(['"]rxjs['"]\)/);
+    expect(testFileContent).toMatch(/require\(['"]rxjs\/dist\/cjs\/internal\/firstValueFrom['"]\)/);
   });
 });
