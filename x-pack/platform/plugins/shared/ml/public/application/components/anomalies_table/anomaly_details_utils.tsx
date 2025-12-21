@@ -328,8 +328,8 @@ export const DetailsItems: FC<{
 
   return (
     <>
-      {items.map(({ title, description }) => (
-        <>
+      {items.map(({ title, description }, index) => (
+        <React.Fragment key={`detail-item-${index}-${title}`}>
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem css={{ width: '180px' }} grow={false}>
               {title}
@@ -337,7 +337,7 @@ export const DetailsItems: FC<{
             <EuiFlexItem>{description}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
-        </>
+        </React.Fragment>
       ))}
     </>
   );

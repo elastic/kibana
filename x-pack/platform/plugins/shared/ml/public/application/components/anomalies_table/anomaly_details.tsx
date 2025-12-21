@@ -290,8 +290,8 @@ const Influencers: FC<{
             </strong>
           </h3>
         </EuiTitle>
-        {listItems.map(({ title, description }) => (
-          <>
+        {listItems.map(({ title, description }, index) => (
+          <React.Fragment key={`influencer-${index}-${title}`}>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem style={{ width: '180px' }} grow={false}>
                 {title}
@@ -299,7 +299,7 @@ const Influencers: FC<{
               <EuiFlexItem>{description}</EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="xs" />
-          </>
+          </React.Fragment>
         ))}
         {othersCount > 0 && (
           <EuiLink onClick={() => toggleAllInfluencers()}>
