@@ -9,12 +9,23 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const SELECTOR_LIST_HEADER_HEIGHT = 57;
+export const SELECTOR_LIST_FOOTER_HEIGHT = 57;
 const SELECTOR_POPOVER_MAX_HEIGHT = 300;
-export const getMaxListHeight = ({ withHeader }: { withHeader: boolean }) => {
+export const getMaxListHeight = ({
+  withHeader,
+  withFooter,
+}: {
+  withHeader?: boolean;
+  withFooter?: boolean;
+}) => {
+  let height = SELECTOR_POPOVER_MAX_HEIGHT;
   if (withHeader) {
-    return SELECTOR_POPOVER_MAX_HEIGHT - SELECTOR_LIST_HEADER_HEIGHT;
+    height -= SELECTOR_LIST_HEADER_HEIGHT;
   }
-  return SELECTOR_POPOVER_MAX_HEIGHT;
+  if (withFooter) {
+    height -= SELECTOR_LIST_FOOTER_HEIGHT;
+  }
+  return height;
 };
 
 export const useSelectorListStyles = ({ listId }: { listId: string }) => {
@@ -28,6 +39,12 @@ export const useSelectorListStyles = ({ listId }: { listId: string }) => {
       }
       & .euiSelectableListItem__content {
         block-size: 100%;
+        gap: ${euiTheme.size.s};
+        .euiSelectableListItem__icon,
+        .euiSelectableListItem__prepend,
+        .euiSelectableListItem__append {
+          margin: 0;
+        }
       }
       & .euiSelectableListItem__text {
         text-decoration: none;

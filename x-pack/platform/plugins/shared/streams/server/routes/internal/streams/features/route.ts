@@ -353,7 +353,8 @@ export const identifyFeaturesRoute = createServerRoute({
       logger,
     });
 
-    const { featurePromptOverride } = await promptsConfigService.getPrompt();
+    const { featurePromptOverride, descriptionPromptOverride } =
+      await promptsConfigService.getPrompt();
 
     return from(
       featureRegistry.identifyFeatures({
@@ -365,7 +366,8 @@ export const identifyFeaturesRoute = createServerRoute({
         stream,
         features: hits,
         signal,
-        systemPromptOverride: featurePromptOverride,
+        featurePromptOverride,
+        descriptionPromptOverride,
       })
     ).pipe(
       map(({ features, tokensUsed }) => {
@@ -409,10 +411,16 @@ export const describeStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Observable<StreamDescriptionEvent>> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+      streamsClient,
+      inferenceClient,
+      soClient,
+    } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -434,6 +442,13 @@ export const describeStreamRoute = createServerRoute({
 
     const stream = await streamsClient.getStream(name);
 
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
+
     return from(
       generateStreamDescription({
         stream,
@@ -443,6 +458,7 @@ export const describeStreamRoute = createServerRoute({
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
         logger: logger.get('stream_description'),
+        systemPromptOverride: descriptionPromptOverride,
       })
     ).pipe(
       map((result) => {

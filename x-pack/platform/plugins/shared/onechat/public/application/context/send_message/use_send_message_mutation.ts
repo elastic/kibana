@@ -14,7 +14,6 @@ import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
-import { useReportConverseError } from '../../hooks/use_report_error';
 import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
@@ -27,7 +26,6 @@ interface UseSendMessageMutationProps {
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { services } = useKibana();
-  const { reportConverseError } = useReportConverseError();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
     useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
@@ -67,7 +65,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setPendingMessage,
     removePendingMessage,
   } = usePendingMessageState({ conversationId });
-  const subscribeToChatEvents = useSubscribeToChatEvents({
+  const { subscribeToChatEvents, unsubscribeFromChatEvents } = useSubscribeToChatEvents({
     setAgentReasoning,
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
@@ -118,6 +116,9 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationActions.invalidateConversation();
       messageControllerRef.current = null;
       setAgentReasoning(null);
+      if (isResponseLoading) {
+        setIsResponseLoading(false);
+      }
     },
     onSuccess: () => {
       removePendingMessage();
@@ -127,8 +128,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       }
     },
     onError: (err) => {
-      setIsResponseLoading(false);
-      reportConverseError(err, { connectorId });
       setError(err);
       const steps = conversation?.rounds?.at(-1)?.steps;
       if (steps) {
@@ -176,12 +175,15 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     },
     canCancel,
     cancel,
-    // Cleaning only makes sense in the context of an error state on a new conversation round
-    // The user can click "New" to clear the pending round and error
     cleanConversation: () => {
-      conversationActions.removeOptimisticRound();
-      removeError();
-      removePendingMessage();
+      // Cleaning the conversation only happens when we are on "/new" and the user wants to back out of a pending or errored conversation and return to an empty conversation state
+      if (isLoading) {
+        // Conversation round is pending, unsubscribe from chat events and resolve mutation
+        unsubscribeFromChatEvents();
+      } else if (Boolean(error)) {
+        removeError();
+        removePendingMessage();
+      }
     },
   };
 };

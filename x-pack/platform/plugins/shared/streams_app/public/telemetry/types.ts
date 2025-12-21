@@ -99,12 +99,14 @@ interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
+export type CountByFeatureType = Record<FeatureType, number>;
+
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
   input_tokens_used: number;
   output_tokens_used: number;
   count: number;
-  count_by_feature_type: Record<FeatureType, number>;
+  count_by_feature_type: CountByFeatureType;
   features_selected: number;
   features_total: number;
   stream_name: string;
@@ -113,14 +115,14 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
-  count_by_feature_type: Record<FeatureType, number>;
+  count_by_feature_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationIdentifiedProps {
   count: number;
-  count_by_type: Record<FeatureType, number>;
+  count_by_type: CountByFeatureType;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
@@ -129,14 +131,14 @@ interface StreamsFeatureIdentificationIdentifiedProps {
 
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
-  count_by_type: Record<FeatureType, number>;
+  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
-  count_by_type: Record<FeatureType, number>;
+  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -152,6 +154,12 @@ interface StreamsProcessingSimulationSamplesFetchLatencyProps {
   stream_name: string;
   stream_type: StreamType;
   data_source_type: EnrichmentDataSource['type'];
+  duration_ms: number;
+}
+
+interface StreamsPartitioningSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
   duration_ms: number;
 }
 
@@ -194,5 +202,6 @@ export {
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,
 };

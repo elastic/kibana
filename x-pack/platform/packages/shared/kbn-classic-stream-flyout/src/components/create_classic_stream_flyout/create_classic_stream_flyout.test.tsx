@@ -8,59 +8,64 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 
-const MOCK_TEMPLATES: TemplateDeserialized[] = [
-  {
+const createMockTemplate = (overrides: Partial<IndexTemplate> = {}): IndexTemplate => ({
+  name: 'mock-template',
+  indexPatterns: ['mock-*'],
+  allowAutoCreate: 'NO_OVERWRITE',
+  _kbnMeta: { type: 'default', hasDatastream: true },
+  hasSettings: false,
+  hasAliases: false,
+  hasMappings: false,
+  ...overrides,
+});
+
+const MOCK_TEMPLATES: IndexTemplate[] = [
+  createMockTemplate({
     name: 'template-1',
     ilmPolicy: { name: '30d' },
     indexPatterns: ['logs-template-1-*'],
-    allowAutoCreate: 'NO_OVERWRITE',
     indexMode: 'standard',
     composedOf: ['logs@mappings', 'logs@settings'],
-    _kbnMeta: { type: 'default', hasDatastream: true },
-  },
-  {
+  }),
+  createMockTemplate({
     name: 'template-2',
     ilmPolicy: { name: '90d' },
     indexPatterns: ['template-2-*'],
-    allowAutoCreate: 'NO_OVERWRITE',
     indexMode: 'logsdb',
     _kbnMeta: { type: 'managed', hasDatastream: true },
-  },
-  {
+  }),
+  createMockTemplate({
     name: 'template-3',
     indexPatterns: ['template-3-*'],
-    allowAutoCreate: 'NO_OVERWRITE',
     lifecycle: { enabled: true, value: 30, unit: 'd' },
-    _kbnMeta: { type: 'default', hasDatastream: true },
-  },
-  {
+  }),
+  createMockTemplate({
     name: 'multi-pattern-template',
     ilmPolicy: { name: 'logs' },
     indexPatterns: ['*-logs-*-*', 'logs-*-data-*', 'metrics-*'],
-    allowAutoCreate: 'NO_OVERWRITE',
     indexMode: 'lookup',
     version: 12,
     composedOf: ['logs@mappings', 'logs@settings'],
     _kbnMeta: { type: 'managed', hasDatastream: true },
-  },
-  {
+  }),
+  createMockTemplate({
     name: 'very-long-pattern-template',
     ilmPolicy: { name: 'logs' },
     indexPatterns: ['*-reallllllllllllllllllly-*-loooooooooooong-*-index-*-name-*', 'short-*'],
-    allowAutoCreate: 'NO_OVERWRITE',
     indexMode: 'lookup',
     version: 12,
     composedOf: ['logs@mappings', 'logs@settings'],
     _kbnMeta: { type: 'managed', hasDatastream: true },
-  },
+  }),
 ];
 
 const defaultProps = {
   onClose: jest.fn(),
-  onCreate: jest.fn(),
+  onCreate: jest.fn().mockResolvedValue(undefined),
   onCreateTemplate: jest.fn(),
   onRetryLoadTemplates: jest.fn(),
   templates: MOCK_TEMPLATES,
@@ -187,7 +192,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('calls onCreate with stream name when Create button is clicked and validation passes', async () => {
-      const onCreate = jest.fn();
+      const onCreate = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderFlyout({ onCreate });
 
       // Select template and navigate to second step
@@ -208,7 +213,7 @@ describe('CreateClassicStreamFlyout', () => {
     });
 
     it('does not call onCreate when validation fails (empty wildcard)', async () => {
-      const onCreate = jest.fn();
+      const onCreate = jest.fn().mockResolvedValue(undefined);
       const { getByTestId, findByText } = renderFlyout({ onCreate });
 
       // Select template and navigate to second step
@@ -227,7 +232,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     it('does not call onCreate or onClose when navigating between steps', () => {
       const onClose = jest.fn();
-      const onCreate = jest.fn();
+      const onCreate = jest.fn().mockResolvedValue(undefined);
       const { getByTestId } = renderFlyout({ onCreate, onClose });
 
       // Select template
@@ -519,7 +524,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('validation', () => {
       it('shows validation error when trying to create with empty wildcard', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const { getByTestId, findByText } = renderFlyout({ onCreate });
 
         // Select template and navigate to second step
@@ -536,7 +541,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('calls onValidate when provided and local validation passes', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockResolvedValue({ errorType: null });
         const { getByTestId } = renderFlyout({ onCreate, onValidate });
 
@@ -565,7 +570,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('shows duplicate error from onValidate', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
 
@@ -587,7 +592,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('shows higher priority error from onValidate', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockResolvedValue({
           errorType: 'higherPriority',
           conflictingIndexPattern: 'logs-*',
@@ -615,7 +620,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('debounced validation and live validation mode', () => {
       it('should trigger debounced validation in Live Validation Mode (when error exists)', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         // Return error to enter Live Validation Mode
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
@@ -650,7 +655,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('should keep error visible while validating in Live Validation Mode', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText, getByText } = renderFlyout({ onCreate, onValidate });
 
@@ -674,7 +679,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('AbortController cancellation', () => {
       it('should abort validation when template changes', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         let abortSignal: AbortSignal | undefined;
 
         const onValidate = jest.fn().mockImplementation((name, template, signal) => {
@@ -711,7 +716,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('template and index pattern change effects', () => {
       it('should reset validation error state when template changes', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText, queryByText } = renderFlyout({ onCreate, onValidate });
 
@@ -743,7 +748,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('should reset validation when index pattern changes', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText, queryByText } = renderFlyout({ onCreate, onValidate });
 
@@ -779,7 +784,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('error handling', () => {
       it('should handle validation errors gracefully', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockRejectedValue(new Error('Network error'));
 
         const { getByTestId } = renderFlyout({ onCreate, onValidate });
@@ -805,7 +810,7 @@ describe('CreateClassicStreamFlyout', () => {
 
     describe('validation state management', () => {
       it('should show loading state during validation', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         const onValidate = jest.fn().mockImplementation(() => {
           return new Promise((resolve) => {
             setTimeout(() => resolve({ errorType: null }), 100);
@@ -840,7 +845,7 @@ describe('CreateClassicStreamFlyout', () => {
       });
 
       it('should reset hasAttemptedSubmit when validation passes in live mode', async () => {
-        const onCreate = jest.fn();
+        const onCreate = jest.fn().mockResolvedValue(undefined);
         // First return error to enter Live Validation Mode
         const onValidate = jest.fn().mockResolvedValue({ errorType: 'duplicate' });
         const { getByTestId, findByText } = renderFlyout({ onCreate, onValidate });
@@ -885,6 +890,98 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Should not validate again (hasAttemptedSubmit was reset to false)
         expect(onValidate).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('showDataRetention prop', () => {
+    describe('select template step', () => {
+      it('hides ILM badge and policy name when showDataRetention is false', () => {
+        const { queryAllByText, queryByText, getByTestId } = renderFlyout({
+          showDataRetention: false,
+        });
+
+        // template-1 and template-2 have ILM policies, but badges should be hidden
+        expect(queryAllByText('ILM')).toHaveLength(0);
+
+        // ILM policy names should also be hidden
+        expect(queryByText('30d')).not.toBeInTheDocument();
+        expect(queryByText('90d')).not.toBeInTheDocument();
+
+        // Template options should still be visible
+        expect(getByTestId('template-option-template-1')).toBeInTheDocument();
+        expect(getByTestId('template-option-template-2')).toBeInTheDocument();
+      });
+
+      it('hides data retention text when showDataRetention is false', () => {
+        const { queryByText } = renderFlyout({ showDataRetention: false });
+
+        // template-3 has lifecycle: { enabled: true, value: 30, unit: 'd' } - retention text should be hidden
+        // ILM policy names should also be hidden
+        expect(queryByText('30d')).not.toBeInTheDocument();
+        expect(queryByText('90d')).not.toBeInTheDocument();
+      });
+
+      it('shows ILM badge when showDataRetention is true (default)', () => {
+        const { getAllByText } = renderFlyout();
+
+        // template-1 and template-2 have ILM policies - badges should be visible
+        const ilmBadges = getAllByText('ILM');
+        expect(ilmBadges.length).toBeGreaterThanOrEqual(2);
+      });
+    });
+
+    describe('name and confirm step', () => {
+      it('hides retention section when showDataRetention is false', () => {
+        const { getByTestId, queryByText } = renderFlyout({ showDataRetention: false });
+
+        // Select template with ILM policy and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Retention should be hidden
+        expect(queryByText('Retention')).not.toBeInTheDocument();
+        expect(queryByText('30d')).not.toBeInTheDocument();
+        expect(queryByText('ILM')).not.toBeInTheDocument();
+
+        // Other template details should still be visible
+        expect(queryByText('Index mode')).toBeInTheDocument();
+        expect(queryByText('Component templates')).toBeInTheDocument();
+      });
+
+      it('does not call getIlmPolicy when showDataRetention is false', () => {
+        const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
+        const { getByTestId } = renderFlyout({
+          showDataRetention: false,
+          getIlmPolicy: mockGetIlmPolicy,
+        });
+
+        // Select template with ILM policy and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Verify we're on the second step
+        expect(getByTestId('nameAndConfirmStep')).toBeInTheDocument();
+
+        // getIlmPolicy should not be called
+        expect(mockGetIlmPolicy).not.toHaveBeenCalled();
+      });
+
+      it('shows retention section and calls getIlmPolicy when showDataRetention is true', async () => {
+        const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
+        const { getByTestId, getByText } = renderFlyout({
+          showDataRetention: true,
+          getIlmPolicy: mockGetIlmPolicy,
+        });
+
+        // Select template with ILM policy and navigate to second step
+        selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+        // Retention should be visible
+        expect(getByText('Retention')).toBeInTheDocument();
+
+        // getIlmPolicy should be called
+        await waitFor(() => {
+          expect(mockGetIlmPolicy).toHaveBeenCalledWith('30d', expect.any(AbortSignal));
+        });
       });
     });
   });

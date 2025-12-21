@@ -374,6 +374,7 @@ export interface BaseConnectorContract {
   connectorIdRequired?: boolean;
   connectorId?: z.ZodType;
   outputSchema: z.ZodType;
+  configSchema?: z.ZodObject;
   summary: string | null;
   description: string | null;
   /** Documentation URL for this API endpoint */
