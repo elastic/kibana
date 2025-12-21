@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/inference-tracing'
   - '@kbn/core-ui-settings-common'
   - '@kbn/setup-node-env'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
