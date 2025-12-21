@@ -3806,7 +3806,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; topSearchBar?: React.ReactNode; }"
+          " | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3881,7 +3881,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; topSearchBar?: React.ReactNode; }"
+          " | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,

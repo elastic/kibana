@@ -9134,6 +9134,27 @@
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.observabilityAgentBuilder",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAgentBuilder",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAgentBuilder",
+                "scope": "public",
+                "docId": "kibObservabilityAgentBuilderPluginApi",
+                "section": "def-public.ObservabilityAgentBuilderPluginPublicStart",
+                "text": "ObservabilityAgentBuilderPluginPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -25043,7 +25064,7 @@
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; editRule: (id: string) => string; }"
+          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; createRuleFromTemplate: (templateId: string) => string; editRule: (id: string) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,

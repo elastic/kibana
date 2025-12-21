@@ -29,6 +29,7 @@ export interface EisUpdateCalloutProps {
   handleOnClick: () => void;
   direction: 'row' | 'column';
   hasUpdatePrivileges: boolean | undefined;
+  addSpacer?: 'top' | 'bottom';
 }
 
 export const EisUpdateCallout = ({
@@ -38,6 +39,7 @@ export const EisUpdateCallout = ({
   handleOnClick,
   direction,
   hasUpdatePrivileges,
+  addSpacer,
 }: EisUpdateCalloutProps) => {
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}UpdateCallout`,
@@ -50,50 +52,54 @@ export const EisUpdateCallout = ({
   }
 
   return (
-    <EuiCallOut
-      data-telemetry-id={dataId}
-      data-test-subj={dataId}
-      css={({ euiTheme }) => ({
-        color: euiTheme.colors.primaryText,
-        backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
-        border: `${euiTheme.border.thin}`,
-        borderRadius: `${euiTheme.border.radius.medium}`,
-      })}
-      onDismiss={onDismissTour}
-    >
-      <EuiFlexGroup direction={direction} alignItems="flexStart">
-        <EuiImage src={searchRocketIcon} alt="" size="original" />
-        <div>
-          <EuiTitle>
-            <h4>{i18n.EIS_CALLOUT_TITLE}</h4>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>{i18n.EIS_UPDATE_CALLOUT_DESCRIPTION}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-            <EuiButton
-              fullWidth={false}
-              color="text"
-              size="s"
-              onClick={handleOnClick}
-              data-test-subj="eisUpdateCalloutCtaBtn"
-              data-telemetry-id={`${dataId}-cta-btn`}
-            >
-              {i18n.EIS_UPDATE_CALLOUT_CTA}
-            </EuiButton>
-            <EuiLink
-              href={ctaLink}
-              target="_blank"
-              external
-              color="text"
-              data-telemetry-id={`${dataId}-docs-btn`}
-            >
-              {i18n.EIS_CALLOUT_DOCUMENTATION_BTN}
-            </EuiLink>
-          </EuiFlexGroup>
-        </div>
-      </EuiFlexGroup>
-    </EuiCallOut>
+    <>
+      {addSpacer === 'top' && <EuiSpacer size="l" />}
+      <EuiCallOut
+        data-telemetry-id={dataId}
+        data-test-subj={dataId}
+        css={({ euiTheme }) => ({
+          color: euiTheme.colors.primaryText,
+          backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
+          border: `${euiTheme.border.thin}`,
+          borderRadius: `${euiTheme.border.radius.medium}`,
+        })}
+        onDismiss={onDismissTour}
+      >
+        <EuiFlexGroup direction={direction} alignItems="flexStart">
+          <EuiImage src={searchRocketIcon} alt="" size="original" />
+          <div>
+            <EuiTitle>
+              <h4>{i18n.EIS_CALLOUT_TITLE}</h4>
+            </EuiTitle>
+            <EuiText color="subdued" size="s">
+              <p>{i18n.EIS_UPDATE_CALLOUT_DESCRIPTION}</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+              <EuiButton
+                fullWidth={false}
+                color="text"
+                size="s"
+                onClick={handleOnClick}
+                data-test-subj="eisUpdateCalloutCtaBtn"
+                data-telemetry-id={`${dataId}-cta-btn`}
+              >
+                {i18n.EIS_UPDATE_CALLOUT_CTA}
+              </EuiButton>
+              <EuiLink
+                href={ctaLink}
+                target="_blank"
+                external
+                color="text"
+                data-telemetry-id={`${dataId}-docs-btn`}
+              >
+                {i18n.EIS_CALLOUT_DOCUMENTATION_BTN}
+              </EuiLink>
+            </EuiFlexGroup>
+          </div>
+        </EuiFlexGroup>
+      </EuiCallOut>
+      {addSpacer === 'bottom' && <EuiSpacer size="l" />}
+    </>
   );
 };

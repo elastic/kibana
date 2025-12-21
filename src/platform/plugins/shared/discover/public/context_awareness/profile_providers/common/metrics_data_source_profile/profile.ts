@@ -9,7 +9,7 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { Parser } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-language';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
@@ -19,8 +19,8 @@ import { createChartSection } from './accessor/chart_section';
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
 export const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
-// FIXME: could kbn-esql-ast provide a union type with existing commands?
-const SUPPORTED_ESQL_COMMANDS = new Set(['ts', 'limit', 'sort']);
+// FIXME: could kbn-esql-language provide a union type with existing commands?
+const SUPPORTED_ESQL_COMMANDS = new Set(['ts', 'limit', 'sort', 'where']);
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({

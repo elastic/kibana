@@ -15,6 +15,7 @@ import { createHapiReadableStreamMock } from '../actions/mocks';
 import type {
   CreateScriptRequestBody,
   ListScriptsRequestQuery,
+  PatchUpdateRequestBody,
 } from '../../../../common/api/endpoint/scripts_library';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
@@ -56,6 +57,16 @@ const generateCreateScriptBodyMock = (
     example: 'bash -c script_one.sh',
     requiresInput: false,
     file: createHapiReadableStreamMock(),
+    ...overrides,
+  };
+};
+
+const generateUpdateScriptBodyMock = (
+  overrides: Partial<PatchUpdateRequestBody> = {}
+): PatchUpdateRequestBody => {
+  return {
+    ...generateCreateScriptBodyMock(),
+    version: 'soVersionHere==',
     ...overrides,
   };
 };
@@ -171,6 +182,7 @@ export const ScriptsLibraryMock = Object.freeze({
   getMockedClient: getScriptsLibraryClientMock,
   generateScriptEntry: generateScriptEntryMock,
   generateCreateScriptBody: generateCreateScriptBodyMock,
+  generateUpdateScriptBody: generateUpdateScriptBodyMock,
   createFilesPluginClient: createFilesPluginClientMock,
   applyMocksToSoClient: applySoClientMocks,
 });

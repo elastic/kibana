@@ -40,10 +40,10 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams",
-      "observabilityAgentBuilder"
+      "streams"
     ],
     "optionalPlugins": [
+      "observabilityAgentBuilder",
       "onechat",
       "aiops",
       "cases",
@@ -67,7 +67,8 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]
   }

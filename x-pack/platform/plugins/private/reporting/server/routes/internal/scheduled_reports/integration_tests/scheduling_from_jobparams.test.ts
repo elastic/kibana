@@ -182,7 +182,17 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+        expect(body.message).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"message\\": \\"Invalid timezone\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ]
+            }
+          ]"
+        `)
       );
   });
 
@@ -354,7 +364,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
         notification: {
@@ -374,7 +384,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
             payload: {
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',

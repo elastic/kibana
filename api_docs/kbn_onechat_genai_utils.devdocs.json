@@ -7955,7 +7955,15 @@
             "section": "def-common.ToolHandlerResult",
             "text": "ToolHandlerResult"
           },
-          "[]>"
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolResult",
+            "text": "ToolResult"
+          },
+          "<Record<string, unknown>>>[]>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
         "deprecated": false,

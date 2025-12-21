@@ -67,30 +67,30 @@ describe('projectRouting', () => {
     expect(manager!.api.projectRouting$.value).toBe('_alias:_origin');
 
     manager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
-      // When projectRoutingRestore is true, changing to 'ALL' is detected
+      // When projectRoutingRestore is true, changing to '_alias:*' is detected
       expect(changes).toEqual({
-        project_routing: 'ALL',
+        project_routing: '_alias:*',
       });
       done();
     });
 
-    manager!.api.setProjectRouting('ALL');
+    manager!.api.setProjectRouting('_alias:*');
   });
 
-  test('Should detect change when setting projectRouting to ALL from undefined', (done) => {
+  test('Should detect change when setting projectRouting to _alias:* from undefined', (done) => {
     const { manager } = initManager(true);
     const lastSavedState$ = createLastSavedState();
 
     manager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
-      // When projectRoutingRestore is true, setting to 'ALL' should be detected as a change
+      // When projectRoutingRestore is true, setting to '_alias:*' should be detected as a change
       expect(changes).toEqual({
-        project_routing: 'ALL',
+        project_routing: '_alias:*',
       });
       done();
     });
 
-    // Setting to 'ALL' when projectRoutingRestore is true should be detected
-    manager!.api.setProjectRouting('ALL');
+    // Setting to '_alias:*' when projectRoutingRestore is true should be detected
+    manager!.api.setProjectRouting('_alias:*');
   });
 
   test('Should restore projectRouting in reset', () => {
@@ -143,28 +143,28 @@ describe('projectRouting', () => {
   test('Should save current routing when projectRoutingRestore is true', () => {
     const { manager } = initManager(true);
 
-    // Set projectRouting to 'ALL'
-    manager!.api.setProjectRouting('ALL');
+    // Set projectRouting to '_alias:*'
+    manager!.api.setProjectRouting('_alias:*');
     const state = manager!.internalApi.getState();
 
-    // projectRouting should be saved as 'ALL' when projectRoutingRestore is true
-    expect(state.project_routing).toBe('ALL');
+    // projectRouting should be saved as '_alias:*' when projectRoutingRestore is true
+    expect(state.project_routing).toBe('_alias:*');
   });
 
   test('Should distinguish between ALL (saved with all projects) and undefined (not saved)', () => {
-    const { manager } = initManager(true, 'ALL');
+    const { manager } = initManager(true, '_alias:*');
 
-    // Should initialize with 'ALL' from saved state
-    expect(manager!.api.projectRouting$.value).toBe('ALL');
+    // Should initialize with '_alias:*' from saved state
+    expect(manager!.api.projectRouting$.value).toBe('_alias:*');
 
     const state = manager!.internalApi.getState();
-    // getState should return 'ALL' when projectRouting is 'ALL'
-    expect(state.project_routing).toBe('ALL');
+    // getState should return '_alias:*' when projectRouting is '_alias:*'
+    expect(state.project_routing).toBe('_alias:*');
   });
 
   test('Should not detect change when projectRouting remains the same', (done) => {
-    const { manager } = initManager(true, 'ALL');
-    const lastSavedState$ = createLastSavedState('ALL');
+    const { manager } = initManager(true, '_alias:*');
+    const lastSavedState$ = createLastSavedState('_alias:*');
 
     manager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
       // When projectRouting is set to the same value as saved, no change detected
@@ -173,7 +173,7 @@ describe('projectRouting', () => {
     });
 
     // Set to same value as saved state - should not detect a change
-    manager!.api.setProjectRouting('ALL');
+    manager!.api.setProjectRouting('_alias:*');
   });
 
   test('Should return undefined when CPS is not enabled', () => {

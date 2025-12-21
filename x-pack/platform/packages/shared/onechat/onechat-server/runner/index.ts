@@ -46,3 +46,5 @@ export type {
 } from './model_provider';
 export type { ToolResultStore, WritableToolResultStore } from './result_store';
 export type { AttachmentsService } from './attachments_service';
+export type { PromptManager, ToolPromptManager } from './prompt_manager';
+export type { ConversationStateManager, ToolStateManager } from './state_manager';

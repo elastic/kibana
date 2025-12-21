@@ -9,7 +9,11 @@ import React, { useState, useEffect } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
+import {
+  useConversationTitle,
+  useHasActiveConversation,
+  useHasPersistedConversation,
+} from '../../../hooks/use_conversation';
 import { RenameConversationInput } from './rename_conversation_input';
 
 const labels = {
@@ -37,6 +41,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
 }) => {
   const { title, isLoading } = useConversationTitle();
   const hasActiveConversation = useHasActiveConversation();
+  const hasPersistedConversation = useHasPersistedConversation();
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
   const [previousTitle, setPreviousTitle] = useState('');
@@ -92,7 +97,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
   `;
 
   // Only show rename icon when there is a conversation ID !== 'new'
-  const canRename = hasActiveConversation;
+  const canRename = hasPersistedConversation;
 
   return (
     <EuiFlexGroup

@@ -22,31 +22,8 @@ import type {
   SavedDashboardPanel,
 } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
-import { emptyState, type LatestTaskStateSchema } from './task_state';
-
-// TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
-// LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).
-export interface DashboardCollectorData {
-  panels: {
-    total: number;
-    by_reference: number;
-    by_value: number;
-    by_type: {
-      [key: string]: {
-        total: number;
-        by_reference: number;
-        by_value: number;
-        details: {
-          [key: string]: number;
-        };
-      };
-    };
-  };
-  controls: ControlGroupTelemetry;
-  sections: {
-    total: number;
-  };
-}
+import { emptyState } from './task_state';
+import type { DashboardCollectorData, DashboardHit } from './types';
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
   panels: {
@@ -59,6 +36,7 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
   sections: {
     total: 0,
   },
+  access_mode: {},
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -101,11 +79,16 @@ export const collectPanelsByType = (
   }
 };
 
-export const collectDashboardSections = (
-  attributes: DashboardSavedObjectAttributes,
+export const collectSectionsAndAccessControl = (
+  dashboard: DashboardHit,
   collectorData: DashboardCollectorData
 ) => {
-  collectorData.sections.total += attributes.sections?.length ?? 0;
+  if (dashboard.accessControl?.accessMode) {
+    const mode = dashboard.accessControl.accessMode;
+    collectorData.access_mode[mode] ??= { total: 0 };
+    collectorData.access_mode[mode].total += 1;
+  }
+  collectorData.sections.total += dashboard.attributes.sections?.length ?? 0;
   return collectorData;
 };
 
@@ -150,7 +133,7 @@ export async function collectDashboardTelemetry(taskManager: TaskManagerStartCon
   const latestTaskState = await getLatestTaskState(taskManager);
 
   if (latestTaskState !== null) {
-    const state = latestTaskState[0].state as LatestTaskStateSchema;
+    const state = latestTaskState[0].state;
     return state.telemetry;
   }
 
