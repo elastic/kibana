@@ -18,7 +18,6 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { dateHistogram } from './common';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { type Bucket, getChangePoints } from '../../utils/get_change_points';
@@ -87,7 +86,10 @@ async function getLogChangePoint({
           },
           aggs: {
             over_time: {
-              auto_date_histogram: dateHistogram,
+              auto_date_histogram: {
+                field: '@timestamp',
+                buckets: 100,
+              },
             },
             changes: {
               change_point: {

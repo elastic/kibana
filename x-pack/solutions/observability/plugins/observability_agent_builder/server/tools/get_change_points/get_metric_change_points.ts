@@ -17,7 +17,6 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { dateHistogram } from './common';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { type Bucket, getChangePoints } from '../../utils/get_change_points';
 import { parseDatemath } from '../../utils/time';
@@ -140,33 +139,34 @@ async function getMetricChangePoints({
 
   const groupAgg = getGroupingAggregation(groupBy);
 
-  const subAggs = {
-    over_time: {
-      auto_date_histogram: dateHistogram,
-      aggs: {
-        metric: metricAgg,
-        value: {
-          bucket_script: {
-            buckets_path: {
-              metric: bucketsPathMetric,
-            },
-            script: 'params.metric',
-          },
-        },
-      },
-    },
-    changes: {
-      change_point: {
-        buckets_path: 'over_time>value',
-      },
-      // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-    } as AggregationsAggregationContainer,
-  };
-
   const aggregations = {
     groups: {
       ...groupAgg,
-      aggs: subAggs,
+      aggs: {
+        over_time: {
+          auto_date_histogram: {
+            field: '@timestamp',
+            buckets: 100,
+          },
+          aggs: {
+            metric: metricAgg,
+            value: {
+              bucket_script: {
+                buckets_path: {
+                  metric: bucketsPathMetric,
+                },
+                script: 'params.metric',
+              },
+            },
+          },
+        },
+        changes: {
+          change_point: {
+            buckets_path: 'over_time>value',
+          },
+          // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
+        } as AggregationsAggregationContainer,
+      },
     },
   };
 
