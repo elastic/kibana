@@ -20,6 +20,7 @@ import {
   getWorkflowSettingsSchema,
   WaitStepSchema,
   WorkflowSchema,
+  WorkflowSettingsSchema,
 } from '../schema';
 
 export function getStepId(stepName: string): string {
@@ -39,12 +40,15 @@ export function generateYamlSchemaFromConnectors(
 
   if (loose) {
     return WorkflowSchema.partial().extend({
+      settings: WorkflowSettingsSchema.omit({ concurrency: true }).optional(),
       steps: z.array(recursiveStepSchema).optional(),
     });
   }
 
   return WorkflowSchema.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose)
+      .omit({ concurrency: true })
+      .optional(),
     steps: z.array(recursiveStepSchema),
   });
 }
