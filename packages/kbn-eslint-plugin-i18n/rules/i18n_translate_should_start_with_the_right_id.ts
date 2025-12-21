@@ -10,8 +10,8 @@
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
-import { findPackageForPath } from '@kbn/repo-packages';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
+import { getAppIdFromFilePath } from '../helpers/get_app_id_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { getStringValue, isTruthy } from '../helpers/utils';
@@ -52,8 +52,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
         // If no i18n identifier is found for this file, report an error
         if (!i18nAppId) {
           // Find the package/plugin ID from kibana.jsonc to show in the error message
-          const pkg = findPackageForPath(cwd, filename);
-          const appId = pkg?.manifest?.plugin?.id ?? pkg?.id ?? 'Unknown package';
+          const appId = getAppIdFromFilePath(filename, cwd);
 
           report({
             node,

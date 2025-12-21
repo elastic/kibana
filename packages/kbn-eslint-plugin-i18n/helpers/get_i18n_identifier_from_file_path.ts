@@ -60,14 +60,20 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
 
   // First try exact matches with both path variants
   for (const [k, v] of Object.entries(allPaths)) {
-    if (matchesPath(v, fullPath) || matchesPath(v, pathWithoutXpack)) {
+    if (
+      matchesPath(v as string | string[], fullPath) ||
+      matchesPath(v as string | string[], pathWithoutXpack)
+    ) {
       return k;
     }
   }
 
   // Fallback to substring (legacy behavior)
   for (const [k, v] of Object.entries(allPaths)) {
-    if (includesPath(v, fullPath) || includesPath(v, pathWithoutXpack)) {
+    if (
+      includesPath(v as string | string[], fullPath) ||
+      includesPath(v as string | string[], pathWithoutXpack)
+    ) {
       return k;
     }
   }
