@@ -60,7 +60,10 @@ describe('toolToLangchain', () => {
     const results = await langchainTool.invoke({ hello: 'world' });
 
     expect(tool.execute).toHaveBeenCalledTimes(1);
-    expect(tool.execute).toHaveBeenCalledWith({ toolParams: { hello: 'world' } });
+    expect(tool.execute).toHaveBeenCalledWith({
+      toolParams: { hello: 'world' },
+      toolCallId: 'unknown',
+    });
 
     expect(JSON.parse(results).results).toEqual([{ type: ToolResultType.other, data: 'foo' }]);
   });

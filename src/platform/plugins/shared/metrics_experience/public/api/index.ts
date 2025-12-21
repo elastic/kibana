@@ -46,16 +46,6 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
   const request = createRepositoryClient(core).fetch as MetricsExperienceRepositoryClient;
 
   return {
-    getDimensions: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/dimensions'>['params']['query'],
-      signal?: AbortSignal | null
-    ) =>
-      request('GET /internal/metrics_experience/dimensions', {
-        params: {
-          query: params,
-        },
-        signal,
-      }),
     getFields: (
       params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/fields'>['params']['query'],
       signal?: AbortSignal | null
@@ -63,16 +53,6 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
       request('GET /internal/metrics_experience/fields', {
         params: {
           query: params,
-        },
-        signal,
-      }),
-    searchFields: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields/_search'>['params']['body'],
-      signal?: AbortSignal | null
-    ) =>
-      request('POST /internal/metrics_experience/fields/_search', {
-        params: {
-          body: params,
         },
         signal,
       }),

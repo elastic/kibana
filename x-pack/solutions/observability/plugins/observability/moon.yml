@@ -143,9 +143,10 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/content-management-utils'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/onechat-plugin'
+  - '@kbn/synthtrace'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
-  - '@kbn/onechat-plugin'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/observability-alerts-table'
 tags:

@@ -106,7 +106,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 3905
+  maintenanceWindows: 8803
   management: 12951
   maps: 45917
   mapsEms: 6734
@@ -118,8 +118,8 @@ pageLoadAssetSize:
   navigation: 15639
   newsfeed: 12371
   noDataPage: 1749
-  observability: 1169364
-  observabilityAgentBuilder: 5727
+  observability: 107797
+  observabilityAgentBuilder: 7079
   observabilityAIAssistant: 54556
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 7126
@@ -208,6 +208,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 61264
+  workflowsExtensions: 73502
   workflowsManagement: 8497
   workplaceAIApp: 6135

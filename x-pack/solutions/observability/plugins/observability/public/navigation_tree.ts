@@ -272,7 +272,6 @@ function createNavTree({
             {
               link: 'agent_builder' as const,
               icon: LazyAgentBuilderIcon,
-              badgeType: 'techPreview' as const,
             },
           ]),
       {

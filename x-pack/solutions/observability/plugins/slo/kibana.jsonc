@@ -31,6 +31,7 @@
       "presentationUtil",
       "ruleRegistry",
       "share",
+      "sloShared",
       "taskManager",
       "triggersActionsUi",
       "uiActions",
