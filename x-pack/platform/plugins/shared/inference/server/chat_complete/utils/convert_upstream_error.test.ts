@@ -7,6 +7,16 @@
 
 import { ChatCompletionErrorCode, InferenceTaskErrorCode } from '@kbn/inference-common';
 import { convertUpstreamError } from './convert_upstream_error';
+import { isUserError } from '@kbn/task-manager-plugin/server/task_running';
+import type { InferenceTaskProviderError } from '@kbn/inference-common';
+import type { ChatCompletionContextLengthExceededError } from '@kbn/inference-common/src/chat_complete/errors';
+import type { DecoratedError } from '@kbn/task-manager-plugin/server';
+
+function isErrorWithCodeAndStatusProperties(
+  error: InferenceTaskProviderError | ChatCompletionContextLengthExceededError | DecoratedError
+): error is InferenceTaskProviderError | ChatCompletionContextLengthExceededError {
+  return 'code' in error && 'status' in error;
+}
 
 const connectorError =
   "Status code: 400. Message: API Error: model_error - The response was filtered due to the prompt triggering Azure OpenAI's content management policy. Please modify your prompt and retry.";
@@ -14,34 +24,50 @@ const connectorError =
 const elasticInferenceError =
   'status_exception - Received an authentication error status code for request from inference entity id [openai-chat_completion-uuid] status [401]. Error message: [Incorrect API key provided]';
 
+const userQuotaError =
+  'Received a rate limit status code for request from inference entity id [openai-chat_completion-***] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]';
+
 describe('convertUpstreamError', () => {
   it('extracts status code from a connector request error', () => {
     const error = convertUpstreamError(connectorError);
-    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
-    expect(error.message).toEqual(connectorError);
-    expect(error.status).toEqual(400);
+    if (isErrorWithCodeAndStatusProperties(error)) {
+      expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
+      expect(error.message).toEqual(connectorError);
+      expect(error.status).toEqual(400);
+    }
   });
 
   it('extracts status code from a ES inference chat_completion error', () => {
     const error = convertUpstreamError(elasticInferenceError);
-    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
-    expect(error.message).toEqual(elasticInferenceError);
-    expect(error.status).toEqual(401);
+    if (isErrorWithCodeAndStatusProperties(error)) {
+      expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
+      expect(error.message).toEqual(elasticInferenceError);
+      expect(error.status).toEqual(401);
+    }
   });
 
   it('supports errors', () => {
     const error = convertUpstreamError(new Error(connectorError));
-    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
-    expect(error.message).toEqual(connectorError);
-    expect(error.status).toEqual(400);
+    if (isErrorWithCodeAndStatusProperties(error)) {
+      expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
+      expect(error.message).toEqual(connectorError);
+      expect(error.status).toEqual(400);
+    }
   });
 
   it('process generic messages', () => {
+    const error = convertUpstreamError(userQuotaError);
+    expect(isUserError(error)).toBe(true);
+  });
+
+  it('converts exceeded quota errors to user errors', () => {
     const message = 'some error message';
     const error = convertUpstreamError(message);
-    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
-    expect(error.message).toEqual(message);
-    expect(error.status).toBe(undefined);
+    if (isErrorWithCodeAndStatusProperties(error)) {
+      expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
+      expect(error.message).toEqual(message);
+      expect(error.status).toBe(undefined);
+    }
   });
 
   describe('context length errors', () => {
@@ -76,9 +102,11 @@ describe('convertUpstreamError', () => {
     for (const [provider, message] of errors) {
       it(`identifies context length error from ${provider}`, () => {
         const error = convertUpstreamError(message);
-        expect(error.code).toEqual(ChatCompletionErrorCode.ContextLengthExceededError);
-        expect(error.message).toContain(message);
-        expect(error.status).toBe(undefined);
+        if (isErrorWithCodeAndStatusProperties(error)) {
+          expect(error.code).toEqual(ChatCompletionErrorCode.ContextLengthExceededError);
+          expect(error.message).toContain(message);
+          expect(error.status).toBe(undefined);
+        }
       });
     }
   });
