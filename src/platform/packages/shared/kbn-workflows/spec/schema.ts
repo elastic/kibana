@@ -177,6 +177,12 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const DataSetStepSchema = BaseStepSchema.extend({
+  type: z.literal('data.set'),
+  with: z.record(z.string(), z.unknown()),
+});
+export type DataSetStep = z.infer<typeof DataSetStepSchema>;
+
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const FetcherConfigSchema = z
   .object({
@@ -453,6 +459,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    DataSetStepSchema,
     HttpStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -468,6 +475,7 @@ export const BuiltInStepTypes = [
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
+  DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   HttpStepSchema.shape.type.value,
 ];
@@ -600,6 +608,7 @@ export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
+  variables: z.record(z.string(), z.unknown()).optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
