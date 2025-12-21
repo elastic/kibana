@@ -30,11 +30,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.dedupe',
-    handlerHash: '87d8763ff202c1f6edb122dee22975c07bd59337774326a22acb12512b9e1a88',
+    handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
   },
   {
     id: 'data.map',
-    handlerHash: '6b1586002bb71c4342d4417ee819bb89f2b205ac216b4543f3f0c9cf34877f7f',
+    handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
   },
   {
     id: 'onechat.runAgent',
