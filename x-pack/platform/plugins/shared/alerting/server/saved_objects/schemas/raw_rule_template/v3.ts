@@ -7,9 +7,23 @@
 
 import { schema } from '@kbn/config-schema';
 import { rawRuleTemplateSchema as rawRuleTemplateSchemaV2 } from './v2';
-import { rawRuleSchemaV7 } from '../raw_rule/index';
+
+export const investigationGuideSchema = schema.object({
+  blob: schema.string(),
+});
+
+export const dashboardsSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+  })
+);
+
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
+  investigation_guide: schema.maybe(investigationGuideSchema),
+});
 
 export const rawRuleTemplateSchema = rawRuleTemplateSchemaV2.extends({
   description: schema.maybe(schema.string()),
-  artifacts: rawRuleSchemaV7.getPropSchemas().artifacts,
+  artifacts: schema.maybe(artifactsSchema),
 });

@@ -45,7 +45,7 @@ export default (ftrProvider: FtrProviderContext): void => {
 
     it('should return rule template with description and artifacts', async () => {
       const myArtifacts = { 
-        dashboards: [{ refId: 'dash-1' }],
+        dashboards: [{ id: 'dash-1' }],
         investigation_guide: { blob: 'text' }
       };
 
