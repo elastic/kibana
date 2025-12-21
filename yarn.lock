@@ -2154,10 +2154,10 @@
   resolved "https://registry.yarnpkg.com/@base2/pretty-print-object/-/pretty-print-object-1.0.1.tgz#371ba8be66d556812dc7fb169ebc3c08378f69d4"
   integrity sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==
 
-"@bazel/runfiles@^6.3.1":
-  version "6.3.1"
-  resolved "https://registry.yarnpkg.com/@bazel/runfiles/-/runfiles-6.3.1.tgz#3f8824b2d82853377799d42354b4df78ab0ace0b"
-  integrity sha512-1uLNT5NZsUVIGS4syuHwTzZ8HycMPyr6POA3FCE4GbMtc4rhoJk8aZKtNIRthJYfL+iioppi+rTfH3olMPr9nA==
+"@bazel/runfiles@^6.5.0":
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/@bazel/runfiles/-/runfiles-6.5.0.tgz#63cf7b77b91b54873e75f7a08fabec215c6888be"
+  integrity sha512-RzahvqTkfpY2jsDxo8YItPX+/iZ6hbiikw1YhE0bA9EKBR5Og8Pa6FHn9PO9M0zaXRVsr0GFQLKbB/0rzy9SzA==
 
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
@@ -30468,12 +30468,12 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.38.0:
-  version "4.38.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.38.0.tgz#a139abb8cf262c7746ef3f66a715e1d4200a494b"
-  integrity sha512-5/UXXFSQmn7FGQkbcpAqvfhzflUdMWtT7QqpEgkFD6Q6rDucxB5EUfzgjmr6JbUj30QodcW3mDXehzoeS/Vy5w==
+selenium-webdriver@^4.39.0:
+  version "4.39.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.39.0.tgz#82c5dd78d2e03b3054d77ea591c3cb601022f801"
+  integrity sha512-NAs9jCU+UeZ/ZmRb8R6zOp7N8eMklefdBYASnaRmCNXdgFE8w3OCxxZmLixkwqnGDHY5VF7hCulfw1Mls43N/A==
   dependencies:
-    "@bazel/runfiles" "^6.3.1"
+    "@bazel/runfiles" "^6.5.0"
     jszip "^3.10.1"
     tmp "^0.2.5"
     ws "^8.18.3"
