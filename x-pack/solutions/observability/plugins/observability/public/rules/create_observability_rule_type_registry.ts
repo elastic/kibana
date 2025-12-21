@@ -11,6 +11,7 @@ import type {
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import type { ObservabilityRuleTypeRegistry as ObservabilityRuleTypeRegistryInterface } from '@kbn/observability-alerts-table';
 import type { AsDuration, AsPercent } from '../../common/utils/formatters';
 
 export type ObservabilityRuleTypeFormatter = (options: {
@@ -46,3 +47,11 @@ export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRe
 }
 
 export type ObservabilityRuleTypeRegistry = ReturnType<typeof createObservabilityRuleTypeRegistry>;
+
+/**
+ * Compile-time check: ensure our full registry type satisfies the minimal interface
+ * exported by @kbn/observability-alerts-table. This guarantees type compatibility
+ * when passing the registry to components that only need getFormatter().
+ */
+export type RegistrySatisfiesInterface =
+  ObservabilityRuleTypeRegistry extends ObservabilityRuleTypeRegistryInterface ? true : never;

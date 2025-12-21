@@ -40,7 +40,7 @@ import type {
   TopAlert,
 } from '../types';
 
-const NOT_AVAILABLE_LABEL = i18n.translate('xpack.observabilityAlertsTable.notAvailable', {
+const NOT_AVAILABLE_LABEL = i18n.translate('undefined.notAvailable', {
   defaultMessage: 'N/A',
 });
 

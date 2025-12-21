@@ -27,6 +27,7 @@
       "licensing",
       "observability",
       "observabilityShared",
+      "observabilityOverview",
       "presentationUtil",
       "ruleRegistry",
       "share",

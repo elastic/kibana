@@ -29,12 +29,12 @@ import {
   getAlertFlyoutAriaLabel,
   ALERT_FLYOUT_DEFAULT_TITLE,
 } from '@kbn/response-ops-alerts-table/translations';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-alerts-table';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { paths } from '../../../common/locators/paths';
 import { AlertOverview } from '../alert_overview/alert_overview';
 import { useKibana } from '../../utils/kibana_react';
-import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 
 type TabId = 'overview' | 'table';
 

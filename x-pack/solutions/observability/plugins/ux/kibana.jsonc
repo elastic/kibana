@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/ux-plugin",
-  "owner": [
-    "@elastic/actionable-obs-team"
-  ],
+  "owner": ["@elastic/actionable-obs-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "ux",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "ux"
-    ],
+    "configPath": ["xpack", "ux"],
     "requiredPlugins": [
       "features",
       "data",
@@ -22,6 +17,7 @@
       "licensing",
       "triggersActionsUi",
       "observabilityShared",
+      "observabilityOverview",
       "embeddable",
       "inspector",
       "apm"
@@ -33,18 +29,13 @@
       "actions",
       "alerts",
       "observability",
-      "observabilityOverview",
+
       "security",
       "maps",
       "lens",
       "observabilityAIAssistant",
       "spaces"
     ],
-    "requiredBundles": [
-      "kibanaReact",
-      "exploratoryView",
-      "observability",
-      "maps"
-    ]
+    "requiredBundles": ["kibanaReact", "exploratoryView", "observability", "maps"]
   }
 }
