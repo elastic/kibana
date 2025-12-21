@@ -17,6 +17,10 @@ import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
 import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
+import {
+  getAgentMarks,
+  type AgentMark,
+} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
 export interface TraceWaterfallContextProps {
   duration: number;
@@ -42,6 +46,7 @@ export interface TraceWaterfallContextProps {
   serviceName?: string;
   message?: string;
   errorMarks: ErrorMark[];
+  agentMarks: AgentMark[];
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -62,6 +67,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   showLegend: false,
   serviceName: '',
   errorMarks: [],
+  agentMarks: [],
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -86,6 +92,7 @@ interface Props {
   serviceName?: string;
   isFiltered?: boolean;
   errors?: Error[];
+  agentMarks?: Record<string, number>;
 }
 
 export function TraceWaterfallContextProvider({
@@ -102,6 +109,7 @@ export function TraceWaterfallContextProvider({
   serviceName,
   isFiltered,
   errors,
+  agentMarks,
 }: Props) {
   const {
     duration,
@@ -182,6 +190,7 @@ export function TraceWaterfallContextProvider({
         serviceName,
         message,
         errorMarks,
+        agentMarks: getAgentMarks(agentMarks),
       }}
     >
       {children}

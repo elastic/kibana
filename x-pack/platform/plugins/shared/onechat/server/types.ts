@@ -25,7 +25,7 @@ import type { AttachmentServiceSetup } from './services/attachments';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
-  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;

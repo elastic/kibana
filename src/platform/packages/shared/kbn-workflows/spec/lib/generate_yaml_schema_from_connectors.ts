@@ -100,5 +100,6 @@ function generateStepSchemaForConnector(
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    ...(connector.configSchema && connector.configSchema.shape),
   });
 }

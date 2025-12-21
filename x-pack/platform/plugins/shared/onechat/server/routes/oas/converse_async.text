@@ -1,0 +1,178 @@
+Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.
+
+## Event types
+
+The endpoint emits Server-Sent Events (SSE) with the following custom event types:
+
+`conversation_id_set`
+
+Sets the conversation ID.
+
+Schema:
+```json
+{
+  "conversation_id": "uuid"
+}
+```
+
+---
+
+`conversation_created`
+
+Fires when a new conversation is persisted and assigned an ID.
+
+Schema:
+```json
+{
+  "conversation_id": "uuid",
+  "title": "conversation title"
+}
+```
+
+---
+
+`conversation_updated`
+
+Fires when a conversation is updated.
+
+Schema:
+```json
+{
+  "conversation_id": "uuid",
+  "title": "updated conversation title"
+}
+```
+
+---
+
+`reasoning`
+
+Handles reasoning-related data.
+
+Schema:
+```json
+{
+  "reasoning": "plain text reasoning content",
+  "transient": false
+}
+```
+
+---
+
+`tool_call`
+
+Triggers when a tool is invoked.
+
+Schema:
+```json
+{
+  "tool_call_id": "uuid",
+  "tool_id": "tool_name",
+  "params": {}
+}
+```
+
+---
+
+`tool_progress`
+
+Reports progress of a running tool.
+
+Schema:
+```json
+{
+  "tool_call_id": "uuid",
+  "message": "progress message"
+}
+```
+
+---
+
+`tool_result`
+
+Returns results from a completed tool call.
+
+Schema:
+```json
+{
+  "tool_call_id": "uuid",
+  "tool_id": "tool_name",
+  "results": []
+}
+```
+
+**Note:** `results` is an array of `ToolResult` objects.
+
+---
+
+`message_chunk`
+
+Streams partial text chunks.
+
+Schema:
+```json
+{
+  "message_id": "uuid",
+  "text_chunk": "partial text"
+}
+```
+
+---
+
+`message_complete`
+
+Indicates message stream is finished.
+
+Schema:
+```json
+{
+  "message_id": "uuid",
+  "message_content": "full text content of the message"
+}
+```
+
+---
+
+`thinking_complete`
+
+Marks the end of the thinking/reasoning phase.
+
+Schema:
+```json
+{
+  "time_to_first_token": 0
+}
+```
+
+**Note:** `time_to_first_token` is in milliseconds.
+
+---
+
+`round_complete`
+
+Marks end of one conversation round.
+
+Schema:
+```json
+{
+  "round": {}
+}
+```
+
+**Note:** `round` contains the full round json object.
+
+---
+
+## Event flow
+
+A typical conversation round emits events in this sequence:
+
+1. `reasoning` (potentially multiple, some transient)
+2. `tool_call` (if tools are used)
+3. `tool_progress` (zero or more progress updates)
+4. `tool_result` (when tool completes)
+5. `thinking_complete`
+6. `message_chunk` (multiple, as text streams)
+7. `message_complete`
+8. `round_complete`
+
