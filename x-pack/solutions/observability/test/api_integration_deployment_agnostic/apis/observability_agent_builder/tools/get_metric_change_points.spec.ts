@@ -1,0 +1,85 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_change_points/get_metric_change_points';
+import type { ChangePoint } from '@kbn/observability-agent-builder-plugin/server/utils/get_change_points';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
+import {
+  METRIC_CHANGE_POINTS_ANALYSIS_WINDOW,
+  METRIC_CHANGE_POINTS_INDEX,
+  createMetricChangePointsData,
+} from '../utils/synthtrace_scenarios/create_metric_change_points_data';
+
+interface ToolResult {
+  type: ToolResultType.other;
+  data: {
+    changePoints: {
+      metrics: ChangePoint[];
+    };
+  };
+}
+
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
+
+  describe(`tool: ${OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID}`, function () {
+    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+    before(async () => {
+      const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin');
+      agentBuilderApiClient = createAgentBuilderApiClient(supertest);
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+      await createMetricChangePointsData({ apmSynthtraceEsClient });
+    });
+
+    after(async () => {
+      await apmSynthtraceEsClient.clean();
+    });
+
+    describe('when retrieving metric change points', () => {
+      let metricChangePoints: ChangePoint[];
+
+      before(async () => {
+        const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+          params: {
+            start: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start,
+            end: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end,
+            metrics: [
+              {
+                name: 'test-metrics',
+                index: METRIC_CHANGE_POINTS_INDEX,
+              },
+            ],
+          },
+        });
+        metricChangePoints = toolResults[0]?.data?.changePoints?.metrics ?? [];
+      });
+
+      it('should detect spike in metrics', () => {
+        expect(metricChangePoints.length).to.be.greaterThan(0);
+        const spike = metricChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
+        expect(spike).to.be.ok();
+      });
+
+      it('should include time series data for visualization', () => {
+        metricChangePoints.forEach((cp: ChangePoint) => {
+          expect(cp).to.have.property('over_time');
+          expect(cp.over_time.length).to.be.greaterThan(0);
+          expect(cp.over_time[0]).to.have.property('x');
+          expect(cp.over_time[0]).to.have.property('y');
+        });
+      });
+    });
+  });
+}
