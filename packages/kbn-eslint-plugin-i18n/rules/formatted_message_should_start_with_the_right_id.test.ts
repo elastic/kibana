@@ -89,22 +89,6 @@ function TestComponent() {
         ],
         invalid: [
           {
-            name: 'When a file is not in a known package or the package has no i18n identifier, it should report an error',
-            filename: '/some/fake/path/that/does/not/exist/test_component.tsx',
-            code: `
-  import { FormattedMessage } from '@kbn/i18n-react';
-
-  function TestComponent() {
-    return <FormattedMessage id="some.id" defaultMessage="test" />;
-  }`,
-            errors: [
-              {
-                line: 5,
-                message: NO_IDENTIFIER_MESSAGE.replace('APP_ID', 'Unknown package'),
-              },
-            ],
-          },
-          {
             name: 'When a string literal is passed to FormattedMessage the ID attribute should start with the correct i18n identifier, and if no existing defaultMessage is passed, it should add an empty default.',
             filename:
               '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
@@ -192,6 +176,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
   function TestComponent() {
     return <FormattedMessage id="xpack.observability.testComponent." defaultMessage="" />;
   }`,
+          },
+          {
+            name: 'When a file is not in a known package or the package has no i18n identifier, it should report an error',
+            filename: '/some/fake/path/that/does/not/exist/test_component.tsx',
+            code: `
+  import { FormattedMessage } from '@kbn/i18n-react';
+
+  function TestComponent() {
+    return <FormattedMessage id="some.id" defaultMessage="test" />;
+  }`,
+            errors: [
+              {
+                line: 5,
+                message: NO_IDENTIFIER_MESSAGE.replace('APP_ID', 'Unknown package'),
+              },
+            ],
           },
         ],
       }
