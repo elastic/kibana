@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { type ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
+  DataSetStepSchema,
   getForEachStepSchema,
   getHttpStepSchema,
   getIfStepSchema,
@@ -80,6 +81,7 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
+      DataSetStepSchema,
       httpSchema,
       ...connectorSchemas,
     ]);
