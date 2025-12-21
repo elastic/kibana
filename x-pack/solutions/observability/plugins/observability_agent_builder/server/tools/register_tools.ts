@@ -8,14 +8,6 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
-import {
-  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
-  createObservabilityGetLogChangePointsTool,
-} from './get_change_points/get_log_change_points';
-import {
-  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
-  createObservabilityGetMetricChangePointsTool,
-} from './get_change_points/get_metric_change_points';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -49,6 +41,14 @@ import {
   createDownstreamDependenciesTool,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 } from './get_downstream_dependencies/tool';
+import {
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  createGetLogChangePointsTool,
+} from './get_log_change_points/tool';
+import {
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  createGetMetricChangePointsTool,
+} from './get_metric_change_points/tool';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -98,8 +98,8 @@ export async function registerTools({
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
-    createObservabilityGetLogChangePointsTool({ core, plugins, logger }),
-    createObservabilityGetMetricChangePointsTool({ core, plugins, logger }),
+    createGetLogChangePointsTool({ core, plugins, logger }),
+    createGetMetricChangePointsTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {
