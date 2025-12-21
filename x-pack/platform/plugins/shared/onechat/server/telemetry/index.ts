@@ -6,6 +6,7 @@
  */
 
 export { TrackingService, ToolCallSource } from './tracking_service';
+export { AnalyticsService } from './analytics_service';
 export { QueryUtils, type UsageCounterData } from './query_utils';
 export {
   createOnechatUsageCounter,
