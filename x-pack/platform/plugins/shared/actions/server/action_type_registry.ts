@@ -12,7 +12,7 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType as CommonActionType } from '../common';
-import { areValidFeatures } from '../common';
+import { areValidFeatures, WorkflowsConnectorFeatureId } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
@@ -202,20 +202,84 @@ export class ActionTypeRegistry {
       );
     }
 
+    // Only workflows-only connectors (with no other feature IDs) can be registered without execute and params
+    const hasExecutor = !!actionType.executor;
+    const hasParamsValidator = !!actionType.validate.params;
+    const isWorkflowsOnlyConnector =
+      actionType.supportedFeatureIds.length === 1 &&
+      actionType.supportedFeatureIds[0] === WorkflowsConnectorFeatureId;
+    const hasMultipleFeatureIds = actionType.supportedFeatureIds.length > 1;
+
+    // For workflows-only connectors: both executor and params must be missing
+    if (isWorkflowsOnlyConnector && (hasExecutor || hasParamsValidator)) {
+      throw new Error(
+        i18n.translate(
+          'xpack.actions.actionTypeRegistry.register.workflowsOnlyConnectorHasExecutorOrParams',
+          {
+            defaultMessage:
+              'Connector type "{connectorTypeId}" is a workflows-only connector and must not have executor or params validator. Both must be omitted.',
+            values: {
+              connectorTypeId: actionType.id,
+            },
+          }
+        )
+      );
+    }
+
+    // For connectors with multiple feature IDs (including workflows + others): both executor and params must be present
+    if (hasMultipleFeatureIds && (!hasExecutor || !hasParamsValidator)) {
+      throw new Error(
+        i18n.translate(
+          'xpack.actions.actionTypeRegistry.register.missingExecutorOrParamsForMultiFeature',
+          {
+            defaultMessage:
+              'Connector type "{connectorTypeId}" has multiple feature IDs and must have both executor and params validator.',
+            values: {
+              connectorTypeId: actionType.id,
+            },
+          }
+        )
+      );
+    }
+
+    // For non-workflows connectors: both executor and params must be present
+    if (
+      !isWorkflowsOnlyConnector &&
+      !hasMultipleFeatureIds &&
+      (!hasExecutor || !hasParamsValidator)
+    ) {
+      throw new Error(
+        i18n.translate(
+          'xpack.actions.actionTypeRegistry.register.missingExecutorOrParamsForNonWorkflows',
+          {
+            defaultMessage:
+              'Connector type "{connectorTypeId}" must have both executor and params validator.',
+            values: {
+              connectorTypeId: actionType.id,
+            },
+          }
+        )
+      );
+    }
+
     const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
       actionTypeId: actionType.id,
       actionTypeMaxAttempts: actionType.maxAttempts,
     });
 
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
-    this.taskManager.registerTaskDefinitions({
-      [`actions:${actionType.id}`]: {
-        title: actionType.name,
-        maxAttempts,
-        cost: TaskCost.Tiny,
-        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
-      },
-    });
+
+    // Skip task type registration for connectors without execute/params
+    if (actionType.executor && actionType.validate.params) {
+      this.taskManager.registerTaskDefinitions({
+        [`actions:${actionType.id}`]: {
+          title: actionType.name,
+          maxAttempts,
+          cost: TaskCost.Tiny,
+          createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
+        },
+      });
+    }
     // No need to notify usage on basic action types
     if (actionType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
@@ -268,7 +332,7 @@ export class ActionTypeRegistry {
         isSystemActionType: !!actionType.isSystemActionType,
         source: actionType.source || ACTION_TYPE_SOURCES.stack,
         subFeature: actionType.subFeature,
-        ...(exposeValidation === true
+        ...(exposeValidation === true && actionType.validate.params
           ? {
               validate: {
                 params: actionType.validate.params,

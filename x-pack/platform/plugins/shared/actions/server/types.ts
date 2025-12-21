@@ -194,7 +194,7 @@ export interface ActionType<
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   validate: {
-    params: ValidatorType<Params>;
+    params?: ValidatorType<Params>;
     config: ValidatorType<Config>;
     secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
@@ -228,7 +228,7 @@ export interface ActionType<
   // Headers that should be added to every Axios request made by this action type
   globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;

@@ -2855,6 +2855,80 @@ describe('execute()', () => {
       actionExecutionId,
     });
   });
+
+  test('throws error when connector does not have an executor function', async () => {
+    // Register a workflows connector without executor
+    const connectorWithoutExecutor = getConnectorType({
+      id: 'connector-without-executor',
+      name: 'Connector Without Executor',
+      supportedFeatureIds: ['workflows'],
+    });
+
+    delete connectorWithoutExecutor.executor;
+
+    actionTypeRegistry.register(connectorWithoutExecutor);
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'action-id',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'connector-without-executor',
+        name: 'test action',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    } as SavedObject);
+
+    await expect(
+      actionsClient.execute({
+        actionId: 'action-id',
+        params: {
+          name: 'my name',
+        },
+        source: asHttpRequestExecutionSource(request),
+      })
+    ).rejects.toThrow(
+      'Connector type "connector-without-executor" does not have an execute function and cannot be executed.'
+    );
+  });
+
+  test('throws error when connector does not have a params validator', async () => {
+    // Register a workflows connector without params validator
+    const connectorWithoutParamsValidator = getConnectorType({
+      id: 'connector-without-params-validator',
+      name: 'Connector Without Params Validator',
+      supportedFeatureIds: ['workflows'],
+    });
+
+    delete connectorWithoutParamsValidator.validate.params;
+
+    actionTypeRegistry.register(connectorWithoutParamsValidator);
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'action-id',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'connector-without-params-validator',
+        name: 'test action',
+        config: {},
+        secrets: {},
+      },
+      references: [],
+    } as SavedObject);
+
+    await expect(
+      actionsClient.execute({
+        actionId: 'action-id',
+        params: {
+          name: 'my name',
+        },
+        source: asHttpRequestExecutionSource(request),
+      })
+    ).rejects.toThrow(
+      'Connector type "connector-without-params-validator" does not have a params validator and cannot be executed.'
+    );
+  });
 });
 
 describe('bulkEnqueueExecution()', () => {

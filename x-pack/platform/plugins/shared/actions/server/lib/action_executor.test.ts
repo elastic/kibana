@@ -2113,3 +2113,71 @@ function setupActionExecutorMock(
   connectorTypeRegistry.get.mockReturnValueOnce(thisConnectorType);
   return thisConnectorType.executor;
 }
+
+describe('execute() - optional params validator', () => {
+  test('handles action types without params validator', async () => {
+    const connectorTypeWithoutParams: ConnectorType = {
+      id: 'test-without-params',
+      name: 'Test Without Params',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['workflows'],
+      validate: {
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        // params validator is missing
+      },
+      executor: jest.fn().mockResolvedValue({ status: 'ok', actionId: CONNECTOR_ID }),
+    };
+
+    connectorTypeRegistry.get.mockReturnValue(connectorTypeWithoutParams);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: CONNECTOR_ID,
+      type: 'action',
+      attributes: {
+        actionTypeId: 'test-without-params',
+        name: 'test',
+        config: {},
+        secrets: {},
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+
+    await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
+      'Connector type "test-without-params" does not have a params validator and cannot be executed.'
+    );
+  });
+
+  test('throws error when action type does not have executor', async () => {
+    const connectorTypeWithoutExecutor: ConnectorType = {
+      id: 'test-without-executor',
+      name: 'Test Without Executor',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['workflows'],
+      validate: {
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        params: { schema: z.object({}) },
+      },
+      // executor is missing
+    };
+
+    connectorTypeRegistry.get.mockReturnValue(connectorTypeWithoutExecutor);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: CONNECTOR_ID,
+      type: 'action',
+      attributes: {
+        actionTypeId: 'test-without-executor',
+        name: 'test',
+        config: {},
+        secrets: {},
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+
+    await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
+      'Connector type "test-without-executor" does not have an execute function and cannot be executed.'
+    );
+  });
+});

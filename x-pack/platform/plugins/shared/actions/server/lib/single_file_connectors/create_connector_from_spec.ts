@@ -15,6 +15,7 @@ import type {
   ActionType,
 } from '../../types';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
+import { WorkflowsConnectorFeatureId } from '../../../common';
 
 import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
@@ -26,10 +27,23 @@ export const createConnectorTypeFromSpec = (
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
-  const executor = generateExecutorFunction({
-    actions: spec.actions,
-    getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
-  });
+
+  // Only workflows-only connectors (with no other feature IDs) can skip executor and params
+  const isWorkflowsOnlyConnector =
+    spec.metadata.supportedFeatureIds.length === 1 &&
+    spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId;
+
+  const shouldGenerateExecutor = !isWorkflowsOnlyConnector;
+  const shouldGenerateParams = !isWorkflowsOnlyConnector;
+
+  const executor = shouldGenerateExecutor
+    ? generateExecutorFunction({
+        actions: spec.actions,
+        getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
+      })
+    : undefined;
+
+  const paramsValidator = shouldGenerateParams ? generateParamsSchema(spec.actions) : undefined;
 
   return {
     id: spec.metadata.id,
@@ -39,9 +53,9 @@ export const createConnectorTypeFromSpec = (
     validate: {
       config: generateConfigSchema(spec.schema),
       secrets: generateSecretsSchema(spec.auth, configUtils),
-      params: generateParamsSchema(spec.actions),
+      ...(paramsValidator ? { params: paramsValidator } : {}),
     },
-    executor,
+    ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,
     source: ACTION_TYPE_SOURCES.spec,
   };

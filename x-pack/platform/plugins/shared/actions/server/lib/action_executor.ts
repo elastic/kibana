@@ -444,6 +444,18 @@ export class ActionExecutor {
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
 
+        if (!actionType.executor) {
+          throw new Error(
+            `Connector type "${actionTypeId}" does not have an execute function and cannot be executed.`
+          );
+        }
+
+        if (!actionType.validate.params) {
+          throw new Error(
+            `Connector type "${actionTypeId}" does not have a params validator and cannot be executed.`
+          );
+        }
+
         let validatedParams: Record<string, unknown>;
         let validatedConfig;
         let validatedSecrets;
@@ -722,6 +734,7 @@ function validateAction(
   let validatedSecrets: Record<string, unknown>;
 
   try {
+    // Params validator is guaranteed to exist at this point (validated in execute method)
     validatedParams = validateParams(actionType, params, validatorServices);
   } catch (err) {
     throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
