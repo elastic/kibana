@@ -66,9 +66,9 @@ dependsOn:
   - '@kbn/core-feature-flags-browser-mocks'
   - '@kbn/shared-ux-feedback-snippet'
   - '@kbn/shared-ux-error-boundary'
-  - '@kbn/shared-ux-label-formatter'
   - '@kbn/core-chrome-sidebar'
   - '@kbn/shared-ux-utility'
+  - '@kbn/shared-ux-label-formatter'
 tags:
   - shared-browser
   - package
