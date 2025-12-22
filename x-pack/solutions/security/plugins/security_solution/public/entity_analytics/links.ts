@@ -20,12 +20,6 @@ import privilegedUserMonitoringPageImg from '../common/images/privileged_user_mo
 import eaOverviewPageImg from '../common/images/ea_overview_page.png';
 
 const privMonLinks: LinkItem = {
-  isBeta: true,
-  betaOptions: {
-    text: i18n.translate('xpack.securitySolution.navigation.privilegedUserMonitoring.betaStatus', {
-      defaultMessage: 'TECHNICAL PREVIEW',
-    }),
-  },
   id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
   title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
   description: i18n.translate(
