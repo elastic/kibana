@@ -11,6 +11,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { ToolResultType } from '@kbn/onechat-common';
 import { platformCoreTools } from '@kbn/onechat-common';
+import type { ToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
@@ -116,10 +117,10 @@ describe('integrationKnowledgeTool', () => {
       mockSearch.mockResolvedValue(mockSearchResponse);
 
       const tool = integrationKnowledgeTool(mockCoreSetup);
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { query: 'How to configure nginx?', max: 5 },
         createHandlerContext() as any
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(mockSearch).toHaveBeenCalledWith({
         index: '.integration_knowledge',
@@ -203,10 +204,10 @@ describe('integrationKnowledgeTool', () => {
       mockSearch.mockResolvedValue(mockSearchResponse);
 
       const tool = integrationKnowledgeTool(mockCoreSetup);
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { query: 'system integration', max: 5 },
         createHandlerContext() as any
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results[0]).toMatchObject({
         type: ToolResultType.other,
@@ -241,10 +242,10 @@ describe('integrationKnowledgeTool', () => {
       mockSearch.mockResolvedValue(mockSearchResponse);
 
       const tool = integrationKnowledgeTool(mockCoreSetup);
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { query: 'MySQL setup', max: 5 },
         createHandlerContext() as any
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results[0]).toMatchObject({
         type: ToolResultType.other,
@@ -267,10 +268,10 @@ describe('integrationKnowledgeTool', () => {
       mockSearch.mockResolvedValue(mockSearchResponse);
 
       const tool = integrationKnowledgeTool(mockCoreSetup);
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { query: 'nonexistent integration', max: 5 },
         createHandlerContext() as any
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0]).toMatchObject({
@@ -288,10 +289,10 @@ describe('integrationKnowledgeTool', () => {
       mockSearch.mockRejectedValue(new Error('Elasticsearch connection failed'));
 
       const tool = integrationKnowledgeTool(mockCoreSetup);
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { query: 'test query', max: 5 },
         createHandlerContext() as any
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0]).toMatchObject({

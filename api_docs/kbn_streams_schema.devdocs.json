@@ -3177,6 +3177,20 @@
           },
           {
             "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.SimulationDocReport.processed_by",
+            "type": "Array",
+            "tags": [],
+            "label": "processed_by",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.SimulationDocReport.value",
             "type": "Object",
             "tags": [],

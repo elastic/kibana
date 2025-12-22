@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { BasicPrettyPrinter, Parser, mutate } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Parser, mutate } from '@kbn/esql-language';
 
 export const appendStatsByToQuery = (queryString: string, column: string) => {
   const { root } = Parser.parse(queryString);
