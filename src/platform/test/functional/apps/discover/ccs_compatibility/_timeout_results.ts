@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await kibanaServer.uiSettings.update({ 'search:timeout': 3000 });
+      await kibanaServer.uiSettings.update({ 'search:timeout': 5000 });
     });
 
     after(async () => {
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 5
+                "stall_time_seconds": 10
               }
             ]
           }
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 5
+                "stall_time_seconds": 10
               }
             ]
           }
