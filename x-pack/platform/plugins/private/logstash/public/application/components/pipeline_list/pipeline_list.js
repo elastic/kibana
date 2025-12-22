@@ -293,7 +293,7 @@ class PipelineListUi extends React.Component {
       <EuiPageSection data-test-subj="pipelineList">
         <EuiPageHeader
           pageTitle={
-            <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" />
+            <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Logstsash pipelines" />
           }
           description={
             <FormattedMessage
