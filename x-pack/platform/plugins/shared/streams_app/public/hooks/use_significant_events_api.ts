@@ -29,15 +29,7 @@ interface SignificantEventsApi {
   abort: () => void;
 }
 
-export function useSignificantEventsApi({
-  name,
-  start,
-  end,
-}: {
-  name: string;
-  start: number;
-  end: number;
-}): SignificantEventsApi {
+export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
   const {
     dependencies: {
       start: {
@@ -89,6 +81,7 @@ export function useSignificantEventsApi({
       });
     },
     generate: (connectorId: string, feature?: Feature) => {
+      const now = Date.now();
       return streamsRepositoryClient.stream(
         `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
         {
@@ -99,8 +92,8 @@ export function useSignificantEventsApi({
             },
             query: {
               connectorId,
-              from: new Date(start).toString(),
-              to: new Date(end).toString(),
+              from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
+              to: new Date(now).toISOString(),
             },
             body: {
               feature,
