@@ -19,7 +19,9 @@ describe('upsellingPages', () => {
   });
 
   it('should register the AI Value page with the expected minimum license for self managed', () => {
-    const aiValuePage = upsellingPages.find(({ pageName }) => pageName === SecurityPageName.aiValue);
+    const aiValuePage = upsellingPages.find(
+      ({ pageName }) => pageName === SecurityPageName.aiValue
+    );
 
     expect(aiValuePage?.minimumLicenseRequired).toEqual('enterprise');
   });

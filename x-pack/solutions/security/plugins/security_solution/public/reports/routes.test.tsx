@@ -32,5 +32,3 @@ describe('AIValueRoutes', () => {
     expect(screen.getByTestId('pluginTemplateWrapper')).toBeInTheDocument();
   });
 });
-
-

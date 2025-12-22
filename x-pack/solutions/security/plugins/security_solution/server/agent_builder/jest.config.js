@@ -17,4 +17,3 @@ module.exports = {
   ],
   moduleNameMapper: require('../__mocks__/module_name_map'),
 };
-

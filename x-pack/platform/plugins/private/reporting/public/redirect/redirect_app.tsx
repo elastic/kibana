@@ -94,7 +94,8 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
         // export-only fields (insight + reportDataHash) that would otherwise force the destination
         // page into an "export mode" UI. Strip these for user navigation.
         if (isUserRedirect && locatorParams.id === AI_VALUE_REPORT_LOCATOR) {
-          const timeRange = (locatorParams.params as { timeRange?: Serializable } | undefined)?.timeRange;
+          const timeRange = (locatorParams.params as { timeRange?: Serializable } | undefined)
+            ?.timeRange;
           locatorParams = {
             ...locatorParams,
             params: timeRange ? { timeRange } : {},

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { AIValueUpsellingPageESS } from './index';
+import { AIValueUpsellingPageESS } from '.';
 
 jest.mock('../attack_discovery/upgrade_actions', () => ({
   UpgradeActions: () => <button type="button">Upgrade</button>,
@@ -29,5 +29,3 @@ describe('AIValueUpsellingPageESS', () => {
     expect(screen.getByTestId('assistantAvatar')).toBeInTheDocument();
   });
 });
-
-

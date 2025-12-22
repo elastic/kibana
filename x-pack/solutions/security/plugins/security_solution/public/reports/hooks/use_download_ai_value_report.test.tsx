@@ -157,8 +157,8 @@ describe('useDownloadAIValueReport', () => {
     it('returns absolute timeRange values in locator params', () => {
       hookResult.toggleContextMenu();
       expect(
-        shareServiceMock.toggleShareContextMenu.mock.calls[0][0].sharingData.locatorParams.params.timeRange
-          .from
+        shareServiceMock.toggleShareContextMenu.mock.calls[0][0].sharingData.locatorParams.params
+          .timeRange.from
       ).toBe(absoluteTimeRange.from);
     });
   });
@@ -185,8 +185,8 @@ describe('useDownloadAIValueReport', () => {
     it('returns relative timeRange values in locator params', () => {
       hookResult.toggleContextMenu();
       expect(
-        shareServiceMock.toggleShareContextMenu.mock.calls[0][0].sharingData.locatorParams.params.timeRange
-          .fromStr
+        shareServiceMock.toggleShareContextMenu.mock.calls[0][0].sharingData.locatorParams.params
+          .timeRange.fromStr
       ).toBe('now-7d');
     });
   });
