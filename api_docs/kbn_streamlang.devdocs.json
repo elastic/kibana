@@ -343,9 +343,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLSingleAstItem",
             "text": "ESQLSingleAstItem"
           }
