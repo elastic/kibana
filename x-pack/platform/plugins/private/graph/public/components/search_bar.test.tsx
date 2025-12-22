@@ -59,24 +59,22 @@ function getServiceMocks() {
   const kqlMock = kqlPluginMock.createStartContract();
   return {
     overlays: {} as OverlayStart,
-    unifiedSearch: {
-      ui: {
-        QueryStringInput: createQueryStringInput({
-          docLinks,
-          uiSettings,
-          storage: {
-            get: () => {},
-            set: () => {},
-            remove: () => {},
-            clear: () => {},
-          } as IStorageWrapper,
-          data: dataPluginMock.createStartContract(),
-          autocomplete: kqlMock.autocomplete,
-          notifications: {} as NotificationsStart,
-          http: {} as HttpStart,
-          dataViews: dataViewPluginMocks.createStartContract(),
-        }),
-      },
+    kql: {
+      QueryStringInput: createQueryStringInput({
+        docLinks,
+        uiSettings,
+        storage: {
+          get: () => {},
+          set: () => {},
+          remove: () => {},
+          clear: () => {},
+        } as IStorageWrapper,
+        data: dataPluginMock.createStartContract(),
+        autocomplete: kqlMock.autocomplete,
+        notifications: {} as NotificationsStart,
+        http: {} as HttpStart,
+        dataViews: dataViewPluginMocks.createStartContract(),
+      }),
     },
   };
 }

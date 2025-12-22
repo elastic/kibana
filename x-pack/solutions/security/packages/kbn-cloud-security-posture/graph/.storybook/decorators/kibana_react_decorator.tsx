@@ -10,6 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { createKibanaReactContext, type KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { of } from 'rxjs';
 import {
   WEB_STORAGE_CLEAR_ACTION,
@@ -179,6 +180,7 @@ const services: Partial<KibanaServices> = {
       editDataView: action(EDIT_DATA_VIEW_ACTION),
     },
   },
+  kql: kqlPluginMock.createStartContract(),
 };
 
 export const KibanaReactStorybookDecorator = (Story: ComponentType) => {
