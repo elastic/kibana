@@ -31,6 +31,7 @@ import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
@@ -53,6 +54,7 @@ const CaseContainerComponent: React.FC = () => {
   const {
     timelinePrivileges: { read: canSeeTimeline },
   } = useUserPrivileges();
+  const { hasAlertsRead } = useAlertsPrivileges();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
@@ -95,6 +97,9 @@ const CaseContainerComponent: React.FC = () => {
 
   const renderAlertsTable = useCallback(
     (props: CaseViewAlertsTableProps) => {
+      if (!hasAlertsRead) {
+        return null;
+      }
       //  For EASE we need to show the Alert summary page alerts table.
       if (EASE) {
         return <EaseAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
@@ -102,7 +107,7 @@ const CaseContainerComponent: React.FC = () => {
         return <AlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
       }
     },
-    [EASE]
+    [EASE, hasAlertsRead]
   );
 
   const onRuleDetailsClick = useCallback(
