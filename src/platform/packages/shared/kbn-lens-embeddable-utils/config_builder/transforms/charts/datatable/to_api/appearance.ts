@@ -123,19 +123,11 @@ function parseSortingToAPI(
 
   // Look up the columnId in the mapping
   const mapped = columnIdMapping[columnId];
-  if (!mapped) {
+  if (!mapped || mapped.type === 'split_metrics_by') {
     return undefined;
   }
 
-  if (mapped.type === 'metric') {
-    return { by: 'metric', index: mapped.index, direction };
-  }
-
-  if (mapped.type === 'row') {
-    return { by: 'row', index: mapped.index, direction };
-  }
-
-  return undefined;
+  return { by: mapped.type, index: mapped.index, direction };
 }
 
 export function convertAppearanceToAPIFormat(
