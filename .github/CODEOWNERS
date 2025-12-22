@@ -1176,6 +1176,7 @@ x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-code-examples @elastic/search-kibana
+x-pack/solutions/search/packages/kbn-scout-search @elastic/appex-qa
 x-pack/solutions/search/packages/kbn-search-queries @elastic/search-kibana
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
