@@ -10,5 +10,10 @@
     "public/**/*",
     "common/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
 }
