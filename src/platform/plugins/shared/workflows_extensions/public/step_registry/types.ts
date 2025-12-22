@@ -51,7 +51,9 @@ export interface PublicStepDefinition extends CommonStepDefinition {
   };
 }
 
-type CompletionFn = () => Promise<Array<{ label: string; value: string }>>;
+type CompletionFn = () => Promise<
+  Array<{ label: string; value: string; detail?: string; documentation?: string }>
+>;
 
 /**
  * The catalog under which the step is displayed in the actions menu

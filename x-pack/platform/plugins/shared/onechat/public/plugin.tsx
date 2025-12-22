@@ -89,7 +89,13 @@ export class OnechatPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    registerWorkflowSteps(deps.workflowsExtensions);
+    const getInternalService = () => {
+      if (!this.internalServices) {
+        throw new Error('getInternalService called before plugin start');
+      }
+      return this.internalServices;
+    };
+    registerWorkflowSteps(deps.workflowsExtensions, getInternalService);
 
     return {};
   }

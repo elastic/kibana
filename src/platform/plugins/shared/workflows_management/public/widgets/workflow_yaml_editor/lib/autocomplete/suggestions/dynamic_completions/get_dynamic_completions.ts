@@ -28,7 +28,8 @@ export async function getDynamicCompletions(
   }
 
   const key = focusedYamlPair.keyNode.value as string;
-  const isInConfig = focusedYamlPair.path.length > 1 && focusedYamlPair.path[0] === 'config';
+  // if the key is in config, it's on a root level, so path will be equal to the key
+  const isInConfig = focusedYamlPair.path.length > 0 && focusedYamlPair.path[0] === key;
   const completionFn = isInConfig
     ? completionFnRecord.config?.[key]
     : completionFnRecord.input?.[key];
@@ -42,5 +43,7 @@ export async function getDynamicCompletions(
     kind: monaco.languages.CompletionItemKind.Value,
     insertText: completion.value,
     range: autocompleteContext.range,
+    detail: completion.detail,
+    documentation: completion.documentation,
   }));
 }

@@ -8,23 +8,27 @@
 import { ActionsMenuGroup, type PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { RunAgentStepTypeId, runAgentStepCommonDefinition } from '../../common/step_types';
+import type { OnechatInternalService } from '../services/types';
 
-export const runAgentStepDefinition: PublicStepDefinition = {
-  ...runAgentStepCommonDefinition,
-  label: i18n.translate('xpack.onechat.runAgentStep.label', {
-    defaultMessage: 'Run Agent',
-  }),
-  description: i18n.translate('xpack.onechat.runAgentStep.description', {
-    defaultMessage: 'Execute an Onechat AI agent to process input and generate responses',
-  }),
-  actionsMenuGroup: ActionsMenuGroup.ai,
-  documentation: {
-    details: i18n.translate('xpack.onechat.runAgentStep.documentation.details', {
-      defaultMessage:
-        'The onechat.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context.',
+export const getRunAgentStepDefinition = (
+  getInternalService: () => OnechatInternalService
+): PublicStepDefinition => {
+  return {
+    ...runAgentStepCommonDefinition,
+    label: i18n.translate('xpack.onechat.runAgentStep.label', {
+      defaultMessage: 'Run Agent',
     }),
-    examples: [
-      `## Basic agent invocation
+    description: i18n.translate('xpack.onechat.runAgentStep.description', {
+      defaultMessage: 'Execute an Onechat AI agent to process input and generate responses',
+    }),
+    actionsMenuGroup: ActionsMenuGroup.ai,
+    documentation: {
+      details: i18n.translate('xpack.onechat.runAgentStep.documentation.details', {
+        defaultMessage:
+          'The onechat.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context.',
+      }),
+      examples: [
+        `## Basic agent invocation
 \`\`\`yaml
 - name: run_agent
   type: ${RunAgentStepTypeId}
@@ -32,7 +36,7 @@ export const runAgentStepDefinition: PublicStepDefinition = {
     message: "Analyze the following data and provide insights"
 \`\`\``,
 
-      `## Use a specific agent
+        `## Use a specific agent
 \`\`\`yaml
 - name: custom_agent
   type: ${RunAgentStepTypeId}
@@ -40,16 +44,20 @@ export const runAgentStepDefinition: PublicStepDefinition = {
   with:
     message: "{{ workflow.input.message }}"
 \`\`\``,
-    ],
-  },
-  completions: {
-    config: {
-      agent_id: async () => {
-        return [
-          { label: 'my-custom-agent', value: 'my-custom-agent' },
-          { label: 'my-other-agent', value: 'my-other-agent' },
-        ];
+      ],
+    },
+    completions: {
+      config: {
+        agent_id: async () => {
+          const internalService = getInternalService();
+          const agents = await internalService.agentService.list();
+          return agents.map((agent) => ({
+            label: agent.name,
+            value: agent.id,
+            detail: agent.description,
+          }));
+        },
       },
     },
-  },
+  };
 };

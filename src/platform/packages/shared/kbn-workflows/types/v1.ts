@@ -368,7 +368,9 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
-export type CompletionFn = () => Promise<Array<{ label: string; value: string }>>;
+export type CompletionFn = () => Promise<
+  Array<{ label: string; value: string; detail?: string; documentation?: string }>
+>;
 
 export interface BaseConnectorContract {
   type: string;
