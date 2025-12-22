@@ -479,6 +479,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.events.populate_file_data',
+    first_supported_version: '9.3.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
+      {
+        defaultMessage:
+          'Enable collection of entropy and header bytes on file events. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.kernel.connect',
     first_supported_version: '7.9',
     documentation: i18n.translate(

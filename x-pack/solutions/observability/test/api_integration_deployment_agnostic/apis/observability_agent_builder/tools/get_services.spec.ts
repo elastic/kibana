@@ -12,7 +12,7 @@ import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
-import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/common';
+import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
@@ -118,10 +118,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(Array.isArray(services)).to.be(true);
         expect(services.length).to.be(2);
 
-        const hasServiceA = services.some((service) => service['service.name'] === SERVICE_NAME);
+        const hasServiceA = services.some((service) => service.serviceName === SERVICE_NAME);
         expect(hasServiceA).to.be(true);
 
-        const hasServiceB = services.some((service) => service['service.name'] === SERVICE_NAME_2);
+        const hasServiceB = services.some((service) => service.serviceName === SERVICE_NAME_2);
         expect(hasServiceB).to.be(true);
       });
 
@@ -178,7 +178,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(Array.isArray(services)).to.be(true);
           expect(services.length).to.be(1);
-          expect(services[0]['service.name']).to.be(SERVICE_NAME_3);
+          expect(services[0].serviceName).to.be(SERVICE_NAME_3);
         });
       });
     });
