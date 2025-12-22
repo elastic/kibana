@@ -65,7 +65,6 @@
     "@kbn/core-feature-flags-browser-mocks",
     "@kbn/shared-ux-feedback-snippet",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/shared-ux-label-formatter",
   ],
   "exclude": [
     "target/**/*",
