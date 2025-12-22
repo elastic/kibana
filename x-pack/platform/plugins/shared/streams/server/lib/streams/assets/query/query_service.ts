@@ -7,6 +7,7 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import type { AssetStorageSettings } from '../storage_settings';
