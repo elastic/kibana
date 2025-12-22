@@ -128,6 +128,9 @@ export interface FunctionParameter {
    * This indicates that the parameter can accept multiple values, which will be passed as an array.
    */
   supportsMultiValues?: boolean;
+
+  /** Additional hint information for the parameter */
+  hint?: unknown;
 }
 
 export interface ElasticsearchCommandDefinition {
