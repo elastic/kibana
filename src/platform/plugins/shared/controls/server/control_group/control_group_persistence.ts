@@ -8,32 +8,28 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { DEFAULT_AUTO_APPLY_SELECTIONS } from '@kbn/controls-constants';
 
-/**
- * @deprecated Backwards compatibility with pre-9.4.0 saved object migrations
- */
-export const controlGroupSavedObjectStateToSerializableRuntimeState = (_: object) => {
+const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
+  if (!jsonString && typeof jsonString !== 'string') return;
+  try {
+    return JSON.parse(jsonString) as OutType;
+  } catch {
+    return;
+  }
+};
+
+export const controlGroupSavedObjectStateToSerializableRuntimeState = (savedObjectState?: {
+  panelsJSON: string;
+}): SerializableRecord => {
   return {
-    chainingSystem: 'HIERARCHICAL',
-    labelPosition: 'oneLine',
-    autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-    ignoreParentSettings: {},
-    panels: {},
+    panels: safeJSONParse(savedObjectState?.panelsJSON) ?? {},
   };
 };
 
-/**
- * @deprecated Backwards compatibility with pre-9.4.0 saved object migrations
- */
 export const serializableRuntimeStateToControlGroupSavedObjectState = (
   serializable: SerializableRecord // It is safe to treat this as SerializableControlGroupState
-) => {
+): SerializableRecord => {
   return {
-    controlStyle: serializable.labelPosition,
-    chainingSystem: serializable.chainingSystem,
-    showApplySelections: !Boolean(serializable.autoApplySelections),
-    ignoreParentSettingsJSON: JSON.stringify(serializable.ignoreParentSettings),
     panelsJSON: JSON.stringify(serializable.panels),
   };
 };
