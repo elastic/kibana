@@ -26,6 +26,8 @@ import { AnomalyDetectionPage } from './page_objects/anomaly_detection';
 import { TransactionsOverviewPage } from './page_objects/transactions_overview';
 import { APM_ROLES } from './constants';
 import { TransactionDetailsPage } from './page_objects/transaction_details';
+import { ServiceDetailsPage } from './page_objects/service_details/service_details';
+import { DependencyDetailsPage } from './page_objects/dependency_details/dependency_details';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
@@ -46,6 +48,8 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     anomalyDetectionPage: AnomalyDetectionPage;
     transactionsOverviewPage: TransactionsOverviewPage;
     transactionDetailsPage: TransactionDetailsPage;
+    serviceDetailsPage: ServiceDetailsPage;
+    dependencyDetailsPage: DependencyDetailsPage;
   };
   browserAuth: ApmBrowserAuthFixture;
 }
@@ -77,6 +81,8 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       transactionsOverviewPage: createLazyPageObject(TransactionsOverviewPage, page, kbnUrl),
       transactionDetailsPage: createLazyPageObject(TransactionDetailsPage, page, kbnUrl),
       serviceGroupsPage: createLazyPageObject(ServiceGroupsPage, page, kbnUrl),
+      serviceDetailsPage: createLazyPageObject(ServiceDetailsPage, page, kbnUrl),
+      dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
