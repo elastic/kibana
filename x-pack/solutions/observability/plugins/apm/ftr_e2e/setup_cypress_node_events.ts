@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SynthtraceClientsManager, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { SynthtraceClientsManager, createLogger, LogLevel } from '@kbn/synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 import { Readable } from 'stream';
-import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtracePipelines } from '@kbn/synthtrace-client';
 
 export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   const logger = createLogger(LogLevel.info);

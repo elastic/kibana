@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowBulkActions } from './use_workflow_bulk_actions';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
@@ -57,13 +58,14 @@ describe('WorkflowsUtilityBar', () => {
   });
 
   it('renders workflow count correctly', () => {
-    render(<WorkflowsUtilityBar {...defaultProps} />);
+    renderWithI18n(<WorkflowsUtilityBar {...defaultProps} />);
 
-    expect(screen.getByText('Showing 1-5 of 10 workflows')).toBeInTheDocument();
+    const countElement = screen.getByTestId('workflows-table-count');
+    expect(countElement.textContent).toBe('Showing 1-5 of 10 workflows');
   });
 
   it('does not show bulk actions when no workflows are selected', () => {
-    render(<WorkflowsUtilityBar {...defaultProps} />);
+    renderWithI18n(<WorkflowsUtilityBar {...defaultProps} />);
 
     expect(screen.queryByTestId('workflows-table-bulk-actions-button')).not.toBeInTheDocument();
   });
@@ -74,7 +76,7 @@ describe('WorkflowsUtilityBar', () => {
       { id: '2', name: 'Test Workflow 2' },
     ] as WorkflowListItemDto[];
 
-    render(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
+    renderWithI18n(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
 
     expect(screen.getByText('2 selected')).toBeInTheDocument();
     expect(screen.getByTestId('workflows-table-bulk-actions-button')).toBeInTheDocument();
@@ -83,7 +85,7 @@ describe('WorkflowsUtilityBar', () => {
   it('opens bulk actions popover when button is clicked', async () => {
     const selectedWorkflows = [{ id: '1', name: 'Test Workflow 1' }] as WorkflowListItemDto[];
 
-    render(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
+    renderWithI18n(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
 
     const bulkActionsButton = screen.getByTestId('workflows-table-bulk-actions-button');
     await userEvent.click(bulkActionsButton);
@@ -91,17 +93,8 @@ describe('WorkflowsUtilityBar', () => {
     expect(screen.getByTestId('workflows-table-bulk-actions-context-menu')).toBeInTheDocument();
   });
 
-  it('calls onRefresh when refresh button is clicked', async () => {
-    render(<WorkflowsUtilityBar {...defaultProps} />);
-
-    const refreshButton = screen.getByTestId('workflows-refresh-button');
-    await userEvent.click(refreshButton);
-
-    expect(mockOnRefresh).toHaveBeenCalledTimes(1);
-  });
-
   it('renders modals from bulk actions hook', () => {
-    render(<WorkflowsUtilityBar {...defaultProps} />);
+    renderWithI18n(<WorkflowsUtilityBar {...defaultProps} />);
 
     expect(screen.getByTestId('mock-modals')).toBeInTheDocument();
   });
@@ -109,7 +102,7 @@ describe('WorkflowsUtilityBar', () => {
   it('calls deselectWorkflows when clear selection button is clicked', async () => {
     const selectedWorkflows = [{ id: '1', name: 'Test Workflow 1' }] as WorkflowListItemDto[];
 
-    render(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
+    renderWithI18n(<WorkflowsUtilityBar {...defaultProps} selectedWorkflows={selectedWorkflows} />);
 
     const clearSelectionButton = screen.getByTestId('workflows-clear-selection-button');
     await userEvent.click(clearSelectionButton);

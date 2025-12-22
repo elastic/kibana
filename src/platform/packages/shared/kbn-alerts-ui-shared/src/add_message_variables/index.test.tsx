@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AddMessageVariables } from '.';
+import userEvent from '@testing-library/user-event';
 
 describe('AddMessageVariables', () => {
   test('it renders variables and filter bar', async () => {
@@ -30,7 +31,7 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    await userEvent.click(await screen.findByTestId('fooAddVariableButton'));
     expect(screen.getByPlaceholderText('Filter options')).toBeInTheDocument();
     expect(screen.getByTestId('myVar-selectableOption')).toBeInTheDocument();
     expect(screen.getByTestId('myVar2-selectableOption')).toBeInTheDocument();
@@ -50,7 +51,7 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    await userEvent.click(await screen.findByTestId('fooAddVariableButton'));
     expect(screen.getByText('myVar')).toBeInTheDocument();
     expect(screen.getByText('My variable description')).toBeInTheDocument();
   });
@@ -69,8 +70,8 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
-    fireEvent.mouseOver(screen.getByText('My variable description'));
+    await userEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    await userEvent.hover(screen.getByText('My variable description'));
     expect(await screen.findByTestId('myVar-tooltip')).toBeInTheDocument();
   });
 
@@ -95,8 +96,8 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
-    fireEvent.click(screen.getByTestId('myVar2-selectableOption'));
+    await userEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByTestId('myVar2-selectableOption'));
 
     expect(onSelectEventHandler).toHaveBeenCalledTimes(1);
     expect(onSelectEventHandler).toHaveBeenCalledWith({
@@ -125,10 +126,32 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
-    fireEvent.click(screen.getByText('Show all'));
+    await userEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    await userEvent.click(screen.getByText('Show all'));
     expect(screen.queryByTestId('myVar-selectableOption')).toBeInTheDocument();
     expect(screen.queryByTestId('deprecatedVar-selectableOption')).toBeInTheDocument();
+  });
+
+  test("it doesn't render the deprecated variables footer if none is available", async () => {
+    render(
+      <AddMessageVariables
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+          },
+          {
+            name: 'anotherVar',
+            description: 'Another var',
+          },
+        ]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    expect(screen.queryByTestId('showDeprecatedVariablesButton')).not.toBeInTheDocument();
   });
 
   test(`it renders a disabled button when no variables exist`, async () => {

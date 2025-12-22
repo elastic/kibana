@@ -16,6 +16,8 @@ const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [
   'apiKey',
   'captureSpanStackTraces',
   'metricsInterval',
+  'captureHeaders',
+  'captureBody',
 ];
 
 export const getApmConfig = (requestPath: string) => {
@@ -34,6 +36,7 @@ export const getApmConfig = (requestPath: string) => {
   const { contextPropagationOnly, ...restOfConfig } = baseConfig;
   const config: Record<string, any> = {
     ...restOfConfig,
+    flushInterval: 150,
     pageLoadTransactionName: requestPath,
   };
 

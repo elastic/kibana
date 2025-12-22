@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { InstallPrepackedTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -36,7 +37,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
       path: PREBUILT_RULES_STATUS_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })

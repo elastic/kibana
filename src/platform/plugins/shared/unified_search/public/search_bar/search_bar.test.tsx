@@ -410,6 +410,14 @@ describe('SearchBar', () => {
   });
 
   describe('draft', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     it('should prefill with the draft query if provided', async () => {
       const draft = {
         query: { language: 'kuery', query: 'test_draft' },
@@ -428,12 +436,13 @@ describe('SearchBar', () => {
         })
       );
 
-      expect(onDraftChange).toHaveBeenCalledWith(draft);
-
       await waitFor(() => {
         const textarea = document.querySelector('textarea');
         expect(textarea).toHaveValue(draft.query.query);
       });
+
+      jest.advanceTimersByTime(500);
+      expect(onDraftChange).toHaveBeenCalledWith(draft);
     });
 
     it('should check for query type mismatch', async () => {
@@ -454,12 +463,13 @@ describe('SearchBar', () => {
         })
       );
 
-      expect(onDraftChange).toHaveBeenCalledWith(undefined);
-
       await waitFor(() => {
         const textarea = document.querySelector('textarea');
         expect(textarea).toHaveValue(kqlQuery.query);
       });
+
+      jest.advanceTimersByTime(500);
+      expect(onDraftChange).toHaveBeenCalledWith(undefined);
     });
   });
 

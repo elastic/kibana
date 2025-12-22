@@ -1241,20 +1241,16 @@ describe('actions schemas', () => {
     });
 
     it('should throw if pid or entity id is used with type = kernel', () => {
-      // @ts-expect-error
       memDumpBody.parameters.pid = 1;
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
 
-      // @ts-expect-error
       delete memDumpBody.parameters.pid;
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = 'some-value';
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 
     it('should accept type of process with a pid', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.pid = 1;
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
@@ -1262,7 +1258,6 @@ describe('actions schemas', () => {
 
     it('should accept type of process with an entity id', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = 'some-value';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
@@ -1278,7 +1273,6 @@ describe('actions schemas', () => {
 
     it('should throw if entity id is an empty string', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = '';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
@@ -1286,7 +1280,6 @@ describe('actions schemas', () => {
 
     it('should throw if entity id a string padded with only spaces', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = '       ';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
@@ -1300,9 +1293,7 @@ describe('actions schemas', () => {
 
     it('should throw if type is process and both pid and entity id is used', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.pid = 1;
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = 'some-value';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();

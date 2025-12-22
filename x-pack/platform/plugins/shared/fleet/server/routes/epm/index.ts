@@ -7,6 +7,11 @@
 
 import type { RouteSecurity } from '@kbn/core-http-server';
 
+import {
+  BulkRollbackAvailableCheckResponseSchema,
+  RollbackAvailableCheckResponseSchema,
+} from '../../../common/types/rest_spec/epm';
+
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthz } from '../../../common';
@@ -96,6 +101,8 @@ import {
   updateCustomIntegrationHandler,
   getKnowledgeBaseHandler,
   rollbackPackageHandler,
+  rollbackAvailableCheckHandler,
+  bulkRollbackAvailableCheckHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -570,12 +577,70 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       deletePackageKibanaAssetsHandler
     );
 
-  if (experimentalFeatures.installedIntegrationsTabularUI) {
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.BULK_UPGRADE_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Bulk upgrade packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: BulkUpgradePackagesRequestSchema,
+          response: {
+            200: {
+              body: () => BulkUpgradePackagesResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      postBulkUpgradePackagesHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.BULK_UNINSTALL_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Bulk uninstall packages`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: BulkUninstallPackagesRequestSchema,
+          response: {
+            200: {
+              body: () => BulkUpgradePackagesResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      postBulkUninstallPackagesHandler
+    );
+
+  if (experimentalFeatures.enablePackageRollback) {
     router.versioned
       .post({
-        path: EPM_API_ROUTES.BULK_UPGRADE_PATTERN,
+        path: EPM_API_ROUTES.BULK_ROLLBACK_PATTERN,
         security: INSTALL_PACKAGES_SECURITY,
-        summary: `Bulk upgrade packages`,
+        summary: `Bulk rollback packages`,
         options: {
           tags: ['oas-tag:Elastic Package Manager (EPM)'],
         },
@@ -583,206 +648,56 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
-          validate: {
-            request: BulkUpgradePackagesRequestSchema,
-            response: {
-              200: {
-                body: () => BulkUpgradePackagesResponseSchema,
-                description: 'OK: A successful request.',
-              },
-              400: {
-                body: genericErrorResponse,
-                description: 'A bad request.',
-              },
-            },
-          },
-        },
-        postBulkUpgradePackagesHandler
-      );
-
-    router.versioned
-      .post({
-        path: EPM_API_ROUTES.BULK_UNINSTALL_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Bulk uninstall packages`,
-        options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: BulkUninstallPackagesRequestSchema,
-            response: {
-              200: {
-                body: () => BulkUpgradePackagesResponseSchema,
-                description: 'OK: A successful request.',
-              },
-              400: {
-                body: genericErrorResponse,
-                description: 'A bad request.',
-              },
-            },
-          },
-        },
-        postBulkUninstallPackagesHandler
-      );
-
-    if (experimentalFeatures.enablePackageRollback) {
-      router.versioned
-        .post({
-          path: EPM_API_ROUTES.BULK_ROLLBACK_PATTERN,
-          security: INSTALL_PACKAGES_SECURITY,
-          summary: `Bulk rollback packages`,
           options: {
-            tags: ['oas-tag:Elastic Package Manager (EPM)'],
-          },
-        })
-        .addVersion(
-          {
-            version: API_VERSIONS.public.v1,
-            options: {
-              oasOperationObject: () => ({
-                requestBody: {
+            oasOperationObject: () => ({
+              requestBody: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      bulkRollbackRequest: {
+                        value: {
+                          packages: [{ name: 'system' }],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: {
                   content: {
                     'application/json': {
                       examples: {
-                        bulkRollbackRequest: {
+                        successResponse: {
                           value: {
-                            packages: [{ name: 'system' }],
+                            taskId: 'taskId',
                           },
                         },
                       },
                     },
                   },
-                },
-                responses: {
-                  200: {
-                    content: {
-                      'application/json': {
-                        examples: {
-                          successResponse: {
-                            value: {
-                              taskId: 'taskId',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                  400: {
-                    content: {
-                      'application/json': {
-                        examples: {
-                          badRequestResponse: {
-                            value: {
-                              message: 'Bad Request',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              }),
-            },
-            validate: {
-              request: BulkRollbackPackagesRequestSchema,
-              response: {
-                200: {
-                  body: () => BulkRollbackPackagesResponseSchema,
-                  description: 'OK: A successful request.',
                 },
                 400: {
-                  body: genericErrorResponse,
-                  description: 'A bad request.',
-                },
-              },
-            },
-          },
-          postBulkRollbackPackagesHandler
-        );
-
-      router.versioned
-        .get({
-          path: EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN,
-          security: INSTALL_PACKAGES_SECURITY,
-          summary: `Get Bulk rollback packages details`,
-          options: {
-            tags: ['oas-tag:Elastic Package Manager (EPM)'],
-          },
-        })
-        .addVersion(
-          {
-            version: API_VERSIONS.public.v1,
-            options: {
-              oasOperationObject: () => ({
-                responses: {
-                  200: {
-                    content: {
-                      'application/json': {
-                        examples: {
-                          successResponse: {
-                            value: {
-                              status: 'success',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                  400: {
-                    content: {
-                      'application/json': {
-                        examples: {
-                          badRequestResponse: {
-                            value: {
-                              message: 'Bad Request',
-                            },
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
                           },
                         },
                       },
                     },
                   },
                 },
-              }),
-            },
-            validate: {
-              request: GetOneBulkOperationPackagesRequestSchema,
-              response: {
-                200: {
-                  body: () => GetOneBulkOperationPackagesResponseSchema,
-                  description: 'OK: A successful request.',
-                },
-                400: {
-                  body: genericErrorResponse,
-                  description: 'A bad request.',
-                },
               },
-            },
+            }),
           },
-          getOneBulkOperationPackagesHandler
-        );
-    }
-
-    router.versioned
-      .get({
-        path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Get Bulk uninstall packages details`,
-        options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
           validate: {
-            request: GetOneBulkOperationPackagesRequestSchema,
+            request: BulkRollbackPackagesRequestSchema,
             response: {
               200: {
-                body: () => GetOneBulkOperationPackagesResponseSchema,
+                body: () => BulkRollbackPackagesResponseSchema,
                 description: 'OK: A successful request.',
               },
               400: {
@@ -792,14 +707,14 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
           },
         },
-        getOneBulkOperationPackagesHandler
+        postBulkRollbackPackagesHandler
       );
 
     router.versioned
       .get({
-        path: EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN,
+        path: EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN,
         security: INSTALL_PACKAGES_SECURITY,
-        summary: `Get Bulk upgrade packages details`,
+        summary: `Get Bulk rollback packages details`,
         options: {
           tags: ['oas-tag:Elastic Package Manager (EPM)'],
         },
@@ -807,6 +722,38 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            status: 'success',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
           validate: {
             request: GetOneBulkOperationPackagesRequestSchema,
             response: {
@@ -824,6 +771,64 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         getOneBulkOperationPackagesHandler
       );
   }
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Get Bulk uninstall packages details`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetOneBulkOperationPackagesRequestSchema,
+          response: {
+            200: {
+              body: () => GetOneBulkOperationPackagesResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getOneBulkOperationPackagesHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Get Bulk upgrade packages details`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetOneBulkOperationPackagesRequestSchema,
+          response: {
+            200: {
+              body: () => GetOneBulkOperationPackagesResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getOneBulkOperationPackagesHandler
+    );
 
   router.versioned
     .post({
@@ -1214,6 +1219,132 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           },
         },
         rollbackPackageHandler
+      );
+
+    router.versioned
+      .get({
+        path: EPM_API_ROUTES.ROLLBACK_AVAILABLE_CHECK_PATTERN,
+        security: READ_PACKAGE_INFO_SECURITY,
+        summary: `Check if rollback is available for a package`,
+        options: {
+          tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+        },
+        access: 'internal',
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            reason: 'reason',
+                            isAvailable: false,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+          validate: {
+            request: RollbackPackageRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => RollbackAvailableCheckResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        rollbackAvailableCheckHandler
+      );
+
+    router.versioned
+      .get({
+        path: EPM_API_ROUTES.BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN,
+        security: READ_PACKAGE_INFO_SECURITY,
+        summary: `Check if rollback is available for installed packages`,
+        options: {
+          tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+        },
+        access: 'internal',
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            reason: 'reason',
+                            isAvailable: false,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+          validate: {
+            request: {},
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => BulkRollbackAvailableCheckResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        bulkRollbackAvailableCheckHandler
       );
   }
 };

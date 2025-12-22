@@ -35,10 +35,12 @@ import {
   FIELD_SELECTOR_TOGGLE_BUTTON,
   FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
+  FLYOUT_JSON_TAB,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
   FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE,
+  FLYOUT_OVERVIEW_TAB,
   FLYOUT_TABLE,
-  FLYOUT_TABS,
+  FLYOUT_TABLE_TAB,
   FLYOUT_TITLE,
   INDICATOR_TYPE_CELL,
   INDICATORS_TABLE,
@@ -67,7 +69,8 @@ const URL = '/app/security/threat_intelligence/indicators';
 const URL_WITH_CONTRADICTORY_FILTERS =
   '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
 
-describe('Single indicator', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/246404
+describe.skip('Single indicator', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_single' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_single' }));
@@ -117,8 +120,9 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
       openFlyout();
 
       cy.get(FLYOUT_TITLE).should('contain', 'Indicator details');
-      cy.get(FLYOUT_TABS).should('exist').children().should('have.length', 3);
-      cy.get(FLYOUT_TABS).should('exist');
+      cy.get(FLYOUT_OVERVIEW_TAB).should('exist');
+      cy.get(FLYOUT_TABLE_TAB).should('exist');
+      cy.get(FLYOUT_JSON_TAB).should('exist');
 
       closeFlyout();
 

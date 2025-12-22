@@ -19,8 +19,8 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 // Mock the JSONDataView component
 const mockJSONDataView = jest.fn();
-jest.mock('../../../shared/ui/json_data_view', () => ({
-  JSONDataView: (props: any) => {
+jest.mock('../../../shared/ui/execution_data_viewer', () => ({
+  ExecutionDataViewer: (props: any) => {
     mockJSONDataView(props);
     return <div data-test-subj="mocked-json-data-view">{props.title}</div>;
   },

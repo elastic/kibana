@@ -10,6 +10,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { useLensExtraActions } from './use_lens_extra_actions';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_VIEW_DETAILS,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+} from '../../../common/constants';
 
 describe('useLensExtraActions', () => {
   it('should return an empty array when no config is provided', () => {
@@ -27,7 +32,7 @@ describe('useLensExtraActions', () => {
 
       expect(action).toEqual(
         expect.objectContaining({
-          id: 'copyToDashboard',
+          id: ACTION_COPY_TO_DASHBOARD,
           order: 1,
           type: 'actionButton',
         })
@@ -60,7 +65,7 @@ describe('useLensExtraActions', () => {
 
       expect(action).toEqual(
         expect.objectContaining({
-          id: 'viewDetails',
+          id: ACTION_VIEW_DETAILS,
           order: 2,
           type: 'actionButton',
         })
@@ -83,24 +88,79 @@ describe('useLensExtraActions', () => {
     });
   });
 
+  describe('exploreInDiscoverTab', () => {
+    it('should return exploreInDiscoverTab action when config is provided', () => {
+      const onClick = jest.fn();
+      const { result } = renderHook(() =>
+        useLensExtraActions({ exploreInDiscoverTab: { onClick } })
+      );
+
+      expect(result.current).toHaveLength(1);
+      const action = result.current[0];
+
+      expect(action).toEqual(
+        expect.objectContaining({
+          id: ACTION_EXPLORE_IN_DISCOVER_TAB,
+          order: 20,
+          type: 'actionButton',
+        })
+      );
+
+      expect(action.getIconType({} as ActionExecutionContext)).toBe('discoverApp');
+    });
+
+    it('should call onClick when execute is invoked', async () => {
+      const onClick = jest.fn();
+      const { result } = renderHook(() =>
+        useLensExtraActions({ exploreInDiscoverTab: { onClick } })
+      );
+
+      const action = result.current[0];
+
+      await act(async () => {
+        await action.execute({} as ActionExecutionContext);
+      });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('should always be compatible', async () => {
+      const onClick = jest.fn();
+      const { result } = renderHook(() =>
+        useLensExtraActions({ exploreInDiscoverTab: { onClick } })
+      );
+
+      const action = result.current[0];
+      const isCompatible = await action.isCompatible({} as ActionExecutionContext);
+
+      expect(isCompatible).toBe(true);
+    });
+  });
+
   describe('multiple actions', () => {
-    it('should return both actions when both configs are provided', () => {
+    it('should return all actions when all configs are provided', () => {
       const copyOnClick = jest.fn();
       const viewOnClick = jest.fn();
+      const exploreOnClick = jest.fn();
       const { result } = renderHook(() =>
         useLensExtraActions({
           copyToDashboard: { onClick: copyOnClick },
           viewDetails: { onClick: viewOnClick },
+          exploreInDiscoverTab: { onClick: exploreOnClick },
         })
       );
 
-      expect(result.current).toHaveLength(2);
+      expect(result.current).toHaveLength(3);
 
-      const copyAction = result.current.find((action) => action.id === 'copyToDashboard');
-      const viewAction = result.current.find((action) => action.id === 'viewDetails');
+      const copyAction = result.current.find((action) => action.id === ACTION_COPY_TO_DASHBOARD);
+      const viewAction = result.current.find((action) => action.id === ACTION_VIEW_DETAILS);
+      const exploreAction = result.current.find(
+        (action) => action.id === ACTION_EXPLORE_IN_DISCOVER_TAB
+      );
 
       expect(copyAction).toBeDefined();
       expect(viewAction).toBeDefined();
+      expect(exploreAction).toBeDefined();
     });
   });
 });

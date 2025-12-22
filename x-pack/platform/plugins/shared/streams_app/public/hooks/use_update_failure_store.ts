@@ -6,9 +6,12 @@
  */
 import { useCallback } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
+import type { Streams } from '@kbn/streams-schema';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { omit } from 'lodash';
 import { useKibana } from './use_kibana';
 
-export function useUpdateFailureStore() {
+export function useUpdateFailureStore(definition: Streams.ingest.all.Definition) {
   const {
     dependencies: {
       start: {
@@ -19,18 +22,18 @@ export function useUpdateFailureStore() {
   const { signal } = useAbortController();
 
   const updateFailureStore = useCallback(
-    async (
-      name: string,
-      options: { failureStoreEnabled: boolean; customRetentionPeriod?: string }
-    ) => {
+    async (name: string, failureStore: FailureStore) => {
       const data = await streamsRepositoryClient.fetch(
-        'PUT /internal/streams/{name}/_failure_store',
+        'PUT /api/streams/{name}/_ingest 2023-10-31',
         {
           params: {
             path: { name },
             body: {
-              failureStoreEnabled: options.failureStoreEnabled,
-              customRetentionPeriod: options.customRetentionPeriod,
+              ingest: {
+                ...definition.ingest,
+                processing: omit(definition.ingest.processing, ['updated_at']),
+                failure_store: failureStore,
+              },
             },
           },
           signal,
@@ -38,7 +41,7 @@ export function useUpdateFailureStore() {
       );
       return data;
     },
-    [streamsRepositoryClient, signal]
+    [streamsRepositoryClient, definition.ingest, signal]
   );
 
   return {

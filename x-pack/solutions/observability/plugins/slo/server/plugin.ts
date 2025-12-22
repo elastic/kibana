@@ -16,24 +16,31 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
-import { mapValues } from 'lodash';
 import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
+import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
+import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { mapValues } from 'lodash';
+import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/register_routes';
 import type { SLORoutesDependencies } from './routes/types';
-import { SO_SLO_TYPE, slo } from './saved_objects';
-import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
+import {
+  slo,
+  sloSettings,
+  SO_SLO_SETTINGS_TYPE,
+  SO_SLO_TEMPLATE_TYPE,
+  SO_SLO_TYPE,
+} from './saved_objects';
 import {
   DefaultResourceInstaller,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
+  DefaultSLODefinitionRepository,
 } from './services';
+import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
 import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
@@ -46,7 +53,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
+import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -75,7 +82,7 @@ export class SLOPlugin
     const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
+    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE, SO_SLO_TEMPLATE_TYPE];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
@@ -167,7 +174,10 @@ export class SLOPlugin
           const internalSoClient = new SavedObjectsClient(
             coreStart.savedObjects.createInternalRepository()
           );
-          const soClient = coreStart.savedObjects.getScopedClient(request);
+
+          const soClient = coreStart.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE],
+          });
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
           const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
@@ -180,7 +190,9 @@ export class SLOPlugin
             pluginsStart.ruleRegistry.getRacClientWithRequest(request),
           ]);
 
-          const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+          const repository = new DefaultSLODefinitionRepository(soClient, logger);
+          const settingsRepository = new DefaultSLOSettingsRepository(soClient);
+          const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless),
@@ -201,6 +213,8 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
+            settingsRepository,
+            templateRepository,
             transformManager,
             summaryTransformManager,
             racClient,

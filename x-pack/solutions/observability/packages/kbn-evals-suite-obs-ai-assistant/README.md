@@ -57,6 +57,78 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   --project="my-connector" \
 ```
 
+### Running Evaluations with Observability Agent (Agent Builder)
+
+The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Observability Agent early in the migration process.
+
+#### Client Selection
+
+Use the `EVALUATION_CLIENT` environment variable to specify which client to use:
+
+- `obs_ai_assistant` (default): Uses the Obs AI Assistant API
+- `agent_builder`: Uses the Agent Builder API
+
+When using `agent_builder`, you can optionally specify which agent to invoke using the `AGENT_BUILDER_AGENT_ID` environment variable (defaults to the default agent).
+
+#### Local Setup for Agent Builder Evaluations
+
+The Scout server **cannot be used for Observability Agent evaluations**, because the Observability Agent requires a feature flag enabled at Kibana start time. Instead, run evaluations against a local Kibana instance:
+
+**1. Enable the Observability Agent feature flag**
+
+Add the following to your Kibana config file (e.g., `config/kibana.dev.yml`):
+
+```yaml
+feature_flags.overrides:
+  observabilityAgent.enabled: true
+```
+
+**2. Start Kibana without base path**
+
+```bash
+yarn start --no-base-path
+```
+
+> The APM synthrace client fixture requires Kibana to run without a base path.
+
+**3. Configure local Scout server**
+
+Create `.scout/servers/local.json` with the following content:
+
+```json
+{
+  "serverless": false,
+  "isCloud": false,
+  "hosts": {
+    "kibana": "http://localhost:5601/",
+    "elasticsearch": "http://localhost:9200/"
+  },
+  "auth": {
+    "username": "elastic",
+    "password": "changeme"
+  }
+}
+```
+
+**4. Run evaluations**
+
+```bash
+EVALUATION_REPETITIONS=1 \
+EVALUATION_CLIENT="agent_builder" \
+AGENT_BUILDER_AGENT_ID="observability.agent" \
+EVALUATION_CONNECTOR_ID="your-connector-id" \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+    evals/esql/esql.spec.ts \
+  --project="your-connector" \
+  --debug
+```
+
+#### Important Notes
+
+- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Observability Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
+- The Agent Builder client implementation and infrastructure are ready for when Agent-specific evaluation criteria are developed
+
 ### Evaluation Reporting
 
 The evaluation framework supports two reporting modes:
@@ -143,4 +215,48 @@ FROM .kibana-evaluations
 | LIMIT 100
     """
 }
+```
+
+## AI Insights Evaluations
+
+The package includes evaluations for AI Insights, which assess the correctness of LLM-generated summaries for alerts.
+
+
+### Prerequisites
+
+Before running AI Insights evaluations, you need to set up snapshot data from Google Cloud Storage.
+
+#### Step 1: Install gcloud CLI
+
+Install the Google Cloud CLI by following the [official installation guide](https://cloud.google.com/sdk/docs/install-sdk).
+
+#### Step 2: Sync Snapshot Data to Local Repository
+
+The Scout server uses `/tmp/repo` as the default `path.repo` value for Elasticsearch snapshot repositories. Sync snapshot data from Google Cloud Storage to this local directory:
+
+```bash
+gcloud storage rsync --recursive gs://YOUR-BUCKET-NAME/snapshot-name /tmp/repo
+```
+
+Replace `YOUR-BUCKET-NAME` with the actual GCS bucket name (shared internally to avoid bucket-squatting). This command downloads the snapshot data locally, making it accessible to Elasticsearch.
+
+#### Step 3: Verify Setup
+
+Confirm that the snapshot data was synced successfully:
+
+```bash
+ls -la /tmp/repo
+```
+
+You should see snapshot metadata files (e.g., `index-*`, `meta-*`, `snap-*`) in the directory.
+
+Now you have datasets ready for executing the evals.
+
+### Running AI Insights Evaluations
+
+```bash
+EVALUATION_CONNECTOR_ID=your-connector-id \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-observability/ai_insights/playwright.config.ts \
+  --project="your-connector"
 ```

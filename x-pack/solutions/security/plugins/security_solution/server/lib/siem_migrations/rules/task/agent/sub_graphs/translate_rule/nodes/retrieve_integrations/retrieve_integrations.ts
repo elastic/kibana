@@ -8,16 +8,16 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
-import type { ChatModel } from '../../../../../../../common/task/util/actions_client_chat';
 import {
   cleanMarkdown,
   generateAssistantComment,
 } from '../../../../../../../common/task/util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_INTEGRATION_PROMPT } from './prompts';
+import type { MigrateRuleGraphParams } from '../../../../types';
 
 interface GetRetrieveIntegrationsNodeParams {
-  model: ChatModel;
+  model: MigrateRuleGraphParams['model'];
   telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }

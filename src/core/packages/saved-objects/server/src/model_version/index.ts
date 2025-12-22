@@ -8,6 +8,7 @@
  */
 
 export type {
+  ModelVersionIdentifier,
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,

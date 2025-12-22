@@ -6,11 +6,11 @@
  */
 
 import type { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
-import type { AllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { GetAllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
 
 export const transformGetAllConnectorsResponse = (
   results: ConnectorWithExtraFindData[]
-): AllConnectorsResponseV1[] => {
+): GetAllConnectorsResponseV1 => {
   return results.map(
     ({
       id,
@@ -22,6 +22,7 @@ export const transformGetAllConnectorsResponse = (
       referencedByCount,
       isMissingSecrets,
       isSystemAction,
+      isConnectorTypeDeprecated,
     }) => ({
       id,
       name,
@@ -32,6 +33,7 @@ export const transformGetAllConnectorsResponse = (
       referenced_by_count: referencedByCount,
       is_missing_secrets: isMissingSecrets,
       is_system_action: isSystemAction,
+      is_connector_type_deprecated: isConnectorTypeDeprecated,
     })
   );
 };

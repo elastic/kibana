@@ -42,7 +42,7 @@ import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
 import type {
-  State as XYState,
+  XYState,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,

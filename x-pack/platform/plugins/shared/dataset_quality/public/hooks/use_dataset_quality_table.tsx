@@ -208,6 +208,31 @@ export const useDatasetQualityTable = () => {
     );
   }, [rowsPerPage, page, renderedItems.length, datasets.length]);
 
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreEnabled,
+      customRetentionPeriod,
+      dataStreamName,
+    }: {
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+      dataStreamName: string;
+    }) => {
+      const dataStream = datasets.find((ds) => ds.rawName === dataStreamName);
+      if (!dataStream) return;
+
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        dataStream: {
+          ...dataStream,
+          hasFailureStore: failureStoreEnabled,
+          customRetentionPeriod,
+        },
+      });
+    },
+    [service, datasets]
+  );
+
   return {
     sort: { sort },
     onTableChange,
@@ -223,5 +248,6 @@ export const useDatasetQualityTable = () => {
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
+    updateFailureStore,
   };
 };

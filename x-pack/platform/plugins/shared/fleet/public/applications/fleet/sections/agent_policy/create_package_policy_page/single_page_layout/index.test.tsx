@@ -9,12 +9,19 @@ import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
+import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/agentless_policy';
+
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
-import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../../constants';
+import {
+  FLEET_ROUTING_PATHS,
+  pagePathGetters,
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+} from '../../../../constants';
 import type { CreatePackagePolicyRouteState } from '../../../../types';
 import {
-  sendCreatePackagePolicy,
+  sendCreatePackagePolicyForRq,
   sendCreateAgentPolicy,
   sendGetAgentStatus,
   useIntraAppState,
@@ -36,6 +43,8 @@ jest.mock('../components/steps/components/use_policies', () => {
     ]),
   };
 });
+
+jest.mock('../../../../../../hooks/use_request/agentless_policy');
 
 jest.mock('../../../../hooks', () => {
   return {
@@ -82,13 +91,11 @@ jest.mock('../../../../hooks', () => {
     sendGetSettings: jest.fn().mockResolvedValue({
       data: { item: {} },
     }),
-    sendCreatePackagePolicy: jest.fn().mockResolvedValue({
-      data: {
-        item: {
-          id: 'policy-1',
-          inputs: [],
-          policy_ids: ['agent-policy-1'],
-        },
+    sendCreatePackagePolicyForRq: jest.fn().mockResolvedValue({
+      item: {
+        id: 'policy-1',
+        inputs: [],
+        policy_ids: ['agent-policy-1'],
       },
     }),
     sendCreateAgentPolicy: jest.fn().mockResolvedValue({
@@ -349,7 +356,7 @@ describe('When on the package policy create page', () => {
     };
 
     beforeEach(() => {
-      (sendCreatePackagePolicy as jest.MockedFunction<any>).mockClear();
+      (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockClear();
     });
 
     test('should show root privileges callout on create page', async () => {
@@ -403,7 +410,7 @@ describe('When on the package policy create page', () => {
         fireEvent.click(saveBtn);
       });
 
-      expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
         ...newPackagePolicy,
         policy_ids: ['agent-policy-1'],
         force: false,
@@ -532,7 +539,7 @@ describe('When on the package policy create page', () => {
         });
 
         (sendCreateAgentPolicy as jest.MockedFunction<any>).mockClear();
-        (sendCreatePackagePolicy as jest.MockedFunction<any>).mockClear();
+        (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockClear();
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
           data: { results: { active: 0 } },
         });
@@ -558,7 +565,7 @@ describe('When on the package policy create page', () => {
           },
           { withSysMonitoring: true }
         );
-        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
           ...newPackagePolicy,
           policy_ids: ['agent-policy-2'],
           force: false,
@@ -605,7 +612,7 @@ describe('When on the package policy create page', () => {
           );
         });
 
-        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalled();
       });
 
       describe('create package policy with existing agent policy', () => {
@@ -621,7 +628,7 @@ describe('When on the package policy create page', () => {
           });
 
           expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
-          expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
             ...newPackagePolicy,
             policy_ids: ['agent-policy-1'],
             force: false,
@@ -677,7 +684,7 @@ describe('When on the package policy create page', () => {
             fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
           });
 
-          expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
+          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
             ...newPackagePolicy,
             inputs: [
               {
@@ -720,9 +727,18 @@ describe('When on the package policy create page', () => {
             isCloudEnabled: true,
           },
         });
-        (sendCreateAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
-          data: {
-            item: { id: 'agentless-policy-1', name: 'Agentless policy 1', namespace: 'default' },
+        (sendCreateAgentlessPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          item: {
+            name: 'Nginx',
+            id: 'policy-1',
+            inputs: [],
+            policy_ids: ['agent-policy-1'],
+            supports_agentless: true,
+            package: {
+              name: 'nginx',
+              title: 'Nginx',
+              version: '1.3.0',
+            },
           },
         });
 
@@ -743,17 +759,19 @@ describe('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+        expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics'],
-            name: 'Agentless policy for nginx-1',
+            name: 'nginx-1',
           }),
-          { withSysMonitoring: true }
+          { format: 'legacy' }
         );
-        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         await waitFor(() => {
-          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+          expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
+            INTEGRATIONS_PLUGIN_ID,
+            { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+          );
         });
       });
 
@@ -768,19 +786,18 @@ describe('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+        expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics'],
-            name: 'Agentless policy for nginx-1',
-            supports_agentless: true,
+            name: 'nginx-1',
           }),
-          { withSysMonitoring: true }
+          { format: 'legacy' }
         );
-        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+        expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
-        await waitFor(() => {
-          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
-        });
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
+          INTEGRATIONS_PLUGIN_ID,
+          { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=agent-policy-1' }
+        );
       });
     });
   });

@@ -11,61 +11,67 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type {
-  MessageChunkEvent,
-  MessageCompleteEvent,
-  ThinkingCompleteEvent,
-  ToolCallEvent,
-  BrowserToolCallEvent,
-  ToolResultEvent,
-  ReasoningEvent,
-} from '@kbn/onechat-common';
+import type { ChatAgentEvent, ConversationRound, ToolResultEvent } from '@kbn/onechat-common/chat';
+import { isToolCallStep } from '@kbn/onechat-common/chat';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
-  matchGraphName,
-  matchEvent,
-  matchName,
-  hasTag,
-  createTextChunkEvent,
-  createMessageEvent,
-  createToolCallEvent,
   createBrowserToolCallEvent,
-  createToolResultEvent,
+  createMessageEvent,
+  createPromptRequestEvent,
   createReasoningEvent,
+  createTextChunkEvent,
   createThinkingCompleteEvent,
+  createToolCallEvent,
+  createToolResultEvent,
   extractTextContent,
+  hasTag,
+  matchEvent,
+  matchGraphName,
+  matchName,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
+import { AgentPromptRequestSourceType } from '@kbn/onechat-common/agents';
 import type { StateType } from './state';
-import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
-import { isToolCallAction, isAnswerAction, isExecuteToolAction } from './actions';
+import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';
+import {
+  isAnswerAction,
+  isExecuteToolAction,
+  isStructuredAnswerAction,
+  isToolCallAction,
+  isToolPromptAction,
+} from './actions';
+import type { InternalEvent } from './events';
+import { createFinalStateEvent } from './events';
 
-export type ConvertedEvents =
-  | MessageChunkEvent
-  | MessageCompleteEvent
-  | ThinkingCompleteEvent
-  | ToolCallEvent
-  | BrowserToolCallEvent
-  | ToolResultEvent
-  | ReasoningEvent;
+export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  pendingRound,
   logger,
   startTime,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
+  pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
+
+    if (pendingRound) {
+      const toolCalls = pendingRound.steps.filter(isToolCallStep);
+      toolCalls.forEach((toolCall) => {
+        toolCallIdToIdMap.set(toolCall.tool_call_id, toolCall.tool_id);
+      });
+    }
+
     const messageId = uuidv4();
 
     let isThinkingComplete = false;
@@ -152,7 +158,12 @@ export const convertGraphEvents = ({
           const answerActions = (event.data.output as StateType).answerActions;
           const lastAction = answerActions[answerActions.length - 1];
 
-          if (isAnswerAction(lastAction)) {
+          if (isStructuredAnswerAction(lastAction)) {
+            const messageEvent = createMessageEvent(lastAction.data, {
+              messageId,
+            });
+            events.push(messageEvent);
+          } else if (isAnswerAction(lastAction)) {
             const messageEvent = createMessageEvent(lastAction.message, {
               messageId,
             });
@@ -176,13 +187,30 @@ export const convertGraphEvents = ({
                 createToolResultEvent({
                   toolCallId: toolResult.toolCallId,
                   toolId: toolId ?? 'unknown',
-                  results: toolReturn.results,
+                  results: toolReturn.results ?? [],
                 })
               );
             }
 
             return of(...toolResultEvents);
           }
+
+          if (isToolPromptAction(nextAction)) {
+            return of(
+              createPromptRequestEvent({
+                prompt: nextAction.prompt,
+                source: {
+                  type: AgentPromptRequestSourceType.toolCall,
+                  tool_call_id: nextAction.tool_call_id,
+                },
+              })
+            );
+          }
+        }
+
+        if (matchEvent(event, 'on_chain_end') && matchName(event, graphName)) {
+          const finalState = event.data.output as StateType;
+          return of(createFinalStateEvent(finalState));
         }
 
         return EMPTY;

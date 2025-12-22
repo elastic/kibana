@@ -23,9 +23,17 @@ export const resolveConfiguration = (configuration: AgentConfiguration): Resolve
   return {
     research: {
       instructions: researchInstructions,
+      replace_default_instructions:
+        configuration.research?.replace_default_instructions ??
+        configuration.replace_default_instructions ??
+        false,
     },
     answer: {
       instructions: answerInstructions,
+      replace_default_instructions:
+        configuration.answer?.replace_default_instructions ??
+        configuration.replace_default_instructions ??
+        false,
     },
   };
 };

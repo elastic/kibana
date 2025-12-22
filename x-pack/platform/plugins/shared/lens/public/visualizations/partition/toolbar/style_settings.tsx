@@ -22,7 +22,7 @@ export function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisua
   const { state } = props;
 
   const layer = state.layers[0];
-  const { emptySizeRatioOptions, isDisabled } = PartitionChartsMeta[state.shape].toolbarPopover;
+  const { emptySizeRatioOptions, isDisabled } = PartitionChartsMeta[state.shape].toolbar;
 
   const selectedOption = emptySizeRatioOptions
     ? emptySizeRatioOptions.find(

@@ -11,10 +11,10 @@ import { css } from '@emotion/react';
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
-import { selectFocusedStepInfo } from '../../../../entities/workflows/store';
+import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
 
 export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
 
   const scrollbarWidth = '24px';
   const styles = useMemo(

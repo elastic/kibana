@@ -14,6 +14,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 import type { RuntimeStateManager, TabState } from '../application/main/state_management/redux';
 import {
+  DEFAULT_TAB_STATE,
+  internalStateActions,
   createInternalStateStore,
   createRuntimeStateManager,
   fromSavedSearchToSavedObjectTab,
@@ -23,7 +25,7 @@ import {
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import {
   getConnectedCustomizationService,
@@ -31,13 +33,16 @@ import {
 } from '../customizations';
 import { createCustomizationService } from '../customizations/customization_service';
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
-import { internalStateActions } from '../application/main/state_management/redux';
-import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
+import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
+import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
+import { updateSavedSearch } from '../application/main/state_management/utils/update_saved_search';
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -58,7 +63,7 @@ function createInternalStateStoreMock({
     useHash: storeInSessionStorage,
     history: services.history,
     useHashQuery: customizationContext.displayMode !== 'embedded',
-    ...(toasts && withNotifyOnErrors(toasts)),
+    ...toasts,
   });
   runtimeStateManager ??= createRuntimeStateManager();
   const tabsStorageManager = createTabsStorageManager({
@@ -89,6 +94,8 @@ function createInternalStateStoreMock({
   };
 }
 
+export type InternalStateMockToolkit = ReturnType<typeof getDiscoverInternalStateMock>;
+
 export function getDiscoverInternalStateMock({
   persistedDataViews,
   ...options
@@ -114,21 +121,44 @@ export function getDiscoverInternalStateMock({
     return Promise.resolve(dataView);
   });
 
+  jest.spyOn(services.dataViews, 'create').mockImplementation((spec) =>
+    Promise.resolve(
+      buildDataViewMock({
+        id: spec.id,
+        title: spec.title,
+        name: spec.name ?? spec.title,
+        type: spec.type,
+        timeFieldName: spec.timeFieldName,
+        isPersisted: false,
+      })
+    )
+  );
+
   const originalSearchSourceCreate = services.data.search.searchSource.create;
 
   services.data.search.searchSource.create = jest.fn((fields) => {
-    if (typeof fields?.index === 'string') {
-      const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
-
-      if (dataView) {
-        return Promise.resolve(
-          createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView })
-        );
-      }
+    if (typeof fields?.index !== 'string') {
+      return originalSearchSourceCreate(fields);
     }
 
-    return originalSearchSourceCreate(fields);
+    const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
+
+    if (!dataView) {
+      throw new Error(
+        `Data view with ID "${fields.index}" not found in provided persistedDataViews mock array`
+      );
+    }
+
+    return Promise.resolve(createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView }));
   });
+
+  jest.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation((discoverSession) =>
+    Promise.resolve({
+      ...discoverSession,
+      id: discoverSession.id ?? 'new-session',
+      managed: false,
+    })
+  );
 
   const assertTabsAreInitialized = <T extends (...params: Parameters<T>) => ReturnType<T>>(
     fn: T
@@ -160,11 +190,13 @@ export function getDiscoverInternalStateMock({
         internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
       );
 
-      await internalState.dispatch(
-        internalStateActions.initializeTabs({
-          discoverSessionId: persistedDiscoverSession?.id,
-        })
-      );
+      await internalState
+        .dispatch(
+          internalStateActions.initializeTabs({
+            discoverSessionId: persistedDiscoverSession?.id,
+          })
+        )
+        .unwrap();
     },
     initializeSingleTab: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
       await toolkit.switchToTab({ tabId });
@@ -187,6 +219,7 @@ export function getDiscoverInternalStateMock({
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks: [],
+        services,
       });
 
       await internalState.dispatch(
@@ -196,10 +229,14 @@ export function getDiscoverInternalStateMock({
             stateContainer,
             customizationService,
             dataViewSpec: undefined,
+            esqlControls: undefined,
             defaultUrlState: undefined,
           },
         })
       );
+    }),
+    getCurrentTab: assertTabsAreInitialized(() => {
+      return selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
     }),
     addNewTab: assertTabsAreInitialized(async ({ tab }: { tab: TabState }) => {
       const currentState = internalState.getState();
@@ -226,6 +263,27 @@ export function getDiscoverInternalStateMock({
         })
       );
     }),
+    saveDiscoverSession: assertTabsAreInitialized(
+      async (params: Partial<SaveDiscoverSessionThunkParams> = {}) => {
+        const { persistedDiscoverSession } = internalState.getState();
+
+        await internalState
+          .dispatch(
+            internalStateActions.saveDiscoverSession({
+              newTitle: persistedDiscoverSession?.title ?? 'new title',
+              newCopyOnSave: false,
+              newTimeRestore:
+                persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false,
+              newDescription: persistedDiscoverSession?.description ?? 'new description',
+              newTags: persistedDiscoverSession?.tags ?? [],
+              isTitleDuplicateConfirmed: false,
+              onTitleDuplicate: jest.fn(),
+              ...params,
+            })
+          )
+          .unwrap();
+      }
+    ),
   };
 
   return toolkit;
@@ -324,6 +382,18 @@ export function getDiscoverStateMock({
     )
   );
 
+  internalState.dispatch(
+    internalStateActions.resetAppState({
+      tabId: internalState.getState().tabs.unsafeCurrentId,
+      appState: getInitialAppState({
+        initialUrlState: getCurrentUrlState(stateStorageContainer, services),
+        persistedTab: persistedDiscoverSession?.tabs[0],
+        dataView: finalSavedSearch?.searchSource.getField('index'),
+        services,
+      }),
+    })
+  );
+
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
@@ -345,7 +415,26 @@ export function getDiscoverStateMock({
   tabRuntimeState.stateContainer$.next(container);
 
   if (finalSavedSearch) {
-    container.savedSearchState.set(finalSavedSearch);
+    const currentTab = selectTab(internalState.getState(), container.getCurrentTab().id);
+    const dataView = finalSavedSearch.searchSource.getField('index');
+
+    container.savedSearchState.set(
+      updateSavedSearch({
+        savedSearch: finalSavedSearch,
+        dataView,
+        initialInternalState: undefined,
+        appState: currentTab.appState,
+        globalState: currentTab.globalState,
+        services,
+      })
+    );
+    tabRuntimeState.currentDataView$.next(finalSavedSearch.searchSource.getField('index'));
+
+    if (dataView) {
+      internalState.dispatch(
+        internalStateActions.loadDataViewList.fulfilled([dataView as DataViewListItem], 'requestId')
+      );
+    }
   }
 
   return container;

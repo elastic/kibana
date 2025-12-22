@@ -21,6 +21,7 @@ import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { metricsExplorerTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { MetricsExplorerOptionsContainer } from './hooks/use_metrics_explorer_options';
+import { MetricsInDiscoverCallout } from './components/metrics_in_discover_callout';
 
 export const MetricsExplorerPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
@@ -117,6 +118,7 @@ const MetricsExplorerContent = () => {
         rightSideItems: [<SavedViews viewState={viewState} />],
       }}
     >
+      <MetricsInDiscoverCallout timeRange={timeRange} />
       <MetricsExplorerToolbar
         timeRange={timeRange}
         options={options}

@@ -46,16 +46,6 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
   const request = createRepositoryClient(core).fetch as MetricsExperienceRepositoryClient;
 
   return {
-    getDimensions: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/dimensions'>['params']['query'],
-      signal?: AbortSignal | null
-    ) =>
-      request('GET /internal/metrics_experience/dimensions', {
-        params: {
-          query: params,
-        },
-        signal,
-      }),
     getFields: (
       params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/fields'>['params']['query'],
       signal?: AbortSignal | null

@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: QRadar Vendor Rule Enhancement Schema
+  version: '1.0.0'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    QRadarMitreMappingTechnique:
+      type: object
+      properties:
+        confidence:
+          type: string
+        enabled:
+          type: boolean
+        id:
+          type: string
+      required:
+        - enabled
+        - id
+
+    QRadarMitreMappingTactic:
+      type: object
+      properties:
+        confidence:
+          type: string
+        user_override:
+          type: boolean
+        enabled:
+          type: boolean
+        ibm_default:
+          type: boolean
+        name:
+          type: string
+        techniques:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/QRadarMitreMappingTechnique'
+      required:
+        - enabled
+        - name
+
+    QRadarMitreMappingRule:
+      type: object
+      properties:
+        id:
+          type: string
+        has_ibm_default:
+          type: boolean
+        last_updated:
+          type: number
+        mapping:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/QRadarMitreMappingTactic'
+        min-mitre-version:
+          type: number
+      required:
+        - id
+        - mapping
+
+    QRadarMitreMappingsData:
+      type: object
+      description: QRadar MITRE mappings data keyed by rule name
+      additionalProperties:
+        $ref: '#/components/schemas/QRadarMitreMappingRule'
+
+    QRadarMitreRequest:
+      type: object
+      description: Request to enhance rules with QRadar MITRE mappings
+      required:
+        - vendor
+        - type
+        - data
+      properties:
+        vendor:
+          type: string
+          enum:
+            - qradar
+          description: The vendor identifier
+        type:
+          type: string
+          enum:
+            - mitre
+          description: The type of enhancement data
+        data:
+          $ref: '#/components/schemas/QRadarMitreMappingsData'
+          description: QRadar MITRE mappings data keyed by rule name
+
+    EnhanceQRadarRule:
+      $ref: '#/components/schemas/QRadarMitreRequest'
+      description: Union type for QRadar rule enhancements

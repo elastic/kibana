@@ -10,19 +10,21 @@ import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/t
 import {
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  INFERENCE_CONNECTOR_TITLE,
-  INFERENCE_CONNECTOR_ID,
+  CONNECTOR_NAME,
+  CONNECTOR_ID,
+  ConfigSchema,
+  SecretsSchema,
   ServiceProviderKeys,
   SUB_ACTION,
-} from '../../../common/inference/constants';
-import { ConfigSchema, SecretsSchema } from '../../../common/inference/schema';
-import type { Config, Secrets } from '../../../common/inference/types';
+} from '@kbn/connector-schemas/inference';
+import type { Config, Secrets } from '@kbn/connector-schemas/inference';
 import { InferenceConnector } from './inference';
 import { unflattenObject } from '../lib/unflatten_object';
 
@@ -49,8 +51,8 @@ const deleteInferenceEndpoint = async (
 };
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
-  id: INFERENCE_CONNECTOR_ID,
-  name: INFERENCE_CONNECTOR_TITLE,
+  id: CONNECTOR_ID,
+  name: CONNECTOR_NAME,
   getService: (params) => new InferenceConnector(params),
   schema: {
     config: ConfigSchema,
@@ -61,6 +63,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
+    WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {

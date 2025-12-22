@@ -78,21 +78,6 @@ export const ADD_NOTES_FOR_ROW = ({
       'Add notes for the event in row {ariaRowindex} to timeline, with columns {columnValues}',
   });
 
-export const PIN_EVENT_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-  isEventPinned,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-  isEventPinned: boolean;
-}) =>
-  i18n.translate('xpack.securitySolution.hoverActions.pinEventForRowAriaLabel', {
-    defaultMessage:
-      '{isEventPinned, select, true {Unpin} other {Pin} } the event in row {ariaRowindex} to timeline, with columns {columnValues}',
-    values: { ariaRowindex, columnValues, isEventPinned },
-  });
-
 export const MORE_ACTIONS_FOR_ROW = ({
   ariaRowindex,
   columnValues,
@@ -104,4 +89,45 @@ export const MORE_ACTIONS_FOR_ROW = ({
     values: { ariaRowindex, columnValues },
     defaultMessage:
       'Select more actions for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+  });
+
+export const PIN_EVENT_FOR_ROW = ({
+  ariaRowindex,
+  columnValues,
+  isPinned,
+}: {
+  ariaRowindex: number;
+  columnValues: string;
+  isPinned: boolean;
+}) =>
+  i18n.translate('xpack.securitySolution.hoverActions.pinEventForRowAriaLabel', {
+    defaultMessage:
+      '{isPinned, select, true {Unpin} other {Pin} } the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+    values: { ariaRowindex, columnValues, isPinned },
+  });
+
+export const UNPINNED = (isAlert: boolean) =>
+  i18n.translate('xpack.securitySolution.timeline.body.pinning.pinTooltip', {
+    values: { isAlert },
+    defaultMessage: 'Pin {isAlert, select, true{alert} other{event}}',
+  });
+
+export const PINNED = (isAlert: boolean) =>
+  i18n.translate('xpack.securitySolution.timeline.body.pinning.unpinTooltip', {
+    values: { isAlert },
+    defaultMessage: 'Unpin {isAlert, select, true{alert} other{event}}',
+  });
+
+export const DISABLE_PIN = (isAlert: boolean) =>
+  i18n.translate('xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip', {
+    values: { isAlert },
+    defaultMessage:
+      'This {isAlert, select, true{alert} other{event}} may not be pinned while editing a template timeline',
+  });
+
+export const PINNED_WITH_NOTES = (isAlert: boolean) =>
+  i18n.translate('xpack.securitySolution.timeline.body.pinning.pinnnedWithNotesTooltip', {
+    values: { isAlert },
+    defaultMessage:
+      'This {isAlert, select, true{alert} other{event}} cannot be unpinned because it has notes in Timeline',
   });

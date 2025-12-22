@@ -173,6 +173,7 @@ export class CoreKibanaRequest<
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
+    this.injectHostInfo(request);
 
     this.url = request.url ?? new URL('https://fake-request/url');
     this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
@@ -206,6 +207,32 @@ export class CoreKibanaRequest<
       // missing in fakeRequests, so we cast to false
       isAuthenticated: request.auth?.isAuthenticated ?? false,
     };
+  }
+
+  /**
+   * Hapi does not officially support HTTP2 at the moment.
+   * - On HTTP/2 the 'Host:' header is replaced by ':authority:'.
+   * - Thus, for HTTP/2 requests, Hapi's request.url getter defaults to using
+   *   the server host information to build the full URL.
+   * - If we configure Kibana to use a "bare" IPv6 host (without square brackets),
+   *   this causes Hapi's request.url getter to try to build ambiguous invalid URLs.
+   *
+   * Note that an IPv6 address like 2001:db8::1:8080 would be ambiguous,
+   * as 8080 could be interpreted as the last segment of the IP address rather than the port.
+   *
+   * This method alters the original Hapi Request object,
+   * injecting the missing 'Host:' header if the ':authority:' information is present (i.e. HTTP/2 request).
+   * This way, the URL is no longer built using server host information,
+   * which causes https://github.com/elastic/kibana/issues/236380 when using IPv6 server.host
+   *
+   * TODO remove this when https://github.com/hapijs/hapi/issues/4560 is addressed
+   * @param request the request to 'decorate'
+   */
+  injectHostInfo(request: RawRequest) {
+    const r = request as RawRequest & { info: Record<string, any> };
+    if (typeof r.info === 'object' && !r.info.host && r.headers[':authority']) {
+      r.info.host = r.headers[':authority'];
+    }
   }
 
   toString() {

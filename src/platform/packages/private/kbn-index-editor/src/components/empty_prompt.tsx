@@ -8,20 +8,65 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiConfirmModal,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import type { KibanaContextExtra } from '../types';
 import { useFileSelectorContext } from './file_drop_zone';
+import { isPlaceholderColumn } from '../utils';
 
 export const EmptyPrompt: FC = () => {
   const { onFileSelectorClick } = useFileSelectorContext();
   const {
-    services: { fileUpload },
+    services: { fileUpload, indexUpdateService, notifications, indexEditorTelemetryService },
   } = useKibana<KibanaContextExtra>();
 
+  const columns = useObservable(indexUpdateService.dataTableColumns$);
+
+  const allowMappingsReset = useMemo(
+    () =>
+      indexUpdateService.isIndexCreated() &&
+      indexUpdateService.userCanResetIndex &&
+      columns?.some((col) => !isPlaceholderColumn(col.name)),
+    [columns, indexUpdateService]
+  );
+
+  const [isResettingMappings, setIsResettingMappings] = useState(false);
+
+  const resetIndexMappings = useCallback(async () => {
+    setIsResettingMappings(true);
+    try {
+      await indexUpdateService.resetIndexMapping();
+      indexEditorTelemetryService.trackResetIndex('success');
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate('indexEditor.emptyPrompt.resetMappingsErrorToastTitle', {
+          defaultMessage: 'Error resetting index mappings',
+        }),
+      });
+      indexEditorTelemetryService.trackResetIndex('error');
+    } finally {
+      setIsResettingMappings(false);
+      setIsResetMappingsWarningModalOpen(false);
+    }
+  }, [indexEditorTelemetryService, indexUpdateService, notifications.toasts]);
+
   const maxFileSize = fileUpload.getMaxBytesFormatted();
+
+  const [isResetMappingsWarningModalOpen, setIsResetMappingsWarningModalOpen] = useState(false);
+  const resetMappingsModalTitleId = useGeneratedHtmlId();
 
   const uploading = (
     <EuiLink
@@ -69,6 +114,54 @@ export const EmptyPrompt: FC = () => {
               }}
             />
           </EuiText>
+          {allowMappingsReset && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiButton onClick={() => setIsResetMappingsWarningModalOpen(true)}>
+                <EuiText size="xs">
+                  <FormattedMessage
+                    id="indexEditor.emptyPrompt.resetIndex"
+                    defaultMessage="Reset index"
+                  />
+                </EuiText>
+              </EuiButton>
+            </>
+          )}
+          {isResetMappingsWarningModalOpen && (
+            <EuiConfirmModal
+              aria-labelledby={resetMappingsModalTitleId}
+              title={
+                <FormattedMessage
+                  id="indexEditor.mappingsWarningModal.title"
+                  defaultMessage="Reset index?"
+                />
+              }
+              onCancel={() => setIsResetMappingsWarningModalOpen(false)}
+              onConfirm={resetIndexMappings}
+              cancelButtonText={
+                <FormattedMessage
+                  id="indexEditor.mappingsWarningModal.cancel"
+                  defaultMessage="Cancel"
+                />
+              }
+              confirmButtonText={
+                <FormattedMessage
+                  id="indexEditor.emptyPrompt.resetIndex"
+                  defaultMessage="Reset index"
+                />
+              }
+              buttonColor="danger"
+              defaultFocusedButton="confirm"
+              isLoading={isResettingMappings}
+            >
+              <p>
+                <FormattedMessage
+                  id="indexEditor.mappingsWarningModal.body"
+                  defaultMessage="This action will permanently delete all existing columns of the lookup index and reset its configuration."
+                />
+              </p>
+            </EuiConfirmModal>
+          )}
         </>
       }
     />

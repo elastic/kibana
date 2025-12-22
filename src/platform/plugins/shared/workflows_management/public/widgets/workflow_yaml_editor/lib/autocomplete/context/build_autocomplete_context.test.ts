@@ -9,14 +9,14 @@
 
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
+import { z } from '@kbn/zod/v4';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
-import { expectZodSchemaEqual } from '../../../../../../common/lib/zod';
 import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
-import type { WorkflowDetailState } from '../../../../../entities/workflows/store';
-import { performComputation } from '../../../../../entities/workflows/store/utils/computation';
-import { findStepByLine } from '../../../../../entities/workflows/store/utils/step_finder';
+import type { WorkflowDetailState } from '../../../../../entities/workflows/store/workflow_detail/types';
+import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
+import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 
 export function getFakeAutocompleteContextParams(
   yamlContent: string,

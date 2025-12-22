@@ -32,6 +32,7 @@ const defaultFetchContext: FetchContext = {
   searchSessionId: 'id',
   timeRange: { from: 'now-30m', to: 'now', mode: 'relative' },
   timeslice: undefined,
+  projectRouting: undefined,
 };
 
 describe('updateSearchSource', () => {
@@ -161,5 +162,44 @@ describe('updateSearchSource', () => {
       timeRangeFilter,
       { meta: { disabled: false } },
     ]);
+  });
+
+  it('updates the parent of a given search source with projectRouting from fetch context', async () => {
+    const searchSource = createSearchSourceMock({});
+    const parentSearchSource = createSearchSourceMock({});
+    searchSource.setParent(parentSearchSource);
+
+    const fetchContextWithProjectRouting: FetchContext = {
+      ...defaultFetchContext,
+      projectRouting: '_alias:_origin',
+    };
+
+    updateSearchSource(
+      discoverServiceMock,
+      searchSource,
+      dataViewMock,
+      [] as SortOrder[],
+      customSampleSize,
+      fetchContextWithProjectRouting,
+      defaults
+    );
+    expect(parentSearchSource.getField('projectRouting')).toBe('_alias:_origin');
+  });
+
+  it('updates the parent of a given search source with undefined projectRouting when not provided', async () => {
+    const searchSource = createSearchSourceMock({});
+    const parentSearchSource = createSearchSourceMock({});
+    searchSource.setParent(parentSearchSource);
+
+    updateSearchSource(
+      discoverServiceMock,
+      searchSource,
+      dataViewMock,
+      [] as SortOrder[],
+      customSampleSize,
+      defaultFetchContext,
+      defaults
+    );
+    expect(parentSearchSource.getField('projectRouting')).toBeUndefined();
   });
 });

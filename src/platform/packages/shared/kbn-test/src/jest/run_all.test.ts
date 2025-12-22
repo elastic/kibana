@@ -559,6 +559,27 @@ describe('run_all.ts', () => {
         expect(mockLog.error).toHaveBeenCalledWith('No configs found after parsing --configs');
       });
 
+      it('should not throw when all configs are empty', async () => {
+        mockGetopts.mockReturnValue({
+          configs: ', , ,',
+          maxParallel: undefined,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [],
+          emptyConfigs: ['/path/to/empty-config.js'],
+        });
+
+        try {
+          await runJestAll();
+        } catch (err) {
+          expect((err as Error).message).toContain('process.exit called with code 0');
+        }
+
+        expect(mockGetJestConfigs).toHaveBeenCalledWith([]);
+        expect(mockLog.error).not.toHaveBeenCalled();
+      });
+
       it('should handle process spawn errors gracefully', async () => {
         mockSpawn.mockImplementation(() => {
           throw new Error('Spawn failed');

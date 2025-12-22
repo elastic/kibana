@@ -11,6 +11,7 @@ import {
   getReasonMessage,
   getUngroupedReasonMessage,
   getMonitorAlertDocument,
+  formatStepInformation,
 } from './message_utils';
 import type { MissingPingMonitorInfo } from '../../../common/runtime_types/alert_rules/common';
 import type { OverviewPing } from '../../../common/runtime_types';
@@ -85,6 +86,16 @@ describe('message_utils', () => {
         locationNames: locationName,
         status: 'down',
         monitorUrlLabel: 'URL',
+        lastErrorMessage: undefined,
+        lastErrorStack: undefined,
+        serviceName: undefined,
+        labels: undefined,
+        stateId: undefined,
+        checks: undefined,
+        monitorTags: undefined,
+        failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       });
     });
 
@@ -127,6 +138,19 @@ describe('message_utils', () => {
         locationNames: locationName,
         monitorUrlLabel: 'URL',
         reason: 'Monitor "Test Monitor" from Test Location is pending.',
+        checkedAt: undefined,
+        timestamp: undefined,
+        hostName: undefined,
+        lastErrorMessage: undefined,
+        lastErrorStack: undefined,
+        serviceName: undefined,
+        labels: undefined,
+        stateId: undefined,
+        checks: undefined,
+        monitorTags: undefined,
+        failedStepInfo: '',
+        failedStepName: undefined,
+        failedStepNumber: undefined,
       });
     });
   });
@@ -265,6 +289,80 @@ describe('message_utils', () => {
         'kibana.alert.evaluation.value': 2,
         'monitor.tags': monitorTags,
       });
+    });
+  });
+
+  describe('formatStepInformation', () => {
+    it('returns empty string for null step info', () => {
+      const result = formatStepInformation(null);
+      expect(result).toBe('');
+    });
+
+    it('returns empty string for undefined step info', () => {
+      const result = formatStepInformation(undefined as any);
+      expect(result).toBe('');
+    });
+
+    it('formats basic step information without context', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        scriptSource: 'await page.click("button")',
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      expect(result).toContain('- Step: Click button');
+      expect(result).toContain('- Step script: await page.click("button")');
+    });
+
+    it('formats complete step information with all fields', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        scriptSource: 'await page.click("button")',
+        stepNumber: 3,
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      // Check that it includes step details
+      expect(result).toContain('- Step: 3. Click button');
+      expect(result).toContain('- Step script: await page.click("button")');
+    });
+
+    it('handles missing context gracefully', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        stepNumber: 3,
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      // Should include available info
+      expect(result).toContain('- Step: 3. Click button');
+    });
+
+    it('handles partial step information', () => {
+      const stepInfo = {
+        stepName: 'Click button',
+        // Missing scriptSource
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      expect(result).toContain('- Step: Click button');
+      expect(result).not.toContain('- Step script:');
+    });
+
+    it('truncates long script source', () => {
+      const longScript = 'a'.repeat(300);
+      const stepInfo = {
+        stepName: 'Click button',
+        scriptSource: longScript,
+      };
+
+      const result = formatStepInformation(stepInfo);
+
+      expect(result).toContain('- Step script: ' + 'a'.repeat(200) + '...');
     });
   });
 });

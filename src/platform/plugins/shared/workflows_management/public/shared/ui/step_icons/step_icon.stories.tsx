@@ -32,7 +32,6 @@ const types = [
   'gemini',
   'bedrock',
   'gen-ai',
-  'crowdstrike',
   'jira',
   'opsgenie',
   'jira-service-management',

@@ -110,7 +110,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).not.toHaveBeenCalled();
       expect(monitoredStepExecutionRuntimeMock.failStep).not.toHaveBeenCalled();
@@ -127,7 +127,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       // Mock empty scope stack (no nested scopes to fail)
       (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
       expect(monitoredStepExecutionRuntimeMock.failStep).toHaveBeenCalledWith(expect.any(Error));
@@ -190,7 +190,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         .mockReturnValueOnce(scopeStepExecutionRuntime1)
         .mockReturnValueOnce(scopeStepExecutionRuntime2);
 
-      await impl.monitor(nestedMonitoredStepExecutionRuntime);
+      impl.monitor(nestedMonitoredStepExecutionRuntime);
 
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
       expect(monitoredStepExecutionRuntimeMock.failStep).toHaveBeenCalledWith(expect.any(Error));
@@ -213,7 +213,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       // Mock empty scope stack (no nested scopes to fail)
       (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(wfExecutionRuntimeManagerMock.setWorkflowError).toHaveBeenCalledWith(undefined);
     });
@@ -226,7 +226,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(parseDuration).toHaveBeenCalledWith('2m');
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).not.toHaveBeenCalled();
@@ -241,7 +241,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
         startedAt: new Date(recentStartTime).toISOString(),
       });
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
       expect(parseDuration).toHaveBeenCalledWith('30s');
 
       // Test minutes
@@ -250,7 +250,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
         startedAt: new Date(recentStartTime).toISOString(),
       });
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
       expect(parseDuration).toHaveBeenCalledWith('5m');
 
       // Test hours
@@ -259,7 +259,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
         startedAt: new Date(recentStartTime).toISOString(),
       });
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
       expect(parseDuration).toHaveBeenCalledWith('1h');
     });
 
@@ -273,7 +273,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
 
       (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
       expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).toHaveBeenCalledTimes(1);
@@ -286,8 +286,8 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      const result = await impl.monitor(monitoredStepExecutionRuntimeMock);
-      expect(result).toBeUndefined(); // Promise<void> resolves to undefined
+      const result = impl.monitor(monitoredStepExecutionRuntimeMock);
+      expect(result).toBeUndefined(); // void returns undefined
     });
 
     it('should handle edge case where timeout exactly equals current duration', async () => {
@@ -298,7 +298,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
 
       // Should not timeout when duration equals timeout limit (using > comparison)
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).not.toHaveBeenCalled();
@@ -314,7 +314,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
 
       (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
-      await impl.monitor(monitoredStepExecutionRuntimeMock);
+      impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
       expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).toHaveBeenCalledTimes(1);

@@ -228,7 +228,7 @@ describe('StepExecutionRepository', () => {
           id: 'step-1',
           stepId: 'test-step-1',
           status: 'completed',
-          completedAt: '2025-10-28T10:00:00Z',
+          finishedAt: '2025-10-28T10:00:00Z',
           executionTimeMs: 5000,
           output: { result: 'success' },
         },

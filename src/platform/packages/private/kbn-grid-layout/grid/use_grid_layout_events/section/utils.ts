@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getScrollDimensions, isAtBottomOfPage } from '../../utils/scroll_container';
+import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
 import type { GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
 import type { UserKeyboardEvent } from '../sensors/keyboard/types';

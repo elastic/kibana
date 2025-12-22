@@ -32,7 +32,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}
@@ -98,7 +98,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}
@@ -151,7 +151,7 @@ describe('AddFilterButton component', () => {
         }
         closePopover={[Function]}
         display="inline-block"
-        hasArrow={true}
+        hasArrow={false}
         id="singlePanel"
         isOpen={false}
         ownFocus={true}

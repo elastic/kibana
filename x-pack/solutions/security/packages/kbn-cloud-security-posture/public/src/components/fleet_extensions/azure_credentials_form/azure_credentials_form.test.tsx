@@ -489,4 +489,102 @@ describe('AzureCredentialsForm', () => {
       expect(screen.getByTestId('azure-input-var-fields')).toBeInTheDocument();
     });
   });
+
+  describe('supports_cloud_connector cleanup for agent-based deployments', () => {
+    beforeEach(() => {
+      mockUseCloudSetup.mockReturnValue({
+        azurePolicyType: 'cspm',
+        azureEnabled: true,
+        azureManualFieldsEnabled: true,
+      });
+
+      mockUseAzureCredentialsForm.mockReturnValue({
+        azureCredentialsType: AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
+        setupFormat: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
+        group: { info: null },
+        fields: getMockAzureFormFields(),
+        hasArmTemplateUrl: true,
+        onSetupFormatChange: mockOnSetupFormatChange,
+        documentationLink: 'https://docs.elastic.co/azure',
+        hasInvalidRequiredVars: false,
+      });
+    });
+
+    it('should set supports_cloud_connector to false when rendering ARM template form', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithSupport = {
+        ...mockNewPolicy,
+        supports_cloud_connector: true, // Start with true (shouldn't be)
+        cloud_connector_id: 'some-connector',
+      };
+
+      renderWithIntl(
+        <AzureCredentialsForm
+          {...defaultProps}
+          newPolicy={mockPolicyWithSupport}
+          updatePolicy={mockUpdatePolicyFn}
+        />
+      );
+
+      expect(mockUpdatePolicyFn).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        }),
+      });
+    });
+
+    it('should set supports_cloud_connector to false when rendering manual setup form', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithSupport = {
+        ...mockNewPolicy,
+        supports_cloud_connector: true,
+        cloud_connector_id: 'some-connector',
+      };
+
+      mockUseAzureCredentialsForm.mockReturnValue({
+        azureCredentialsType: AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET,
+        setupFormat: AZURE_SETUP_FORMAT.MANUAL,
+        group: { info: null },
+        fields: getMockAzureFormFields(),
+        hasArmTemplateUrl: false,
+        onSetupFormatChange: mockOnSetupFormatChange,
+        documentationLink: 'https://docs.elastic.co/azure',
+        hasInvalidRequiredVars: false,
+      });
+
+      renderWithIntl(
+        <AzureCredentialsForm
+          {...defaultProps}
+          newPolicy={mockPolicyWithSupport}
+          updatePolicy={mockUpdatePolicyFn}
+        />
+      );
+
+      expect(mockUpdatePolicyFn).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        }),
+      });
+    });
+
+    it('should not call updatePolicy when supports_cloud_connector is already false', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithoutSupport = {
+        ...mockNewPolicy,
+        supports_cloud_connector: false, // Already correct
+      };
+
+      renderWithIntl(
+        <AzureCredentialsForm
+          {...defaultProps}
+          newPolicy={mockPolicyWithoutSupport}
+          updatePolicy={mockUpdatePolicyFn}
+        />
+      );
+
+      expect(mockUpdatePolicyFn).not.toHaveBeenCalled();
+    });
+  });
 });

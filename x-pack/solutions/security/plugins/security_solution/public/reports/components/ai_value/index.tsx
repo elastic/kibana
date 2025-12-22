@@ -8,16 +8,17 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ValueReportSettings } from './value_report_settings';
 import {
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-} from '../../../../common/constants';
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+} from '@kbn/management-settings-ids';
+import { ValueReportSettings } from './value_report_settings';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
 import { useValueMetrics } from '../../hooks/use_value_metrics';
 import { useKibana } from '../../../common/lib/kibana';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   setHasAttackDiscoveries: React.Dispatch<boolean>;
@@ -25,19 +26,34 @@ interface Props {
   to: string;
 }
 
-export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from, to }) => {
+export const AIValueMetrics: React.FC<Props> = (props) => {
+  const { setHasAttackDiscoveries } = props;
   const { uiSettings } = useKibana().services;
+  const exportContext = useAIValueExportContext();
+  const setReportInputForExportContext = exportContext?.setReportInput;
+
+  const { from, to } = useMemo(() => {
+    if (exportContext?.forwardedState) {
+      const { timeRange } = exportContext.forwardedState;
+      return {
+        from: timeRange.from,
+        to: timeRange.to,
+      };
+    }
+    return {
+      from: props.from,
+      to: props.to,
+    };
+  }, [props.from, props.to, exportContext?.forwardedState]);
 
   const { analystHourlyRate, minutesPerAlert } = useMemo(
     () => ({
-      minutesPerAlert: uiSettings.get<number>(DEFAULT_VALUE_REPORT_MINUTES),
-      analystHourlyRate: uiSettings.get<number>(DEFAULT_VALUE_REPORT_RATE),
+      minutesPerAlert: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES),
+      analystHourlyRate: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE),
     }),
     [uiSettings]
   );
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+
   const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
     from,
     to,
@@ -51,8 +67,33 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
   );
 
   useEffect(() => {
+    if (isLoading || !setReportInputForExportContext) {
+      return;
+    }
+    setReportInputForExportContext({
+      attackAlertIds,
+      valueMetrics,
+      valueMetricsCompare,
+      analystHourlyRate,
+      minutesPerAlert,
+    });
+  }, [
+    isLoading,
+    attackAlertIds,
+    valueMetrics,
+    valueMetricsCompare,
+    analystHourlyRate,
+    minutesPerAlert,
+    setReportInputForExportContext,
+  ]);
+
+  useEffect(() => {
     setHasAttackDiscoveries(hasAttackDiscoveries);
   }, [hasAttackDiscoveries, setHasAttackDiscoveries]);
+
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
 
   return (
     <div

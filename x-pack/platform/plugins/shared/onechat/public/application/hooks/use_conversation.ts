@@ -8,10 +8,9 @@
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { ConversationRound } from '@kbn/onechat-common';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
-import { newConversationId } from '../utils/new_conversation';
+import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
@@ -25,6 +24,7 @@ export const useConversation = () => {
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
+
   const {
     data: conversation,
     isLoading,
@@ -96,24 +96,20 @@ export const useConversationTitle = () => {
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const { pendingMessage, error } = useSendMessage();
+  const { pendingMessage, error, errorSteps } = useSendMessage();
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
-      const pendingRound: ConversationRound = {
-        id: '',
-        input: { message: pendingMessage },
-        response: { message: '' },
-        steps: [],
-        time_to_first_token: 0,
-        time_to_last_token: 0,
-        started_at: new Date().toISOString(),
-      };
+      const pendingRound = createNewRound({
+        userMessage: pendingMessage,
+        roundId: '',
+        steps: errorSteps,
+      });
       return [...rounds, pendingRound];
     }
     return rounds;
-  }, [conversation?.rounds, error, pendingMessage]);
+  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
 
   return conversationRounds;
 };
@@ -130,7 +126,12 @@ export const useStepsFromPrevRounds = () => {
 };
 
 export const useHasActiveConversation = () => {
-  const conversationId = useConversationId();
+  const hasPersistedConversation = useHasPersistedConversation();
   const conversationRounds = useConversationRounds();
-  return Boolean(conversationId || conversationRounds.length > 0);
+  return hasPersistedConversation || conversationRounds.length > 0;
+};
+
+export const useHasPersistedConversation = () => {
+  const conversationId = useConversationId();
+  return Boolean(conversationId);
 };

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FilterStateStore } from '@kbn/es-query-constants';
 import type { Serializable } from '@kbn/utility-types';
 import type { Filter, FILTERS } from './types';
 
@@ -18,7 +19,6 @@ import { buildRangeFilter } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
 
 import type { DataViewFieldBase, DataViewBase, DataViewBaseNoFields } from '../../es_query';
-import type { FilterStateStore } from './types';
 
 /**
  *

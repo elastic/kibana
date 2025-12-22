@@ -10,7 +10,7 @@
 import type {
   StepPropInfo,
   WorkflowLookup,
-} from '../../../../../entities/workflows/store/utils/build_workflow_lookup';
+} from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 export function getFocusedYamlPair(
   workflowLookup: WorkflowLookup | undefined,

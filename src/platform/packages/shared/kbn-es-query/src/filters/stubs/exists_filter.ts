@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { FilterStateStore } from '@kbn/es-query-constants';
 import type { ExistsFilter } from '..';
-import { FilterStateStore } from '..';
 
 export const existsFilter: ExistsFilter = {
   meta: {

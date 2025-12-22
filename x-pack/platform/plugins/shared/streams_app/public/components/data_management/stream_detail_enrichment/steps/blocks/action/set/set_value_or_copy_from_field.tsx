@@ -34,7 +34,7 @@ export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setValueFieldHelpText"
-          defaultMessage="The value to be set for the field. Supports template snippets."
+          defaultMessage="The value to be set for the field."
         />
       }
       labelAppend={
@@ -49,7 +49,7 @@ export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
       }
       fullWidth
     >
-      <EuiFieldText {...inputProps} inputRef={ref} />
+      <EuiFieldText {...inputProps} inputRef={ref} compressed={true} />
     </EuiFormRow>
   );
 };

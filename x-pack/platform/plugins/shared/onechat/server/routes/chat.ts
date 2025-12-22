@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
@@ -28,12 +29,15 @@ import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import converseAsyncDescription from './oas/converse_async.text';
 
 export function registerChatRoutes({
   router,
   getInternalServices,
   coreSetup,
   logger,
+  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -58,9 +62,14 @@ export function registerChatRoutes({
         },
       })
     ),
-    input: schema.string({
-      meta: { description: 'The user input message to send to the agent.' },
-    }),
+    input: schema.maybe(
+      schema.string({
+        meta: { description: 'The user input message to send to the agent.' },
+      })
+    ),
+    confirm: schema.maybe(
+      schema.boolean({ meta: { description: 'Can be used to respond to a confirmation prompt.' } })
+    ),
     attachments: schema.maybe(
       schema.arrayOf(
         schema.object({
@@ -164,9 +173,12 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      confirm,
       capabilities,
       browser_api_tools: browserApiTools,
     } = payload;
+
+    const promptResponse = confirm !== undefined ? { confirmed: confirm } : undefined;
 
     return chatService.converse({
       agentId,
@@ -177,6 +189,7 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: {
         message: input,
+        prompt_response: promptResponse,
         attachments,
       },
       request,
@@ -194,6 +207,9 @@ export function registerChatRoutes({
       description:
         'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
@@ -248,9 +264,12 @@ export function registerChatRoutes({
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
-            trace_id: round.trace_id,
-            steps: round.steps,
-            response: round.response,
+            round_id: round.id,
+            ...omit(round, ['id', 'input', 'response', 'pending_prompt', 'state']),
+            response: {
+              ...round.response,
+              prompt: round.pending_prompt,
+            },
           },
         });
       })
@@ -264,9 +283,11 @@ export function registerChatRoutes({
       },
       access: 'public',
       summary: 'Send chat message (streaming)',
-      description:
-        "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.",
+      description: converseAsyncDescription,
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',

@@ -9,70 +9,62 @@ import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
-import { z } from '@kbn/zod';
 import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
 import type { Logger } from '@kbn/core/server';
-import type { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
+import type {
+  ActionType as ConnectorType,
+  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
+} from '@kbn/actions-plugin/server';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionTypeExecutorResult, ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/torq';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/torq';
 import { isValidTorqHostName } from '../../../common/torq';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import type { Result } from '../lib/result_type';
 import { promiseResult, isOk } from '../lib/result_type';
 
-export type TorqActionType = ActionType<
-  ActionTypeConfigType,
-  ActionTypeSecretsType,
+export type TorqConnectorType = ConnectorType<
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
   ActionParamsType,
   unknown
 >;
-export type TorqActionTypeExecutorOptions = ActionTypeExecutorOptions<
-  ActionTypeConfigType,
-  ActionTypeSecretsType,
+export type TorqActionTypeExecutorOptions = ConnectorTypeExecutorOptions<
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
   ActionParamsType
 >;
 
-const configSchemaProps = {
-  webhookIntegrationUrl: z.string(),
-};
-const ConfigSchema = z.object(configSchemaProps).strict();
-export type ActionTypeConfigType = z.infer<typeof ConfigSchema>;
-
-// secrets definition
-export type ActionTypeSecretsType = z.infer<typeof SecretsSchema>;
-const secretSchemaProps = {
-  token: z.string(),
-};
-const SecretsSchema = z.object(secretSchemaProps).strict();
-
-// params definition
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-const ParamsSchema = z
-  .object({
-    body: z.string(),
-  })
-  .strict();
-
-export const ActionTypeId = '.torq';
 // action type definition
-export function getActionType(): TorqActionType {
+export function getActionType(): TorqConnectorType {
   return {
-    id: ActionTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.torqTitle', {
-      defaultMessage: 'Torq',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {
@@ -101,7 +93,7 @@ function renderParameterTemplates(
 }
 
 function validateActionTypeConfig(
-  configObject: ActionTypeConfigType,
+  configObject: ConnectorTypeConfigType,
   validatorServices: ValidatorServices
 ) {
   const configuredUrl = configObject.webhookIntegrationUrl;
@@ -152,7 +144,7 @@ export async function executor(
   const configurationUtilities = execOptions.configurationUtilities;
   const connectorUsageCollector = execOptions.connectorUsageCollector;
 
-  const secrets: ActionTypeSecretsType = execOptions.secrets;
+  const secrets: ConnectorTypeSecretsType = execOptions.secrets;
   const token = secrets.token;
 
   let body;

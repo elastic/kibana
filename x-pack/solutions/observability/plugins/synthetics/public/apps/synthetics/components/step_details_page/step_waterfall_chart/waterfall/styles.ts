@@ -40,7 +40,7 @@ export const WaterfallChartOuterContainer = euiStyled(
 
 export const WaterfallChartStickyHeaderContainer = euiStyled(StyledScrollDiv)`
   position: sticky;
-  top: 96px;
+  top: var(--kbn-application--sticky-headers-offset, 0px);
   z-index: ${(props) => props.theme.eui.euiZLevel5 + 10};
   overflow: visible;
   min-height: ${CHART_HEADER_HEIGHT}px;

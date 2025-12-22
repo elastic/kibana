@@ -960,6 +960,14 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "histogram",
             },
             Object {
+              "text": "exponential_histogram",
+              "value": "exponential_histogram",
+            },
+            Object {
+              "text": "tdigest",
+              "value": "tdigest",
+            },
+            Object {
               "text": "conflict",
               "value": "conflict",
             },

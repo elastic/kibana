@@ -15,7 +15,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / artifacts container image
-      description: Kibana container image artifact builds
+      description: Kibana serverless container image artifact builds
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-serverless-test-alerts'
@@ -44,4 +44,4 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
       tags:
         - kibana
-        - kibana-serverless-release
+        - ':kibana: Kibana release path'

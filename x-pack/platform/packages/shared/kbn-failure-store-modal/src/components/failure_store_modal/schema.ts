@@ -14,6 +14,10 @@ const isInvalidRetention = (value: string) => {
 };
 
 export const editFailureStoreFormSchema: FormSchema = {
+  inherit: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+  },
   failureStore: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,

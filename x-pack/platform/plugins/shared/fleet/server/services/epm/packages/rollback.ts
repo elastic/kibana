@@ -8,13 +8,24 @@
 import { uniq } from 'lodash';
 import type { unitOfTime } from 'moment';
 import moment from 'moment';
+import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core/server';
+
+import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../common';
+
+import type {
+  BulkRollbackAvailableCheckResponse,
+  Installation,
+  RollbackAvailableCheckResponse,
+} from '../../../../common/types';
 
 import { PackageRollbackError } from '../../../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { UpdateEventType, sendTelemetryEvents } from '../../upgrade_sender';
+
+import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../../../constants/max_concurrency_constants';
 
 import { getPackageSavedObjects } from './get';
 import { installPackage } from './install';
@@ -31,6 +42,71 @@ export const isIntegrationRollbackTTLExpired = (installStartedAt: string): boole
   const ttlDuration = moment.duration(Number(numberPart), unitPart).asMilliseconds();
   return Date.parse(installStartedAt) < Date.now() - ttlDuration;
 };
+
+export async function rollbackAvailableCheck(
+  pkgName: string
+): Promise<RollbackAvailableCheckResponse> {
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  const packageSORes = await getPackageSavedObjects(savedObjectsClient, {
+    searchFields: ['name'],
+    search: pkgName,
+  });
+  const packageSO = packageSORes.saved_objects[0];
+  const packageVersion = packageSO?.attributes.version;
+
+  const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(
+    savedObjectsClient,
+    {
+      searchFields: ['package.name'],
+      search: pkgName,
+      spaceIds: ['*'],
+      fields: ['package.version'],
+    }
+  );
+  const packagePolicySOs = packagePolicySORes.saved_objects;
+
+  if (
+    packagePolicySOs
+      .filter((so) => !so.id.endsWith(':prev'))
+      .some((so) => so.attributes.package?.version !== packageVersion)
+  ) {
+    return {
+      isAvailable: false,
+      reason: `Rollback not available because some integration policies are not upgraded to version ${packageVersion}`,
+    };
+  }
+
+  return {
+    isAvailable: true,
+  };
+}
+
+export async function bulkRollbackAvailableCheck(): Promise<BulkRollbackAvailableCheckResponse> {
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  const result = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    fields: ['name'],
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed`,
+    perPage: SO_SEARCH_LIMIT,
+  });
+  const installedPackageNames = result.saved_objects.map((so) => so.attributes.name);
+  const items: Record<string, RollbackAvailableCheckResponse> = {};
+
+  await pMap(
+    installedPackageNames,
+    async (pkgName) => {
+      const { isAvailable } = await rollbackAvailableCheck(pkgName);
+      items[pkgName] = { isAvailable };
+    },
+    {
+      concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
+    }
+  );
+  return items;
+}
 
 export async function rollbackInstallation(options: {
   esClient: ElasticsearchClient;

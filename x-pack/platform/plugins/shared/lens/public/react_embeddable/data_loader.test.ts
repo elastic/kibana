@@ -19,12 +19,12 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   LensDocument,
   GetStateType,
-  LensApi,
   LensInternalApi,
   LensOverrides,
   LensPublicCallbacks,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import type {
   HasParentApi,
   PublishesTimeRange,
@@ -367,6 +367,66 @@ describe('Data Loader', () => {
           parentApiQuery,
           parentApiFilters,
           parentApiTimeRange
+        ),
+      }
+    );
+  });
+
+  it('should propagate projectRouting from parent API to search context', async () => {
+    const projectRouting = '_alias:_origin';
+
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          projectRouting
+        ),
+      }
+    );
+  });
+
+  it('should handle undefined projectRouting from parent API', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            projectRouting: undefined,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi(
+          { query: '', language: 'kuery' },
+          [],
+          { from: 'now-7d', to: 'now' },
+          undefined
         ),
       }
     );

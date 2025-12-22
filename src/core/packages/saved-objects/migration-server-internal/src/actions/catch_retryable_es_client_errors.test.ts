@@ -62,7 +62,7 @@ describe('catchRetryableEsClientErrors', () => {
         type: 'retryable_es_client_error',
       });
     });
-    it.each([503, 401, 403, 408, 410, 429])(
+    it.each([504, 503, 502, 401, 403, 408, 410, 429])(
       'ResponseError with retryable status code (%d)',
       async (status) => {
         const error = new esErrors.ResponseError(
@@ -86,7 +86,7 @@ describe('catchRetryableEsClientErrors', () => {
 });
 
 describe('catchRetryableSearchPhaseExecutionException', () => {
-  it('retries search phase execution exception ', async () => {
+  it('retries search phase execution exception', async () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
         body: {
@@ -111,6 +111,34 @@ describe('catchRetryableSearchPhaseExecutionException', () => {
         "message": "search_phase_execution_exception
       	Caused by:
       		search_phase_execution_exception: Search rejected due to missing shards [.kibana]. Consider using \`allow_partial_search_results\` setting to bypass this error.",
+        "type": "retryable_es_client_error",
+      }
+    `);
+  });
+  it('retries search phase execution exception for "all shards failed"', async () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            caused_by: {
+              type: 'search_phase_execution_exception',
+              reason: 'all shards failed',
+            },
+          },
+        },
+      })
+    );
+    expect(
+      ((await Promise.reject(error).catch(catchRetryableSearchPhaseExecutionException)) as any).left
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": [ResponseError: search_phase_execution_exception
+      	Caused by:
+      		search_phase_execution_exception: all shards failed],
+        "message": "search_phase_execution_exception
+      	Caused by:
+      		search_phase_execution_exception: all shards failed",
         "type": "retryable_es_client_error",
       }
     `);

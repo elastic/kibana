@@ -13,3 +13,5 @@ export interface Dimension {
   name: string;
   type: ES_FIELD_TYPES;
 }
+
+export type DimensionFilters = Record<string, string[]>;

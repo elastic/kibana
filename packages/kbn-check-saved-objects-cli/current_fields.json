@@ -22,6 +22,7 @@
     "actions.actionRef",
     "actions.actionTypeId",
     "actions.group",
+    "actions.params",
     "alertTypeId",
     "artifacts",
     "artifacts.investigation_guide",
@@ -94,6 +95,10 @@
     "tags"
   ],
   "api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt"
+  ],
+  "api_key_to_invalidate": [
     "apiKeyId",
     "createdAt"
   ],
@@ -260,6 +265,12 @@
     "type"
   ],
   "cloud": [],
+  "cloud-connect-api-key": [
+    "apiKey",
+    "clusterId",
+    "createdAt",
+    "updatedAt"
+  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -309,6 +320,17 @@
     "timeTo",
     "title",
     "version"
+  ],
+  "data_connector": [
+    "config",
+    "createdAt",
+    "features",
+    "kscIds",
+    "name",
+    "toolIds",
+    "type",
+    "updatedAt",
+    "workflowIds"
   ],
   "data_stream-config": [
     "created_by",
@@ -559,6 +581,7 @@
     "updated_by"
   ],
   "fleet-cloud-connector": [
+    "accountType",
     "cloudProvider",
     "created_at",
     "name",
@@ -629,6 +652,13 @@
     "namespaces",
     "policy_id",
     "token_plain"
+  ],
+  "gap_auto_fill_scheduler": [
+    "createdAt",
+    "enabled",
+    "name",
+    "ruleTypeConsumerPairs",
+    "updatedAt"
   ],
   "graph-workspace": [
     "description",
@@ -797,9 +827,12 @@
     "delete_unenrolled_agents.is_preconfigured",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
+    "ilm_migration_status",
+    "integration_knowledge_enabled",
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
     "secret_storage_requirements_met",
+    "ssl_secret_storage_requirements_met",
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],
@@ -962,7 +995,8 @@
     "installation_status",
     "last_installation_date",
     "product_name",
-    "product_version"
+    "product_version",
+    "resource_type"
   ],
   "query": [
     "description",
@@ -994,7 +1028,8 @@
     "unInstallCount"
   ],
   "scheduled_report": [
-    "createdBy"
+    "createdBy",
+    "title"
   ],
   "search": [
     "description",
@@ -1172,12 +1207,17 @@
     "version"
   ],
   "slo-settings": [],
+  "slo_template": [
+    "name",
+    "tags"
+  ],
   "space": [
     "disabledFeatures",
     "name",
     "solution"
   ],
   "spaces-usage-stats": [],
+  "stream-prompts": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",

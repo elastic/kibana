@@ -12,9 +12,17 @@ import {
   type KibanaPhoenixClient,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
+  selectEvaluators,
+  withEvaluatorSpan,
+  createSpanLatencyEvaluator,
+  createRagEvaluators,
+  type GroundTruth,
+  type RetrievedDoc,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { EsClient } from '@kbn/scout';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { OnechatEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
@@ -23,6 +31,10 @@ interface DatasetExample extends Example {
   };
   output: {
     expected?: string;
+    groundTruth?: GroundTruth;
+  };
+  metadata?: {
+    [key: string]: unknown;
   };
 }
 
@@ -40,10 +52,14 @@ export function createEvaluateDataset({
   evaluators,
   phoenixClient,
   chatClient,
+  traceEsClient,
+  log,
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
   chatClient: OnechatEvaluationChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
@@ -70,37 +86,81 @@ export function createEvaluateDataset({
       });
 
       // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+      // Wrap LLM judge calls @kbn/evals spans and assign root context to prevent them from contributing to latency, token use and other metrics of the EvaluateExample span
       const [correctnessResult, groundednessResult] = await Promise.all([
-        evaluators.correctnessAnalysis().evaluate({
-          input,
-          expected: output,
-          output: response,
-          metadata,
-        }),
-        evaluators.groundednessAnalysis().evaluate({
-          input,
-          expected: output,
-          output: response,
-          metadata,
-        }),
+        withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+          evaluators.correctnessAnalysis().evaluate({
+            input,
+            expected: output,
+            output: response,
+            metadata,
+          })
+        ),
+        withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+          evaluators.groundednessAnalysis().evaluate({
+            input,
+            expected: output,
+            output: response,
+            metadata,
+          })
+        ),
       ]);
-      const correctnessAnalysis = correctnessResult.metadata;
-      const groundednessAnalysis = groundednessResult.metadata;
 
       return {
         errors: response.errors,
         messages: response.messages,
-        correctnessAnalysis,
-        groundednessAnalysis,
+        steps: response.steps,
+        traceId: response.traceId,
+        correctnessAnalysis: correctnessResult?.metadata,
+        groundednessAnalysis: groundednessResult?.metadata,
       };
     };
+
+    const ragEvaluators = createRagEvaluators({
+      k: 10,
+      relevanceThreshold: 1,
+      extractRetrievedDocs: (output: TaskOutput) => {
+        const steps =
+          (
+            output as {
+              steps?: Array<{
+                type: string;
+                tool_id?: string;
+                results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
+              }>;
+            }
+          )?.steps ?? [];
+        return steps
+          .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
+          .flatMap((step) => step.results ?? [])
+          .map((result) => ({
+            index: result.data?.reference?.index,
+            id: result.data?.reference?.id,
+          }))
+          .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
+      },
+      extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
+        referenceOutput?.groundTruth ?? {},
+    });
 
     await phoenixClient.runExperiment(
       {
         dataset,
         task: callConverseAndEvaluate,
       },
-      [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
+      selectEvaluators([
+        ...createQuantitativeCorrectnessEvaluators(),
+        createQuantitativeGroundednessEvaluator(),
+        ...ragEvaluators,
+        ...Object.values({
+          ...evaluators.traceBasedEvaluators,
+          latency: createSpanLatencyEvaluator({
+            traceEsClient,
+            log,
+            spanName: 'Converse',
+          }),
+        }),
+      ])
     );
   };
 }

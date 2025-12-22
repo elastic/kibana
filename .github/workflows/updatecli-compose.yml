@@ -28,11 +28,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: elastic/oblt-actions/updatecli/run@v1
+      - name: Free Disk Space
+        continue-on-error: true
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
-          command: --experimental compose diff
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: false
+          tool-cache: false
 
       - uses: elastic/oblt-actions/updatecli/run@v1
         with:

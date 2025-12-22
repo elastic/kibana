@@ -19,6 +19,7 @@ export interface MetricField {
   instrument?: MappingTimeSeriesMetricType;
   unit?: MetricUnit;
   display?: string;
+  scope?: string;
   noData?: boolean;
 }
 

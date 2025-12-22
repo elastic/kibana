@@ -124,21 +124,18 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'should reject Mustache template syntax {{ and {{{ in field names',
-      async ({ testBed, esql }) => {
-        const streamlangDSL: StreamlangDSL = {
-          steps: [
-            {
-              action: 'remove_by_prefix',
-              from: '{{field.name}}',
-            } as RemoveByPrefixProcessor,
-          ],
-        };
-        expect(() => transpile(streamlangDSL)).toThrow(
-          'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
-        );
-      }
-    );
+    apiTest('should reject Mustache template syntax {{ and {{{ in field names', async ({}) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'remove_by_prefix',
+            from: '{{field.name}}',
+          } as RemoveByPrefixProcessor,
+        ],
+      };
+      expect(() => transpile(streamlangDSL)).toThrow(
+        'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+      );
+    });
   }
 );

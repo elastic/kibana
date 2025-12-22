@@ -1,0 +1,154 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { updateYamlField } from './update_yaml_field';
+
+describe('updateYamlField', () => {
+  it('should update enabled field while preserving formatting', () => {
+    const yaml = `name: Test Workflow
+enabled: true
+steps: []`;
+
+    const result = updateYamlField(yaml, 'enabled', false);
+
+    expect(result).toContain('enabled: false');
+    expect(result).not.toContain('enabled: true');
+    expect(result).toContain('name: Test Workflow');
+    expect(result).toContain('steps: []');
+  });
+
+  it('should preserve comments when updating fields', () => {
+    const yaml = `# This is a comment
+name: Test Workflow
+# Another comment
+enabled: true
+
+# Steps section
+steps: []`;
+
+    const result = updateYamlField(yaml, 'enabled', false);
+
+    expect(result).toContain('# This is a comment');
+    expect(result).toContain('# Another comment');
+    expect(result).toContain('# Steps section');
+    expect(result).toContain('enabled: false');
+    expect(result).not.toContain('enabled: true');
+  });
+
+  it('should preserve blank lines when updating fields', () => {
+    const yaml = `name: Test Workflow
+
+enabled: true
+
+steps: []`;
+
+    const result = updateYamlField(yaml, 'enabled', false);
+
+    expect(result).toContain('\n\n'); // Blank lines should be preserved
+    expect(result).toContain('enabled: false');
+  });
+
+  it('should add field if it does not exist', () => {
+    const yaml = `name: Test Workflow
+steps: []`;
+
+    const result = updateYamlField(yaml, 'enabled', true);
+
+    expect(result).toContain('enabled: true');
+    expect(result).toContain('name: Test Workflow');
+    expect(result).toContain('steps: []');
+  });
+
+  it('should update name field', () => {
+    const yaml = `name: Old Name
+steps: []`;
+
+    const result = updateYamlField(yaml, 'name', 'New Name');
+
+    expect(result).toContain('name: New Name');
+    expect(result).not.toContain('name: Old Name');
+  });
+
+  it('should update description field', () => {
+    const yaml = `name: Test Workflow
+steps: []`;
+
+    const result = updateYamlField(yaml, 'description', 'A test workflow');
+
+    expect(result).toContain('description: A test workflow');
+    expect(result).toContain('name: Test Workflow');
+  });
+
+  it('should update tags field', () => {
+    const yaml = `name: Test Workflow
+steps: []`;
+
+    const result = updateYamlField(yaml, 'tags', ['tag1', 'tag2']);
+
+    expect(result).toContain('tags:');
+    expect(result).toContain('tag1');
+    expect(result).toContain('tag2');
+  });
+
+  it('should handle multiple field updates', () => {
+    const yaml = `name: Old Name
+enabled: true
+steps: []`;
+
+    let result = updateYamlField(yaml, 'name', 'New Name');
+    result = updateYamlField(result, 'enabled', false);
+
+    expect(result).toContain('name: New Name');
+    expect(result).toContain('enabled: false');
+    expect(result).not.toContain('name: Old Name');
+    expect(result).not.toContain('enabled: true');
+  });
+
+  it('should return original YAML if parsing fails', () => {
+    const invalidYaml = 'invalid: yaml: content: [';
+
+    const result = updateYamlField(invalidYaml, 'enabled', false);
+
+    // Should return original YAML as fallback
+    expect(result).toBe(invalidYaml);
+  });
+
+  it('should preserve complex formatting with nested structures', () => {
+    const yaml = `name: Test Workflow
+# Comment before enabled
+enabled: true
+
+steps:
+  # Step comment
+  - name: step1
+    type: console`;
+
+    const result = updateYamlField(yaml, 'enabled', false);
+
+    expect(result).toContain('# Comment before enabled');
+    expect(result).toContain('# Step comment');
+    expect(result).toContain('enabled: false');
+    expect(result).toContain('steps:');
+    expect(result).toContain('- name: step1');
+  });
+
+  it('should handle nested field paths with dot notation', () => {
+    const yaml = `metadata:
+  version: 1.0
+  author: Old Author
+steps: []`;
+
+    const result = updateYamlField(yaml, 'metadata.author', 'New Author');
+
+    expect(result).toContain('author: New Author');
+    expect(result).not.toContain('author: Old Author');
+    expect(result).toContain('version: 1.0');
+    expect(result).toContain('steps: []');
+  });
+});

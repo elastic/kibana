@@ -30,6 +30,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pushFlyoutPaddingStyles } from '../../../common.styles';
 import { docLinks } from '../../../../common/doc_links';
 import type {
   CreateToolPayload,
@@ -211,6 +212,12 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     reset(mergedValues);
   }, [toolType, mode, getValues, reset]);
 
+  useEffect(() => {
+    if (urlToolType && urlToolType !== toolType) {
+      setUrlToolType(toolType);
+    }
+  }, [urlToolType, toolType, setUrlToolType]);
+
   const toolFormId = useGeneratedHtmlId({
     prefix: 'toolForm',
   });
@@ -370,13 +377,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 {isViewMode ? (
                   <ToolForm mode={ToolFormMode.View} formId={toolFormId} />
                 ) : (
-                  <ToolForm
-                    mode={mode}
-                    formId={toolFormId}
-                    saveTool={handleSave}
-                    toolType={urlToolType!}
-                    setToolType={setUrlToolType}
-                  />
+                  <ToolForm mode={mode} formId={toolFormId} saveTool={handleSave} />
                 )}
                 <EuiSpacer
                   css={css`
@@ -395,7 +396,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
             position="fixed"
             usePortal
           >
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" css={pushFlyoutPaddingStyles}>
               {mode !== ToolFormMode.View && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty

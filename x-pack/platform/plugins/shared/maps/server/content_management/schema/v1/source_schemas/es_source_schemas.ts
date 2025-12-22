@@ -130,8 +130,6 @@ export const ESSearchSourceSchema = BaseESSourceSchema.extends(
 export const ESQLSourceSchema = schema.object(
   {
     applyForceRefresh: applyForceRefreshSchema,
-    // TODO dataViewId is derived from esql statement, remove from stored state
-    dataViewId: schema.string(),
     dateField: schema.maybe(
       schema.string({
         meta: {

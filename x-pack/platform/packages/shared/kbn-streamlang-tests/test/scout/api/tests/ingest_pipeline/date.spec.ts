@@ -190,7 +190,7 @@ apiTest.describe('Streamlang to Ingest Pipeline - Date Processor', () => {
       description: 'should reject {{{ }}} template syntax in field names',
     },
   ].forEach(({ templateFrom, templateTo, description }) => {
-    apiTest(`${description}`, { tag: ['@ess', '@svlOblt'] }, async ({ testBed }) => {
+    apiTest(`${description}`, { tag: ['@ess', '@svlOblt'] }, async () => {
       expect(() => {
         const streamlangDSL: StreamlangDSL = {
           steps: [

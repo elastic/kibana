@@ -10,10 +10,20 @@ import {
   createToolNotFoundError,
   createBadRequestError,
   validateToolId,
+  ToolResultType,
+  type ToolType,
+  type ErrorResult,
 } from '@kbn/onechat-common';
-import type { Runner, RunToolReturn, ScopedRunnerRunToolsParams } from '@kbn/onechat-server';
 import type {
+  Runner,
+  RunToolReturn,
+  ScopedRunnerRunToolsParams,
+  ToolAvailabilityContext,
   InternalToolDefinition,
+} from '@kbn/onechat-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type {
   ToolCreateParams,
   ToolUpdateParams,
   ToolProvider,
@@ -22,6 +32,7 @@ import type {
 } from './tool_provider';
 import { isReadonlyToolProvider } from './tool_provider';
 import { toExecutableTool } from './utils';
+import type { ToolHealthClient } from './health';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ToolListParams {
@@ -42,29 +53,53 @@ export interface ToolRegistry {
   ): Promise<RunToolReturn>;
 }
 
-interface CreateToolClientParams {
+interface CreateToolRegistryParams {
   getRunner: () => Runner;
   persistedProvider: WritableToolProvider;
   builtinProvider: ReadonlyToolProvider;
   request: KibanaRequest;
   space: string;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
+  healthClient: ToolHealthClient;
+  healthTrackedToolTypes: Set<ToolType>;
 }
 
-export const createToolRegistry = (params: CreateToolClientParams): ToolRegistry => {
+export const createToolRegistry = (params: CreateToolRegistryParams): ToolRegistry => {
   return new ToolRegistryImpl(params);
 };
 
 class ToolRegistryImpl implements ToolRegistry {
   private readonly persistedProvider: WritableToolProvider;
   private readonly builtinProvider: ReadonlyToolProvider;
+  private readonly spaceId: string;
   private readonly request: KibanaRequest;
+  private readonly uiSettings: UiSettingsServiceStart;
+  private readonly savedObjects: SavedObjectsServiceStart;
   private readonly getRunner: () => Runner;
+  private readonly healthClient: ToolHealthClient;
+  private readonly healthTrackedToolTypes: Set<ToolType>;
 
-  constructor({ persistedProvider, builtinProvider, request, getRunner }: CreateToolClientParams) {
+  constructor({
+    persistedProvider,
+    builtinProvider,
+    request,
+    getRunner,
+    space,
+    uiSettings,
+    savedObjects,
+    healthClient,
+    healthTrackedToolTypes,
+  }: CreateToolRegistryParams) {
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
     this.request = request;
+    this.spaceId = space;
+    this.uiSettings = uiSettings;
+    this.savedObjects = savedObjects;
     this.getRunner = getRunner;
+    this.healthClient = healthClient;
+    this.healthTrackedToolTypes = healthTrackedToolTypes;
   }
 
   private get orderedProviders(): ToolProvider[] {
@@ -76,8 +111,19 @@ class ToolRegistryImpl implements ToolRegistry {
   ): Promise<RunToolReturn> {
     const { toolId, ...otherParams } = params;
     const tool = await this.get(toolId);
+    if (!(await this.isAvailable(tool))) {
+      throw createBadRequestError(`Tool ${toolId} is not available`);
+    }
     const executable = toExecutableTool({ tool, runner: this.getRunner(), request: this.request });
-    return (await executable.execute(otherParams)) as RunToolReturn;
+    const result = (await executable.execute(otherParams)) as RunToolReturn;
+
+    // Track health for tool types that have opted in via trackHealth: true
+    // Fire-and-forget: don't block tool execution on health tracking
+    if (this.healthTrackedToolTypes.has(tool.type)) {
+      void this.trackToolHealth(toolId, result).catch(() => {});
+    }
+
+    return result;
   }
 
   async has(toolId: string) {
@@ -92,7 +138,11 @@ class ToolRegistryImpl implements ToolRegistry {
   async get(toolId: string) {
     for (const provider of this.orderedProviders) {
       if (await provider.has(toolId)) {
-        return provider.get(toolId);
+        const tool = await provider.get(toolId);
+        if (!(await this.isAvailable(tool))) {
+          throw createBadRequestError(`Tool ${toolId} is not available`);
+        }
+        return tool;
       }
     }
     throw createToolNotFoundError({ toolId });
@@ -102,7 +152,11 @@ class ToolRegistryImpl implements ToolRegistry {
     const allTools: InternalToolDefinition[] = [];
     for (const provider of this.orderedProviders) {
       const toolsFromType = await provider.list();
-      allTools.push(...toolsFromType);
+      for (const tool of toolsFromType) {
+        if (await this.isAvailable(tool)) {
+          allTools.push(tool);
+        }
+      }
     }
     return allTools;
   }
@@ -140,9 +194,44 @@ class ToolRegistryImpl implements ToolRegistry {
         if (isReadonlyToolProvider(provider)) {
           throw createBadRequestError(`Tool ${toolId} is read-only and can't be deleted`);
         }
+
+        // Clean up health data when tool is deleted (fire-and-forget)
+        void this.healthClient.delete(toolId).catch(() => {});
+
         return provider.delete(toolId);
       }
     }
     throw createToolNotFoundError({ toolId });
+  }
+
+  private async isAvailable(tool: InternalToolDefinition): Promise<boolean> {
+    const soClient = this.savedObjects.getScopedClient(this.request);
+    const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+
+    const context: ToolAvailabilityContext = {
+      spaceId: this.spaceId,
+      request: this.request,
+      uiSettings: uiSettingsClient,
+    };
+    const toolStatus = await tool.isAvailable(context);
+    return toolStatus.status === 'available';
+  }
+
+  /**
+   * Tracks health state for a tool based on its execution result.
+   * Records success if no error results are present, otherwise records failure.
+   */
+  private async trackToolHealth(toolId: string, result: RunToolReturn): Promise<void> {
+    if (result.results) {
+      const errorResult = result.results?.find(
+        (r): r is ErrorResult => r.type === ToolResultType.error
+      );
+
+      if (errorResult) {
+        await this.healthClient.recordFailure(toolId, errorResult.data.message);
+      } else {
+        await this.healthClient.recordSuccess(toolId);
+      }
+    }
   }
 }

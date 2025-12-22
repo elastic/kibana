@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type FleetServerAgent } from '../../common/types';
+import { type FleetServerAgent } from '@kbn/fleet-plugin/common/types';
 
 export const createAgentDoc = (
   id: string,

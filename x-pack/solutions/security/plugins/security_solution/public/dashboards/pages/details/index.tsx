@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
@@ -31,7 +31,6 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
@@ -53,7 +52,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView();
 
   const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');
   const errorState = useMemo(
@@ -68,15 +67,15 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView: experimentalDataView } = useDataView();
 
   return (
     <>
       <FiltersGlobal>
         <SiemSearchBar
+          dataView={experimentalDataView}
           id={InputsModelId.global}
-          sourcererDataView={newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView}
+          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
         />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>

@@ -19,18 +19,15 @@ describe('workflow with continue on failure', () => {
   });
 
   describe.each(['step level', 'workflow level'])('continue is on %s', (testCase) => {
-    let buildYamlFn: () => string;
-
-    beforeAll(() => {
+    function buildYamlFn(continueExpression: boolean | string | undefined): string {
       if (testCase === 'step level') {
-        buildYamlFn = () => {
-          return `
+        return `
 steps:
   - name: constantlyFailingStep
     type: ${FakeConnectors.constantlyFailing.actionTypeId}
     connector-id: ${FakeConnectors.constantlyFailing.name}
-    on-failure:
-      continue: true
+    ${continueExpression ? 'on-failure:' : ''}
+      ${continueExpression ? `continue: ${continueExpression}` : ''}
     with:
       message: 'Hi there! Are you alive?'
 
@@ -40,98 +37,11 @@ steps:
     with:
       message: 'Final message!'
 `;
-        };
-      } else if (testCase === 'workflow level') {
-        buildYamlFn = () => {
-          return `
-settings:
-  on-failure:
-    continue: true
-steps:
-  - name: constantlyFailingStep
-    type: ${FakeConnectors.constantlyFailing.actionTypeId}
-    connector-id: ${FakeConnectors.constantlyFailing.name}
-    with:
-      message: 'Hi there! Are you alive?'
-
-  - name: finalStep
-    type: slack
-    connector-id: ${FakeConnectors.slack2.name}
-    with:
-      message: 'Final message!'
-`;
-        };
       }
-    });
-
-    describe('when continue is true', () => {
-      beforeEach(async () => {
-        jest.clearAllMocks();
-        await workflowRunFixture.runWorkflow({
-          workflowYaml: buildYamlFn(),
-        });
-      });
-
-      it('should successfully complete workflow despite error in constantlyFailingStep', async () => {
-        const workflowExecutionDoc =
-          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-            'fake_workflow_execution_id'
-          );
-        expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
-        expect(workflowExecutionDoc?.error).toBe(undefined);
-        expect(workflowExecutionDoc?.scopeStack).toEqual([]);
-      });
-
-      it('should execute constantlyFailingStep once and record its failure', async () => {
-        const failingStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-        ).filter(
-          (se) =>
-            se.stepId === 'constantlyFailingStep' &&
-            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
-        );
-        expect(failingStepExecutions.length).toBe(1);
-        expect(failingStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
-        expect(failingStepExecutions[0].error).toBe('Error: Constantly failing connector');
-      });
-
-      it('should execute finalStep successfully after the failing step', async () => {
-        const finalStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-        ).filter((se) => se.stepId === 'finalStep');
-        expect(finalStepExecutions.length).toBe(1);
-        expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
-        expect(finalStepExecutions[0].error).toBe(undefined);
-      });
-
-      it('should execute finalStep after constantlyFailingStep', async () => {
-        const failingStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-        ).filter(
-          (se) =>
-            se.stepId === 'constantlyFailingStep' &&
-            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
-        );
-        const finalStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-        ).filter((se) => se.stepId === 'finalStep');
-
-        expect(failingStepExecutions.length).toBe(1);
-        expect(finalStepExecutions.length).toBe(1);
-
-        const failingStepCompletedAt = new Date(failingStepExecutions[0].completedAt!).getTime();
-        const finalStepStartedAt = new Date(finalStepExecutions[0].startedAt).getTime();
-
-        expect(finalStepStartedAt).toBeGreaterThanOrEqual(failingStepCompletedAt);
-      });
-    });
-  });
-
-  describe('when continue is false (default behavior)', () => {
-    beforeEach(async () => {
-      jest.clearAllMocks();
-      await workflowRunFixture.runWorkflow({
-        workflowYaml: `
+      return `
+settings:
+  ${continueExpression ? 'on-failure:' : ''}
+    ${continueExpression ? `continue: ${continueExpression}` : ''}
 steps:
   - name: constantlyFailingStep
     type: ${FakeConnectors.constantlyFailing.actionTypeId}
@@ -144,38 +54,123 @@ steps:
     connector-id: ${FakeConnectors.slack2.name}
     with:
       message: 'Final message!'
-`,
-      });
-    });
+`;
+    }
 
-    it('should fail the workflow due to error in constantlyFailingStep', async () => {
-      const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-          'fake_workflow_execution_id'
-        );
-      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
-      expect(workflowExecutionDoc?.error).toBe('Error: Constantly failing connector');
-      expect(workflowExecutionDoc?.scopeStack).toEqual([]);
-    });
+    describe.each([true, '${{error.type == "Error"}}'])(
+      'when continue is %s',
+      (continueTestCase) => {
+        beforeEach(async () => {
+          jest.clearAllMocks();
+          await workflowRunFixture.runWorkflow({
+            workflowYaml: buildYamlFn(continueTestCase),
+          });
+        });
 
-    it('should execute constantlyFailingStep once and record its failure', async () => {
-      const failingStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).filter(
-        (se) =>
-          se.stepId === 'constantlyFailingStep' &&
-          se.stepType === FakeConnectors.constantlyFailing.actionTypeId
-      );
-      expect(failingStepExecutions.length).toBe(1);
-      expect(failingStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
-      expect(failingStepExecutions[0].error).toBe('Error: Constantly failing connector');
-    });
+        it('should successfully complete workflow despite error in constantlyFailingStep', async () => {
+          const workflowExecutionDoc =
+            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+              'fake_workflow_execution_id'
+            );
+          expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
+          expect(workflowExecutionDoc?.error).toBe(undefined);
+          expect(workflowExecutionDoc?.scopeStack).toEqual([]);
+        });
 
-    it('should not execute finalStep', async () => {
-      const finalStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).filter((se) => se.stepId === 'finalStep');
-      expect(finalStepExecutions.length).toBe(0);
-    });
+        it('should execute constantlyFailingStep once and record its failure', async () => {
+          const failingStepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).filter(
+            (se) =>
+              se.stepId === 'constantlyFailingStep' &&
+              se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+          );
+          expect(failingStepExecutions.length).toBe(1);
+          expect(failingStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
+          expect(failingStepExecutions[0].error).toEqual({
+            message: 'Error: Constantly failing connector',
+            type: 'Error',
+          });
+        });
+
+        it('should execute finalStep successfully after the failing step', async () => {
+          const finalStepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).filter((se) => se.stepId === 'finalStep');
+          expect(finalStepExecutions.length).toBe(1);
+          expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+          expect(finalStepExecutions[0].error).toBe(undefined);
+        });
+
+        it('should execute finalStep after constantlyFailingStep', async () => {
+          const failingStepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).filter(
+            (se) =>
+              se.stepId === 'constantlyFailingStep' &&
+              se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+          );
+          const finalStepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).filter((se) => se.stepId === 'finalStep');
+
+          expect(failingStepExecutions.length).toBe(1);
+          expect(finalStepExecutions.length).toBe(1);
+
+          const failingStepCompletedAt = new Date(failingStepExecutions[0].finishedAt!).getTime();
+          const finalStepStartedAt = new Date(finalStepExecutions[0].startedAt).getTime();
+
+          expect(finalStepStartedAt).toBeGreaterThanOrEqual(failingStepCompletedAt);
+        });
+      }
+    );
+
+    describe.each([undefined, false, '${{error.type == "SomeOtherError"}}'])(
+      'when continue is "%s"',
+      (continueTestCase) => {
+        beforeEach(async () => {
+          jest.clearAllMocks();
+          await workflowRunFixture.runWorkflow({
+            workflowYaml: buildYamlFn(continueTestCase),
+          });
+        });
+
+        it('should fail the workflow due to error in constantlyFailingStep', async () => {
+          const workflowExecutionDoc =
+            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+              'fake_workflow_execution_id'
+            );
+          expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
+          expect(workflowExecutionDoc?.error).toEqual({
+            message: 'Error: Constantly failing connector',
+            type: 'Error',
+          });
+          expect(workflowExecutionDoc?.scopeStack).toEqual([]);
+        });
+
+        it('should execute constantlyFailingStep once and record its failure', async () => {
+          const failingStepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).filter(
+            (se) =>
+              se.stepId === 'constantlyFailingStep' &&
+              se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+          );
+          expect(failingStepExecutions.length).toBe(1);
+          expect(failingStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
+          expect(failingStepExecutions[0].error).toEqual({
+            message: 'Error: Constantly failing connector',
+            type: 'Error',
+          });
+        });
+
+        it('should not execute finalStep', async () => {
+          const finalStepExecutions = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).filter((se) => se.stepId === 'finalStep');
+          expect(finalStepExecutions.length).toBe(0);
+        });
+      }
+    );
   });
 });

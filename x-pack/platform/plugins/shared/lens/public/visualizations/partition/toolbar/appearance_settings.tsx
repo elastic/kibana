@@ -25,7 +25,7 @@ export function PartitionAppearanceSettings(
 ) {
   const { state, setState } = props;
   const layer = state.layers[0];
-  const { emptySizeRatioOptions } = PartitionChartsMeta[state.shape].toolbarPopover;
+  const { emptySizeRatioOptions } = PartitionChartsMeta[state.shape].toolbar;
 
   const onEmptySizeRatioChange = useCallback(
     ([option]: Array<EuiComboBoxOptionOption<string>>) => {

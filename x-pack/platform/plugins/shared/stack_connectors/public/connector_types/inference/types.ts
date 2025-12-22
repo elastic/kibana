@@ -7,14 +7,14 @@
 
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SUB_ACTION } from '../../../common/inference/constants';
+import type { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import type {
   ChatCompleteParams,
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
   UnifiedChatCompleteParams,
-} from '../../../common/inference/types';
+} from '@kbn/connector-schemas/inference';
 
 export type InferenceActionParams =
   | { subAction: SUB_ACTION.UNIFIED_COMPLETION_STREAM; subActionParams: UnifiedChatCompleteParams }

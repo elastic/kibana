@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const { bundle } = require('@kbn/openapi-bundler');
 // eslint-disable-next-line import/no-nodejs-modules
 const { join, resolve } = require('path');

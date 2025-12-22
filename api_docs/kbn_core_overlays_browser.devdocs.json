@@ -900,7 +900,7 @@
         "signature": [
           "Omit<",
           "EuiFlyoutProps",
-          "<\"div\"> | ",
+          "<\"div\" | \"nav\"> | ",
           "EuiFlyoutResizableProps",
           ", \"onResize\" | \"onClose\"> & { onClose?: ((flyout: ",
           "OverlayRef",

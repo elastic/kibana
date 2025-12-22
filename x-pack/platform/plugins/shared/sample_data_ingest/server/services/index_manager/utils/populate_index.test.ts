@@ -67,15 +67,18 @@ describe('populateIndex', () => {
     });
 
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      refresh: false,
-      operations: [
-        { index: { _index: '.foo' } },
-        { idx: 0 },
-        { index: { _index: '.foo' } },
-        { idx: 1 },
-      ],
-    });
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      {
+        refresh: false,
+        operations: [
+          { index: { _index: '.foo' } },
+          { idx: 0 },
+          { index: { _index: '.foo' } },
+          { idx: 1 },
+        ],
+      },
+      { signal: undefined }
+    );
   });
 
   it('rewrites the inference_id of semantic fields', async () => {
@@ -101,22 +104,25 @@ describe('populateIndex', () => {
     });
 
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      refresh: false,
-      operations: [
-        { index: { _index: '.foo' } },
-        {
-          semantic: 'foo',
-          _inference_fields: {
-            semantic: {
-              inference: {
-                inference_id: internalElserInferenceId,
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      {
+        refresh: false,
+        operations: [
+          { index: { _index: '.foo' } },
+          {
+            semantic: 'foo',
+            _inference_fields: {
+              semantic: {
+                inference: {
+                  inference_id: internalElserInferenceId,
+                },
               },
             },
           },
-        },
-      ],
-    });
+        ],
+      },
+      { signal: undefined }
+    );
   });
 
   it('rewrites the inference_id of semantic fields for legacy semantic_field', async () => {
@@ -135,19 +141,22 @@ describe('populateIndex', () => {
     });
 
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      refresh: false,
-      operations: [
-        { index: { _index: '.foo' } },
-        {
-          semantic: {
-            inference: {
-              inference_id: internalElserInferenceId,
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      {
+        refresh: false,
+        operations: [
+          { index: { _index: '.foo' } },
+          {
+            semantic: {
+              inference: {
+                inference_id: internalElserInferenceId,
+              },
+              text: 'foo',
             },
-            text: 'foo',
           },
-        },
-      ],
-    });
+        ],
+      },
+      { signal: undefined }
+    );
   });
 });

@@ -18,7 +18,10 @@ export const storybookAliases = {
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
   coloring: 'src/platform/packages/shared/kbn-coloring/.storybook',
+  content_management:
+    'src/platform/packages/shared/content-management/kbn-content-management-storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
+  classic_stream_flyout: 'x-pack/platform/packages/shared/kbn-classic-stream-flyout/.storybook',
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',
@@ -44,6 +47,7 @@ export const storybookAliases = {
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
   kibana_react: 'src/platform/plugins/shared/kibana_react/.storybook',
+  kbn_split_button: 'src/platform/packages/private/kbn-split-button/.storybook',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',

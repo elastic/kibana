@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/kbn-developer-toolbar'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-developer-toolbar'],
 };

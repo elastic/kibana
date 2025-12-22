@@ -61,6 +61,7 @@ export class SearchSessionsMgmtApp {
       share: pluginsStart.share,
       kibanaVersion: this.kibanaVersion,
       searchUsageCollector: setupDeps.searchUsageCollector,
+      searchSessionEBTManager: setupDeps.searchSessionEBTManager,
     };
 
     const { element } = params;

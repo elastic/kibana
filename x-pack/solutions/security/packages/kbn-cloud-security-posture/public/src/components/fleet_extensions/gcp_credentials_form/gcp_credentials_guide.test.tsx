@@ -17,7 +17,7 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('GoogleCloudShellCredentialsGuide', () => {
   const defaultProps = {
-    commandText: 'gcloud config set project <PROJECT_ID> ./deploy_service_account.sh',
+    commandText: 'gcloud config set project <PROJECT_ID> && ./deploy_service_account.sh',
     isOrganization: false,
   };
 
@@ -159,7 +159,10 @@ describe('GoogleCloudShellCredentialsGuide', () => {
       expect(screen.getByText('Trust Repo')).toBeInTheDocument();
       expect(screen.getByText('Confirm')).toBeInTheDocument();
 
-      // Step 5: Run command (text is split across elements, use matcher function)
+      // Step 5: Authorize
+      expect(screen.getByText('Authorize')).toBeInTheDocument();
+
+      // Step 6: Run command
       expect(
         screen.getByText((content, element) => {
           return (
@@ -168,7 +171,7 @@ describe('GoogleCloudShellCredentialsGuide', () => {
         })
       ).toBeInTheDocument();
 
-      // Step 6: Copy JSON
+      // Step 7: Copy JSON
       expect(screen.getByText('cat KEY_FILE.json')).toBeInTheDocument();
     });
 
@@ -176,7 +179,7 @@ describe('GoogleCloudShellCredentialsGuide', () => {
       renderWithIntl(<GoogleCloudShellCredentialsGuide {...defaultProps} />);
 
       const listItems = screen.getAllByRole('listitem');
-      expect(listItems).toHaveLength(6); // Should have 6 instruction steps
+      expect(listItems).toHaveLength(7);
     });
   });
 

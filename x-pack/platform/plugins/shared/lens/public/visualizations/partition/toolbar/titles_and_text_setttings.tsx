@@ -22,7 +22,7 @@ export function PartitionTitlesAndTextSettings(
 ) {
   const { state, setState } = props;
   const layer = state.layers[0];
-  const { categoryOptions, numberOptions } = PartitionChartsMeta[state.shape].toolbarPopover;
+  const { categoryOptions, numberOptions } = PartitionChartsMeta[state.shape].toolbar;
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {

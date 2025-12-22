@@ -201,6 +201,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       }).addVersion(
         {
           version,
+          options,
           validate: {
             request: validationObject,
           },

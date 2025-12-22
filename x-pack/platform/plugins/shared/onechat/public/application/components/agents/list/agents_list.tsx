@@ -10,6 +10,7 @@ import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -31,7 +32,7 @@ import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
-import { AgentAvatar } from '../agent_avatar';
+import { AgentAvatar } from '../../common/agent_avatar';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const columnNames = {
@@ -63,17 +64,15 @@ export const AgentsList: React.FC = () => {
   const { manageAgents } = useUiPrivileges();
   const { createOnechatUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10);
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
       width: '48px',
       align: 'center',
-      render: (agent) =>
-        agent.readonly && !agent.avatar_symbol ? (
-          <EuiIcon type={agent.avatar_icon ?? 'logoElastic'} size="xl" />
-        ) : (
-          <AgentAvatar agent={agent} size="m" />
-        ),
+      render: (agent) => <AgentAvatar agent={agent} size="m" />,
+      'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
@@ -83,9 +82,14 @@ export const AgentsList: React.FC = () => {
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
             {agent.readonly ? (
-              <EuiText size="s">{name}</EuiText>
+              <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
+                {name}
+              </EuiText>
             ) : (
-              <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
+              <EuiLink
+                data-test-subj="agentBuilderAgentsListName"
+                href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}
+              >
                 {name}
               </EuiLink>
             )}
@@ -95,6 +99,7 @@ export const AgentsList: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+      'data-test-subj': 'agentBuilderAgentsListNameAndDescription',
     };
 
     const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
@@ -107,6 +112,7 @@ export const AgentsList: React.FC = () => {
 
         return <Labels labels={labels} />;
       },
+      'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
@@ -116,6 +122,7 @@ export const AgentsList: React.FC = () => {
           icon: 'comment',
           name: actionLabels.chat,
           description: actionLabels.chatDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListChat-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
           href: (agent) =>
@@ -126,6 +133,7 @@ export const AgentsList: React.FC = () => {
           icon: 'pencil',
           name: actionLabels.edit,
           description: actionLabels.editDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListEdit-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
@@ -136,6 +144,7 @@ export const AgentsList: React.FC = () => {
           icon: 'copy',
           name: actionLabels.clone,
           description: actionLabels.cloneDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListClone-${agent.id}`,
           showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
@@ -150,6 +159,7 @@ export const AgentsList: React.FC = () => {
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiIcon type="trash" color="danger" />
                   <EuiLink
+                    data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
                     onClick={() => {
                       deleteAgent({ agent });
                     }}
@@ -191,6 +201,8 @@ export const AgentsList: React.FC = () => {
 
   return (
     <EuiInMemoryTable
+      data-test-subj="agentBuilderAgentsListTable"
+      rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
       items={agents}
       itemId={(agent) => agent.id}
       columns={columns}
@@ -208,6 +220,21 @@ export const AgentsList: React.FC = () => {
             autoSortOptions: false,
           },
         ],
+      }}
+      pagination={{
+        pageIndex,
+        pageSize,
+        pageSizeOptions: [10, 25, 50, 100],
+        showPerPageOptions: true,
+      }}
+      onTableChange={({ page }: CriteriaWithPagination<AgentDefinition>) => {
+        if (page) {
+          setPageIndex(page.index);
+          if (page.size !== pageSize) {
+            setPageSize(page.size);
+            setPageIndex(0);
+          }
+        }
       }}
       loading={isLoading}
       error={errorMessage}

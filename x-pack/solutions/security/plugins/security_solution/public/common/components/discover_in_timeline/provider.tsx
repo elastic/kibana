@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type { ExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { PropsWithChildren, FC } from 'react';
 import React, { useCallback, useRef } from 'react';
 import { DiscoverInTimelineContext } from './context';
@@ -16,13 +16,16 @@ type DiscoverInTimelineContextProviderProps = PropsWithChildren<{}>;
 export const DiscoverInTimelineContextProvider: FC<DiscoverInTimelineContextProviderProps> = (
   props
 ) => {
-  const discoverStateContainer = useRef<DiscoverStateContainer>();
+  const discoverStateContainer = useRef<ExtendedDiscoverStateContainer>();
 
   const actions = useDiscoverInTimelineActions(discoverStateContainer);
 
-  const setDiscoverStateContainer = useCallback((stateContainer: DiscoverStateContainer) => {
-    discoverStateContainer.current = stateContainer;
-  }, []);
+  const setDiscoverStateContainer = useCallback(
+    (stateContainer: ExtendedDiscoverStateContainer) => {
+      discoverStateContainer.current = stateContainer;
+    },
+    []
+  );
 
   return (
     <DiscoverInTimelineContext.Provider

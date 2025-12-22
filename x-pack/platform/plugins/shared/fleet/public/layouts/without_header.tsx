@@ -13,7 +13,7 @@ export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
 
   // Set the min height to the viewport size minus the height of any global Kibana headers
-  min-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+  min-height: var(--kbn-application--content-height);
 `;
 
 export const Page = styled(EuiPage)`

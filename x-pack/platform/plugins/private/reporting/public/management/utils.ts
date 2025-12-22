@@ -67,10 +67,6 @@ const isCustomRrule = (rRule: Rrule) => {
   if (rRule.interval && rRule.interval > 1) {
     return true;
   }
-  // frequency is daily and no weekdays are selected
-  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
-    return true;
-  }
   // frequency is weekly and there are multiple weekdays selected
   if (freq && freq === Frequency.WEEKLY && rRule.byweekday && rRule.byweekday.length > 1) {
     return true;
@@ -83,7 +79,7 @@ const isCustomRrule = (rRule: Rrule) => {
 };
 
 export const transformScheduledReport = (report: ScheduledReportApiJSON): ScheduledReport => {
-  const { title, schedule, notification } = report;
+  const { title, schedule, notification, id } = report;
   const rRule = schedule.rrule;
 
   const isCustomFrequency = isCustomRrule(rRule);
@@ -124,6 +120,7 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
   }
 
   return {
+    id,
     title,
     recurringSchedule,
     // TODO dtstart should be required
@@ -133,5 +130,31 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
     recurring: true,
     sendByEmail: Boolean(notification?.email),
     emailRecipients: [...(notification?.email?.to || [])],
+    emailCcRecipients: [...(notification?.email?.cc || [])],
+    emailBccRecipients: [...(notification?.email?.bcc || [])],
+    emailSubject: notification?.email?.subject ?? '',
+    emailMessage: notification?.email?.message ?? '',
+  };
+};
+
+export const transformEmailNotification = ({
+  emailRecipients,
+  emailCcRecipients,
+  emailBccRecipients,
+  emailSubject,
+  emailMessage,
+}: {
+  emailRecipients: string[];
+  emailCcRecipients: string[];
+  emailBccRecipients: string[];
+  emailSubject: string;
+  emailMessage: string;
+}): NonNullable<NonNullable<ScheduledReportApiJSON['notification']>['email']> => {
+  return {
+    to: emailRecipients,
+    cc: emailCcRecipients,
+    bcc: emailBccRecipients,
+    subject: emailSubject,
+    message: emailMessage,
   };
 };
