@@ -16,16 +16,64 @@ describe('cleanFiltersForSerialize', () => {
     expect(cleanFiltersForSerialize()).toBeUndefined();
   });
 
-  test('should remove "meta.value" property from each filter', () => {
+  test('should remove undefined "meta.value" property from each filter', () => {
     const filters: Filter[] = [
-      { query: { a: 'a' }, meta: { value: 'value1' } },
-      { query: { b: 'b' }, meta: { value: 'value2' } },
+      { query: { a: 'a' }, meta: { value: undefined } },
+      { query: { b: 'b' }, meta: { value: undefined } },
     ];
 
     const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
 
     expect(cleanedFilters[0]).toEqual({ query: { a: 'a' }, meta: {} });
     expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
+  });
+
+  test('should remove undefined "meta.key" property from each filter', () => {
+    const filters: Filter[] = [
+      { query: { a: 'a' }, meta: { key: undefined } },
+      { query: { b: 'b' }, meta: { key: undefined } },
+    ];
+
+    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
+
+    expect(cleanedFilters[0]).toEqual({ query: { a: 'a' }, meta: {} });
+    expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
+  });
+
+  test('should remove undefined "meta.alias" property from each filter', () => {
+    const filters: Filter[] = [
+      { query: { a: 'a' }, meta: { alias: undefined } },
+      { query: { b: 'b' }, meta: { alias: undefined } },
+    ];
+
+    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
+
+    expect(cleanedFilters[0]).toEqual({ query: { a: 'a' }, meta: {} });
+    expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
+  });
+
+  test('should remove these undefined properties from compound filters as well', () => {
+    const filters: Filter[] = [
+      {
+        meta: {
+          params: [
+            { query: { a: 'a' }, meta: { value: undefined, key: undefined, alias: undefined } },
+            { query: { b: 'b' }, meta: { value: undefined, key: undefined, alias: undefined } },
+          ],
+        },
+      },
+    ];
+
+    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
+
+    expect(cleanedFilters[0]).toEqual({
+      meta: {
+        params: [
+          { query: { a: 'a' }, meta: {} },
+          { query: { b: 'b' }, meta: {} },
+        ],
+      },
+    });
   });
 
   test('should not fail if meta is missing from filters', () => {
