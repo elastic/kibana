@@ -107,16 +107,6 @@ const CaseBaseFields = {
    * Observables
    */
   observables: rt.array(CaseObservableRt),
-
-  /**
-   * New templating system
-   */
-  template: rt.union([rt.null, CaseTemplate]),
-
-  /**
-   * Validated using external schema
-   */
-  templateFields: rt.any,
 };
 
 export const CaseBaseOptionalFieldsRt = rt.exact(
@@ -157,6 +147,15 @@ export const CaseAttributesRt = rt.intersection([
       time_to_acknowledge: rt.union([rt.number, rt.null]),
       time_to_investigate: rt.union([rt.number, rt.null]),
       time_to_resolve: rt.union([rt.number, rt.null]),
+      /**
+       * New templating system
+       */
+      template: rt.union([rt.null, CaseTemplate]),
+
+      /**
+       * Validated using external schema
+       */
+      templateFields: rt.any,
     })
   ),
 ]);
