@@ -6,11 +6,19 @@
  */
 
 import React from 'react';
+import type { EuiPageSectionProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
+/**
+ * @see https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/management/public/components/management_app/management_app.tsx#L125
+ */
+type KibanaPageTemplatePropsWithPadding = Omit<KibanaPageTemplateProps, 'mainProps'> & {
+  mainProps?: EuiPageSectionProps;
+};
+
 type RulesPageTemplateProps = Omit<
-  KibanaPageTemplateProps,
+  KibanaPageTemplatePropsWithPadding,
   'restrictWidth' | 'panelled' | 'mainProps'
 > & {
   children: React.ReactNode;
@@ -27,17 +35,16 @@ export const RulesPageTemplate: React.FunctionComponent<RulesPageTemplateProps> 
   pageHeader,
   ...restProps
 }) => {
+  const templateProps: KibanaPageTemplatePropsWithPadding = {
+    restrictWidth: false,
+    panelled: true,
+    mainProps: { paddingSize: 'l' },
+    pageHeader,
+    ...restProps,
+  };
+
   return (
-    <KibanaPageTemplate
-      restrictWidth={false}
-      panelled
-      // @ts-expect-error Technically `paddingSize` isn't supported but it is passed through,
-      // this is a stop-gap for Stack management specifically until page components can be converted to template components
-      // this is required for rules detail page to have proper padding, see https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/management/public/components/management_app/management_app.tsx#L125
-      mainProps={{ paddingSize: 'l' }}
-      pageHeader={pageHeader}
-      {...restProps}
-    >
+    <KibanaPageTemplate {...(templateProps as unknown as KibanaPageTemplateProps)}>
       {children}
     </KibanaPageTemplate>
   );
