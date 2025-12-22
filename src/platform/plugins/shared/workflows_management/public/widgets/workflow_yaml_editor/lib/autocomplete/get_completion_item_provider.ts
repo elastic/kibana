@@ -71,7 +71,7 @@ export function getCompletionItemProvider(
       }
 
       // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
-      const workflowSuggestions = getSuggestions({
+      const workflowSuggestions = await getSuggestions({
         ...autocompleteContext,
         model,
         position,

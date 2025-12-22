@@ -42,4 +42,14 @@ export const runAgentStepDefinition: PublicStepDefinition = {
 \`\`\``,
     ],
   },
+  completions: {
+    config: {
+      agent_id: async () => {
+        return [
+          { label: 'my-custom-agent', value: 'my-custom-agent' },
+          { label: 'my-other-agent', value: 'my-other-agent' },
+        ];
+      },
+    },
+  },
 };

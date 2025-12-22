@@ -10,6 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
+import { getDynamicCompletions } from './dynamic_completions/get_dynamic_completions';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
@@ -21,9 +22,10 @@ import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_sugge
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
-export function getSuggestions(
+// eslint-disable-next-line complexity
+export async function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
-): monaco.languages.CompletionItem[] {
+): Promise<monaco.languages.CompletionItem[]> {
   // console.log('getSuggestions', autocompleteContext);
   const { lineParseResult } = autocompleteContext;
 
@@ -145,6 +147,11 @@ export function getSuggestions(
     };
 
     return getTimezoneSuggestions(adjustedRange, lineParseResult.fullKey);
+  }
+
+  // Dynamic completions
+  if (autocompleteContext.dynamicConnectorTypes) {
+    return getDynamicCompletions(autocompleteContext);
   }
 
   // TODO: Implement connector with block completion

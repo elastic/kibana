@@ -44,7 +44,14 @@ export interface PublicStepDefinition extends CommonStepDefinition {
    * Default value is `kibana`
    */
   actionsMenuGroup?: ActionsMenuGroup;
+
+  completions?: {
+    config?: Record<string, CompletionFn>;
+    input?: Record<string, CompletionFn>;
+  };
 }
+
+type CompletionFn = () => Promise<Array<{ label: string; value: string }>>;
 
 /**
  * The catalog under which the step is displayed in the actions menu

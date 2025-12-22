@@ -102,6 +102,7 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
         examples: stepDefinition.documentation?.examples
           ? { snippet: stepDefinition.documentation?.examples.join('\n') }
           : undefined,
+        completions: stepDefinition.completions,
       };
     }
     return definition;

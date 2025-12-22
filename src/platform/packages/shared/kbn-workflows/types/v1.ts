@@ -368,6 +368,8 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
+export type CompletionFn = () => Promise<Array<{ label: string; value: string }>>;
+
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
@@ -380,6 +382,10 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   examples?: ConnectorExamples;
+  completions?: {
+    config?: Record<string, CompletionFn>;
+    input?: Record<string, CompletionFn>;
+  };
 }
 
 export interface DynamicConnectorContract extends BaseConnectorContract {
