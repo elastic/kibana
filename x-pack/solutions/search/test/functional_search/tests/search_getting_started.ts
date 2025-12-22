@@ -113,6 +113,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const endpointValue = await testSubjects.getVisibleText('endpointValueField');
             expect(endpointValue).to.contain('https://');
           });
+
+          it('shows checkmark icon feedback when copy button is clicked', async () => {
+            await testSubjects.existOrFail('copyEndpointButton');
+            await testSubjects.click('copyEndpointButton');
+            // After clicking, the button should show copied state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton-copied');
+            });
+            // After 1 second, it should revert back to normal state
+            await retry.try(async () => {
+              await testSubjects.existOrFail('copyEndpointButton');
+              await testSubjects.missingOrFail('copyEndpointButton-copied');
+            });
+          });
         });
 
         describe('View connection details', function () {
@@ -191,28 +205,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'href'
             );
             expect(href).to.contain('docs/solutions/search/get-started');
-          });
-        });
-      });
-
-      describe('Getting Started navigation', function () {
-        it('renders Getting Started side nav item', async () => {
-          await pageObjects.searchNavigation.navigateToElasticsearchSearchGettingStartedPage();
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'searchGettingStarted',
-          });
-        });
-
-        it('Getting Started nav item is active and shows correct breadcrumbs', async () => {
-          await pageObjects.solutionNavigation.sidenav.clickLink({
-            deepLinkId: 'searchGettingStarted',
-          });
-          await testSubjects.existOrFail('gettingStartedHeader');
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'searchGettingStarted',
-          });
-          await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-            text: 'Getting started',
           });
         });
       });

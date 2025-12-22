@@ -16,7 +16,7 @@ const mockSetConnectorId = jest.fn();
 const mockClosePopover = jest.fn();
 const mockOpenPopover = jest.fn();
 const mockOpenAgentBuilderFlyout = jest.fn();
-const mockUseIsExperimentalFeatureEnabled = jest.fn(() => false);
+const mockUseAgentBuilderAvailability = jest.fn(() => ({ isAgentBuilderEnabled: false }));
 
 jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
   useAskAiAssistant: () => ({
@@ -24,8 +24,8 @@ jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
   }),
 }));
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
 }));
 
 jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
@@ -56,7 +56,7 @@ describe('EntityHighlightsSettings', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: false });
   });
 
   it('renders the settings button', () => {
@@ -157,24 +157,31 @@ describe('EntityHighlightsSettings', () => {
   });
 
   it('disables Ask AI Assistant when agent builder is enabled and no assistant result', () => {
-    mockUseIsExperimentalFeatureEnabled.mockImplementation(() => true);
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({ isAgentBuilderEnabled: true }));
 
     render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
       wrapper: TestProviders,
     });
 
-    const menuItem = screen.getByLabelText('Ask AI Assistant');
-    expect(menuItem.className).toContain('disabled');
+    const agentButton = screen.getByTestId('newAgentBuilderAttachment');
+    expect(agentButton).toBeDisabled();
+
+    fireEvent.click(agentButton);
+    expect(mockOpenAgentBuilderFlyout).not.toHaveBeenCalled();
   });
 
   it('enables Ask AI Assistant when agent builder is enabled and assistant result exists', () => {
-    mockUseIsExperimentalFeatureEnabled.mockImplementation(() => true);
+    mockUseAgentBuilderAvailability.mockImplementation(() => ({ isAgentBuilderEnabled: true }));
 
     render(<EntityHighlightsSettings {...defaultProps} isLoading={false} />, {
       wrapper: TestProviders,
     });
+    const agentButton = screen.getByTestId('newAgentBuilderAttachment');
 
-    expect(screen.getByLabelText('Ask AI Assistant')).not.toBeDisabled();
+    expect(agentButton).not.toBeDisabled();
+
+    fireEvent.click(agentButton);
+    expect(mockOpenAgentBuilderFlyout).toHaveBeenCalled();
   });
 
   it('renders connector selector', () => {

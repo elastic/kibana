@@ -12,16 +12,6 @@ export const MIGRATION_SOURCE_DROPDOWN_TITLE = i18n.translate(
   { defaultMessage: 'Select migration source' }
 );
 
-export const MIGRATION_SOURCE_DROPDOWN_OPTION_SPLUNK = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationSource.option.splunk',
-  { defaultMessage: 'Splunk' }
-);
-
-export const MIGRATION_SOURCE_DROPDOWN_OPTION_QRADAR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationSource.option.qradar',
-  { defaultMessage: 'QRadar' }
-);
-
 export const MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationSource.helperText',
   { defaultMessage: 'You cannot change the migration source after creating a migration.' }

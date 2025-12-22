@@ -5,108 +5,102 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-const i18nNamespaceKey = 'securitySolutionPackages.csp.graph.callout';
-
-export type CalloutVariant =
-  | 'missingAllRequirements'
-  | 'uninstalledIntegration'
-  | 'disabledEntityStore'
-  | 'unavailableEntityInfo'
-  | 'unknownEntityType';
-
-export interface CalloutConfig {
-  title: string;
-  message: string;
-  links: Array<{ text: string; href: string }>;
-}
-
-// Reusable i18n constants
-const ENRICH_GRAPH_EXPERIENCE_TITLE = i18n.translate(`${i18nNamespaceKey}.enrichGraphExperience`, {
-  defaultMessage: 'Enrich graph experience',
-});
-
-const INSTALL_CLOUD_ASSET_DISCOVERY_LINK = {
-  text: i18n.translate(`${i18nNamespaceKey}.installCloudAssetDiscovery`, {
-    defaultMessage: 'Install Cloud Asset Discovery',
-  }),
-  href: '#',
-};
-
-const ENABLE_ENTITY_STORE_LINK = {
-  text: i18n.translate(`${i18nNamespaceKey}.enableEntityStore`, {
-    defaultMessage: 'Enable Entity Store',
-  }),
-  href: '#',
-};
-
-const CALLOUT_CONFIG: Record<CalloutVariant, CalloutConfig> = {
-  missingAllRequirements: {
-    title: ENRICH_GRAPH_EXPERIENCE_TITLE,
-    message: i18n.translate(`${i18nNamespaceKey}.missingAllRequirements.message`, {
-      defaultMessage:
-        'Installing the Cloud Asset Discovery integration and enabling Entity Store for a high fidelity graph investigation experience.',
-    }),
-    links: [INSTALL_CLOUD_ASSET_DISCOVERY_LINK, ENABLE_ENTITY_STORE_LINK],
-  },
-  uninstalledIntegration: {
-    title: ENRICH_GRAPH_EXPERIENCE_TITLE,
-    message: i18n.translate(`${i18nNamespaceKey}.uninstalledIntegration.message`, {
-      defaultMessage:
-        'Installing the Cloud Asset Discovery integration for a high fidelity graph investigation experience.',
-    }),
-    links: [INSTALL_CLOUD_ASSET_DISCOVERY_LINK],
-  },
-  disabledEntityStore: {
-    title: ENRICH_GRAPH_EXPERIENCE_TITLE,
-    message: i18n.translate(`${i18nNamespaceKey}.disabledEntityStore.message`, {
-      defaultMessage: 'Enable Entity Store for a high fidelity graph investigation experience.',
-    }),
-    links: [ENABLE_ENTITY_STORE_LINK],
-  },
-  unavailableEntityInfo: {
-    title: i18n.translate(`${i18nNamespaceKey}.unavailableEntityInfo.title`, {
-      defaultMessage: 'Entity information unavailable',
-    }),
-    message: i18n.translate(`${i18nNamespaceKey}.unavailableEntityInfo.message`, {
-      defaultMessage: 'Entity information could not be retrieved.',
-    }),
-    links: [
-      {
-        text: i18n.translate(`${i18nNamespaceKey}.unavailableEntityInfo.linkText`, {
-          defaultMessage: 'Verify Cloud Asset Discovery Data',
-        }),
-        href: '#',
-      },
-    ],
-  },
-  unknownEntityType: {
-    title: i18n.translate(`${i18nNamespaceKey}.unknownEntityType.title`, {
-      defaultMessage: 'Unknown entity type',
-    }),
-    message: i18n.translate(`${i18nNamespaceKey}.unknownEntityType.message`, {
-      defaultMessage: 'Verify entity fields to improve graph accuracy.',
-    }),
-    links: [
-      {
-        text: i18n.translate(`${i18nNamespaceKey}.unknownEntityType.linkText`, {
-          defaultMessage: 'Verify Cloud Asset Discovery',
-        }),
-        href: '#',
-      },
-    ],
-  },
-};
+import type { CalloutVariant, CalloutConfig } from './callout.translations';
+import {
+  ENRICH_GRAPH_EXPERIENCE_TITLE,
+  UNAVAILABLE_ENTITY_INFO_TITLE,
+  UNKNOWN_ENTITY_TYPE_TITLE,
+  MISSING_ALL_REQUIREMENTS_MESSAGE,
+  MISSING_INTEGRATION_MESSAGE,
+  MISSING_ENTITY_STORE_MESSAGE,
+  UNAVAILABLE_ENTITY_INFO_MESSAGE,
+  UNKNOWN_ENTITY_TYPE_MESSAGE,
+  INSTALL_CLOUD_ASSET_DISCOVERY_TEXT,
+  ENABLE_ENTITY_STORE_TEXT,
+  VERIFY_CLOUD_ASSET_DISCOVERY_DATA_TEXT,
+} from './callout.translations';
 
 /**
- * Get the callout configuration for a specific variant.
- * Consumers can use this to retrieve preset configurations with placeholder hrefs.
- * Override the hrefs with actual routes when using the configuration.
+ * Get the callout configuration for a specific variant with provided URLs.
  *
  * @param variant - The callout variant to retrieve configuration for
- * @returns The callout configuration containing title, message, and links
+ * @param links - Object containing URLs for integration, entity store, and discover
+ * @returns The callout configuration
  */
-export const getCalloutConfig = (variant: CalloutVariant): CalloutConfig => {
-  return CALLOUT_CONFIG[variant];
+export const getCalloutConfig = (
+  variant: CalloutVariant,
+  links: {
+    integrationUrl: string;
+    entityStoreUrl: string;
+    discoverUrl: string;
+  }
+): CalloutConfig => {
+  const { integrationUrl, entityStoreUrl, discoverUrl } = links;
+
+  // Build complete CalloutConfig objects based on variant
+  switch (variant) {
+    case 'missingAllRequirements':
+      return {
+        title: ENRICH_GRAPH_EXPERIENCE_TITLE,
+        message: MISSING_ALL_REQUIREMENTS_MESSAGE,
+        links: [
+          {
+            text: INSTALL_CLOUD_ASSET_DISCOVERY_TEXT,
+            href: integrationUrl,
+          },
+          {
+            text: ENABLE_ENTITY_STORE_TEXT,
+            href: entityStoreUrl,
+          },
+        ],
+      };
+
+    case 'uninstalledIntegration':
+      return {
+        title: ENRICH_GRAPH_EXPERIENCE_TITLE,
+        message: MISSING_INTEGRATION_MESSAGE,
+        links: [
+          {
+            text: INSTALL_CLOUD_ASSET_DISCOVERY_TEXT,
+            href: integrationUrl,
+          },
+        ],
+      };
+
+    case 'disabledEntityStore':
+      return {
+        title: ENRICH_GRAPH_EXPERIENCE_TITLE,
+        message: MISSING_ENTITY_STORE_MESSAGE,
+        links: [
+          {
+            text: ENABLE_ENTITY_STORE_TEXT,
+            href: entityStoreUrl,
+          },
+        ],
+      };
+
+    case 'unavailableEntityInfo':
+      return {
+        title: UNAVAILABLE_ENTITY_INFO_TITLE,
+        message: UNAVAILABLE_ENTITY_INFO_MESSAGE,
+        links: [
+          {
+            text: VERIFY_CLOUD_ASSET_DISCOVERY_DATA_TEXT,
+            href: discoverUrl,
+          },
+        ],
+      };
+
+    case 'unknownEntityType':
+      return {
+        title: UNKNOWN_ENTITY_TYPE_TITLE,
+        message: UNKNOWN_ENTITY_TYPE_MESSAGE,
+        links: [
+          {
+            text: VERIFY_CLOUD_ASSET_DISCOVERY_DATA_TEXT,
+            href: discoverUrl,
+          },
+        ],
+      };
+  }
 };

@@ -12,7 +12,6 @@ import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export interface SignificantEventItem {
-  title: string;
   query: StreamQuery;
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
@@ -22,10 +21,12 @@ export const useFetchSignificantEvents = ({
   name,
   start,
   end,
+  query,
 }: {
   name: string;
   start: number;
   end: number;
+  query: string;
 }) => {
   const {
     dependencies: {
@@ -37,7 +38,15 @@ export const useFetchSignificantEvents = ({
   } = useKibana();
 
   const result = useStreamsAppFetch(
-    async ({ signal }): Promise<undefined | SignificantEventItem[]> => {
+    async ({
+      signal,
+    }): Promise<
+      | undefined
+      | {
+          significant_events: SignificantEventItem[];
+          aggregated_occurrences: { x: number; y: number }[];
+        }
+    > => {
       const isoFrom = new Date(start).toISOString();
       const isoTo = new Date(end).toISOString();
 
@@ -65,28 +74,40 @@ export const useFetchSignificantEvents = ({
               from: isoFrom,
               to: isoTo,
               bucketSize: intervalString,
+              query: query.trim(),
             },
           },
           signal,
         })
-        .then((res) => {
-          return res.map((series) => {
-            const { occurrences, change_points: changePoints, ...query } = series;
+        .then(
+          ({
+            significant_events: significantEvents,
+            aggregated_occurrences: aggregatedOccurrences,
+          }) => {
             return {
-              title: query.title,
-              query,
-              change_points: changePoints,
-              occurrences: occurrences.map((occurrence) => ({
+              significant_events: significantEvents.map((series) => {
+                const { occurrences, change_points: changePoints, ...rest } = series;
+                return {
+                  title: rest.title,
+                  query: rest,
+                  change_points: changePoints,
+                  occurrences: occurrences.map((occurrence) => ({
+                    x: new Date(occurrence.date).getTime(),
+                    y: occurrence.count,
+                  })),
+                };
+              }),
+              aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
                 x: new Date(occurrence.date).getTime(),
                 y: occurrence.count,
               })),
             };
-          });
-        });
+          }
+        );
 
       return response;
     },
-    [name, start, end, streamsRepositoryClient, data.query.timefilter]
+    [name, start, end, streamsRepositoryClient, data.query.timefilter, query]
   );
 
   return result;

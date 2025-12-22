@@ -76,7 +76,6 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
 
 function validateGroupings({
   metrics,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   group_by,
 }: {
   metrics: Array<{}>;

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiText,
@@ -13,13 +14,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiPanel,
+  EuiCard,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCloudConnectedAppContext } from '../../../app_context';
 
 export const MigrationSection: React.FC = () => {
   const { docLinks, telemetryService } = useCloudConnectedAppContext();
+  const { euiTheme } = useEuiTheme();
 
   const benefits = [
     {
@@ -71,13 +74,13 @@ export const MigrationSection: React.FC = () => {
       <EuiSpacer size="xxl" />
       <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false} style={{ maxWidth: '50%' }}>
-          <EuiTitle size="s">
-            <h2>
+          <EuiTitle size="xs">
+            <h3>
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.migration.title"
                 defaultMessage="Move your self-managed workloads to Elastic Cloud"
               />
-            </h2>
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
@@ -92,7 +95,6 @@ export const MigrationSection: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             color="text"
-            size="s"
             href={docLinks.links.cloud.cloudConnect}
             target="_blank"
             iconType="popout"
@@ -116,16 +118,44 @@ export const MigrationSection: React.FC = () => {
 
       <EuiFlexGroup gutterSize="l">
         {benefits.map((benefit, index) => (
-          <EuiFlexItem key={index}>
-            <EuiPanel color="subdued" paddingSize="l">
-              <EuiTitle size="xs">
-                <h3>{benefit.title}</h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                <p>{benefit.description}</p>
-              </EuiText>
-            </EuiPanel>
+          <EuiFlexItem
+            key={index}
+            css={css`
+              @media (min-width: ${euiTheme.breakpoint.m}px) {
+                & + & {
+                  position: relative;
+
+                  &::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    height: 100px;
+                    width: 1px;
+                    background-color: ${euiTheme.colors.borderBaseSubdued};
+                    z-index: 1;
+                  }
+                }
+              }
+            `}
+          >
+            <EuiCard
+              hasBorder={false}
+              paddingSize="l"
+              layout="horizontal"
+              title={benefit.title}
+              description={benefit.description}
+              titleSize="xs"
+              css={css`
+                box-shadow: none !important;
+                ${index === 0 && 'padding-left: 0 !important;'}
+
+                @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
+                  padding-left: 0 !important;
+                }
+              `}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
