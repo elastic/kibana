@@ -57,6 +57,7 @@ jest.mock('../../utils/is_attack_discovery_alert', () => ({
 const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
 
 const mockUseUpdateWorkflowStatusAction = useUpdateWorkflowStatusAction as jest.Mock;
+
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
 
@@ -111,14 +112,13 @@ describe('TakeAction', () => {
       hasSearchAILakeConfigurations: false, // EASE is not configured
     });
 
-    // Default hook mock: provide actions + no modal by default
+    // hook returns only actionItems
     mockUseUpdateWorkflowStatusAction.mockReturnValue({
       actionItems: [
         { title: 'markAsOpen', onClick: mockMarkAsOpen },
         { title: 'markAsAcknowledged', onClick: mockMarkAsAcknowledged },
         { title: 'markAsClosed', onClick: mockMarkAsClosed },
       ],
-      confirmationModal: null,
     });
   });
 
@@ -210,22 +210,6 @@ describe('TakeAction', () => {
 
     expect(setSelectedAttackDiscoveries).toHaveBeenCalledWith({});
     expect(refetchFindAttackDiscoveries).toHaveBeenCalled();
-  });
-
-  it('renders confirmationModal returned by useUpdateWorkflowStatusAction', async () => {
-    mockUseUpdateWorkflowStatusAction.mockReturnValue({
-      actionItems: [{ title: 'markAsClosed', onClick: mockMarkAsClosed }],
-      confirmationModal: <div data-test-subj="confirmModal">{'modal'}</div>,
-    });
-
-    render(
-      <TestProviders>
-        <TakeAction {...defaultProps} />
-      </TestProviders>
-    );
-
-    // Confirmation modal is rendered outside the popover, so it should exist immediately
-    expect(screen.getByTestId('confirmModal')).toBeInTheDocument();
   });
 
   describe('actions when multiple alerts are selected', () => {

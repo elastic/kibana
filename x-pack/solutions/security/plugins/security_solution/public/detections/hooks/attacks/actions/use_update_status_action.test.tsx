@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, renderHook, screen } from '@testing-library/react';
+import { act, renderHook, screen, render } from '@testing-library/react';
 
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useUpdateWorkflowStatusAction } from './use_update_status_action';
@@ -41,6 +41,7 @@ jest.mock('../../../../attack_discovery/pages/results/take_action/update_alerts_
     attackDiscoveriesCount: number;
     workflowStatus: 'open' | 'acknowledged' | 'closed';
     onCancel: () => void;
+    onClose: () => void;
     onConfirm: (args: {
       updateAlerts: boolean;
       workflowStatus: 'open' | 'acknowledged' | 'closed';
@@ -74,8 +75,28 @@ jest.mock('../../../../attack_discovery/pages/results/take_action/update_alerts_
       <button type="button" data-test-subj="cancel" onClick={props.onCancel}>
         {'cancel'}
       </button>
+
+      <button type="button" data-test-subj="close" onClick={props.onClose}>
+        {'close'}
+      </button>
     </div>
   ),
+}));
+
+let lastOpenedModalNode: React.ReactNode | null = null;
+const mockCloseModal = jest.fn();
+
+const mockOpenModal = jest.fn((node: React.ReactNode) => {
+  lastOpenedModalNode = node;
+  return { close: mockCloseModal };
+});
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useKibana: () => ({
+    overlays: { openModal: mockOpenModal },
+    services: {},
+  }),
 }));
 
 const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
@@ -92,6 +113,7 @@ describe('useUpdateWorkflowStatusAction', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    lastOpenedModalNode = null;
   });
 
   it('returns only the actions that would change status', () => {
@@ -109,7 +131,7 @@ describe('useUpdateWorkflowStatusAction', () => {
     expect(titles).toEqual(['Mark as acknowledged', 'Mark as closed']);
   });
 
-  it('non-EASE: clicking an action shows confirmation modal with correct props', async () => {
+  it('non-EASE: clicking an action opens confirmation modal with correct props', async () => {
     setAssistantAvailability(false);
 
     const { result } = renderHook(() =>
@@ -120,15 +142,17 @@ describe('useUpdateWorkflowStatusAction', () => {
       })
     );
 
-    const view = render(<>{result.current.confirmationModal}</>);
-
-    expect(screen.queryByTestId('update-alerts-modal')).toBeNull();
+    expect(mockOpenModal).not.toHaveBeenCalled();
+    expect(lastOpenedModalNode).toBeNull();
 
     await act(async () => {
       result.current.actionItems.find((x) => x.title === 'Mark as acknowledged')?.onClick?.();
     });
 
-    view.rerender(<>{result.current.confirmationModal}</>);
+    expect(mockOpenModal).toHaveBeenCalledTimes(1);
+    expect(lastOpenedModalNode).not.toBeNull();
+
+    render(<>{lastOpenedModalNode}</>);
 
     expect(screen.getByTestId('update-alerts-modal')).toBeInTheDocument();
     expect(screen.getByTestId('alertsCount')).toHaveTextContent(String(alertIds.length));
@@ -138,7 +162,7 @@ describe('useUpdateWorkflowStatusAction', () => {
     expect(screen.getByTestId('workflowStatus')).toHaveTextContent('acknowledged');
   });
 
-  it('non-EASE: confirm updates attack discoveries and (optionally) alerts', async () => {
+  it('non-EASE: confirm updates attack discoveries and (optionally) alerts, and closes modal', async () => {
     setAssistantAvailability(false);
 
     const { result } = renderHook(() =>
@@ -149,13 +173,12 @@ describe('useUpdateWorkflowStatusAction', () => {
       })
     );
 
-    const view = render(<>{result.current.confirmationModal}</>);
-
     await act(async () => {
       result.current.actionItems.find((x) => x.title === 'Mark as closed')?.onClick?.();
     });
 
-    view.rerender(<>{result.current.confirmationModal}</>);
+    render(<>{lastOpenedModalNode}</>);
+
     expect(screen.getByTestId('update-alerts-modal')).toBeInTheDocument();
 
     await act(async () => {
@@ -172,8 +195,8 @@ describe('useUpdateWorkflowStatusAction', () => {
       kibanaAlertWorkflowStatus: 'closed',
     });
 
-    view.rerender(<>{result.current.confirmationModal}</>);
-    expect(screen.queryByTestId('update-alerts-modal')).toBeNull();
+    // close is called by the hook before / around updates
+    expect(mockCloseModal).toHaveBeenCalled();
   });
 
   it('non-EASE: confirm does not update alerts when user opts out', async () => {
@@ -187,13 +210,11 @@ describe('useUpdateWorkflowStatusAction', () => {
       })
     );
 
-    const view = render(<>{result.current.confirmationModal}</>);
-
     await act(async () => {
       result.current.actionItems.find((x) => x.title === 'Mark as acknowledged')?.onClick?.();
     });
 
-    view.rerender(<>{result.current.confirmationModal}</>);
+    render(<>{lastOpenedModalNode}</>);
 
     await act(async () => {
       screen.getByTestId('confirm-no-alerts').click();
@@ -218,13 +239,11 @@ describe('useUpdateWorkflowStatusAction', () => {
       })
     );
 
-    const view = render(<>{result.current.confirmationModal}</>);
-
     await act(async () => {
       result.current.actionItems.find((x) => x.title === 'Mark as closed')?.onClick?.();
     });
 
-    view.rerender(<>{result.current.confirmationModal}</>);
+    render(<>{lastOpenedModalNode}</>);
 
     await act(async () => {
       screen.getByTestId('confirm-update-alerts').click();
@@ -238,7 +257,7 @@ describe('useUpdateWorkflowStatusAction', () => {
     expect(mockMutateAsyncStatus).not.toHaveBeenCalled();
   });
 
-  it('EASE: clicking an action updates attack discoveries immediately and does not render the modal', async () => {
+  it('EASE: clicking an action updates attack discoveries immediately and does not open the modal', async () => {
     setAssistantAvailability(true);
 
     const { result } = renderHook(() =>
@@ -248,8 +267,6 @@ describe('useUpdateWorkflowStatusAction', () => {
         currentWorkflowStatus: 'open',
       })
     );
-
-    const view = render(<>{result.current.confirmationModal}</>);
 
     await act(async () => {
       result.current.actionItems.find((x) => x.title === 'Mark as closed')?.onClick?.();
@@ -261,8 +278,7 @@ describe('useUpdateWorkflowStatusAction', () => {
     });
 
     expect(mockMutateAsyncStatus).not.toHaveBeenCalled();
-
-    view.rerender(<>{result.current.confirmationModal}</>);
-    expect(screen.queryByTestId('update-alerts-modal')).toBeNull();
+    expect(mockOpenModal).not.toHaveBeenCalled();
+    expect(lastOpenedModalNode).toBeNull();
   });
 });

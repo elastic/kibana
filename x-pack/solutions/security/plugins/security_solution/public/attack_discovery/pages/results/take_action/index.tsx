@@ -111,7 +111,7 @@ const TakeActionComponent: React.FC<Props> = ({
     return isAlert ? firstAttackDiscovery.alertWorkflowStatus : null;
   }, [attackDiscoveries]);
 
-  const { actionItems, confirmationModal } = useUpdateWorkflowStatusAction({
+  const { actionItems } = useUpdateWorkflowStatusAction({
     attackDiscoveryIds,
     alertIds: originalAlertIds,
     currentWorkflowStatus,
@@ -276,8 +276,6 @@ const TakeActionComponent: React.FC<Props> = ({
       >
         <EuiContextMenuPanel size="s" items={allItems} />
       </EuiPopover>
-
-      {confirmationModal}
     </>
   );
 };

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { KibanaContextProvider, useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAttackDiscoveryBulk } from '../../../../attack_discovery/pages/use_attack_discovery_bulk';
 import { useUpdateAlertsStatus } from '../../../../attack_discovery/pages/results/take_action/use_update_alerts_status';
@@ -16,16 +18,12 @@ import * as i18n from './translations';
 
 export type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
-export interface AttackActionItem {
-  /**
-   * User-facing label for the action
-   */
-  title: string;
-  /**
-   * Callback executed when the action is selected
-   */
+type AttackActionItem = Omit<
+  Pick<EuiContextMenuPanelItemDescriptor, 'title' | 'onClick'>,
+  'onClick'
+> & {
   onClick?: () => void;
-}
+};
 
 /**
  * Parameters required by the useUpdateWorkflowStatusAction hook
@@ -48,16 +46,20 @@ export interface UseUpdateWorkflowStatusActionParams {
 /**
  * Hook responsible for generating workflow status actions for Attack Discoveries
  * and coordinating their updates (and optionally their related alerts).
+ *
+ * In non-EASE projects, it opens a confirmation modal via overlays.openModal.
+ * In EASE projects, it updates immediately without a modal.
  */
 export const useUpdateWorkflowStatusAction = ({
   attackDiscoveryIds,
   alertIds,
   currentWorkflowStatus,
 }: UseUpdateWorkflowStatusActionParams) => {
-  // Determines whether the current environment supports Search AI Lake configurations (EASE).
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
+  const { overlays, services } = useKibana();
 
   const [pendingAction, setPendingAction] = useState<WorkflowStatus | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Bulk mutation for updating workflow status on Attack Discoveries.
   const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
@@ -91,17 +93,68 @@ export const useUpdateWorkflowStatusAction = ({
     [attackDiscoveryBulk, attackDiscoveryIds, alertIds, updateAlertStatus]
   );
 
+  const onCloseOrCancel = useCallback(() => {
+    setPendingAction(null);
+  }, []);
+
   const onUpdateWorkflowStatus = useCallback(
-    async (workflowStatus: WorkflowStatus) => {
+    (workflowStatus: WorkflowStatus) => {
+      // EASE: update immediately (no modal)
       setPendingAction(workflowStatus);
 
       if (hasSearchAILakeConfigurations) {
         // EASE update immediately
         onConfirm({ updateAlerts: false, workflowStatus });
       }
+
+      // non-EASE: trigger modal via effect
     },
     [hasSearchAILakeConfigurations, onConfirm]
   );
+
+  // Open the confirmation modal when needed (non-EASE) and prevent duplicate openings
+  useEffect(() => {
+    if (hasSearchAILakeConfigurations) return;
+    if (pendingAction == null) return;
+    if (isModalOpen) return;
+
+    setIsModalOpen(true);
+
+    const modalRef = overlays.openModal(
+      <KibanaContextProvider services={services}>
+        <UpdateAlertsModal
+          alertsCount={alertIds.length}
+          attackDiscoveriesCount={attackDiscoveryIds.length}
+          workflowStatus={pendingAction}
+          onCancel={() => {
+            modalRef.close();
+            setIsModalOpen(false);
+            onCloseOrCancel();
+          }}
+          onClose={() => {
+            modalRef.close();
+            setIsModalOpen(false);
+            onCloseOrCancel();
+          }}
+          onConfirm={async (args) => {
+            modalRef.close();
+            setIsModalOpen(false);
+            await onConfirm(args);
+          }}
+        />
+      </KibanaContextProvider>
+    );
+  }, [
+    alertIds.length,
+    attackDiscoveryIds.length,
+    hasSearchAILakeConfigurations,
+    isModalOpen,
+    onCloseOrCancel,
+    onConfirm,
+    overlays,
+    pendingAction,
+    services,
+  ]);
 
   const actionItems: AttackActionItem[] = useMemo(() => {
     const isOpen = currentWorkflowStatus === 'open';
@@ -128,33 +181,5 @@ export const useUpdateWorkflowStatusAction = ({
     return [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem].flat();
   }, [currentWorkflowStatus, onUpdateWorkflowStatus]);
 
-  const onCloseOrCancel = useCallback(() => {
-    setPendingAction(null);
-  }, []);
-
-  const confirmationModal = useMemo(() => {
-    return (
-      <>
-        {/* In non-EASE environments, users must confirm whether alerts should also be updated */}
-        {pendingAction != null && !hasSearchAILakeConfigurations && (
-          <UpdateAlertsModal
-            alertsCount={alertIds.length}
-            attackDiscoveriesCount={attackDiscoveryIds.length}
-            onCancel={onCloseOrCancel}
-            onClose={onCloseOrCancel}
-            onConfirm={onConfirm}
-            workflowStatus={pendingAction}
-          />
-        )}
-      </>
-    );
-  }, [
-    attackDiscoveryIds.length,
-    hasSearchAILakeConfigurations,
-    onCloseOrCancel,
-    alertIds.length,
-    pendingAction,
-    onConfirm,
-  ]);
-  return { actionItems, confirmationModal };
+  return { actionItems };
 };
