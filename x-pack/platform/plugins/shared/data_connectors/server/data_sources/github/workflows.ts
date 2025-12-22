@@ -6,7 +6,7 @@
  */
 export function generateGithubSearchIssuesWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'github.search_issues'
+name: 'sources.github.search_issues'
 description: 'Search for issues in a GitHub repository'
 enabled: true
 triggers:
@@ -32,7 +32,7 @@ steps:
 
 export function generateGithubGetDocsWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'github.get_docs'
+name: 'sources.github.get_docs'
 description: 'Get all markdown files from a GitHub repository'
 enabled: true
 triggers:
@@ -58,7 +58,7 @@ steps:
 
 export function generateGithubListRepositoriesWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: 'github.list_repos'
+name: 'sources.github.list_repos'
 description: 'List repositories for a specific owner (user or organization)'
 enabled: true
 triggers:

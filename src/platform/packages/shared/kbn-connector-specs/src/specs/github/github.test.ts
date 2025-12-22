@@ -66,9 +66,7 @@ describe('GithubConnector', () => {
         GithubConnector.actions.listRepos.handler(mockContext, {
           owner: 'nonexistent-owner',
         })
-      ).rejects.toThrow(
-        "User or organization 'nonexistent-owner' not found. Please verify the owner name is correct."
-      );
+      ).rejects.toThrow('Not found');
     });
 
     it('should rethrow non-404 errors', async () => {
@@ -155,9 +153,7 @@ describe('GithubConnector', () => {
           repo: 'repo',
           query: 'invalid query syntax',
         })
-      ).rejects.toThrow(
-        'Invalid GitHub search query: Invalid query syntax. Please check your query syntax'
-      );
+      ).rejects.toThrow('Validation failed');
     });
 
     it('should handle 422 error without message', async () => {
@@ -173,9 +169,7 @@ describe('GithubConnector', () => {
           owner: 'owner',
           repo: 'repo',
         })
-      ).rejects.toThrow(
-        'Invalid GitHub search query: Invalid search query. Please check your query syntax'
-      );
+      ).rejects.toThrow('Validation failed');
     });
 
     it('should rethrow non-422 errors', async () => {
@@ -476,12 +470,10 @@ describe('GithubConnector', () => {
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
+        status: 200,
         data: {
-          results: [
-            { id: 'user-1', login: 'alice' },
-            { id: 'user-2', login: 'bob' },
-            { id: 'user-3', login: 'charlie' },
-          ],
+          id: 'user-1',
+          login: 'alice',
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
@@ -491,25 +483,29 @@ describe('GithubConnector', () => {
       }
       const result = await GithubConnector.test.handler(mockContext);
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/users');
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/user');
       expect(mockContext.log.debug).toHaveBeenCalledWith('Github test handler');
       expect(result).toEqual({
         ok: true,
-        message: 'Successfully connected to Github API: found 3 users',
+        message: 'Successfully connected to Github API',
       });
     });
 
     it('should return failure when API is not accessible', async () => {
-      const error = new Error('Invalid API token');
-      mockClient.get.mockRejectedValue(error);
+      const mockResponse = {
+        status: 401,
+        data: {},
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
 
       if (!GithubConnector.test) {
         throw new Error('Test handler not defined');
       }
       const result = await GithubConnector.test.handler(mockContext);
 
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/user');
       expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid API token');
+      expect(result.message).toBe('Failed to connect to Github API');
     });
   });
 });

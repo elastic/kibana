@@ -37,19 +37,10 @@ export const GithubConnector: ConnectorSpec = {
         const typedInput = input as {
           owner: string;
         };
-        try {
-          const response = await ctx.client.get(
-            `https://api.github.com/users/${typedInput.owner}/repos`
-          );
-          return response.data.map((repo: { name: string }) => repo.name);
-        } catch (error: any) {
-          if (error?.response?.status === 404) {
-            throw new Error(
-              `User or organization '${typedInput.owner}' not found. Please verify the owner name is correct.`
-            );
-          }
-          throw error;
-        }
+        const response = await ctx.client.get(
+          `https://api.github.com/users/${typedInput.owner}/repos`
+        );
+        return response.data.map((repo: { name: string }) => repo.name);
       },
     },
     searchIssues: {
@@ -65,30 +56,20 @@ export const GithubConnector: ConnectorSpec = {
           repo: string;
           query?: string;
         };
-        try {
-          let searchQuery = `repo:${typedInput.owner}/${typedInput.repo} is:issue is:open`;
-          if (typedInput.query) {
-            searchQuery += ` ${typedInput.query}`;
-          }
-
-          const response = await ctx.client.get('https://api.github.com/search/issues', {
-            params: {
-              q: searchQuery,
-            },
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-            },
-          });
-          return response.data;
-        } catch (error: any) {
-          if (error?.response?.status === 422) {
-            const errorMessage = error?.response?.data?.message || 'Invalid search query';
-            throw new Error(
-              `Invalid GitHub search query: ${errorMessage}. Please check your query syntax`
-            );
-          }
-          throw error;
+        let searchQuery = `repo:${typedInput.owner}/${typedInput.repo} is:issue is:open`;
+        if (typedInput.query) {
+          searchQuery += ` ${typedInput.query}`;
         }
+
+        const response = await ctx.client.get('https://api.github.com/search/issues', {
+          params: {
+            q: searchQuery,
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+        return response.data;
       },
     },
     getDocs: {
@@ -184,16 +165,12 @@ export const GithubConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Github test handler');
+      const response = await ctx.client.get('https://api.github.com/user');
 
-      try {
-        const response = await ctx.client.get('https://api.github.com/users');
-        const numOfUsers = response.data.results.length;
-        return {
-          ok: true,
-          message: `Successfully connected to Github API: found ${numOfUsers} users`,
-        };
-      } catch (error) {
-        return { ok: false, message: error.message };
+      if (response.status !== 200) {
+        return { ok: false, message: 'Failed to connect to Github API' };
+      } else {
+        return { ok: true, message: 'Successfully connected to Github API' };
       }
     },
   },
