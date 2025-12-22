@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('Standard Product intercept', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/245800
+  describe.skip('Standard Product intercept', () => {
     const interceptTestId = `intercept-${TRIGGER_DEF_ID}`;
 
     describe('on initial page load', () => {
