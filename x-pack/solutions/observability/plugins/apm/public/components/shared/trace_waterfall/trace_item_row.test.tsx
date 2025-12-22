@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { TraceItemRow } from './trace_item_row';
+import { TraceItemRow, getCriticalPathOverlays } from './trace_item_row';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallContextProps } from './trace_waterfall_context';
 import { useEuiTheme } from '@elastic/eui';
+import type { CriticalPathSegment } from './critical_path';
 
 // Mock dependencies
 jest.mock('./bar', () => ({
@@ -341,5 +342,78 @@ describe('TraceItemRow', () => {
       const bar = getByTestId('bar');
       expect(bar).toHaveAttribute('data-color', 'red');
     });
+  });
+});
+
+describe('getCriticalPathOverlays', () => {
+  const mockItem = (overrides = {}): TraceWaterfallItem =>
+    ({
+      id: 'test-span',
+      duration: 100,
+      offset: 50,
+      skew: 0,
+      color: 'blue',
+      depth: 1,
+      errors: [],
+      timestampUs: 1000,
+      name: 'Test Item',
+      traceId: 'test-trace',
+      serviceName: 'test-service',
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      ...overrides,
+    } as TraceWaterfallItem);
+
+  const mockSegment = (
+    item: TraceWaterfallItem,
+    offset: number,
+    duration: number,
+    self: boolean
+  ): CriticalPathSegment<TraceWaterfallItem> => ({
+    item,
+    offset,
+    duration,
+    self,
+  });
+
+  it('returns undefined when segments is undefined', () => {
+    const result = getCriticalPathOverlays(undefined, mockItem(), 'orange');
+    expect(result).toBeUndefined();
+  });
+
+  it('returns empty array when segments array is empty', () => {
+    const result = getCriticalPathOverlays([], mockItem(), 'orange');
+    expect(result).toEqual([]);
+  });
+
+  it('filters out segments where self is false', () => {
+    const item = mockItem({ offset: 0, duration: 100, skew: 0 });
+    const item1 = mockItem({ id: 'segment-1', offset: 0, duration: 100, skew: 0 });
+    const item2 = mockItem({ id: 'segment-2', offset: 0, duration: 100, skew: 0 });
+    const item3 = mockItem({ id: 'segment-3', offset: 0, duration: 100, skew: 0 });
+    const item4 = mockItem({ id: 'segment-4', offset: 0, duration: 100, skew: 0 });
+
+    const segments = [
+      mockSegment(item1, 10, 20, true),
+      mockSegment(item2, 30, 15, false),
+      mockSegment(item3, 50, 30, true),
+      mockSegment(item4, 80, 10, false),
+    ];
+
+    const result = getCriticalPathOverlays(segments, item, 'purple');
+
+    expect(result).toHaveLength(2);
+    expect(result?.map((s) => s.id)).toEqual(['segment-1', 'segment-3']);
+  });
+
+  it('calculates position with offset and skew', () => {
+    const item = mockItem({ offset: 100, duration: 200, skew: 10 });
+    const segments = [mockSegment(item, 150, 50, true), mockSegment(item, 220, 40, true)];
+
+    const result = getCriticalPathOverlays(segments, item, 'orange');
+
+    expect(result).toEqual([
+      { id: 'test-span', color: 'orange', left: 0.2, width: 0.25 },
+      { id: 'test-span', color: 'orange', left: 0.55, width: 0.2 },
+    ]);
   });
 });
