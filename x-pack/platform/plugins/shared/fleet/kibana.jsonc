@@ -45,7 +45,8 @@
       "discover",
       "ingestPipelines",
       "automaticImport",
-      "alerting"
+      "alerting",
+      "sloShared"
     ],
     "requiredBundles": [
       "kibanaReact",
