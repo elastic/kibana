@@ -13,7 +13,7 @@ import type {
   ESQLVariableType,
   ControlTriggerSource,
 } from '@kbn/esql-types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
