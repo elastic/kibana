@@ -12,9 +12,9 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map, catchError } from 'rxjs';
+import { identifySystemsWithDescription } from '../../../../lib/streams/system/identify_systems';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
@@ -23,9 +23,8 @@ import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import type { IdentifiedSystemsEvent, StreamDescriptionEvent } from './types';
+import type { IdentifiedSystemsEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { identifySystemsWithDescription } from '@kbn/streams-plugin/server/lib/streams/system/identify_systems';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 

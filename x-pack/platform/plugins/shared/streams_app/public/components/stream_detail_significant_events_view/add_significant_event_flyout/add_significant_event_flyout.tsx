@@ -21,13 +21,7 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  isFeature,
-  type StreamQueryKql,
-  type Streams,
-  type System,
-  type FeatureType,
-} from '@kbn/streams-schema';
+import { type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';

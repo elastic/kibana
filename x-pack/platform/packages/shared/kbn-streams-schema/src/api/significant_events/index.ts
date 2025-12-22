@@ -10,7 +10,6 @@ import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { StreamQueryKql } from '../../queries';
-import type { FeatureType } from '../../feature';
 
 /**
  * SignificantEvents Get Response
