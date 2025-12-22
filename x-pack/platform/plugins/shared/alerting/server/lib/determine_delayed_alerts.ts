@@ -6,6 +6,7 @@
  */
 
 import { keys } from 'lodash';
+import { ALERT_STATUS_DELAYED } from '@kbn/rule-data-utils';
 import type { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../types';
 import type { RuleRunMetricsStore } from './rule_run_metrics_store';
@@ -50,9 +51,9 @@ export function determineDelayedAlerts<
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {
       // remove from new alerts and active alerts
-      delete newAlerts[id];
-      delete activeAlerts[id];
-
+      // delete newAlerts[id];
+      // delete activeAlerts[id];
+      alert.setStatus(ALERT_STATUS_DELAYED);
       delayedAlertsCount += 1;
     } else {
       // if the active count is equal to the alertDelay it is considered a new alert

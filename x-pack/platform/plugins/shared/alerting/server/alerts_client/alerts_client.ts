@@ -21,6 +21,7 @@ import {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_STATUS_DELAYED,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -118,6 +119,7 @@ export class AlertsClient<
     indices: Record<string, string>;
     active: Record<string, Alert & AlertData>;
     recovered: Record<string, Alert & AlertData>;
+    delayed: Record<string, Alert & AlertData>;
     seqNo: Record<string, number | undefined>;
     primaryTerm: Record<string, number | undefined>;
     get: (uuid: string) => Alert & AlertData;
@@ -161,16 +163,19 @@ export class AlertsClient<
       indices: {},
       active: {},
       recovered: {},
+      delayed: {},
       seqNo: {},
       primaryTerm: {},
       get(uuid: string) {
         return this.active[uuid] ?? this.recovered[uuid];
       },
       getById(id: string) {
-        return (
-          Object.values(this.active).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
-          Object.values(this.recovered).find((alert) => get(alert, ALERT_INSTANCE_ID) === id)
-        );
+        const alerts = [
+          ...Object.values(this.active),
+          ...Object.values(this.recovered),
+          ...Object.values(this.delayed),
+        ];
+        return alerts.find((alert) => get(alert, ALERT_INSTANCE_ID) === id);
       },
     };
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
@@ -246,6 +251,12 @@ export class AlertsClient<
           }
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
             this.trackedAlerts.recovered[alertUuid] = alertHit;
+          }
+          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
+            this.trackedAlerts.recovered[alertUuid] = alertHit;
+          }
+          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_DELAYED) {
+            this.trackedAlerts.delayed[alertUuid] = alertHit;
           }
           this.trackedAlerts.indices[alertUuid] = hit._index;
           this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
@@ -360,6 +371,14 @@ export class AlertsClient<
     }
     return false;
   }
+  // public isDelayedAlert(id: string) {
+  //   const alert = this.trackedAlerts.getById(id);
+  //   const uuid = alert?.[ALERT_UUID];
+  //   if (uuid) {
+  //     return !!this.trackedAlerts.delayed[uuid];
+  //   }
+  //   return false;
+  // }
 
   public hasReachedAlertLimit(): boolean {
     return this.legacyAlertsClient.hasReachedAlertLimit();
@@ -520,8 +539,6 @@ export class AlertsClient<
             })
           );
         } else {
-          const isDelayed = activeAlerts[id].getActiveCount() < this.options.rule.alertDelay;
-
           activeAlertsToIndex.push(
             buildNewAlert<
               AlertData,
@@ -538,7 +555,6 @@ export class AlertsClient<
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
               dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
-              isDelayed,
             })
           );
         }

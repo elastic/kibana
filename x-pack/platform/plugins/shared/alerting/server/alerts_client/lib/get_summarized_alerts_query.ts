@@ -19,6 +19,8 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_DELAYED,
   ALERT_UUID,
   EVENT_ACTION,
   TIMESTAMP,
@@ -152,6 +154,9 @@ const getQueryByExecutionUuid = ({
           exists: {
             field: ALERT_MAINTENANCE_WINDOW_IDS,
           },
+          term: {
+            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          },
         },
       },
     },
@@ -212,6 +217,15 @@ const getQueryByTimeRange = ({
     {
       term: {
         [ALERT_RULE_UUID]: ruleId,
+      },
+    },
+    {
+      bool: {
+        must_not: {
+          term: {
+            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          },
+        },
       },
     },
   ];
@@ -304,6 +318,15 @@ export const getQueryByScopedQueries = ({
     {
       term: {
         [ALERT_RULE_UUID]: ruleId,
+      },
+    },
+    {
+      bool: {
+        must_not: {
+          term: {
+            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          },
+        },
       },
     },
   ];

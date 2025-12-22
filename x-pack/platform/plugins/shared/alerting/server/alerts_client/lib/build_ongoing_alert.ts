@@ -28,6 +28,9 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_STATE_NAMESPACE,
+  ALERT_STATUS_DELAYED,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
@@ -107,6 +110,8 @@ export const buildOngoingAlert = <
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isDelayed = legacyAlert.isDelayed();
+  const alertStatus = isDelayed ? ALERT_STATUS_DELAYED : ALERT_STATUS_ACTIVE;
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -115,6 +120,7 @@ export const buildOngoingAlert = <
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'active',
     [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
+    [ALERT_STATUS]: alertStatus,
     // Because we're building this alert after the action execution handler has been
     // run, the scheduledExecutionOptions for the alert has been cleared and
     // the lastScheduledActions has been set. If we ever change the order of operations

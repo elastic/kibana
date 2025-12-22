@@ -289,7 +289,8 @@ export class PerAlertActionScheduler<
       !this.hasActiveMaintenanceWindow({ alert, action }) &&
       !this.isAlertMuted(alert) &&
       !this.hasPendingCountButNotNotifyOnChange({ alert, action }) &&
-      !alert.isFilteredOut(summarizedAlerts)
+      !alert.isFilteredOut(summarizedAlerts) &&
+      !alert.isDelayed()
     );
   }
 

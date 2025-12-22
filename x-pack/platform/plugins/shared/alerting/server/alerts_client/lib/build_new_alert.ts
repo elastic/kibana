@@ -60,7 +60,6 @@ interface BuildNewAlertOpts<
   timestamp: string;
   kibanaVersion: string;
   dangerouslyCreateAlertsInAllSpaces?: boolean;
-  isDelayed: boolean;
 }
 
 /**
@@ -83,7 +82,6 @@ export const buildNewAlert = <
   payload,
   kibanaVersion,
   dangerouslyCreateAlertsInAllSpaces,
-  isDelayed,
 }: BuildNewAlertOpts<
   AlertData,
   LegacyState,
@@ -98,6 +96,7 @@ export const buildNewAlert = <
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isDelayed = legacyAlert.isDelayed();
   const alertStatus = isDelayed ? ALERT_STATUS_DELAYED : ALERT_STATUS_ACTIVE;
 
   return deepmerge.all(

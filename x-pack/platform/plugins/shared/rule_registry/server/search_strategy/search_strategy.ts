@@ -19,7 +19,7 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
 import { partition } from 'lodash';
-import { isSiemRuleType } from '@kbn/rule-data-utils';
+import { ALERT_STATUS, ALERT_STATUS_DELAYED, isSiemRuleType } from '@kbn/rule-data-utils';
 import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 import { AlertAuditAction, alertAuditEvent } from '@kbn/alerting-plugin/server/lib';
 import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '../../common';
@@ -137,6 +137,20 @@ export const ruleRegistrySearchStrategyProvider = (
 
           if (ruleTypeFilter) {
             filter.push(ruleTypeFilter);
+          }
+
+          const shouldIncludeDelayedAlerts = request.includeDelayedAlerts ?? false;
+
+          if (!shouldIncludeDelayedAlerts) {
+            filter.push({
+              bool: {
+                must_not: {
+                  term: {
+                    [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+                  },
+                },
+              },
+            });
           }
 
           const sort = request.sort ?? [];
