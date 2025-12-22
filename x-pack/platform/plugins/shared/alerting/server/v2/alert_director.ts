@@ -10,7 +10,25 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_EVENTS_INDEX, ALERT_TRANSITIONS_INDEX } from './create_indices';
 
 export const DIRECTOR_INTERVAL = 1000;
-export const DIRECTOR_ESQL_QUERY = `FROM ${ALERT_EVENTS_INDEX} | STATS last_status = LAST(status, @timestamp) BY rule.id, alert_series_id | RENAME alert_series_id AS alert_event.alert_series_id | LOOKUP JOIN .kibana_alert_transitions ON rule.id == rule_id AND alert_series_id == alert_event.alert_series_id | STATS last_tracked_state = COALESCE(LAST(end_state, @timestamp), "inactive"), last_episode_id = LAST(episode_id, @timestamp) BY rule.id, alert_event.alert_series_id, last_status | EVAL candidate_state = CASE(last_tracked_state == "inactive" AND last_status == "breach", "pending", CASE(last_tracked_state == "pending" AND last_status == "recovered", "inactive", CASE(last_tracked_state == "active" AND last_status == "recover", "recovering", CASE(last_tracked_state == "recovering" AND last_status == "breach", "active")))) | WHERE candidate_state IS NOT NULL`;
+export const DIRECTOR_ESQL_QUERY = `FROM ${ALERT_EVENTS_INDEX}
+| STATS last_status = LAST(status, @timestamp)
+    BY rule.id, alert_series_id
+| RENAME alert_series_id AS event_alert_series_id
+| LOOKUP JOIN .kibana_alert_transitions
+    ON rule.id == rule_id AND event_alert_series_id == alert_series_id
+| STATS
+    last_tracked_state = COALESCE(LAST(end_state, @timestamp), "inactive"),
+    last_episode_id    = LAST(episode_id, @timestamp),
+    last_status        = ANY(last_status)
+    BY rule.id, event_alert_series_id
+| EVAL candidate_state = CASE(
+    last_tracked_state == "inactive"     AND last_status == "breach",    "pending",
+    last_tracked_state == "pending"      AND last_status == "recovered", "inactive",
+    last_tracked_state == "active"       AND last_status == "recover",   "recovering",
+    last_tracked_state == "recovering"   AND last_status == "breach",    "active",
+    NULL
+  )
+| WHERE candidate_state IS NOT NULL`;
 
 export interface CreateIndicesOpts {
   esClient: ElasticsearchClient;
