@@ -10,14 +10,6 @@ import type { ScoutPage } from '@kbn/scout';
 export class Homepage {
   constructor(private readonly page: ScoutPage) {}
 
-  async skipGettingStarted() {
-    // Skip to homepage by going to the URL twice.
-    await this.page.gotoApp('elasticsearch/home');
-    await this.page.testSubj.waitForSelector('skipAndGoHomeBtn');
-    await this.page.gotoApp('elasticsearch/home');
-    await this.page.testSubj.waitForSelector('search-homepage');
-  }
-
   async goto() {
     await this.page.gotoApp('elasticsearch/home');
     await this.page.testSubj.waitForSelector('search-homepage');

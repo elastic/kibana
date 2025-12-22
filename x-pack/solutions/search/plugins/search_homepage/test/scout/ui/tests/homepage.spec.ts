@@ -9,9 +9,15 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 
 test.describe('Homepage', { tag: ['@svlSearch'] }, () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('gettingStartedVisited', 'true');
+    });
+  });
+
   test('Viewer should not be able to see manage button', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.homepage.skipGettingStarted();
+    await pageObjects.homepage.goto();
 
     const headerLeftGroup = await pageObjects.homepage.getHeaderLeftGroup();
 
@@ -21,7 +27,7 @@ test.describe('Homepage', { tag: ['@svlSearch'] }, () => {
 
   test('Admin should see the manage button', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.homepage.skipGettingStarted();
+    await pageObjects.homepage.goto();
 
     const headerLeftGroup = await pageObjects.homepage.getHeaderLeftGroup();
 
@@ -36,7 +42,7 @@ test.describe('Homepage', { tag: ['@svlSearch'] }, () => {
     page,
   }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.homepage.skipGettingStarted();
+    await pageObjects.homepage.goto();
 
     const navigationCards = await pageObjects.homepage.getNavigationCards();
     await expect(navigationCards).toHaveCount(5);
@@ -77,7 +83,7 @@ test.describe('Homepage', { tag: ['@svlSearch'] }, () => {
     page,
   }) => {
     await browserAuth.loginAsViewer();
-    await pageObjects.homepage.skipGettingStarted();
+    await pageObjects.homepage.goto();
 
     await pageObjects.homepage.clickGettingStartedButton();
 
@@ -86,7 +92,7 @@ test.describe('Homepage', { tag: ['@svlSearch'] }, () => {
 
   test('Should open connection details flyout', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.homepage.skipGettingStarted();
+    await pageObjects.homepage.goto();
 
     await pageObjects.homepage.clickConnectionDetailsButton();
 
@@ -99,7 +105,7 @@ test.describe('Homepage', { tag: ['@svlSearch'] }, () => {
 
   test('Should create API key through the modal', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.homepage.skipGettingStarted();
+    await pageObjects.homepage.goto();
 
     await pageObjects.homepage.clickApiKeysButton();
 
