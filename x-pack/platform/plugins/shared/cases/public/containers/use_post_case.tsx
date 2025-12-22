@@ -22,15 +22,22 @@ export const usePostCase = () => {
   const { showErrorToast } = useCasesToast();
   const refreshCases = useRefreshCases();
 
-  return useMutation(({ request }: MutationArgs) => postCase({ newCase: request }), {
-    mutationKey: casesMutationsKeys.createCase,
-    onSuccess: () => {
-      refreshCases();
+  return useMutation(
+    ({ request }: MutationArgs) => {
+      console.log('usePostCase', request);
+
+      return postCase({ newCase: request });
     },
-    onError: (error: ServerError) => {
-      showErrorToast(error, { title: i18n.ERROR_CREATING_CASE });
-    },
-  });
+    {
+      mutationKey: casesMutationsKeys.createCase,
+      onSuccess: () => {
+        refreshCases();
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_CREATING_CASE });
+      },
+    }
+  );
 };
 
 export type UsePostCase = ReturnType<typeof usePostCase>;

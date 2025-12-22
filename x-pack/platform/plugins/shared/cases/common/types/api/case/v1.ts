@@ -40,6 +40,7 @@ import {
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
+  CaseTemplate,
   RelatedCaseRt,
   SimilarCaseRt,
 } from '../../domain/case/v1';
@@ -218,6 +219,10 @@ export const CasePostRequestRt = rt.intersection([
        * The list of custom field values of the case.
        */
       customFields: CaseRequestCustomFieldsRt,
+
+      template: rt.union([CaseTemplate, rt.null]),
+
+      templateFields: rt.any,
     })
   ),
 ]);

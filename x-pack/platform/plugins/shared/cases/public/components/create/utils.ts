@@ -36,6 +36,8 @@ export const getInitialCaseValue = ({
   description: '',
   settings: { syncAlerts: true, extractObservables: true },
   customFields: [],
+  template: undefined,
+  templateFields: {},
   ...restFields,
   connector: connector ?? getNoneConnector(),
   owner,

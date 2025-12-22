@@ -93,6 +93,8 @@ export const transformNewCase = ({
   observables: [],
   total_observables: 0,
   incremental_id: undefined,
+  template: newCase.template,
+  templateFields: newCase.templateFields,
 });
 
 export const transformCases = ({

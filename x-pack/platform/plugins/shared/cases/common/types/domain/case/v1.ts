@@ -60,6 +60,11 @@ export const CaseSettingsRt = rt.intersection([
   ),
 ]);
 
+export const CaseTemplate = rt.strict({
+  id: rt.string,
+  version: rt.number,
+});
+
 const CaseBaseFields = {
   /**
    * The description of the case
@@ -102,6 +107,16 @@ const CaseBaseFields = {
    * Observables
    */
   observables: rt.array(CaseObservableRt),
+
+  /**
+   * New templating system
+   */
+  template: rt.union([rt.null, CaseTemplate]),
+
+  /**
+   * Validated using external schema
+   */
+  templateFields: rt.any,
 };
 
 export const CaseBaseOptionalFieldsRt = rt.exact(

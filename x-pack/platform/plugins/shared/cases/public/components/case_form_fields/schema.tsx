@@ -112,4 +112,8 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
   fields: {
     defaultValue: null,
   },
+  template: {
+    defaultValue: null,
+  },
+  templateFields: {},
 };

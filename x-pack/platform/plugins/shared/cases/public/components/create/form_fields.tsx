@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import {
   EuiLoadingSpinner,
   EuiSteps,
@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
+import type { Template } from '../../../common/templates';
 import type { CasePostRequest, CaseUI } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
 import { Connector } from '../case_form_fields/connector';
@@ -30,7 +31,6 @@ import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservablesToggle } from '../case_form_fields/observables_toggle';
 import { TemplateSelectorV2 } from '../templates_v2';
-import { Template } from '@kbn/cases-plugin/common/templates';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -107,13 +107,17 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         children: (
           <>
             <TemplateSelectorV2
-              onSelectTemplate={setCaseTemplate}
+              onSelectTemplate={(t) => {
+                setCaseTemplate(t);
+                setFieldValue('template', { id: t?.templateId, version: t?.templateVersion });
+                setFieldValue('templateFields', {});
+              }}
               selectedTemplateId={caseTemplate?.templateId}
             />
           </>
         ),
       }),
-      [caseTemplate?.templateId]
+      [caseTemplate?.templateId, setFieldValue]
     );
 
     const secondStep = useMemo(
