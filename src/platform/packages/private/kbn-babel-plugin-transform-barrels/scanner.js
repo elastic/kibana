@@ -68,6 +68,12 @@ function resolvePackageBarrel(packageRoot, pkgJson) {
     barrelRelPath = pkgJson.main;
   }
 
+  // Some entry points are JSON, .d.ts or binary files, so we need to skip them
+  const isParseableFile = /(?<!\.d)\.(js|jsx|ts|tsx|mjs|cjs)$/.test(barrelRelPath);
+  if (!isParseableFile) {
+    return null;
+  }
+
   // Default to index.js if nothing specified
   if (!barrelRelPath) {
     barrelRelPath = './index.js';
@@ -153,7 +159,9 @@ async function buildBarrelIndex(repoRoot) {
             index[barrelPath] = { exports };
           }
         } catch (err) {
-          console.warn(`[barrel-transform] Skipping ${barrelPath}: ${err.message}`);
+          console.warn(
+            `[barrel-transform] Error parsing barrel file ${barrelPath}: ${err.message}`
+          );
         }
       })
     ),
@@ -225,7 +233,9 @@ async function buildBarrelIndex(repoRoot) {
           }
         } catch (err) {
           // Skip packages that can't be processed
-          console.warn(`[barrel-transform] Skipping package ${pkgJsonPath}: ${err.message}`);
+          console.warn(
+            `[barrel-transform] Error parsing package.json ${pkgJsonPath}: ${err.message}`
+          );
         }
       })
     ),
