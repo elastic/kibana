@@ -188,17 +188,6 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'histogram',
-          optional: false,
-          description: 'Expression that outputs values to be checked for absence.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'integer',
           optional: false,
           description: 'Expression that outputs values to be checked for absence.',
@@ -233,17 +222,6 @@ const absentDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
-          description: 'Expression that outputs values to be checked for absence.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
           optional: false,
           description: 'Expression that outputs values to be checked for absence.',
         },
@@ -727,17 +705,6 @@ const avgDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'long',
-          optional: false,
-          description: 'Expression that outputs values to average.',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'tdigest',
           optional: false,
           description: 'Expression that outputs values to average.',
         },
@@ -2200,17 +2167,6 @@ const maxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: '',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'text',
           optional: false,
           description: '',
@@ -2487,17 +2443,6 @@ const minDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: '',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'text',
           optional: false,
           description: '',
@@ -2762,60 +2707,6 @@ const percentileDefinition: FunctionDefinition = {
       ],
       returnType: 'double',
     },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'tdigest',
-          optional: false,
-          description: '',
-        },
-        {
-          name: 'percentile',
-          type: 'double',
-          optional: false,
-          description: '',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'tdigest',
-          optional: false,
-          description: '',
-        },
-        {
-          name: 'percentile',
-          type: 'integer',
-          optional: false,
-          description: '',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'tdigest',
-          optional: false,
-          description: '',
-        },
-        {
-          name: 'percentile',
-          type: 'long',
-          optional: false,
-          description: '',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
   ],
   locationsAvailable: [Location.STATS],
   examples: [
@@ -2982,17 +2873,6 @@ const presentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'histogram',
-          optional: false,
-          description: 'Expression that outputs values to be checked for presence.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'integer',
           optional: false,
           description: 'Expression that outputs values to be checked for presence.',
@@ -3027,17 +2907,6 @@ const presentDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
-          description: 'Expression that outputs values to be checked for presence.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
           optional: false,
           description: 'Expression that outputs values to be checked for presence.',
         },
@@ -3621,17 +3490,6 @@ const sumDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'tdigest',
-          optional: false,
-          description: '',
-        },
-      ],
-      returnType: 'double',
     },
   ],
   locationsAvailable: [Location.STATS],

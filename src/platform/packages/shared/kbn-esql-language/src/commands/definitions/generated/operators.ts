@@ -2520,18 +2520,6 @@ const isNotNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'histogram',
-          optional: false,
-          description:
-            'Value to check. It can be a single- or multi-valued column or an expression.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
           type: 'integer',
           optional: false,
           description:
@@ -2569,18 +2557,6 @@ const isNotNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'long',
-          optional: false,
-          description:
-            'Value to check. It can be a single- or multi-valued column or an expression.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'tdigest',
           optional: false,
           description:
             'Value to check. It can be a single- or multi-valued column or an expression.',
@@ -2856,18 +2832,6 @@ const isNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'histogram',
-          optional: false,
-          description:
-            'Value to check. It can be a single- or multi-valued column or an expression.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
           type: 'integer',
           optional: false,
           description:
@@ -2905,18 +2869,6 @@ const isNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'long',
-          optional: false,
-          description:
-            'Value to check. It can be a single- or multi-valued column or an expression.',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'tdigest',
           optional: false,
           description:
             'Value to check. It can be a single- or multi-valued column or an expression.',

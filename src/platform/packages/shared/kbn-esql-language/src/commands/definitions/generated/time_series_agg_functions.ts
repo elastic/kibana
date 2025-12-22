@@ -46,7 +46,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'aggregate_metric_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -57,7 +57,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -68,7 +68,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -79,7 +79,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -90,7 +90,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -101,7 +101,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -112,7 +112,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -123,7 +123,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -134,7 +134,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -145,7 +145,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -156,7 +156,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -167,7 +167,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -178,18 +178,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'histogram',
-          optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -200,7 +189,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -211,7 +200,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -222,7 +211,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -233,18 +222,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -255,7 +233,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -266,7 +244,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -277,7 +255,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -302,10 +280,10 @@ const avgOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'aggregate_metric_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to average.',
         },
         {
           name: 'window',
@@ -319,10 +297,10 @@ const avgOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to average.',
         },
         {
           name: 'window',
@@ -336,10 +314,10 @@ const avgOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to average.',
         },
         {
           name: 'window',
@@ -353,10 +331,10 @@ const avgOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to average.',
         },
         {
           name: 'window',
@@ -370,27 +348,10 @@ const avgOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'window',
-          type: 'time_duration',
-          optional: true,
-          description: 'the time window over which to compute the average',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to average.',
         },
         {
           name: 'window',
@@ -424,7 +385,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -435,29 +396,11 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
           type: 'integer',
-          optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'boolean',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'precision',
-          type: 'long',
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
@@ -471,7 +414,25 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: '',
         },
         {
           name: 'precision',
@@ -489,7 +450,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -500,29 +461,11 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
           type: 'integer',
-          optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'precision',
-          type: 'long',
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
@@ -536,7 +479,25 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: '',
         },
         {
           name: 'precision',
@@ -554,7 +515,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -565,29 +526,11 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
           type: 'integer',
-          optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'date_nanos',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'precision',
-          type: 'long',
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
@@ -601,7 +544,25 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: '',
         },
         {
           name: 'precision',
@@ -619,7 +580,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -630,29 +591,11 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
           type: 'integer',
-          optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'precision',
-          type: 'long',
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
@@ -666,7 +609,25 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: '',
         },
         {
           name: 'precision',
@@ -684,7 +645,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -695,7 +656,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -713,7 +674,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -731,7 +692,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -749,7 +710,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -760,29 +721,11 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
           type: 'integer',
-          optional: true,
-          description:
-            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'ip',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'precision',
-          type: 'long',
           optional: true,
           description:
             'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
@@ -796,7 +739,25 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+          description:
+            'Precision threshold. Refer to <<esql-agg-count-distinct-approximate>>. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+          description: '',
         },
         {
           name: 'precision',
@@ -814,7 +775,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -825,7 +786,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -843,7 +804,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -861,7 +822,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -879,7 +840,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -890,7 +851,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -908,7 +869,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -926,7 +887,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -944,7 +905,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -955,7 +916,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -973,7 +934,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -991,7 +952,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -1009,7 +970,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1020,7 +981,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -1038,7 +999,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -1056,7 +1017,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'precision',
@@ -1091,7 +1052,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'aggregate_metric_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1102,7 +1063,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1113,7 +1074,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1124,7 +1085,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1135,7 +1096,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1146,7 +1107,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1157,7 +1118,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1168,7 +1129,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1179,7 +1140,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1190,7 +1151,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1201,7 +1162,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1212,7 +1173,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1223,7 +1184,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1234,7 +1195,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1245,7 +1206,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1256,7 +1217,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1267,7 +1228,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1278,7 +1239,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1289,7 +1250,7 @@ const countOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'long',
@@ -1317,7 +1278,7 @@ const deltaDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1328,7 +1289,7 @@ const deltaDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1339,7 +1300,7 @@ const deltaDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1368,7 +1329,7 @@ const derivDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1379,7 +1340,7 @@ const derivDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1390,7 +1351,7 @@ const derivDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1419,7 +1380,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1436,7 +1397,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1453,7 +1414,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1470,7 +1431,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1487,7 +1448,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1504,7 +1465,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1521,7 +1482,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1556,7 +1517,7 @@ const ideltaDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1567,7 +1528,7 @@ const ideltaDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1578,7 +1539,7 @@ const ideltaDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1606,7 +1567,7 @@ const increaseDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1617,7 +1578,7 @@ const increaseDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1628,7 +1589,7 @@ const increaseDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1657,7 +1618,7 @@ const irateDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1668,7 +1629,7 @@ const irateDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1679,7 +1640,7 @@ const irateDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -1708,7 +1669,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_double',
           optional: false,
-          description: 'the metric field to calculate the latest value for',
+          description: 'the field to calculate the latest value for',
         },
         {
           name: 'window',
@@ -1725,7 +1686,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_integer',
           optional: false,
-          description: 'the metric field to calculate the latest value for',
+          description: 'the field to calculate the latest value for',
         },
         {
           name: 'window',
@@ -1742,7 +1703,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'counter_long',
           optional: false,
-          description: 'the metric field to calculate the latest value for',
+          description: 'the field to calculate the latest value for',
         },
         {
           name: 'window',
@@ -1759,7 +1720,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the latest value for',
+          description: 'the field to calculate the latest value for',
         },
         {
           name: 'window',
@@ -1776,7 +1737,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the latest value for',
+          description: 'the field to calculate the latest value for',
         },
         {
           name: 'window',
@@ -1793,7 +1754,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the latest value for',
+          description: 'the field to calculate the latest value for',
         },
         {
           name: 'window',
@@ -1810,7 +1771,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the latest value for',
+          description: 'the field to calculate the latest value for',
         },
         {
           name: 'window',
@@ -1844,7 +1805,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'aggregate_metric_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1861,7 +1822,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1878,7 +1839,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1895,7 +1856,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1912,7 +1873,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1929,7 +1890,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1946,7 +1907,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1963,7 +1924,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1980,7 +1941,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -1997,7 +1958,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2012,26 +1973,9 @@ const maxOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'window',
-          type: 'time_duration',
-          optional: true,
-          description: 'the time window over which to compute the maximum',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2048,7 +1992,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2065,7 +2009,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2099,7 +2043,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'aggregate_metric_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2116,7 +2060,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2133,7 +2077,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2150,7 +2094,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2167,7 +2111,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2184,7 +2128,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2201,7 +2145,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2218,7 +2162,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2235,7 +2179,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2252,7 +2196,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2267,26 +2211,9 @@ const minOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'window',
-          type: 'time_duration',
-          optional: true,
-          description: 'the time window over which to compute the minimum',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2303,7 +2230,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2320,7 +2247,7 @@ const minOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -2343,7 +2270,7 @@ const percentileOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: 'percentile_over_time',
   description: i18n.translate('kbn-esql-language.esql.definitions.percentile_over_time', {
-    defaultMessage: 'Calculates the percentile over time of a field.',
+    defaultMessage: 'Calculates the percentile over time of a numeric field.',
   }),
   preview: true,
   alias: undefined,
@@ -2351,16 +2278,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2368,16 +2295,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2385,16 +2312,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2402,16 +2329,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2419,16 +2346,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2436,16 +2363,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2453,16 +2380,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2470,16 +2397,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2487,16 +2414,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2504,16 +2431,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'double',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2521,16 +2448,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'integer',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2538,67 +2465,16 @@ const percentileOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'percentile',
-          type: 'long',
-          optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'percentile',
-          type: 'double',
-          optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'percentile',
-          type: 'integer',
-          optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression that outputs values to calculate the percentile of.',
         },
         {
           name: 'percentile',
           type: 'long',
           optional: false,
-          description: 'the percentile value to compute (between 0 and 100)',
+          description: '',
         },
       ],
       returnType: 'double',
@@ -2626,7 +2502,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'aggregate_metric_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2637,7 +2513,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'boolean',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2648,7 +2524,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_point',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2659,7 +2535,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'cartesian_shape',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2670,7 +2546,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2681,7 +2557,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'date_nanos',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2692,7 +2568,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2703,7 +2579,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2714,7 +2590,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_point',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2725,7 +2601,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geo_shape',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2736,7 +2612,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohash',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2747,7 +2623,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geohex',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2758,18 +2634,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'geotile',
           optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'histogram',
-          optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2780,7 +2645,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2791,7 +2656,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'ip',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2802,7 +2667,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2813,18 +2678,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2835,7 +2689,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2846,7 +2700,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'unsigned_long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2857,7 +2711,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'version',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
       ],
       returnType: 'boolean',
@@ -2951,10 +2805,10 @@ const stddevOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the standard deviation for',
+          description: 'Expression that outputs values to calculate the standard deviation of.',
         },
       ],
       returnType: 'double',
@@ -2962,10 +2816,10 @@ const stddevOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the standard deviation for',
+          description: 'Expression that outputs values to calculate the standard deviation of.',
         },
       ],
       returnType: 'double',
@@ -2973,10 +2827,10 @@ const stddevOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the standard deviation for',
+          description: 'Expression that outputs values to calculate the standard deviation of.',
         },
       ],
       returnType: 'double',
@@ -3004,7 +2858,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'aggregate_metric_double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -3021,7 +2875,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -3038,7 +2892,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'exponential_histogram',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -3055,7 +2909,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -3072,7 +2926,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
           name: 'field',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: '',
         },
         {
           name: 'window',
@@ -3082,23 +2936,6 @@ const sumOverTimeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'tdigest',
-          optional: false,
-          description: 'the metric field to calculate the value for',
-        },
-        {
-          name: 'window',
-          type: 'time_duration',
-          optional: true,
-          description: 'the time window over which to compute the sum over time',
-        },
-      ],
-      returnType: 'double',
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
@@ -3120,10 +2957,10 @@ const varianceOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'double',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression for which to calculate the variance over time.',
         },
       ],
       returnType: 'double',
@@ -3131,10 +2968,10 @@ const varianceOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'integer',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression for which to calculate the variance over time.',
         },
       ],
       returnType: 'double',
@@ -3142,10 +2979,10 @@ const varianceOverTimeDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'number',
           type: 'long',
           optional: false,
-          description: 'the metric field to calculate the value for',
+          description: 'Expression for which to calculate the variance over time.',
         },
       ],
       returnType: 'double',
