@@ -50,7 +50,7 @@ interface EditorFooterProps {
   detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
   onUpdateAndSubmitQuery: (newQuery: string, querySource: QuerySource) => void;
-  updateQuery: (qs: string) => void;
+  onPrettifyQuery: () => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
   isLanguageComponentOpen: boolean;
@@ -77,7 +77,7 @@ export const EditorFooter = memo(function EditorFooter({
   detectedTimestamp,
   onErrorClick,
   onUpdateAndSubmitQuery,
-  updateQuery,
+  onPrettifyQuery,
   hideRunQueryText,
   editorIsInline,
   isSpaceReduced,
@@ -139,7 +139,7 @@ export const EditorFooter = memo(function EditorFooter({
                 gap: 12px;
               `}
             >
-              <QueryWrapComponent code={code} updateQuery={updateQuery} />
+              <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-footer-lines">
                   <p>

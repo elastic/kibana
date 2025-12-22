@@ -8,7 +8,7 @@
  */
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
-import { uniq } from 'lodash';
+import { isEqual, uniq, uniqWith } from 'lodash';
 import { matchesSpecialFunction } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import type { ExpressionContext } from '../types';
@@ -21,6 +21,7 @@ import type {
   FunctionDefinition,
   FunctionParameter,
   FunctionParameterType,
+  ParameterHint,
 } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
@@ -29,6 +30,7 @@ import {
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
+import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
@@ -95,9 +97,14 @@ function tryExclusiveSuggestions(
     Boolean(functionParamContext.hasMoreMandatoryArgs),
     options.isCursorFollowedByComma ?? false
   );
-
   if (enumItems.length > 0) {
     return enumItems;
+  }
+
+  // Some parameters suggests special values that are deduced from the hints object provided by ES.
+  const itemsFromHints = buildSuggestionsFromHints(paramDefinitions, ctx);
+  if (itemsFromHints.length > 0) {
+    return itemsFromHints;
   }
 
   return [];
@@ -372,6 +379,24 @@ function buildEnumValueSuggestions(
     addComma: shouldAddComma,
     advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
   });
+}
+
+function buildSuggestionsFromHints(
+  paramDefinitions: FunctionParameter[],
+  ctx: ExpressionContext
+): ISuggestionItem[] {
+  // Keep the hints that are unique by entityType + constraints
+  const hints: ParameterHint[] = uniqWith(
+    paramDefinitions.flatMap(({ hint }) => hint ?? []),
+    (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
+  );
+
+  const results = hints.map(
+    (hint) =>
+      parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
+  );
+
+  return results.flat();
 }
 
 /** Builds suggestions for constant-only literal parameters */

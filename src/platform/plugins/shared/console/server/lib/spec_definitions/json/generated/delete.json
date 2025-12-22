@@ -12,7 +12,7 @@
         "false",
         "wait_for"
       ],
-      "routing": "",
+      "routing": [],
       "timeout": [
         "1m",
         "-1",

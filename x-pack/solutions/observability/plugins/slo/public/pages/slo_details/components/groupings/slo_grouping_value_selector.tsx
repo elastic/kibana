@@ -10,10 +10,10 @@ import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
-import { SLOS_BASE_PATH } from '../../../../../common/locators/paths';
 import { useFetchSloGroupings } from '../../hooks/use_fetch_slo_instances';
 import { useGetQueryParams } from '../../hooks/use_get_query_params';
 

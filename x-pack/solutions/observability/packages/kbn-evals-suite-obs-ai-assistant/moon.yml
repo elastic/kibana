@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/synthtrace'
   - '@kbn/onechat-common'
+  - '@kbn/es-snapshot-loader'
 tags:
   - functional-tests
   - package

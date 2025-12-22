@@ -82,6 +82,10 @@ describe('WorkflowContextManager', () => {
       delete: jest.fn(),
     } as any;
 
+    workflowExecutionState.getLatestStepExecution = jest
+      .fn()
+      .mockReturnValue({} as EsWorkflowStepExecution);
+
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,

@@ -828,10 +828,10 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.kbnesqlast",
+            "id": "def-common.externals.kbnesqllanguage",
             "type": "string",
             "tags": [],
-            "label": "'@kbn/esql-ast'",
+            "label": "'@kbn/esql-language'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

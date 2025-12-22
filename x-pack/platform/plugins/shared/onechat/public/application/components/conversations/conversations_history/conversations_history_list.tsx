@@ -7,25 +7,25 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiFlexGroup,
+  EuiButtonIcon,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useConversationList } from '../../../hooks/use_conversation_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { groupConversationsByTime } from '../../../utils/group_conversations';
 import { NoConversationsPrompt } from './no_conversations_prompt';
-import { useConversationList } from '../../../hooks/use_conversation_list';
+import { DeleteConversationModal } from '../delete_conversation_modal';
 
 const EMPTY_CONTAINER_HEIGHT = 300;
 
@@ -39,6 +39,12 @@ const emptyContainerStyles = css`
   align-items: center;
 `;
 
+const deleteConversationLabel = (title: string) =>
+  i18n.translate('xpack.onechat.conversationsHistory.deleteConversation', {
+    defaultMessage: 'Delete conversation {title}',
+    values: { title },
+  });
+
 interface ConversationHistoryListProps {
   onClose?: () => void;
 }
@@ -48,6 +54,9 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
   const currentConversationId = useConversationId();
   const { navigateToOnechatUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const { euiTheme } = useEuiTheme();
+  const [conversationToDelete, setConversationToDelete] =
+    useState<ConversationWithoutRounds | null>(null);
 
   const timeSections = useMemo(() => {
     if (!conversations || conversations.length === 0) {
@@ -73,6 +82,19 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
           label: conversation.title,
           checked: currentConversationId === conversation.id ? 'on' : undefined,
           'data-test-subj': `conversationItem-${conversation.id}`,
+          append: (
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              aria-label={deleteConversationLabel(conversation.title)}
+              onClick={(event: React.MouseEvent) => {
+                // Must stop click event from propagating to list item which would trigger navigation
+                event.stopPropagation();
+                setConversationToDelete(conversation);
+              }}
+              data-test-subj={`deleteConversationButton-${conversation.id}`}
+            />
+          ),
           data: {
             conversation,
           },
@@ -122,6 +144,17 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     }
     .euiSelectableList__groupLabel {
       border-block-end: 0;
+      :not(:first-of-type) {
+        padding-block-start: ${euiTheme.size.m};
+      }
+    }
+    /* Only show append icon on hover or focus */
+    .euiSelectableListItem__append {
+      opacity: 0;
+    }
+    .euiSelectableListItem:hover .euiSelectableListItem__append,
+    .euiSelectableListItem-isFocused .euiSelectableListItem__append {
+      opacity: 1;
     }
   `;
 
@@ -130,66 +163,47 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
   const listHeight = Math.min(listItemsHeight, MAX_LIST_HEIGHT);
 
   return (
-    <EuiSelectable
-      height={listHeight}
-      searchable
-      searchProps={{
-        placeholder: i18n.translate('xpack.onechat.conversationsHistory.searchPlaceholder', {
-          defaultMessage: 'Search conversations',
-        }),
-        compressed: true,
-        inputRef: (node) => {
-          node?.focus();
-        },
-      }}
-      options={selectableOptions}
-      onChange={handleChange}
-      singleSelection={true}
-      aria-label={i18n.translate('xpack.onechat.conversationsHistory.conversations', {
-        defaultMessage: 'Conversations',
-      })}
-      data-test-subj="agentBuilderConversationList"
-      listProps={{
-        bordered: false,
-        showIcons: false,
-      }}
-      css={listStylesOverride}
-    >
-      {(list, search) => (
-        <>
-          <PopoverHeader />
-          <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-          {list}
-        </>
-      )}
-    </EuiSelectable>
-  );
-};
-
-const PopoverHeader = () => {
-  const { euiTheme } = useEuiTheme();
-
-  const headerStyles = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    border-bottom: 1px solid ${euiTheme.border.color};
-  `;
-
-  return (
-    <EuiFlexGroup
-      css={headerStyles}
-      justifyContent="spaceBetween"
-      alignItems="center"
-      gutterSize="none"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
-          <h5>
-            {i18n.translate('xpack.onechat.conversationsHistory.title', {
-              defaultMessage: 'Conversations',
-            })}
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSelectable
+        height={listHeight}
+        searchable
+        searchProps={{
+          placeholder: i18n.translate('xpack.onechat.conversationsHistory.searchPlaceholder', {
+            defaultMessage: 'Search conversations',
+          }),
+          compressed: true,
+          inputRef: (node) => {
+            node?.focus();
+          },
+        }}
+        options={selectableOptions}
+        onChange={handleChange}
+        singleSelection={true}
+        aria-label={i18n.translate('xpack.onechat.conversationsHistory.conversations', {
+          defaultMessage: 'Conversations',
+        })}
+        data-test-subj="agentBuilderConversationList"
+        listProps={{
+          bordered: false,
+          showIcons: false,
+          onFocusBadge: false,
+        }}
+        css={listStylesOverride}
+      >
+        {(list, search) => (
+          <>
+            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+      <DeleteConversationModal
+        isOpen={conversationToDelete !== null}
+        onClose={() => {
+          setConversationToDelete(null);
+        }}
+        conversation={conversationToDelete ?? undefined}
+      />
+    </>
   );
 };

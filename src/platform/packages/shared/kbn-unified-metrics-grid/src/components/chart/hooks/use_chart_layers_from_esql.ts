@@ -17,6 +17,22 @@ import { useEsqlQueryInfo } from '../../../hooks';
 import { DIMENSIONS_COLUMN, getLensMetricFormat } from '../../../common/utils';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
+interface ChartLayersFromEsqlProps {
+  query: string;
+  color?: string;
+  unit?: MetricUnit;
+  timeRange: TimeRange;
+  seriesType: LensSeriesLayer['seriesType'];
+  services: UnifiedMetricsGridProps['services'];
+  abortController?: AbortController;
+}
+
+export interface ChartLayersFromEsqlResult {
+  layers: LensSeriesLayer[];
+  loading: boolean;
+  error?: Error;
+}
+
 export const useChartLayersFromEsql = ({
   query,
   timeRange,
@@ -25,18 +41,14 @@ export const useChartLayersFromEsql = ({
   services,
   unit,
   abortController,
-}: {
-  query: string;
-  color?: string;
-  unit?: MetricUnit;
-  timeRange: TimeRange;
-  seriesType: LensSeriesLayer['seriesType'];
-  services: UnifiedMetricsGridProps['services'];
-  abortController?: AbortController;
-} & Pick<UnifiedMetricsGridProps, 'services'>): LensSeriesLayer[] => {
+}: ChartLayersFromEsqlProps): ChartLayersFromEsqlResult => {
   const queryInfo = useEsqlQueryInfo({ query });
 
-  const { value: columns = [] } = useAsync(
+  const {
+    value: columns = [],
+    loading,
+    error,
+  } = useAsync(
     () =>
       getESQLQueryColumns({
         esqlQuery: query,
@@ -90,5 +102,5 @@ export const useChartLayersFromEsql = ({
     ];
   }, [columns, queryInfo.dimensions, seriesType, color, unit]);
 
-  return layers;
+  return { layers, loading, error };
 };

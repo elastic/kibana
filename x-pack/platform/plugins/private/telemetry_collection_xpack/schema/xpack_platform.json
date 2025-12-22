@@ -6596,90 +6596,160 @@
             "dashboard": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "lens": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "visualization": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "map": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "search": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "osquery-pack": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "osquery-pack-asset": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "osquery-saved-query": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             },
             "alerting_rule_template": {
               "properties": {
                 "usedTags": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
                 },
                 "taggedObjects": {
-                  "type": "integer"
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
+                }
+              }
+            },
+            "slo_template": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of tags used"
+                  }
+                },
+                "taggedObjects": {
+                  "type": "integer",
+                  "_meta": {
+                    "description": "Count of Saved Objects tagged"
+                  }
                 }
               }
             }

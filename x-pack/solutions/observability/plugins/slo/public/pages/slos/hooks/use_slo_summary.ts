@@ -6,12 +6,12 @@
  */
 
 import numeral from '@elastic/numeral';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { useKibana } from '../../../hooks/use_kibana';
-import { paths } from '../../../../common/locators/paths';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export const useSloFormattedSummary = (slo: SLOWithSummaryResponse) => {
   const {

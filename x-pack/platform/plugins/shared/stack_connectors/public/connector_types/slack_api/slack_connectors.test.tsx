@@ -212,7 +212,7 @@ describe('SlackActionFields renders', () => {
       expect(screen.getByText('#test')).toBeInTheDocument();
     });
 
-    it('changes the values correctly', async () => {
+    it('changes the values correctly and preserve the id of the channel', async () => {
       render(
         <ConnectorFormTestProvider
           connector={actionConnector}
@@ -232,7 +232,6 @@ describe('SlackActionFields renders', () => {
       await userEvent.click(screen.getByTestId('secrets.token-input'));
       await userEvent.paste('token updated');
 
-      await userEvent.click(screen.getByTestId('comboBoxClearButton'));
       await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
       await userEvent.type(screen.getByTestId('comboBoxSearchInput'), '#new-channel{enter}');
 
@@ -247,7 +246,7 @@ describe('SlackActionFields renders', () => {
               token: 'token updated',
             },
             config: {
-              allowedChannels: [{ name: '#new-channel' }],
+              allowedChannels: [{ id: 'channel-id', name: '#test' }, { name: '#new-channel' }],
             },
           },
           isValid: true,

@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { SnapshotInfo } from '../types';
 
 export function generateRepoName(): string {
@@ -15,16 +15,16 @@ export function generateRepoName(): string {
 
 export async function registerUrlRepository({
   esClient,
-  logger,
+  log,
   repoName,
   snapshotUrl,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   repoName: string;
   snapshotUrl: string;
 }): Promise<void> {
-  logger.debug(`Connecting to snapshot at ${snapshotUrl}`);
+  log.debug(`Connecting to snapshot at ${snapshotUrl}`);
 
   await esClient.snapshot.createRepository({
     name: repoName,
@@ -34,16 +34,16 @@ export async function registerUrlRepository({
 
 export async function getSnapshotMetadata({
   esClient,
-  logger,
+  log,
   repoName,
   snapshotName,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   repoName: string;
   snapshotName?: string;
 }): Promise<SnapshotInfo> {
-  logger.debug('Reading snapshot metadata...');
+  log.debug('Reading snapshot metadata...');
 
   const response = await esClient.snapshot.get({
     repository: repoName,
@@ -89,22 +89,22 @@ export async function getSnapshotMetadata({
     state: selected.state ?? 'unknown',
   };
 
-  logger.info(`Found snapshot: ${info.snapshot} with ${info.indices.length} indices`);
+  log.info(`Found snapshot: ${info.snapshot} with ${info.indices.length} indices`);
   return info;
 }
 
 export async function deleteRepository({
   esClient,
-  logger,
+  log,
   repoName,
 }: {
   esClient: Client;
-  logger: Logger;
+  log: ToolingLog;
   repoName: string;
 }): Promise<void> {
   try {
     await esClient.snapshot.deleteRepository({ name: repoName });
   } catch (error) {
-    logger.debug(`Failed to delete repository: ${error}`);
+    log.debug(`Failed to delete repository: ${error}`);
   }
 }

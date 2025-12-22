@@ -106,40 +106,13 @@ export const registerClustersRoute = ({
         logger.error('Failed to retrieve cluster details', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status;
           const errorData = error.response?.data;
-
-          if (status === 401) {
-            return response.unauthorized({
-              body: {
-                message: 'Invalid or expired API key',
-              },
-            });
-          }
-
-          if (status === 403) {
-            return response.forbidden({
-              body: {
-                message: 'Insufficient permissions to access cluster details',
-              },
-            });
-          }
-
-          if (status === 404) {
-            return response.notFound({
-              body: {
-                message: 'Cluster not found',
-              },
-            });
-          }
-
-          if (status === 400) {
-            return response.badRequest({
-              body: {
-                message: errorData?.message || 'Invalid request',
-              },
-            });
-          }
+          return response.customError({
+            statusCode: 500,
+            body: errorData || {
+              message: 'Failed to retrieve cluster details',
+            },
+          });
         }
 
         return response.customError({
@@ -206,12 +179,13 @@ export const registerClustersRoute = ({
         logger.error('Failed to disconnect cluster', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
           return response.customError({
-            statusCode: status,
-            body: errorData || { message: 'An error occurred while disconnecting the cluster' },
+            statusCode: 500,
+            body: errorData || {
+              message: 'An error occurred while disconnecting the cluster',
+            },
           });
         }
 
@@ -366,7 +340,6 @@ export const registerClustersRoute = ({
         logger.error('Failed to update cluster services', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
           // Extract error code from Cloud Connect API error format
@@ -387,7 +360,7 @@ export const registerClustersRoute = ({
           }
 
           return response.customError({
-            statusCode: status,
+            statusCode: 500,
             body: {
               message: errorMessage,
               ...(errorCode && { code: errorCode }),

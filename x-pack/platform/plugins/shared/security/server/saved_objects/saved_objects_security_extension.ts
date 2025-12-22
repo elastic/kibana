@@ -1225,24 +1225,37 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
-    const { types: typesRequiringAccessControl } =
+    const { types: typesRequiringAccessControl, objects: objectsRequiringAccessControl } =
       this.accessControlService.getObjectsRequiringPrivilegeCheck({
         objects,
         actions: new Set([action]),
       });
 
+    // Enforce RBAC + Access Control
+    // Get the objects that are owned by the current user so we can check for the 'update' action
+    // instead of 'manage_access_control'. The owner is required to have access to update an object
+    // in order to change its access control settings.
+    const typesRequiringRbac = new Set(
+      objectsRequiringAccessControl
+        .filter((object) => object.requiresManageAccessControl === false)
+        .map((object) => object.type)
+    );
+
     /**
      * AccessControl operations do not fall under the regular authorization actions for
-     * Saved Objects, but still require authorization. Hence, we pass an empty actions list to the base
-     * authorization checks.
+     * Saved Objects, but still require authorization. Hence, we may pass an empty actions list
+     * to the base authorization checks if none of the objects are owned by the current user.
+     *
+     * Objects not owned by the current user will require the 'manage_access_control' privilege.
+     * Objects owned by the current user will require the 'update' privilege.
      */
 
     let authorizationResult: CheckAuthorizationResult<A>;
-    if (typesRequiringAccessControl.size > 0) {
+    if (typesRequiringAccessControl.size > 0 || typesRequiringRbac.size > 0) {
       authorizationResult = await this.checkAuthorization({
-        types: new Set(typesRequiringAccessControl),
+        types: typesRequiringRbac.size > 0 ? typesRequiringRbac : typesRequiringAccessControl,
         spaces: spacesToAuthorize,
-        actions: new Set<A>([]),
+        actions: new Set<A>(typesRequiringRbac.size > 0 ? ['update' as A] : []),
         options: { allowGlobalResource: true, typesRequiringAccessControl },
       });
 
@@ -1253,6 +1266,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
        */
       this.accessControlService.enforceAccessControl({
         typesRequiringAccessControl,
+        typesRequiringRbac,
         authorizationResult,
         currentSpace: namespaceString,
         addAuditEventFn: (types: string[]) => {
@@ -1261,7 +1275,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           this.addAuditEvent({
             action: auditAction!,
             error: err,
-            unauthorizedTypes: [...typesRequiringAccessControl],
+            unauthorizedTypes: types,
             unauthorizedSpaces: [...spacesToAuthorize],
           });
         },

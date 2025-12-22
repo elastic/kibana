@@ -51,7 +51,7 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-} from '../../../../common/field_names/slo';
+} from '../../../../common/burn_rate_rule/field_names';
 import type { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';

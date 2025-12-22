@@ -1,0 +1,21 @@
+{
+  "indices.get_sample_stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{index}/_sample/stats"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

@@ -1694,7 +1694,7 @@ export class CstToAstConverter {
     // KEY BY <key_columns>
     const keyCtx = configCtx.KEY();
     if (keyCtx && byContext) {
-      const args = this.fromFields(configCtx.fields());
+      const args = this.fromFuseKeyByFields(configCtx.fuseKeyByFields());
       const incomplete = args.length === 0 || args.some((arg) => arg.incomplete);
       return this.toOption('key by', configCtx, args, incomplete);
     }
@@ -2716,6 +2716,33 @@ export class CstToAstConverter {
 
   private isQuoted(text: string | undefined) {
     return text && /^(`)/.test(text);
+  }
+
+  private fromFuseKeyByFields(ctx: cst.FuseKeyByFieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const fieldCtx of ctx.qualifiedName_list()) {
+        // Skip empty nodes created by ANTLR
+        if (!textExistsAndIsValid(fieldCtx.getText())) {
+          continue;
+        }
+
+        const field = this.fromQualifiedName(fieldCtx);
+
+        if (field) {
+          fields.push(field);
+        }
+      }
+    } catch (e) {
+      // do nothing
+    }
+
+    return fields;
   }
 
   private fromFields(ctx: cst.FieldsContext | undefined): ast.ESQLAstField[] {

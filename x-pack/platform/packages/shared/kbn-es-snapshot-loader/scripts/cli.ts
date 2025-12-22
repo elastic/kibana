@@ -7,7 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
-import { createKibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
+import { createKibanaClient } from '@kbn/kibana-api-cli';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { restoreSnapshot } from '../src/restore';
 import { replaySnapshot } from '../src/replay';
@@ -55,10 +55,7 @@ async function createEsClientFromKibana({
   return kibanaClient.es;
 }
 
-async function getEsClient(
-  flags: CommonFlags,
-  log: Parameters<typeof toolingLogToLogger>[0]['log']
-): Promise<Client> {
+async function getEsClient(flags: CommonFlags, log: ToolingLog): Promise<Client> {
   const { 'es-url': esUrl, 'kibana-url': kibanaUrl } = flags;
   if (esUrl) return createEsClientFromUrl(esUrl);
   return createEsClientFromKibana({ kibanaUrl, log, signal: new AbortController().signal });
@@ -119,7 +116,6 @@ function runRestoreCli(): void {
 
       const esClient = await getEsClient(flags as CommonFlags, log);
       const indices = parseCommaSeparatedList(indicesFlag);
-      const logger = toolingLogToLogger({ flags, log });
 
       log.info(`Snapshot Restore`);
       log.info(`================`);
@@ -129,7 +125,7 @@ function runRestoreCli(): void {
 
       const result = await restoreSnapshot({
         esClient,
-        logger,
+        log,
         snapshotUrl,
         snapshotName,
         indices,
@@ -186,7 +182,6 @@ function runReplayCli(): void {
       if (concurrencyFlag && (isNaN(concurrency!) || concurrency! < 1)) {
         throw new Error('--concurrency must be a positive integer');
       }
-      const logger = toolingLogToLogger({ flags, log });
 
       log.info(`Snapshot Replay`);
       log.info(`===============`);
@@ -197,7 +192,7 @@ function runReplayCli(): void {
 
       const result = await replaySnapshot({
         esClient,
-        logger,
+        log,
         snapshotUrl,
         snapshotName,
         patterns,

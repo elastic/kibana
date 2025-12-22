@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/field-types'
   - '@kbn/unified-histogram'
-  - '@kbn/metrics-experience-plugin'
   - '@kbn/shared-ux-utility'
   - '@kbn/esql-language'
   - '@kbn/i18n'

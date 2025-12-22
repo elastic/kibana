@@ -6,10 +6,20 @@
  */
 
 import type { ConnectorFormSchema, InternalConnectorForm } from '@kbn/alerts-ui-shared';
+import type { SlackApiConfig } from '@kbn/connector-schemas/slack_api';
 
 export const serializer = (data: InternalConnectorForm): ConnectorFormSchema => {
-  const formAllowedChannels = (data.config?.allowedChannels as string[]) ?? [];
-  const allowedChannels = formAllowedChannels.map((option) => ({ name: option })) ?? [];
+  const formAllowedChannels =
+    (data.config?.allowedChannels as SlackApiConfig['allowedChannels']) ?? [];
+
+  const allowedChannels =
+    formAllowedChannels.map((channel) => {
+      if (channel.name.startsWith('#')) {
+        return channel;
+      }
+
+      return { ...channel, name: `#${channel.name}` };
+    }) ?? [];
 
   return {
     ...data,

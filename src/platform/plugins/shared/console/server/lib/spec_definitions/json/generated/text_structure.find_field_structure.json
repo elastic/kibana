@@ -5,7 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "column_names": "",
+      "column_names": [],
       "delimiter": "",
       "documents_to_sample": [
         "1000"

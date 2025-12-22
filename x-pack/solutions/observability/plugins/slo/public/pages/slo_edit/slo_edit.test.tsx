@@ -9,15 +9,15 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { ILicense } from '@kbn/licensing-types';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
-import { HeaderMenuPortal, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
-import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
 import { useCreateRule } from '../../hooks/use_create_burn_rate_rule';
 import { useCreateDataView } from '../../hooks/use_create_data_view';
@@ -25,6 +25,7 @@ import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { useFetchSloTemplate } from '../../hooks/use_fetch_slo_template';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePermissions } from '../../hooks/use_permissions';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
@@ -42,6 +43,7 @@ jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_fetch_slo_details');
+jest.mock('../../hooks/use_fetch_slo_template');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
@@ -59,6 +61,7 @@ const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
 const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
+const useFetchSloTemplateMock = useFetchSloTemplate as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useCreateRuleMock = useCreateRule as jest.Mock;
@@ -66,11 +69,6 @@ const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 const useFetcherMock = useFetcher as jest.Mock;
 
-const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
-HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
-
-const mockAddSuccess = jest.fn();
-const mockAddError = jest.fn();
 const mockNavigate = jest.fn();
 const mockBasePathPrepend = jest.fn();
 const licenseMock = licensingMock.createLicenseMock();
@@ -118,8 +116,8 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       },
       notifications: {
         toasts: {
-          addError: mockAddError,
-          addSuccess: mockAddSuccess,
+          addError: jest.fn(),
+          addSuccess: jest.fn(),
         },
       },
       observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
@@ -233,7 +231,8 @@ describe('SLO Edit Page', () => {
       jest
         .spyOn(Router, 'useLocation')
         .mockReturnValue({ pathname: '/slos/create', search: '', state: '', hash: '' });
-      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: undefined });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: undefined });
+      useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: undefined });
     });
 
     it('with invalid license triggers a redirect to the SLO Welcome page', async () => {
@@ -321,6 +320,51 @@ describe('SLO Edit Page', () => {
 
       expect(mockCreate).toHaveBeenCalled();
     });
+
+    it('renders the SLO Edit Form with prefilled values from a template', async () => {
+      history.replace('/slos/create?fromTemplateId=template-1234');
+
+      const sloTemplate = {
+        templateId: 'template-1234',
+        name: 'My template',
+        description: 'This is my template',
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            index: 'some-index',
+            filter: 'template: foo',
+            good: 'http_status: 2xx',
+            total: 'http_status: *',
+            timestampField: '@timestamp',
+          },
+        },
+        budgetingMethod: 'occurrences',
+        objective: {
+          target: 0.95,
+        },
+      };
+      useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: sloTemplate });
+
+      const { queryByTestId, getByTestId } = render(<SloEditPage />);
+
+      expect(queryByTestId('sloEditPage')).toBeTruthy();
+      expect(queryByTestId('sloForm')).toBeTruthy();
+
+      expect(queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+      expect(queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue('sli.kql.custom');
+      expect(queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+      expect(queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
+
+      expect(queryByTestId('sloFormNameInput')).toHaveValue('My template');
+      expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue('This is my template');
+
+      expect(getByTestId('sloFormSubmitButton')).toBeEnabled();
+
+      await waitFor(() => {
+        fireEvent.click(getByTestId('sloFormSubmitButton'));
+        expect(mockCreate).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('edit SLO flow', () => {
@@ -331,7 +375,8 @@ describe('SLO Edit Page', () => {
         .spyOn(Router, 'useLocation')
         .mockReturnValue({ pathname: `/slos/edit/${SLO_ID}`, search: '', state: '', hash: '' });
       slo = buildSlo({ id: SLO_ID });
-      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: slo });
+      useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: undefined });
     });
 
     it('with invalid license triggers a redirect to the SLO welcome page', async () => {
