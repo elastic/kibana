@@ -253,7 +253,7 @@ describe('useLensProps', () => {
         fetchParams,
         discoverFetch$,
         chartRef,
-        chartLayers: [],
+        chartLayers: mockEmptyChartLayers,
       })
     );
 
