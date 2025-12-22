@@ -20,8 +20,8 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConfigType } from '../../../config';
-import { isRetryableEsClientError } from '../../utils';
 import { SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
+import { isRetryableEsClientError } from '@kbn/core/packages/elasticsearch/server-utils';
 
 interface SynchronizationTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
