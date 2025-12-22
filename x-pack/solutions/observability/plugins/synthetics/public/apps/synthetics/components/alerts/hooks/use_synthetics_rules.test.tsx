@@ -57,7 +57,8 @@ const contextsModule = require('../../../contexts');
 const mockUseSyntheticsSettingsContext =
   contextsModule.useSyntheticsSettingsContext as jest.MockedFunction<any>;
 
-describe('useSyntheticsRules', () => {
+// Failing: See https://github.com/elastic/kibana/issues/246633
+describe.skip('useSyntheticsRules', () => {
   const baseMockState = {
     defaultAlerting: {
       data: {

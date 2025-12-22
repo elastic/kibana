@@ -159,6 +159,7 @@ export const createMockEndpointAppContextService = (
     })),
     getSpaceId: jest.fn().mockReturnValue('default'),
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
+    getServerConfigValue: jest.fn(),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
