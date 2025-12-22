@@ -18,9 +18,9 @@ import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 
-type Validations<T = string> = Array<ValidationConfig<FormData, string, T>>;
+type Validations<T = any> = Array<ValidationConfig<FormData, string, T>>;
 
-export interface CommonFieldSchema<T = string> {
+export interface CommonFieldSchema<T = any> {
   id: string;
   label: string;
   helpText?: string | ReactNode;
@@ -30,7 +30,7 @@ export interface CommonFieldSchema<T = string> {
   validations?: Validations<T>;
 }
 
-export interface ConfigFieldSchema<T = string> extends CommonFieldSchema<T> {
+export interface ConfigFieldSchema<T = any> extends CommonFieldSchema<T> {
   isUrlField?: boolean;
   requireTld?: boolean;
   defaultValue?: T;
@@ -53,7 +53,7 @@ const UseTextField = getUseField({ component: Field });
 const UseComboBoxField = getUseField({ component: ComboBoxField });
 const { emptyField, urlField } = fieldValidators;
 
-const getFieldConfig = <T extends string | string[] = string>({
+const getFieldConfig = <T,>({
   label,
   isRequired = true,
   isUrlField = false,

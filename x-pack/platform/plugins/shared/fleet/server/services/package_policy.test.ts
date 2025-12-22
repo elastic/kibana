@@ -86,7 +86,12 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
 
-jest.mock('./spaces/helpers');
+jest.mock('./spaces/helpers', () => {
+  return {
+    ...jest.requireActual('./spaces/helpers'),
+    isSpaceAwarenessEnabled: jest.fn(),
+  };
+});
 
 jest.mock('./license');
 
@@ -8059,6 +8064,7 @@ describe('Package policy service', () => {
               updated_at: '2025-12-22T21:28:05.380Z',
               updated_by: 'elastic',
             },
+            initialNamespaces: ['default'],
             references: [],
             score: 0,
           },
@@ -8084,6 +8090,7 @@ describe('Package policy service', () => {
               updated_at: '2025-12-22T21:28:05.380Z',
               updated_by: 'elastic',
             },
+            initialNamespaces: ['myspace'],
             references: [],
             score: 0,
           },
@@ -8174,6 +8181,7 @@ describe('Package policy service', () => {
                 updated_by: 'elastic',
               },
               references: [],
+              initialNamespaces: ['default'],
               score: 0,
             },
           ],
@@ -8209,6 +8217,7 @@ describe('Package policy service', () => {
               },
               references: [],
               score: 0,
+              initialNamespaces: ['myspace'],
             },
           ],
           { namespace: 'myspace' }

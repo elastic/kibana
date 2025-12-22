@@ -14,14 +14,14 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
+import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
-import { SLOS_BASE_PATH } from '../common/locators/paths';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
@@ -29,6 +29,7 @@ import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
 import type { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
@@ -38,9 +39,8 @@ import type {
   SLOPublicSetup,
   SLOPublicStart,
 } from './types';
-import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
-import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
+import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -219,18 +219,18 @@ export class SLOPlugin
       sloClient,
     });
 
-    const getCreateSLOFlyout = lazyWithContextProviders(
-      lazy(() => import('./pages/slo_edit/shared_flyout/slo_add_form_flyout')),
+    const getCreateSLOFormFlyout = lazyWithContextProviders(
+      lazy(() => import('./pages/slo_edit/shared_flyout/create_slo_form_flyout')),
       { spinnerSize: 'm' }
     );
 
     plugins.discoverShared.features.registry.register({
       id: 'observability-create-slo',
-      createSLOFlyout: getCreateSLOFlyout,
+      createSLOFlyout: getCreateSLOFormFlyout,
     });
 
     return {
-      getCreateSLOFlyout,
+      getCreateSLOFormFlyout,
     };
   }
 

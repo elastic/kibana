@@ -1887,6 +1887,20 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.BaseConnectorContract.configSchema",
+            "type": "Any",
+            "tags": [],
+            "label": "configSchema",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.BaseConnectorContract.summary",
             "type": "CompoundType",
             "tags": [],
@@ -2583,6 +2597,20 @@
             "type": "string",
             "tags": [],
             "label": "entryTransactionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.EsWorkflowExecution.concurrencyGroupKey",
+            "type": "string",
+            "tags": [],
+            "label": "concurrencyGroupKey",
             "description": [],
             "signature": [
               "string | undefined"
@@ -5563,6 +5591,66 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.CollisionStrategy",
+        "type": "Type",
+        "tags": [],
+        "label": "CollisionStrategy",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.CollisionStrategySchema",
+        "type": "Any",
+        "tags": [],
+        "label": "CollisionStrategySchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ConcurrencySettings",
+        "type": "Type",
+        "tags": [],
+        "label": "ConcurrencySettings",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ConcurrencySettingsSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ConcurrencySettingsSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.ConnectorContractUnion",
         "type": "Type",
         "tags": [],
@@ -5639,6 +5727,36 @@
           "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.DataSetStep",
+        "type": "Type",
+        "tags": [],
+        "label": "DataSetStep",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.DataSetStepSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "DataSetStepSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
