@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { paths } from '../../../common/locators/paths';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function SloSelectorEmptyState() {
