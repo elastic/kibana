@@ -51,8 +51,7 @@ test.describe(
         '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
       );
 
-      // Wait for the row to be rendered before clicking
-      // Stream routing may take time, so we use retry with page refresh
+      // Refresh and wait for the row — stream routing may take time
       await pageObjects.discover.waitForDataGridRowWithRefresh(expandButton);
       await expandButton.click();
 
