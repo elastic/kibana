@@ -3405,10 +3405,10 @@
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
   integrity sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==
 
-"@grpc/grpc-js@^1.13.1", "@grpc/grpc-js@^1.14.1", "@grpc/grpc-js@^1.7.1":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.14.2.tgz#d245069181a1a8057abd35522d6052482730cf19"
-  integrity sha512-QzVUtEFyu05UNx2xr0fCQmStUO17uVQhGNowtxs00IgTZT6/W2PBLfUkj30s0FKJ29VtTa3ArVNIhNP6akQhqA==
+"@grpc/grpc-js@^1.13.1", "@grpc/grpc-js@^1.14.2", "@grpc/grpc-js@^1.7.1":
+  version "1.14.3"
+  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.14.3.tgz#4c9b817a900ae4020ddc28515ae4b52c78cfb8da"
+  integrity sha512-Iq8QQQ/7X3Sac15oB6p0FmUg/klxQvXLeileoqrTRGJYLV+/9tubbr9ipz0GKHjmXVsgFPo/+W+2cA8eNcR+XA==
   dependencies:
     "@grpc/proto-loader" "^0.8.0"
     "@js-sdsl/ordered-map" "^4.4.2"
@@ -5157,6 +5157,10 @@
   uid ""
 
 "@kbn/core-elasticsearch-server-mocks@link:src/core/packages/elasticsearch/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-elasticsearch-server-utils@link:src/core/packages/elasticsearch/server-utils":
   version "0.0.0"
   uid ""
 
@@ -17048,10 +17052,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^142.0.0:
-  version "142.0.2"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-142.0.2.tgz#bea4e241ea694aba14ab79e5f085adaff03780c6"
-  integrity sha512-FmItmTE56bg2DVSbAC4SEuSzaOpqM7Mv3Kfha+EC7ecT67r4xHZErp+apESfOXkFeo7ry8Z7SG4KWaETFWxMNQ==
+chromedriver@^143.0.0:
+  version "143.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-143.0.1.tgz#d1328faa18a06d42759b8c867fbcc5f95adc68ba"
+  integrity sha512-qR0DKGV7C3r5Fo6WJD2bqQ1ny9THrJTL4X8JeArBQ6m5Cq6sHXAhIrVgsTZuKi9tL/YUcFoELMI3UTg6dMiKWA==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.12.0"

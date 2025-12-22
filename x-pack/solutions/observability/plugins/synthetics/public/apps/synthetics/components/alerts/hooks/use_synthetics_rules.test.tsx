@@ -180,7 +180,12 @@ describe('useSyntheticsRules', () => {
       wrapper: TestWrapper,
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith(enableDefaultAlertingSilentlyAction.get());
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: enableDefaultAlertingSilentlyAction.get().type,
+        meta: { dispatchedAt: expect.any(Number) },
+      })
+    );
   });
 
   it('dispatches getDefaultAlertingAction when canSave is false and popover opens', () => {
@@ -202,7 +207,12 @@ describe('useSyntheticsRules', () => {
       wrapper: TestWrapper,
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith(getDefaultAlertingAction.get());
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: getDefaultAlertingAction.get().type,
+        meta: { dispatchedAt: expect.any(Number) },
+      })
+    );
   });
 
   it('returns NewRuleFlyout as null when isNewRule is false', () => {
