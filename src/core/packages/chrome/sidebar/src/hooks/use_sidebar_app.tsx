@@ -18,81 +18,112 @@ interface SetState<T> {
   (state: Partial<T>, merge?: true): void;
 }
 
+interface ActionContext<T> {
+  get: () => T;
+  set: SetState<T>;
+  open: () => void;
+  close: () => void;
+}
+
+export interface SidebarAppHooks<T, A> {
+  useSelector<K>(selector: (state: T) => K, isEqual?: (a: K, b: K) => boolean): K;
+  useSnapshot(): T;
+  useIsOpen(): boolean;
+  useActions(): A & ActionContext<T>;
+}
+
 /**
- * Factory hook for a sidebar app. Returns specialized hooks and actions.
+ * Creates specialized hooks and actions for a sidebar app.
  *
  * @example
- * const counterApp = useSidebarApp<CounterState>('counter');
+ * // Define app hooks with actions
+ * const counterApp = createSidebarAppHooks<CounterState>('counter')(({ get, set }) => ({
+ *   increment: () => set({ counter: get().counter + 1 }),
+ *   decrement: () => set({ counter: get().counter - 1 }),
+ *   reset: () => set({ counter: 0 }),
+ * }));
  *
- * function Component() {
- *   // Subscribe to state (re-renders on change)
- *   const { state } = counterApp.useState();
+ * // Define app hooks without actions
+ * const simpleApp = createSidebarAppHooks<SimpleState>('simple')();
  *
- *   // Subscribe to field only (re-renders when field changes)
+ * // Use in components
+ * function Counter() {
  *   const counter = counterApp.useSelector(s => s.counter);
- *
- *   // Actions never cause re-renders
- *   return <button onClick={() => counterApp.setState({ counter: 0 })}>Reset</button>;
+ *   const { increment } = counterApp.useActions();
+ *   return <button onClick={increment}>{counter}</button>;
  * }
  */
-export function useSidebarApp<T>(appId: string) {
-  const appState = useSidebarAppStateService();
-  const { open, close } = useSidebar();
-
-  const setState: SetState<T> = useCallback(
-    (newState: T | Partial<T>, merge: boolean = true) => {
-      if (merge) {
-        appState.set<T>(appId, newState as Partial<T>, true);
-      } else {
-        appState.set<T>(appId, newState as T, false);
-      }
-    },
-    [appId, appState]
-  );
-
-  const openApp = useCallback(() => {
-    open(appId);
-  }, [appId, open]);
-
-  return useMemo(
-    () => ({
-      setState,
-      open: openApp,
-      close,
-      /**
-       * Check if the app is currently open
-       */
-      useIsOpen: () => {
-        const { currentAppId, isOpen: sidebarIsOpen } = useSidebar();
-        return sidebarIsOpen && currentAppId === appId;
-      },
-
-      /**
-       * Subscribe to full app state. Re-renders on any state change.
-       */
-      useSnapshot: () => {
-        const state = useObservable<T>(appState.get$<T>(appId), appState.get<T>(appId));
-        return state;
-      },
-
+export function createSidebarAppHooks<T>(appId: string) {
+  return function <A = {}>(createActions?: (ctx: ActionContext<T>) => A): SidebarAppHooks<T, A> {
+    return {
       /**
        * Subscribe to derived value. Only re-renders when selected value changes.
        */
       useSelector<K>(selector: (state: T) => K, isEqual?: (a: K, b: K) => boolean): K {
+        const appState = useSidebarAppStateService();
+
         const selected$ = useMemo(
           () =>
             appState.get$<T>(appId).pipe(
               map((state) => selector(state)),
               distinctUntilChanged(isEqual)
             ),
-          [selector, isEqual]
+          [selector, isEqual, appState]
         );
 
-        const initialValue = useMemo(() => selector(appState.get<T>(appId)), [selector]);
+        const initialValue = useMemo(() => selector(appState.get<T>(appId)), [selector, appState]);
 
         return useObservable(selected$, initialValue);
       },
-    }),
-    [appState, appId, setState, openApp, close]
-  );
+
+      /**
+       * Subscribe to full app state. **Causes re-renders on any state change.**
+       */
+      useSnapshot(): T {
+        const appState = useSidebarAppStateService();
+        return useObservable<T>(appState.get$<T>(appId), appState.get<T>(appId));
+      },
+
+      /**
+       * Check if app is currently open.
+       */
+      useIsOpen(): boolean {
+        const { currentAppId, isOpen } = useSidebar();
+        return isOpen && currentAppId === appId;
+      },
+
+      /**
+       * Get actions (never causes re-renders).
+       */
+      useActions(): A & ActionContext<T> {
+        const appState = useSidebarAppStateService();
+        const { open, close } = useSidebar();
+
+        const get = useCallback(() => appState.get<T>(appId), [appState]);
+
+        const set: SetState<T> = useCallback(
+          (newState: T | Partial<T>, merge: boolean = true) => {
+            if (merge) {
+              appState.set<T>(appId, newState as Partial<T>, true);
+            } else {
+              appState.set<T>(appId, newState as T, false);
+            }
+          },
+          [appState]
+        );
+
+        const openApp = useCallback(() => open(appId), [open]);
+
+        const customActions = useMemo(() => {
+          if (!createActions) return {} as A;
+          return createActions({ get, set, open: openApp, close });
+        }, [get, set, openApp, close]);
+
+        return useMemo(
+          () => ({ ...customActions, get, set, open: openApp, close }),
+          [customActions, get, set, openApp, close]
+        );
+      },
+    } as const;
+  };
 }

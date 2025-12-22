@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 export { useSidebar, useSidebarWidth } from './use_sidebar';
-export type { UseSidebarWidthResult, UseSidebarResult } from './use_sidebar';
-export { useSidebarApp } from './use_sidebar_app';
+export type { UseSidebarResult } from './use_sidebar';
+export { createSidebarAppHooks } from './use_sidebar_app';
+export type { SidebarAppHooks } from './use_sidebar_app';

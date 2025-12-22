@@ -19,21 +19,20 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useSidebar, useSidebarWidth } from '@kbn/core-chrome-sidebar';
+import { useSidebar } from '@kbn/core-chrome-sidebar';
 import React from 'react';
-import { useCounterSideBarApp } from './counter_app';
-import { useTextInputSideBarApp } from './text_input_app';
-import { useTabSelectionSideBarApp } from './tab_selection_app';
+import { counterApp } from './counter_app';
+import { textApp } from './text_input_app';
+import { tabApp } from './tab_selection_app';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
 
 export function App({}: Props) {
-  const { close } = useSidebar();
-  const { setWidth } = useSidebarWidth();
-  const { open: openCounterApp, reset: resetCounter } = useCounterSideBarApp();
-  const { open: openTextInputApp, reset: resetTextInput } = useTextInputSideBarApp();
-  const { open: openTabsApp, reset: resetTabs } = useTabSelectionSideBarApp();
+  const { close, setWidth } = useSidebar();
+  const { open: openCounterApp, reset: resetCounter } = counterApp.useActions();
+  const { open: openTextInputApp, clear: resetTextInput } = textApp.useActions();
+  const { open: openTabsApp, reset: resetTabs } = tabApp.useActions();
 
   const handleOpenTextApp = () => {
     openTextInputApp();

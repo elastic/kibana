@@ -18,6 +18,7 @@ export interface UseSidebarResult {
   isOpen: boolean;
   open: (appId: string) => void;
   close: () => void;
+  setWidth: (width: number) => void;
   currentAppId: string | null;
 }
 
@@ -32,6 +33,7 @@ export function useSidebar(): UseSidebarResult {
 
   const open = useCallback((appId: string) => sidebar.open(appId), [sidebar]);
   const close = useCallback(() => sidebar.close(), [sidebar]);
+  const setWidth = useCallback((newWidth: number) => sidebar.setWidth(newWidth), [sidebar]);
 
   return useMemo(
     () => ({
@@ -39,27 +41,16 @@ export function useSidebar(): UseSidebarResult {
       currentAppId,
       open,
       close,
-    }),
-    [isOpen, currentAppId, open, close]
-  );
-}
-
-export interface UseSidebarWidthResult {
-  width: number;
-  setWidth: (width: number) => void;
-}
-
-export function useSidebarWidth(): UseSidebarWidthResult {
-  const sidebar = useSidebarService().state;
-
-  const width = useObservable(sidebar.width$, sidebar.getWidth());
-  const setWidth = useCallback((newWidth: number) => sidebar.setWidth(newWidth), [sidebar]);
-
-  return useMemo(
-    () => ({
-      width,
       setWidth,
     }),
-    [width, setWidth]
+    [isOpen, currentAppId, open, close, setWidth]
   );
+}
+
+/**
+ * React hook for accessing the sidebar width
+ */
+export function useSidebarWidth(): number {
+  const sidebar = useSidebarService().state;
+  return useObservable(sidebar.width$, sidebar.getWidth());
 }

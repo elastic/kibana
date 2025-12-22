@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import { useSidebarApp } from '@kbn/core-chrome-sidebar';
+import { createSidebarAppHooks } from '@kbn/core-chrome-sidebar';
 
 export const textInputAppId = 'sidebarExampleText';
 
@@ -21,26 +21,16 @@ export const getTextInputStateSchema = () =>
 
 export type TextInputSidebarState = z.infer<ReturnType<typeof getTextInputStateSchema>>;
 
-export const useTextInputSideBarApp = () => {
-  const { open, setState, state } = useSidebarApp<TextInputSidebarState>(textInputAppId);
-  return {
-    // business state
-    userName: state.userName,
-    // Awesome business logic goes here
-    setUserName: (userName: string) => {
-      setState({ userName });
-    },
-    open: () => {
-      open();
-    },
-    reset: () => {
-      setState({ userName: '' });
-    },
-  };
-};
+export const textApp = createSidebarAppHooks<TextInputSidebarState>(textInputAppId)(({ set }) => ({
+  setUserName: (userName: string) => set({ userName }),
+  clear: () => set({ userName: '' }),
+}));
+
+const selectUserName = (s: TextInputSidebarState) => s.userName;
 
 export function TextInputApp() {
-  const { userName, setUserName } = useTextInputSideBarApp();
+  const userName = textApp.useSelector(selectUserName);
+  const { setUserName } = textApp.useActions();
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>

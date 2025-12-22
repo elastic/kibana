@@ -33,5 +33,5 @@ export type {
 } from './src/services';
 export { Sidebar } from './src/components';
 export type { SidebarProps } from './src/components';
-export { useSidebar, useSidebarApp, useSidebarWidth } from './src/hooks';
-export type { UseSidebarWidthResult, UseSidebarResult } from './src/hooks';
+export { useSidebar, useSidebarWidth, createSidebarAppHooks } from './src/hooks';
+export type { UseSidebarResult, SidebarAppHooks } from './src/hooks';

@@ -20,7 +20,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { z } from '@kbn/zod/v4';
-import { useSidebarApp } from '@kbn/core-chrome-sidebar';
+import { createSidebarAppHooks } from '@kbn/core-chrome-sidebar';
 
 export const counterAppId = 'sidebarExampleCounter';
 
@@ -31,32 +31,20 @@ export const getCounterStateSchema = () =>
 
 export type CounterSidebarState = z.infer<ReturnType<typeof getCounterStateSchema>>;
 
-export const useCounterSideBarApp = () => {
-  const { open, setState, state } = useSidebarApp<CounterSidebarState>(counterAppId);
-  return {
-    // business state
-    counter: state.counter,
-    // Awesome business logic goes here
-    increment: () => {
-      setState({ counter: state.counter + 1 });
-    },
-    decrement: () => {
-      setState({ counter: state.counter - 1 });
-    },
-    incrementBy: (amount: number) => {
-      setState({ counter: state.counter + amount });
-    },
-    open: () => {
-      open();
-    },
-    reset: () => {
-      setState({ counter: 0 });
-    },
-  };
-};
+export const counterApp = createSidebarAppHooks<CounterSidebarState>(counterAppId)(
+  ({ get, set }) => ({
+    increment: () => set({ counter: get().counter + 1 }),
+    decrement: () => set({ counter: get().counter - 1 }),
+    incrementBy: (amount: number) => set({ counter: get().counter + amount }),
+    reset: () => set({ counter: 0 }),
+  })
+);
+
+const selectCounter = (s: CounterSidebarState) => s.counter;
 
 export function CounterApp() {
-  const { counter, increment, decrement, incrementBy } = useCounterSideBarApp();
+  const counter = counterApp.useSelector(selectCounter);
+  const { increment, decrement, incrementBy, reset } = counterApp.useActions();
 
   return (
     <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
@@ -89,6 +77,11 @@ export function CounterApp() {
           <EuiFlexItem grow={false}>
             <EuiButton size="s" onClick={() => incrementBy(5)}>
               +5
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" onClick={reset}>
+              Reset
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
