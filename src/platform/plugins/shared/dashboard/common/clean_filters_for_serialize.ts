@@ -7,17 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter } from '@kbn/es-query';
+import { isCombinedFilter, type Filter } from '@kbn/es-query';
 import type { DashboardFilter } from '../server';
 
 export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] | undefined {
   if (!filters) return;
   return filters.map((filter) => {
-    if (filter.meta?.value) {
+    const cleanedFilter = { ...filter };
+    if (cleanedFilter.meta?.value === undefined) {
       // Create a new filter object with meta excluding 'value'
-      const { value, ...metaWithoutValue } = filter.meta;
-      return { ...filter, meta: metaWithoutValue };
+      const { value, ...metaWithoutValue } = cleanedFilter.meta;
+      cleanedFilter.meta = metaWithoutValue;
     }
-    return filter;
+
+    if (cleanedFilter.meta?.key === undefined) {
+      // Create a new filter object with meta excluding 'key'
+      const { key, ...metaWithoutKey } = cleanedFilter.meta;
+      cleanedFilter.meta = metaWithoutKey;
+    }
+
+    if (cleanedFilter.meta?.alias === undefined) {
+      // Create a new filter object with meta excluding 'alias'
+      const { alias, ...metaWithoutAlias } = cleanedFilter.meta;
+      cleanedFilter.meta = metaWithoutAlias;
+    }
+
+    if (isCombinedFilter(filter) && filter.meta?.params) {
+      cleanedFilter.meta.params = cleanFiltersForSerialize(cleanedFilter.meta.params as Filter[]);
+    }
+
+    return cleanedFilter;
   });
 }
