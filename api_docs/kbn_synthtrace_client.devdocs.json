@@ -3640,7 +3640,7 @@
             "section": "def-common.SynthtraceDynamicTemplate",
             "text": "SynthtraceDynamicTemplate"
           },
-          " | undefined; } & TFields"
+          " | undefined; \"data_stream.type\"?: string | undefined; \"data_stream.dataset\"?: string | undefined; \"data_stream.namespace\"?: string | undefined; } & TFields"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/types/index.ts",
         "deprecated": false,

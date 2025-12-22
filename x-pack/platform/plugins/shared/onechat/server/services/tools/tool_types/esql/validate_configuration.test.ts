@@ -7,11 +7,11 @@
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateConfig } from './validate_configuration';
-import { validateQuery } from '@kbn/esql-ast';
+import { validateQuery } from '@kbn/esql-language';
 import type { EsqlToolFieldTypes } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 
-jest.mock('@kbn/esql-ast', () => ({
+jest.mock('@kbn/esql-language', () => ({
   validateQuery: jest.fn(),
 }));
 
