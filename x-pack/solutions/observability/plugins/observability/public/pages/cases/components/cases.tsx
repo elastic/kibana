@@ -8,13 +8,13 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CasesPermissions } from '@kbn/cases-plugin/common';
+import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
 import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
 
 export interface CasesProps {
