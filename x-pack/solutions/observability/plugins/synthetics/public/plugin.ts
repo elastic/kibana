@@ -68,6 +68,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -97,6 +98,7 @@ export interface ClientPluginsStart {
   fleet: FleetStart;
   data: DataPublicPluginStart;
   kql: KqlPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   contentManagement: ContentManagementPublicStart;
