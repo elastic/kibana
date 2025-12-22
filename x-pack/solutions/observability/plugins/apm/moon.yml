@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/maps-plugin'
   - '@kbn/ml-plugin'
   - '@kbn/observability-plugin'
+  - '@kbn/observability-alerts-table'
   - '@kbn/rule-registry-plugin'
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'

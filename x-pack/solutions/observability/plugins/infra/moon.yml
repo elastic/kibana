@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/license-management-plugin'
   - '@kbn/ml-plugin'
   - '@kbn/observability-plugin'
+  - '@kbn/observability-alerts-table'
   - '@kbn/spaces-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/unified-search-plugin'
