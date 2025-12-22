@@ -1,9 +1,331 @@
 {
   "id": "maintenanceWindows",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicPlugin",
+            "text": "MaintenanceWindowsPublicPlugin"
+          },
+          " implements ",
+          "Plugin",
+          "<void, void, ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+            "text": "MaintenanceWindowsPublicSetupDependencies"
+          },
+          ", ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicStartDependencies",
+            "text": "MaintenanceWindowsPublicStartDependencies"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initContext",
+                "description": [],
+                "signature": [
+                  "PluginInitializerContext",
+                  "<object>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              "CoreSetup",
+              "<{}, unknown>, plugins: ",
+              {
+                "pluginId": "maintenanceWindows",
+                "scope": "public",
+                "docId": "kibMaintenanceWindowsPluginApi",
+                "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+                "text": "MaintenanceWindowsPublicSetupDependencies"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<{}, unknown>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maintenanceWindows",
+                    "scope": "public",
+                    "docId": "kibMaintenanceWindowsPluginApi",
+                    "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+                    "text": "MaintenanceWindowsPublicSetupDependencies"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicSetupDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicSetupDependencies.management",
+            "type": "Object",
+            "tags": [],
+            "label": "management",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSetup",
+                "text": "ManagementSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicStartDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "public",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesApi",
+                "text": "SpacesApi"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "serverless",
+                "scope": "public",
+                "docId": "kibServerlessPluginApi",
+                "section": "def-public.ServerlessPluginStart",
+                "text": "ServerlessPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []
@@ -998,6 +1320,21 @@
         "tags": [],
         "label": "ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.BASE_ALERTING_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_ALERTING_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting\""
+        ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
