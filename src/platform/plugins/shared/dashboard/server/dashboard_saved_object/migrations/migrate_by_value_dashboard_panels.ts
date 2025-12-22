@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Serializable } from '@kbn/utility-types';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
+import {
+  controlGroupSavedObjectStateToSerializableRuntimeState,
+  serializableRuntimeStateToControlGroupSavedObjectState,
+} from '@kbn/controls-plugin/server';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
@@ -27,6 +32,18 @@ export const migrateByValueDashboardPanels =
   (migrate: MigrateFunction, version: string): SavedObjectMigrationFn =>
   (doc: any) => {
     const { attributes } = doc;
+
+    if (attributes?.controlGroupInput) {
+      const controlGroupState = controlGroupSavedObjectStateToSerializableRuntimeState(
+        attributes.controlGroupInput
+      );
+      const migratedControlGroupInput = migrate({
+        ...controlGroupState,
+        type: CONTROLS_GROUP_TYPE,
+      } as SerializableRecord);
+      attributes.controlGroupInput =
+        serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
+    }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
     // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
