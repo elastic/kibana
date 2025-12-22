@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery, Streams, Feature } from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -15,7 +15,7 @@ interface Params {
   connectorId: string;
   start: number;
   end: number;
-  feature?: Feature;
+  feature?: System;
   sampleDocsSize?: number;
   // optional overrides for templates
   systemPromptOverride?: string;
@@ -58,7 +58,7 @@ export async function generateSignificantEventDefinitions(
       title: query.title,
       kql: query.kql,
       feature: feature
-        ? { name: feature.name, filter: feature?.filter, type: feature.type }
+        ? { name: feature.name, filter: feature.filter, type: feature.type }
         : undefined,
       severity_score: query.severity_score,
       evidence: query.evidence,

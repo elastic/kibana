@@ -22,7 +22,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { type Streams, type System, isFeatureWithFilter } from '@kbn/streams-schema';
+import { type Streams, type System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
@@ -121,20 +121,16 @@ export const StreamFeatureDetailsFlyout = ({
                 }
               />
             </EuiFlexGroup>
-            {isFeatureWithFilter(updatedFeature) && (
-              <EditableConditionPanel
-                condition={updatedFeature.filter}
-                isEditingCondition={isEditingCondition}
-                setCondition={(condition) =>
-                  setUpdatedFeature({ ...updatedFeature, filter: condition })
-                }
-              />
-            )}
+            <EditableConditionPanel
+              condition={updatedFeature.filter}
+              isEditingCondition={isEditingCondition}
+              setCondition={(condition) =>
+                setUpdatedFeature({ ...updatedFeature, filter: condition })
+              }
+            />
           </EuiFlexGroup>
           <EuiHorizontalRule />
-          {isFeatureWithFilter(feature) && (
-            <FeatureEventsData feature={updatedFeature} definition={definition} />
-          )}
+          <FeatureEventsData feature={updatedFeature} definition={definition} />
         </div>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

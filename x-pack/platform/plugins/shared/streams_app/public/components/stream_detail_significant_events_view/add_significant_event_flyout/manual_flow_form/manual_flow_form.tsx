@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
@@ -31,7 +31,7 @@ interface Props {
   isSubmitting: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Feature[];
+  features: System[];
   dataViews: DataView[];
 }
 

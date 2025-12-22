@@ -25,7 +25,7 @@ import {
   isFeature,
   type StreamQueryKql,
   type Streams,
-  type Feature,
+  type System,
   type FeatureType,
 } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
@@ -54,10 +54,10 @@ interface Props {
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
-  features: Feature[];
+  features: System[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedFeatures: Feature[];
+  initialSelectedFeatures: System[];
   onFeatureIdentificationClick: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
@@ -111,7 +111,7 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>(initialSelectedFeatures);
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>(initialSelectedFeatures);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -136,13 +136,10 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(
-    (featuresOverride?: Feature[]) => {
+    (featuresOverride?: System[]) => {
       setSelectedFlow('ai');
 
       let numberOfGeneratedQueries = 0;
-      const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
-        system: 0,
-      };
       let inputTokensUsed = 0;
       let outputTokensUsed = 0;
       const connector = aiFeatures?.genAiConnectors.selectedConnector;
@@ -169,9 +166,7 @@ export function AddSignificantEventFlyout({
               generate(connector, feature.type === 'all_data' ? undefined : feature).pipe(
                 concatMap(({ queries: nextQueries, tokensUsed }) => {
                   numberOfGeneratedQueries += nextQueries.length;
-                  if (isFeature(feature)) {
-                    numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
-                  }
+
                   inputTokensUsed += tokensUsed.prompt;
                   outputTokensUsed += tokensUsed.completion;
 
@@ -229,7 +224,6 @@ export function AddSignificantEventFlyout({
                 input_tokens_used: inputTokensUsed,
                 output_tokens_used: outputTokensUsed,
                 count: numberOfGeneratedQueries,
-                count_by_feature_type: numberOfGeneratedQueriesByFeature,
                 features_selected: selectedFeatures?.length ?? 0,
                 features_total: features.length,
                 stream_name: definition.stream.name,

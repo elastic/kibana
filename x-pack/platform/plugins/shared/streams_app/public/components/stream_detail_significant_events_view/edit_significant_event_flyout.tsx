@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
@@ -36,9 +36,9 @@ export const EditSignificantEventFlyout = ({
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
-  selectedFeatures: Feature[];
-  setSelectedFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
-  features: Feature[];
+  selectedFeatures: System[];
+  setSelectedFeatures: React.Dispatch<React.SetStateAction<System[]>>;
+  features: System[];
   queryToEdit?: StreamQueryKql;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
@@ -49,7 +49,6 @@ export const EditSignificantEventFlyout = ({
 }) => {
   const {
     core: { notifications },
-    services: { telemetryClient },
   } = useKibana();
   const {
     timeState: { start, end },
@@ -70,8 +69,6 @@ export const EditSignificantEventFlyout = ({
       query={queryToEdit}
       aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
-        const streamType = getStreamTypeFromDefinition(definition.stream);
-
         switch (data.type) {
           case 'single':
             await upsertQuery(data.query).then(
@@ -85,19 +82,6 @@ export const EditSignificantEventFlyout = ({
 
                 setIsEditFlyoutOpen(false);
                 refresh();
-
-                telemetryClient.trackSignificantEventsCreated({
-                  count: 1,
-                  count_by_feature_type: !data.query.feature
-                    ? {
-                        system: 0,
-                      }
-                    : {
-                        [data.query.feature.type]: 1,
-                      },
-                  stream_name: definition.stream.name,
-                  stream_type: streamType,
-                });
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -124,23 +108,6 @@ export const EditSignificantEventFlyout = ({
                   ),
                 });
 
-                telemetryClient.trackSignificantEventsCreated({
-                  count: data.queries.length,
-                  count_by_feature_type: data.queries.reduce(
-                    (acc, query) => {
-                      if (query.feature) {
-                        const type = query.feature.type;
-                        acc[type] = acc[type] + 1;
-                      }
-                      return acc;
-                    },
-                    {
-                      system: 0,
-                    } satisfies Record<FeatureType, number>
-                  ),
-                  stream_name: definition.stream.name,
-                  stream_type: streamType,
-                });
                 setIsEditFlyoutOpen(false);
                 refresh();
               },

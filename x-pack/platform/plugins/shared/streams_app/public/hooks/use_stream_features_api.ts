@@ -7,11 +7,10 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import { firstValueFrom } from 'rxjs';
-import type { Streams, System, FeatureType } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import type { IdentifiedSystemsEvent } from '@kbn/streams-plugin/server/routes/internal/streams/systems/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { useKibana } from './use_kibana';
-import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
   upsertSystem: (system: System) => Promise<void>;
@@ -28,7 +27,6 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         streams: { streamsRepositoryClient },
       },
     },
-    services: { telemetryClient },
   } = useKibana();
 
   const { signal, abort, refresh } = useAbortController();
@@ -52,23 +50,6 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
       );
 
       const identifiedSystems = await firstValueFrom(events$);
-
-      telemetryClient.trackFeaturesIdentified({
-        count: identifiedSystems.systems.length,
-        count_by_type: identifiedSystems.systems.reduce<Record<FeatureType, number>>(
-          (acc, system) => {
-            acc[system.type] = (acc[system.type] || 0) + 1;
-            return acc;
-          },
-          {
-            system: 0,
-          }
-        ),
-        stream_name: definition.name,
-        stream_type: getStreamTypeFromDefinition(definition),
-        input_tokens_used: identifiedSystems.tokensUsed.prompt,
-        output_tokens_used: identifiedSystems.tokensUsed.completion,
-      });
 
       return identifiedSystems;
     },

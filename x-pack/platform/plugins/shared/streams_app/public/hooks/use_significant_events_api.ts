@@ -6,7 +6,7 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 
@@ -25,7 +25,7 @@ interface SignificantEventsApi {
   upsertQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
-  generate: (connectorId: string, feature?: Feature) => SignificantEventsGenerateResponse;
+  generate: (connectorId: string, feature?: System) => SignificantEventsGenerateResponse;
   abort: () => void;
 }
 
@@ -88,7 +88,7 @@ export function useSignificantEventsApi({
         },
       });
     },
-    generate: (connectorId: string, feature?: Feature) => {
+    generate: (connectorId: string, feature?: System) => {
       return streamsRepositoryClient.stream(
         `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
         {
