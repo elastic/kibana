@@ -19,7 +19,7 @@ export const DIRECTOR_ESQL_QUERY = `FROM ${ALERT_EVENTS_INDEX}
 | STATS
     last_tracked_state = COALESCE(LAST(end_state, @timestamp), "inactive"),
     last_episode_id    = LAST(episode_id, @timestamp),
-    last_status        = ANY(last_status)
+    last_status        = LAST(last_status, @timestamp)
     BY rule.id, event_alert_series_id
 | EVAL candidate_state = CASE(
     last_tracked_state == "inactive"     AND last_status == "breach",    "pending",
