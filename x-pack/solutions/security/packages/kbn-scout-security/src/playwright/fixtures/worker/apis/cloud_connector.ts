@@ -27,7 +27,6 @@ interface FleetSettingsResponse {
 
 export interface CloudConnectorApiService {
   getCloudConnector: (id: string) => Promise<unknown>;
-  getPackagePolicy: (id: string) => Promise<unknown>;
   getAllCloudConnectors: () => Promise<unknown[]>;
   deleteAllCloudConnectors: () => Promise<void>;
   deleteAllPackagePolicies: () => Promise<void>;
@@ -49,14 +48,6 @@ export const getCloudConnectorApiService = ({
       const response = await kbnClient.request<FleetItemResponse>({
         method: 'GET',
         path: `${basePath}/api/fleet/cloud_connectors/${id}`,
-      });
-      return response.data.item;
-    },
-
-    getPackagePolicy: async (id: string) => {
-      const response = await kbnClient.request<FleetItemResponse>({
-        method: 'GET',
-        path: `${basePath}/api/fleet/package_policies/${id}`,
       });
       return response.data.item;
     },

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as securityServerlessConfig } from '../../../default/serverless/security.serverless.config';
+import { cspmAgentlessServerArgs } from '../shared';
 
 /**
  * Custom Scout server configuration for Cloud Security Posture Management (CSPM)
@@ -28,46 +28,6 @@ export const servers: ScoutServerConfig = {
 
   kbnTestServer: {
     ...securityServerlessConfig.kbnTestServer,
-    serverArgs: [
-      ...securityServerlessConfig.kbnTestServer.serverArgs,
-
-      // Enable agentless integration in Fleet
-      '--xpack.fleet.agentless.enabled=true',
-      // Agentless API URL - requests will be intercepted by Playwright in tests
-      '--xpack.fleet.agentless.api.url=http://localhost:8089',
-      // Use test certificates (Fleet Agentless client always enables SSL)
-      `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
-      `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,
-      `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,
-
-      // Enable Fleet experimental features for agentless
-      `--xpack.fleet.enableExperimental=${JSON.stringify([
-        'agentlessPoliciesAPI',
-        'useAgentlessAPIInUI',
-      ])}`,
-
-      // Enable cloud connector feature flag in Security Solution
-      '--uiSettings.overrides.securitySolution:enableCloudConnector=true',
-
-      // Pre-install cloud_security_posture package at startup
-      '--xpack.fleet.packages.0.name=cloud_security_posture',
-      '--xpack.fleet.packages.0.version=3.1.2',
-
-      // Enable debug logging for troubleshooting
-      `--logging.loggers=${JSON.stringify([
-        {
-          name: 'plugins.fleet.agentless',
-          level: 'debug',
-        },
-        {
-          name: 'plugins.fleet.agentless_policies',
-          level: 'debug',
-        },
-        {
-          name: 'plugins.fleet.cloud_connectors',
-          level: 'debug',
-        },
-      ])}`,
-    ],
+    serverArgs: [...securityServerlessConfig.kbnTestServer.serverArgs, ...cspmAgentlessServerArgs],
   },
 };

@@ -343,7 +343,7 @@ spaceTest.describe(
         // Wait for the save button to be enabled before clicking
         await expect(saveButton).toBeEnabled({ timeout: 10000 });
 
-        await pageObjects.cspmIntegrationPage.saveIntegration();
+        await pageObjects.cspmIntegrationPage.saveAgentBasedIntegration();
 
         // Wait for the package policy request to be captured
         await expect
@@ -463,7 +463,7 @@ spaceTest.describe(
         // Wait for the save button to be enabled before clicking
         await expect(saveButton).toBeEnabled({ timeout: 10000 });
 
-        await pageObjects.cspmIntegrationPage.saveIntegration();
+        await pageObjects.cspmIntegrationPage.saveAgentBasedIntegration();
 
         // Wait for the package policy request to be captured
         await expect

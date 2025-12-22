@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { EuiSuperSelectWrapper } from '@kbn/scout/src/playwright/eui_components/super_select';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   AZURE_PROVIDER_TEST_SUBJ,
@@ -58,15 +59,11 @@ export class CspmIntegrationPage {
   }
 
   async fillCloudConnectorName(name: string) {
-    const input = this.page.getByTestId(CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ);
-    await input.waitFor({ state: 'visible' });
-    await input.fill(name);
+    await this.page.getByTestId(CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ).fill(name);
   }
 
   async fillAwsCloudConnectorDetails(roleArn: string, externalId?: string) {
-    const roleArnInput = this.page.getByTestId(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN);
-    await roleArnInput.waitFor({ state: 'visible' });
-    await roleArnInput.fill(roleArn);
+    await this.page.getByTestId(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN).fill(roleArn);
 
     // External ID field is optional and may not be present
     if (externalId) {
@@ -79,19 +76,11 @@ export class CspmIntegrationPage {
   }
 
   async fillAzureCloudConnectorDetails(tenantId: string, clientId: string, credentialsId: string) {
-    const tenantIdInput = this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
-    await tenantIdInput.waitFor({ state: 'visible' });
-    await tenantIdInput.fill(tenantId);
-
-    const clientIdInput = this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
-    await clientIdInput.waitFor({ state: 'visible' });
-    await clientIdInput.fill(clientId);
-
-    const connectorIdInput = this.page.getByTestId(
-      AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID
-    );
-    await connectorIdInput.waitFor({ state: 'visible' });
-    await connectorIdInput.fill(credentialsId);
+    await this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID).fill(tenantId);
+    await this.page.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID).fill(clientId);
+    await this.page
+      .getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
+      .fill(credentialsId);
   }
 
   async selectExistingCloudConnector(provider: 'aws' | 'azure', connectorName: string) {
@@ -102,23 +91,36 @@ export class CspmIntegrationPage {
         ? AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ
         : AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
 
-    // Wait for the super select to be visible
-    await this.page.getByTestId(selectTestSubj).waitFor({ state: 'visible' });
+    // Use EUI wrapper for reliable super select interaction
+    const superSelect = new EuiSuperSelectWrapper(this.page, { dataTestSubj: selectTestSubj });
 
-    // Click to open the dropdown
-    await this.page.getByTestId(selectTestSubj).click();
+    // Open the dropdown
+    await superSelect.toggleDropdown();
 
-    // Wait for and click the connector option by name
-    await this.page.getByRole('option', { name: new RegExp(connectorName, 'i') }).click();
+    // Find and click the option by visible text (connector names are dynamic)
+    const dropdown = this.page.locator('[role="listbox"]');
+    await dropdown.waitFor({ state: 'visible' });
+    await dropdown.locator(`[role="option"]`).filter({ hasText: connectorName }).click();
+
+    // Wait for dropdown to close
+    await dropdown.waitFor({ state: 'detached' });
   }
 
   async fillIntegrationName(name: string) {
-    const input = this.page.locator('input[id="name"]');
-    await input.waitFor({ state: 'visible' });
-    await input.fill(name);
+    await this.page.locator('input[id="name"]').fill(name);
   }
 
   async saveIntegration() {
     await this.page.getByTestId('createPackagePolicySaveButton').click();
+    await this.page.getByTestId('packagePolicyCreateSuccessToast').waitFor({ state: 'visible' });
+  }
+
+  async saveAgentBasedIntegration() {
+    await this.page.getByTestId('createPackagePolicySaveButton').click();
+    const cloudFormationModal = this.page.getByTestId('postInstallCloudFormationModal');
+    const armTemplateModal = this.page.getByTestId('postInstallAzureArmTemplateModal');
+    const addAgentModal = this.page.getByTestId('postInstallAddAgentModal');
+
+    await cloudFormationModal.or(armTemplateModal).or(addAgentModal).waitFor({ state: 'visible' });
   }
 }
