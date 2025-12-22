@@ -35,11 +35,12 @@ import { internalStateActions } from '../application/main/state_management/redux
 import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
+import { updateSavedSearch } from '../application/main/state_management/utils/update_saved_search';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -333,7 +334,8 @@ export function getDiscoverStateMock({
       tabId: internalState.getState().tabs.unsafeCurrentId,
       appState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
-        savedSearch: finalSavedSearch,
+        persistedTab: persistedDiscoverSession?.tabs[0],
+        dataView: finalSavedSearch?.searchSource.getField('index'),
         services,
       }),
     })
@@ -360,7 +362,25 @@ export function getDiscoverStateMock({
   tabRuntimeState.stateContainer$.next(container);
 
   if (finalSavedSearch) {
-    container.savedSearchState.set(finalSavedSearch);
+    const currentTab = selectTab(internalState.getState(), container.getCurrentTab().id);
+    const dataView = finalSavedSearch.searchSource.getField('index');
+
+    container.savedSearchState.set(
+      updateSavedSearch({
+        savedSearch: finalSavedSearch,
+        dataView,
+        initialInternalState: undefined,
+        appState: currentTab.appState,
+        globalState: currentTab.globalState,
+        services,
+      })
+    );
+
+    if (dataView) {
+      internalState.dispatch(
+        internalStateActions.loadDataViewList.fulfilled([dataView as DataViewListItem], 'requestId')
+      );
+    }
   }
 
   return container;
