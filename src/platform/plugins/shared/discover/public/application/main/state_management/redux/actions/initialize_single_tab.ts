@@ -137,8 +137,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           })
         : undefined;
 
-    const initialQuery =
-      urlAppState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
+    const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
 
     const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
