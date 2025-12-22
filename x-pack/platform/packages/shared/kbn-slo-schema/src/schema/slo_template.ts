@@ -23,6 +23,7 @@ const sloTemplateSchema = t.intersection([
     timeWindow: timeWindowSchema,
     tags: tagsSchema,
     settings: optionalSettingsSchema,
+    groupBy: t.array(t.string),
   }),
 ]);
 

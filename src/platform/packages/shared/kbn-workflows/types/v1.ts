@@ -86,6 +86,7 @@ export interface EsWorkflowExecution {
   triggeredBy?: string; // 'manual' or 'scheduled'
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
 }
 
 export interface ProviderInput {
