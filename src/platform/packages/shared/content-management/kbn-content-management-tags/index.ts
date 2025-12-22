@@ -7,12 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './specs/abuseipdb/abuseipdb';
-export * from './specs/alienvault_otx/alienvault_otx';
-export * from './specs/brave_search/brave_search';
-export * from './specs/github/github';
-export * from './specs/greynoise/greynoise';
-export * from './specs/notion/notion';
-export * from './specs/shodan/shodan';
-export * from './specs/urlvoid/urlvoid';
-export * from './specs/virustotal/virustotal';
+export {
+  ContentManagementTagsKibanaProvider,
+  ContentManagementTagsProvider,
+  TagBadge,
+  TagList,
+  TagListComponent,
+  useTags,
+  useTagServices,
+} from './src';
+
+export type {
+  ContentManagementTagsKibanaDependencies,
+  ContentManagementTagsServices,
+  ParsedQuery,
+  Tag,
+  TagBadgeProps,
+  TagListComponentProps,
+  TagListProps,
+  UseTagsParams,
+  UseTagsReturn,
+} from './src';
