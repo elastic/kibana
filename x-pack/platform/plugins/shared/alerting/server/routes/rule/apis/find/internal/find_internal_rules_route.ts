@@ -9,17 +9,19 @@ import type { IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   FindRulesInternalRequestBodyV1,
-  FindRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/find';
-import { findRulesInternalRequestBodySchemaV1 } from '../../../../../common/routes/rule/apis/find';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import type { ILicenseState } from '../../../../lib';
-import type { AlertingRequestHandlerContext } from '../../../../types';
-import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
-import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
-import { transformFindRulesInternalBodyV1, transformFindRulesResponseV1 } from './transforms';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+  FindRulesInternalResponseV1,
+} from '../../../../../../common/routes/rule/apis/find/internal';
+import { findRulesInternalRequestBodySchemaV1 } from '../../../../../../common/routes/rule/apis/find/internal';
+import type { ILicenseState } from '../../../../../lib';
+import type { AlertingRequestHandlerContext } from '../../../../../types';
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '../../../../../types';
+import { verifyAccessAndContext } from '../../../../lib';
+import { trackLegacyTerminology } from '../../../../lib/track_legacy_terminology';
+import {
+  transformFindRulesInternalBodyV1,
+  transformFindRulesInternalResponseV1,
+} from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 export const findInternalRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -67,8 +69,10 @@ export const findInternalRulesRoute = (
           includeSnoozeData: true,
         });
 
-        const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields, true);
+        const responseBody: FindRulesInternalResponseV1 = transformFindRulesInternalResponseV1(
+          findResult,
+          options.fields
+        );
 
         return res.ok({
           body: responseBody,

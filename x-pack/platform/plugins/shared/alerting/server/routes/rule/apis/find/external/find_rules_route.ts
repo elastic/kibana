@@ -10,20 +10,19 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   FindRulesRequestQueryV1,
   FindRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/find';
+} from '../../../../../../common/routes/rule/apis/find/external';
 import {
   findRulesRequestQuerySchemaV1,
   findRuleParamsExamplesV1,
-} from '../../../../../common/routes/rule/apis/find';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import type { ILicenseState } from '../../../../lib';
-import type { AlertingRequestHandlerContext } from '../../../../types';
-import { BASE_ALERTING_API_PATH } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
-import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
+  findRulesResponseSchemaV1,
+} from '../../../../../../common/routes/rule/apis/find/external';
+import type { ILicenseState } from '../../../../../lib';
+import type { AlertingRequestHandlerContext } from '../../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../../types';
+import { verifyAccessAndContext } from '../../../../lib';
+import { trackLegacyTerminology } from '../../../../lib/track_legacy_terminology';
 import { transformFindRulesBodyV1, transformFindRulesResponseV1 } from './transforms';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 export const findRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -46,7 +45,7 @@ export const findRulesRoute = (
         },
         response: {
           200: {
-            body: () => ruleResponseSchemaV1,
+            body: () => findRulesResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
           400: {
@@ -88,8 +87,10 @@ export const findRulesRoute = (
           includeSnoozeData: true,
         });
 
-        const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields, false);
+        const responseBody: FindRulesResponseV1 = transformFindRulesResponseV1(
+          findResult,
+          options.fields
+        );
 
         return res.ok({
           body: responseBody,

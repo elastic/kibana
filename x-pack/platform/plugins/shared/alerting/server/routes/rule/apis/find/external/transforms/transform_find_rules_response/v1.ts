@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import type { FindRulesResponseV1 } from '../../../../../../../common/routes/rule/apis/find';
+import type { FindRulesResponseV1 } from '../../../../../../../../common/routes/rule/apis/find/external';
 import type {
   RuleResponseV1,
   RuleParamsV1,
-} from '../../../../../../../common/routes/rule/response';
-import type { FindResult } from '../../../../../../application/rule/methods/find';
-import type { Rule, RuleParams } from '../../../../../../application/rule/types';
+} from '../../../../../../../../common/routes/rule/response';
+import type { FindResult } from '../../../../../../../application/rule/methods/find';
 import {
   transformRuleActionsV1,
   transformMonitoringV1,
   transformRuleLastRunV1,
   transformFlappingV1,
-} from '../../../../transforms';
+} from '../../../../../transforms';
 
-export const transformPartialRule = <Params extends RuleParams = never>(
-  rule: Partial<Rule<Params>>,
-  fields?: string[],
-  includeArtifacts: boolean = false
-): Partial<RuleResponseV1<RuleParamsV1>> => {
+export const transformPartialRule = (
+  rule: FindResult<{}>['data'][number],
+  fields?: string[]
+): FindRulesResponseV1['data'][number] => {
   const ruleResponse = {
     ...(rule.id !== undefined ? { id: rule.id } : {}),
     ...(rule.enabled !== undefined ? { enabled: rule.enabled } : {}),
@@ -81,7 +79,7 @@ export const transformPartialRule = <Params extends RuleParams = never>(
       : {}),
     ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
-    ...(includeArtifacts && rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
+    ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
   };
 
   type RuleKeys = keyof RuleResponseV1<RuleParamsV1>;
@@ -97,20 +95,18 @@ export const transformPartialRule = <Params extends RuleParams = never>(
     }
     delete ruleResponse[key as RuleKeys];
   }
+
   return ruleResponse;
 };
 
-export const transformFindRulesResponse = <Params extends RuleParams = never>(
-  result: FindResult<Params>,
-  fields?: string[],
-  includeArtifacts: boolean = false
-): FindRulesResponseV1<RuleParamsV1>['body'] => {
+export const transformFindRulesResponse = (
+  result: FindResult<{}>,
+  fields?: string[]
+): FindRulesResponseV1 => {
   return {
     page: result.page,
     per_page: result.perPage,
     total: result.total,
-    data: result.data.map((rule) =>
-      transformPartialRule<RuleParamsV1>(rule as Partial<Rule<Params>>, fields, includeArtifacts)
-    ),
+    data: result.data.map((rule) => transformPartialRule(rule, fields)),
   };
 };

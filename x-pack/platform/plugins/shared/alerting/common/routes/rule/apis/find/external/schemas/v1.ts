@@ -6,7 +6,8 @@
  */
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import { stringOrStringArraySchema } from '../../../../../schemas';
+import { stringOrStringArraySchema } from '../../../../../../schemas';
+import { ruleResponseSchemaV1 } from '../../../../response';
 
 export const findRuleParamsExamples = () => path.join(__dirname, 'examples_find_rules.yaml');
 
@@ -105,34 +106,11 @@ export const findRulesRequestQuerySchema = schema.object({
   ),
 });
 
-export const findRulesInternalRequestBodySchema = schema.object({
-  per_page: schema.number({
-    defaultValue: 10,
-    min: 0,
-  }),
-  page: schema.number({
-    defaultValue: 1,
-    min: 1,
-  }),
-  search: schema.maybe(schema.string()),
-  default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
-    defaultValue: 'OR',
-  }),
-  search_fields: schema.maybe(stringOrStringArraySchema()),
-  sort_field: schema.maybe(schema.string()),
-  sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  has_reference: schema.maybe(
-    // use nullable as maybe is currently broken
-    // in config-schema
-    schema.nullable(
-      schema.object({
-        type: schema.string(),
-        id: schema.string(),
-      })
-    )
-  ),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
-  filter: schema.maybe(schema.string()),
-  rule_type_ids: schema.maybe(schema.arrayOf(schema.string())),
-  consumers: schema.maybe(schema.arrayOf(schema.string())),
+const findRulesResponseDataSchema = schema.arrayOf(ruleResponseSchemaV1.extends({}));
+
+export const findRulesResponseSchema = schema.object({
+  page: schema.number(),
+  per_page: schema.number(),
+  total: schema.number(),
+  data: findRulesResponseDataSchema,
 });

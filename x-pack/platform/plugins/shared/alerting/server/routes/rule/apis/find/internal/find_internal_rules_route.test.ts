@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { findInternalRulesRoute } from './find_internal_rules_route';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../../rules_client.mock';
 
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('../../../lib/track_legacy_terminology', () => ({
+jest.mock('../../../../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
