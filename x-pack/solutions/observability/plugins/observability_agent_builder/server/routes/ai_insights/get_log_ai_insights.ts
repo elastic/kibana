@@ -33,7 +33,8 @@ export async function getLogAiInsights({
 }: GetLogAiInsightsParams): Promise<{ summary: string; context: string }> {
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
-    Using the provided data produce a concise, action-oriented response.`);
+    Using the provided data produce a concise, action-oriented response.
+    If it's an issue, provide remediation steps suitable for an on-call SRE.`);
 
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
