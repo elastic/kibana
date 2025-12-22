@@ -153,7 +153,6 @@ export const RulesPage = () => {
       <EuiSpacer size="l" />
       <Routes>
         <Route exact path="/logs" component={renderLogsList} />
-        <Route exact path="/rules" component={renderRulesList} />
         <Route exact path="/" component={renderRulesList} />
       </Routes>
     </RulesPageTemplate>
