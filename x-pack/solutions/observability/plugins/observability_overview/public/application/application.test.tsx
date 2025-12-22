@@ -73,6 +73,7 @@ describe('renderApp', () => {
     uiSettings: { get: () => false },
     http: { basePath: { prepend: (path: string) => path } },
     theme: themeServiceMock.createStartContract(),
+    rendering: { addContext: (element: React.ReactNode) => element },
   } as unknown as CoreStart;
 
   const params = {
@@ -149,8 +150,9 @@ describe('renderApp', () => {
 
     const { result } = renderHook(() => useAppRoutes(), { wrapper: AppWrapper });
     expect(result.current).not.toBeNull();
-    // Optionally, check for expected keys:
-    expect(Object.keys(result.current)).toContain('/cases');
+    // Complete tier includes both the overview page (/) and landing page
+    expect(Object.keys(result.current)).toContain('/');
+    expect(Object.keys(result.current)).toContain('/landing');
   });
 
   it('should adjust routes for essentials', () => {
@@ -164,7 +166,8 @@ describe('renderApp', () => {
 
     const { result } = renderHook(useAppRoutes, { wrapper: AppWrapper });
     expect(result.current).not.toBeNull();
+    // Essentials tier only includes the landing page, not the overview page
     expect(Object.keys(result.current)).toContain('/landing');
-    expect(Object.keys(result.current)).not.toContain('/cases');
+    expect(Object.keys(result.current)).not.toContain('/');
   });
 });

@@ -4,7 +4,7 @@ pageLoadAssetSize:
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 13590
   aiops: 15359
-  alerting: 26932
+  alerting: 22371
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
@@ -106,20 +106,20 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 8803
+  maintenanceWindows: 8783
   management: 12951
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44988
-  metricsExperience: 6655
+  metricsExperience: 6547
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
   navigation: 15639
   newsfeed: 12371
   noDataPage: 1749
-  observability: 107797
-  observabilityAgentBuilder: 7079
+  observability: 106620
+  observabilityAgentBuilder: 7077
   observabilityAIAssistant: 54556
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 7126
@@ -166,8 +166,8 @@ pageLoadAssetSize:
   securitySolutionServerless: 52082
   serverless: 7451
   serverlessObservability: 19472
-  serverlessSearch: 26340
-  serverlessWorkplaceAI: 6671
+  serverlessSearch: 26314
+  serverlessWorkplaceAI: 6645
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -208,6 +208,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 73502
+  workflowsExtensions: 68415
   workflowsManagement: 8497
   workplaceAIApp: 6135

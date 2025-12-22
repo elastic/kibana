@@ -14,7 +14,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import { ObservabilityAlertsTable } from '../../..';
+import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
 
 export interface CasesProps {

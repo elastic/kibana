@@ -65,6 +65,7 @@
       "onechat"
     ],
     "requiredBundles": [
+      "cases",
       "fleet",
       "kibanaReact",
       "kibanaUtils",

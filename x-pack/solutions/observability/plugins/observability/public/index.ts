@@ -121,10 +121,11 @@ export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_gro
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
 export { Threshold } from './components/custom_threshold/components/threshold';
 
-export {
-  ObservabilityAlertsTable,
-  AlertActions,
-  type GetObservabilityAlertsTableProp,
-  type ObservabilityAlertsTableContext,
-  type ObservabilityAlertsTableProps,
+// Only re-export types from @kbn/observability-alerts-table to avoid pulling
+// heavy dependencies into the page load bundle. Consumers should import
+// components directly from '@kbn/observability-alerts-table' when needed.
+export type {
+  GetObservabilityAlertsTableProp,
+  ObservabilityAlertsTableContext,
+  ObservabilityAlertsTableProps,
 } from '@kbn/observability-alerts-table';

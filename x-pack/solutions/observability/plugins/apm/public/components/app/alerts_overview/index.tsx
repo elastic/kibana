@@ -11,7 +11,7 @@ import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import {
   APM_ALERTING_CONSUMERS,

@@ -15,6 +15,11 @@ export class ObservabilityNavigation {
   }
 
   async gotoLanding() {
-    await this.page.gotoApp('observability/landing');
+    // Overview/landing is now in the separate observabilityOverview app
+    await this.page.gotoApp('observabilityOverview/landing');
+  }
+
+  async gotoOverview() {
+    await this.page.gotoApp('observabilityOverview');
   }
 }
