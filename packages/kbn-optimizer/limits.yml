@@ -111,7 +111,6 @@ pageLoadAssetSize:
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44988
-  metricsExperience: 6655
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
@@ -208,6 +207,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 53333
   watcher: 10485
-  workflowsExtensions: 61264
+  workflowsExtensions: 73502
   workflowsManagement: 8497
   workplaceAIApp: 6135
