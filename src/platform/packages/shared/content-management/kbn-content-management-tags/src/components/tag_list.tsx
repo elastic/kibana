@@ -16,11 +16,9 @@ import { TagListComponent, type TagListComponentProps } from './tag_list.compone
 
 /**
  * Props for the {@link TagList} component.
- *
- * @property tagIds - Array of tag IDs to resolve and display.
- * @property onClick - Optional click handler inherited from {@link TagListComponentProps}.
  */
 export interface TagListProps extends Pick<TagListComponentProps, 'onClick'> {
+  /** Array of tag IDs to resolve and display. */
   tagIds: string[];
 }
 
@@ -34,10 +32,6 @@ export interface TagListProps extends Pick<TagListComponentProps, 'onClick'> {
  * Must be used within a {@link ContentManagementTagsProvider} or {@link ContentManagementTagsKibanaProvider}.
  * If no provider is present, the component renders nothing.
  *
- * @param props - The component props.
- * @param props.tagIds - Array of tag IDs to resolve and render.
- * @param props.onClick - Optional click handler for tag interaction.
- *
  * @returns The rendered tag list, or an empty {@link TagListComponent} if services are unavailable.
  *
  * @example
@@ -49,7 +43,8 @@ export interface TagListProps extends Pick<TagListComponentProps, 'onClick'> {
  * />
  * ```
  */
-export const TagList: FC<TagListProps> = ({ tagIds, ...rest }) => {
+export const TagList: FC<TagListProps> = (props: TagListProps) => {
+  const { tagIds, ...rest } = props;
   const services = useServices();
 
   const tags = useMemo(() => {
@@ -78,4 +73,3 @@ export const TagList: FC<TagListProps> = ({ tagIds, ...rest }) => {
 
   return <TagListComponent tags={tags} {...rest} />;
 };
-

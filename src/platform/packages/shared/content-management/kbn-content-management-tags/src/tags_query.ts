@@ -15,29 +15,36 @@ import type { Tag } from './types';
  * Parameters for the {@link useTags} hook.
  *
  * @typeParam T - The item type, must have an `id` property and optional `tags` array of tag IDs.
- *
- * @property query - The current EUI Query object representing the active search/filter state.
- * @property updateQuery - Callback to update the query when tag filters change.
- * @property items - The list of items to build the tag-to-item mapping from.
  */
 export interface UseTagsParams<T extends { id: string; tags?: string[] }> {
+  /** The current EUI Query object representing the active search/filter state. */
   query: Query;
+  /**
+   * Callback to update the query when tag filters change.
+   * @param query - The updated EUI Query object.
+   */
   updateQuery: (query: Query) => void;
+  /** The list of items to build the tag-to-item mapping from. */
   items: T[];
 }
 
 /**
  * Return value from the {@link useTags} hook.
- *
- * @property toggleIncludeTagFilter - Toggles a tag in/out of the include filter. If the tag is in the exclude filter, it is removed first.
- * @property toggleExcludeTagFilter - Toggles a tag in/out of the exclude filter. If the tag is in the include filter, it is removed first.
- * @property clearTagSelection - Removes all tag filter clauses from the query.
- * @property tagsToTableItemMap - A mapping of tag IDs to arrays of item IDs that have that tag.
  */
 export interface UseTagsReturn {
+  /**
+   * Toggles a tag in/out of the include filter. If the tag is in the exclude filter, it is removed first.
+   * @param tag - The tag to toggle.
+   */
   toggleIncludeTagFilter: (tag: Tag) => void;
+  /**
+   * Toggles a tag in/out of the exclude filter. If the tag is in the include filter, it is removed first.
+   * @param tag - The tag to toggle.
+   */
   toggleExcludeTagFilter: (tag: Tag) => void;
+  /** Removes all tag filter clauses from the query. */
   clearTagSelection: () => void;
+  /** A mapping of tag IDs to arrays of item IDs that have that tag. */
   tagsToTableItemMap: { [tagId: string]: string[] };
 }
 
@@ -52,11 +59,6 @@ export interface UseTagsReturn {
  * - Exclude filter: `-tag:tagName` (must not match)
  *
  * @typeParam T - The item type with required `id` and optional `tags` properties.
- *
- * @param params - The hook parameters.
- * @param params.query - Current EUI Query object.
- * @param params.updateQuery - Callback invoked when the query should be updated.
- * @param params.items - Items to build the tag-to-item mapping from.
  *
  * @returns An object containing filter toggle functions and a tag-to-item mapping.
  *
@@ -75,11 +77,10 @@ export interface UseTagsReturn {
  * clearTagSelection();
  * ```
  */
-export function useTags<T extends { id: string; tags?: string[] }>({
-  query,
-  updateQuery,
-  items,
-}: UseTagsParams<T>): UseTagsReturn {
+export const useTags = <T extends { id: string; tags?: string[] }>(
+  params: UseTagsParams<T>
+): UseTagsReturn => {
+  const { query, updateQuery, items } = params;
   // Return a map of tag.id to an array of item ids having that tag
   // { 'abc-123': ['item_id_1', 'item_id_2', ...] }
   const tagsToTableItemMap = useMemo(() => {
@@ -170,5 +171,4 @@ export function useTags<T extends { id: string; tags?: string[] }>({
     clearTagSelection,
     tagsToTableItemMap,
   };
-}
-
+};

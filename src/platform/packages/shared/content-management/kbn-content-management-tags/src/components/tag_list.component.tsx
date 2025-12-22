@@ -15,12 +15,15 @@ import { TagBadge } from './tag_badge';
 
 /**
  * Props for the {@link TagListComponent}.
- *
- * @property tags - Array of tag objects to render as badges.
- * @property onClick - Optional click handler passed to each {@link TagBadge}. Called with the clicked tag and modifier key state.
  */
 export interface TagListComponentProps {
+  /** Array of tag objects to render as badges. */
   tags: Tag[];
+  /**
+   * Optional click handler passed to each {@link TagBadge}. Called with the clicked tag and modifier key state.
+   * @param tag - The clicked tag.
+   * @param withModifierKey - Whether a modifier key was held during the click.
+   */
   onClick?: (tag: Tag, withModifierKey: boolean) => void;
 }
 
@@ -33,10 +36,6 @@ export interface TagListComponentProps {
  * The tags are rendered as {@link TagBadge} components in a flexbox layout
  * with wrapping enabled for responsive display.
  *
- * @param props - The component props.
- * @param props.tags - Array of tag objects to render.
- * @param props.onClick - Optional click handler for tag interaction.
- *
  * @returns The rendered tag list, or `null` if the tags array is empty.
  *
  * @example
@@ -47,7 +46,8 @@ export interface TagListComponentProps {
  * />
  * ```
  */
-export const TagListComponent: FC<TagListComponentProps> = ({ tags, onClick }) => {
+export const TagListComponent: FC<TagListComponentProps> = (props: TagListComponentProps) => {
+  const { tags, onClick } = props;
   if (tags.length === 0) {
     return null;
   }
@@ -66,4 +66,3 @@ export const TagListComponent: FC<TagListComponentProps> = ({ tags, onClick }) =
     </div>
   );
 };
-

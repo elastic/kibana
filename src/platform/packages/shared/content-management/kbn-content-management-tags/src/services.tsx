@@ -29,7 +29,7 @@ import type { ParsedQuery, Tag } from './types';
  * @property parseSearchQuery - Optional function to parse a search query string and extract tag filters.
  * @property onError - Optional error handler for reporting errors to the user. Defaults to noop.
  */
-export interface Services {
+interface Services {
   getTagList: () => Tag[];
   parseSearchQuery?: (searchQuery: string) => ParsedQuery;
   /** Optional error handler for reporting errors to the user. Defaults to noop. */
@@ -51,9 +51,6 @@ export type ContentManagementTagsServices = Services;
  * the Kibana plugin ecosystem. Consumers should provide these dependencies when using
  * {@link ContentManagementTagsKibanaProvider}.
  *
- * @property savedObjectsTagging.ui - Tagging UI utilities from the saved objects tagging plugin.
- * @property core.notifications.toasts - Toast notification service for error reporting.
- *
  * @example
  * ```tsx
  * const dependencies: ContentManagementTagsKibanaDependencies = {
@@ -67,12 +64,14 @@ export type ContentManagementTagsServices = Services;
  * ```
  */
 export interface ContentManagementTagsKibanaDependencies {
+  /** Tagging UI utilities from the saved objects tagging plugin. */
   savedObjectsTagging: {
     ui: Pick<
       SavedObjectsTaggingApiUi,
       'getTagList' | 'parseSearchQuery' | 'getSearchBarFilter' | 'getTagIdFromName'
     >;
   };
+  /** Core Kibana services including notifications for error reporting. */
   core: {
     notifications: {
       toasts: Pick<IToasts, 'addError'>;
@@ -199,12 +198,6 @@ const parseSearchQueryCore = (searchQuery: string, tags: Tag[]): ParsedQuery => 
  *
  * For Kibana plugin integration, use {@link ContentManagementTagsKibanaProvider} instead.
  *
- * @param props - The services to provide plus children to render.
- * @param props.getTagList - Function that returns the list of available tags.
- * @param props.parseSearchQuery - Optional function to parse search queries for tag filters.
- * @param props.onError - Optional error handler callback.
- * @param props.children - Child components that will have access to the tag services.
- *
  * @example
  * ```tsx
  * <ContentManagementTagsProvider
@@ -216,10 +209,10 @@ const parseSearchQueryCore = (searchQuery: string, tags: Tag[]): ParsedQuery => 
  * </ContentManagementTagsProvider>
  * ```
  */
-export const ContentManagementTagsProvider: FC<
-  PropsWithChildren<ContentManagementTagsServices>
-> = ({ children, ...services }) => {
-  const { getTagList, parseSearchQuery, onError } = services;
+export const ContentManagementTagsProvider: FC<PropsWithChildren<ContentManagementTagsServices>> = (
+  props: PropsWithChildren<ContentManagementTagsServices>
+) => {
+  const { children, getTagList, parseSearchQuery, onError } = props;
 
   return (
     <ContentManagementTagsContext.Provider value={{ getTagList, parseSearchQuery, onError }}>
@@ -238,11 +231,6 @@ export const ContentManagementTagsProvider: FC<
  * Use this provider in Kibana plugins that need tag functionality. For standalone usage
  * without Kibana dependencies, use {@link ContentManagementTagsProvider} instead.
  *
- * @param props - Kibana plugin dependencies plus children to render.
- * @param props.savedObjectsTagging - The saved objects tagging plugin's UI API.
- * @param props.core - Core Kibana services including notifications.
- * @param props.children - Child components that will have access to the tag services.
- *
  * @example
  * ```tsx
  * // In a Kibana plugin's application component
@@ -256,8 +244,9 @@ export const ContentManagementTagsProvider: FC<
  */
 export const ContentManagementTagsKibanaProvider: FC<
   PropsWithChildren<ContentManagementTagsKibanaDependencies>
-> = ({ children, ...dependencies }) => {
+> = (props: PropsWithChildren<ContentManagementTagsKibanaDependencies>) => {
   const {
+    children,
     savedObjectsTagging: {
       ui: { getTagList: getTagListFn },
     },
@@ -266,7 +255,7 @@ export const ContentManagementTagsKibanaProvider: FC<
         toasts: { addError },
       },
     },
-  } = dependencies;
+  } = props;
 
   const onError = useCallback(
     (error: Error, title: string) => {
@@ -337,4 +326,3 @@ export const ContentManagementTagsKibanaProvider: FC<
 export const useServices = (): Services | undefined => {
   return useContext(ContentManagementTagsContext) ?? undefined;
 };
-

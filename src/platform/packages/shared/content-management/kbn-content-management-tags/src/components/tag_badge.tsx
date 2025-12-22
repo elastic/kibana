@@ -15,12 +15,16 @@ import type { Tag } from '../types';
 
 /**
  * Props for the {@link TagBadge} component.
- *
- * @property tag - The tag object to display.
- * @property onClick - Optional click handler. Called with the tag and a boolean indicating whether a modifier key (Cmd on Mac, Ctrl on Windows/Linux) was held during the click.
  */
 export interface TagBadgeProps {
+  /** The tag object to display. */
   tag: Tag;
+  /**
+   * Optional click handler. Called with the tag and a boolean indicating whether a modifier key
+   * (Cmd on Mac, Ctrl on Windows/Linux) was held during the click.
+   * @param tag - The clicked tag.
+   * @param withModifierKey - Whether a modifier key was held during the click.
+   */
   onClick?: (tag: Tag, withModifierKey: boolean) => void;
 }
 
@@ -62,10 +66,6 @@ const isMac = (() => {
  * modifier-key clicks (Cmd on macOS, Ctrl on Windows/Linux) for alternate actions
  * such as adding to an exclude filter instead of an include filter.
  *
- * @param props - The component props.
- * @param props.tag - The tag to render.
- * @param props.onClick - Optional click handler receiving the tag and modifier key state.
- *
  * @example
  * ```tsx
  * // Static badge (no interaction)
@@ -84,10 +84,11 @@ const isMac = (() => {
  * />
  * ```
  */
-export const TagBadge: FC<TagBadgeProps> = ({ tag, onClick }) => {
+export const TagBadge: FC<TagBadgeProps> = (props: TagBadgeProps) => {
+  const { tag, onClick } = props;
   const { name: tagName, color, description: title, id } = tag;
 
-  const props = {
+  const badgeProps = {
     color,
     title,
     'data-test-subj': `tag-${id}`,
@@ -95,12 +96,12 @@ export const TagBadge: FC<TagBadgeProps> = ({ tag, onClick }) => {
   };
 
   if (!onClick) {
-    return <EuiBadge {...props} />;
+    return <EuiBadge {...badgeProps} />;
   }
 
   return (
     <EuiBadge
-      {...props}
+      {...badgeProps}
       onClick={(e) => {
         e.stopPropagation();
         const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
@@ -115,4 +116,3 @@ export const TagBadge: FC<TagBadgeProps> = ({ tag, onClick }) => {
     />
   );
 };
-

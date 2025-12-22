@@ -9,18 +9,17 @@
 
 /**
  * Represents a content tag with display properties for categorizing and filtering saved objects.
- *
- * @property id - Optional unique identifier for the tag. May be undefined for newly created tags.
- * @property name - The display name of the tag shown in the UI.
- * @property description - A brief description of the tag's purpose.
- * @property color - The hex color code used for visual representation (e.g., badge background).
- * @property managed - Indicates whether the tag is system-managed (true) or user-created (false).
  */
 export interface Tag {
+  /** Optional unique identifier for the tag. May be undefined for newly created tags. */
   id?: string;
+  /** The display name of the tag shown in the UI. */
   name: string;
+  /** A brief description of the tag's purpose. */
   description: string;
+  /** The hex color code used for visual representation (e.g., badge background). */
   color: string;
+  /** Indicates whether the tag is system-managed (true) or user-created (false). */
   managed: boolean;
 }
 
@@ -29,10 +28,6 @@ export interface Tag {
  *
  * Used to separate the text search component from tag-based filtering when processing
  * user search input in the format `tag:tagName` or `-tag:tagName`.
- *
- * @property searchQuery - The search query text with tag clauses removed.
- * @property tagIds - Optional array of tag IDs to include in the filter (must match).
- * @property tagIdsToExclude - Optional array of tag IDs to exclude from results (must not match).
  *
  * @example
  * ```ts
@@ -46,8 +41,10 @@ export interface Tag {
  * ```
  */
 export interface ParsedQuery {
+  /** The search query text with tag clauses removed. */
   searchQuery: string;
+  /** Optional array of tag IDs to include in the filter (must match). */
   tagIds?: string[];
+  /** Optional array of tag IDs to exclude from results (must not match). */
   tagIdsToExclude?: string[];
 }
-
