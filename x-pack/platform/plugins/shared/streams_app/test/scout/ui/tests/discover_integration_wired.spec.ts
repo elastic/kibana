@@ -51,6 +51,8 @@ test.describe(
         '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
       );
 
+      // Refresh and wait for the row — stream routing may take time
+      await pageObjects.discover.waitForDataGridRowWithRefresh(expandButton);
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
@@ -98,6 +100,8 @@ test.describe(
         '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
       );
 
+      // Wait for the row to be rendered before clicking
+      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
