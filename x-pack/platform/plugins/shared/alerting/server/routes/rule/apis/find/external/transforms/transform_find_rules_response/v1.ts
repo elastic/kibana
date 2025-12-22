@@ -83,20 +83,24 @@ export const transformPartialRule = (
   };
 
   type RuleKeys = keyof RuleResponseV1<RuleParamsV1>;
+
   for (const key in ruleResponse) {
     if (ruleResponse[key as RuleKeys] !== undefined) {
       continue;
     }
+
     if (!fields) {
       continue;
     }
+
     if (fields.includes(key)) {
       continue;
     }
+
     delete ruleResponse[key as RuleKeys];
   }
 
-  return ruleResponse;
+  return ruleResponse as FindRulesResponseV1['data'][number];
 };
 
 export const transformFindRulesResponse = (
