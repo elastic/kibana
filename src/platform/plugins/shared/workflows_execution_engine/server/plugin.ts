@@ -251,7 +251,7 @@ export class WorkflowsExecutionEnginePlugin
                 triggeredBy: 'scheduled',
               };
 
-              const workflowExecution = {
+              const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
@@ -264,7 +264,46 @@ export class WorkflowsExecutionEnginePlugin
                 createdBy: '',
                 triggeredBy: 'scheduled',
               };
+
+              // Evaluate concurrency key if concurrency settings are present
+              if (workflow.definition?.settings?.concurrency?.key) {
+                const workflowExecutionContext = buildWorkflowContext(
+                  workflowExecution as EsWorkflowExecution,
+                  coreStart,
+                  dependencies
+                );
+                const concurrencyGroupKey = this.concurrencyManager.evaluateConcurrencyKey(
+                  workflow.definition.settings.concurrency,
+                  workflowExecutionContext
+                );
+                if (concurrencyGroupKey) {
+                  workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
+                }
+              }
+
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+
+              // Check concurrency limits and apply collision strategy if needed
+              if (
+                workflow.definition?.settings?.concurrency &&
+                workflowExecution.concurrencyGroupKey &&
+                workflowExecution.id &&
+                workflowExecution.spaceId
+              ) {
+                const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
+                await this.concurrencyManager.checkConcurrency(
+                  workflow.definition.settings.concurrency,
+                  workflowExecution.concurrencyGroupKey,
+                  workflowExecution.id,
+                  workflowExecution.spaceId,
+                  workflowExecutionRepository,
+                  workflowTaskManager
+                );
+              }
+
+              if (!workflowExecution.id || !workflowExecution.spaceId) {
+                throw new Error('Workflow execution must have id and spaceId');
+              }
 
               await runWorkflow({
                 workflowRunId: workflowExecution.id,
@@ -391,11 +430,24 @@ export class WorkflowsExecutionEnginePlugin
         throw new Error('Workflows cannot be executed without the user context');
       }
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecution, repository } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'manual'
       );
+
+      // Check concurrency limits and apply collision strategy if needed
+      if (workflow.definition?.settings?.concurrency && workflowExecution.concurrencyGroupKey) {
+        const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
+        await this.concurrencyManager.checkConcurrency(
+          workflow.definition.settings.concurrency,
+          workflowExecution.concurrencyGroupKey,
+          workflowExecution.id as string,
+          workflowExecution.spaceId || 'default',
+          repository,
+          workflowTaskManager
+        );
+      }
 
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
@@ -426,11 +478,24 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecution, repository } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'alert'
       );
+
+      // Check concurrency limits and apply collision strategy if needed
+      if (workflow.definition?.settings?.concurrency && workflowExecution.concurrencyGroupKey) {
+        const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
+        await this.concurrencyManager.checkConcurrency(
+          workflow.definition.settings.concurrency,
+          workflowExecution.concurrencyGroupKey,
+          workflowExecution.id as string,
+          workflowExecution.spaceId || 'default',
+          repository,
+          workflowTaskManager
+        );
+      }
 
       // Always schedule a task (never execute directly)
       const taskInstance = createTaskInstance(

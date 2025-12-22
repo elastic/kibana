@@ -339,4 +339,144 @@ describe('WorkflowExecutionRepository', () => {
       }
     });
   });
+
+  describe('getRunningExecutionsByConcurrencyGroup', () => {
+    it('should query for RUNNING executions by concurrency group key', async () => {
+      const mockExecutions = [
+        {
+          _source: {
+            id: 'exec-1',
+            concurrencyGroupKey: 'server-1',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            createdAt: '2024-01-01T00:00:00Z',
+          },
+        },
+        {
+          _source: {
+            id: 'exec-2',
+            concurrencyGroupKey: 'server-1',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            createdAt: '2024-01-01T01:00:00Z',
+          },
+        },
+      ];
+
+      esClient.search.mockResolvedValue({
+        hits: { hits: mockExecutions, total: { value: 2, relation: 'eq' } },
+      });
+
+      const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            must: [
+              { term: { concurrencyGroupKey: 'server-1' } },
+              { term: { spaceId: 'default' } },
+              { term: { status: ExecutionStatus.RUNNING } },
+            ],
+          },
+        },
+        sort: [{ createdAt: { order: 'asc' } }],
+        size: 1000,
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe('exec-1');
+      expect(result[1].id).toBe('exec-2');
+    });
+
+    it('should exclude specified execution ID from results', async () => {
+      const mockExecutions = [
+        {
+          _source: {
+            id: 'exec-2',
+            concurrencyGroupKey: 'server-1',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            createdAt: '2024-01-01T01:00:00Z',
+          },
+        },
+      ];
+
+      esClient.search.mockResolvedValue({
+        hits: { hits: mockExecutions, total: { value: 1, relation: 'eq' } },
+      });
+
+      await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default', 'exec-1');
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            must: [
+              { term: { concurrencyGroupKey: 'server-1' } },
+              { term: { spaceId: 'default' } },
+              { term: { status: ExecutionStatus.RUNNING } },
+            ],
+            must_not: [{ term: { id: 'exec-1' } }],
+          },
+        },
+        sort: [{ createdAt: { order: 'asc' } }],
+        size: 1000,
+      });
+    });
+
+    it('should return executions sorted by createdAt ascending (oldest first)', async () => {
+      const mockExecutions = [
+        {
+          _source: {
+            id: 'exec-1',
+            concurrencyGroupKey: 'server-1',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            createdAt: '2024-01-01T00:00:00Z',
+          },
+        },
+        {
+          _source: {
+            id: 'exec-2',
+            concurrencyGroupKey: 'server-1',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            createdAt: '2024-01-01T01:00:00Z',
+          },
+        },
+        {
+          _source: {
+            id: 'exec-3',
+            concurrencyGroupKey: 'server-1',
+            spaceId: 'default',
+            status: ExecutionStatus.RUNNING,
+            createdAt: '2024-01-01T02:00:00Z',
+          },
+        },
+      ];
+
+      esClient.search.mockResolvedValue({
+        hits: { hits: mockExecutions, total: { value: 3, relation: 'eq' } },
+      });
+
+      const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+
+      // ES returns sorted results, so we expect them in order
+      expect(result).toHaveLength(3);
+      expect(result[0].id).toBe('exec-1');
+      expect(result[1].id).toBe('exec-2');
+      expect(result[2].id).toBe('exec-3');
+    });
+
+    it('should return empty array when no running executions found', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+
+      expect(result).toHaveLength(0);
+    });
+  });
 });

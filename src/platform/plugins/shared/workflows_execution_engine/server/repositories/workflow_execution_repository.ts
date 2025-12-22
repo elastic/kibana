@@ -151,4 +151,58 @@ export class WorkflowExecutionRepository {
       1
     );
   }
+
+  /**
+   * Retrieves non-terminal workflow executions by concurrency group key.
+   * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
+   * to make room for new executions.
+   *
+   * @param concurrencyGroupKey - The concurrency group key to filter by.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param excludeExecutionId - Optional execution ID to exclude from results (e.g., current execution).
+   * @returns A promise that resolves to an array of workflow execution documents sorted by createdAt (oldest first).
+   */
+  public async getRunningExecutionsByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    excludeExecutionId?: string
+  ): Promise<EsWorkflowExecution[]> {
+    const mustClauses: Array<Record<string, unknown>> = [
+      { term: { concurrencyGroupKey } },
+      { term: { spaceId } },
+    ];
+
+    // Exclude terminal statuses - include PENDING, RUNNING, WAITING, etc.
+    const mustNotClauses: Array<Record<string, unknown>> = [
+      {
+        terms: {
+          status: [
+            ExecutionStatus.COMPLETED,
+            ExecutionStatus.FAILED,
+            ExecutionStatus.CANCELLED,
+            ExecutionStatus.SKIPPED,
+            ExecutionStatus.TIMED_OUT,
+          ],
+        },
+      },
+    ];
+
+    if (excludeExecutionId) {
+      mustNotClauses.push({ term: { id: excludeExecutionId } });
+    }
+
+    const response = await this.esClient.search<EsWorkflowExecution>({
+      index: this.indexName,
+      query: {
+        bool: {
+          must: mustClauses,
+          must_not: mustNotClauses.length > 0 ? mustNotClauses : undefined,
+        },
+      },
+      sort: [{ createdAt: { order: 'asc' } }], // Oldest first
+      size: 1000, // Reasonable limit for concurrency groups
+    });
+
+    return response.hits.hits.map((hit) => hit._source as EsWorkflowExecution);
+  }
 }

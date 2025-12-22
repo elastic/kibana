@@ -9,7 +9,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
  * Manages concurrency control for workflow executions.
@@ -47,7 +50,6 @@ export class ConcurrencyManager {
 
     const keyExpression = concurrencySettings.key.trim();
     if (keyExpression === '') {
-      this.logger.debug('[Concurrency] Empty concurrency key provided');
       return null;
     }
     if (!keyExpression.includes('{{') || !keyExpression.includes('}}')) {
@@ -61,28 +63,96 @@ export class ConcurrencyManager {
       );
 
       if (evaluated === null || evaluated === undefined) {
-        this.logger.debug(
-          `[Concurrency] Concurrency key evaluation returned null/undefined for expression: ${keyExpression}. Treating as static string.`
-        );
         return keyExpression;
       }
 
       const result = String(evaluated).trim();
 
       if (result === '') {
-        this.logger.debug(
-          `[Concurrency] Concurrency key evaluation returned empty string for expression: ${keyExpression}`
-        );
         return null;
       }
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.debug(
-        `[Concurrency] Failed to evaluate concurrency key expression "${keyExpression}": ${errorMessage}. Treating as static string.`
-      );
       return keyExpression;
     }
+  }
+
+  /**
+   * Checks concurrency limits and applies the collision strategy if needed.
+   *
+   * For 'cancel-in-progress' strategy:
+   * - Queries for RUNNING executions with the same concurrency group key
+   * - If limit is exceeded, cancels the oldest execution(s) to make room
+   * - Returns true if the new execution can proceed, false otherwise
+   *
+   * @param concurrencySettings - The concurrency settings from workflow definition
+   * @param concurrencyGroupKey - The evaluated concurrency group key
+   * @param currentExecutionId - The ID of the current execution to check
+   * @param spaceId - The space ID of the execution
+   * @param workflowExecutionRepository - Repository for querying/updating executions
+   * @param workflowTaskManager - Task manager for propagating cancellations
+   * @returns Promise<boolean> - true if execution can proceed, false otherwise
+   */
+  public async checkConcurrency(
+    concurrencySettings: ConcurrencySettings | undefined,
+    concurrencyGroupKey: string | null,
+    currentExecutionId: string,
+    spaceId: string,
+    workflowExecutionRepository: WorkflowExecutionRepository,
+    workflowTaskManager: WorkflowTaskManager
+  ): Promise<boolean> {
+    // If no concurrency settings or key, allow execution to proceed
+    if (!concurrencySettings || !concurrencyGroupKey) {
+      return true;
+    }
+
+    const strategy = concurrencySettings.strategy ?? 'queue';
+    const maxConcurrency = concurrencySettings.max ?? 1;
+
+    // Only handle 'cancel-in-progress' strategy in this sub-task
+    if (strategy !== 'cancel-in-progress') {
+      return true;
+    }
+
+    // Query for non-terminal executions in the same concurrency group
+    // For cancel-in-progress, we cancel any non-terminal executions (PENDING, RUNNING, etc.)
+    const runningExecutions =
+      await workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
+        concurrencyGroupKey,
+        spaceId,
+        currentExecutionId
+      );
+
+    const activeCount = runningExecutions.length;
+
+    // If we're within the limit, allow execution to proceed
+    if (activeCount < maxConcurrency) {
+      return true;
+    }
+
+    // Calculate how many executions to cancel
+    const executionsToCancel = activeCount - maxConcurrency + 1;
+
+    // Cancel the oldest executions (they're already sorted by createdAt ascending)
+    const executionsToCancelList = runningExecutions.slice(0, executionsToCancel);
+
+    await Promise.all(
+      executionsToCancelList.map(async (execution) => {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: execution.id,
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
+          cancelledAt: new Date().toISOString(),
+          cancelledBy: 'system',
+        });
+
+        // Propagate cancellation to the running task
+        await workflowTaskManager.forceRunIdleTasks(execution.id);
+      })
+    );
+
+    return true; // Execution can proceed after cancelling old ones
   }
 }
