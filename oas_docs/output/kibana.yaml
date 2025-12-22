@@ -337,7 +337,12 @@ tags:
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
     x-displayName: Task manager
-  - description: The assistant helps you prepare for the next major version of Elasticsearch.
+  - description: |
+      The Kibana Upgrade Assistant API helps you prepare for the next major Elasticsearch release.
+      > warn
+      > This is a Kibana REST API (not an Elasticsearch API) and requests must target your Kibana URL:
+      > * Self-managed URL pattern: `https://localhost:5601`
+      > * Elastic Cloud URL pattern: `https://your-deployment.kb.us-east-1.aws.elastic.cloud:9243`
     name: upgrade
     x-displayName: Upgrade assistant
   - description: Uptime APIs enable you to view and update uptime monitoring settings.
@@ -6943,6 +6948,7 @@ paths:
       operationId: getCaseDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_includeComments'
       responses:
         '200':
           content:
@@ -63867,7 +63873,8 @@ components:
     Cases_ids:
       description: |
         The cases that you want to removed. All non-ASCII characters must be URL encoded.
-      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+      example:
+        - d4e7abb0-b462-11ec-9a8d-698504725a43
       in: query
       name: ids
       required: true
@@ -63877,6 +63884,14 @@ components:
           minItems: 1
           type: string
         type: array
+    Cases_includeComments:
+      deprecated: true
+      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
+      in: query
+      name: includeComments
+      schema:
+        default: true
+        type: boolean
     Cases_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header

@@ -1510,7 +1510,8 @@ export const runActionTestSuite = ({
     });
   });
 
-  describe('updateAndPickupMappings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176846
+  describe.skip('updateAndPickupMappings', () => {
     it('resolves right when mappings were updated and picked up', async () => {
       // Create an index without any mappings and insert documents into it
       await createIndex({
@@ -1809,7 +1810,8 @@ export const runActionTestSuite = ({
     });
   });
 
-  describe('createIndex', () => {
+  // Fails on 9.1: https://github.com/elastic/kibana/issues/188962
+  describe.skip('createIndex', () => {
     afterEach(async () => {
       // Restore the default setting of 1000 shards per node
       await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: null } } });

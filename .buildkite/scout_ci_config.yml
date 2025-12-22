@@ -4,6 +4,7 @@ plugins:
     - apm
     - console
     - discover_enhanced
+    - index_management
     - maps
     - observability_onboarding
     - painless_lab

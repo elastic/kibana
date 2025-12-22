@@ -1611,9 +1611,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/{packages,plugins}/**/test/scout/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/scout/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -2392,8 +2392,8 @@ module.exports = {
     },
     {
       files: [
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
         'no-restricted-imports': [
@@ -2414,7 +2414,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/test/scout/**/*.ts'],
+      files: ['x-pack/solutions/observability/plugins/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2448,7 +2448,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/test/scout/**/*.ts'],
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2484,12 +2484,14 @@ module.exports = {
     {
       // Custom rules for scout tests
       files: [
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/test/scout/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
     {

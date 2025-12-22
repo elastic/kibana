@@ -1,0 +1,115 @@
+{
+  "lastModified": "2025-12-11T11:26:51.754Z",
+  "sha1": "04a54e83a3aa45d0f021fa0fc01efe68839f3b4a",
+  "tests": [
+    {
+      "id": "78d42dfeebef544-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global_setup.ts",
+        "line": 13,
+        "column": 16
+      }
+    },
+    {
+      "id": "0d134541f1c6605-c4b50efe70ebaee",
+      "title": "Service Inventory renders page with selected date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-8e85ec93bd93df2",
+      "title": "Service Inventory loads the service overview for a service when clicking on it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-253f5f2a737073b",
+      "title": "Service Inventory shows the correct environment when changing the environment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-ea51020387fecfa",
+      "title": "Service Inventory shows the filtered services when using the service name fast filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-a30bea60ac9595c",
+      "title": "Service Map renders page with selected date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-415da39c8ef6797",
+      "title": "Service Map shows a detailed service map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-8ccae9ef4be0fb3",
+      "title": "Service Map shows empty state when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    }
+  ]
+}
