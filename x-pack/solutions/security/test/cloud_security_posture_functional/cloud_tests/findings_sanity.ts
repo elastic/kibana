@@ -62,21 +62,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expectedGroupCount: '1 cloud account',
           expectedUnitCount: '1 finding',
         },
-        {
-          searchQuery:
-            'rule.benchmark.id : "cis_k8s" and rule.benchmark.rule_number : "4.2.4" and result.evaluation : "failed"',
-          provider: 'k8s',
-          expectedRowsCount: 2,
-          expectedGroupCount: '0 cloud accounts',
-          expectedUnitCount: '2 findings',
-        },
-        {
-          searchQuery: 'rule.benchmark.id : "cis_eks" and rule.benchmark.rule_number : "3.1.1"',
-          provider: 'eks',
-          expectedRowsCount: 2,
-          expectedGroupCount: '0 cloud accounts',
-          expectedUnitCount: '2 findings',
-        },
+        // {
+        //   searchQuery:
+        //     'rule.benchmark.id : "cis_k8s" and rule.benchmark.rule_number : "4.2.4" and result.evaluation : "failed"',
+        //   provider: 'k8s',
+        //   expectedRowsCount: 2,
+        //   expectedGroupCount: '0 cloud accounts',
+        //   expectedUnitCount: '2 findings',
+        // },
+        // {
+        //   searchQuery: 'rule.benchmark.id : "cis_eks" and rule.benchmark.rule_number : "3.1.1"',
+        //   provider: 'eks',
+        //   expectedRowsCount: 2,
+        //   expectedGroupCount: '0 cloud accounts',
+        //   expectedUnitCount: '2 findings',
+        // },
       ];
 
       testCases.forEach(

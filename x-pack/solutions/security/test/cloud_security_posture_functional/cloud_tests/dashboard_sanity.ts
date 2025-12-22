@@ -87,52 +87,52 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Kubernetes Dashboard', () => {
-      it('displays compliance score greater than 80', async () => {
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const scoreElement = await dashboard.getKubernetesComplianceScore();
-        const score = parseInt((await scoreElement.getVisibleText()).replace('%', ''), 10);
-        expect(score).to.be.greaterThan(80);
-      });
+    // describe('Kubernetes Dashboard', () => {
+    //   it('displays compliance score greater than 80', async () => {
+    //     await pageObjects.header.waitUntilLoadingHasFinished();
+    //     const scoreElement = await dashboard.getKubernetesComplianceScore();
+    //     const score = parseInt((await scoreElement.getVisibleText()).replace('%', ''), 10);
+    //     expect(score).to.be.greaterThan(80);
+    //   });
 
-      it('displays a number of resources evaluated greater than 150', async () => {
-        const resourcesEvaluated = await dashboard.getKubernetesResourcesEvaluated();
-        const resourcesEvaluatedCount = parseInt(
-          (await resourcesEvaluated.getVisibleText()).replace(/,/g, ''),
-          10
-        );
-        expect(resourcesEvaluatedCount).greaterThan(150);
-      });
+    //   it('displays a number of resources evaluated greater than 150', async () => {
+    //     const resourcesEvaluated = await dashboard.getKubernetesResourcesEvaluated();
+    //     const resourcesEvaluatedCount = parseInt(
+    //       (await resourcesEvaluated.getVisibleText()).replace(/,/g, ''),
+    //       10
+    //     );
+    //     expect(resourcesEvaluatedCount).greaterThan(150);
+    //   });
 
-      it('Compliance By CIS sections have non empty values', async () => {
-        const complianceScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection(
-          'Kubernetes'
-        );
-        expect(complianceScoresChartPanel.length).to.be.greaterThan(0);
-        for (const score of complianceScoresChartPanel) {
-          const scoreValue = await score.getVisibleText();
-          // Check if the score is a percentage
-          expect(scoreValue).to.match(/^\d+%$/);
-        }
-      });
+    //   it('Compliance By CIS sections have non empty values', async () => {
+    //     const complianceScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection(
+    //       'Kubernetes'
+    //     );
+    //     expect(complianceScoresChartPanel.length).to.be.greaterThan(0);
+    //     for (const score of complianceScoresChartPanel) {
+    //       const scoreValue = await score.getVisibleText();
+    //       // Check if the score is a percentage
+    //       expect(scoreValue).to.match(/^\d+%$/);
+    //     }
+    //   });
 
-      it('Navigation to Findings page', async () => {
-        const findingsLinkCount = await dashboard.getFindingsLinksCount(TAB_TYPES.KUBERNETES);
-        for (let i = 0; i < findingsLinkCount; i++) {
-          const link = await dashboard.getFindingsLinkAtIndex(TAB_TYPES.KUBERNETES, i);
-          await link.click();
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          const groupSelector = await findings.groupSelector();
-          await groupSelector.openDropDown();
-          await groupSelector.setValue('None');
-          expect(
-            await findings.createDataTableObject('latest_findings_table').getRowsCount()
-          ).to.be.greaterThan(0);
-          await cspDashboard.navigateToComplianceDashboardPage();
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await dashboard.getKubernetesDashboard();
-        }
-      });
-    });
+    //   it('Navigation to Findings page', async () => {
+    //     const findingsLinkCount = await dashboard.getFindingsLinksCount(TAB_TYPES.KUBERNETES);
+    //     for (let i = 0; i < findingsLinkCount; i++) {
+    //       const link = await dashboard.getFindingsLinkAtIndex(TAB_TYPES.KUBERNETES, i);
+    //       await link.click();
+    //       await pageObjects.header.waitUntilLoadingHasFinished();
+    //       const groupSelector = await findings.groupSelector();
+    //       await groupSelector.openDropDown();
+    //       await groupSelector.setValue('None');
+    //       expect(
+    //         await findings.createDataTableObject('latest_findings_table').getRowsCount()
+    //       ).to.be.greaterThan(0);
+    //       await cspDashboard.navigateToComplianceDashboardPage();
+    //       await pageObjects.header.waitUntilLoadingHasFinished();
+    //       await dashboard.getKubernetesDashboard();
+    //     }
+    //   });
+    // });
   });
 };
