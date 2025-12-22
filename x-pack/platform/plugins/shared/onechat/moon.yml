@@ -52,7 +52,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/inference-tracing'
   - '@kbn/std'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/esql-utils'
   - '@kbn/esql'
   - '@kbn/field-types'

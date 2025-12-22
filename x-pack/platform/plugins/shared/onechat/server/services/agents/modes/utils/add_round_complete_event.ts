@@ -97,7 +97,7 @@ export const addRoundCompleteEvent = ({
             type: ChatEventType.roundComplete,
             data: {
               round,
-              resumed: pendingRound !== null,
+              resumed: pendingRound !== undefined,
             },
           };
 

@@ -37,6 +37,7 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
+  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 

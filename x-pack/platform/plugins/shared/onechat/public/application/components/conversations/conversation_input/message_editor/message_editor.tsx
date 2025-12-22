@@ -55,7 +55,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   const placeholderStyles = css`
     &[data-placeholder]:empty:before {
       content: attr(data-placeholder);
-      color: ${euiTheme.colors.subduedText};
+      color: ${euiTheme.colors.textDisabled};
       pointer-events: none;
       display: block;
     }
