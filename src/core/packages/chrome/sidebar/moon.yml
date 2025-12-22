@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/react-context-registry'
   - '@kbn/use-observable'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
