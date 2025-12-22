@@ -28,6 +28,7 @@ import {
   SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
   SPAN_SUBTYPE,
+  SPAN_SYNC,
   SPAN_TYPE,
   STATUS_CODE,
   TIMESTAMP_US,
@@ -65,6 +66,7 @@ const optionalFields = asMutableArray([
   STATUS_CODE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_SYNC,
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
@@ -218,6 +220,8 @@ export async function getUnifiedTraceItems({
       parentId: event[PARENT_ID],
       serviceName: event[SERVICE_NAME],
       type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
+      sync: event[SPAN_SYNC],
+      agentName: event[AGENT_NAME],
       spanLinksCount: {
         incoming: incomingSpanLinksCountById[id] ?? 0,
         outgoing:
