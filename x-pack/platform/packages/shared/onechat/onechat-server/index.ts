@@ -32,6 +32,8 @@ export type {
   ToolProgressEmitterFn,
   ToolResultStore,
   WritableToolResultStore,
+  ToolPromptManager,
+  ToolStateManager,
 } from './runner';
 export type {
   ToolHandlerFn,

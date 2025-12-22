@@ -17,17 +17,15 @@ const EMPTY_HEALTH_STATES: readonly ToolHealthState[] = [];
 export const useToolsHealth = () => {
   const { toolsService } = useOnechatServices();
 
-  const { data, isLoading, error, isError, refetch } = useQuery({
+  const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.health.list(),
     queryFn: () => toolsService.listToolsHealth(),
+    retry: false,
   });
 
   return {
     healthStates: data?.results ?? EMPTY_HEALTH_STATES,
-    isLoading,
-    error,
-    isError,
-    refetch,
+    ...queryFields,
   };
 };
 
@@ -39,35 +37,31 @@ export interface UseToolHealthOptions {
 export const useToolHealth = ({ toolId }: UseToolHealthOptions) => {
   const { toolsService } = useOnechatServices();
 
-  const { data, isLoading, error, isError, refetch } = useQuery({
+  const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.health.byId(toolId),
     queryFn: () => toolsService.getToolHealth({ toolId }),
     enabled: !!toolId,
+    retry: false,
   });
 
   return {
     toolHealth: data?.health,
-    isLoading,
-    error,
-    isError,
-    refetch,
+    ...queryFields,
   };
 };
 
 export const useMcpToolsHealth = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { toolsService } = useOnechatServices();
 
-  const { data, isLoading, error, isError, refetch } = useQuery({
+  const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.health.mcp(),
     queryFn: () => toolsService.listMcpToolsHealth(),
     enabled,
+    retry: false,
   });
 
   return {
     mcpHealthStates: data?.results ?? EMPTY_MCP_HEALTH_STATES,
-    isLoading,
-    error,
-    isError,
-    refetch,
+    ...queryFields,
   };
 };

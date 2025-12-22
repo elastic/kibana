@@ -30,7 +30,7 @@ import {
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
-import { registerStepDefinitions } from './step_types';
+import { registerWorkflowSteps } from './step_types';
 import { createPublicAgentsContract } from './services/agents';
 import type {
   ConfigSchema,
@@ -89,9 +89,7 @@ export class OnechatPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    if (deps.workflowsExtensions) {
-      registerStepDefinitions(deps.workflowsExtensions);
-    }
+    registerWorkflowSteps(deps.workflowsExtensions);
 
     return {};
   }
@@ -129,6 +127,33 @@ export class OnechatPlugin
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
 
+    const openFlyoutInternal = (options?: OpenConversationFlyoutOptions) => {
+      const config = options ?? this.conversationFlyoutActiveConfig;
+
+      // If a flyout is already open, update its props instead of creating a new one
+      if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
+        this.updateFlyoutPropsCallback(config);
+        return { flyoutRef: this.activeFlyoutRef };
+      }
+
+      // Create new flyout and set up prop updates
+      const { flyoutRef } = openConversationFlyout(config, {
+        coreStart: core,
+        services: internalServices,
+        onPropsUpdate: (callback) => {
+          this.updateFlyoutPropsCallback = callback;
+        },
+        onClose: () => {
+          this.activeFlyoutRef = null;
+          this.updateFlyoutPropsCallback = null;
+        },
+      });
+
+      this.activeFlyoutRef = flyoutRef;
+
+      return { flyoutRef };
+    };
+
     const onechatService: OnechatPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
@@ -146,30 +171,20 @@ export class OnechatPlugin
         this.conversationFlyoutActiveConfig = {};
       },
       openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
-        const config = options ?? this.conversationFlyoutActiveConfig;
-
-        // If a flyout is already open, update its props instead of creating a new one
-        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
-          this.updateFlyoutPropsCallback(config);
-          return { flyoutRef: this.activeFlyoutRef };
+        return openFlyoutInternal(options);
+      },
+      toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
+        if (this.activeFlyoutRef) {
+          const flyoutRef = this.activeFlyoutRef;
+          // Be defensive: clear local references immediately in case the underlying overlay doesn't
+          // synchronously invoke our onClose callback.
+          this.activeFlyoutRef = null;
+          this.updateFlyoutPropsCallback = null;
+          flyoutRef.close();
+          return;
         }
 
-        // Create new flyout and set up prop updates
-        const { flyoutRef } = openConversationFlyout(config, {
-          coreStart: core,
-          services: internalServices,
-          onPropsUpdate: (callback) => {
-            this.updateFlyoutPropsCallback = callback;
-          },
-          onClose: () => {
-            this.activeFlyoutRef = null;
-            this.updateFlyoutPropsCallback = null;
-          },
-        });
-
-        this.activeFlyoutRef = flyoutRef;
-
-        return { flyoutRef };
+        openFlyoutInternal(options);
       },
     };
 

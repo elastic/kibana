@@ -25,7 +25,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 565105
+  core: 559233
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 41839
-  esql: 20000
+  esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -106,12 +106,11 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 3905
+  maintenanceWindows: 8803
   management: 12951
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44988
-  metricsExperience: 6655
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
@@ -119,7 +118,7 @@ pageLoadAssetSize:
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
-  observabilityAgentBuilder: 5727
+  observabilityAgentBuilder: 7079
   observabilityAIAssistant: 54556
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 7438
@@ -130,7 +129,7 @@ pageLoadAssetSize:
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9000
+  presentationUtil: 9948
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
@@ -207,6 +206,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 61264
+  workflowsExtensions: 73502
   workflowsManagement: 8497
   workplaceAIApp: 6135
