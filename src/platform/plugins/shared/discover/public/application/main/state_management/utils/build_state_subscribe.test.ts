@@ -89,6 +89,12 @@ describe('buildStateSubscribe', () => {
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });
 
+  it('should call refetch$ if interval has changed', async () => {
+    await getSubscribeFn()({ interval: 'm' });
+
+    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+  });
+
   it('should call refetch$ if sort has changed', async () => {
     await getSubscribeFn()({ sort: [['field', 'test']] });
 

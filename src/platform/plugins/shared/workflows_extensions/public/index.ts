@@ -20,3 +20,4 @@ export type {
 } from './types';
 
 export type { PublicStepDefinition, StepDocumentation } from './step_registry/types';
+export { ActionsMenuGroup } from './step_registry/types';

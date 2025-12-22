@@ -24,7 +24,6 @@ import {
   getAncestors,
   getParentId,
 } from '@kbn/streams-schema';
-import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
@@ -72,7 +71,6 @@ export class StreamsClient {
     private readonly dependencies: {
       lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
-      assetClient: AssetClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
@@ -220,8 +218,8 @@ export class StreamsClient {
         }
       );
 
-      const { assetClient, attachmentClient, storageClient } = this.dependencies;
-      await Promise.all([assetClient.clean(), attachmentClient.clean(), storageClient.clean()]);
+      const { attachmentClient, queryClient, storageClient } = this.dependencies;
+      await Promise.all([queryClient.clean(), attachmentClient.clean(), storageClient.clean()]);
     }
 
     if (elasticsearchStreamsEnabled) {

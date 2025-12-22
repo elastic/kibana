@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -16,7 +16,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { AssetImage } from '../../asset_image';
@@ -27,13 +26,6 @@ export const RootStreamEmptyPrompt = () => {
   const {
     path: { key: streamName },
   } = useStreamsAppParams('/{key}/management/{tab}');
-
-  const { onPageReady } = usePerformanceContext();
-
-  // Telemetry for TTFMP (time to first meaningful paint)
-  useEffect(() => {
-    onPageReady();
-  }, [onPageReady]);
 
   return (
     <EuiEmptyPrompt

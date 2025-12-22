@@ -9,6 +9,7 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { ToolType } from '@kbn/onechat-common';
 import React, { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { appPaths } from '../../../../../utils/app_paths';
 import { labels } from '../../../../../utils/i18n';
 import { McpToolHealthStatus } from '../../types/mcp';
 import { useToolHealth } from '../../../../../hooks/tools/use_tools_health';
@@ -26,7 +27,7 @@ export const McpReadOnlyFields = ({
   setMcpHealthStatus,
 }: McpConfigurationFieldsProps) => {
   const { createTool, deleteTool } = useToolsActions();
-  const { navigateToManageConnectors } = useNavigation();
+  const { navigateToManageConnectors, navigateToOnechatUrl } = useNavigation();
 
   const { control, setError, clearErrors } = useFormContext<McpToolFormData>();
   const [connectorId, mcpToolName, toolId] = useWatch({
@@ -34,12 +35,12 @@ export const McpReadOnlyFields = ({
     name: ['connectorId', 'mcpToolName', 'toolId'],
   });
 
-  const { toolHealth } = useToolHealth({ toolId });
+  const { toolHealth, isLoading: isLoadingToolHealth } = useToolHealth({ toolId });
 
   const {
     connector,
     isLoading: isLoadingConnector,
-    isError: isLoadingConnectorError,
+    failureReason: loadingConnectorError,
   } = useGetConnector({
     connectorId,
   });
@@ -53,16 +54,16 @@ export const McpReadOnlyFields = ({
   const {
     mcpTools,
     isLoading: isLoadingMcpTools,
-    isError: isLoadingMcpToolsError,
+    failureReason: loadingMcpToolsError,
   } = useListMcpTools({ connectorId });
 
   useEffect(() => {
-    if (isLoadingConnector || isLoadingMcpTools) {
+    if (isLoadingConnector || isLoadingMcpTools || isLoadingToolHealth) {
       return;
     }
 
     // MCP connector deleted
-    if (isLoadingConnectorError) {
+    if (loadingConnectorError) {
       setMcpHealthStatus(McpToolHealthStatus.ConnectorNotFound);
       setError('connectorId', {
         message: labels.tools.mcpHealthStatus.connectorNotFound.title,
@@ -71,7 +72,7 @@ export const McpReadOnlyFields = ({
     }
 
     // MCP tools not found
-    if (isLoadingMcpToolsError) {
+    if (loadingMcpToolsError) {
       setMcpHealthStatus(McpToolHealthStatus.ListToolsFailed);
       setError('connectorId', {
         message: labels.tools.mcpHealthStatus.listToolsFailed.title,
@@ -103,10 +104,11 @@ export const McpReadOnlyFields = ({
     mcpToolName,
     mcpTools,
     toolHealth,
-    isLoadingConnectorError,
-    isLoadingMcpToolsError,
+    loadingConnectorError,
+    loadingMcpToolsError,
     isLoadingConnector,
     isLoadingMcpTools,
+    isLoadingToolHealth,
     setMcpHealthStatus,
     setError,
     clearErrors,
@@ -117,7 +119,9 @@ export const McpReadOnlyFields = ({
       {mcpHealthStatus && (
         <McpHealthBanner
           status={mcpHealthStatus}
-          onDeleteTool={() => deleteTool(toolId)}
+          onDeleteTool={() =>
+            deleteTool(toolId, { onConfirm: () => navigateToOnechatUrl(appPaths.tools.list) })
+          }
           onCreateNewTool={() => createTool(ToolType.mcp)}
           onViewConnectors={navigateToManageConnectors}
           onViewMcpServer={openEditMcpServerFlyout}
