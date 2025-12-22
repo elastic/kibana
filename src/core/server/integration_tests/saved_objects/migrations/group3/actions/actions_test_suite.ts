@@ -1510,7 +1510,8 @@ export const runActionTestSuite = ({
     });
   });
 
-  describe('updateAndPickupMappings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176846
+  describe.skip('updateAndPickupMappings', () => {
     it('resolves right when mappings were updated and picked up', async () => {
       // Create an index without any mappings and insert documents into it
       await createIndex({
