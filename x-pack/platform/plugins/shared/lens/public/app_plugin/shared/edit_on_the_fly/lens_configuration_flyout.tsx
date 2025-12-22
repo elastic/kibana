@@ -95,7 +95,7 @@ export function LensEditConfigurationFlyout({
             // Extract references from the current state as they contain resolved data view IDs
             // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
             datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
-              .references
+              .savedObjectReferences
           )
         : false;
 
