@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { FormBasedLayer, TypedLensSerializedState } from '@kbn/lens-common';
+import { ESQLLangEditor } from '@kbn/esql/public';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -38,6 +39,8 @@ import { useApplicationUserMessages } from '../../get_application_user_messages'
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
+import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
+
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 
@@ -571,8 +574,10 @@ export function LensEditConfigurationFlyout({
                 if (status && isLayerAccordionOpen) {
                   setIsLayerAccordionOpen(!status);
                 }
-              }} />
-                     <EuiFlexItem grow={false}>
+              }}
+            />
+          )}
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup
               css={css`
                 > * {
@@ -582,7 +587,7 @@ export function LensEditConfigurationFlyout({
               gutterSize="none"
               direction="column"
               ref={editorContainer}
- />
+            />
           </EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}

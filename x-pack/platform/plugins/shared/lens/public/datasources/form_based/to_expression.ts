@@ -79,7 +79,7 @@ function getExpressionForLayer(
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string,
-  forceDSL?: boolean
+  forceDSL?: boolean,
   returnESQL?: boolean
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -568,7 +568,7 @@ export function toExpression(
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string,
-  forceDSL?: boolean
+  forceDSL?: boolean,
   returnESQL?: boolean
 ) {
   if (state.layers[layerId]) {
@@ -580,7 +580,7 @@ export function toExpression(
       dateRange,
       nowInstant,
       searchSessionId,
-      forceDSL
+      forceDSL,
       returnESQL
     );
   }

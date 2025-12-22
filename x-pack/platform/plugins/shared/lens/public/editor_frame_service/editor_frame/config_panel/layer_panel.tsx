@@ -24,14 +24,12 @@ import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { isEqual } from 'lodash';
 import { isOperation } from '../../../types_guards';
-import type { LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
-import { isOperation } from '../../../types';
 import { LayerHeader } from './layer_header';
 import type { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
@@ -302,7 +300,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
     layerDatasourceState !== undefined &&
-    layerDatasourceState.layers &&
+    layerDatasourceState?.layers &&
     layerDatasourceState.layers[layerId] &&
     layerDatasourceState?.layers[layerId].query !== undefined;
 
@@ -481,7 +479,6 @@ export function LayerPanel(props: LayerPanelProps) {
       visualizationState,
       updateVisualization,
       props.registerLibraryAnnotationGroup,
-      isSaveable,
       core,
       layerIndex,
       isOnlyLayer,
