@@ -32,6 +32,7 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     await page.testSubj.click('customEquation');
     await customEquationField.click();
     await customEquationField.fill('A +');
+    await expect(customEquationField).toHaveValue('A +');
 
     await page.testSubj.click('o11yClosablePopoverTitleButton');
 
@@ -43,6 +44,8 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     await page.testSubj.click('customEquation');
     await customEquationField.click();
     await customEquationField.fill('A');
+    await expect(customEquationField).toHaveValue('A');
+
     await page.testSubj.click('o11yClosablePopoverTitleButton');
 
     await expect(lensFailure).toHaveCount(0);
