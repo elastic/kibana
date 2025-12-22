@@ -5,10 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import type { AgentName } from '@kbn/apm-types/es_schemas_ui';
 import { getSyncLabel, SyncBadge } from '.';
-import userEvent from '@testing-library/user-event';
 
 describe('Sync badge', () => {
   describe('getSyncLabel', () => {
@@ -54,11 +53,10 @@ describe('SyncBadge Component', () => {
   describe('Tooltip functionality', () => {
     it('renders badge with tooltip on hover', async () => {
       render(<SyncBadge sync={true} agentName="nodejs" />);
-      const user = userEvent.setup({ delay: null });
       const badge = screen.getByText('blocking');
       expect(badge).toBeInTheDocument();
 
-      await user.hover(badge);
+      fireEvent.mouseOver(badge);
 
       await waitFor(() =>
         expect(
