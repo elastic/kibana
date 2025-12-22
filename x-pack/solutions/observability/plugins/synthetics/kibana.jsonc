@@ -34,7 +34,7 @@
       "triggersActionsUi",
       "usageCollection",
       "uiActions",
-      "unifiedSearch",
+      "kql",
       "presentationUtil",
       "charts",
       "fieldsMetadata"
