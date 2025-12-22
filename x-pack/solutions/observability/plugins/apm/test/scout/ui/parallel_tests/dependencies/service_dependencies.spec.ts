@@ -64,7 +64,7 @@ test.describe('Service Dependencies Tab', { tag: ['@ess', '@svlOblt'] }, () => {
       await serviceDetailsPage.dependenciesTab.clickDependencyInDependenciesTable(DEPENDENCY_NAME);
     });
 
-    await test.step('lands on the dependency service overview page', async () => {
+    await test.step('land on the dependency service overview page', async () => {
       const url = new URL(page.url());
       expect(url.pathname).toContain('/dependencies/overview');
       expect(url.searchParams.get('dependencyName')).toBe(DEPENDENCY_NAME);

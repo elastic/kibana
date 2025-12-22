@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import type { DependencyDetailsPageTabName } from './dependency_details_tab';
 import { DependencyDetailsTab } from './dependency_details_tab';
 import { waitForChartToLoad, waitForTableToLoad } from '../utils';

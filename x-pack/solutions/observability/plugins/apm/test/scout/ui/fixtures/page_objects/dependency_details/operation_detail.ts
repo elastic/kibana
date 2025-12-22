@@ -6,7 +6,6 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { subj } from '@kbn/test-subj-selector';
 import { testData } from '../..';
 import { waitForChartToLoad } from '../utils';
 
@@ -35,7 +34,7 @@ export class OperationDetailSubpage {
     this.waterfallInvestigateButton = this.page.getByTestId('apmActionMenuButtonInvestigateButton');
     this.waterfallInvestigatePopup = this.page.getByTestId('apmActionMenuInvestigateButtonPopup');
     this.waterfallPaginationLastButton = this.page.getByTestId('pagination-button-last');
-    this.waterfallSpanLinksBadge = this.page.locator(subj('^spanLinksBadge_'));
+    this.waterfallSpanLinksBadge = this.page.testSubj.locator('^spanLinksBadge_');
   }
 
   private async waitForWaterfallToLoad() {
