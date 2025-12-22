@@ -19,9 +19,8 @@ import type {
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
-
+import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
-
 import {
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
@@ -39,15 +38,14 @@ import type {
   WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-
 import { generateExecutionTaskScope } from './utils';
+import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
@@ -64,12 +62,14 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private readonly concurrencyManager: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.concurrencyManager = new ConcurrencyManager(this.logger);
   }
 
   public setup(
@@ -318,10 +318,8 @@ export class WorkflowsExecutionEnginePlugin
     }> => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-      // Get ES client and create repository for this execution
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const createdBy = (context.createdBy as string | undefined) || 'system';
       const spaceId = (context.spaceId as string | undefined) || 'default';
@@ -338,6 +336,22 @@ export class WorkflowsExecutionEnginePlugin
         createdBy,
         triggeredBy,
       };
+
+      if (workflow.definition?.settings?.concurrency?.key) {
+        const workflowExecutionContext = buildWorkflowContext(
+          workflowExecution as EsWorkflowExecution,
+          coreStart,
+          dependencies
+        );
+        const concurrencyGroupKey = this.concurrencyManager.evaluateConcurrencyKey(
+          workflow.definition.settings.concurrency,
+          workflowExecutionContext
+        );
+        if (concurrencyGroupKey) {
+          workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
+        }
+      }
+
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       return { workflowExecution, repository: workflowExecutionRepository };
