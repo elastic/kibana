@@ -17,7 +17,7 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, Feature, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import {
@@ -38,16 +38,16 @@ export function StreamExistingFeaturesTable({
   aiFeatures,
 }: {
   isLoading?: boolean;
-  features: Feature[];
+  features: System[];
   definition: Streams.all.Definition;
   refreshFeatures: () => void;
   aiFeatures: AIFeatures | null;
 }) {
   const router = useStreamsAppRouter();
 
-  const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
-  const { removeFeaturesFromStream } = useStreamFeaturesApi(definition);
+  const [selectedFeature, setSelectedFeature] = useState<System>();
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
+  const { removeSystemsFromStream } = useStreamFeaturesApi(definition);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
@@ -102,7 +102,7 @@ export function StreamExistingFeaturesTable({
           color: 'danger',
           onClick: (feature: Feature) => {
             setIsDeleting(true);
-            removeFeaturesFromStream([feature])
+            removeSystemsFromStream([feature])
               .then(() => {
                 refreshFeatures();
               })
@@ -196,7 +196,7 @@ export function StreamExistingFeaturesTable({
             isDisabled={selectedFeatures.length === 0 || isLoading}
             onClick={() => {
               setIsDeleting(true);
-              removeFeaturesFromStream(selectedFeatures)
+              removeSystemsFromStream(selectedFeatures)
                 .then(() => {
                   setSelectedFeatures([]);
                 })

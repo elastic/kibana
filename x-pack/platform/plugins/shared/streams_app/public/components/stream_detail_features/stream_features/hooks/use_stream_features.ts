@@ -15,7 +15,7 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
 
   const { value, loading, error, refresh } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/systems', {
         signal,
         params: {
           path: {
@@ -27,16 +27,16 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
     [definition.name, streamsRepositoryClient]
   );
 
-  const features = useMemo(() => value?.features ?? [], [value?.features]);
+  const systems = useMemo(() => value?.systems ?? [], [value?.systems]);
 
   const featuresByName = useMemo(
-    () => Object.fromEntries(features.map((f) => [f.name, f])),
-    [features]
+    () => Object.fromEntries(systems.map((s) => [s.name, s])),
+    [systems]
   );
 
   return {
     refreshFeatures: refresh,
-    features,
+    features: systems,
     featuresByName,
     featuresLoading: loading,
     error,

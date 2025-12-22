@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
 import type { AIFeatures } from '../../hooks/use_ai_features';
@@ -27,8 +27,8 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
     core: { notifications },
   } = useKibana();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { identifyFeatures, abort } = useStreamFeaturesApi(definition);
-  const [features, setFeatures] = useState<Feature[]>([]);
+  const { identifySystems, abort } = useStreamFeaturesApi(definition);
+  const [features, setFeatures] = useState<System[]>([]);
   const {
     features: existingFeatures,
     refreshFeatures,
@@ -70,9 +70,9 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
                       onClick: () => {
                         setIsLoading(true);
                         setIsFlyoutVisible(!isFlyoutVisible);
-                        identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!)
+                        identifySystems(aiFeatures?.genAiConnectors.selectedConnector!)
                           .then((data) => {
-                            setFeatures(data.features);
+                            setFeatures(data.systems);
                           })
                           .catch((error) => {
                             if (error.name === 'AbortError') {

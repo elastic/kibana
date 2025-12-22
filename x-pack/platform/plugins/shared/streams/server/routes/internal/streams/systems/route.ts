@@ -12,7 +12,6 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map, catchError } from 'rxjs';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
@@ -23,9 +22,9 @@ import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import type { IdentifiedSystemsEvent, StreamDescriptionEvent } from './types';
+import type { IdentifiedSystemsEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { identifySystemsWithDescription } from '@kbn/streams-plugin/server/lib/streams/system/identify_systems';
+import { identifySystemsWithDescription } from '../../../../lib/streams/system/identify_systems';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -362,111 +361,11 @@ export const identifySystemsRoute = createServerRoute({
   },
 });
 
-export const describeStreamRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/_describe_stream',
-  options: {
-    access: 'internal',
-    summary: 'Generate a stream description',
-    description: 'Generate a stream description based on data in the stream',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z.string(),
-      from: dateFromString,
-      to: dateFromString,
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<Observable<StreamDescriptionEvent>> => {
-    const {
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-      soClient,
-    } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { name },
-      query: { connectorId, from: start, to: end },
-    } = params;
-
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(
-        `Cannot generate stream description for ${name}, insufficient privileges`
-      );
-    }
-
-    // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const stream = await streamsClient.getStream(name);
-
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
-      logger,
-    });
-
-    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
-
-    return from(
-      generateStreamDescription({
-        stream,
-        esClient: scopedClusterClient.asCurrentUser,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
-        start: start.valueOf(),
-        end: end.valueOf(),
-        signal: getRequestAbortSignal(request),
-        logger: logger.get('stream_description'),
-        systemPromptOverride: descriptionPromptOverride,
-      })
-    ).pipe(
-      map((result) => {
-        return {
-          type: 'stream_description' as const,
-          description: result.description,
-          tokensUsed: sumTokens(
-            {
-              prompt: 0,
-              completion: 0,
-              total: 0,
-              cached: 0,
-            },
-            result.tokensUsed
-          ),
-        };
-      }),
-      catchError((error: Error) => {
-        throw createConnectorSSEError(error, connector);
-      })
-    );
-  },
-});
-
-export const featureRoutes = {
+export const systemRoutes = {
   ...getSystemRoute,
   ...deleteSystemRoute,
   ...upsertSystemRoute,
   ...listSystemsRoute,
   ...bulkSystemsRoute,
   ...identifySystemsRoute,
-  ...describeStreamRoute,
 };

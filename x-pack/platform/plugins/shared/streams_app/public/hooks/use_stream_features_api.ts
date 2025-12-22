@@ -7,20 +7,18 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import { firstValueFrom } from 'rxjs';
-import type { Streams, Feature, FeatureType } from '@kbn/streams-schema';
-import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/internal/streams/features/types';
+import type { Streams, System, FeatureType } from '@kbn/streams-schema';
+import type { IdentifiedSystemsEvent } from '@kbn/streams-plugin/server/routes/internal/streams/systems/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface StreamFeaturesApi {
-  upsertFeature: (feature: Feature) => Promise<void>;
-  identifyFeatures: (connectorId: string) => Promise<IdentifiedFeaturesEvent>;
-  addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
-  removeFeaturesFromStream: (
-    features: Pick<Feature, 'type' | 'name'>[]
-  ) => Promise<StorageClientBulkResponse>;
+  upsertSystem: (system: System) => Promise<void>;
+  identifySystems: (connectorId: string) => Promise<IdentifiedSystemsEvent>;
+  addSystemsToStream: (systems: System[]) => Promise<StorageClientBulkResponse>;
+  removeSystemsFromStream: (systems: Pick<System, 'name'>[]) => Promise<StorageClientBulkResponse>;
   abort: () => void;
 }
 
@@ -37,10 +35,10 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    identifyFeatures: async (connectorId: string) => {
+    identifySystems: async (connectorId: string) => {
       const { from, to } = getLast24HoursTimeRange();
       const events$ = streamsRepositoryClient.stream(
-        'POST /internal/streams/{name}/features/_identify',
+        'POST /internal/streams/{name}/systems/_identify',
         {
           signal,
           params: {
@@ -54,13 +52,13 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         }
       );
 
-      const identifiedFeatures = await firstValueFrom(events$);
+      const identifiedSystems = await firstValueFrom(events$);
 
       telemetryClient.trackFeaturesIdentified({
-        count: identifiedFeatures.features.length,
-        count_by_type: identifiedFeatures.features.reduce<Record<FeatureType, number>>(
-          (acc, feature) => {
-            acc[feature.type] = (acc[feature.type] || 0) + 1;
+        count: identifiedSystems.systems.length,
+        count_by_type: identifiedSystems.systems.reduce<Record<FeatureType, number>>(
+          (acc, system) => {
+            acc[system.type] = (acc[system.type] || 0) + 1;
             return acc;
           },
           {
@@ -69,72 +67,39 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         ),
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
-        input_tokens_used: identifiedFeatures.tokensUsed.prompt,
-        output_tokens_used: identifiedFeatures.tokensUsed.completion,
+        input_tokens_used: identifiedSystems.tokensUsed.prompt,
+        output_tokens_used: identifiedSystems.tokensUsed.completion,
       });
 
-      return identifiedFeatures;
+      return identifiedSystems;
     },
-    addFeaturesToStream: async (features: Feature[]) => {
-      telemetryClient.trackFeaturesSaved({
-        count: features.length,
-        count_by_type: features.reduce<Record<FeatureType, number>>(
-          (acc, feature) => {
-            acc[feature.type] = (acc[feature.type] || 0) + 1;
-            return acc;
-          },
-          {
-            system: 0,
-          }
-        ),
-        stream_name: definition.name,
-        stream_type: getStreamTypeFromDefinition(definition),
-      });
-
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+    addSystemsToStream: async (systems: System[]) => {
+      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
         signal,
         params: {
           path: {
             name: definition.name,
           },
           body: {
-            operations: features.map((feature) => ({
-              index: {
-                feature,
-              },
+            operations: systems.map((system) => ({
+              index: { system },
             })),
           },
         },
       });
     },
-    removeFeaturesFromStream: async (features: Pick<Feature, 'type' | 'name'>[]) => {
-      telemetryClient.trackFeaturesDeleted({
-        count: features.length,
-        count_by_type: features.reduce<Record<FeatureType, number>>(
-          (acc, feature) => {
-            acc[feature.type] = (acc[feature.type] || 0) + 1;
-            return acc;
-          },
-          {
-            system: 0,
-          }
-        ),
-        stream_name: definition.name,
-        stream_type: getStreamTypeFromDefinition(definition),
-      });
-
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+    removeSystemsFromStream: async (systems: Pick<System, 'name'>[]) => {
+      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
         signal,
         params: {
           path: {
             name: definition.name,
           },
           body: {
-            operations: features.map((feature) => ({
+            operations: systems.map((system) => ({
               delete: {
-                feature: {
-                  type: feature.type,
-                  name: feature.name,
+                system: {
+                  name: system.name,
                 },
               },
             })),
@@ -142,21 +107,17 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         },
       });
     },
-    upsertFeature: async (feature) => {
-      await streamsRepositoryClient.fetch(
-        'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
-        {
-          signal,
-          params: {
-            path: {
-              name: definition.name,
-              featureType: feature.type,
-              featureName: feature.name,
-            },
-            body: feature,
+    upsertSystem: async (system: System) => {
+      await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
+        signal,
+        params: {
+          path: {
+            name: definition.name,
+            systemName: system.name,
           },
-        }
-      );
+          body: system,
+        },
+      });
     },
     abort: () => {
       abort();

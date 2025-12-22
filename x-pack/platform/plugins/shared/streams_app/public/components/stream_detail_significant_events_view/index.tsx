@@ -7,7 +7,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams, StreamQueryKql, Feature } from '@kbn/streams-schema';
+import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { compact, isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -53,10 +53,10 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   }, [timeState.start, timeState.end]);
 
   const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
-  const { identifyFeatures, abort } = useStreamFeaturesApi(definition.stream);
+  const { identifySystems, abort } = useStreamFeaturesApi(definition.stream);
   const [isFeatureDetectionFlyoutOpen, setIsFeatureDetectionFlyoutOpen] = useState(false);
   const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
-  const [detectedFeatures, setDetectedFeatures] = useState<Feature[]>([]);
+  const [detectedFeatures, setDetectedFeatures] = useState<System[]>([]);
 
   const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
@@ -70,7 +70,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
 
@@ -78,9 +78,9 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     setIsFeatureDetectionLoading(true);
     setIsFeatureDetectionFlyoutOpen(true);
 
-    identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!)
+    identifySystems(aiFeatures?.genAiConnectors.selectedConnector!)
       .then((data) => {
-        setDetectedFeatures(data.features);
+        setDetectedFeatures(data.systems);
       })
       .catch((error) => {
         if (error.name === 'AbortError') {
@@ -96,7 +96,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
         setIsFeatureDetectionLoading(false);
       });
   }, [
-    identifyFeatures,
+    identifySystems,
     aiFeatures?.genAiConnectors.selectedConnector,
     setIsFeatureDetectionLoading,
     setIsFeatureDetectionFlyoutOpen,
