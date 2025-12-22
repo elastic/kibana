@@ -16,36 +16,29 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
 
 const getLogChangePointsSchema = z.object({
   ...timeRangeSchemaRequired,
-  logs: z
-    .array(
-      z.object({
-        name: z
-          .string()
-          .describe(
-            'A descriptive label for the log change point analysis, e.g. "Error Logs" or "API Requests". Used to identify results in the output.'
-          ),
-        index: z.string().describe('The index or index pattern to find the logs').optional(),
-        kqlFilter: z
-          .string()
-          .describe('A KQL filter to filter the log documents, e.g.: my_field:foo')
-          .optional(),
-        field: z
-          .string()
-          .describe(
-            'The text field that contains the message to be analyzed, usually `message`. ONLY use field names from the conversation.'
-          )
-          .optional(),
-      })
-    )
+  name: z
+    .string()
     .describe(
-      'Analyze changes in log patterns. If no index is given, the default logs index pattern will be used'
+      'A descriptive label for the log change point analysis, e.g. "Error Logs" or "API Requests". Used to identify results in the output.'
     ),
+  index: z.string().describe('The index or index pattern to find the logs').optional(),
+  kqlFilter: z
+    .string()
+    .describe('A KQL filter to filter the log documents, e.g.: my_field:foo')
+    .optional(),
+  messageField: z
+    .string()
+    .describe(
+      'The text field that contains the message to be analyzed, usually `message`. ONLY use field names from the conversation.'
+    )
+    .optional(),
 });
 
 export function createGetLogChangePointsTool({
@@ -69,15 +62,23 @@ How it works:
 It uses the "categorize_text" aggregation to group similar unstructured messages into categories and then detects change points (spikes/dips) within each cateogory.`,
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
-    handler: async ({ start, end, logs = [] }, { esClient }) => {
+    handler: async (
+      { start, end, name, index, kqlFilter, messageField = 'message' },
+      { esClient }
+    ) => {
       try {
-        const allLogChangePoints = await getToolHandler({
+        const logIndexPatterns = await getLogsIndices({ core, logger });
+
+        const topLogChangePoints = await getToolHandler({
           core,
           logger,
           esClient,
           start,
           end,
-          logs,
+          name,
+          index: index || logIndexPatterns.join(','),
+          kqlFilter,
+          messageField,
         });
 
         return {
@@ -85,9 +86,7 @@ It uses the "categorize_text" aggregation to group similar unstructured messages
             {
               type: ToolResultType.other,
               data: {
-                changePoints: {
-                  logs: allLogChangePoints,
-                },
+                changePoints: topLogChangePoints,
               },
             },
           ],

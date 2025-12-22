@@ -21,9 +21,7 @@ import {
 interface ToolResult {
   type: ToolResultType.other;
   data: {
-    changePoints: {
-      metrics: ChangePoint[];
-    };
+    changePoints: ChangePoint[];
   };
 }
 
@@ -55,15 +53,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start,
             end: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end,
-            metrics: [
-              {
-                name: 'test-metrics',
-                index: METRIC_CHANGE_POINTS_INDEX,
-              },
-            ],
+            name: 'test-metrics',
+            index: METRIC_CHANGE_POINTS_INDEX,
           },
         });
-        metricChangePoints = toolResults[0]?.data?.changePoints?.metrics ?? [];
+        metricChangePoints = toolResults[0]?.data?.changePoints ?? [];
       });
 
       it('should detect spike in metrics', () => {

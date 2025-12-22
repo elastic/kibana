@@ -7,13 +7,6 @@
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { orderBy } from 'lodash';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
-import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { type Bucket, getChangePoints } from '../../utils/get_change_points';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
@@ -194,62 +187,37 @@ async function getMetricChangePoints({
 }
 
 export async function getToolHandler({
-  core,
-  plugins,
-  logger,
   esClient,
   start,
   end,
-  metrics,
+  name,
+  index,
+  kqlFilter: kqlFilterValue,
+  field,
+  aggregationType,
+  groupBy = [],
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
-  logger: Logger;
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  metrics: {
-    name: string;
-    aggregationType?: MetricType;
-    field?: string;
-    index?: string;
-    kqlFilter?: string;
-    groupBy?: string[];
-  }[];
+  name: string;
+  index: string;
+  aggregationType: MetricType;
+  field?: string;
+  kqlFilter?: string;
+  groupBy?: string[];
 }) {
-  if (metrics.length === 0) {
-    throw new Error('No metrics found');
-  }
-
-  const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
-
-  const metricChangePoints = await Promise.all(
-    metrics.map(
-      async ({
-        name,
-        index = metricIndexPatterns.join(','),
-        kqlFilter: kqlFilterValue,
-        groupBy = [],
-        field,
-        aggregationType = 'count',
-      }) => {
-        return await getMetricChangePoints({
-          name,
-          index,
-          esClient,
-          start,
-          end,
-          kqlFilter: kqlFilterValue,
-          groupBy,
-          aggregationType,
-          field,
-        });
-      }
-    )
-  );
+  const metricChangePoints = await getMetricChangePoints({
+    name,
+    index,
+    esClient,
+    start,
+    end,
+    kqlFilter: kqlFilterValue,
+    groupBy,
+    aggregationType,
+    field,
+  });
 
   return orderBy(metricChangePoints.flat(), [(item) => item.changes.p_value]).slice(0, 25);
 }

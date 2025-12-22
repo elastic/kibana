@@ -14,7 +14,7 @@ POST kbn://api/agent_builder/tools/_execute
     "logs": [
       {
         "name": "Error Logs",
-        "index": "logs-*",
+        "index": "logs-*"
       }
     ]
   }

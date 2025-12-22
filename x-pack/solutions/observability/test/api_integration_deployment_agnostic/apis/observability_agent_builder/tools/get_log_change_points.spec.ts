@@ -21,9 +21,7 @@ import {
 interface ToolResult {
   type: ToolResultType.other;
   data: {
-    changePoints: {
-      logs: ChangePoint[];
-    };
+    changePoints: ChangePoint[];
   };
 }
 
@@ -55,15 +53,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start,
             end: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end,
-            logs: [
-              {
-                index: LOG_CHANGE_POINTS_DATA_STREAM,
-                name: 'test-logs',
-              },
-            ],
+            index: LOG_CHANGE_POINTS_DATA_STREAM,
+            name: 'test-logs',
           },
         });
-        logChangePoints = toolResults[0]?.data?.changePoints?.logs ?? [];
+        logChangePoints = toolResults[0]?.data?.changePoints ?? [];
       });
 
       it('should detect spike in error logs', () => {

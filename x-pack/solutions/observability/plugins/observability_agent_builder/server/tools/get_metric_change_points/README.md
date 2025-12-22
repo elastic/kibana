@@ -15,8 +15,8 @@ POST kbn://api/agent_builder/tools/_execute
     "end": "now",
     "metrics": [
       {
-        "name": "API Latency P95",
-        "index": "metrics-*",
+        "name": "API Latency",
+        "index": "metrics-*"
       }
     ]
   }

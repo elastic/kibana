@@ -13,7 +13,6 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { type Bucket, getChangePoints } from '../../utils/get_change_points';
 import { parseDatemath } from '../../utils/time';
@@ -31,7 +30,7 @@ async function getLogChangePoint({
   start,
   end,
   kqlFilter: kqlFilterValue,
-  field,
+  messageField,
   esClient,
 }: {
   name: string;
@@ -39,7 +38,7 @@ async function getLogChangePoint({
   start: string;
   end: string;
   kqlFilter?: string;
-  field: string;
+  messageField: string;
   esClient: IScopedClusterClient;
 }) {
   const countDocumentsResponse = await esClient.asCurrentUser.search({
@@ -73,7 +72,7 @@ async function getLogChangePoint({
       aggs: {
         groups: {
           categorize_text: {
-            field,
+            field: messageField,
             size: 1000,
           },
           aggs: {
@@ -133,7 +132,10 @@ export async function getToolHandler({
   esClient,
   start,
   end,
-  logs,
+  name,
+  index,
+  kqlFilter: kqlFilterValue,
+  messageField,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
@@ -143,34 +145,20 @@ export async function getToolHandler({
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  logs: {
-    name: string;
-    index?: string;
-    kqlFilter?: string;
-    field?: string;
-  }[];
+  name: string;
+  index: string;
+  kqlFilter?: string;
+  messageField: string;
 }) {
-  if (logs.length === 0) {
-    throw new Error('No logs found');
-  }
+  const logChangePoints = await getLogChangePoint({
+    name,
+    index,
+    esClient,
+    start,
+    end,
+    kqlFilter: kqlFilterValue,
+    messageField,
+  });
 
-  const logIndexPatterns = await getLogsIndices({ core, logger });
-
-  const logChangePoints = await Promise.all(
-    logs.map(async (log) => {
-      return await getLogChangePoint({
-        name: log.name,
-        index: log.index || logIndexPatterns.join(','),
-        esClient,
-        start,
-        end,
-        kqlFilter: log.kqlFilter,
-        field: log.field ?? 'message',
-      });
-    })
-  );
-
-  return orderBy(logChangePoints.flat(), [
-    (item) => item.changes.p_value ?? Number.POSITIVE_INFINITY,
-  ]).slice(0, 25);
+  return orderBy(logChangePoints.flat(), [(item) => item.changes.p_value]).slice(0, 25);
 }
