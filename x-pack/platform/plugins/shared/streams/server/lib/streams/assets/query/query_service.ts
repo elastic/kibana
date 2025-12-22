@@ -7,10 +7,12 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
-import type { AssetClient } from '../asset_client';
-import { QueryClient } from './query_client';
+import type { AssetStorageSettings } from '../storage_settings';
+import { assetStorageSettings } from '../storage_settings';
+import { QueryClient, type StoredAssetLink } from './query_client';
 
 export class QueryService {
   constructor(
@@ -18,13 +20,7 @@ export class QueryService {
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({
-    request,
-    assetClient,
-  }: {
-    request: KibanaRequest;
-    assetClient: AssetClient;
-  }): Promise<QueryClient> {
+  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<QueryClient> {
     const [core, pluginStart] = await this.coreSetup.getStartServices();
 
     const soClient = core.savedObjects.getScopedClient(request);
@@ -35,9 +31,16 @@ export class QueryService {
     const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
     const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
+    const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
+      core.elasticsearch.client.asInternalUser,
+      this.logger.get('queries'),
+      assetStorageSettings
+    );
+
     return new QueryClient(
       {
-        assetClient,
+        storageClient: adapter.getClient(),
+        soClient,
         rulesClient,
         logger: this.logger,
       },
