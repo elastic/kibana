@@ -276,6 +276,8 @@
       "@kbn/content-management-table-list-view-common/*": ["src/platform/packages/shared/content-management/table_list_view_common/*"],
       "@kbn/content-management-table-list-view-table": ["src/platform/packages/shared/content-management/table_list_view_table"],
       "@kbn/content-management-table-list-view-table/*": ["src/platform/packages/shared/content-management/table_list_view_table/*"],
+      "@kbn/content-management-tags": ["src/platform/packages/shared/content-management/kbn-content-management-tags"],
+      "@kbn/content-management-tags/*": ["src/platform/packages/shared/content-management/kbn-content-management-tags/*"],
       "@kbn/content-management-user-profiles": ["src/platform/packages/shared/content-management/user_profiles"],
       "@kbn/content-management-user-profiles/*": ["src/platform/packages/shared/content-management/user_profiles/*"],
       "@kbn/content-management-utils": ["src/platform/packages/shared/kbn-content-management-utils"],

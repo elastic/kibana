@@ -253,6 +253,7 @@ export function initializeFetch({
               },
               executionContext,
               disableWarningToasts: true,
+              projectRouting: fetchContext.projectRouting,
             })
           );
           const interceptedWarnings: SearchResponseWarning[] = [];

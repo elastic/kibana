@@ -5071,6 +5071,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-tags@link:src/platform/packages/shared/content-management/kbn-content-management-tags":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-user-profiles@link:src/platform/packages/shared/content-management/user_profiles":
   version "0.0.0"
   uid ""

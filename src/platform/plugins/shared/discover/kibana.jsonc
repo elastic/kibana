@@ -48,7 +48,8 @@
       "logsDataAccess",
       "embeddableEnhanced",
       "apmSourcesAccess",
-      "fileUpload"
+      "fileUpload",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaUtils",
@@ -57,8 +58,6 @@
       "savedObjects",
       "presentationPanel"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }
