@@ -101,6 +101,8 @@ export function getDefaultFormValueForOperator(
       return true;
     case 'range':
       return {};
+    case 'includes':
+      return '';
     default:
       return '';
   }
@@ -178,6 +180,7 @@ function getFieldTypeForFilterCondition(
     case 'contains':
     case 'startsWith':
     case 'endsWith':
+    case 'includes':
       return 'string';
     default:
       return 'string';

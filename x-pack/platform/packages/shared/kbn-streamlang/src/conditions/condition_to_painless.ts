@@ -190,6 +190,18 @@ function shorthandBinaryToPainless(
 
       return `((${safeFieldAccessor} instanceof Number && ${numberExpr}) || (${safeFieldAccessor} instanceof String && ${stringExpr}))`;
     }
+    case 'includes': {
+      let includesValue: StringOrNumberOrBoolean = value as StringOrNumberOrBoolean;
+      if (typeof includesValue === 'string') {
+        const parsed = Number(includesValue);
+        if (!isNaN(parsed) && includesValue.trim() !== '') {
+          includesValue = parsed;
+        }
+      }
+      return `(${safeFieldAccessor} instanceof List && ${safeFieldAccessor}.contains(${encodeValue(
+        includesValue
+      )}))`;
+    }
     case 'neq':
     default: // eq
       const operator = op === 'neq' ? '!=' : '==';

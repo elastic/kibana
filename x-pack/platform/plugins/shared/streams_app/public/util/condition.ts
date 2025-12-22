@@ -66,6 +66,7 @@ const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<OperatorKeys, string[]> = {
   exists: ['boolean'],
 
   range: ['object'],
+  includes: ['string'],
 };
 
 function isOperatorUiSupported(

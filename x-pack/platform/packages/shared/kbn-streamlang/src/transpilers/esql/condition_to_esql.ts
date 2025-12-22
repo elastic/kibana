@@ -115,6 +115,16 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
         Builder.expression.literal.string(String(condition.endsWith)),
       ]);
     }
+    if ('includes' in condition) {
+      let value: string | number | boolean = condition.includes as string | number | boolean;
+      if (typeof value === 'string') {
+        const parsed = Number(value);
+        if (!isNaN(parsed) && value.trim() !== '') {
+          value = parsed;
+        }
+      }
+      return Builder.expression.func.call('MV_CONTAINS', [field, esqlLiteralFromAny(value)]);
+    }
   } else if (isAndCondition(condition)) {
     const andConditions = condition.and.map((c) => conditionToESQLAst(c));
     return andConditions.reduce((acc, cond) => Builder.expression.func.binary('and', [acc, cond]));
