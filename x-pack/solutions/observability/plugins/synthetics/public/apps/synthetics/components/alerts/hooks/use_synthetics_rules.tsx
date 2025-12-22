@@ -6,22 +6,29 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { selectDynamicSettings } from '../../../state/settings/selectors';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
   selectSyntheticsAlertsLoaded,
 } from '../../../state/alert_rules/selectors';
+import {
+  enableDefaultAlertingSilentlyAction,
+  getDefaultAlertingAction,
+} from '../../../state/alert_rules';
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
 import {
   selectAlertFlyoutVisibility,
   selectIsNewRule,
   setAlertFlyoutVisible,
 } from '../../../state';
+import { selectMonitorListState } from '../../../state/monitor_list/selectors';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const useSyntheticsRules = (isOpen: boolean) => {
