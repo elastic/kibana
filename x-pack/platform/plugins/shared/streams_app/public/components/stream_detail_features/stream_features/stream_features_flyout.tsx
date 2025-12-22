@@ -20,7 +20,7 @@ import {
   EuiTitle,
   EuiLoadingElastic,
 } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -36,13 +36,13 @@ export const StreamFeaturesFlyout = ({
   setFeatures,
 }: {
   isLoading: boolean;
-  features: Feature[];
+  features: System[];
   closeFlyout: () => void;
   definition: Streams.all.Definition;
-  setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
+  setFeatures: React.Dispatch<React.SetStateAction<System[]>>;
 }) => {
   const [selectedFeatureNames, setSelectedFeatureNames] = useState<Set<string>>(new Set());
-  const { addFeaturesToStream } = useStreamFeaturesApi(definition);
+  const { addSystemsToStream } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const selectedFeatures = useMemo(
@@ -115,7 +115,7 @@ export const StreamFeaturesFlyout = ({
               isLoading={isUpdating}
               onClick={() => {
                 setIsUpdating(true);
-                addFeaturesToStream(selectedFeatures).finally(() => {
+                addSystemsToStream(selectedFeatures).finally(() => {
                   closeFlyout();
                   setIsUpdating(false);
                 });

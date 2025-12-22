@@ -22,7 +22,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
+import { type Streams, type System, isFeatureWithFilter } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
@@ -36,19 +36,19 @@ export const StreamFeatureDetailsFlyout = ({
   closeFlyout,
   refreshFeatures,
 }: {
-  feature: Feature;
+  feature: System;
   definition: Streams.all.Definition;
   closeFlyout: () => void;
   refreshFeatures: () => void;
 }) => {
-  const [updatedFeature, setUpdatedFeature] = React.useState<Feature>(cloneDeep(feature));
-  const { upsertFeature } = useStreamFeaturesApi(definition);
+  const [updatedFeature, setUpdatedFeature] = React.useState<System>(cloneDeep(feature));
+  const { upsertSystem } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
-    upsertFeature(updatedFeature).finally(() => {
+    upsertSystem(updatedFeature).finally(() => {
       setIsUpdating(false);
       refreshFeatures();
       closeFlyout();

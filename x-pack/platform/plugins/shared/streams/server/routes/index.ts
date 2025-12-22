@@ -17,6 +17,7 @@ import { contentRoutes } from './content/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
 import { featureRoutes as internalFeaturesRoutes } from './internal/streams/features/route';
+import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
 import { internalPromptsRoutes } from './internal/streams/prompts/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
@@ -36,6 +37,7 @@ export const streamsRouteRepository = {
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
   ...internalFeaturesRoutes,
+  ...internalSystemsRoutes,
   ...internalPromptsRoutes,
   ...internalIngestRoutes,
   ...connectorRoutes,
