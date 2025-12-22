@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/rule-registry-plugin'
   - '@kbn/alerts-grouping'
+  - '@kbn/grouping'
   - '@kbn/data-views-plugin'
   - '@kbn/visualization-ui-components'
   - '@kbn/event-annotation-components'
