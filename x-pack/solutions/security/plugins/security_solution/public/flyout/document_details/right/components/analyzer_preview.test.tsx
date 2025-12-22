@@ -14,17 +14,16 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { DocumentDetailsContext } from '../../shared/context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
 import * as mock from '../mocks/mock_analyzer_data';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
-jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockTreeValues = {
@@ -49,9 +48,7 @@ describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
-      indexPatterns: ['index'],
-    });
+    (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
   });
 
   it('shows analyzer preview correctly when documentId and index are present', () => {
