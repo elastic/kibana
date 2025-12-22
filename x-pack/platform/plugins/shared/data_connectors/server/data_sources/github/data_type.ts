@@ -29,8 +29,11 @@ export const githubDataSource: DataTypeDefinition = {
   },
 
   stackConnector: {
-    type: '.github',
-    config: {},
+    type: '.mcp',
+    config: {
+      serverUrl: 'https://api.githubcopilot.com/mcp/',
+      hasAuth: true,
+    },
   },
 
   generateWorkflows(stackConnectorId: string) {

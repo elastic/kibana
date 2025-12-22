@@ -186,14 +186,25 @@ export function registerRoutes(
         }
 
         const connectorType = dataConnectorTypeDef.stackConnector.type;
-        const secrets = buildSecretsFromConnectorSpec(connectorType, token);
-
+        const connectorConfig = dataConnectorTypeDef.stackConnector.config;
         const actionsClient = await actions.getActionsClientWithRequest(request);
+
+        let secrets: Record<string, string> = {};
+        // secrets are apart of unencrypted config right now for MCP connector testing purposes
+        if (connectorType === '.mcp') {
+          connectorConfig.headers = {
+            Authorization: token,
+          };
+        } else {
+          secrets = buildSecretsFromConnectorSpec(connectorType, token);
+        }
+
+        logger.info(`Creating stack connector with config: ${JSON.stringify(connectorConfig)}`);
         const stackConnector = await actionsClient.create({
           action: {
             name: `${type} stack connector for data connector '${name}'`,
             actionTypeId: connectorType,
-            config: {},
+            config: connectorConfig as any,
             secrets,
           },
         });
