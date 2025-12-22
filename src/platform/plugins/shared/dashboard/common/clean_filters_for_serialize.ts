@@ -14,7 +14,7 @@ export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] 
   if (!filters) return;
   return filters.map((filter) => {
     const cleanedFilter = { ...filter };
-    if (cleanedFilter.meta?.value === undefined) {
+    if (cleanedFilter.meta?.value) {
       // Create a new filter object with meta excluding 'value'
       const { value, ...metaWithoutValue } = cleanedFilter.meta;
       cleanedFilter.meta = metaWithoutValue;
@@ -33,6 +33,7 @@ export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] 
     }
 
     if (isCombinedFilter(filter) && filter.meta?.params) {
+      // Recursively clean filters in combined filters
       cleanedFilter.meta.params = cleanFiltersForSerialize(cleanedFilter.meta.params as Filter[]);
     }
 
