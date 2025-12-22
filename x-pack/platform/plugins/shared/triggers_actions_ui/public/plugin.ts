@@ -443,7 +443,7 @@ export class Plugin
     }
 
     // unified rules page /app/rules (hidden from navigation)
-    if (this.config.rules.enabled) {
+    if (this.experimentalFeatures.unifiedRulesPage) {
       core.application.register({
         id: 'rules',
         appRoute: '/app/rules',
