@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +25,6 @@ import {
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import type { ILicense } from '@kbn/licensing-types';
 
 import { documentationService } from '../../../../../services';
 import { useAppContext } from '../../../../../app_context';
@@ -48,12 +47,12 @@ export const MappingsInformationPanels = ({
   refetchMapping,
 }: MappingsInformationPanelsProps) => {
   const {
-    plugins: { cloud, licensing },
+    plugins: { cloud },
     core: { application },
+    canUseEis,
   } = useAppContext();
   const state = useMappingsState();
 
-  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const showAboutMappingsStyles = css`
@@ -65,15 +64,7 @@ export const MappingsInformationPanels = ({
   const hasSemanticText = hasSemanticTextField(state.mappingViewFields);
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (isEnterpriseLicense || cloud?.isServerlessEnabled)) ?? false;
-
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
+    (cloud?.isCloudEnabled && (canUseEis || cloud?.isServerlessEnabled)) ?? false;
 
   return (
     <EuiFlexItem grow={false} css={showAboutMappingsStyles}>

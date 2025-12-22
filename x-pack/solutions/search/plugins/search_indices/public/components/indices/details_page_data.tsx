@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { EisCloudConnectPromoCallout, EisUpdateCallout } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import type { ILicense } from '@kbn/licensing-types';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
@@ -29,6 +28,7 @@ import { docLinks } from '../../../common/doc_links';
 import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
 import { flattenMappings, hasElserOnMlNodeSemanticTextField } from '../update_elser_mappings/utils';
 import type { NormalizedFields } from '../update_elser_mappings/types';
+import { useLicense } from '../../hooks/use_license';
 
 interface IndexDetailsDataProps {
   indexName: string;
@@ -45,15 +45,15 @@ export const IndexDetailsData = ({
   navigateToPlayground,
   userPrivileges,
 }: IndexDetailsDataProps) => {
-  const { application, cloud, licensing } = useKibana().services;
+  const { application, cloud } = useKibana().services;
   const { data: mappingData } = useIndexMapping(indexName);
+  const { isAtLeastEnterprise } = useLicense();
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
-  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
 
   const documents = indexDocuments?.results?.data ?? [];
 
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (isEnterpriseLicense || cloud?.isServerlessEnabled)) ?? false;
+    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
 
   const fieldsForUpdate = useMemo<NormalizedFields['byId'] | undefined>(() => {
     const properties = mappingData?.mappings?.properties;
@@ -66,14 +66,6 @@ export const IndexDetailsData = ({
     // Return undefined when there are no ELSER fields on ML node to update
     return undefined;
   }, [mappingData]);
-
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
 
   if (isInitialLoading) {
     return (

@@ -31,7 +31,6 @@ import {
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import type { ILicense } from '@kbn/licensing-types';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
@@ -68,8 +67,9 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   } = indexDetails;
   const {
     core,
-    plugins: { cloud, share, licensing },
+    plugins: { cloud, share },
     services: { extensionsService },
+    canUseEis,
   } = useAppContext();
   const state = useMappingsState();
   const { data: mappingsData, resendRequest } = useLoadIndexMappings(name || '');
@@ -78,7 +78,6 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
-  const [isEnterpriseLicense, setIsEnterpriseLicense] = useState<boolean>(false);
 
   // Setting undefined here because we don't have user privileges data in index management
   // If the user doesn't have update mappings privileges we let the api handle the error
@@ -94,7 +93,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const isLarge = useIsWithinBreakpoints(['xl']);
 
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (isEnterpriseLicense || cloud?.isServerlessEnabled)) ?? false;
+    (cloud?.isCloudEnabled && (canUseEis || cloud?.isServerlessEnabled)) ?? false;
 
   const { parsedDefaultValue } = useMemo(
     () => parseMappings(mappingsData ?? undefined),
@@ -108,14 +107,6 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
       setElasticsearchUrl(config.elasticsearchUrl || 'https://your_deployment_url');
     });
   }, [cloud]);
-
-  useEffect(() => {
-    const subscription = licensing?.license$.subscribe((license: ILicense) => {
-      setIsEnterpriseLicense(license.isActive && license.hasAtLeast('enterprise'));
-    });
-
-    return () => subscription?.unsubscribe();
-  }, [licensing]);
 
   return (
     <>
