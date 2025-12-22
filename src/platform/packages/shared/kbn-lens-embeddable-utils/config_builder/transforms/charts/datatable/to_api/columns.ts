@@ -17,7 +17,7 @@ import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
 import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
-import { isMetricColumn } from '../helpers';
+import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
 type APIMetricRowCommonProps = Partial<
   Pick<DatatableState['metrics'][number], 'visible' | 'alignment'>
 >;
@@ -120,7 +120,7 @@ export function convertDatatableColumnsToAPI(
       const apiOperation = columnId ? operationFromColumn(columnId, layer) : undefined;
       if (!apiOperation) throw new Error('Column not found');
 
-      if (isMetricColumn(column, true, apiOperation)) {
+      if (isMetricColumnNoESQL(column, apiOperation)) {
         if (!isAPIColumnOfMetricType(apiOperation))
           throw new Error(
             `Metric column ${columnId} must be a metric operation (got ${apiOperation.operation})`
@@ -150,6 +150,10 @@ export function convertDatatableColumnsToAPI(
       }
     }
 
+    if (metrics.length === 0) {
+      throw new Error('Datatable must have at least one metric column');
+    }
+
     return {
       metrics,
       ...(rows.length > 0 ? { rows } : {}),
@@ -167,7 +171,7 @@ export function convertDatatableColumnsToAPI(
     const apiOperation = columnId ? getValueApiColumn(columnId, layer) : undefined;
     if (!apiOperation) throw new Error('Column not found');
 
-    if (isMetricColumn(column, false)) {
+    if (isMetricColumnESQL(column, layer.columns)) {
       columnIdMapping[columnId] = { type: 'metric', index: metrics.length };
       metrics.push({
         ...apiOperation,
@@ -180,6 +184,10 @@ export function convertDatatableColumnsToAPI(
       columnIdMapping[columnId] = { type: 'row', index: rows.length };
       rows.push({ ...apiOperation, ...buildRowsAPI(column) });
     }
+  }
+
+  if (metrics.length === 0) {
+    throw new Error('Datatable must have at least one metric column');
   }
 
   return {
