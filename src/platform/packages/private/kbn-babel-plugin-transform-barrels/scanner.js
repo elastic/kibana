@@ -45,88 +45,191 @@ function getParserPlugins(filePath) {
 }
 
 /**
+ * Resolve the barrel file path from a package.json.
+ * Uses the exports field root or main field to find the entry point.
+ *
+ * @param {string} packageRoot - Absolute path to package root
+ * @param {Record<string, any>} pkgJson - Parsed package.json content
+ * @returns {string | null} - Absolute path to barrel file or null
+ */
+function resolvePackageBarrel(packageRoot, pkgJson) {
+  let barrelRelPath = null;
+
+  // Try exports field first (root entry ".")
+  if (pkgJson.exports) {
+    const rootExport = pkgJson.exports['.'];
+    if (rootExport) {
+      barrelRelPath = extractFileTarget(rootExport);
+    }
+  }
+
+  // Fall back to main field
+  if (!barrelRelPath && pkgJson.main) {
+    barrelRelPath = pkgJson.main;
+  }
+
+  // Default to index.js if nothing specified
+  if (!barrelRelPath) {
+    barrelRelPath = './index.js';
+  }
+
+  // Resolve to absolute path
+  const barrelPath = path.resolve(packageRoot, barrelRelPath);
+
+  // Verify file exists
+  if (fs.existsSync(barrelPath) && fs.statSync(barrelPath).isFile()) {
+    return barrelPath;
+  }
+
+  return null;
+}
+
+/**
+ * Check if a package has subpath exports (beyond just root and package.json).
+ *
+ * @param {Record<string, any>} exportsField - The exports field from package.json
+ * @returns {boolean} - True if package has subpath exports
+ */
+function hasSubpathExports(exportsField) {
+  return Object.keys(exportsField).some((key) => key !== '.' && key !== './package.json');
+}
+
+/**
  * Build the barrel index by scanning all index files in the repository.
  * This runs ONCE before the Piscina worker pool is created.
+ *
+ * Uses separate strategies for Kibana internal code vs node_modules:
+ * - Kibana: Scan for barrel files directly (no exports field restrictions)
+ * - node_modules: Check package.json exports first, only parse barrels with valid subpaths
  *
  * @param {string} repoRoot - Absolute path to repository root
  * @returns {Promise<import('./types').BarrelIndex>}
  */
 async function buildBarrelIndex(repoRoot) {
-  // Find all potential barrel files
-  const barrelFiles = await fg('**/index.{ts,tsx,js,jsx}', {
-    cwd: repoRoot,
-    ignore: [
-      // Exclude our own build artifacts, but NOT node_modules dist folders
-      'dist/**',
-      'target/**',
-      'build/**',
-      'x-pack/build/**',
-      '**/*.test.*',
-      '**/*.spec.*',
-      '**/__fixtures__/**',
-      '**/__mocks__/**',
-    ],
-    absolute: true,
-    followSymbolicLinks: false,
-  });
-
   /** @type {import('./types').BarrelIndex} */
   const index = {};
 
-  // Cache for package exports reverse maps to avoid re-reading package.json
-  /** @type {Map<string, ExportsReverseMapEntry[] | null>} */
-  const exportsReverseMapCache = new Map();
+  // Step 1: Find files in parallel
+  const [kibanaBarrels, packageJsonFiles] = await Promise.all([
+    // Kibana internal barrel files (exclude node_modules)
+    fg('**/index.{ts,tsx,js,jsx}', {
+      cwd: repoRoot,
+      ignore: [
+        'node_modules/**',
+        'dist/**',
+        'target/**',
+        'build/**',
+        'x-pack/build/**',
+        '**/*.test.*',
+        '**/*.spec.*',
+        '**/__fixtures__/**',
+        '**/__mocks__/**',
+      ],
+      absolute: true,
+      followSymbolicLinks: false,
+    }),
+    // node_modules package.json files
+    fg('node_modules/**/package.json', {
+      cwd: repoRoot,
+      ignore: [
+        // Avoid deeply nested node_modules (dependencies of dependencies)
+        '**/node_modules/**/node_modules/**',
+      ],
+      absolute: true,
+      followSymbolicLinks: false,
+    }),
+  ]);
 
-  // Process all barrel files in parallel
-  await Promise.all(
-    barrelFiles.map(async (barrelPath) => {
-      try {
-        const content = await readFile(barrelPath, 'utf-8');
-        const exports = parseBarrelExports(content, barrelPath);
+  // Step 2: Process both in parallel
+  await Promise.all([
+    // Process Kibana barrels - simple, no exports field restrictions
+    Promise.all(
+      kibanaBarrels.map(async (barrelPath) => {
+        try {
+          const content = await readFile(barrelPath, 'utf-8');
+          const exports = parseBarrelExports(content, barrelPath);
 
-        // Only add to index if it has re-exports (is actually a barrel file)
-        if (Object.keys(exports).length > 0) {
-          /** @type {import('./types').BarrelFileEntry} */
-          const entry = { exports };
+          if (Object.keys(exports).length > 0) {
+            index[barrelPath] = { exports };
+          }
+        } catch (err) {
+          console.warn(`[barrel-transform] Skipping ${barrelPath}: ${err.message}`);
+        }
+      })
+    ),
 
-          // Detect if this is a node_modules package and extract package info
-          const nodeModulesMatch = barrelPath.match(/node_modules\/((?:@[^/]+\/[^/]+)|[^/]+)/);
-          if (nodeModulesMatch) {
-            entry.packageName = nodeModulesMatch[1];
-            const nodeModulesIdx = barrelPath.indexOf('node_modules/');
-            entry.packageRoot = barrelPath.slice(
-              0,
-              nodeModulesIdx + 'node_modules/'.length + nodeModulesMatch[1].length
-            );
+    // Process node_modules packages with package.json context
+    Promise.all(
+      packageJsonFiles.map(async (pkgJsonPath) => {
+        try {
+          const pkgJsonContent = await readFile(pkgJsonPath, 'utf-8');
+          const pkgJson = JSON.parse(pkgJsonContent);
+          const packageRoot = path.dirname(pkgJsonPath);
+          const packageName = pkgJson.name;
 
-            // Get or build the exports reverse map for this package
-            let reverseMap = exportsReverseMapCache.get(entry.packageRoot);
-            if (reverseMap === undefined) {
-              const pkgExports = readPackageExports(entry.packageRoot);
-              reverseMap = pkgExports ? buildExportsReverseMap(pkgExports) : null;
-              exportsReverseMapCache.set(entry.packageRoot, reverseMap);
-            }
+          // Skip packages without a name
+          if (!packageName) return;
 
-            // If package has exports field, compute publicSubpath for each export
-            if (reverseMap && reverseMap.length > 0) {
-              for (const exportInfo of Object.values(entry.exports)) {
-                const relativePath = path.relative(entry.packageRoot, exportInfo.path);
-                const publicSubpath = resolvePublicSubpath(relativePath, reverseMap);
-                if (publicSubpath !== null) {
-                  exportInfo.publicSubpath = publicSubpath;
-                }
-              }
+          const pkgExports = pkgJson.exports;
+
+          // Check exports field to determine if transforms are possible
+          if (pkgExports) {
+            // If package has exports but only root export, skip entirely
+            // No valid subpath transforms are possible
+            if (!hasSubpathExports(pkgExports)) {
+              return;
             }
           }
 
-          index[barrelPath] = entry;
+          // Find barrel file path
+          const barrelPath = resolvePackageBarrel(packageRoot, pkgJson);
+          if (!barrelPath) return;
+
+          // Parse barrel with context available
+          const content = await readFile(barrelPath, 'utf-8');
+          const exports = parseBarrelExports(content, barrelPath);
+
+          if (Object.keys(exports).length > 0) {
+            /** @type {import('./types').BarrelFileEntry} */
+            const entry = { exports, packageName, packageRoot };
+
+            // Build reverse map and compute publicSubpath for each export
+            if (pkgExports) {
+              const reverseMap = buildExportsReverseMap(pkgExports);
+
+              // Filter exports to only include those with valid publicSubpath
+              // Exports without publicSubpath would violate the exports field restrictions
+              /** @type {Record<string, import('./types').ExportInfo>} */
+              const validExports = {};
+
+              for (const [exportName, exportInfo] of Object.entries(exports)) {
+                const relativePath = path.relative(packageRoot, exportInfo.path);
+                const publicSubpath = resolvePublicSubpath(relativePath, reverseMap);
+                if (publicSubpath !== null) {
+                  exportInfo.publicSubpath = publicSubpath;
+                  validExports[exportName] = exportInfo;
+                }
+                // Exports without valid publicSubpath are intentionally not included
+                // They can't be safely transformed since they're not publicly exposed
+              }
+
+              // Only add to index if there are valid exports
+              if (Object.keys(validExports).length > 0) {
+                entry.exports = validExports;
+                index[barrelPath] = entry;
+              }
+            } else {
+              // No exports field - all exports are valid (legacy mode)
+              index[barrelPath] = entry;
+            }
+          }
+        } catch (err) {
+          // Skip packages that can't be processed
+          console.warn(`[barrel-transform] Skipping package ${pkgJsonPath}: ${err.message}`);
         }
-      } catch (err) {
-        // Skip files that can't be parsed
-        console.warn(`[barrel-transform] Skipping ${barrelPath}: ${err.message}`);
-      }
-    })
-  );
+      })
+    ),
+  ]);
 
   return index;
 }

@@ -211,4 +211,110 @@ describe('barrel transform plugin', () => {
       expect(deserialized[RXJS_BARREL_PATH].packageRoot).toBe(RXJS_BARREL.packageRoot);
     });
   });
+
+  describe('exports field handling', () => {
+    // Use relative imports to avoid require.resolve issues in tests
+    const RESTRICTED_BARREL_PATH = '/test/src/restricted-lib/index.ts';
+
+    it('leaves import unchanged when export is not in barrel index', () => {
+      // In the new architecture, the scanner filters out exports without valid publicSubpath
+      // So exports that can't be safely transformed are not in the index at all
+      const emptyIndex: TestBarrelIndex = {
+        [RESTRICTED_BARREL_PATH]: {
+          packageName: 'restricted-lib',
+          packageRoot: '/test/src/restricted-lib',
+          // Empty exports - simulates scanner filtering out non-public exports
+          exports: {},
+        },
+      };
+
+      const result = transform({
+        code: `import { helper } from './restricted-lib';`,
+        barrelIndex: emptyIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should NOT transform - import should remain unchanged
+      expect(result?.code).toContain(`from './restricted-lib'`);
+      expect(result?.code).not.toContain('restricted-lib/internal/helper');
+    });
+
+    it('transforms when package has NO exports field (uses file path fallback)', () => {
+      const indexWithoutExportsField: TestBarrelIndex = {
+        [RESTRICTED_BARREL_PATH]: {
+          // No packageName/packageRoot - Kibana internal barrel (no exports field)
+          exports: {
+            helper: {
+              path: '/test/src/restricted-lib/internal/helper.ts',
+              type: 'named',
+              localName: 'helper',
+              importedName: 'helper',
+              expectedPath: './restricted-lib/internal/helper',
+            },
+          },
+        },
+      };
+
+      const result = transform({
+        code: `import { helper } from './restricted-lib';`,
+        barrelIndex: indexWithoutExportsField,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should transform using file path fallback
+      expect(result?.code).toContain('./restricted-lib/internal/helper');
+    });
+
+    it('handles exports with publicSubpath - only public exports are in index', () => {
+      // In the new architecture, the scanner only includes exports with valid publicSubpath
+      // So privateHelper wouldn't be in the index at all
+      const publicOnlyIndex: TestBarrelIndex = {
+        [RESTRICTED_BARREL_PATH]: {
+          packageName: 'restricted-lib',
+          packageRoot: '/test/src/restricted-lib',
+          exports: {
+            // Only publicHelper is in the index (scanner filtered out privateHelper)
+            publicHelper: {
+              path: '/test/src/restricted-lib/public/helper.ts',
+              type: 'named',
+              localName: 'publicHelper',
+              importedName: 'publicHelper',
+              publicSubpath: 'public/helper',
+              expectedPath: 'restricted-lib/public/helper',
+            },
+          },
+        },
+      };
+
+      const result = transform({
+        code: `import { privateHelper, publicHelper } from './restricted-lib';`,
+        barrelIndex: publicOnlyIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // publicHelper should be transformed, privateHelper not found so remains unchanged
+      expect(result?.code).toContain('restricted-lib/public/helper');
+      expect(result?.code).toContain('./restricted-lib');
+      expect(result?.code).not.toContain('restricted-lib/internal/private');
+    });
+
+    it('uses publicSubpath when available for package imports', () => {
+      const result = transform({
+        code: `import { Observable } from 'rxjs';`,
+        filename: REAL_TEST_FILE_PATH,
+      });
+
+      // Should use the publicSubpath from the index
+      expect(result?.code).toContain('rxjs/internal/Observable');
+    });
+
+    it('preserves publicSubpath through serialization', () => {
+      const serialized = JSON.stringify(BARREL_INDEX);
+      const deserialized = JSON.parse(serialized) as BarrelIndex;
+
+      expect(deserialized[RXJS_BARREL_PATH].exports.Observable.publicSubpath).toBe(
+        'internal/Observable'
+      );
+    });
+  });
 });
