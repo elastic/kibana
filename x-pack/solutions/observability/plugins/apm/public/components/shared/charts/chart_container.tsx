@@ -20,11 +20,11 @@ export interface ChartContainerProps {
 
 export function ChartContainer({ children, height, status, hasData, id }: ChartContainerProps) {
   if (!hasData && isPending(status)) {
-    return <LoadingChartPlaceholder height={height} />;
+    return <LoadingChartPlaceholder height={height} id={id} />;
   }
 
   if (status === FETCH_STATUS.FAILURE) {
-    return <FailedChartPlaceholder height={height} />;
+    return <FailedChartPlaceholder height={height} id={id} />;
   }
 
   return (
@@ -34,7 +34,7 @@ export function ChartContainer({ children, height, status, hasData, id }: ChartC
   );
 }
 
-function LoadingChartPlaceholder({ height }: { height: number }) {
+function LoadingChartPlaceholder({ height, id }: { height: number; id?: string }) {
   return (
     <div
       style={{
@@ -43,18 +43,21 @@ function LoadingChartPlaceholder({ height }: { height: number }) {
         alignItems: 'center',
         justifyContent: 'center',
       }}
+      data-test-subj={id}
     >
       <EuiLoadingChart data-test-subj="loading" size={'xl'} />
     </div>
   );
 }
 
-function FailedChartPlaceholder({ height }: { height: number }) {
+function FailedChartPlaceholder({ height, id }: { height: number; id?: string }) {
   return (
-    <EuiText color="subdued" style={{ height }}>
-      {i18n.translate('xpack.apm.chart.error', {
-        defaultMessage: 'An error happened when trying to fetch data. Please try again',
-      })}
-    </EuiText>
+    <div data-test-subj={id}>
+      <EuiText color="subdued" style={{ height }} data-test-subj="error">
+        {i18n.translate('xpack.apm.chart.error', {
+          defaultMessage: 'An error happened when trying to fetch data. Please try again',
+        })}
+      </EuiText>
+    </div>
   );
 }

@@ -106,12 +106,11 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 3905
+  maintenanceWindows: 8803
   management: 12951
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44988
-  metricsExperience: 6655
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
@@ -207,6 +206,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 61264
+  workflowsExtensions: 73502
   workflowsManagement: 8497
   workplaceAIApp: 6135
