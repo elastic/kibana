@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { errors as EsErrors } from '@elastic/elasticsearch';
-import { isRetryableEsClientError } from '../utils';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 
 import type { BackoffFactory } from '../../common/retry_service/types';
 import { RetryService } from '../../common/retry_service';
