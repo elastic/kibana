@@ -39,7 +39,7 @@ export class OperationDetailSubpage {
   }
 
   private async waitForWaterfallToLoad() {
-    this.waterfallInvestigateButton.getByRole('progressbar').waitFor({ state: 'hidden' });
+    await this.waterfallInvestigateButton.getByRole('progressbar').waitFor({ state: 'hidden' });
   }
 
   private async waitForOperationDetailToLoad() {
