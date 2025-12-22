@@ -169,10 +169,6 @@ describe('ConnectionDetailsService', () => {
 
       // Manually set tab to apiKeys before permission check completes
       service.setTab('apiKeys');
-      expect(service.tabId$.getValue()).toBe('apiKeys');
-
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Should switch back to endpoints
       expect(service.tabId$.getValue()).toBe('endpoints');
@@ -204,7 +200,7 @@ describe('ConnectionDetailsService', () => {
       const service = new ConnectionDetailsService(createMockOpts());
 
       service.setTab('apiKeys');
-      expect(service.tabId$.getValue()).toBe('apiKeys');
+      expect(service.tabId$.getValue()).toBe('endpoints');
 
       service.setTab('endpoints');
       expect(service.tabId$.getValue()).toBe('endpoints');
@@ -212,10 +208,10 @@ describe('ConnectionDetailsService', () => {
   });
 
   describe('when apiKeys options are not provided', () => {
-    it('should not call hasPermission', () => {
+    it('we assume we do not have permission to access the tab', () => {
       const service = new ConnectionDetailsService({});
 
-      expect(service.apiKeyHasAccess$.getValue()).toBe(null);
+      expect(service.apiKeyHasAccess$.getValue()).toBe(false);
     });
   });
 });
