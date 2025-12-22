@@ -94,7 +94,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    application: { capabilities, navigateToApp, getUrlForApp },
+    application,
     ruleTypeRegistry,
     setBreadcrumbs,
     chrome,
@@ -104,6 +104,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
   } = useKibana().services;
+  const { capabilities, navigateToApp, getUrlForApp, isAppRegistered } = application;
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -123,14 +124,18 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   // Set breadcrumb and page title
   useEffect(() => {
     const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
+
+    const breadcrumbHref = isAppRegistered('rules')
+      ? getUrlForApp('rules', { path: '/' })
+      : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
+
     const rulesBreadcrumbWithAppPath = {
       ...rulesBreadcrumb,
-      href: getUrlForApp('rules', { path: '/' }),
+      href: breadcrumbHref,
     };
     setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [application, rule.name, setBreadcrumbs, chrome, isAppRegistered, getUrlForApp]);
 
   // Determine if any attached action has an issue with its connector
   useEffect(() => {
