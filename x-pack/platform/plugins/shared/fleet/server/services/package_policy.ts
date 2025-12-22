@@ -646,11 +646,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     if (options?.bumpRevision ?? true) {
-      for (const policyId of enrichedPackagePolicy.policy_ids) {
-        await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-        });
-      }
+      await pMap(
+        enrichedPackagePolicy.policy_ids,
+        (policyId) =>
+          agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+          }),
+        {
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+        }
+      );
     }
 
     const createdPackagePolicy = mapPackagePolicySavedObjectToPackagePolicy(newSo);
@@ -871,12 +876,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Assign it to the given agent policy
 
     if (options?.bumpRevision ?? true) {
-      for (const agentPolicyId of agentPolicyIds) {
-        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-          user: options?.user,
-          asyncDeploy: options?.asyncDeploy,
-        });
-      }
+      await pMap(
+        agentPolicyIds,
+        (agentPolicyId) =>
+          agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
+            user: options?.user,
+            asyncDeploy: options?.asyncDeploy,
+          }),
+        {
+          concurrency:
+            agentPolicies.length >= 10
+              ? MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10
+              : MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+        }
+      );
     }
     logger.debug(`Created new package policies`);
     return {
@@ -1918,24 +1931,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
     });
 
-    const bumpPromise = pMap(associatedPolicyIds, async (agentPolicyId) => {
-      // Check if the agent policy is in both old and updated package policies
-      const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
-      const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
+    const bumpPromise = pMap(
+      associatedPolicyIds,
+      async (agentPolicyId) => {
+        // Check if the agent policy is in both old and updated package policies
+        const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
+        const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
 
-      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-      const removeProtection =
-        (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
-        (!assignedInOldPolicies && assignedInUpdatedPolicies);
+        // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+        const removeProtection =
+          (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
+          (!assignedInOldPolicies && assignedInUpdatedPolicies);
 
-      logger.debug(`bumping revision for agent policy id [${agentPolicyId}]`);
+        logger.debug(`bumping revision for agent policy id [${agentPolicyId}]`);
 
-      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
-        user: options?.user,
-        removeProtection,
-        asyncDeploy: options?.asyncDeploy,
-      });
-    }).finally(() => {
+        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
+          user: options?.user,
+          removeProtection,
+          asyncDeploy: options?.asyncDeploy,
+        });
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+    ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
     });
 
@@ -2206,16 +2223,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
-      for (const policyId of uniquePolicyIdsR) {
-        const agentPolicy = agentPolicies.find((p) => p.id === policyId);
-        if (agentPolicy) {
-          // is the agent policy attached to package policy with endpoint
-          await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-            user: options?.user,
-            removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
-          });
-        }
-      }
+      await pMap(
+        uniquePolicyIdsR,
+        async (policyId) => {
+          const agentPolicy = agentPolicies.find((p) => p.id === policyId);
+          if (agentPolicy) {
+            // is the agent policy attached to package policy with endpoint
+            await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+              user: options?.user,
+              removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
+            });
+          }
+        },
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+      );
     }
 
     if (secretsToDelete.length > 0) {
