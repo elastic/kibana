@@ -154,7 +154,9 @@ export const RuleFlyoutBody = ({
         {isEdit && <RuleFlyoutEditTabs steps={steps} />}
       </EuiFlyoutHeader>
       <EuiFlyoutBody onClick={onInteraction} onKeyDown={onInteraction}>
-        {!isEdit && <EuiStepsHorizontal size="xs" steps={steps} />}
+        {!isEdit && (
+          <EuiStepsHorizontal size="xs" steps={steps} data-test-subj="addRuleFlyoutSteps" />
+        )}
         {hasActionsDisabled && (
           <>
             <EuiCallOut

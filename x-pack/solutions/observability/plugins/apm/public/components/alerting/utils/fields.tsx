@@ -243,6 +243,7 @@ export function IsAboveField({
           onClick={() => {
             serThresholdPopoverOpen(true);
           }}
+          data-test-subj="apmIsAboveExpression"
         />
       }
     >

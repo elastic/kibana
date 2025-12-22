@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EuiDataGridWrapper, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 
@@ -17,12 +17,16 @@ export class AlertsTab extends ServiceDetailsTab {
   public readonly alertsTableEmptyState: Locator;
   public readonly controlTitles: Locator;
 
+  public readonly alertsTable: EuiDataGridWrapper;
+
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
     this.globalQueryBar = this.page.testSubj.locator('globalQueryBar');
     this.alertsTableEmptyState = this.page.testSubj.locator('alertsTableEmptyState');
     this.controlTitles = this.page.testSubj.locator('control-frame-title');
+
+    this.alertsTable = new EuiDataGridWrapper(this.page, 'alertsTableIsLoaded');
   }
 
   protected async waitForTabLoad() {
