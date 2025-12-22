@@ -30,7 +30,7 @@ export type EntityRiskScoreToolParams = Require<
   'alertsIndexPattern' | 'size' | 'assistantContext'
 >;
 
-export const ENTITY_RISK_SCORE_TOOL_DESCRIPTION = `Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.`;
+export const ENTITY_RISK_SCORE_TOOL_DESCRIPTION = `Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'. The 'modifiers' array contains risk adjustments including asset criticality and privileged user monitoring (watchlist/privmon).`;
 
 export const ENTITY_RISK_SCORE_TOOL_ID = 'entity-risk-score-tool';
 
@@ -131,7 +131,11 @@ export const ENTITY_RISK_SCORE_TOOL: AssistantTool = {
           }))
         );
 
-        const data = { ...latestRiskScore, inputs: enhancedInputs, id_value: input.identifier }; // Replace id_value for the anonymized identifier to avoid leaking user data
+        const data = {
+          ...latestRiskScore,
+          inputs: enhancedInputs,
+          id_value: input.identifier, // Replace id_value for the anonymized identifier to avoid leaking user data
+        };
 
         return JSON.stringify({
           riskScore: data,

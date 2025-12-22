@@ -13,6 +13,7 @@ import { sendTelemetryEvents } from '../../upgrade_sender';
 
 import { installPackage } from './install';
 import {
+  bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
   rollbackAvailableCheck,
   rollbackInstallation,
@@ -511,6 +512,7 @@ describe('rollbackAvailableCheck', () => {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
             attributes: {
+              name: pkgName,
               install_source: 'registry',
               previous_version: oldPkgVersion,
               version: newPkgVersion,
@@ -599,6 +601,43 @@ describe('rollbackAvailableCheck', () => {
 
     expect(response).toEqual({
       isAvailable: true,
+    });
+  });
+
+  describe('bulkRollbackAvailableCheck', () => {
+    it('should return isAvailable: true if installed package has rollback available', async () => {
+      packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              name: `${pkgName}-1`,
+              package: { name: pkgName, title: 'Test Package', version: newPkgVersion },
+              revision: 3,
+              latest_revision: true,
+            },
+          },
+          {
+            id: 'test-package-policy:prev',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {
+              name: `${pkgName}-1`,
+              package: { name: pkgName, title: 'Test Package', version: oldPkgVersion },
+              revision: 1,
+              latest_revision: false,
+            },
+          },
+        ],
+      } as any);
+
+      const response = await bulkRollbackAvailableCheck();
+
+      expect(response).toEqual({
+        'test-package': {
+          isAvailable: true,
+        },
+      });
     });
   });
 });

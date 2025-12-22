@@ -15,11 +15,7 @@ import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_defini
 
 interface StreamFeaturesApi {
   upsertFeature: (feature: Feature) => Promise<void>;
-  identifyFeatures: (
-    connectorId: string,
-    to: string,
-    from: string
-  ) => Promise<IdentifiedFeaturesEvent>;
+  identifyFeatures: (connectorId: string) => Promise<IdentifiedFeaturesEvent>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
   removeFeaturesFromStream: (
     features: Pick<Feature, 'type' | 'name'>[]
@@ -40,7 +36,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    identifyFeatures: async (connectorId: string, to: string, from: string) => {
+    identifyFeatures: async (connectorId: string) => {
+      const now = Date.now();
       const events$ = streamsRepositoryClient.stream(
         'POST /internal/streams/{name}/features/_identify',
         {
@@ -49,8 +46,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
             path: { name: definition.name },
             query: {
               connectorId,
-              to,
-              from,
+              to: new Date(now).toISOString(),
+              from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
             },
           },
         }

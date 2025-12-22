@@ -25,6 +25,7 @@ import { registerOnechatHandlerContext } from './request_handler_context';
 import { createOnechatUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
+import { AnalyticsService } from './telemetry';
 
 export class OnechatPlugin
   implements
@@ -41,6 +42,7 @@ export class OnechatPlugin
   private serviceManager = new ServiceManager();
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
+  private analyticsService?: AnalyticsService;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -64,6 +66,13 @@ export class OnechatPlugin
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
 
+    // Register server-side EBT events for Agent Builder
+    this.analyticsService = new AnalyticsService(
+      coreSetup.analytics,
+      this.logger.get('telemetry').get('analytics')
+    );
+    this.analyticsService.registerAgentBuilderEventTypes();
+
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
@@ -74,11 +83,9 @@ export class OnechatPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    if (setupDeps.workflowsExtensions) {
-      setupDeps.workflowsExtensions.registerStepDefinition(
-        getRunAgentStepDefinition(this.serviceManager)
-      );
-    }
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      getRunAgentStepDefinition(this.serviceManager)
+    );
 
     registerOnechatHandlerContext({ coreSetup });
 
@@ -96,6 +103,7 @@ export class OnechatPlugin
         return services;
       },
       trackingService: this.trackingService,
+      analyticsService: this.analyticsService,
     });
 
     return {
@@ -113,7 +121,7 @@ export class OnechatPlugin
 
   start(
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces }: OnechatStartDependencies
+    { inference, spaces, actions }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
@@ -121,9 +129,11 @@ export class OnechatPlugin
       elasticsearch,
       inference,
       spaces,
+      actions,
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
+      analyticsService: this.analyticsService,
     });
 
     const { tools, agents, runnerFactory } = startServices;

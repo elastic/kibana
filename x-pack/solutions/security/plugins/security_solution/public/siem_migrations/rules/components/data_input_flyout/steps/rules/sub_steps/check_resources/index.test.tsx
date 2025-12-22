@@ -11,6 +11,7 @@ import { useCheckResourcesStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock';
 import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
 import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
+import { MigrationSource } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../../common/hooks/use_get_missing_resources');
 
@@ -113,5 +114,27 @@ describe('useCheckResourcesStep', () => {
     );
 
     expect(getMissingResources).not.toHaveBeenCalled();
+  });
+
+  it('returns reference sets content', () => {
+    const getMissingResources = jest.fn();
+    mockUseGetMissingResources.mockReturnValue({
+      getMissingResources,
+      isLoading: false,
+      error: null,
+    });
+
+    const { result } = renderHook(
+      () =>
+        useCheckResourcesStep({
+          status: 'incomplete',
+          migrationStats: mockMigrationStats,
+          onMissingResourcesFetched: jest.fn(),
+          migrationSource: MigrationSource.QRADAR,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(result.current.title).toEqual('Check for reference sets');
   });
 });

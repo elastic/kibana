@@ -27,6 +27,10 @@ export enum ToolType {
    * Index search tools
    */
   index_search = 'index_search',
+  /**
+   * MCP server tools
+   */
+  mcp = 'mcp',
 }
 
 /**

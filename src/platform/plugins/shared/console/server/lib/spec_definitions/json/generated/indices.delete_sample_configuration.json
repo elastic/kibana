@@ -1,0 +1,15 @@
+{
+  "indices.delete_sample_configuration": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "{index}/_sample/config"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-sample-configuration",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

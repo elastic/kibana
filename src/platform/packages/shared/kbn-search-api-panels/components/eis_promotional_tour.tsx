@@ -42,11 +42,10 @@ export const EisPromotionalTour = ({
   const { euiTheme } = useEuiTheme();
   const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
     promoId: `${promoId}Tour`,
-    isCloudEnabled,
   });
   const dataId = `${promoId}-eis-promo-tour`;
 
-  if (!isPromoVisible) {
+  if (!isPromoVisible || !isCloudEnabled) {
     return children;
   }
 

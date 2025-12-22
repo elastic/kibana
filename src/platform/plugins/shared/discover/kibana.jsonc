@@ -50,8 +50,7 @@
       "logsDataAccess",
       "embeddableEnhanced",
       "apmSourcesAccess",
-      "fileUpload",
-      "metricsExperience"
+      "fileUpload"
     ],
     "requiredBundles": [
       "kibanaUtils",

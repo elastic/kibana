@@ -2624,29 +2624,29 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.6.0.tgz#e1d72f3969049dd07ca96736119c08e7ac24f748"
   integrity sha512-XWCgM8TkpMDcX8OX8v0ocm0zI2cuxbRrGVtMcSFqLN8VWP/7JjVuw8Dg1Jo3cvMqXK/2YbfcREgzuCqvPD28+w==
 
-"@elastic/eui-theme-borealis@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.1.0.tgz#43fed047fd2770622a72987b74f0c2e020d21046"
-  integrity sha512-M+J7AkruSLrjWyNYTmU2rpZ4g1h93tdQ1DANq3K/SD+xR76NLufuJOOhi6ELHWo1FiHWVM4GsnndrbW5aJrD5A==
+"@elastic/eui-theme-borealis@5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.2.0.tgz#e73aabdb6f9a54fd819b1de97e692dbdb72c3864"
+  integrity sha512-1EwwqseJ3IymCVKvk04rUN7pt4YWhS9U3rKFm8+jzqH2k3gwuDaWeVdzhOAMWdTOhrIfwFov8Gu7hpCYRZ0VOQ==
   dependencies:
-    "@elastic/eui-theme-common" "7.1.0"
+    "@elastic/eui-theme-common" "7.2.0"
     chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@7.1.0":
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.1.0.tgz#d349389f4b14d8a666c9352ec85a5a17c9771e6d"
-  integrity sha512-o5h3ph8N3izD+tQOu/KM2kB0jRfzb8+nZwKWnCKkpA9jmm2hBf8QCC51MWtj69pUpsJah3YFSz6WlYVAOuF+iA==
+"@elastic/eui-theme-common@7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.2.0.tgz#caf3800d2faca3c69c0beea0afb8684007071580"
+  integrity sha512-vN8g7znFnhkjHJU1XYHuYZUwXtb9G7EdgqAGj+/jjrcnvmbJiOU1vU9lHMH8MaHkPnWVmk5aBcV3B+yRu06qrQ==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@110.0.0":
-  version "110.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-110.0.0.tgz#2baeb804e5124b1c88577d7b9b03fdbbcfcdf7a8"
-  integrity sha512-mzq9NTrJNkkTp7d+zV8wX8NeiqivczwfthZlV/dIjW2qCTH1eU3B7gT5c28qrymynvD9Jp6zy/EtK8MnEzB4ng==
+"@elastic/eui@111.0.0":
+  version "111.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-111.0.0.tgz#e9f27ed57e966af9b9507f294ce6c40fb8f7c5f4"
+  integrity sha512-FqXSLqiVUYrk+yuxjEV1hUTqf0RxyKC299iFfc027+s/yUp7D39T/eBpig67HxvC3i4yYctuQiOHjry41cv3xA==
   dependencies:
-    "@elastic/eui-theme-common" "7.1.0"
+    "@elastic/eui-theme-common" "7.2.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2679,6 +2679,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
+    use-sync-external-store "^1.6.0"
     uuid "^8.3.0"
     vfile "^4.2.1"
 
@@ -3542,10 +3543,10 @@
   resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
   integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
 
-"@grpc/grpc-js@^1.14.1", "@grpc/grpc-js@^1.7.1":
-  version "1.14.2"
-  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.14.2.tgz#d245069181a1a8057abd35522d6052482730cf19"
-  integrity sha512-QzVUtEFyu05UNx2xr0fCQmStUO17uVQhGNowtxs00IgTZT6/W2PBLfUkj30s0FKJ29VtTa3ArVNIhNP6akQhqA==
+"@grpc/grpc-js@^1.14.2", "@grpc/grpc-js@^1.7.1":
+  version "1.14.3"
+  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.14.3.tgz#4c9b817a900ae4020ddc28515ae4b52c78cfb8da"
+  integrity sha512-Iq8QQQ/7X3Sac15oB6p0FmUg/klxQvXLeileoqrTRGJYLV+/9tubbr9ipz0GKHjmXVsgFPo/+W+2cA8eNcR+XA==
   dependencies:
     "@grpc/proto-loader" "^0.8.0"
     "@js-sdsl/ordered-map" "^4.4.2"
@@ -3899,23 +3900,23 @@
   resolved "https://registry.yarnpkg.com/@hey-api/codegen-core/-/codegen-core-0.3.3.tgz#a93d2a6b338a5525fe53be42c29e2dd839122e43"
   integrity sha512-vArVDtrvdzFewu1hnjUm4jX1NBITlSCeO81EdWq676MxQbyxsGcDPAgohaSA+Wvr4HjPSvsg2/1s2zYxUtXebg==
 
-"@hey-api/json-schema-ref-parser@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@hey-api/json-schema-ref-parser/-/json-schema-ref-parser-1.2.1.tgz#7268186964bfb24beb227e2d79e514fd0dd3c775"
-  integrity sha512-inPeksRLq+j3ArnuGOzQPQE//YrhezQG0+9Y9yizScBN2qatJ78fIByhEgKdNAbtguDCn4RPxmEhcrePwHxs4A==
+"@hey-api/json-schema-ref-parser@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@hey-api/json-schema-ref-parser/-/json-schema-ref-parser-1.2.2.tgz#9609373215dd868d42d89561c9b906c64f5d9239"
+  integrity sha512-oS+5yAdwnK20lSeFO1d53Ku+yaGCsY8PcrmSq2GtSs3bsBfRnHAbpPKSVzQcaxAOrzj5NB+f34WhZglVrNayBA==
   dependencies:
     "@jsdevtools/ono" "^7.1.3"
     "@types/json-schema" "^7.0.15"
-    js-yaml "^4.1.0"
+    js-yaml "^4.1.1"
     lodash "^4.17.21"
 
-"@hey-api/openapi-ts@0.88.0":
-  version "0.88.0"
-  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.88.0.tgz#357ac0eae7c47738c75d67440ae89d2aff04db71"
-  integrity sha512-ZrvmDfmVf+N4ry786LAhS/DoH+xkIjIJIeDnj2aL1qnMTIDsdRIXXvr80EnAZVBgunzu1wTBbHb3H9OfyDQ2EQ==
+"@hey-api/openapi-ts@0.88.1":
+  version "0.88.1"
+  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.88.1.tgz#516c9c9f4461f3e5f05dfb9ccb71c56cbdd9fc5a"
+  integrity sha512-x/nDTupOnV9VuSeNIiJpgIpc915GHduhyseJeMTnI0JMsXaObmpa0rgPr3ASVEYMLgpvqozIEG1RTOOnal6zLQ==
   dependencies:
     "@hey-api/codegen-core" "^0.3.3"
-    "@hey-api/json-schema-ref-parser" "1.2.1"
+    "@hey-api/json-schema-ref-parser" "1.2.2"
     ansi-colors "4.1.3"
     c12 "3.3.2"
     color-support "1.1.3"
@@ -4586,10 +4587,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-insights@link:x-pack/platform/packages/shared/ai-insights":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-security-labs-content@link:x-pack/solutions/security/packages/ai-security-labs-content":
   version "0.0.0"
   uid ""
@@ -5010,6 +5007,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-mock-data@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
   version "0.0.0"
   uid ""
@@ -5047,6 +5048,10 @@
   uid ""
 
 "@kbn/content-management-plugin@link:src/platform/plugins/shared/content_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-management-storybook@link:src/platform/packages/shared/content-management/kbn-content-management-storybook":
   version "0.0.0"
   uid ""
 
@@ -6514,6 +6519,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-snapshot-loader@link:x-pack/platform/packages/shared/kbn-es-snapshot-loader":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-types@link:src/platform/packages/shared/kbn-es-types":
   version "0.0.0"
   uid ""
@@ -6558,14 +6567,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast-inspector-plugin@link:examples/esql_ast_inspector":
-  version "0.0.0"
-  uid ""
-
-"@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
-  version "0.0.0"
-  uid ""
-
 "@kbn/esql-composer@link:src/platform/packages/shared/kbn-esql-composer":
   version "0.0.0"
   uid ""
@@ -6578,6 +6579,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-language-inspector-plugin@link:examples/esql_ast_inspector":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-language@link:src/platform/packages/shared/kbn-esql-language":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-types@link:src/platform/packages/shared/kbn-esql-types":
   version "0.0.0"
   uid ""
@@ -6587,10 +6596,6 @@
   uid ""
 
 "@kbn/esql-ux-example-plugin@link:examples/esql_ux_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
 
@@ -7399,10 +7404,6 @@
   uid ""
 
 "@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
-  version "0.0.0"
-  uid ""
-
-"@kbn/metrics-experience-plugin@link:src/platform/plugins/shared/metrics_experience":
   version "0.0.0"
   uid ""
 
@@ -8374,6 +8375,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-labs-artifact-builder@link:x-pack/packages/ai-infra/security-labs-artifact-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-plugin-types-common@link:x-pack/platform/packages/shared/security/plugin_types_common":
   version "0.0.0"
   uid ""
@@ -8686,6 +8691,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-label-formatter@link:src/platform/packages/shared/shared-ux/label_formatter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-link-redirect-app@link:src/platform/packages/shared/shared-ux/link/redirect_app/impl":
   version "0.0.0"
   uid ""
@@ -8827,6 +8836,10 @@
   uid ""
 
 "@kbn/slo-schema@link:x-pack/platform/packages/shared/kbn-slo-schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/slo-shared-plugin@link:x-pack/platform/plugins/shared/slo_shared":
   version "0.0.0"
   uid ""
 
@@ -11752,17 +11765,17 @@
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
 
-"@redocly/cli@^2.12.0":
-  version "2.12.5"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-2.12.5.tgz#b27e3b9d605d20a8640b3aa2ebb0c1b6c368f447"
-  integrity sha512-/kIIKHRpsIu/QxvLzsuxsFFbMJqQmCcbcZUSkNhbeJdYkB+3y5R6xpsLOlcaC33wJePcbDg2v3VYfKEhbU6rtA==
+"@redocly/cli@^2.12.3":
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-2.13.0.tgz#6b1374d2a3f379e4af17997e1c88b43e76daf1ff"
+  integrity sha512-VOGh8p5gKy+u94SbvMGaHvDM6TPw668D9iQkNSztoi4T5sj3ZwM7Y8Z3yZnMqC5s5epDcLAMq4jCO8UVn5ZWHg==
   dependencies:
     "@opentelemetry/exporter-trace-otlp-http" "0.202.0"
     "@opentelemetry/resources" "2.0.1"
     "@opentelemetry/sdk-trace-node" "2.0.1"
     "@opentelemetry/semantic-conventions" "1.34.0"
-    "@redocly/openapi-core" "2.12.5"
-    "@redocly/respect-core" "2.12.5"
+    "@redocly/openapi-core" "2.13.0"
+    "@redocly/respect-core" "2.13.0"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -11797,10 +11810,10 @@
   dependencies:
     json-schema-to-ts "2.7.2"
 
-"@redocly/openapi-core@2.12.5":
-  version "2.12.5"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-2.12.5.tgz#5ae014d52fec47788c7707d09e66b8c7ceb01ffa"
-  integrity sha512-PlzsfOgPUWg4OmyznsIWQ6EnfZK6KSOn2MG4sZS3DY9cHgno5YywNy8zFQWHADXLqR7hTw2M7VvbiMKVJxzyiA==
+"@redocly/openapi-core@2.13.0":
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-2.13.0.tgz#4211616ff8557d04b18b10c8411cd774fdecdbaa"
+  integrity sha512-xQ4z5tsrXbIa4EfCniHv1zZ4etmQ0lpRcxy750iOamV5A/+19mgbPtD+UQCoT18puDAjcnOgpX7x2ha72qKrnw==
   dependencies:
     "@redocly/ajv" "^8.17.1"
     "@redocly/config" "^0.41.0"
@@ -11827,15 +11840,15 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redocly/respect-core@2.12.5":
-  version "2.12.5"
-  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-2.12.5.tgz#3303a6f78877b10d66e3574a4fdcbcc907a7705f"
-  integrity sha512-c0Tj+Yqd48uCD+fo0WtNeHeVIBkSWNpyT+L3ViAyMXxWD6HiMaA7JTb+IXJXhWdcUrVwd4l1gMuduSyvzFX2gg==
+"@redocly/respect-core@2.13.0":
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-2.13.0.tgz#f0f4d584114d7eb1cbbb0fae81287dadb7f079ec"
+  integrity sha512-35OidNXWkmmsJiwgX+tFw7FaU8usZVvZ/lFBFNJga65pivEvaDlfiwKxIRTzM4iuNbc2FRvP2q30dlGAztv0tg==
   dependencies:
     "@faker-js/faker" "^7.6.0"
     "@noble/hashes" "^1.8.0"
     "@redocly/ajv" "8.17.1"
-    "@redocly/openapi-core" "2.12.5"
+    "@redocly/openapi-core" "2.13.0"
     better-ajv-errors "^1.2.0"
     colorette "^2.0.20"
     json-pointer "^0.6.2"
@@ -17353,10 +17366,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^142.0.0:
-  version "142.0.2"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-142.0.2.tgz#bea4e241ea694aba14ab79e5f085adaff03780c6"
-  integrity sha512-FmItmTE56bg2DVSbAC4SEuSzaOpqM7Mv3Kfha+EC7ecT67r4xHZErp+apESfOXkFeo7ry8Z7SG4KWaETFWxMNQ==
+chromedriver@^143.0.0:
+  version "143.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-143.0.1.tgz#d1328faa18a06d42759b8c867fbcc5f95adc68ba"
+  integrity sha512-qR0DKGV7C3r5Fo6WJD2bqQ1ny9THrJTL4X8JeArBQ6m5Cq6sHXAhIrVgsTZuKi9tL/YUcFoELMI3UTg6dMiKWA==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.12.0"
@@ -25623,10 +25636,10 @@ lru-cache@^10.2.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.4.3.tgz#410fc8a17b70e598013df257c2446b7f3383f119"
   integrity sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==
 
-lru-cache@^11.0.0, lru-cache@^11.1.0, lru-cache@^11.2.2:
-  version "11.2.2"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.2.2.tgz#40fd37edffcfae4b2940379c0722dc6eeaa75f24"
-  integrity sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg==
+lru-cache@^11.0.0, lru-cache@^11.1.0, lru-cache@^11.2.4:
+  version "11.2.4"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.2.4.tgz#ecb523ebb0e6f4d837c807ad1abaea8e0619770d"
+  integrity sha512-B5Y16Jr9LB9dHVkh6ZevG+vAbOsNOYCX+sXvFWFu7B3Iz5mijW3zdbMyhsh8ANd2mSWBYdJgnqi+mL7/LrOPYg==
 
 lru-cache@^4.1.5:
   version "4.1.5"
@@ -26716,7 +26729,7 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.12.3:
+msw@~2.12.4:
   version "2.12.4"
   resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.4.tgz#9a7045a6ef831826f57f4050552ca41dd21fe0d4"
   integrity sha512-rHNiVfTyKhzc0EjoXUBVGteNKBevdjOlVC6GlIRXpy+/3LHEIGRovnB5WPjcvmNODVQ1TNFnoa7wsGbd0V3epg==
@@ -33811,10 +33824,10 @@ use-sync-external-store@1.2.2:
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.2.tgz#c3b6390f3a30eba13200d2302dcdf1e7b57b2ef9"
   integrity sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==
 
-use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-external-store@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.4.0.tgz#adbc795d8eeb47029963016cefdf89dc799fcebc"
-  integrity sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==
+use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-external-store@^1.4.0, use-sync-external-store@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 use@^2.0.0:
   version "2.0.2"

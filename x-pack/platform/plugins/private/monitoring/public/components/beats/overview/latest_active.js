@@ -36,6 +36,9 @@ export function LatestActive({ latestActive }) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('xpack.monitoring.beats.overview.latestActive.tableCaption', {
+        defaultMessage: 'Latest active beats',
+      })}
       items={activity}
       columns={[
         {

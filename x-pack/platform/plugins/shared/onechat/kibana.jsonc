@@ -29,7 +29,9 @@
       "spaces",
       "stackConnectors",
       "licensing",
-      "triggersActionsUi"
+      "triggersActionsUi",
+      "esUiShared",
+      "workflowsExtensions",
     ],
     "requiredBundles": [
       "kibanaReact"
@@ -37,7 +39,6 @@
     "optionalPlugins": [
       "cloud",
       "licenseManagement",
-      "workflowsExtensions",
       "workflowsManagement",
       "usageCollection"
     ],
