@@ -61,7 +61,7 @@ for mode in $RUN_MODES; do
 
   # Prevent non-zero exit code from breaking the loop
   set +e
-  node scripts/scout.js run-tests "$mode" --config "$CONFIG_PATH" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  node scripts/scout.js run-tests "$mode" --config "$CONFIG_PATH" --config-dir cspm_agentless --kibana-install-dir "$KIBANA_BUILD_LOCATION"
   EXIT_CODE=$?
   set -e
 
