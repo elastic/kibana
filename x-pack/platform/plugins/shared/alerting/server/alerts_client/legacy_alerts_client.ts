@@ -6,6 +6,7 @@
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, clone, keys } from 'lodash';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
@@ -30,7 +31,6 @@ import type {
 import { DEFAULT_MAX_ALERTS } from '../config';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
 import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
@@ -176,9 +176,23 @@ export class LegacyAlertsClient<
           maintenanceWindows,
         });
 
+        // Create a map of maintenance window IDs to names
+        const maintenanceWindowNamesMap = new Map(
+          (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+        );
+
+        // Get the names corresponding to the IDs
+        const maintenanceWindowsWithoutScopedQueryNames =
+          maintenanceWindowsWithoutScopedQueryIds.map(
+            (id) => maintenanceWindowNamesMap.get(id) || id
+          );
+
         for (const id in processedAlertsNew) {
           if (Object.hasOwn(processedAlertsNew, id)) {
             processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+            processedAlertsNew[id].setMaintenanceWindowNames(
+              maintenanceWindowsWithoutScopedQueryNames
+            );
           }
         }
       }
@@ -313,6 +327,7 @@ export class LegacyAlertsClient<
     maintenanceWindows: MaintenanceWindow[];
   }) {
     const maintenanceWindowIds = maintenanceWindows.map((mw) => mw.id);
+    const maintenanceWindowNamesMap = new Map(maintenanceWindows.map((mw) => [mw.id, mw.title]));
 
     const clearMws = (
       alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
@@ -323,7 +338,14 @@ export class LegacyAlertsClient<
           const activeMaintenanceWindowIds = existingMaintenanceWindowIds.filter((mw) => {
             return maintenanceWindowIds.includes(mw);
           });
+
+          // Map active IDs to their corresponding names
+          const activeMaintenanceWindowNames = activeMaintenanceWindowIds.map(
+            (mwId) => maintenanceWindowNamesMap.get(mwId) || mwId
+          );
+
           alerts[id].setMaintenanceWindowIds(activeMaintenanceWindowIds);
+          alerts[id].setMaintenanceWindowNames(activeMaintenanceWindowNames);
         }
       }
     };

@@ -291,7 +291,7 @@ export const DataDriftOverviewTable = ({
       onChange={onTableChange}
       pagination={pagination}
       loading={status === FETCH_STATUS.LOADING}
-      message={tableMessage}
+      noItemsMessage={tableMessage}
     />
   );
 };

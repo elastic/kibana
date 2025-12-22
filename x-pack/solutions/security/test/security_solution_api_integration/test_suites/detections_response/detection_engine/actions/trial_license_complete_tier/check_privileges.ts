@@ -10,14 +10,14 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
   createAlertsIndex,
   waitForRulePartialFailure,
   getRuleForAlertTesting,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';

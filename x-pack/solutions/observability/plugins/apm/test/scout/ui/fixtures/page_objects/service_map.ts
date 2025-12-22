@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
+import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
@@ -27,7 +28,7 @@ export class ServiceMapPage {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
+    return await waitForApmSettingsHeaderLink(this.page);
   }
 
   async gotoDetailedServiceMapWithDateSelected(start: string, end: string) {
@@ -36,7 +37,7 @@ export class ServiceMapPage {
         'apm'
       )}/services/opbeans-java/service-map?&rangeFrom=${start}&rangeTo=${end}`
     );
-    return this.page.waitForLoadingIndicatorHidden();
+    return await waitForApmSettingsHeaderLink(this.page);
   }
 
   async getSearchBar() {
@@ -68,7 +69,7 @@ export class ServiceMapPage {
     // Try to click with force if normal click fails due to tooltip interference
     try {
       await button.click({ timeout: 5000 });
-    } catch (error) {
+    } catch {
       // If normal click fails, try with force to bypass tooltip interference
       await button.click({ force: true, timeout: 5000 });
     }

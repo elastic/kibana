@@ -11,10 +11,10 @@ import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { API_VERSIONS } from '../../../common/constants';
 
 import { DATA_STREAM_API_ROUTES } from '../../constants';
-
+import { DeprecatedILMPolicyCheckResponseSchema } from '../../../common/types/rest_spec/data_stream';
 import { genericErrorResponse } from '../schema/errors';
 
-import { getListHandler } from './handlers';
+import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
 
 export const ListDataStreamsResponseSchema = schema.object({
   data_streams: schema.arrayOf(
@@ -81,5 +81,44 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getListHandler
+    );
+
+  // Check for deprecated ILM policies
+  router.versioned
+    .get({
+      path: DATA_STREAM_API_ROUTES.DEPRECATED_ILM_CHECK_PATTERN,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
+      },
+      summary: `Check if Fleet-managed component templates are using deprecated ILM policies that require manual migration`,
+      options: {
+        tags: ['internal', 'oas-tag:Data streams'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => DeprecatedILMPolicyCheckResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getDeprecatedILMCheckHandler
     );
 };

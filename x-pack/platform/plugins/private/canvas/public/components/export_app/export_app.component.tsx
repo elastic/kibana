@@ -56,6 +56,7 @@ export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWor
 };
 
 ExportApp.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   workpad: PropTypes.shape({
     id: PropTypes.string.isRequired,
     pages: PropTypes.array.isRequired,

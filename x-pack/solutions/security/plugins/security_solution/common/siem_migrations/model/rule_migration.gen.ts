@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
+import { Threat } from '../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 import {
   MigrationTranslationResult,
@@ -30,7 +31,9 @@ import {
  * The original rule vendor identifier.
  */
 export type OriginalRuleVendor = z.infer<typeof OriginalRuleVendor>;
-export const OriginalRuleVendor = z.literal('splunk');
+export const OriginalRuleVendor = z.enum(['splunk', 'qradar']);
+export type OriginalRuleVendorEnum = typeof OriginalRuleVendor.enum;
+export const OriginalRuleVendorEnum = OriginalRuleVendor.enum;
 
 /**
  * The original rule annotations containing additional information.
@@ -82,6 +85,10 @@ export const OriginalRule = z.object({
    * The original rule's severity or some representation of it.
    */
   severity: z.string().optional(),
+  /**
+   * The MITRE ATT&CK threat information for this rule.
+   */
+  threat: z.array(Threat).optional(),
 });
 
 /**
@@ -125,6 +132,10 @@ export const ElasticRule = z.object({
    * The Elastic rule id installed as a result.
    */
   id: NonEmptyString.optional(),
+  /**
+   * The MITRE ATT&CK threat information for this rule.
+   */
+  threat: z.array(Threat).optional(),
 });
 
 /**
@@ -355,7 +366,7 @@ export const UpdateRuleMigrationRule = z.object({
  * Indicates the filter to retry the migrations rules translation
  */
 export type RuleMigrationRetryFilter = z.infer<typeof RuleMigrationRetryFilter>;
-export const RuleMigrationRetryFilter = z.enum(['failed', 'not_fully_translated']);
+export const RuleMigrationRetryFilter = z.enum(['failed', 'not_fully_translated', 'selected']);
 export type RuleMigrationRetryFilterEnum = typeof RuleMigrationRetryFilter.enum;
 export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
 

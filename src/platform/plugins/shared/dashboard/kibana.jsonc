@@ -39,7 +39,9 @@
       "serverless",
       "noDataPage",
       "observabilityAIAssistant",
-      "lens"
+      "lens",
+      "security",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaReact",

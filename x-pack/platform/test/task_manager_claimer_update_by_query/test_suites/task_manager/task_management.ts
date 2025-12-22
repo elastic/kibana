@@ -433,7 +433,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: originalTask.id,
       });
 
-      expect(runSoonResult).to.eql({ id: originalTask.id });
+      expect(runSoonResult).to.eql({ id: originalTask.id, forced: false });
 
       await retry.try(async () => {
         expect(
@@ -600,7 +600,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
-      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
+      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id, forced: false });
     });
 
     it('should disable and reenable task and run it when runSoon = true', async () => {

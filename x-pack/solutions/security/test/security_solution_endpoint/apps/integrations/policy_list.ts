@@ -25,7 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Endpoint Policy List Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246212
+  describe.skip('When on the Endpoint Policy List Page', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     before(async () => {

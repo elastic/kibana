@@ -144,6 +144,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
 
 ExtendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
 };
 

@@ -9,15 +9,15 @@ import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
-import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
   waitForRulePartialFailure,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
+import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';

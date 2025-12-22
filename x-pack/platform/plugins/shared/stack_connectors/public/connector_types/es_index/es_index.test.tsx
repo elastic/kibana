@@ -34,9 +34,12 @@ describe('connectorTypeRegistry.get() works', () => {
 describe('action params validation', () => {
   test('action params validation succeeds when action params are valid', async () => {
     expect(
-      await connectorTypeModel.validateParams({
-        documents: [{ test: 1234 }],
-      })
+      await connectorTypeModel.validateParams(
+        {
+          documents: [{ test: 1234 }],
+        },
+        null
+      )
     ).toEqual({
       errors: {
         documents: [],
@@ -45,10 +48,13 @@ describe('action params validation', () => {
     });
 
     expect(
-      await connectorTypeModel.validateParams({
-        documents: [{ test: 1234 }],
-        indexOverride: 'kibana-alert-history-anything',
-      })
+      await connectorTypeModel.validateParams(
+        {
+          documents: [{ test: 1234 }],
+          indexOverride: 'kibana-alert-history-anything',
+        },
+        null
+      )
     ).toEqual({
       errors: {
         documents: [],
@@ -58,7 +64,7 @@ describe('action params validation', () => {
   });
 
   test('action params validation fails when action params are invalid', async () => {
-    expect(await connectorTypeModel.validateParams({})).toEqual({
+    expect(await connectorTypeModel.validateParams({}, null)).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
         indexOverride: [],
@@ -66,9 +72,12 @@ describe('action params validation', () => {
     });
 
     expect(
-      await connectorTypeModel.validateParams({
-        documents: [{}],
-      })
+      await connectorTypeModel.validateParams(
+        {
+          documents: [{}],
+        },
+        null
+      )
     ).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
@@ -77,10 +86,13 @@ describe('action params validation', () => {
     });
 
     expect(
-      await connectorTypeModel.validateParams({
-        documents: [{}],
-        indexOverride: 'kibana-alert-history-',
-      })
+      await connectorTypeModel.validateParams(
+        {
+          documents: [{}],
+          indexOverride: 'kibana-alert-history-',
+        },
+        null
+      )
     ).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
@@ -89,10 +101,13 @@ describe('action params validation', () => {
     });
 
     expect(
-      await connectorTypeModel.validateParams({
-        documents: [{}],
-        indexOverride: 'this.is-a_string',
-      })
+      await connectorTypeModel.validateParams(
+        {
+          documents: [{}],
+          indexOverride: 'this.is-a_string',
+        },
+        null
+      )
     ).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],

@@ -6,7 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL_FIND,
+  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  MAX_RULES_WITH_GAPS_TO_FETCH,
+} from '../../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
 import {
@@ -20,6 +24,12 @@ import type {
   MockClients,
   SecuritySolutionRequestHandlerContextMock,
 } from '../../../../routes/__mocks__/request_context';
+import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
+
+jest.mock('../../../logic/search/get_gap_filtered_rule_ids');
+const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as jest.MockedFunction<
+  typeof getGapFilteredRuleIds
+>;
 
 describe('Find rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -98,6 +108,145 @@ describe('Find rules route', () => {
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
+    });
+  });
+
+  describe('gap range functionality', () => {
+    const gapStartDate = '2025-01-01T00:00:00.000Z';
+    const gapEndDate = '2025-01-02T00:00:00.000Z';
+
+    test('calls getGapFilteredRuleIds with correct parameters', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: ['rule-1', 'rule-2'],
+        truncated: false,
+      });
+
+      const request = requestMock.create({
+        method: 'get',
+        path: DETECTION_ENGINE_RULES_URL_FIND,
+        query: {
+          page: 1,
+          per_page: 20,
+          sort_field: 'enabled',
+          sort_order: 'desc',
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+          gap_fill_statuses: ['unfilled'],
+          filter: 'alert.attributes.name: test',
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(mockGetGapFilteredRuleIds).toHaveBeenCalledWith({
+        rulesClient: expect.anything(),
+        gapRange: {
+          start: gapStartDate,
+          end: gapEndDate,
+        },
+        gapFillStatuses: ['unfilled'],
+        maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+        filter: 'alert.attributes.name: test',
+        sortField: 'enabled',
+        sortOrder: 'desc',
+      });
+    });
+
+    test('returns empty response when no rules have gaps', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: [],
+        truncated: false,
+      });
+
+      const request = requestMock.create({
+        method: 'get',
+        path: DETECTION_ENGINE_RULES_URL_FIND,
+        query: {
+          page: 1,
+          per_page: 20,
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+          gap_fill_statuses: ['unfilled'],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(response.body.data).toEqual([]);
+      expect(response.body.total).toEqual(0);
+    });
+
+    test('returns warnings when truncated is true', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: ['rule-1', 'rule-2'],
+        truncated: true,
+      });
+
+      const request = requestMock.create({
+        method: 'get',
+        path: DETECTION_ENGINE_RULES_URL_FIND,
+        query: {
+          page: 1,
+          per_page: 20,
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+          gap_fill_statuses: ['unfilled'],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(response.body.warnings).toEqual([
+        {
+          type: MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+          message: expect.stringContaining('rules with gaps'),
+          actionPath: '',
+        },
+      ]);
+    });
+
+    test('does not return warnings when truncated is false', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: ['rule-1', 'rule-2'],
+        truncated: false,
+      });
+
+      const request = requestMock.create({
+        method: 'get',
+        path: DETECTION_ENGINE_RULES_URL_FIND,
+        query: {
+          page: 1,
+          per_page: 20,
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+          gap_fill_statuses: ['unfilled'],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
+      expect(response.body.warnings).toBeUndefined();
+    });
+
+    test('does not call getGapFilteredRuleIds when gap_fill_statuses is empty', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: DETECTION_ENGINE_RULES_URL_FIND,
+        query: {
+          page: 1,
+          per_page: 20,
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+          gap_fill_statuses: [],
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(mockGetGapFilteredRuleIds).not.toHaveBeenCalled();
     });
   });
 });

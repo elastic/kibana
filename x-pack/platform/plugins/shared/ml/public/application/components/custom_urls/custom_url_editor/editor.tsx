@@ -242,8 +242,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
 
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
-  const dashboardOptions = dashboards.map((dashboard) => {
-    return { value: dashboard.id, text: dashboard.attributes.title };
+  const dashboardOptions = dashboards.map(({ id, data }) => {
+    return { value: id, text: data.title };
   });
 
   const dataViewOptions = dataViewListItems.map(({ id, title }) => {

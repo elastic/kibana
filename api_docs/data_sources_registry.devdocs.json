@@ -170,8 +170,10 @@
         "type": "Interface",
         "tags": [],
         "label": "DataTypeDefinition",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+        "description": [
+          "\nAbstraction defining a federated data source (\"fetcher\").\nThis defines:\n- Connectivity (OAuth) configuration\n- What workflows should be created\n- How to interact with data stored in third-party systems\n"
+        ],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,8 +183,10 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "description": [
+              "Unique identifier for the data type"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -192,8 +196,10 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "description": [
+              "Display name for the data type"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,11 +209,84 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [],
+            "description": [
+              "Optional description of the data type"
+            ],
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataTypeDefinition.generateWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "generateWorkflows",
+            "description": [
+              "\nGenerates workflows for interacting with the third-party data source.\nWorkflows are the only model for \"taking action\" against the third party."
+            ],
+            "signature": [
+              "(stackConnectorId?: string | undefined) => ",
+              "WorkflowInfo",
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataSourcesRegistry",
+                "id": "def-server.DataTypeDefinition.generateWorkflows.$1",
+                "type": "string",
+                "tags": [],
+                "label": "stackConnectorId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataTypeDefinition.stackConnector",
+            "type": "Object",
+            "tags": [],
+            "label": "stackConnector",
+            "description": [
+              "\nStack connector configuration.\nStack connectors are the only model for executing workflow actions against the third party."
+            ],
+            "signature": [
+              "StackConnectorConfig"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataTypeDefinition.oauthConfiguration",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "oauthConfiguration",
+            "description": [
+              "OAuth configuration for authentication"
+            ],
+            "signature": [
+              "EARSOAuthConfiguration",
+              " | ",
+              "CustomOAuthConfiguration",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_type.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -289,7 +368,31 @@
       "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "dataSourcesRegistry",
+          "id": "def-server.DataSourcesRegistryPluginStart.getCatalog",
+          "type": "Function",
+          "tags": [],
+          "label": "getCatalog",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "dataSourcesRegistry",
+              "scope": "server",
+              "docId": "kibDataSourcesRegistryPluginApi",
+              "section": "def-server.DataCatalog",
+              "text": "DataCatalog"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

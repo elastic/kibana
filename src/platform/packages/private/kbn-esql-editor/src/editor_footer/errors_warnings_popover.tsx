@@ -71,6 +71,19 @@ function ErrorsWarningsContent({
 }) {
   const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
+
+  const handleClick = (item: MonacoMessage) => {
+    const selection = window.getSelection();
+    const selectedText = selection?.toString();
+
+    // If user has selected text, don't treat it as a normal click
+    if (selectedText && selectedText.length > 0) {
+      return;
+    }
+
+    onErrorClick(item);
+  };
+
   return (
     <div style={{ width: 500, padding: euiTheme.size.s, maxHeight: 300, overflow: 'auto' }}>
       <EuiDescriptionList data-test-subj="ESQLEditor-errors-warnings-content">
@@ -79,12 +92,13 @@ function ErrorsWarningsContent({
             <EuiDescriptionListDescription
               key={index}
               className={classNameCss`
-                                &:hover {
-                                  cursor: pointer;
-                                }
-                                white-space: pre-line;
-                              `}
-              onClick={() => onErrorClick(item)}
+                &:hover {
+                  cursor: pointer;
+                }
+                white-space: pre-line;
+                user-select: text;
+              `}
+              onClick={() => handleClick(item)}
             >
               <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                 <EuiFlexItem grow={false}>

@@ -13,7 +13,7 @@ import { useGetChoices } from './use_get_choices';
 import FieldsPreview from './servicenow_itsm_case_fields_preview';
 
 import { renderWithTestingProviders } from '../../../common/mock';
-import { createQueryWithMarkup } from '../../../common/test_utils';
+import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
 jest.mock('./use_get_choices');
 
@@ -41,14 +41,16 @@ describe('ServiceNowITSM Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = [
+      ['Urgency', '2 - High'],
+      ['Severity', '1 - Critical'],
+      ['Impact', '3 - Moderate'],
+      ['Category', 'Denial of Service'],
+      ['Subcategory', 'Inbound or outbound'],
+      ['foo', 'bar'],
+    ];
 
-    expect(getByTextWithMarkup('Urgency: 2 - High')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Severity: 1 - Critical')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Impact: 3 - Moderate')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Category: Denial of Service')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Subcategory: Inbound or outbound')).toBeInTheDocument();
-    expect(getByTextWithMarkup('Additional Fields:')).toBeInTheDocument();
-    expect(getByTextWithMarkup('{"foo": "bar"}')).toBeInTheDocument();
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

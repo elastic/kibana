@@ -17,7 +17,7 @@ export class EnterConditionBranchNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     if (this.node.type === 'enter-then-branch') {
       this.wfExecutionRuntimeManager.enterScope('true');
     } else {

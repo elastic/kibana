@@ -150,5 +150,3 @@ export interface XYState {
   showCurrentTimeMarker?: boolean;
   pointVisibility?: PointVisibility;
 }
-
-export type State = XYState;

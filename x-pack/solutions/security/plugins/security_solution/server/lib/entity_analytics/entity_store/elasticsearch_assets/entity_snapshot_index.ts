@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type EntityType } from '../../../../../common/api/entity_analytics';
+import {
+  type EntityType,
+  type EngineComponentStatus,
+  EngineComponentResourceEnum,
+} from '../../../../../common/api/entity_analytics';
 import { getEntitiesSnapshotIndexName, getEntitiesSnapshotIndexPattern } from '../utils';
 
 interface Options {
@@ -61,3 +65,30 @@ export async function deleteAllEntitySnapshotIndices({
   );
   await Promise.all(promises);
 }
+
+export const getEntitySnapshotIndexStatus = async ({
+  entityType,
+  esClient,
+  namespace,
+}: Pick<Options, 'entityType' | 'namespace' | 'esClient'>): Promise<
+  Array<EngineComponentStatus>
+> => {
+  const indexPattern = getEntitiesSnapshotIndexPattern(entityType, namespace);
+  const response = await esClient.indices.get(
+    {
+      index: indexPattern,
+      expand_wildcards: 'all',
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  const result = Object.keys(response).map((indexId) => ({
+    id: indexId,
+    installed: true,
+    resource: EngineComponentResourceEnum.index,
+  }));
+
+  return result;
+};

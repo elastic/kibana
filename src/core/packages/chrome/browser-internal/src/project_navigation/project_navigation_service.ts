@@ -47,7 +47,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
@@ -201,7 +200,6 @@ export class ProjectNavigationService {
       /** In stateful Kibana, get the id of the active solution navigation */
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
       getActiveDataTestSubj$: () => this.activeDataTestSubj$.asObservable(),
-      tourManager: new NavigationTourManager(),
     };
   }
 

@@ -34,6 +34,7 @@ export {
 } from './constants/v1';
 
 export { flappingSchema as flappingSchemaV1 } from './flapping/schemas/v1';
+export { flappingSchema as flappingSchemaV2 } from './flapping/schemas/v2';
 
 export type {
   RuleNotifyWhen as RuleNotifyWhenV1,
@@ -44,3 +45,4 @@ export type {
 } from './constants/v1';
 
 export type { Flapping as FlappingV1 } from './flapping/types/v1';
+export type { Flapping as FlappingV2 } from './flapping/types/v2';

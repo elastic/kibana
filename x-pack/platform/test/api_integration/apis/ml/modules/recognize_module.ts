@@ -163,6 +163,27 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
+      testTitleSuffix: 'for siem azure activity logs dataset',
+      sourceDataArchive:
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs',
+      indexPattern: 'ft_module_security_azure_activitylogs',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_azure_activitylogs'],
+      },
+    },
+    {
+      testTitleSuffix: 'for siem azure gcp audit dataset',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_gcp_audit',
+      indexPattern: 'ft_module_security_gcp_audit',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_gcp_audit'],
+      },
+    },
+    {
       testTitleSuffix: 'for metrics ui dataset',
       sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_metrics_ui',
       indexPattern: 'ft_module_metrics_ui',

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { fieldMetadataPlainRT } from './fields_metadata/types';
 export type {
   AnyFieldName,
   EcsFieldName,
@@ -21,11 +20,4 @@ export type {
   TOtelFields,
 } from './fields_metadata/types';
 
-export { FieldMetadata } from './fields_metadata/models/field_metadata';
-export { FieldsMetadataDictionary } from './fields_metadata/models/fields_metadata_dictionary';
-export {
-  createProxiedFieldsMap,
-  createProxiedPlainFields,
-  extractPrefixParts,
-  SUPPORTED_PREFIXES,
-} from './fields_metadata/utils/create_proxied_fields_map';
+export { isMetadataField } from './guards';

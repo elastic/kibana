@@ -12,11 +12,13 @@ import type {
   ReasoningEvent,
   ThinkingCompleteEvent,
   ToolCallEvent,
+  PromptRequestEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
-} from '@kbn/onechat-common';
+} from '@kbn/onechat-common/chat/events';
 import { ChatEventType } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { PromptRequestSource, PromptRequest } from '@kbn/onechat-common/agents/prompts';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -53,6 +55,22 @@ export const createToolCallEvent = (data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
       params: data.params,
+    },
+  };
+};
+
+export const createPromptRequestEvent = ({
+  prompt,
+  source,
+}: {
+  prompt: PromptRequest;
+  source: PromptRequestSource;
+}): PromptRequestEvent => {
+  return {
+    type: ChatEventType.promptRequest,
+    data: {
+      prompt,
+      source,
     },
   };
 };
@@ -101,14 +119,15 @@ export const createTextChunkEvent = (
 };
 
 export const createMessageEvent = (
-  content: string,
+  content: string | object,
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageCompleteEvent => {
   return {
     type: ChatEventType.messageComplete,
     data: {
       message_id: messageId,
-      message_content: content,
+      message_content: typeof content === 'string' ? content : '',
+      ...(typeof content === 'object' ? { structured_output: content } : {}),
     },
   };
 };

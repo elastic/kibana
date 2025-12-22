@@ -1,0 +1,14 @@
+openapi: 3.0.3
+info:
+  title: Qradar components for both dashboards and rules
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    SplunkResourceType:
+      type: string
+      description: The type of the resource
+      enum:
+        - lookup
+        - macro

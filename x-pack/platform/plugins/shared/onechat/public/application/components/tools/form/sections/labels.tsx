@@ -18,7 +18,7 @@ export interface LabelsProps {
   mode: ToolFormMode;
 }
 
-export const Labels = ({ mode }: LabelsProps) => {
+export const LabelsSection = ({ mode }: LabelsProps) => {
   const { tags, isLoading: isLoadingTags } = useToolsTags();
   const {
     control,

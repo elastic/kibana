@@ -15,13 +15,17 @@ const cssProp = css`
   width: 100vw;
   min-height: 100%;
   min-width: 100%;
-  overflow: hidden;
+
+  @media screen {
+    // do not restrict height when printing
+    overflow: hidden;
+  }
 
   display: grid;
 
   grid-template-areas:
     'banner banner banner'
-    'navigation header sidebar'
+    'header header header'
     'navigation application sidebar'
     'footer footer footer';
 `;

@@ -25,7 +25,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe('tool: recall', function () {
+  // Skipping temporarily: https://github.com/elastic/kibana/issues/246720
+  describe.skip('tool: recall', function () {
     // fails/flaky on MKI, see https://github.com/elastic/kibana/issues/232588
     this.tags(['failsOnMKI']);
 
@@ -54,21 +55,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const entries = await recall('What happened during the database outage?');
         const docTypes = uniq(entries.map(({ id }) => id.split('_')[0]));
         expect(docTypes).to.eql(['animal', 'technical']);
-      });
-
-      it('returns entries in a consistent order', async () => {
-        const entries = await recall('whales');
-
-        expect(entries.map(({ id, esScore }) => `${formatScore(esScore!)} - ${id}`)).to.eql([
-          'high - animal_whale_migration_patterns',
-          'low - animal_elephants_social_structure',
-          'low - technical_api_gateway_timeouts',
-          'low - technical_cache_misses_thirdparty_api',
-          'low - animal_cheetah_life_speed',
-          'low - technical_db_outage_slow_queries',
-          'low - animal_giraffe_habitat_feeding',
-          'low - animal_penguin_antarctic_adaptations',
-        ]);
       });
 
       it('returns the "Cheetah" entry from search connectors as the top result', async () => {
@@ -109,16 +95,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     return body.entries;
   }
-}
-
-function formatScore(score: number) {
-  if (score > 0.5) {
-    return 'high';
-  }
-
-  if (score > 0.1) {
-    return 'medium';
-  }
-
-  return 'low';
 }

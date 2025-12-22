@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import { TOURS, useTourQueue } from '@kbn/tour-queue';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -32,12 +33,15 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
     return tourConfig;
   });
 
+  const { isActive: isActiveInQueue, onComplete } = useTourQueue(TOURS.SECURITY_SIEM_MIGRATION);
+
   const onTourFinished = useCallback(() => {
     setTourState({
       ...tourState,
       isTourActive: false,
     });
-  }, [tourState]);
+    onComplete();
+  }, [tourState, onComplete]);
 
   useEffect(() => {
     storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.SIEM_MAIN_LANDING_PAGE, tourState);
@@ -52,8 +56,13 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
   }, []);
 
   const showTour = useMemo(() => {
-    return siemMigrations.rules.isAvailable() && tourState.isTourActive && tourDelayElapsed;
-  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive]);
+    return (
+      siemMigrations.rules.isAvailable() &&
+      tourState.isTourActive &&
+      tourDelayElapsed &&
+      isActiveInQueue
+    );
+  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive, isActiveInQueue]);
 
   return (
     <EuiTourStep

@@ -291,6 +291,58 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isNonEmptyOrWhitespace",
+        "type": "Function",
+        "tags": [],
+        "label": "isNonEmptyOrWhitespace",
+        "description": [
+          "\nChecks that the input is a string that is not empty while allowing whitespace."
+        ],
+        "signature": [
+          "(input: string, ctx: ",
+          "RefinementCtx",
+          ") => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isNonEmptyOrWhitespace.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isNonEmptyOrWhitespace.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              "RefinementCtx"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.isNonEmptyString",
         "type": "Function",
         "tags": [],
@@ -695,6 +747,24 @@
           "KbnZodBooleanFromString"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.NonEmptyOrWhitespaceString",
+        "type": "Object",
+        "tags": [],
+        "label": "NonEmptyOrWhitespaceString",
+        "description": [],
+        "signature": [
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

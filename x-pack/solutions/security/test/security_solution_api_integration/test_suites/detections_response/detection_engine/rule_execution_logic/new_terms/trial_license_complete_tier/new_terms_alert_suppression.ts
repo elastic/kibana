@@ -27,7 +27,7 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { createRule } from '../../../../../../config/services/detections_response';
+import { createRule } from '@kbn/detections-response-ftr-services';
 import {
   getOpenAlerts,
   getPreviewAlerts,

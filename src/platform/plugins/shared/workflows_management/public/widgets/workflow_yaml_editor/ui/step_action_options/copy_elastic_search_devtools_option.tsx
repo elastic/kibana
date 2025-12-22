@@ -13,9 +13,15 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
-import { selectFocusedStepInfo, selectWorkflowGraph } from '../../../../entities/workflows/store';
+import {
+  selectEditorFocusedStepInfo,
+  selectEditorWorkflowGraph,
+} from '../../../../entities/workflows/store';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
+import {
+  getElasticsearchRequestInfo,
+  isElasticsearchStep,
+} from '../../lib/elasticsearch_step_utils';
 
 export interface CopyElasticSearchDevToolsOptionProps {
   onClick: () => void;
@@ -24,8 +30,8 @@ export interface CopyElasticSearchDevToolsOptionProps {
 export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevToolsOptionProps> = ({
   onClick,
 }) => {
-  const workflowGraph = useSelector(selectWorkflowGraph);
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const workflowGraph = useSelector(selectEditorWorkflowGraph);
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const {
     services: { notifications },
   } = useKibana();
@@ -52,7 +58,10 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
       const stepGraph = workflowGraph.getStepGraph(focusedStepInfo.stepId);
       const elasticSearchNode = stepGraph
         .getAllNodes()
-        .find((node) => node.type.startsWith('kibana')) as ElasticsearchGraphNode;
+        .find((node): node is ElasticsearchGraphNode => isElasticsearchStep(node.stepType));
+      if (!elasticSearchNode) {
+        return;
+      }
       const stepType = elasticSearchNode.stepType;
       const requestInfo = getElasticsearchRequestInfo(
         stepType,

@@ -87,6 +87,7 @@ export function StackTraces({
             <EuiCallOut
               announceOnMount
               iconType="warning"
+              data-test-subj="stackTracesAgentCallout"
               title={i18n.translate('xpack.profiling.stackTraces.euiCallOut.wrongAgentTitle', {
                 defaultMessage: 'No executable names available',
               })}
@@ -99,10 +100,11 @@ export function StackTraces({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow>
-          <EuiPanel>
+          <EuiPanel data-test-subj="stackTracesChartPanel">
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <EuiButtonGroup
+                  data-test-subj="stackTracesDisplayOptionButtonGroup"
                   idSelected={displayOption}
                   type="single"
                   onChange={(nextValue) => {
@@ -134,7 +136,7 @@ export function StackTraces({
             <>
               <EuiSpacer />
               <EuiTitle size="s">
-                <h1>
+                <h1 data-test-subj="stackTracesTopLabel">
                   {i18n.translate('xpack.profiling.chartGrid.h1.topLabel', {
                     defaultMessage: 'Top {size}',
                     values: {
@@ -167,6 +169,10 @@ export function StackTraces({
       </EuiFlexGroup>
       {selectedSubchart && (
         <EuiFlyout
+          data-test-subj="stackTracesFlyout"
+          aria-label={i18n.translate('xpack.profiling.stackTraces.flyout.ariaLabel', {
+            defaultMessage: 'Stack trace details',
+          })}
           onClose={() => {
             setSelectedSubchart(undefined);
           }}

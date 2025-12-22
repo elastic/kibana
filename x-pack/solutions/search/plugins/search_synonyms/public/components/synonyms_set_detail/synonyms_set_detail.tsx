@@ -38,12 +38,10 @@ export const SynonymsSetDetail = () => {
       grow={false}
       data-test-subj="searchSynonymsSetDetailPage"
       solutionNav={searchNavigation?.useClassicNavigation(history)}
-      color="primary"
     >
       <KibanaPageTemplate.Header
         pageTitle={synonymsSetId}
         restrictWidth
-        color="primary"
         breadcrumbs={[
           {
             text: (

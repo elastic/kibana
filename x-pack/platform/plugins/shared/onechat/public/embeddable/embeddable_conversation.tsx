@@ -11,7 +11,13 @@ import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
-import { EmbeddableConversationHeader } from './embeddable_conversation_header';
+import { ConversationHeader } from '../application/components/conversations/conversation_header/conversation_header';
+import {
+  conversationBackgroundStyles,
+  headerHeight,
+} from '../application/components/conversations/conversation.styles';
+import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
+import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -19,14 +25,16 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   const { euiTheme } = useEuiTheme();
   const { onClose, ariaLabelledBy } = props;
 
-  const backgroundStyles = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+  const wrapperStyles = css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    ${conversationBackgroundStyles(euiTheme)}
   `;
 
   const headerStyles = css`
-    ${backgroundStyles}
     display: flex;
-    align-items: center;
+    height: ${headerHeight}px;
     &.euiFlyoutHeader {
       padding-inline: 0;
       padding-block-start: 0;
@@ -34,8 +42,8 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     }
   `;
   const bodyStyles = css`
-    ${backgroundStyles}
     flex: 1;
+    min-height: 0;
 
     .euiFlyoutBody__overflow {
       overflow: hidden;
@@ -54,13 +62,18 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   `;
 
   return (
-    <EmbeddableConversationsProvider {...props}>
-      <EuiFlyoutHeader css={headerStyles}>
-        <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody css={bodyStyles}>
-        <Conversation />
-      </EuiFlyoutBody>
-    </EmbeddableConversationsProvider>
+    <div css={wrapperStyles}>
+      <EmbeddableConversationsProvider {...props}>
+        <EmbeddableAccessBoundary onClose={onClose}>
+          <EuiFlyoutHeader css={headerStyles}>
+            <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+          </EuiFlyoutHeader>
+          <EmbeddableWelcomeMessage />
+          <EuiFlyoutBody css={bodyStyles}>
+            <Conversation />
+          </EuiFlyoutBody>
+        </EmbeddableAccessBoundary>
+      </EmbeddableConversationsProvider>
+    </div>
   );
 };

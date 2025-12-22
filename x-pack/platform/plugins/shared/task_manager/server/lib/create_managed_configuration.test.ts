@@ -23,8 +23,7 @@ import {
   DEFAULT_CAPACITY,
   DEFAULT_POLL_INTERVAL,
 } from '../config';
-import { MsearchError } from './msearch_error';
-import { BulkUpdateError } from './bulk_update_error';
+import { BulkUpdateError, MsearchError } from './errors';
 import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
 
 describe('createManagedConfiguration()', () => {

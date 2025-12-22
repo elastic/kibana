@@ -13,6 +13,7 @@ import type {
   MetricVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -29,7 +30,7 @@ import {
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiState, MetricState } from '../../schema';
+import type { MetricState } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
@@ -40,6 +41,8 @@ import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,
   getMetricAccessor,
+  getDatasourceLayers,
+  getLensStateLayer,
 } from './utils';
 import {
   fromColorByValueAPIToLensState,
@@ -53,12 +56,11 @@ type MetricApiCompareType = Extract<
   { compare: any }
 >['compare'];
 
-const ACCESSOR = 'metric_formula_accessor';
+const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -132,10 +134,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn:
-      layer.breakdown_by && layer.breakdown_by.collapse_by
-        ? layer.breakdown_by.collapse_by
-        : undefined,
+    collapseFn: layer.breakdown_by?.collapse_by,
     ...(layer.metric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
@@ -189,7 +188,7 @@ function fromCompareLensStateToAPI(
 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -200,7 +199,7 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
   if (!dataset || dataset.type == null) {
     throw new Error('Unsupported dataset type');
@@ -436,7 +435,16 @@ function getValueColumns(layer: MetricStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: MetricState): LensAttributes {
+type MetricAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsMetric' }
+>;
+
+export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'state'> & {
+  state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(config: MetricState): MetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
 
@@ -449,7 +457,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -459,37 +467,24 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
 }
 
-export function fromLensStateToAPI(
-  config: LensAttributes
-): Extract<LensApiState, { type: 'metric' }> {
+export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  // Layers can be in any order, so make sure to get the main one
-  const [layerId, layer] = Object.entries(layers).find(
-    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
-  )!;
+  const layers = getDatasourceLayers(state);
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

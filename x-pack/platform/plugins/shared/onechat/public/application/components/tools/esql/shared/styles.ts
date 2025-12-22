@@ -26,7 +26,7 @@ export const actionsContainer = (euiTheme: UseEuiTheme['euiTheme']) =>
   css({
     position: 'absolute',
     top: `-${euiTheme.size.xs}`,
-    right: `-${euiTheme.size.xs}`,
+    right: 0,
     zIndex: 2,
     opacity: 0,
     pointerEvents: 'none',

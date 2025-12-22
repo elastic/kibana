@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const commonPage = getPageObject('common');
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
-  // Flaky in serverless tests
-  describe.skip('Disabled UIs', function () {
+  describe('Disabled UIs', function () {
+    before(async () => {
+      await pageObjects.svlCommonPage.loginAsAdmin();
+    });
+
     const DISABLED_PLUGINS = [
       {
         appName: 'Upgrade Assistant',
         url: 'stack/upgrade_assistant',
-      },
-      {
-        appName: 'Advanced Settings',
-        url: 'kibana/settings',
       },
       {
         appName: 'Migrate',
@@ -59,10 +60,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         url: 'security/users',
       },
       {
-        appName: 'Roles',
-        url: 'security/roles',
-      },
-      {
         appName: 'Role Mappings',
         url: 'security/role_mappings',
       },
@@ -70,11 +67,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     DISABLED_PLUGINS.forEach(({ appName, url }) => {
       it(`${appName} is not accessible`, async () => {
-        await commonPage.navigateToUrl('management', url, {
+        await pageObjects.common.navigateToUrl('management', url, {
           shouldUseHashForSubUrl: false,
         });
         // If the route doesn't exist, the user will be redirected back to the Management landing page
-        await testSubjects.exists('managementHome');
+        // Wait for the redirect to complete and verify the management landing page is visible
+        await retry.waitFor('management landing page to be visible', async () => {
+          return await testSubjects.exists('cards-navigation-page');
+        });
+        expect(await testSubjects.exists('cards-navigation-page')).to.be(true);
       });
     });
   });

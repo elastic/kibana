@@ -6,8 +6,9 @@
  */
 
 export {
+  ConversationRoundStatus,
   type RoundInput,
-  type RawRoundInput,
+  type ConverseInput,
   type AssistantResponse,
   type ToolCallWithResult,
   type ConversationRound,
@@ -19,6 +20,7 @@ export {
   type ReasoningStepData,
   type ReasoningStep,
   type ToolCallProgress,
+  type RoundModelUsageStats,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
@@ -52,6 +54,8 @@ export {
   type ThinkingCompleteEvent,
   type RoundCompleteEventData,
   type RoundCompleteEvent,
+  type PromptRequestEventData,
+  type PromptRequestEvent,
   isToolCallEvent,
   isBrowserToolCallEvent,
   isToolResultEvent,
@@ -64,4 +68,6 @@ export {
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isConversationIdSetEvent,
+  isPromptRequestEvent,
 } from './events';
+export type { RoundState } from './round_state';

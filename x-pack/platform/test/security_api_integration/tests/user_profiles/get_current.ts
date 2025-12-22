@@ -51,7 +51,10 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/security/user_profile/_data')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
-        .send({ some: 'data', another: 'another-data' })
+        .send({
+          avatar: { initials: 'some-initials', color: '#f3f3f3' },
+          userSettings: { darkMode: 'dark', contrastMode: 'high' },
+        })
         .expect(200);
 
       const { body: profileWithoutData } = await supertestWithoutAuth
@@ -96,8 +99,15 @@ export default function ({ getService }: FtrProviderContext) {
       expectSnapshot(profileWithAllData).toMatchInline(`
         Object {
           "data": Object {
-            "another": "another-data",
-            "some": "data",
+            "avatar": Object {
+              "color": "#f3f3f3",
+              "imageUrl": null,
+              "initials": "some-initials",
+            },
+            "userSettings": Object {
+              "contrastMode": "high",
+              "darkMode": "dark",
+            },
           },
           "enabled": true,
           "labels": Object {},
@@ -119,9 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       `);
       expectSnapshot(profileWithSomeData).toMatchInline(`
         Object {
-          "data": Object {
-            "some": "data",
-          },
+          "data": Object {},
           "enabled": true,
           "labels": Object {},
           "uid": "u_K1WXIRQbRoHiuJylXp842IEhAO_OdqT7SDHrJSzUIjU_0",

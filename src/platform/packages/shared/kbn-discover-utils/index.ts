@@ -32,7 +32,6 @@ export {
   convertValueToString,
   createLogsContextService,
   createApmContextService,
-  createMetricsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -44,8 +43,10 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getAvailableResourceFields,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
+  getLogExceptionTypeFieldWithFallback,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
@@ -72,14 +73,7 @@ export {
   severityOrder,
 } from './src';
 
-export type {
-  LogsContextService,
-  ApmContextService,
-  MetricsContextService,
-  SortOrder,
-  SortInput,
-  SortPair,
-} from './src';
+export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
 
 export * from './src/types';
 

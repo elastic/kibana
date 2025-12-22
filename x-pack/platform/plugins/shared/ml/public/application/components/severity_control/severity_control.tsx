@@ -15,6 +15,7 @@ import { ML_ANOMALY_THRESHOLD, ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils'
 export interface SeveritySelectorProps {
   value: number | undefined;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }
 
 const MAX_ANOMALY_SCORE = 100;
@@ -42,13 +43,10 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
       color: ML_SEVERITY_COLORS.CRITICAL,
     },
   ];
-
   const label = i18n.translate('xpack.ml.severitySelector.formControlLabel', {
     defaultMessage: 'Severity',
   });
-
   const resultValue = value ?? ML_ANOMALY_THRESHOLD.LOW;
-
   const ticks = new Array(5).fill(null).map((x, i) => {
     const v = i * 25;
     return { value: v, label: v };

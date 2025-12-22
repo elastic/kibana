@@ -133,7 +133,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         to: [],
         cc: [],
@@ -152,7 +152,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         to: ['Email address invalid.com is not valid.'],
         cc: ['Email address bob@notallowed.com is not allowed.'],

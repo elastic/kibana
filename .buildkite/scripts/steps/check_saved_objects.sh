@@ -6,9 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
-# ------------------------------------------------------------------------------
 # Function to find a valid commit SHA, aka a SHA for which a snapshot exists
-# ------------------------------------------------------------------------------
 findExistingSnapshotSha() {
   # The merge base commit, to start looking for existing snapshots.
   local sha="${1}"
@@ -48,7 +46,7 @@ findExistingSnapshotSha() {
   return 1
 }
 
-echo "Check changes in Saved Objects"
+echo --- Check changes in Saved Objects
 
 if is_pr; then
   # We are on the 'pull_request' pipeline, the goal is to test against the merge-base commit.
@@ -62,6 +60,7 @@ if is_pr; then
   if ! is_auto_commit_disabled; then
     # The step might update files like removed_types.json and/or SO fixtures
     node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" --fix
+    check_for_changed_files "node scripts/check_saved_objects" true
   else
     node scripts/check_saved_objects --baseline "$MERGE_BASE_REV"
   fi

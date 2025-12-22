@@ -39,6 +39,7 @@ import {
 
 import type { Moment } from 'moment';
 import moment from 'moment';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   isEqlRule,
   isNewTermsRule,
@@ -108,6 +109,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
+  const { read: canReadRules } = useUserPrivileges().rulesPrivileges;
 
   const [
     {
@@ -158,7 +160,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     useFindExceptionListReferences();
 
   useEffect(() => {
-    if (fetchReferences != null) {
+    if (fetchReferences != null && canReadRules) {
       fetchReferences([
         {
           id: list.id,
@@ -167,7 +169,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         },
       ]);
     }
-  }, [list, fetchReferences]);
+  }, [list, fetchReferences, canReadRules]);
 
   /**
    * Reducer action dispatchers

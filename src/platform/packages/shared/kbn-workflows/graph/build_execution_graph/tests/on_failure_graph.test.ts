@@ -241,6 +241,9 @@ describe('on_failure graph', () => {
         stepId: 'testRetryConnectorStep',
         stepType: 'continue',
         exitNodeId: 'exitContinue_testRetryConnectorStep',
+        configuration: {
+          condition: true,
+        },
       });
     });
 

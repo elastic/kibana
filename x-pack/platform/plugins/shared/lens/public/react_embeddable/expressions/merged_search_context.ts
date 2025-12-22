@@ -6,7 +6,7 @@
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
-import type { ExecutionContextSearch } from '@kbn/es-query';
+import type { ExecutionContextSearch, ProjectRouting } from '@kbn/es-query';
 import {
   type AggregateQuery,
   type Filter,
@@ -26,6 +26,7 @@ export interface MergedSearchContext {
   filters: Filter[];
   disableWarningToasts: boolean;
   esqlVariables?: ESQLControlVariable[];
+  projectRouting?: ProjectRouting;
 }
 
 export function getMergedSearchContext(
@@ -35,11 +36,13 @@ export function getMergedSearchContext(
     query,
     timeRange,
     esqlVariables,
+    projectRouting,
   }: {
     filters?: Filter[];
     query?: Query | AggregateQuery;
     timeRange?: TimeRange;
     esqlVariables?: ESQLControlVariable[];
+    projectRouting?: ProjectRouting;
   },
   customTimeRange$: PublishingSubject<TimeRange | undefined>,
   parentApi: unknown,
@@ -63,6 +66,7 @@ export function getMergedSearchContext(
   const customTimeRange = customTimeRange$.getValue();
 
   const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? timeRange;
+
   const context = {
     esqlVariables,
     now: data.nowProvider.get().getTime(),
@@ -70,6 +74,7 @@ export function getMergedSearchContext(
     query: [attributes.state.query].filter(nonNullable),
     filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
     disableWarningToasts: true,
+    projectRouting,
   };
   // Prepend query and filters from dashboard to the visualization ones
   if (query) {

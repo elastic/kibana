@@ -43,7 +43,7 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 import { DEFAULT_SERIES } from './const';
-import type { ChangePointEmbeddableState } from './types';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 export interface AnomalyChartsInitializerProps {
   initialInput?: Partial<ChangePointEmbeddableState>;

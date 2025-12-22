@@ -5,24 +5,33 @@
  * 2.0.
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, useEuiTheme } from '@elastic/eui';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import React from 'react';
+import { css } from '@emotion/react';
+import { codeblockStyles } from './codeblock.styles';
 
 interface OtherResultStepProps {
   result: ToolResult;
 }
 
 export const OtherResultStep: React.FC<OtherResultStepProps> = ({ result }) => {
+  const { euiTheme } = useEuiTheme();
+  const paddingLeftStyles = css`
+    padding-left: ${euiTheme.size.xl};
+  `;
   return (
-    <EuiCodeBlock
-      language="json"
-      fontSize="s"
-      paddingSize="s"
-      isCopyable={false}
-      transparentBackground
-    >
-      {JSON.stringify(result.data, null, 2)}
-    </EuiCodeBlock>
+    <div css={paddingLeftStyles}>
+      <EuiCodeBlock
+        language="json"
+        fontSize="s"
+        paddingSize="s"
+        isCopyable={false}
+        color="subdued"
+        css={codeblockStyles}
+      >
+        {JSON.stringify(result.data, null, 2)}
+      </EuiCodeBlock>
+    </div>
   );
 };

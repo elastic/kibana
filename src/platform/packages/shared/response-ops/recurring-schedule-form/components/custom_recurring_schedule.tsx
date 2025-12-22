@@ -163,12 +163,12 @@ export const CustomRecurringSchedule = memo(
             }}
             componentProps={{
               'data-test-subj': 'byweekday-field',
-              compressed,
               euiFieldProps: {
                 'data-test-subj': 'customRecurringScheduleByWeekdayButtonGroup',
                 legend: 'Repeat on weekday',
                 options: WEEKDAY_OPTIONS,
                 isDisabled: readOnly,
+                ...(compressed ? { buttonSize: 'compressed' } : {}),
               },
             }}
           />
@@ -179,11 +179,11 @@ export const CustomRecurringSchedule = memo(
             path="recurringSchedule.bymonth"
             componentProps={{
               'data-test-subj': 'bymonth-field',
-              compressed,
               euiFieldProps: {
                 legend: 'Repeat on weekday or month day',
                 options: bymonthOptions,
-                readOnly,
+                isDisabled: readOnly,
+                ...(compressed ? { buttonSize: 'compressed' } : {}),
               },
             }}
           />

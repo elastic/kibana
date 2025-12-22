@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       await waitForStatus(alertId, new Set(['ok']), 90_000);
       const logs = await readLogFile();
 
-      await assertLogContains({
+      assertLogContains({
         description:
           'task manager execution context propagates to Elasticsearch via "x-opaque-id" header',
         predicate: (record) =>
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         logs,
       });
 
-      await assertLogContains({
+      assertLogContains({
         description:
           'alerting execution context propagates to Elasticsearch via "x-opaque-id" header',
         predicate: (record) =>
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         logs,
       });
 
-      await assertLogContains({
+      assertLogContains({
         description: 'execution context propagates to Kibana logs',
         predicate: (record) =>
           isExecutionContextLog(record, {
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         logs,
       });
 
-      await assertLogContains({
+      assertLogContains({
         description: 'execution context propagates to Kibana logs',
         predicate: (record) =>
           isExecutionContextLog(record, {
@@ -145,6 +145,62 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'collector.fetch',
             id: 'application_usage',
             description: 'Fetch method in the Collector "application_usage"',
+          }),
+        logs,
+      });
+    });
+
+    it('logs contain the default space received in the execution context header', async () => {
+      const executionContext = {
+        type: 'test',
+        name: 'status check',
+        id: 'test-123',
+        space: 'default',
+      };
+
+      await supertest
+        .get('/api/status')
+        .set('x-kbn-context', encodeURIComponent(JSON.stringify(executionContext)))
+        .expect(200);
+
+      const logs = await readLogFile();
+
+      assertLogContains({
+        description: 'execution context includes space id in Kibana logs',
+        predicate: (record) =>
+          isExecutionContextLog(record, {
+            type: 'test',
+            name: 'status check',
+            id: 'test-123',
+            space: 'default',
+          }),
+        logs,
+      });
+    });
+
+    it('logs contain the myspace space received in the execution context header', async () => {
+      const executionContext = {
+        type: 'test',
+        name: 'api call',
+        id: 'test-456',
+        space: 'myspace',
+      };
+
+      await supertest
+        .get('/s/myspace/emit_log_with_trace_id')
+        .set('x-kbn-context', encodeURIComponent(JSON.stringify(executionContext)))
+        .expect(200);
+
+      const logs = await readLogFile();
+
+      assertLogContains({
+        description: 'execution context includes space id in Kibana logs',
+        predicate: (record) =>
+          isExecutionContextLog(record, {
+            type: 'test',
+            name: 'api call',
+            id: 'test-456',
+            space: 'myspace',
           }),
         logs,
       });

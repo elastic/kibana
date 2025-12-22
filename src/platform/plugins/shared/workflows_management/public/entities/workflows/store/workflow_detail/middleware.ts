@@ -10,19 +10,16 @@
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
 import { debounce } from 'lodash';
 import { _clearComputedData, _setComputedDataInternal, setYamlString } from './slice';
+import { performComputation } from './utils/computation';
 import type { RootState } from '../types';
-import { performComputation } from '../utils/computation';
 
-const COMPUTATION_DEBOUNCE_MS = 500; // 500ms debounce
+const COMPUTATION_DEBOUNCE_MS = 500;
 
-const compute = (
-  yamlString: string | undefined,
-  store: MiddlewareAPI<Dispatch<AnyAction>, RootState>
-) => {
-  const computed = performComputation(yamlString);
-  if (computed) {
+const compute = (yamlString: string, store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => {
+  try {
+    const computed = performComputation(yamlString);
     store.dispatch(_setComputedDataInternal(computed));
-  } else {
+  } catch (e) {
     store.dispatch(_clearComputedData());
   }
 };

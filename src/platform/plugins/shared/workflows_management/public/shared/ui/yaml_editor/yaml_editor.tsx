@@ -25,11 +25,6 @@ export const YamlEditor = React.memo(
     const onChangeDebounced = useMemo(() => debounce(onChange, 200), [onChange]);
 
     useEffect(() => {
-      // Initialize or update the YAML language service with the provided schemas
-      yamlLanguageService.update(props.schemas ?? []);
-    }, [props.schemas]);
-
-    useEffect(() => {
       // Update the internal value to the latest value from the props
       // Most of the time will be the same value, so monaco won't even update, only if some forced modification happened.
       setInternalValue(value);
@@ -44,6 +39,11 @@ export const YamlEditor = React.memo(
       },
       [onChangeDebounced]
     );
+
+    useEffect(() => {
+      // Initialize or update the YAML language service with the provided schemas
+      yamlLanguageService.update(props.schemas ?? []);
+    }, [props.schemas]);
 
     const handleEditorWillUnmount = useCallback(() => {
       // Clear schemas when unmounting to avoid conflicts with other YamlEditor instances

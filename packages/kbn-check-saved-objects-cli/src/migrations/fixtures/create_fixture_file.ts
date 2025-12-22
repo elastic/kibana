@@ -9,7 +9,7 @@
 
 import type { ModelVersionIdentifier, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createFixtureTemplate } from './create_fixture_template';
-import { jsonToFile } from '../../util/json';
+import { jsonToFile } from '../../util';
 
 export async function createFixtureFile({
   type,

@@ -9,7 +9,7 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowContextSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { inferZodType } from '../../../../common/lib/zod';
 
 export function getWorkflowContextSchema(definition: WorkflowYaml) {
@@ -34,11 +34,7 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
               const opts = input.options ?? [];
               valueSchema = z.any();
               if (opts.length > 0) {
-                const literals = opts.map((o) => z.literal(o)) as [
-                  z.ZodLiteral<unknown>,
-                  z.ZodLiteral<unknown>,
-                  ...z.ZodLiteral<unknown>[]
-                ];
+                const literals = opts.map((o) => z.literal(o));
                 valueSchema = z.union(literals);
               }
               break;

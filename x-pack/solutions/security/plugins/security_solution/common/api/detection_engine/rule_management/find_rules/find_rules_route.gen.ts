@@ -18,7 +18,9 @@ import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { SortOrder } from '../../model/sorting.gen';
+import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import { WarningSchema } from '../../model/warning_schema.gen';
 
 export type FindRulesSortField = z.infer<typeof FindRulesSortField>;
 export const FindRulesSortField = z.enum([
@@ -82,6 +84,10 @@ Filters the returned results according to the value of the specified field, usin
    * Gaps range end
    */
   gaps_range_end: z.string().optional(),
+  /**
+   * Gap fill statuses
+   */
+  gap_fill_statuses: ArrayFromString(GapFillStatus).optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 
@@ -91,4 +97,5 @@ export const FindRulesResponse = z.object({
   perPage: z.number().int(),
   total: z.number().int(),
   data: z.array(RuleResponse),
+  warnings: z.array(WarningSchema).optional(),
 });

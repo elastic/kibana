@@ -10,13 +10,14 @@ import type { Conversation, ConversationWithoutRounds } from '@kbn/onechat-commo
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
+  RenameConversationResponse,
 } from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 
 export class ConversationsService {
   private readonly http: HttpSetup;
@@ -44,6 +45,15 @@ export class ConversationsService {
   async delete({ conversationId }: ConversationDeleteOptions) {
     return await this.http.delete<DeleteConversationResponse>(
       `${publicApiPath}/conversations/${conversationId}`
+    );
+  }
+
+  async rename({ conversationId, title }: { conversationId: string; title: string }) {
+    return await this.http.post<RenameConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}/_rename`,
+      {
+        body: JSON.stringify({ title }),
+      }
     );
   }
 }

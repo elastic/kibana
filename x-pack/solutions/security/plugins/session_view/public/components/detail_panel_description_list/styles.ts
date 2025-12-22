@@ -21,10 +21,13 @@ export const useStyles = () => {
 
     const tabListTitle = {
       display: 'flex',
+      minWidth: 0,
     };
 
     const tabListDescription = {
       display: 'flex',
+      minWidth: 0,
+      overflow: 'hidden',
     };
 
     return {

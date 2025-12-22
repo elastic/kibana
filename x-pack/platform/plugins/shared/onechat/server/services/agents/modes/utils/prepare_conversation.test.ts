@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import type { ConversationRound, RawRoundInput } from '@kbn/onechat-common';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/onechat-common';
+import { z } from '@kbn/zod';
+import type { ConversationRound, ConverseInput } from '@kbn/onechat-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+  ToolType,
+} from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
-import type { AttachmentRepresentation } from '@kbn/onechat-server/attachments';
+import type {
+  AttachmentBoundedTool,
+  AttachmentRepresentation,
+  AttachmentTypeDefinition,
+} from '@kbn/onechat-server/attachments';
 import { getToolResultId } from '@kbn/onechat-server/tools';
+import {
+  createAgentHandlerContextMock,
+  type AgentHandlerContextMock,
+} from '../../../../test_utils/runner';
 import { prepareConversation } from './prepare_conversation';
 
 jest.mock('@kbn/onechat-server/tools', () => ({
@@ -20,31 +34,93 @@ jest.mock('@kbn/onechat-server/tools', () => ({
 const mockGetToolResultId = getToolResultId as jest.MockedFunction<typeof getToolResultId>;
 
 describe('prepareConversation', () => {
+  let mockContext: AgentHandlerContextMock;
   let mockAttachmentsService: jest.Mocked<AttachmentsService>;
 
-  beforeEach(() => {
-    mockAttachmentsService = {
-      format: jest.fn(),
+  const attachmentDefinition = ({
+    id = 'text',
+    description,
+    repr,
+    boundedTools = [],
+  }: {
+    id?: string;
+    description?: string;
+    repr: AttachmentRepresentation;
+    boundedTools?: AttachmentBoundedTool[];
+  }): AttachmentTypeDefinition => {
+    return {
+      id,
+      validate: jest.fn(),
+      format: jest.fn().mockImplementation(() => {
+        return {
+          getRepresentation: () => repr,
+          getBoundedTools: () => boundedTools,
+        };
+      }),
+      getAgentDescription: description ? () => description : undefined,
     };
+  };
+
+  const textRepresentation = (value: string): AttachmentRepresentation => ({ type: 'text', value });
+
+  const boundedTool = (id = 'bounded_tool'): AttachmentBoundedTool => {
+    return {
+      id,
+      type: ToolType.builtin,
+      description: 'test tool',
+      handler: jest.fn(),
+      schema: z.object({}),
+    } as AttachmentBoundedTool;
+  };
+
+  beforeEach(() => {
+    mockContext = createAgentHandlerContextMock();
+    mockAttachmentsService = mockContext.attachments;
 
     mockGetToolResultId.mockReset();
     let idCounter = 0;
     mockGetToolResultId.mockImplementation(() => `generated-id-${++idCounter}`);
   });
 
+  const createRound = (parts: Partial<ConversationRound> = {}): ConversationRound => {
+    return {
+      id: 'round-1',
+      status: ConversationRoundStatus.completed,
+      input: {
+        message: '',
+      },
+      steps: [],
+      response: {
+        message: 'Response',
+      },
+      started_at: new Date().toISOString(),
+      time_to_first_token: 0,
+      time_to_last_token: 0,
+      model_usage: {
+        connector_id: 'unknown',
+        llm_calls: 1,
+        input_tokens: 12,
+        output_tokens: 42,
+      },
+      ...parts,
+    };
+  };
+
   describe('with no attachments', () => {
     it('should process a simple nextInput with no attachments', async () => {
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
       };
 
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result).toEqual({
+        attachments: [],
+        attachmentTypes: [],
         nextInput: {
           message: 'Hello',
           attachments: [],
@@ -52,11 +128,11 @@ describe('prepareConversation', () => {
         previousRounds: [],
       });
 
-      expect(mockAttachmentsService.format).not.toHaveBeenCalled();
+      expect(mockAttachmentsService.getTypeDefinition).not.toHaveBeenCalled();
     });
 
     it('should handle empty attachments array', async () => {
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [],
       };
@@ -64,29 +140,118 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toEqual([]);
-      expect(mockAttachmentsService.format).not.toHaveBeenCalled();
+      expect(mockAttachmentsService.getTypeDefinition).not.toHaveBeenCalled();
     });
   });
 
   describe('nextInput with attachments', () => {
+    it('collect attachment types', async () => {
+      const attachment1: AttachmentInput = {
+        type: 'text',
+        data: { content: 'content 1' },
+      };
+
+      const attachment2: AttachmentInput = {
+        type: 'screen_context',
+        data: { url: 'http://example.com' },
+        hidden: true,
+      };
+
+      const mockRepresentation1 = textRepresentation('formatted 1');
+      const mockRepresentation2 = textRepresentation('formatted 2');
+
+      const textDefinition = attachmentDefinition({
+        id: 'text',
+        description: 'foobar',
+        repr: mockRepresentation1,
+      });
+      const screenContextDefinition = attachmentDefinition({
+        id: 'screen_context',
+        repr: mockRepresentation2,
+      });
+
+      mockAttachmentsService.getTypeDefinition.mockImplementation((id) => {
+        if (id === 'text') {
+          return textDefinition;
+        }
+        if (id === 'screen_context') {
+          return screenContextDefinition;
+        }
+        throw new Error(`Unexpected attachment type: ${id}`);
+      });
+
+      const nextInput: ConverseInput = {
+        message: 'Hello',
+        attachments: [attachment1, attachment2],
+      };
+
+      const result = await prepareConversation({
+        nextInput,
+        previousRounds: [],
+        context: mockContext,
+      });
+
+      expect(result.nextInput.attachments).toHaveLength(2);
+
+      expect(result.attachmentTypes).toEqual([
+        {
+          type: 'text',
+          description: 'foobar',
+        },
+        {
+          type: 'screen_context',
+        },
+      ]);
+    });
+
+    it('collect bounded tools', async () => {
+      const attachment: AttachmentInput = {
+        type: 'text',
+        data: { content: 'content 1' },
+      };
+
+      const mockRepresentation = textRepresentation('formatted 1');
+
+      const textDefinition = attachmentDefinition({
+        id: 'text',
+        repr: mockRepresentation,
+        boundedTools: [boundedTool('tool_1'), boundedTool('tool_2')],
+      });
+
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(textDefinition);
+
+      const nextInput: ConverseInput = {
+        message: 'Hello',
+        attachments: [attachment],
+      };
+
+      const result = await prepareConversation({
+        nextInput,
+        previousRounds: [],
+        context: mockContext,
+      });
+
+      expect(result.nextInput.attachments).toHaveLength(1);
+      expect(result.nextInput.attachments[0].tools.map((t) => t.id)).toEqual(['tool_1', 'tool_2']);
+    });
+
     it('should generate ID for attachment without ID', async () => {
       const attachment: AttachmentInput = {
         type: 'text',
         data: { content: 'test content' },
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted text',
-      };
+      const mockRepresentation = textRepresentation('formatted text');
 
-      mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment],
       };
@@ -94,20 +259,14 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toHaveLength(1);
-      expect(result.nextInput.attachments[0]).toEqual({
-        attachment: {
-          ...attachment,
-          id: 'generated-id-1',
-        },
-        representation: mockRepresentation,
-      });
+      expect(result.nextInput.attachments[0].attachment.id).toEqual('generated-id-1');
 
       expect(mockGetToolResultId).toHaveBeenCalledTimes(1);
-      expect(mockAttachmentsService.format).toHaveBeenCalledWith(attachment);
+      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
     });
 
     it('should preserve existing ID for attachment with ID', async () => {
@@ -117,14 +276,13 @@ describe('prepareConversation', () => {
         data: { content: 'test content' },
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted text',
-      };
+      const mockRepresentation = textRepresentation('formatted text');
 
-      mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment],
       };
@@ -132,19 +290,13 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
-      expect(result.nextInput.attachments[0]).toEqual({
-        attachment: {
-          ...attachment,
-          id: 'existing-id',
-        },
-        representation: mockRepresentation,
-      });
+      expect(result.nextInput.attachments[0].attachment.id).toEqual('existing-id');
 
       expect(mockGetToolResultId).not.toHaveBeenCalled();
-      expect(mockAttachmentsService.format).toHaveBeenCalledWith(attachment);
+      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
     });
 
     it('should process multiple attachments', async () => {
@@ -165,27 +317,29 @@ describe('prepareConversation', () => {
         hidden: true,
       };
 
-      const mockRepresentation1: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted 1',
-      };
+      const mockRepresentation1 = textRepresentation('formatted 1');
+      const mockRepresentation2 = textRepresentation('formatted 2');
+      const mockRepresentation3 = textRepresentation('formatted 3');
 
-      const mockRepresentation2: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted 2',
-      };
-
-      const mockRepresentation3: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted 3',
-      };
-
-      mockAttachmentsService.format
+      const getRepresentation = jest
+        .fn()
         .mockResolvedValueOnce(mockRepresentation1)
         .mockResolvedValueOnce(mockRepresentation2)
         .mockResolvedValueOnce(mockRepresentation3);
 
-      const nextInput: RawRoundInput = {
+      const definition: AttachmentTypeDefinition = {
+        id: 'foo',
+        validate: jest.fn(),
+        format: () => {
+          return {
+            getRepresentation,
+          };
+        },
+      };
+
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(definition);
+
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment1, attachment2, attachment3],
       };
@@ -193,25 +347,27 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments).toHaveLength(3);
       expect(result.nextInput.attachments[0]).toEqual({
         attachment: { ...attachment1, id: 'generated-id-1' },
         representation: mockRepresentation1,
+        tools: [],
       });
       expect(result.nextInput.attachments[1]).toEqual({
         attachment: { ...attachment2, id: 'existing-id' },
         representation: mockRepresentation2,
+        tools: [],
       });
       expect(result.nextInput.attachments[2]).toEqual({
         attachment: { ...attachment3, id: 'generated-id-2' },
         representation: mockRepresentation3,
+        tools: [],
       });
 
       expect(mockGetToolResultId).toHaveBeenCalledTimes(2);
-      expect(mockAttachmentsService.format).toHaveBeenCalledTimes(3);
     });
 
     it('should preserve attachment properties', async () => {
@@ -221,14 +377,13 @@ describe('prepareConversation', () => {
         hidden: true,
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted',
-      };
+      const mockRepresentation = textRepresentation('formatted');
 
-      mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
-      const nextInput: RawRoundInput = {
+      const nextInput: ConverseInput = {
         message: 'Hello',
         attachments: [attachment],
       };
@@ -236,7 +391,7 @@ describe('prepareConversation', () => {
       const result = await prepareConversation({
         previousRounds: [],
         nextInput,
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.nextInput.attachments[0].attachment).toEqual({
@@ -249,7 +404,7 @@ describe('prepareConversation', () => {
 
   describe('previousRounds with attachments', () => {
     it('should process previous rounds without attachments', async () => {
-      const previousRound: ConversationRound = {
+      const previousRound = createRound({
         id: 'round-1',
         input: {
           message: 'Previous message',
@@ -258,17 +413,14 @@ describe('prepareConversation', () => {
         response: {
           message: 'Response',
         },
-        started_at: new Date().toISOString(),
-        time_to_first_token: 0,
-        time_to_last_token: 0,
-      };
+      });
 
       const previousRounds: ConversationRound[] = [previousRound];
 
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds).toHaveLength(1);
@@ -288,15 +440,14 @@ describe('prepareConversation', () => {
         data: { content: 'previous content' },
       };
 
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted previous',
-      };
+      const mockRepresentation = textRepresentation('formatted previous');
 
-      mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
-      const previousRounds: ConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: {
             message: 'Previous message',
@@ -306,16 +457,13 @@ describe('prepareConversation', () => {
           response: {
             message: 'Response',
           },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
+        }),
       ];
 
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds[0].input.attachments).toHaveLength(1);
@@ -325,21 +473,21 @@ describe('prepareConversation', () => {
           id: 'prev-attachment-id',
         },
         representation: mockRepresentation,
+        tools: [],
       });
 
-      expect(mockAttachmentsService.format).toHaveBeenCalledWith(attachment);
+      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
     });
 
     it('should process multiple previous rounds', async () => {
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted',
-      };
+      const mockRepresentation = textRepresentation('formatted');
 
-      mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
+      mockAttachmentsService.getTypeDefinition.mockReturnValue(
+        attachmentDefinition({ id: 'text', repr: mockRepresentation })
+      );
 
-      const previousRounds: ConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: {
             message: 'Message 1',
@@ -351,24 +499,16 @@ describe('prepareConversation', () => {
               },
             ],
           },
-          steps: [],
           response: { message: 'Response 1' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
-        {
+        }),
+        createRound({
           id: 'round-2',
           input: {
             message: 'Message 2',
           },
-          steps: [],
           response: { message: 'Response 2' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
-        {
+        }),
+        createRound({
           id: 'round-3',
           input: {
             message: 'Message 3',
@@ -380,18 +520,14 @@ describe('prepareConversation', () => {
               },
             ],
           },
-          steps: [],
           response: { message: 'Response 3' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
+        }),
       ];
 
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds).toHaveLength(3);
@@ -410,8 +546,8 @@ describe('prepareConversation', () => {
     });
 
     it('should preserve all round properties', async () => {
-      const previousRounds: ConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: {
             message: 'Message 1',
@@ -429,16 +565,13 @@ describe('prepareConversation', () => {
             message: 'Response 1',
           },
           trace_id: 'trace-123',
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
+        }),
       ];
 
       const result = await prepareConversation({
         previousRounds,
         nextInput: { message: 'New message' },
-        attachmentsService: mockAttachmentsService,
+        context: mockContext,
       });
 
       expect(result.previousRounds[0]).toEqual({
@@ -448,103 +581,6 @@ describe('prepareConversation', () => {
           attachments: [],
         },
       });
-    });
-  });
-
-  describe('complex scenarios', () => {
-    it('should process both previousRounds and nextInput with attachments', async () => {
-      const mockRepresentation: AttachmentRepresentation = {
-        type: 'text',
-        value: 'formatted',
-      };
-
-      mockAttachmentsService.format.mockResolvedValue(mockRepresentation);
-
-      const previousRounds: ConversationRound[] = [
-        {
-          id: 'round-1',
-          input: {
-            message: 'Previous',
-            attachments: [
-              {
-                id: 'prev-id',
-                type: 'text',
-                data: { content: 'prev' },
-              },
-            ],
-          },
-          steps: [],
-          response: { message: 'Response' },
-          started_at: new Date().toISOString(),
-          time_to_first_token: 0,
-          time_to_last_token: 0,
-        },
-      ];
-
-      const nextInput: RawRoundInput = {
-        message: 'Next',
-        attachments: [
-          {
-            type: 'text',
-            data: { content: 'next' },
-          },
-        ],
-      };
-
-      const result = await prepareConversation({
-        previousRounds,
-        nextInput,
-        attachmentsService: mockAttachmentsService,
-      });
-
-      expect(result.previousRounds[0].input.attachments).toHaveLength(1);
-      expect(result.previousRounds[0].input.attachments[0].attachment.id).toBe('prev-id');
-
-      expect(result.nextInput.attachments).toHaveLength(1);
-      expect(result.nextInput.attachments[0].attachment.id).toBe('generated-id-1');
-
-      expect(mockAttachmentsService.format).toHaveBeenCalledTimes(2);
-      expect(mockGetToolResultId).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle attachments service returning different representations', async () => {
-      const attachment1: AttachmentInput = {
-        type: 'text',
-        data: { content: 'short text' },
-      };
-
-      const attachment2: AttachmentInput = {
-        type: 'text',
-        data: { content: 'long text content that gets formatted differently' },
-      };
-
-      const mockRepresentation1: AttachmentRepresentation = {
-        type: 'text',
-        value: 'Short representation',
-      };
-
-      const mockRepresentation2: AttachmentRepresentation = {
-        type: 'text',
-        value: 'Longer formatted representation with more detail',
-      };
-
-      mockAttachmentsService.format
-        .mockResolvedValueOnce(mockRepresentation1)
-        .mockResolvedValueOnce(mockRepresentation2);
-
-      const nextInput: RawRoundInput = {
-        message: 'Message',
-        attachments: [attachment1, attachment2],
-      };
-
-      const result = await prepareConversation({
-        previousRounds: [],
-        nextInput,
-        attachmentsService: mockAttachmentsService,
-      });
-
-      expect(result.nextInput.attachments[0].representation).toEqual(mockRepresentation1);
-      expect(result.nextInput.attachments[1].representation).toEqual(mockRepresentation2);
     });
   });
 });

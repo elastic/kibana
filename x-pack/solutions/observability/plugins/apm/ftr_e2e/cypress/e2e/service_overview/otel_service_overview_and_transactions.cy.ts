@@ -6,7 +6,7 @@
  */
 
 import url from 'url';
-import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
 import { synthtrace } from '../../../synthtrace';
 import { sendotlp } from '../../fixtures/synthtrace/sendotlp';
 import { checkA11y } from '../../support/commands';
@@ -143,7 +143,7 @@ describe('Service Overview', () => {
       cy.getByTestSubj('waterfall').should('exist');
       cy.getByTestSubj('accordionWaterfall').should('exist');
       cy.getByTestSubj('accordionWaterfall').first().click();
-      cy.contains('h4', 'Transaction details');
+      cy.contains('h2', 'Transaction details');
       cy.getByTestSubj('apmTransactionDetailLinkLink').should('exist');
       cy.getByTestSubj('apmTransactionDetailLinkLink').contains('parent-synth');
       cy.getByTestSubj('apmServiceListAppLink').should('exist');
