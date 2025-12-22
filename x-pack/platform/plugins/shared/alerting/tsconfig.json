@@ -79,8 +79,8 @@
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
     "@kbn/response-ops-recurring-schedule-form",
-    "@kbn/react-query"
     "@kbn/core-elasticsearch-server-utils",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"
