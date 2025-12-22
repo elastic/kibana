@@ -71,7 +71,6 @@ evaluate.describe(
     const indexPattern = 'ecs_compliant,auditbeat-*,winlogbeat-*';
 
     evaluate.beforeAll(async ({ log, esArchiverLoad, supertest, kbnClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
       await createAlertsIndex(supertest, log);
       await esArchiverLoad(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -88,7 +87,6 @@ evaluate.describe(
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.delete('security-solution');
       await deleteEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
-      await kbnClient.savedObjects.cleanStandardList();
     });
 
     evaluate.describe('without data', () => {

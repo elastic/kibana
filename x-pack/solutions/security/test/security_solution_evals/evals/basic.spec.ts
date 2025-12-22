@@ -17,8 +17,7 @@ import {
 const AGENT_ID = 'test_agent';
 
 evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecurity' }, () => {
-  evaluate.beforeAll(async ({ log, esArchiverLoad, supertest, kbnClient, apiServices }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+  evaluate.beforeAll(async ({ log, esArchiverLoad, supertest }) => {
     await createAlertsIndex(supertest, log);
     await esArchiverLoad(
       'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -28,11 +27,10 @@ evaluate.describe('SIEM Entity Analytics Agent - Basic Tests', { tag: '@svlSecur
     await createEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
   });
 
-  evaluate.afterAll(async ({ kbnClient, supertest, log, apiServices }) => {
+  evaluate.afterAll(async ({ supertest, log }) => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     await dataView.delete('security-solution');
     await deleteEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
-    await kbnClient.savedObjects.cleanStandardList();
   });
 
   evaluate.describe('without data', () => {

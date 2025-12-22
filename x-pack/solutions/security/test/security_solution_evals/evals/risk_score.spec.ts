@@ -27,8 +27,7 @@ const AGENT_ID = 'test_agent';
 evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svlSecurity' }, () => {
   const userId = uuidv4();
 
-  evaluate.beforeAll(async ({ log, esArchiverLoad, supertest, kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+  evaluate.beforeAll(async ({ log, esArchiverLoad, supertest }) => {
     await createAlertsIndex(supertest, log);
     await esArchiverLoad(
       'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -38,11 +37,10 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
     await createEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
   });
 
-  evaluate.afterAll(async ({ kbnClient, supertest, log }) => {
+  evaluate.afterAll(async ({ supertest, log }) => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     await dataView.delete('security-solution');
     await deleteEntityAnalyticsTestAgent({ agentId: AGENT_ID, supertest, log });
-    await kbnClient.savedObjects.cleanStandardList();
   });
 
   evaluate.describe('without data', () => {
@@ -114,32 +112,30 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
   });
 
   evaluate.describe('with risk score data', () => {
-    evaluate.beforeAll(
-      async ({ log, esClient, esArchiverLoad, supertest, quickApiClient, kbnClient, config }) => {
-        const { indexListOfDocuments } = dataGeneratorFactory({
-          es: esClient,
-          index: 'ecs_compliant', // Index to populate risk score
-          log,
-        });
-        const userDocs = Array(10)
-          .fill({})
-          .map((_, index) => buildDocument({ user: { name: `user-${index}` } }, userId));
-        await indexListOfDocuments(userDocs);
-        const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({
-          supertest,
-          log,
-        });
-        await createAndSyncRuleAndAlerts({
-          query: `id: ${userId}`,
-          alerts: 10,
-          riskScore: 40,
-        });
-        await quickApiClient.initRiskEngine();
-        await waitForRiskScoresToBePresent({ es: esClient, log, scoreCount: 10 });
-      }
-    );
+    evaluate.beforeAll(async ({ log, esClient, supertest, quickApiClient }) => {
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es: esClient,
+        index: 'ecs_compliant', // Index to populate risk score
+        log,
+      });
+      const userDocs = Array(10)
+        .fill({})
+        .map((_, index) => buildDocument({ user: { name: `user-${index}` } }, userId));
+      await indexListOfDocuments(userDocs);
+      const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({
+        supertest,
+        log,
+      });
+      await createAndSyncRuleAndAlerts({
+        query: `id: ${userId}`,
+        alerts: 10,
+        riskScore: 40,
+      });
+      await quickApiClient.initRiskEngine();
+      await waitForRiskScoresToBePresent({ es: esClient, log, scoreCount: 10 });
+    });
 
-    evaluate.afterAll(async ({ quickApiClient, supertest, kbnClient, log, esClient }) => {
+    evaluate.afterAll(async ({ quickApiClient, supertest, log, esClient }) => {
       await quickApiClient.cleanUpRiskEngine();
       await deleteAllRiskScores(log, esClient);
       await deleteAllAlerts(supertest, log, esClient);
