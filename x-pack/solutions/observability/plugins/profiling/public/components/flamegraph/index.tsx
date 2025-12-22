@@ -152,7 +152,6 @@ export function FlameGraph({
         })}
         color="warning"
         iconType="warning"
-        announceOnMount={false}
         data-test-subj="profilingFlamegraphWebGLWarning"
       >
         <p>
