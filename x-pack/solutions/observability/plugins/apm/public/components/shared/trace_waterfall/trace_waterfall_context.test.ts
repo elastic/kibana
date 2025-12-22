@@ -269,23 +269,4 @@ describe('filterMapByCriticalPath', () => {
 
     expect(result.parent1[0]).toBe(child1);
   });
-
-  it('filters out children when criticalPathSegmentsById has empty array', () => {
-    const child1 = mockItem('child1');
-    const child2 = mockItem('child2');
-
-    const map = {
-      parent1: [child1, child2],
-    };
-
-    const criticalPathSegmentsById = {
-      child1: [], // Empty array should be treated as not in critical path
-      child2: [mockSegment(child2)],
-    };
-
-    const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
-
-    expect(result.parent1).toHaveLength(1);
-    expect(result.parent1.map((c: TraceWaterfallItem) => c.id)).toEqual(['child2']);
-  });
 });

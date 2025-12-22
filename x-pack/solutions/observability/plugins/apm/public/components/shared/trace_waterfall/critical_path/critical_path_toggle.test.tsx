@@ -15,8 +15,9 @@ describe('CriticalPathToggle', () => {
     const onChange = jest.fn();
     renderWithTheme(<CriticalPathToggle checked={false} onChange={onChange} />);
 
-    const toggle = screen.getByLabelText('Show critical path');
+    const toggle = screen.getByTestId('criticalPathToggle');
     expect(toggle).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
 
     fireEvent.click(toggle);
     expect(onChange).toHaveBeenCalledWith(true);
