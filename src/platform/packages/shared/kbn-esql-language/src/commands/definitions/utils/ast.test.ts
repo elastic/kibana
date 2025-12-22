@@ -21,6 +21,7 @@ describe('getBracketsToClose', () => {
       )
     ).toEqual([')']);
     expect(getBracketsToClose('FROM a | WHERE ("""field: *""")')).toEqual([]);
+    expect(getBracketsToClose('FROM a | WHERE ("""field: *')).toEqual(['"""', ')']);
   });
 
   it('igonres any bracket found within string or tripple quotes', () => {
