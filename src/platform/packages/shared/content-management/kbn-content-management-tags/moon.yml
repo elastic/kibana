@@ -30,8 +30,9 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
+    - index.ts
+    - src/**/*.ts
+    - src/**/*.tsx
     - '!target/**/*'
 tasks:
   jest:
