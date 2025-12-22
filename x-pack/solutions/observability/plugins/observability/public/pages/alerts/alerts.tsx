@@ -29,7 +29,7 @@ import {
   DEFAULT_GROUPING_OPTIONS,
   type AlertsByGroupingAgg,
   type GetObservabilityAlertsTableProp,
-} from '@kbn/observability-alerts-table';
+} from '../../components/alerts_table';
 
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';

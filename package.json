@@ -797,7 +797,6 @@
     "@kbn/observability-ai-server": "link:x-pack/solutions/observability/packages/observability-ai/observability-ai-server",
     "@kbn/observability-alert-details": "link:x-pack/solutions/observability/packages/alert-details",
     "@kbn/observability-alerting-test-data": "link:x-pack/solutions/observability/packages/alerting-test-data",
-    "@kbn/observability-alerts-table": "link:x-pack/solutions/observability/packages/kbn-observability-alerts-table",
     "@kbn/observability-fixtures-plugin": "link:x-pack/platform/test/cases_api_integration/common/plugins/observability",
     "@kbn/observability-get-padded-alert-time-range-util": "link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util",
     "@kbn/observability-logs-explorer-plugin": "link:x-pack/solutions/observability/plugins/observability_logs_explorer",

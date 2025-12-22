@@ -48,6 +48,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/rule-registry-plugin",
     "@kbn/alerts-grouping",
+    "@kbn/grouping",
     "@kbn/data-views-plugin",
     "@kbn/visualization-ui-components",
     "@kbn/event-annotation-components",
@@ -142,8 +143,7 @@
     "@kbn/synthtrace",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
-    "@kbn/observability-agent-builder-plugin",
-    "@kbn/observability-alerts-table",
+    "@kbn/observability-agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -49,6 +49,7 @@ export {
 } from '@kbn/deeplinks-observability';
 
 export type { RulesLocatorParams } from '@kbn/deeplinks-observability';
+
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 
 export type {
@@ -121,11 +122,35 @@ export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_gro
 export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';
 export { Threshold } from './components/custom_threshold/components/threshold';
 
-// Only re-export types from @kbn/observability-alerts-table to avoid pulling
-// heavy dependencies into the page load bundle. Consumers should import
-// components directly from '@kbn/observability-alerts-table' when needed.
+export {
+  ObservabilityAlertsTableLazy,
+  ObservabilityAlertsTable,
+  AlertsTableCellValue,
+  getAlertFieldValue,
+  CellTooltip,
+  TimestampTooltip,
+  getColumns,
+  getGroupStats,
+  getAggregationsByGroupingField,
+  renderGroupPanel,
+  GroupingToolbarControls,
+  DEFAULT_GROUPING_OPTIONS,
+  ungrouped,
+  ruleName,
+  source,
+  AlertSeverityBadge,
+  AlertStatusIndicator,
+  Tags,
+  AlertActions,
+  useCaseActions,
+} from './components/alerts_table';
 export type {
-  GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
-} from '@kbn/observability-alerts-table';
+  GetObservabilityAlertsTableProp,
+  BucketItem,
+  AlertsByGroupingAgg,
+  ObservabilityRuleTypeRegistry as AlertsTableObservabilityRuleTypeRegistry,
+  ConfigSchema as AlertsTableConfigSchema,
+  TopAlert as AlertsTableTopAlert,
+} from './components/alerts_table';

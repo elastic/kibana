@@ -56,7 +56,6 @@
       "serverless"
     ],
     "requiredBundles": [
-      "cases",
       "observability",
       "licenseManagement",
       "kibanaUtils",

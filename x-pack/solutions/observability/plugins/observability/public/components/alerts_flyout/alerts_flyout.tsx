@@ -29,7 +29,7 @@ import {
   getAlertFlyoutAriaLabel,
   ALERT_FLYOUT_DEFAULT_TITLE,
 } from '@kbn/response-ops-alerts-table/translations';
-import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-alerts-table';
+import type { ObservabilityRuleTypeRegistry } from '../alerts_table';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { paths } from '../../../common/locators/paths';

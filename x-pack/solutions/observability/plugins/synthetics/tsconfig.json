@@ -16,7 +16,6 @@
     "@kbn/ml-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/observability-plugin",
-    "@kbn/observability-alerts-table",
     "@kbn/fleet-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/i18n",

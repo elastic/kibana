@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { BoolQuery, Filter } from '@kbn/es-query';
-import { ObservabilityAlertsTable, getColumns } from '@kbn/observability-alerts-table';
+import { ObservabilityAlertsTable, getColumns } from '../../../components/alerts_table';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';

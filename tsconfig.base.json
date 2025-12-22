@@ -1560,8 +1560,6 @@
       "@kbn/observability-alert-details/*": ["x-pack/solutions/observability/packages/alert-details/*"],
       "@kbn/observability-alerting-test-data": ["x-pack/solutions/observability/packages/alerting-test-data"],
       "@kbn/observability-alerting-test-data/*": ["x-pack/solutions/observability/packages/alerting-test-data/*"],
-      "@kbn/observability-alerts-table": ["x-pack/solutions/observability/packages/kbn-observability-alerts-table"],
-      "@kbn/observability-alerts-table/*": ["x-pack/solutions/observability/packages/kbn-observability-alerts-table/*"],
       "@kbn/observability-fixtures-plugin": ["x-pack/platform/test/cases_api_integration/common/plugins/observability"],
       "@kbn/observability-fixtures-plugin/*": ["x-pack/platform/test/cases_api_integration/common/plugins/observability/*"],
       "@kbn/observability-get-padded-alert-time-range-util": ["x-pack/solutions/observability/packages/get-padded-alert-time-range-util"],

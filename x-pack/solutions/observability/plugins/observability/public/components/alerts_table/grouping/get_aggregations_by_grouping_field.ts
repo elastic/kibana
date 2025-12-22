@@ -49,3 +49,4 @@ export const getAggregationsByGroupingField = (field: string): NamedAggregation[
       ];
   }
 };
+

@@ -7,12 +7,13 @@
   "plugin": {
     "id": "observabilityOverview",
     "browser": true,
-    "server": false,
+    "server": true,
     "configPath": ["xpack", "observabilityOverview"],
     "requiredPlugins": [
       "charts",
       "data",
       "dataViews",
+      "features",
       "logsDataAccess",
       "observabilityShared",
       "share",
@@ -25,6 +26,6 @@
       "serverless",
       "usageCollection"
     ],
-    "requiredBundles": ["cases", "kibanaReact", "kibanaUtils", "logsShared"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "logsShared", "observability"]
   }
 }

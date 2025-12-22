@@ -32,7 +32,7 @@ export function Tags({
       key="more"
       onClick={onMoreTagsClick}
       onClickAriaLabel={i18n.translate(
-        'xpack.observabilityAlertsTable.component.tags.moreTags.ariaLabel',
+        'xpack.observability.alertsTable.component.tags.moreTags.ariaLabel',
         {
           defaultMessage: 'more tags badge',
         }
@@ -40,7 +40,7 @@ export function Tags({
       color={color}
     >
       <FormattedMessage
-        id="xpack.observabilityAlertsTable.component.tags.moreTags"
+        id="xpack.observability.alertsTable.component.tags.moreTags"
         defaultMessage="+{number} more"
         values={{ number: tags.length - size }}
       />
@@ -65,3 +65,4 @@ export function Tags({
     </>
   );
 }
+

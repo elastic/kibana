@@ -56,7 +56,6 @@
       "maintenanceWindows"
     ],
     "requiredBundles": [
-      "cases",
       "data",
       "fleet",
       "kibanaReact",

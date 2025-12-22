@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';

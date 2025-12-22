@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { BoolQuery } from '@kbn/es-query';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
-import { ObservabilityAlertsTable, getColumns } from '@kbn/observability-alerts-table';
+import { ObservabilityAlertsTable, getColumns } from '@kbn/observability-plugin/public';
 import { paths } from '../../../../../constants/paths';
 import { observabilityAlertFeatureIds } from '../../../../../constants/alerts';
 import { useHasData } from '../../../../../hooks/use_has_data';

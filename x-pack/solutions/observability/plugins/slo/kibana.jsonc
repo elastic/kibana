@@ -51,7 +51,6 @@
       "spaces"
     ],
     "requiredBundles": [
-      "cases",
       "controls",
       "embeddable",
       "ingestPipelines",

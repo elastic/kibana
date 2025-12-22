@@ -19,7 +19,7 @@ import type {
   AlertsTableProps,
   AlertsTableImperativeApi,
 } from '@kbn/response-ops-alerts-table/types';
-import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SloItem } from '../types';
@@ -168,6 +168,7 @@ export function SloAlertsTable({
       consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
       query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
       columns={columns}
+      hideLazyLoader
       pageSize={ALERTS_PER_PAGE}
       onLoaded={() => {
         if (onLoaded) {

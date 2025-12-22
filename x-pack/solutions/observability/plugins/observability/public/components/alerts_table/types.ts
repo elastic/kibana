@@ -98,3 +98,4 @@ export interface AlertsByGroupingAgg extends Record<string, unknown> {
     value: number;
   };
 }
+

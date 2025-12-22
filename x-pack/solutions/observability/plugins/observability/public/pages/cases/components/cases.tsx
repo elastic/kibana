@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CasesPermissions } from '@kbn/cases-plugin/common';
-import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
+import { ObservabilityAlertsTable } from '../../../components/alerts_table';
 import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';

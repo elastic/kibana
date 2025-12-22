@@ -17,7 +17,7 @@ import {
   AlertsTableCellValue,
   type GetObservabilityAlertsTableProp,
   type ObservabilityAlertsTableContext,
-} from '@kbn/observability-alerts-table';
+} from '../../../../components/alerts_table';
 import { getRelatedColumns } from './get_related_columns';
 import { getBuildRelatedAlertsQuery } from '../../hooks/related_alerts/get_build_related_alerts_query';
 import type { AlertData } from '../../../../hooks/use_fetch_alert_detail';

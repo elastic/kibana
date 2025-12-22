@@ -31,7 +31,7 @@ export const getColumns = (
     ? [
         {
           displayAsText: i18n.translate(
-            'xpack.observabilityAlertsTable.alertsTGrid.ruleNameColumnDescription',
+            'xpack.observability.alertsTable.alertsTGrid.ruleNameColumnDescription',
             {
               defaultMessage: 'Rule name',
             }
@@ -45,7 +45,7 @@ export const getColumns = (
   return [
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.statusColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.statusColumnDescription',
         {
           defaultMessage: 'Alert Status',
         }
@@ -55,7 +55,7 @@ export const getColumns = (
     },
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.triggeredColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.triggeredColumnDescription',
         {
           defaultMessage: 'Triggered',
         }
@@ -66,7 +66,7 @@ export const getColumns = (
     },
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.durationColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.durationColumnDescription',
         {
           defaultMessage: 'Duration',
         }
@@ -77,7 +77,7 @@ export const getColumns = (
     ...ruleNameColumn,
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.sourceColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.sourceColumnDescription',
         {
           defaultMessage: 'Group',
         }
@@ -87,7 +87,7 @@ export const getColumns = (
     },
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.observedValueColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.observedValueColumnDescription',
         {
           defaultMessage: 'Observed value',
         }
@@ -97,7 +97,7 @@ export const getColumns = (
     },
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.thresholdColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.thresholdColumnDescription',
         {
           defaultMessage: 'Threshold',
         }
@@ -107,7 +107,7 @@ export const getColumns = (
     },
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.tagsColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.tagsColumnDescription',
         {
           defaultMessage: 'Tags',
         }
@@ -117,7 +117,7 @@ export const getColumns = (
     },
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.workflowTagsColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.workflowTagsColumnDescription',
         {
           defaultMessage: 'Workflow tags',
         }
@@ -127,7 +127,7 @@ export const getColumns = (
     },
     {
       displayAsText: i18n.translate(
-        'xpack.observabilityAlertsTable.alertsTGrid.reasonColumnDescription',
+        'xpack.observability.alertsTable.alertsTGrid.reasonColumnDescription',
         {
           defaultMessage: 'Reason',
         }

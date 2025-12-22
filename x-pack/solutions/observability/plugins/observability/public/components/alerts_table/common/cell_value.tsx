@@ -40,7 +40,7 @@ import type {
   TopAlert,
 } from '../types';
 
-const NOT_AVAILABLE_LABEL = i18n.translate('undefined.notAvailable', {
+const NOT_AVAILABLE_LABEL = i18n.translate('xpack.observability.alertsTable.notAvailable', {
   defaultMessage: 'N/A',
 });
 
@@ -198,3 +198,4 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
 
   return cellRenderers[columnId] ? cellRenderers[columnId](val) : <>{val}</>;
 };
+

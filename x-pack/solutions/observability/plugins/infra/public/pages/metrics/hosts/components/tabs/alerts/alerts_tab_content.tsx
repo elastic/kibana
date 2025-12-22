@@ -10,7 +10,7 @@ import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { BrushEndListener } from '@elastic/charts';
 import { type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
-import { ObservabilityAlertsTable } from '@kbn/observability-alerts-table';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';
 import { INFRA_ALERT_CONSUMERS } from '../../../../../../../common/constants';

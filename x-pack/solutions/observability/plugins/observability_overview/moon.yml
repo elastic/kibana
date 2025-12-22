@@ -55,7 +55,6 @@ dependsOn:
   - '@kbn/core-pricing-browser-mocks'
   - '@kbn/synthtrace-client'
   - '@kbn/scout-oblt'
-  - '@kbn/observability-alerts-table'
 tags:
   - plugin
   - prod

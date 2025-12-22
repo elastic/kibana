@@ -72,7 +72,7 @@ const InstanceIdGroupContent = React.memo<{
                 <EuiIconTip
                   content={
                     <FormattedMessage
-                      id="xpack.observabilityAlertsTable.alert.grouping.ungrouped.info"
+                      id="xpack.observability.alertsTable.alert.grouping.ungrouped.info"
                       defaultMessage='There is no "group by" field selected in the rule definition.'
                     />
                   }
@@ -86,3 +86,4 @@ const InstanceIdGroupContent = React.memo<{
   );
 });
 InstanceIdGroupContent.displayName = 'InstanceIdGroupContent';
+

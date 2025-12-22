@@ -26,3 +26,4 @@ export function AlertSeverityBadge({ severityLevel }: SeverityBadgeProps) {
     <EuiBadge color={severityLevel ? colorMap[severityLevel] : 'default'}>{severityLevel}</EuiBadge>
   );
 }
+
