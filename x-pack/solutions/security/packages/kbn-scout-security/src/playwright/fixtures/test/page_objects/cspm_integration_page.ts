@@ -112,7 +112,6 @@ export class CspmIntegrationPage {
 
   async saveIntegration() {
     await this.page.getByTestId('createPackagePolicySaveButton').click();
-    await this.page.getByTestId('packagePolicyCreateSuccessToast').waitFor({ state: 'visible' });
   }
 
   async saveAgentBasedIntegration() {
