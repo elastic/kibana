@@ -233,7 +233,7 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/security-ai-prompts'
   - '@kbn/inference-common'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/inference-langchain'
   - '@kbn/scout-security'
   - '@kbn/custom-icons'
@@ -268,6 +268,8 @@ dependsOn:
   - '@kbn/onechat-plugin'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/onechat-browser'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/product-doc-common'
 tags:
   - plugin
   - prod

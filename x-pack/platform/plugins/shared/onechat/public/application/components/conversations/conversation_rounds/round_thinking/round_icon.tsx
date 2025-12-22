@@ -26,5 +26,5 @@ export const RoundIcon: React.FC<RoundIconProps> = ({ isLoading }) => {
   if (isLoading) {
     return <EuiLoadingElastic size="m" aria-label={labels.loading} />;
   }
-  return <EuiIcon type="logoElastic" aria-label={labels.content} size="m" />;
+  return <EuiIcon type="sparkles" aria-label={labels.content} size="m" />;
 };

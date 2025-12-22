@@ -1509,6 +1509,48 @@
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.hasAgentBuilderPrivilege",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasAgentBuilderPrivilege",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.hasAgentBuilderManagePrivilege",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasAgentBuilderManagePrivilege",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.isAiAgentsEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isAiAgentsEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2281,7 +2323,7 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; reader?: ",
+          ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
           "objectOutputType",
           "<{}, ",
           "ZodUnknown",
@@ -2712,7 +2754,7 @@
               "ZodString",
               "; }, \"strip\", ",
               "ZodTypeAny",
-              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; reader?: ",
+              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -2816,7 +2858,7 @@
               "ZodString",
               "; }, \"strip\", ",
               "ZodTypeAny",
-              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; reader?: ",
+              ", { id: string; type: \"Href\"; href: string; label?: string | undefined; }, { id: string; type: \"Href\"; href: string; label?: string | undefined; }>]>, \"strip\"> | undefined; interruptValue?: { type: \"SELECT_OPTION\"; options: { value: string; label: string; buttonColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; }[]; description: string; threadId: string; expired?: boolean | undefined; } | { type: \"INPUT_TEXT\"; threadId: string; description?: string | undefined; placeholder?: string | undefined; expired?: boolean | undefined; } | undefined; interruptResumeValue?: { value: string; type: \"SELECT_OPTION\"; } | { value: string; type: \"INPUT_TEXT\"; } | undefined; } | undefined; isError?: boolean | undefined; refusal?: string | undefined; reader?: ",
               "objectOutputType",
               "<{}, ",
               "ZodUnknown",
@@ -3073,6 +3115,48 @@
             "tags": [],
             "label": "hasManageGlobalKnowledgeBase",
             "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.UseAssistantAvailability.hasAgentBuilderPrivilege",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasAgentBuilderPrivilege",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.UseAssistantAvailability.hasAgentBuilderManagePrivilege",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasAgentBuilderManagePrivilege",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.UseAssistantAvailability.isAiAgentsEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isAiAgentsEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
             "deprecated": false,
             "trackAdoption": false

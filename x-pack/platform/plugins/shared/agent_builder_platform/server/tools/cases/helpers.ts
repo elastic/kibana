@@ -19,7 +19,7 @@ import type {
   RelatedCase,
   UserCommentAttachment,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { CasesSearchRequest } from '@kbn/cases-plugin/common/types/api';
+import type { CasesFindRequest } from '@kbn/cases-plugin/common/types/api';
 import { getCurrentSpaceId } from '@kbn/onechat-plugin/server/utils/spaces';
 import { getCaseViewPath } from '@kbn/cases-plugin/server/common/utils';
 import type { PluginStartDependencies } from '../../types';
@@ -165,7 +165,7 @@ export const createCommentSummariesFromArray = (comments: Attachment[]): Comment
  */
 export const fetchAllPages = async (
   casesClient: CasesClient,
-  searchParams: CasesSearchRequest,
+  searchParams: CasesFindRequest,
   maxPages: number = 10
 ): Promise<Case[]> => {
   const allCases: Case[] = [];
@@ -174,7 +174,7 @@ export const fetchAllPages = async (
 
   while (hasMorePages && currentPage <= maxPages) {
     searchParams.page = currentPage;
-    const searchResult = await casesClient.cases.search(searchParams);
+    const searchResult = await casesClient.cases.find(searchParams);
 
     if (searchResult.cases.length === 0) {
       break;

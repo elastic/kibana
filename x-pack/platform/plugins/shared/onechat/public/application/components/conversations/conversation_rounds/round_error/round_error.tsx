@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import { isContextLengthExceededAgentError } from '@kbn/onechat-common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { RoundErrorThinkingTitle } from './round_error_thinking_title';
 import { ContextExceededRoundError } from './context_exceeded_round_error';
 import { GenericRoundError } from './generic_round_error';
 import { RoundErrorThinkingPanel } from './round_error_thinking_panel';
@@ -34,11 +33,6 @@ const labels = {
 
 export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRetry }) => {
   const { euiTheme } = useEuiTheme();
-  const [showErrorThinkingPanel, setShowErrorThinkingPanel] = useState(false);
-
-  const toggleErrorThinkingPanel = () => {
-    setShowErrorThinkingPanel(!showErrorThinkingPanel);
-  };
 
   const errorContent = isContextLengthExceededAgentError(error) ? (
     <ContextExceededRoundError />
@@ -53,14 +47,11 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
       responsive={false}
       data-test-subj="agentBuilderRoundError"
     >
-      {showErrorThinkingPanel ? (
-        <RoundErrorThinkingPanel onClose={toggleErrorThinkingPanel}>
-          <RoundSteps isLoading={false} steps={errorSteps} />
-          {errorContent}
-        </RoundErrorThinkingPanel>
-      ) : (
-        <RoundErrorThinkingTitle onClick={toggleErrorThinkingPanel} />
-      )}
+      <RoundErrorThinkingPanel>
+        <RoundSteps isLoading={false} steps={errorSteps} />
+        {errorContent}
+      </RoundErrorThinkingPanel>
+
       <EuiFlexGroup direction="row" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

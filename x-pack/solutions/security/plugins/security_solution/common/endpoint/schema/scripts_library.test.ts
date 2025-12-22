@@ -8,7 +8,10 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import { Readable } from 'stream';
 import type { CreateScriptRequestBody } from '../../api/endpoint/scripts_library';
-import { CreateScriptRequestSchema } from '../../api/endpoint/scripts_library';
+import {
+  PatchUpdateRequestSchema,
+  CreateScriptRequestSchema,
+} from '../../api/endpoint/scripts_library';
 import type { HapiReadableStream } from '../../../server/types';
 import { ListScriptsRequestSchema } from '../../api/endpoint/scripts_library/list_scripts';
 
@@ -245,6 +248,56 @@ describe('Scripts library schemas', () => {
     it('should error if `kuery` uses invalid fields', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ kuery: 'foo:bar' })).toThrow(
         '[kuery]: Invalid KQL filter field: foo'
+      );
+    });
+  });
+
+  describe('Patch Update API request schema', () => {
+    // NOTE:
+    // The definition of the individual fields accepted by the Update API
+    // are shared with the `create` API, thus they are already tested/covered
+    // with those tests above.
+
+    it('should accept full payload', () => {
+      expect(
+        PatchUpdateRequestSchema.body.validate({
+          name: 'foo',
+          platform: ['linux'],
+          requiresInput: true,
+          description: 'some description',
+          instructions: 'some instructions',
+          example: 'some example',
+          pathToExecutable: 'some path',
+          file: createFileStream(),
+          version: 'someVersionString',
+        })
+      ).toBeTruthy();
+    });
+
+    it.each`
+      title                 | bodyPayload
+      ----------             -------------
+      ${'name'}             | ${{ name: 'foo' }}
+      ${'platform'}         | ${{ platform: ['windows'] }}
+      ${'file'}             | ${{ file: createFileStream() }}
+      ${'requiresInput'}    | ${{ requiresInput: true }}
+      ${'description'}      | ${{ description: 'some description' }}
+      ${'instructions'}     | ${{ instructions: 'some instruction' }}
+      ${'example'}          | ${{ example: 'some example' }}
+      ${'pathToExecutable'} | ${{ pathToExecutable: '/some/path' }}
+    `('should accept partial updates with only `$title`', ({ bodyPayload }) => {
+      expect(PatchUpdateRequestSchema.body.validate(bodyPayload)).toBeTruthy();
+    });
+
+    it('should error if no updates are provided', () => {
+      expect(() => PatchUpdateRequestSchema.body.validate({})).toThrow(
+        'At least one field must be defined for update'
+      );
+    });
+
+    it('should error if only `version` is provided', () => {
+      expect(() => PatchUpdateRequestSchema.body.validate({ version: 'fdfd' })).toThrow(
+        'At least one field must be defined for update'
       );
     });
   });

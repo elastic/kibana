@@ -366,6 +366,14 @@ const ESQLEditorInternal = function ESQLEditor({
         absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
       }
 
+      // Set time picker date to the nearest half hour
+      setTimePickerDate(
+        moment()
+          .minute(Math.round(moment().minute() / 30) * 30)
+          .second(0)
+          .millisecond(0)
+      );
+
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
       popoverRef.current?.focus();
@@ -481,15 +489,20 @@ const ESQLEditorInternal = function ESQLEditor({
             .filter((item) => item.status !== 'error')
             .map((item) => item.queryString);
 
-          const { favoriteMetadata } = (await favoritesClientInstance?.getFavorites()) || {};
+          try {
+            const { favoriteMetadata } = (await favoritesClientInstance?.getFavorites()) || {};
 
-          if (favoriteMetadata) {
-            Object.keys(favoriteMetadata).forEach((id) => {
-              const item = favoriteMetadata[id];
-              const { queryString } = item;
-              historyStarredItems.push(queryString);
-            });
+            if (favoriteMetadata) {
+              Object.keys(favoriteMetadata).forEach((id) => {
+                const item = favoriteMetadata[id];
+                const { queryString } = item;
+                historyStarredItems.push(queryString);
+              });
+            }
+          } catch {
+            // do nothing
           }
+
           return historyStarredItems;
         })(),
       }),

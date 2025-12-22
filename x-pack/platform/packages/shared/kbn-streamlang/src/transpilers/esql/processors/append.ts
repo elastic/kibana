@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import type { AppendProcessor } from '../../../../types/processors';
 import { conditionToESQLAst, esqlLiteralFromAny } from '../condition_to_esql';
 
 export function convertAppendProcessorToESQL(processor: AppendProcessor): ESQLAstCommand[] {
   const {
     to,
-    value, // eslint-disable-next-line @typescript-eslint/naming-convention
+    value,
     allow_duplicates = true, // default to true to match Append Ingest Processor
     where,
   } = processor as AppendProcessor;

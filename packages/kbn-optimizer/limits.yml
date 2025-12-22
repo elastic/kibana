@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilderPlatform: 64202
-  aiAssistantManagementSelection: 10000
+  aiAssistantManagementSelection: 13590
   aiops: 15359
   alerting: 26932
   apm: 38573
@@ -25,7 +25,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 566392
+  core: 559233
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -53,8 +53,8 @@ pageLoadAssetSize:
   embeddable: 18432
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
-  enterpriseSearch: 38000
-  esql: 20000
+  enterpriseSearch: 41839
+  esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -75,7 +75,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 187942
-  genAiSettings: 5003
+  genAiSettings: 5663
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -106,31 +106,31 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
-  maintenanceWindows: 3905
+  maintenanceWindows: 8803
   management: 12951
   maps: 45917
   mapsEms: 6734
   metricsDataAccess: 44988
-  metricsExperience: 6655
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 18999
+  navigation: 15639
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
-  observabilityAIAssistant: 52556
-  observabilityAIAssistantApp: 16012
-  observabilityAiAssistantManagement: 6438
+  observabilityAgentBuilder: 7079
+  observabilityAIAssistant: 54556
+  observabilityAIAssistantApp: 18012
+  observabilityAiAssistantManagement: 7438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 28638
+  onechat: 88464
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9000
-  productDocBase: 3083
+  presentationUtil: 9948
+  productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
   reindexService: 3469
@@ -174,7 +174,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 23974
+  streamsApp: 27784
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -200,12 +200,12 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 19665
+  visTypeTimeseries: 20000
   visTypeVega: 38538
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 61264
+  workflowsExtensions: 73502
   workflowsManagement: 8497
   workplaceAIApp: 6135

@@ -8,7 +8,7 @@
 import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  RawRoundInput,
+  ConverseInput,
   Conversation,
   ChatAgentEvent,
   AgentCapabilities,
@@ -32,7 +32,7 @@ export const executeAgent$ = ({
   capabilities?: AgentCapabilities;
   agentService: AgentsServiceStart;
   conversation: Conversation;
-  nextInput: RawRoundInput;
+  nextInput: ConverseInput;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   browserApiTools?: BrowserApiToolMetadata[];

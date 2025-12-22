@@ -22,19 +22,19 @@ describe('useHasGraphVisualizationLicense', () => {
     jest.clearAllMocks();
   });
 
-  it('should return true when both PLI feature is enabled and user has Enterprise-level feature', () => {
+  it('should return true when both PLI feature is enabled and user has Platinum-level feature', () => {
     // In Serverless Complete tier, both checks are true:
     // - PLI feature check returns true
-    // - Enterprise-level features are available (treated as "Enterprise" for license purposes)
-    // In ESS/Self-Managed with Enterprise license, both checks are true:
-    // - PLI feature check passes (Enterprise includes all features)
-    // - License check passes (user has Enterprise license)
+    // - Platinum-level features are available (treated as "Platinum" for license purposes)
+    // In ESS/Self-Managed with Platinum license, both checks are true:
+    // - PLI feature check passes (Platinum includes all features)
+    // - License check passes (user has Platinum license)
     mockUseProductFeatureKeys.mockReturnValue(
       new Set<string>([ProductFeatureSecurityKey.graphVisualization])
     );
 
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => true),
+      isPlatinumPlus: jest.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -42,13 +42,13 @@ describe('useHasGraphVisualizationLicense', () => {
     expect(result.current).toBe(true);
   });
 
-  it('should return false when user has graphVisualization feature but NOT Enterprise license', () => {
+  it('should return false when user has graphVisualization feature but NOT Platinum license', () => {
     mockUseProductFeatureKeys.mockReturnValue(
       new Set<string>([ProductFeatureSecurityKey.graphVisualization])
     );
 
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => false),
+      isPlatinumPlus: jest.fn(() => false),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -56,11 +56,11 @@ describe('useHasGraphVisualizationLicense', () => {
     expect(result.current).toBe(false);
   });
 
-  it('should return false when user has Enterprise license but NOT graphVisualization feature', () => {
+  it('should return false when user has Platinum license but NOT graphVisualization feature', () => {
     mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
 
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => true),
+      isPlatinumPlus: jest.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -68,11 +68,11 @@ describe('useHasGraphVisualizationLicense', () => {
     expect(result.current).toBe(false);
   });
 
-  it('should return false when user has neither graphVisualization feature nor Enterprise license', () => {
+  it('should return false when user has neither graphVisualization feature nor Platinum license', () => {
     mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
 
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => false),
+      isPlatinumPlus: jest.fn(() => false),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());
@@ -84,7 +84,7 @@ describe('useHasGraphVisualizationLicense', () => {
     mockUseProductFeatureKeys.mockReturnValue(new Set<string>([]));
 
     mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn(() => true),
+      isPlatinumPlus: jest.fn(() => true),
     });
 
     const { result } = renderHook(() => useHasGraphVisualizationLicense());

@@ -43,7 +43,23 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "onechat",
+        "id": "def-public.ONECHAT_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ONECHAT_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"agentBuilder\""
+        ],
+        "path": "x-pack/platform/plugins/shared/onechat/common/features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "onechat",
@@ -179,6 +195,43 @@
           "returnComment": [
             "An object containing the flyout reference"
           ]
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-public.OnechatPluginStart.toggleConversationFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "toggleConversationFlyout",
+          "description": [
+            "\nToggles the conversation flyout.\n\nIf the flyout is open, it will be closed. Otherwise, it will be opened."
+          ],
+          "signature": [
+            "(options?: ",
+            "OpenConversationFlyoutOptions",
+            " | undefined) => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "onechat",
+              "id": "def-public.OnechatPluginStart.toggleConversationFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "OpenConversationFlyoutOptions",
+                " | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/onechat/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "onechat",
