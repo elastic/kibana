@@ -22,7 +22,7 @@ export const DIRECTOR_ESQL_QUERY = `FROM ${ALERT_EVENTS_INDEX}
     BY rule.id, event_alert_series_id, last_status
 | EVAL candidate_state = CASE(
     last_tracked_state == "inactive"     AND last_status == "breach",    "pending",
-    last_tracked_state == "pending"      AND last_status == "recovered", "inactive",
+    last_tracked_state == "pending"      AND last_status == "recover",   "inactive",
     last_tracked_state == "active"       AND last_status == "recover",   "recovering",
     last_tracked_state == "recovering"   AND last_status == "breach",    "active",
     NULL
