@@ -21,15 +21,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                ids:
-                  $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
-                tags:
-                  $ref: '../../alert_tags/set_alert_tags/set_alert_tags.schema.yaml#/components/schemas/SetAlertTags'
-              required:
-                - ids
-                - tags
+              $ref: '../../model/set_alert_tags_body.schema.yaml#/components/schemas/SetAlertTagsBody'
             examples:
               add:
                 value:

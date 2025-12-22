@@ -16,19 +16,12 @@
 
 import { z } from '@kbn/zod';
 
-import { AlertAssignees } from '../../alert_assignees/set_alert_assignees_route.gen';
-import { AlertIds } from '../../../model/alert.gen';
+import { SetAlertAssigneesBody } from '../../model/set_alert_assignees_body.gen';
 
 export type SetUnifiedAlertsAssigneesRequestBody = z.infer<
   typeof SetUnifiedAlertsAssigneesRequestBody
 >;
-export const SetUnifiedAlertsAssigneesRequestBody = z.object({
-  /**
-   * Details about the assignees to assign and unassign.
-   */
-  assignees: AlertAssignees,
-  ids: AlertIds,
-});
+export const SetUnifiedAlertsAssigneesRequestBody = SetAlertAssigneesBody;
 export type SetUnifiedAlertsAssigneesRequestBodyInput = z.input<
   typeof SetUnifiedAlertsAssigneesRequestBody
 >;

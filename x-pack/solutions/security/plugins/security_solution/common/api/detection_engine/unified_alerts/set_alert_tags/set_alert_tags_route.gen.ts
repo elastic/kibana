@@ -16,14 +16,10 @@
 
 import { z } from '@kbn/zod';
 
-import { AlertIds } from '../../../model/alert.gen';
-import { SetAlertTags } from '../../alert_tags/set_alert_tags/set_alert_tags.gen';
+import { SetAlertTagsBody } from '../../model/set_alert_tags_body.gen';
 
 export type SetUnifiedAlertsTagsRequestBody = z.infer<typeof SetUnifiedAlertsTagsRequestBody>;
-export const SetUnifiedAlertsTagsRequestBody = z.object({
-  ids: AlertIds,
-  tags: SetAlertTags,
-});
+export const SetUnifiedAlertsTagsRequestBody = SetAlertTagsBody;
 export type SetUnifiedAlertsTagsRequestBodyInput = z.input<typeof SetUnifiedAlertsTagsRequestBody>;
 
 /**
