@@ -72,12 +72,8 @@ export const Chart = ({
     chartRef,
     chartLayers,
     yBounds,
+    error,
   });
-
-  // if error, set datasourceStates to empty to trigger Lens error about datasource
-  if (lensProps && error) {
-    lensProps.attributes.state.datasourceStates = {};
-  }
 
   return (
     <div
