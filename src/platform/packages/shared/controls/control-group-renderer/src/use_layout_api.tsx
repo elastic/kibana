@@ -13,7 +13,7 @@ import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs'
 import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { StickyControlState } from '@kbn/controls-schemas';
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type { PanelPackage } from '@kbn/presentation-containers';
 
@@ -60,7 +60,7 @@ export const useLayoutApi = (
 
     return {
       layout$: layout$Ref.current,
-      addNewPanel: async <State extends StickyControlState = StickyControlState>(
+      addNewPanel: async <State extends PinnedControlState = PinnedControlState>(
         panelPackage: PanelPackage<State>
       ) => {
         const { panelType: type, serializedState, maybePanelId } = panelPackage;
@@ -70,8 +70,8 @@ export const useLayoutApi = (
         const oldControls = layout$Ref.current.getValue().controls;
         const { rawState } = {
           rawState: {
-            width: DEFAULT_CONTROL_WIDTH as StickyControlState['width'],
-            grow: DEFAULT_CONTROL_GROW as StickyControlState['grow'],
+            width: DEFAULT_CONTROL_WIDTH as PinnedControlState['width'],
+            grow: DEFAULT_CONTROL_GROW as PinnedControlState['grow'],
             ...serializedState?.rawState,
           },
         };
@@ -82,13 +82,13 @@ export const useLayoutApi = (
               order: Object.keys(oldControls).length,
               width: rawState.width,
               grow: rawState.grow,
-              type: type as StickyControlState['type'],
+              type: type as PinnedControlState['type'],
             },
           },
         });
         return await childrenApi?.getChildApi(uuid);
       },
-      replacePanel: async <State extends StickyControlState = StickyControlState>(
+      replacePanel: async <State extends PinnedControlState = PinnedControlState>(
         idToRemove: string,
         newPanel: PanelPackage<State>
       ) => {
@@ -104,7 +104,7 @@ export const useLayoutApi = (
           delete controls[idToRemove];
         }
         controls[uuid] = {
-          type: type as StickyControlState['type'],
+          type: type as PinnedControlState['type'],
           ...serializedState,
           order: newOrder,
         };

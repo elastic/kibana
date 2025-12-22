@@ -27,7 +27,7 @@ import {
   collectPanelsByType,
   getEmptyDashboardData,
   collectSectionsAndAccessControl,
-  collectStickyControls,
+  collectPinnedControls,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
@@ -109,7 +109,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
               const controls = JSON.parse(
                 dashboard.attributes.controlGroupInput?.panelsJSON as string
               ) as unknown as StoredControlGroupInput['panels'];
-              collectStickyControls(controls, dashboardData, embeddable);
+              collectPinnedControls(controls, dashboardData, embeddable);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }

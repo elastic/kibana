@@ -89,7 +89,7 @@ export const collectSectionsAndAccessControl = (
   return collectorData;
 };
 
-export const collectStickyControls = (
+export const collectPinnedControls = (
   controls: StoredControlGroupInput['panels'],
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService

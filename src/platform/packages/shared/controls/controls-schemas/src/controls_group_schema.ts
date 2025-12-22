@@ -35,7 +35,7 @@ export const controlWidthSchema = schema.oneOf(
   }
 );
 
-export const stickyControlSchema = schema.object({
+export const pinnedControlSchema = schema.object({
   uid: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
   width: schema.maybe(controlWidthSchema),
   grow: schema.maybe(
@@ -54,27 +54,27 @@ export const controlsGroupSchema = schema.object({
         .allOf([
           schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
           schema.object({ config: optionsListDSLControlSchema }),
-          stickyControlSchema,
+          pinnedControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
       schema
         .allOf([
           schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
           schema.object({ config: rangeSliderControlSchema }),
-          stickyControlSchema,
+          pinnedControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }),
       schema
         .allOf([
           schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
           schema.object({ config: timeSliderControlSchema }),
-          stickyControlSchema,
+          pinnedControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
       schema.allOf([
         schema.object({ type: schema.literal(ESQL_CONTROL) }),
         schema.object({ config: optionsListESQLControlSchema }),
-        stickyControlSchema,
+        pinnedControlSchema,
       ]), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
     ]),
     {

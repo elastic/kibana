@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StickyControlState } from '@kbn/controls-schemas';
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
@@ -30,7 +30,7 @@ describe('transformDashboardIn', () => {
             order: 0,
             type: 'type1',
             width: 'small',
-          } as unknown as StickyControlState,
+          } as unknown as PinnedControlState,
         ],
       },
       description: 'description',

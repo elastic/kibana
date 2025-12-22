@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlsGroupState, StickyControlState } from '@kbn/controls-schemas';
+import type { ControlsGroupState, PinnedControlState } from '@kbn/controls-schemas';
 import { transformControlGroupIn } from './transform_control_group_in';
 import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 
@@ -30,13 +30,13 @@ describe('transformControlGroupIn', () => {
         width: CONTROL_WIDTH_SMALL,
         config: { bizz: 'buzz' },
         grow: false,
-      } as unknown as StickyControlState,
+      } as unknown as PinnedControlState,
       {
         type: 'type2',
         grow: true,
         width: CONTROL_WIDTH_SMALL,
         config: { boo: 'bear' },
-      } as unknown as StickyControlState,
+      } as unknown as PinnedControlState,
     ],
   };
 

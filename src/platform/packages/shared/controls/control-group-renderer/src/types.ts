@@ -13,8 +13,8 @@ import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type {
   DataControlState,
   LegacyIgnoreParentSettings,
-  StickyControlLayoutState,
-  StickyControlState,
+  PinnedControlLayoutState,
+  PinnedControlState,
 } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
@@ -92,7 +92,7 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
  * ----------------------------------------------------------------
  */
 
-export type FlattenedStickyControlState = StickyControlLayoutState & StickyControlState['config'];
+export type FlattenedPinnedControlState = PinnedControlLayoutState & PinnedControlState['config'];
 
 export interface ControlGroupRuntimeState<State extends {} = {}> {
   initialChildControlState: ControlPanelsState<State>;
@@ -111,7 +111,7 @@ export interface ControlPanelsState<ControlState extends {} = {}> {
 }
 
 export type ControlPanelState<ControlState extends {} = {}> = ControlState &
-  FlattenedStickyControlState & {
+  FlattenedPinnedControlState & {
     type: string; // prevents having to cast to the literal type
     order: number;
   };

@@ -43,7 +43,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { StickyControlLayoutState } from '@kbn/controls-schemas';
+import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { PanelResizeSettings } from '@kbn/presentation-util-plugin/public';
 import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import type { DashboardState } from '../../../common';
@@ -409,7 +409,7 @@ export function initializeLayoutManager(
     const newControls = { ...layout$.getValue().controls };
 
     newControls[uuid] = {
-      type: controlToPin.type as StickyControlLayoutState['type'],
+      type: controlToPin.type as PinnedControlLayoutState['type'],
       order: controlToPin.order ?? Object.keys(newControls).length,
       width: controlToPin.width ?? DEFAULT_CONTROL_WIDTH,
       grow: controlToPin.grow ?? DEFAULT_CONTROL_GROW,
@@ -423,7 +423,7 @@ export function initializeLayoutManager(
 
   const addPinnedPanel = async (
     panelPackage: PanelPackage,
-    prevLayoutState?: Partial<StickyControlLayoutState>
+    prevLayoutState?: Partial<PinnedControlLayoutState>
   ) => {
     const newPanelUuid = createPanel(panelPackage);
     const { serializedState } = panelPackage;

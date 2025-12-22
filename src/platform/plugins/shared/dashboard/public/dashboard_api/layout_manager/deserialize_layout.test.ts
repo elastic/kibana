@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StickyControlState } from '@kbn/controls-schemas';
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import { deserializeLayout } from './deserialize_layout';
 
 describe('deserializeLayout', () => {
@@ -45,12 +45,12 @@ describe('deserializeLayout', () => {
             width: 'small',
             grow: true,
             config: { someValue: 'test' },
-          } as unknown as StickyControlState,
+          } as unknown as PinnedControlState,
           {
             uid: 'control2',
             type: 'anotherType',
             config: { anotherValue: 1 },
-          } as unknown as StickyControlState,
+          } as unknown as PinnedControlState,
         ],
       },
       () => []

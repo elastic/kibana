@@ -14,7 +14,7 @@ import type { controlSchema, dataControlSchema } from './control_schema';
 import type {
   controlsGroupSchema,
   controlWidthSchema,
-  stickyControlSchema,
+  pinnedControlSchema,
 } from './controls_group_schema';
 import type {
   optionsListDSLControlSchema,
@@ -28,10 +28,10 @@ import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_
 import type { timeSliderControlSchema } from './time_slider_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
-export type StickyControlState = ControlsGroupState['controls'][number];
-export type StickyControlLayoutState = TypeOf<typeof stickyControlSchema> & {
+export type PinnedControlState = ControlsGroupState['controls'][number];
+export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
   order: number;
-  type: StickyControlState['type'];
+  type: PinnedControlState['type'];
 };
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
 export type ControlState = TypeOf<typeof controlSchema>;

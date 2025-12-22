@@ -23,10 +23,10 @@ export type {
   OptionsListSortingType,
   RangeSliderControlState,
   RangeSliderValue,
-  StickyControlState,
+  PinnedControlState,
   TimeSlice,
   TimeSliderControlState,
   HasCustomPrepend,
   LegacyIgnoreParentSettings,
-  StickyControlLayoutState,
+  PinnedControlLayoutState,
 } from './src/types';

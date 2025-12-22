@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StickyControlState } from '@kbn/controls-schemas';
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
@@ -77,7 +77,7 @@ describe('transformDashboardOut', () => {
             config: { anyKey: 'some value' },
             uid: 'foo',
             type: 'type1',
-          } as unknown as StickyControlState,
+          } as unknown as PinnedControlState,
         ],
       },
       description: 'my description',
@@ -161,7 +161,7 @@ describe('transformDashboardOut', () => {
               anyKey: 'some value',
             },
             type: 'type1',
-          } as unknown as StickyControlState,
+          } as unknown as PinnedControlState,
         ],
       },
       description: 'description',

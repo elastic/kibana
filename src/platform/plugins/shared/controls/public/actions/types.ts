@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StickyControlLayoutState } from '@kbn/controls-schemas';
+import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import type { BehaviorSubject } from 'rxjs';
 
 export interface PublishesControlsLayout {
   layout$: BehaviorSubject<{
     controls: {
-      [id: string]: StickyControlLayoutState;
+      [id: string]: PinnedControlLayoutState;
     };
   }>;
 }

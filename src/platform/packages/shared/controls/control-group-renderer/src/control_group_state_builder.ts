@@ -20,7 +20,7 @@ import type {
   DataControlState,
   OptionsListDSLControlState,
   RangeSliderControlState,
-  StickyControlState,
+  PinnedControlState,
 } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -29,13 +29,13 @@ import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   ControlGroupRuntimeState,
   ControlPanelState,
-  FlattenedStickyControlState,
+  FlattenedPinnedControlState,
 } from './types';
 
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<DataControlState & Partial<FlattenedStickyControlState>, 'type'>,
+    controlState: Omit<DataControlState & Partial<FlattenedPinnedControlState>, 'type'>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
@@ -62,7 +62,7 @@ export const controlGroupStateBuilder = {
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<StickyControlState, keyof OptionsListDSLControlState | 'config'> &
+      Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
         OptionsListDSLControlState,
       'type'
     >,
@@ -80,7 +80,7 @@ export const controlGroupStateBuilder = {
   addRangeSliderControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<StickyControlState, keyof RangeSliderControlState> & RangeSliderControlState,
+      Omit<PinnedControlState, keyof RangeSliderControlState> & RangeSliderControlState,
       'type'
     >,
     controlId?: string
@@ -113,7 +113,7 @@ async function getCompatibleControlType(
   dataViewId: string,
   fieldName: string,
   uiActionsService: UiActionsStart
-): Promise<StickyControlState['type'] | undefined> {
+): Promise<PinnedControlState['type'] | undefined> {
   const controlTypes = (await uiActionsService.getTriggerActions(CONTROL_MENU_TRIGGER)) as Array<
     Action<EmbeddableApiContext & { state: unknown }> // This is CreateControlTypeAction but I cannot import it due to circular dependencies
   >;
@@ -125,7 +125,7 @@ async function getCompatibleControlType(
       embeddable: undefined, // parentApi isn't necessary for this
       state: { dataViewId, fieldName },
     });
-    if (compatible) return action.type as StickyControlState['type'];
+    if (compatible) return action.type as PinnedControlState['type'];
   }
   return undefined;
 }

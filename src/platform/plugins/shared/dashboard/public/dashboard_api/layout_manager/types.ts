@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlWidth, StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
+import type { ControlWidth, PinnedControlLayoutState } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DashboardPanel, DashboardSection } from '../../../server';
@@ -37,7 +37,7 @@ export interface DashboardLayout {
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'grid' | 'title'> };
   controls: {
-    [id: string]: StickyControlLayoutState;
+    [id: string]: PinnedControlLayoutState;
   };
 }
 

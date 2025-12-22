@@ -8,7 +8,7 @@
  */
 
 import type { ControlsGroupState } from '@kbn/controls-schemas';
-import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
+import type { PinnedControlLayoutState } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import type {
@@ -28,7 +28,7 @@ export interface ControlRendererServices {
 
 export interface ControlsLayout {
   controls: {
-    [id: string]: StickyControlLayoutState;
+    [id: string]: PinnedControlLayoutState;
   };
 }
 
