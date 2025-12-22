@@ -30,7 +30,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import type { FleetStart } from '@kbn/fleet-plugin/public';
@@ -68,6 +67,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -96,7 +96,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet: FleetStart;
   data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   contentManagement: ContentManagementPublicStart;
