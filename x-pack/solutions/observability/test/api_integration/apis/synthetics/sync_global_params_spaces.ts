@@ -11,7 +11,7 @@ import type {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { omit } from 'lodash';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     const params: Record<string, string> = {};
 
     before(async () => {
+      await testPrivateLocations.cleanupFleetPolicies();
       await kServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
       _browserMonitorJson = getFixtureJson('browser_monitor');
