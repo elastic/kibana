@@ -12,7 +12,7 @@ import type { RecursivePartial } from '@kbn/utility-types';
 import React from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
-import { transformPartialSLOStateToFormState } from '../helpers/process_slo_form_values';
+import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
@@ -24,7 +24,7 @@ export default function CreateSLOFormFlyout({
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
 }) {
-  const formInitialValues = transformPartialSLOStateToFormState(initialValues);
+  const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" size="l" maxWidth={620} ownFocus>
