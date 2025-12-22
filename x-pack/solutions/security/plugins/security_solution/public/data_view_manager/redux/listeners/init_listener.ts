@@ -10,6 +10,7 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { PageScope } from '../../constants';
@@ -43,6 +44,7 @@ export const createInitListener = (
     dataViews: DataViewsServicePublic;
     spaces: SpacesPluginStart;
     storage: Storage;
+    logger: Logger;
   },
   attacksAlertsAlignmentEnabled: boolean
 ) => {
@@ -53,6 +55,7 @@ export const createInitListener = (
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
       try {
+        const logger = dependencies.logger;
         // Initialize default data views first
         const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
@@ -63,6 +66,15 @@ export const createInitListener = (
           attacksAlertsAlignmentEnabled,
         });
 
+        logger.info(`Default data views created: 
+          - Default Data View: ${defaultDataView.title} (ID: ${defaultDataView.id}) 
+          - Alert Data View: ${alertDataView.title} (ID: ${alertDataView.id}) 
+          ${
+            attacksAlertsAlignmentEnabled
+              ? `- Attack Data View: ${attackDataView.title} (ID: ${attackDataView.id})`
+              : ''
+          }`);
+
         const exploreDataView = await createExploreDataView(
           {
             dataViews: dependencies.dataViews,
@@ -72,13 +84,24 @@ export const createInitListener = (
           alertDataView.title
         );
 
+        logger.info(`Explore Data View created: 
+          - Explore Data View: ${exploreDataView.title} (ID: ${exploreDataView.id})`);
+
+        // Store the created data views in the Redux state
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(exploreDataView));
 
         // NOTE: This is later used in the data view manager drop-down selector
         const dataViews = await dependencies.dataViews.getAllDataViewLazy();
+
+        logger.info(`Fetched ${dataViews.length} data views from the Data Views service.`);
+
         const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
 
+        logger.info(`Converted data views to specs.`);
+
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.setDataViews(dataViewSpecs));
+
+        logger.info(`Set data views in the Redux state.`);
 
         // NOTE: save default dataview id for the given space in the store.
         // this is used to identify the default selection in pickers across Kibana Space
@@ -88,6 +111,8 @@ export const createInitListener = (
             alertDataViewId: alertDataView.id,
           })
         );
+
+        logger.info(`Set default and alert data view IDs in the Redux state.`);
 
         // Preload the default data view for all the scopes
         // Immediate calls that would dispatch this call from other places will cancel this action,
@@ -104,6 +129,7 @@ export const createInitListener = (
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
+            logger.info(`Preloading data view for scope: ${scope}`);
             if (scope === PageScope.explore) {
               return listenerApi.dispatch(
                 selectDataViewAsync({
@@ -148,9 +174,11 @@ export const createInitListener = (
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)
         action.payload.forEach((defaultSelection) => {
+          logger.info(`Preloading additional data view for scope: ${defaultSelection.scope}`);
           listenerApi.dispatch(selectDataViewAsync(defaultSelection));
         });
       } catch (error: unknown) {
+        dependencies.logger.error(`Error initializing Data View Manager: ${error}`);
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.error());
       }
     },
