@@ -7,7 +7,6 @@
 
 import type { EuiCallOutProps } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiCallOut,
   EuiTextBlockTruncate,
@@ -95,25 +94,19 @@ export const ProcessorMetricBadges = ({
             content={
               <>
                 <p>
-                  {i18n.translate(
-                    'xpack.streams.processorMetricBadges.euiBadge.parsedRate',
-                    {
-                      defaultMessage:
-                        '{parsedRate} of the sampled documents were successfully parsed by this processor',
-                      values: { parsedRate },
-                    }
-                  )}
+                  {i18n.translate('xpack.streams.processorMetricBadges.euiBadge.parsedRate', {
+                    defaultMessage:
+                      '{parsedRate} of the sampled documents were successfully parsed by this processor',
+                    values: { parsedRate },
+                  })}
                 </p>
                 {detectedFieldsCount > 0 && (
                   <p>
-                    {i18n.translate(
-                      'xpack.streams.processorMetricBadges.detectedFields.tooltip',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {# field was extracted} other {# fields were extracted}}',
-                        values: { count: detectedFieldsCount },
-                      }
-                    )}
+                    {i18n.translate('xpack.streams.processorMetricBadges.detectedFields.tooltip', {
+                      defaultMessage:
+                        '{count, plural, one {# field was extracted} other {# fields were extracted}}',
+                      values: { count: detectedFieldsCount },
+                    })}
                   </p>
                 )}
               </>
