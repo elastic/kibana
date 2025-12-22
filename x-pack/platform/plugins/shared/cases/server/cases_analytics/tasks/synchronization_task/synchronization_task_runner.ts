@@ -19,9 +19,9 @@ import type {
   IndicesGetMappingResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { ConfigType } from '../../../config';
 import { SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
-import { isRetryableEsClientError } from '@kbn/core/packages/elasticsearch/server-utils';
 
 interface SynchronizationTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
