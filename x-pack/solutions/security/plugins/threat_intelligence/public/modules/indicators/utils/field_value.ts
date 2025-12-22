@@ -9,6 +9,8 @@ import { EMPTY_VALUE } from '../../../constants/common';
 import { unwrapValue } from './unwrap_value';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 
+export type NormalizedValue = string | string[] | null;
+
 const normalize = (v: string | string[] | null): string | null => {
   if (v == null) return null;
   if (Array.isArray(v)) return v.length > 0 ? v[0] : null;
@@ -45,5 +47,19 @@ export const getIndicatorFieldAndValue = (
  * @param value Indicator string|null value for the field
  * @returns true if correct, false if not
  */
-export const fieldAndValueValid = (field: string | null, value: string | null): boolean =>
-  !!value && value !== EMPTY_VALUE && !!field;
+export const fieldAndValueValid = (field: string | null, value: NormalizedValue): boolean => {
+  if (!field) return false;
+  if (value == null) return false;
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return false; // reject '' or whitespace
+    return trimmed !== EMPTY_VALUE;
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((v) => typeof v === 'string' && v.trim() && v !== EMPTY_VALUE);
+  }
+
+  return false;
+};
