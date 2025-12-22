@@ -25,6 +25,20 @@
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/alert_ai_insight.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgentBuilder",
+            "id": "def-public.AlertAiInsightProps.alertTitle",
+            "type": "string",
+            "tags": [],
+            "label": "alertTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/alert_ai_insight.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
