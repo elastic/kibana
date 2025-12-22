@@ -38,6 +38,7 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMet
   const escalatedCount = formatThousands(valueMetrics.totalAlerts - valueMetrics.filteredAlerts);
 
   const isFilteredNone = filteredPercentage === '0.00%';
+  const isFilteredAll = filteredPercentage === '100.00%';
   const isEscalatedAll = escalatedPercentage === '100.00%';
   const isEscalatedNone = escalatedPercentage === '0.00%';
 
@@ -100,7 +101,11 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMet
                     count: filteredCount,
                   })}
                 </strong>
-                {isFilteredNone ? i18n.FILTERED_ALERTS_2_NONE : i18n.FILTERED_ALERTS_2}
+                {isFilteredAll
+                  ? i18n.FILTERED_ALERTS_2_NONE
+                  : isFilteredNone
+                    ? i18n.FILTERED_ALERTS_2_ALL
+                    : i18n.FILTERED_ALERTS_2}
               </li>
               <li>
                 <strong>

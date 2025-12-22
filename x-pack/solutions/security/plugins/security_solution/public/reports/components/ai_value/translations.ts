@@ -174,6 +174,14 @@ export const FILTERED_ALERTS_2_NONE = i18n.translate(
   }
 );
 
+export const FILTERED_ALERTS_2_ALL = i18n.translate(
+  'xpack.securitySolution.aiValue.filteredAlerts2All',
+  {
+    defaultMessage:
+      ' were automatically filtered out by AI, meaning analysts reviewed all alerts manually.',
+  }
+);
+
 export const ESCALATED_ALERTS_1 = ({ percentage, count }: { percentage: string; count: string }) =>
   i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1', {
     defaultMessage: 'Focused escalations: Only {percentage} of alerts ({count})',
