@@ -49,6 +49,7 @@ export const EditSignificantEventFlyout = ({
 }) => {
   const {
     core: { notifications },
+    services: { telemetryClient },
   } = useKibana();
   const {
     timeState: { start, end },
@@ -69,6 +70,8 @@ export const EditSignificantEventFlyout = ({
       query={queryToEdit}
       aiFeatures={aiFeatures}
       onSave={async (data: SaveData) => {
+        const streamType = getStreamTypeFromDefinition(definition.stream);
+
         switch (data.type) {
           case 'single':
             await upsertQuery(data.query).then(
@@ -82,6 +85,12 @@ export const EditSignificantEventFlyout = ({
 
                 setIsEditFlyoutOpen(false);
                 refresh();
+
+                telemetryClient.trackSignificantEventsCreated({
+                  count: 1,
+                  stream_name: definition.stream.name,
+                  stream_type: streamType,
+                });
               },
               (error) => {
                 notifications.showErrorDialog({
@@ -106,6 +115,12 @@ export const EditSignificantEventFlyout = ({
                     'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
                     { defaultMessage: `Saved significant events queries successfully` }
                   ),
+                });
+
+                telemetryClient.trackSignificantEventsCreated({
+                  count: data.queries.length,
+                  stream_name: definition.stream.name,
+                  stream_type: streamType,
                 });
 
                 setIsEditFlyoutOpen(false);
