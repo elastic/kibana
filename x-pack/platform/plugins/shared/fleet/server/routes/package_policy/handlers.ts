@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
+import { groupBy, isEmpty, isEqual, keyBy, uniq } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -73,6 +73,8 @@ import {
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
+const deduplicateIds = (ids: string[]) => uniq(ids);
+
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
@@ -112,7 +114,8 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
-  const { ids, ignoreMissing } = request.body;
+  const ignoreMissing = request.body.ignoreMissing;
+  const ids = deduplicateIds(request.body.ids);
 
   try {
     const items = await packagePolicyService.getByIDs(soClient, ids, {
@@ -490,11 +493,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
     context,
     request
@@ -549,10 +553,11 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
   const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
-    request.body.packagePolicyIds,
+    packagePolicyIds,
     { user }
   );
 
@@ -577,7 +582,7 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   const soClient = (await context.core).savedObjects.client;
 
   const body: UpgradePackagePolicyDryRunResponse = [];
-  const { packagePolicyIds } = request.body;
+  const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
   await runWithCache(async () => {
     for (const id of packagePolicyIds) {
       const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
