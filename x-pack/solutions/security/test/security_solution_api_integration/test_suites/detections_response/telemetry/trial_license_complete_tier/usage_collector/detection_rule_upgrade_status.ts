@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { getCustomQueryRuleParams, getStats } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
@@ -16,7 +17,6 @@ import {
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
 } from '../../../utils';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
 
 /**
  * Test suite for detection rule upgrade status telemetry.

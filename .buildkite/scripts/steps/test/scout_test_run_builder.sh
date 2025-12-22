@@ -7,8 +7,11 @@ source .buildkite/scripts/steps/functional/common.sh
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 
-echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
-node scripts/scout discover-playwright-configs --save
+echo '--- Update Scout Test Config Manifests'
+node scripts/scout.js update-test-config-manifests
+
+echo '--- Discover Playwright Configs and upload to Buildkite artifacts (only stateful tests)'
+node scripts/scout discover-playwright-configs --target ech --save
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
 
@@ -19,6 +22,7 @@ node scripts/scout.js run-tests \
 --kibana-install-dir "$KIBANA_BUILD_LOCATION"
 
 echo '--- Running Scout EUI Helpers Tests'
+SCOUT_TARGET_TYPE='local' SCOUT_TARGET_MODE='serverless=security' \
 "${KIBANA_DIR:-$(pwd)}/node_modules/.bin/playwright" test \
   --project local \
   --grep @svlSecurity \

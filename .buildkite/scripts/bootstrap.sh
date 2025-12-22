@@ -45,7 +45,6 @@ if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTS
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
-  export MOON_LOG=debug
   echo "--- yarn install and bootstrap, attempt 2"
   yarn kbn bootstrap --force-install || yarn kbn bootstrap
 fi
@@ -53,7 +52,3 @@ fi
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
-
-# Clear the cache after installation
-rm -rf ./.yarn-local-mirror
-yarn cache clean

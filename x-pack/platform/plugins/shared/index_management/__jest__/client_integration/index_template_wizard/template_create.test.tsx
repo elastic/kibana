@@ -390,21 +390,14 @@ describe('<TemplateCreate />', () => {
       });
 
       describe('plugin parameters', () => {
-        const selectMappingsEditorTab = async (
-          tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced'
-        ) => {
-          const tabIndex = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
-          const tabElement = testBed.find('mappingsEditor.formTab').at(tabIndex);
-          await act(async () => {
-            tabElement.simulate('click');
-          });
-          testBed.component.update();
-        };
-
         test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
           const { exists } = testBed;
           // Navigate to the advanced configuration
-          await selectMappingsEditorTab('advanced');
+
+          await act(async () => {
+            testBed.find('advancedOptionsTab').simulate('click');
+          });
+          testBed.component.update();
 
           expect(exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(false);
         });
@@ -418,7 +411,10 @@ describe('<TemplateCreate />', () => {
           testBed.component.update();
           await navigateToMappingsStep();
 
-          await selectMappingsEditorTab('advanced');
+          await act(async () => {
+            testBed.find('advancedOptionsTab').simulate('click');
+          });
+          testBed.component.update();
 
           expect(testBed.exists('mappingsEditor.advancedConfiguration.sizeEnabledToggle')).toBe(
             true

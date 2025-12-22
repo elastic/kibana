@@ -1,5 +1,9 @@
 # @kbn-doc-linker partial
-
+title: Inventory
+description: >
+  The parameters for the infrastructure inventory rule.
+  These parameters are appropriate when `rule_type_id` is `metrics.alert.inventory.threshold`.
+type: object
 properties:
   criteria:
     type: array

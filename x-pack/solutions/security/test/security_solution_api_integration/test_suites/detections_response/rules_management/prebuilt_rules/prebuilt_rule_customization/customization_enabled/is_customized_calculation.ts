@@ -9,7 +9,7 @@ import {
   BulkActionTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
 import expect from 'expect';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,

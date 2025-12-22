@@ -431,25 +431,15 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           />
         </EuiFormRow>
 
-        <EuiSpacer size="xxl" />
-        {disabled || isReservedUser ? (
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButton iconType="arrowLeft" onClick={onCancel}>
-                <FormattedMessage
-                  id="xpack.security.management.users.userForm.backToUsersButton"
-                  defaultMessage="Back to users"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
+        <EuiSpacer size="l" />
+        {disabled || isReservedUser ? undefined : (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="editUserFormSubmitButton"
                 type="submit"
                 isLoading={form.isSubmitting}
-                isDisabled={form.isSubmitted && form.isInvalid}
+                isDisabled={defaultValues === form.values || (form.isSubmitted && form.isInvalid)}
                 fill
               >
                 {isNewUser ? (
@@ -467,14 +457,16 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 )}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty flush="left" isDisabled={form.isSubmitting} onClick={onCancel}>
-                <FormattedMessage
-                  id="xpack.security.management.users.userForm.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {isNewUser ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty flush="left" isDisabled={form.isSubmitting} onClick={onCancel}>
+                  <FormattedMessage
+                    id="xpack.security.management.users.userForm.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : undefined}
           </EuiFlexGroup>
         )}
       </EuiDescribedFormGroup>

@@ -12,6 +12,7 @@ import { EuiSelectableWrapper } from './selectable';
 import { EuiCheckBoxWrapper } from './check_box';
 import { EuiDataGridWrapper } from './data_grid';
 import { EuiToastWrapper } from './toast';
+import { EuiFieldTextWrapper } from './field_text';
 
 export {
   EuiComboBoxWrapper,
@@ -19,4 +20,5 @@ export {
   EuiCheckBoxWrapper,
   EuiDataGridWrapper,
   EuiToastWrapper,
+  EuiFieldTextWrapper,
 };

@@ -96,6 +96,53 @@ describe('getFileHandler', () => {
     );
   });
 
+  it('should sanitize the file for bundled package and an existing file', async () => {
+    mockedGetBundledPackageByPkgKey.mockResolvedValue({
+      getBuffer: () => Promise.resolve(),
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'test',
+        pkgVersion: '1.0.0',
+        filePath: 'README.svg',
+      },
+    });
+    const buffer = Buffer.from(
+      `<svg width="100" height="100">
+<script>alert("bad")</script>
+<style>body { background: red; }</style>
+<iframe src="https://evil.com"></iframe>
+<object data="evil.swf"></object>
+<form action="https://evil.com"><input type="text" /></form>
+<foreignObject height="1" width="1"><div>XSS</div></foreignObject>
+<circle cx="50" cy="50" r="40"/>
+<rect x="50" y="50" width="50" height="50"/>
+</svg>`
+    );
+    mockedUnpackBufferEntries.mockResolvedValue([
+      {
+        path: 'test-1.0.0/README.svg',
+        buffer,
+      },
+    ]);
+    const response = httpServerMock.createResponseFactory();
+    const context = mockContext();
+    await getFileHandler(context, request, response);
+
+    expect(response.custom).toBeCalledWith(
+      expect.objectContaining({
+        statusCode: 200,
+        headers: expect.objectContaining({
+          'content-type': 'image/svg+xml',
+        }),
+      })
+    );
+
+    expect(response.custom.mock.calls[0][0].body?.toString().replace(/(\n)/g, '')).toEqual(
+      `<svg width="100" height="100"><circle cx="50" cy="50" r="40"></circle><rect x="50" y="50" width="50" height="50"></rect></svg>`
+    );
+  });
+
   it('should throw if the file is not supported for bundled package and an existing file', async () => {
     mockedGetBundledPackageByPkgKey.mockResolvedValue({
       getBuffer: () => Promise.resolve(),
@@ -249,6 +296,53 @@ describe('getFileHandler', () => {
           'content-type': 'text/markdown; charset=utf-8',
         }),
       })
+    );
+  });
+
+  it('should sanitize the file from installation for installed package', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'test',
+        pkgVersion: '1.0.0',
+        filePath: 'test.svg',
+      },
+    });
+    const response = httpServerMock.createResponseFactory();
+    const context = mockContext();
+
+    mockedGetInstallation.mockResolvedValue({ version: '1.0.0' } as any);
+    mockedGetAsset.mockResolvedValue({
+      asset_path: '/test/1.0.0/test.svg',
+      data_utf8: `<svg width="100" height="100">
+<script>alert("bad")</script>
+<style>body { background: red; }</style>
+<iframe src="https://evil.com"></iframe>
+<object data="evil.swf"></object>
+<form action="https://evil.com"><input type="text" /></form>
+<foreignObject height="1" width="1"><div>XSS</div></foreignObject>
+<circle cx="50" cy="50" r="40"/>
+<rect x="50" y="50" width="50" height="50"/>
+</svg>`,
+      data_base64: '',
+      media_type: 'image/svg+xml',
+      package_name: 'test',
+      package_version: '1.0.0',
+      install_source: 'registry',
+    });
+
+    await getFileHandler(context, request, response);
+
+    expect(response.custom).toBeCalledWith(
+      expect.objectContaining({
+        statusCode: 200,
+        headers: expect.objectContaining({
+          'content-type': 'image/svg+xml',
+        }),
+      })
+    );
+
+    expect(response.custom.mock.calls[0][0].body?.toString().replace(/(\n)/g, '')).toEqual(
+      `<svg width="100" height="100"><circle cx="50" cy="50" r="40"></circle><rect x="50" y="50" width="50" height="50"></rect></svg>`
     );
   });
 

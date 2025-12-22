@@ -18,8 +18,8 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, licenseService } from '../../services';
-import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import { type AgentClient } from '../../services/agents';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -34,6 +34,8 @@ import type {
   AgentPolicy,
   FleetRequestHandlerContext,
   GetAutoUpgradeAgentsStatusRequestSchema,
+  RunAgentPolicyRevisionsCleanupTaskRequestSchema,
+  RunAgentPolicyRevisionsCleanupTaskResponseSchema,
 } from '../../types';
 
 import type {
@@ -54,6 +56,9 @@ import { createAgentPolicyWithPackages } from '../../services/agent_policy_creat
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { getAutoUpgradeAgentsStatus } from '../../services/agents';
+import { cleanupPolicyRevisions } from '../../tasks/fleet_policy_revisions_cleanup/cleanup_policy_revisions';
+
+import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -497,7 +502,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
     const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
       soClient,
       request.params.agentPolicyId,
@@ -553,7 +558,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
     const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
       soClient,
       request.params.agentPolicyId,
@@ -606,7 +611,7 @@ export const getK8sManifest: FleetRequestHandler<
   const fleetServer = request.query.fleetServer ?? '';
   const token = request.query.enrolToken ?? '';
 
-  const agentVersion = await getLatestAvailableAgentVersion();
+  const agentVersion = await getLatestAgentAvailableDockerImageVersion();
 
   const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
     fleetServer,
@@ -634,7 +639,7 @@ export const downloadK8sManifest: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetServer = request.query.fleetServer ?? '';
   const token = request.query.enrolToken ?? '';
-  const agentVersion = await getLatestAvailableAgentVersion();
+  const agentVersion = await getLatestAgentAvailableDockerImageVersion();
   const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
     fleetServer,
     token,
@@ -656,4 +661,35 @@ export const downloadK8sManifest: FleetRequestHandler<
       body: { message: 'Agent manifest not found' },
     });
   }
+};
+
+export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof RunAgentPolicyRevisionsCleanupTaskRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const logger = appContextService.getLogger().get('httpRunAgentPolicyRevisionsCleanupTaskHandler');
+  const kbnConfig = appContextService.getConfig()?.fleetPolicyRevisionsCleanup;
+
+  const config = {
+    maxRevisions: kbnConfig?.maxRevisions,
+    maxPolicies: kbnConfig?.maxPoliciesPerRun,
+    ...request.body,
+  };
+
+  const result = await cleanupPolicyRevisions(esClient, {
+    logger,
+    config,
+  });
+
+  const body: TypeOf<typeof RunAgentPolicyRevisionsCleanupTaskResponseSchema> = {
+    success: true,
+    totalDeletedRevisions: result?.totalDeletedRevisions ?? 0,
+  };
+
+  return response.ok({
+    body,
+  });
 };

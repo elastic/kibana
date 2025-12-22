@@ -214,7 +214,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     // log the error
     let docOutput;
     if (error) {
-      errorLogger(logger, message, error);
+      errorLogger(logger, message, error, [report._id]);
       docOutput = this.formatOutput(error);
     } else {
       errorLogger(logger, message);
@@ -265,8 +265,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput,
     message: string
   ): Promise<UpdateResponse<ReportDocument>> {
-    const logger = this.logger.get(report._id);
-    logger.warn(message);
+    this.logger.warn(message, { tags: [report._id] });
 
     // update the report in the store
     const store = await this.opts.reporting.getStore();
@@ -408,9 +407,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput
   ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
-    const logger = this.logger.get(report._id);
 
-    logger.debug(`Saving ${report.jobtype} to ${docId}.`);
+    this.logger.debug(`Saving ${report.jobtype} to ${docId}.`, { tags: [report._id] });
 
     const completedTime = moment();
     const docOutput = this.formatOutput(output);
@@ -424,7 +422,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
     const resp = await store.setReportCompleted(report, doc);
 
-    logger.info(`Saved ${report.jobtype} job ${docId}`);
+    this.logger.info(`Saved ${report.jobtype} job ${docId}`, { tags: [report._id] });
     report._seq_no = resp._seq_no!;
     report._primary_term = resp._primary_term!;
 
@@ -512,22 +510,24 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             errorLogger(this.logger, errorMessage);
 
             // Throw so Task manager can clean up the failed task
-            throw new Error(errorMessage);
+            throw new Error(`Job ${jobId} could not be claimed. Exiting...`);
           }
 
           const { jobtype: jobType, attempts } = report;
-          const logger = this.logger.get(jobId);
 
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
-            logger.debug(
-              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
+            this.logger.debug(
+              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`,
+              { tags: [jobId] }
             );
           } else {
-            logger.debug(`Starting ${jobType} report ${jobId}.`);
+            this.logger.debug(`Starting ${jobType} report ${jobId}.`, { tags: [jobId] });
           }
 
-          logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+          this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+            tags: [jobId],
+          });
 
           const eventLog = this.opts.reporting.getEventLogger(
             new Report({ ...task, _id: task.id, _index: task.index })
@@ -562,9 +562,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             stream.end();
 
-            logger.debug(`Begin waiting for the stream's pending callbacks...`);
+            this.logger.debug(`Begin waiting for the stream's pending callbacks...`, {
+              tags: [jobId],
+            });
             await finishedWithNoPendingCallbacks(stream);
-            logger.info(`The stream's pending callbacks have completed.`);
+            this.logger.info(`The stream's pending callbacks have completed.`, {
+              tags: [jobId],
+            });
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
@@ -576,7 +580,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             });
 
             if (output) {
-              logger.debug(`Job output size: ${byteSize} bytes.`);
+              this.logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
               // Update the job status to "completed"
               report = await this.completeJob(report, {
                 ...output,
@@ -594,12 +598,17 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             }
 
             // untrack the report for concurrency awareness
-            logger.debug(`Stopping ${jobId}.`);
+            this.logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
           } catch (failedToExecuteErr) {
             eventLog.logError(failedToExecuteErr);
 
             await this.saveExecutionError(report, failedToExecuteErr).catch((failedToSaveError) => {
-              errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
+              errorLogger(
+                this.logger,
+                `Error in saving execution error ${jobId}`,
+                failedToSaveError,
+                [jobId]
+              );
             });
 
             cancellationToken.cancel();
@@ -609,7 +618,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
             this.opts.reporting.untrackReport(jobId);
-            logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+            this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+              tags: [jobId],
+            });
           }
         },
 
@@ -619,7 +630,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
          */
         cancel: async () => {
           if (jobId) {
-            this.logger.get(jobId).warn(`Cancelling job ${jobId}...`);
+            this.logger.warn(`Cancelling job ${jobId}...`, { tags: [jobId] });
           }
           cancellationToken.cancel();
         },

@@ -18759,15 +18759,32 @@ paths:
                       type: object
                       properties:
                         agents:
+                          description: Number of agents that upgraded to this version
                           type: number
+                        failedUpgradeActionIds:
+                          description: List of action IDs related to failed upgrades
+                          items:
+                            type: string
+                          type: array
                         failedUpgradeAgents:
+                          description: Number of agents that failed to upgrade to this version
+                          type: number
+                        inProgressUpgradeActionIds:
+                          description: List of action IDs related to in-progress upgrades
+                          items:
+                            type: string
+                          type: array
+                        inProgressUpgradeAgents:
+                          description: Number of agents that are upgrading to this version
                           type: number
                         version:
+                          description: Agent version
                           type: string
                       required:
                         - version
                         - agents
                         - failedUpgradeAgents
+                        - inProgressUpgradeAgents
                     type: array
                   totalAgents:
                     type: number
@@ -53222,7 +53239,7 @@ paths:
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53233,7 +53250,7 @@ paths:
           description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53272,7 +53289,7 @@ paths:
           description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53283,7 +53300,7 @@ paths:
           description: Indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53379,7 +53396,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53504,7 +53521,7 @@ paths:
           description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -53639,7 +53656,7 @@ paths:
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -72757,7 +72774,6 @@ components:
           description: |
             Base64-encoded PEM CA certificate content for PKI authentication (Other provider only). Optional.
           minLength: 1
-      required: []
     opsgenie_secrets:
       title: Connector secrets properties for an Opsgenie connector
       required:
@@ -73790,6 +73806,10 @@ components:
               description: The Slack channel identifier.
               example: C123ABC456
     params_property_apm_anomaly:
+      title: APM anomaly
+      description: |
+        The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.rules.anomaly`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -73828,6 +73848,10 @@ components:
             - minor
             - warning
     params_property_apm_error_count:
+      title: APM error count
+      description: |
+        The parameters for the APM error count rule. These parameters are appropriate when `rule_type_id` is `apm.error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -73876,6 +73900,10 @@ components:
           description: |
             Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.
     params_property_apm_transaction_duration:
+      title: APM transaction duration
+      description: |
+        The parameters for the APM transaction duration rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_duration`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -73935,6 +73963,10 @@ components:
             - 99th
           description: The type of aggregation to perform.
     params_property_apm_transaction_error_rate:
+      title: APM transaction error rate
+      description: |
+        The parameters for the APM transaction error rate rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -74322,6 +74354,10 @@ components:
         timeWindowUnit:
           $ref: '#/components/schemas/timewindowunit'
     params_property_infra_inventory:
+      title: Inventory
+      description: |
+        The parameters for the infrastructure inventory rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.inventory.threshold`.
+      type: object
       properties:
         criteria:
           type: array
@@ -74434,7 +74470,9 @@ components:
           type: boolean
     params_property_log_threshold:
       oneOf:
-        - title: Count
+        - title: Log threshold count
+          description: |
+            The parameters for a log threshold rule that counts the number of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -74512,7 +74550,9 @@ components:
               type: array
               items:
                 type: string
-        - title: Ratio
+        - title: Log threshold ratio
+          description: |
+            The parameters for a log threshold rule that calculates the ratio of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -74595,6 +74635,10 @@ components:
               items:
                 type: string
     params_property_infra_metric_threshold:
+      title: Metric threshold
+      description: |
+        The parameters for the metric threshold rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.threshold`.
+      type: object
       properties:
         criteria:
           type: array
@@ -74812,6 +74856,10 @@ components:
           description: |
             If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period. This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.
     params_property_slo_burn_rate:
+      title: SLO burn rate
+      description: |
+        The parameters for the SLO burn rate rule. These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.
+      type: object
       properties:
         sloId:
           description: The SLO identifier used by the rule
@@ -74850,6 +74898,10 @@ components:
               type: string
               example: m
     params_property_synthetics_uptime_tls:
+      title: Synthetics TLS certificate
+      description: |
+        The parameters for the synthetics TLS certificate rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.tls`.
+      type: object
       properties:
         search:
           type: string
@@ -74858,6 +74910,10 @@ components:
         certAgeThreshold:
           type: number
     params_property_synthetics_monitor_status:
+      title: Synthetics monitor status
+      description: |
+        The parameters for the Synthetics monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.monitorStatus`.
+      type: object
       required:
         - numTimes
         - shouldCheckStatus

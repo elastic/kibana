@@ -666,6 +666,8 @@ module.exports = {
         'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
+        '**/playwright.config.ts',
+        '**/parallel.playwright.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -1154,11 +1156,9 @@ module.exports = {
         ],
       },
     },
-    // Allow node.js imports only for the prebuilt rules package generation scripts
+    // Allow node.js imports for security solution test packages
     {
-      files: [
-        'x-pack/solutions/security/packages/test-api-clients/prebuilt_rules_package_generation/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'off',
       },
@@ -1473,9 +1473,9 @@ module.exports = {
         'packages/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
       ],
       excludedFiles: ['packages/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -1516,6 +1516,21 @@ module.exports = {
         'playwright/prefer-web-first-assertions': 'error',
         'playwright/require-to-throw-message': 'error',
         'playwright/require-top-level-describe': 'error',
+        'playwright/valid-describe-callback': 'error',
+        'playwright/valid-title': 'error',
+        // Scout has a its own runtime validator for test tags
+        'playwright/valid-test-tags': 'off',
+        // Check all function arguments to catch unused destructured params
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            vars: 'all',
+            args: 'all',
+            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
+            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
+            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
+          },
+        ],
       },
     },
     {
@@ -2235,8 +2250,8 @@ module.exports = {
     },
     {
       files: [
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
         'no-restricted-imports': [
@@ -2257,7 +2272,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/test/scout/**/*.ts'],
+      files: ['x-pack/solutions/observability/plugins/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2291,7 +2306,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/test/scout/**/*.ts'],
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2327,12 +2342,47 @@ module.exports = {
     {
       // Custom rules for scout tests
       files: [
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/test/scout/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/require_include_in_check_a11y': 'warn',
+      },
+    },
+    {
+      // Restrict fs imports in production code (exclude test files, scripts, etc.)
+      files: [
+        'src/platform/plugins/shared/**/*.ts',
+        'x-pack/solutions/**/*.ts',
+        'x-pack/plugins/**/*.ts',
+      ],
+      excludedFiles: [
+        '**/*.{test,spec}.ts',
+        '**/*.test.ts',
+        '**/test/**',
+        '**/tests/**',
+        '**/__tests__/**',
+        '**/scripts/**',
+        '**/e2e/**',
+        '**/cypress/**',
+        '**/ftr_e2e/**',
+        '**/.storybook/**',
+        '**/json_schemas/**',
+        // Can use fs for telemetry collection
+        'src/platform/plugins/shared/telemetry/**',
+      ],
+      rules: {
+        '@kbn/eslint/require_kbn_fs': [
+          'warn',
+          {
+            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            disallowedMessage:
+              'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+          },
+        ],
       },
     },
   ],
