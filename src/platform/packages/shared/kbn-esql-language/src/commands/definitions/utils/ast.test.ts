@@ -23,6 +23,14 @@ describe('getBracketsToClose', () => {
     expect(getBracketsToClose('FROM a | WHERE ("""field: *""")')).toEqual([]);
   });
 
+  it('igonres any bracket found within string or tripple quotes', () => {
+    expect(getBracketsToClose('FROM a | WHERE KQL("""field: "something"""")')).toEqual([]);
+    expect(getBracketsToClose('FROM a | WHERE FUNCTION("field: (something)")')).toEqual([]);
+    expect(getBracketsToClose('FROM a | WHERE FUNCTION("field: (som")')).toEqual([]);
+    expect(getBracketsToClose('FROM a | WHERE FUNCTION(""" "field" : (som""")')).toEqual([]);
+    expect(getBracketsToClose('FROM a | WHERE FUNCTION(""" "field : (som""")')).toEqual([]);
+  });
+
   it('ignores /* and */ inside string literals but handles real comments', () => {
     expect(getBracketsToClose('KQL("path: */internal/*")')).toEqual([]);
     expect(getBracketsToClose('WHERE field /* comment')).toEqual(['*/']);
