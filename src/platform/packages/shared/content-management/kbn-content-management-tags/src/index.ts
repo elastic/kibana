@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Core layer exports
 export {
+  type ContentManagementTagsKibanaDependencies,
   ContentManagementTagsKibanaProvider,
   ContentManagementTagsProvider,
-  TagBadge,
-  TagList,
-  TagListComponent,
-  useTags,
-  useTagServices,
-} from './src';
+  type ContentManagementTagsServices,
+  useServices as useTagServices,
+} from './services';
 
-export type {
-  ContentManagementTagsKibanaDependencies,
-  ContentManagementTagsServices,
-  ParsedQuery,
-  Tag,
-  TagBadgeProps,
-  TagListComponentProps,
-  TagListProps,
-  UseTagsParams,
-  UseTagsReturn,
-} from './src';
+export { useTags } from './tags_query';
+export type { UseTagsParams, UseTagsReturn } from './tags_query';
+
+export {
+  TagList,
+  type TagListProps,
+  TagBadge,
+  type TagBadgeProps,
+  TagListComponent,
+  type TagListComponentProps,
+} from './components';
+
+export type { Tag, ParsedQuery } from './types';
+

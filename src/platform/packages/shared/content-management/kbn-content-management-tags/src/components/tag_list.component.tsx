@@ -66,3 +66,4 @@ export const TagListComponent: FC<TagListComponentProps> = ({ tags, onClick }) =
     </div>
   );
 };
+

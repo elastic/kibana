@@ -444,3 +444,4 @@ describe('ContentManagementTagsKibanaProvider', () => {
     });
   });
 });
+

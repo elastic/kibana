@@ -213,3 +213,4 @@ describe('TagBadge', () => {
     });
   });
 });
+

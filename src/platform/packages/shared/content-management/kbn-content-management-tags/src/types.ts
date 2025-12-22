@@ -50,3 +50,4 @@ export interface ParsedQuery {
   tagIds?: string[];
   tagIdsToExclude?: string[];
 }
+
