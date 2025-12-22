@@ -635,7 +635,7 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"to.0\\": String must contain at most 256 character(s)"`
+      `"error validating action params: Field \\"to.0\\": String must contain at most 512 character(s)"`
     );
   });
   test('throws for too long "cc" address ', async () => {
@@ -657,7 +657,7 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"cc.0\\": String must contain at most 256 character(s)"`
+      `"error validating action params: Field \\"cc.0\\": String must contain at most 512 character(s)"`
     );
   });
   test('throws for too long "bcc" address ', async () => {
@@ -679,7 +679,7 @@ describe('params validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"bcc.0\\": String must contain at most 256 character(s)"`
+      `"error validating action params: Field \\"bcc.0\\": String must contain at most 512 character(s)"`
     );
   });
 });

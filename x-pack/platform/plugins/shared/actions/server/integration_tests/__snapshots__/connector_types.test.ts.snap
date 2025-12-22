@@ -673,16 +673,11 @@ Object {
           "type": "boolean",
         },
         "host": Object {
-          "anyOf": Array [
-            Object {
-              "maxLength": 2048,
-              "type": "string",
-            },
-            Object {
-              "type": "null",
-            },
-          ],
           "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
         },
         "oauthTokenUrl": Object {
           "default": null,
@@ -713,7 +708,6 @@ Object {
         },
         "service": Object {
           "default": "other",
-          "maxLength": 512,
           "type": "string",
         },
         "tenantId": Object {
@@ -805,7 +799,7 @@ Object {
         "bcc": Object {
           "default": Array [],
           "items": Object {
-            "maxLength": 256,
+            "maxLength": 512,
             "type": "string",
           },
           "maxItems": 100,
@@ -814,7 +808,7 @@ Object {
         "cc": Object {
           "default": Array [],
           "items": Object {
-            "maxLength": 256,
+            "maxLength": 512,
             "type": "string",
           },
           "maxItems": 100,
@@ -849,13 +843,12 @@ Object {
           ],
         },
         "subject": Object {
-          "maxLength": 1024,
           "type": "string",
         },
         "to": Object {
           "default": Array [],
           "items": Object {
-            "maxLength": 256,
+            "maxLength": 512,
             "type": "string",
           },
           "maxItems": 100,
