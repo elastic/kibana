@@ -44,9 +44,9 @@ export default (ftrProvider: FtrProviderContext): void => {
     });
 
     it('should return rule template with description and artifacts', async () => {
-      const myArtifacts = { 
+      const myArtifacts = {
         dashboards: [{ id: 'dash-1' }],
-        investigation_guide: { blob: 'text' }
+        investigation_guide: { blob: 'text' },
       };
 
       await createRuleTemplateSO(ftrProvider);
@@ -58,7 +58,7 @@ export default (ftrProvider: FtrProviderContext): void => {
         description: 'This is a sample alerting rule template description',
         artifacts: myArtifacts,
       });
-});
+    });
 
     it('unhappy path - 404s when rule template do not exists', async () => {
       await supertest

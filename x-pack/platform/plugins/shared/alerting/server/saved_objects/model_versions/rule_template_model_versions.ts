@@ -6,7 +6,11 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawRuleTemplateSchemaV1, rawRuleTemplateSchemaV2, rawRuleTemplateSchemaV3 } from '../schemas/raw_rule_template';
+import {
+  rawRuleTemplateSchemaV1,
+  rawRuleTemplateSchemaV2,
+  rawRuleTemplateSchemaV3,
+} from '../schemas/raw_rule_template';
 
 export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
   '1': {
