@@ -164,13 +164,14 @@ export class ESQLService extends FtrService {
   }
 
   public async openEsqlControlFlyout(query: string) {
-    await this.retry.waitFor('control flyout to open', async () => {
+    await this.retry.try(async () => {
       await this.typeEsqlEditorQuery(query);
       // Wait until suggestions are loaded
       await this.common.sleep(1000);
       await this.selectEsqlSuggestionByLabel('Create control');
 
-      return await this.testSubjects.exists('create_esql_control_flyout');
+      const isControlFlyoutOpen = await this.testSubjects.exists('create_esql_control_flyout');
+      expect(isControlFlyoutOpen).to.be(true);
     });
   }
 
