@@ -26,13 +26,14 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
   });
 
   test('should handle the error message correctly', async ({ page }) => {
+    const customEquationButton = page.testSubj.locator('customEquation');
     const customEquationField = page.testSubj.locator('thresholdRuleCustomEquationEditorFieldText');
 
     // Introduce an error in the equation
-    await page.testSubj.click('customEquation');
+    await customEquationButton.click();
     await customEquationField.click();
     await customEquationField.fill('A +');
-    await expect(customEquationField).toHaveValue('A +');
+    await expect(customEquationButton).toHaveText('Equation A +');
 
     await page.testSubj.click('o11yClosablePopoverTitleButton');
 
@@ -41,10 +42,10 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     await expect(lensFailure).toContainText('An error occurred while rendering the chart');
 
     // Fix the introduced error
-    await page.testSubj.click('customEquation');
+    await customEquationButton.click();
     await customEquationField.click();
     await customEquationField.fill('A');
-    await expect(customEquationField).toHaveValue('A');
+    await expect(customEquationButton).toHaveText('Equation A');
 
     await page.testSubj.click('o11yClosablePopoverTitleButton');
 
