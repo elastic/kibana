@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
+import { isInProtectedNamespace, hasNamespaceName } from '@kbn/onechat-common/base/namespaces';
+import { toolIdRegexp, toolIdMaxLength } from '@kbn/onechat-common/tools';
 import { useQueryClient } from '@kbn/react-query';
+import { z } from '@kbn/zod';
 import { useOnechatServices } from '../../../../hooks/use_onechat_service';
 import { queryKeys } from '../../../../query_keys';
 
@@ -35,6 +37,28 @@ export const bulkImportMcpI18nMessages = {
         defaultMessage: 'Namespace is required.',
       }
     ),
+    tooLongError: i18n.translate(
+      'xpack.onechat.tools.bulkImportMcp.validation.namespace.tooLongError',
+      {
+        defaultMessage: 'Namespace must be {maxLength} characters or less.',
+        values: { maxLength: toolIdMaxLength },
+      }
+    ),
+    formatError: i18n.translate(
+      'xpack.onechat.tools.bulkImportMcp.validation.namespace.formatError',
+      {
+        defaultMessage:
+          'Namespace must start with a letter and contain only lowercase letters, numbers, and hyphens.',
+      }
+    ),
+    protectedNamespaceError: (name: string) =>
+      i18n.translate(
+        'xpack.onechat.tools.bulkImportMcp.validation.namespace.protectedNamespaceError',
+        {
+          defaultMessage: '"{name}" is a protected namespace and cannot be used.',
+          values: { name },
+        }
+      ),
     conflictError: i18n.translate(
       'xpack.onechat.tools.bulkImportMcp.validation.namespace.conflictError',
       {
@@ -63,6 +87,14 @@ export const useBulkImportMcpToolFormValidationSchema = () => {
     namespace: z
       .string()
       .min(1, { message: bulkImportMcpI18nMessages.namespace.requiredError })
+      .max(toolIdMaxLength, { message: bulkImportMcpI18nMessages.namespace.tooLongError })
+      .regex(toolIdRegexp, { message: bulkImportMcpI18nMessages.namespace.formatError })
+      .refine(
+        (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
+        (name) => ({
+          message: bulkImportMcpI18nMessages.namespace.protectedNamespaceError(name),
+        })
+      )
       .superRefine(async (value, ctx) => {
         if (value.length > 0) {
           const { isValid } = await queryClient.fetchQuery({

@@ -23,7 +23,7 @@ export function useCreateSLO({
 
   const [isSLOFlyoutOpen, setIsSLOFlyoutOpen] = useState(false);
 
-  const CreateSLOFlyout = slo?.getCreateSLOFlyout({
+  const CreateSLOFlyout = slo?.getCreateSLOFormFlyout({
     initialValues: {
       name: `SLO for monitor ${label}`,
       indicator: {

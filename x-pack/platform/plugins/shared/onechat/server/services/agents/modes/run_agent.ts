@@ -9,7 +9,7 @@ import type {
   AgentCapabilities,
   Conversation,
   ConversationRound,
-  RawRoundInput,
+  ConverseInput,
   AgentConfiguration,
 } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
@@ -20,7 +20,7 @@ export interface RunAgentParams {
   /**
    * The next message in this conversation that the agent should respond to.
    */
-  nextInput: RawRoundInput;
+  nextInput: ConverseInput;
   /**
    * Current conversation.
    */

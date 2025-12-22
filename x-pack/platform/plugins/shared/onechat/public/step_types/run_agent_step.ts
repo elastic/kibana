@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { ActionsMenuGroup, type PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { RunAgentStepTypeId, runAgentStepCommonDefinition } from '../../common/step_types';
 
@@ -17,6 +17,7 @@ export const runAgentStepDefinition: PublicStepDefinition = {
   description: i18n.translate('xpack.onechat.runAgentStep.description', {
     defaultMessage: 'Execute an Onechat AI agent to process input and generate responses',
   }),
+  actionsMenuGroup: ActionsMenuGroup.ai,
   documentation: {
     details: i18n.translate('xpack.onechat.runAgentStep.documentation.details', {
       defaultMessage:
@@ -35,8 +36,8 @@ export const runAgentStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: custom_agent
   type: ${RunAgentStepTypeId}
+  agent_id: "my-custom-agent"
   with:
-    agent_id: "my-custom-agent"
     message: "{{ workflow.input.message }}"
 \`\`\``,
     ],
