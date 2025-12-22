@@ -15,6 +15,8 @@ import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schem
 import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
 import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
 import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
+import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
+import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { getToolResultId } from '@kbn/onechat-server';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import { guessChartType } from './guess_chart_type';
@@ -24,6 +26,8 @@ const metricSchema = parse(esqlMetricState.getSchema()) as object;
 const gaugeSchema = parse(gaugeStateSchemaESQL.getSchema()) as object;
 const tagcloudSchema = parse(tagcloudStateSchemaESQL.getSchema()) as object;
 const xySchema = parse(xyStateSchema.getSchema()) as object;
+const regionMapSchema = parse(regionMapStateSchemaESQL.getSchema()) as object;
+const heatmapSchema = parse(heatmapStateSchemaESQL.getSchema()) as object;
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -37,6 +41,8 @@ const createVisualizationSchema = z.object({
       SupportedChartType.Gauge,
       SupportedChartType.Tagcloud,
       SupportedChartType.XY,
+      SupportedChartType.RegionMap,
+      SupportedChartType.Heatmap,
     ])
     .optional()
     .describe(
@@ -101,6 +107,10 @@ This tool will:
           schema = tagcloudSchema;
         } else if (selectedChartType === SupportedChartType.XY) {
           schema = xySchema;
+        } else if (selectedChartType === SupportedChartType.RegionMap) {
+          schema = regionMapSchema;
+        } else if (selectedChartType === SupportedChartType.Heatmap) {
+          schema = heatmapSchema;
         } else {
           schema = metricSchema;
         }

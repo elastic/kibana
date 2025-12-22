@@ -18,6 +18,7 @@ import {
   useUpdateEffect,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/constants';
 import type { Tool } from '@kbn/mcp-client';
 import React, { useCallback, useEffect, useMemo } from 'react';
@@ -51,17 +52,24 @@ export const McpEditableFields = ({
   const { navigateToOnechatUrl } = useNavigation();
 
   const {
-    openFlyout: openCreateMcpServerFlyout,
-    isOpen: isCreateMcpServerFlyoutOpen,
-    flyout: createMcpServerFlyout,
-  } = useAddMcpServerFlyout();
-
-  const {
     control,
     formState: { errors },
     clearErrors,
     setValue,
   } = useFormContext<McpToolFormData>();
+
+  const handleConnectorCreated = useCallback(
+    (connector: ActionConnector) => {
+      setValue('connectorId', connector.id, { shouldValidate: true });
+    },
+    [setValue]
+  );
+
+  const {
+    openFlyout: openCreateMcpServerFlyout,
+    isOpen: isCreateMcpServerFlyoutOpen,
+    flyout: createMcpServerFlyout,
+  } = useAddMcpServerFlyout({ onConnectorCreated: handleConnectorCreated });
 
   const handleBulkImportClick = useCallback(() => {
     navigateToOnechatUrl(appPaths.tools.bulkImportMcp);

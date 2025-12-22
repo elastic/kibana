@@ -11,6 +11,7 @@ import type { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
 import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { productDocIndexPattern } from '@kbn/product-doc-common';
 import type { LlmProxy } from '../../utils/create_llm_proxy';
 import { createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
@@ -24,10 +25,10 @@ import {
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
+  const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  // Skipping temporarily: https://github.com/elastic/kibana/issues/246177
-  describe.skip('tool: retrieve_elastic_doc', function () {
+  describe('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
@@ -103,6 +104,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await deployTinyElserAndSetupKb(getService);
 
         await installProductDoc(supertest, TINY_ELSER_INFERENCE_ID);
+
+        // Refresh the product doc index to ensure documents are immediately searchable
+        // This prevents flakiness caused by ES not having refreshed the index yet
+        await es.indices.refresh({ index: productDocIndexPattern });
 
         void llmProxy.interceptQueryRewrite('This is a rewritten user prompt.');
 

@@ -6,18 +6,18 @@
  */
 
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
-import { isHumanMessage, isAIMessage } from '@langchain/core/messages';
-import type { ToolCallWithResult, ToolCallStep } from '@kbn/onechat-common';
-import { ConversationRoundStepType } from '@kbn/onechat-common';
+import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
+import type { ToolCallStep, ToolCallWithResult } from '@kbn/onechat-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type {
-  ProcessedConversationRound,
   ProcessedAttachment,
-  ProcessedRoundInput,
   ProcessedConversation,
+  ProcessedConversationRound,
+  ProcessedRoundInput,
 } from './prepare_conversation';
 
 describe('conversationLangchainMessages', () => {
@@ -81,6 +81,7 @@ describe('conversationLangchainMessages', () => {
   ): ProcessedConversationRound => {
     return {
       id: 'round-1',
+      status: ConversationRoundStatus.completed,
       input: {
         message: '',
         attachments: [],

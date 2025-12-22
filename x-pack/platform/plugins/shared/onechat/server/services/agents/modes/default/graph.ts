@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StateGraph, START as _START_, END as _END_ } from '@langchain/langgraph';
+import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { BaseMessage } from '@langchain/core/messages';
@@ -18,25 +18,26 @@ import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
-import { getResearchAgentPrompt, getAnswerAgentPrompt } from './prompts';
+import { getAnswerAgentPrompt, getResearchAgentPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
 import {
+  processAnswerResponse,
   processResearchResponse,
   processToolNodeResponse,
-  processAnswerResponse,
 } from './action_utils';
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
-  isToolCallAction,
-  isHandoverAction,
-  isAgentErrorAction,
-  isAnswerAction,
-  isStructuredAnswerAction,
   errorAction,
   handoverAction,
+  isAgentErrorAction,
+  isAnswerAction,
+  isHandoverAction,
+  isStructuredAnswerAction,
+  isToolCallAction,
+  isToolPromptAction,
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 
@@ -64,7 +65,9 @@ export const createAgentGraph = ({
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
 }) => {
-  const toolNode = new ToolNode<BaseMessage[]>(tools);
+  const init = async () => {
+    return {};
+  };
 
   const researcherModel = chatModel.bindTools(tools).withConfig({
     tags: [tags.agent, tags.researchAgent],
@@ -130,6 +133,8 @@ export const createAgentGraph = ({
     throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
   };
 
+  const toolNode = new ToolNode<BaseMessage[]>(tools);
+
   const executeTool = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
     if (!isToolCallAction(lastAction)) {
@@ -143,6 +148,25 @@ export const createAgentGraph = ({
     const action = processToolNodeResponse(toolNodeResult);
     return {
       mainActions: [action],
+    };
+  };
+
+  const executeToolEdge = async (state: StateType) => {
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+    if (isToolPromptAction(lastAction)) {
+      return steps.handleToolInterrupt;
+    }
+    return steps.researchAgent;
+  };
+
+  const handleToolInterrupt = async (state: StateType) => {
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+    if (!isToolPromptAction(lastAction)) {
+      throw invalidState(`[handleToolInterrupt] last action type was ${lastAction.type}}`);
+    }
+    return {
+      interrupted: true,
+      prompt: lastAction.prompt,
     };
   };
 
@@ -247,19 +271,26 @@ export const createAgentGraph = ({
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     // nodes
+    .addNode(steps.init, init)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
+    .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.prepareToAnswer, prepareToAnswer)
     .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
     // edges
-    .addEdge(_START_, steps.researchAgent)
-    .addEdge(steps.executeTool, steps.researchAgent)
+    .addEdge(_START_, steps.init)
+    .addEdge(steps.init, steps.researchAgent)
     .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
+    .addConditionalEdges(steps.executeTool, executeToolEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.handleToolInterrupt]: steps.handleToolInterrupt,
+    })
+    .addEdge(steps.handleToolInterrupt, _END_)
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
     .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
       [steps.answerAgent]: steps.answerAgent,

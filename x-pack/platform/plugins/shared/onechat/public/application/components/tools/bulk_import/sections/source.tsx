@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption, UseEuiTheme } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiLink, euiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/constants';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useListConnectors, useListMcpTools } from '../../../../hooks/tools/use_mcp_connectors';
@@ -28,11 +29,20 @@ export const SourceSection = () => {
   const { control, formState, setValue } = useFormContext<BulkImportMcpToolsFormData>();
   const { errors } = formState;
 
+  const handleConnectorCreated = useCallback(
+    (connector: ActionConnector) => {
+      setValue('connectorId', connector.id, { shouldValidate: true });
+      // Clear tool selection when connector changes
+      setValue('tools', []);
+    },
+    [setValue]
+  );
+
   const {
     openFlyout: openCreateMcpServerFlyout,
     isOpen: isCreateMcpServerFlyoutOpen,
     flyout: createMcpServerFlyout,
-  } = useAddMcpServerFlyout();
+  } = useAddMcpServerFlyout({ onConnectorCreated: handleConnectorCreated });
 
   const { connectors, isLoading: isLoadingConnectors } = useListConnectors({
     type: MCP_CONNECTOR_TYPE,
