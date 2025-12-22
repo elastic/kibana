@@ -8,6 +8,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { BarSegments } from './bar_segments';
 
 export interface BarSegment {
   id: string;
@@ -39,35 +40,7 @@ export function Bar({
         margin-left: ${left}%;
       `}
     >
-      {segments?.length ? (
-        <div
-          css={css`
-            box-sizing: border-box;
-            position: relative;
-            height: ${euiTheme.size.s};
-            top: ${euiTheme.size.s};
-            min-width: 2px;
-            background-color: transparent;
-            display: flex;
-            flex-direction: row;
-          `}
-        >
-          {segments.map((segment) => (
-            <div
-              key={segment.id}
-              css={css`
-                box-sizing: border-box;
-                position: absolute;
-                height: ${euiTheme.size.s};
-                left: ${segment.left * 100}%;
-                width: ${segment.width * 100}%;
-                min-width: 2px;
-                background-color: ${segment.color};
-              `}
-            />
-          ))}
-        </div>
-      ) : null}
+      <BarSegments segments={segments} />
     </div>
   );
 }
