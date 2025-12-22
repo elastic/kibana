@@ -35,7 +35,7 @@ const testMap = [
     'alertsUIShared',
   ],
   [
-    'src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metric_flyout/metrics_insights_flyout.tsx',
+    'src/platform/packages/shared/kbn-unified-metrics-grid/src/components/flyout/metrics_insights_flyout.tsx',
     'metricsExperience',
   ],
 ];
