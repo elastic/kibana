@@ -40,4 +40,3 @@ export type {
   ConfigSchema,
   TopAlert,
 } from './types';
-

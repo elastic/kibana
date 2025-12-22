@@ -22,9 +22,12 @@ export const ruleName = i18n.translate(
   }
 );
 
-export const source = i18n.translate('xpack.observability.alertsTable.alert.grouping.source.label', {
-  defaultMessage: 'Source',
-});
+export const source = i18n.translate(
+  'xpack.observability.alertsTable.alert.grouping.source.label',
+  {
+    defaultMessage: 'Source',
+  }
+);
 
 export const DEFAULT_GROUPING_OPTIONS = [
   {
@@ -36,4 +39,3 @@ export const DEFAULT_GROUPING_OPTIONS = [
     key: ALERT_INSTANCE_ID,
   },
 ];
-

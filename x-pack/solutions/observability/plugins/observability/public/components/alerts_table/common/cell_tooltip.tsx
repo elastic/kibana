@@ -20,4 +20,3 @@ export function CellTooltip({ value, tooltipContent }: Props) {
     </EuiToolTip>
   );
 }
-

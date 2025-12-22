@@ -71,4 +71,3 @@ export function ObservabilityAlertsTable({
 // eslint-disable-next-line import/no-default-export
 export default ObservabilityAlertsTable;
 export type ObservabilityAlertsTableType = typeof ObservabilityAlertsTable;
-

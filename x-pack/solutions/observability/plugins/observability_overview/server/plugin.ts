@@ -28,4 +28,3 @@ export class ObservabilityOverviewServerPlugin implements Plugin {
 
   public stop() {}
 }
-

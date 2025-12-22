@@ -11,4 +11,3 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   const { ObservabilityOverviewServerPlugin } = await import('./plugin');
   return new ObservabilityOverviewServerPlugin(initializerContext);
 }
-

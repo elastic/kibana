@@ -39,4 +39,3 @@ export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStat
     </EuiHealth>
   );
 }
-

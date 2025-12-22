@@ -41,4 +41,3 @@ export const OBSERVABILITY_OVERVIEW_FEATURE: KibanaFeatureConfig = {
     },
   },
 };
-

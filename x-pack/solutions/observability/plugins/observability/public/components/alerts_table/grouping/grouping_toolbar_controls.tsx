@@ -56,4 +56,3 @@ export const GroupingToolbarControls = React.memo<GroupingToolbarControlsProps>(
     });
   }
 );
-

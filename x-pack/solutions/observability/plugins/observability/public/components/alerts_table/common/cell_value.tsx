@@ -198,4 +198,3 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
 
   return cellRenderers[columnId] ? cellRenderers[columnId](val) : <>{val}</>;
 };
-

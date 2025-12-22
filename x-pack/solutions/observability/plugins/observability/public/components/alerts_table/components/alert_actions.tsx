@@ -272,4 +272,3 @@ const VIEW_DETAILS = i18n.translate('xpack.observability.alertsTable.viewDetails
 });
 
 export type AlertActionsType = typeof AlertActions;
-

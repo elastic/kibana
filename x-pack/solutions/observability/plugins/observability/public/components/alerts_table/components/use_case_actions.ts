@@ -86,4 +86,3 @@ export const useCaseActions = ({
     handleAddToNewCaseClick,
   };
 };
-
