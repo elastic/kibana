@@ -2134,6 +2134,23 @@
             "returnComment": [
               "A Playwright `Locator` for the current error markers."
             ]
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaCodeEditorWrapper.getCodeEditorSuggestWidget",
+            "type": "Function",
+            "tags": [],
+            "label": "getCodeEditorSuggestWidget",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Locator"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/ui_components/monaco_editor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8756,6 +8773,130 @@
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.RequestAuthFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestAuthFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.RequestAuthFixture.getApiKey",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiKey",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleApiCredentials",
+                "text": "RoleApiCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.RequestAuthFixture.getApiKey.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.RequestAuthFixture.getApiKeyForCustomRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiKeyForCustomRole",
+            "description": [],
+            "signature": [
+              "(role: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaRole",
+                "text": "KibanaRole"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ElasticsearchRoleDescriptor",
+                "text": "ElasticsearchRoleDescriptor"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleApiCredentials",
+                "text": "RoleApiCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.RequestAuthFixture.getApiKeyForCustomRole.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.KibanaRole",
+                    "text": "KibanaRole"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ElasticsearchRoleDescriptor",
+                    "text": "ElasticsearchRoleDescriptor"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

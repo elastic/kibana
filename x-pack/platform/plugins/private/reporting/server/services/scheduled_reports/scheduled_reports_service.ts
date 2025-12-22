@@ -66,7 +66,8 @@ export class ScheduledReportsService {
     private logger: Logger,
     private responseFactory: KibanaResponseFactory,
     private savedObjectsClient: SavedObjectsClientContract,
-    private taskManager: TaskManagerStartContract
+    private taskManager: TaskManagerStartContract,
+    private request: KibanaRequest
   ) {}
 
   static async build({
@@ -93,7 +94,8 @@ export class ScheduledReportsService {
       logger,
       responseFactory,
       savedObjectsClient,
-      taskManager
+      taskManager,
+      request
     );
   }
 
@@ -490,7 +492,9 @@ export class ScheduledReportsService {
     id,
     schedule,
   }: { id: string } & UpdateScheduledReportParams) {
-    if (schedule) await this.taskManager.bulkUpdateSchedules([id], schedule);
+    if (schedule) {
+      await this.taskManager.bulkUpdateSchedules([id], schedule, { request: this.request });
+    }
   }
 
   private async _canUpdateReport({

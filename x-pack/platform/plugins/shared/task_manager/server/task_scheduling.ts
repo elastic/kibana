@@ -13,6 +13,7 @@ import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
+  ApiKeyOptions,
   ConcreteTaskInstance,
   IntervalSchedule,
   RruleSchedule,
@@ -223,7 +224,8 @@ export class TaskScheduling {
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
-    schedule: IntervalSchedule | RruleSchedule
+    schedule: IntervalSchedule | RruleSchedule,
+    options?: ApiKeyOptions
   ): Promise<BulkUpdateTaskResult> {
     return retryableBulkUpdate({
       taskIds,
@@ -244,6 +246,7 @@ export class TaskScheduling {
        * where both are defined by passing mergeAttributes: false here.
        */
       mergeAttributes: false,
+      options,
     });
   }
 

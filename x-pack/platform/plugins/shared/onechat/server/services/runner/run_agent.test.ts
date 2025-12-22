@@ -9,10 +9,14 @@ import type { ScopedRunnerRunAgentParams } from '@kbn/onechat-server';
 
 import { RunnerManager } from './runner';
 import { runAgent } from './run_agent';
-import type { CreateScopedRunnerDepsMock, MockedAgent, AgentRegistryMock } from '../../test_utils';
+import type {
+  CreateScopedRunnerDepsMock,
+  MockedInternalAgent,
+  AgentRegistryMock,
+} from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
-  createMockedAgent,
+  createMockedInternalAgent,
   createMockedAgentRegistry,
 } from '../../test_utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
@@ -24,14 +28,14 @@ const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof create
 describe('runAgent', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
-  let agent: MockedAgent;
+  let agent: MockedInternalAgent;
   let agentClient: AgentRegistryMock;
   let agentHandler: jest.MockedFn<any>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
-    agent = createMockedAgent();
+    agent = createMockedInternalAgent();
 
     agentClient = createMockedAgentRegistry();
     agentClient.get.mockResolvedValue(agent);

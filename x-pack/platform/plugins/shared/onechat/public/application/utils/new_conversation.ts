@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/onechat-common';
+import type { Conversation, ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
+import { ConversationRoundStatus, oneChatDefaultAgentId } from '@kbn/onechat-common';
 import type { Attachment } from '@kbn/onechat-common/attachments';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 
 export const newConversationId = 'new';
 export const createNewConversation = (): Conversation => {
@@ -29,16 +29,19 @@ export const createNewRound = ({
   userMessage,
   attachments,
   roundId = pendingRoundId,
+  steps = [],
 }: {
   userMessage: string;
   attachments?: Attachment[];
   roundId?: string;
+  steps?: ConversationRoundStep[];
 }): ConversationRound => {
   return {
     id: roundId,
+    status: ConversationRoundStatus.inProgress,
     input: { message: userMessage, attachments },
     response: { message: '' },
-    steps: [],
+    steps,
     started_at: new Date().toISOString(),
     time_to_first_token: 0,
     time_to_last_token: 0,

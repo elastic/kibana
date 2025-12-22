@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConfigProperties } from './dynamic_config/types';
 
 interface ConfigEntry extends ConfigProperties {
@@ -76,4 +78,9 @@ export function isMapWithStringValues(value: unknown): value is Map {
     value !== null &&
     Object.values(value).every((v) => typeof v === 'string')
   );
+}
+
+export interface InferenceEndpointUiCommonPluginStartDependencies {
+  application: ApplicationStart;
+  cloud?: CloudStart;
 }

@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useMemo } from 'react';
 
-import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../../common/constants';
-import { useLicense } from '../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../services';
-import {
-  isAgentEligibleForMigration,
-  isAgentEligibleForPrivilegeLevelChange,
-  isAgentRequestDiagnosticsSupported,
-} from '../../../../../../../common/services';
-import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useLink } from '../../../../hooks';
-import { useAuthz } from '../../../../../../hooks/use_authz';
-import { ContextMenuActions } from '../../../../components';
-import { isAgentUpgradeable } from '../../../../services';
+import { HierarchicalActionsMenu } from '../../components';
+import { useSingleAgentMenuItems } from '../../hooks/use_single_agent_menu_items';
+import type { SingleAgentMenuCallbacks } from '../../hooks/use_single_agent_menu_items';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;
@@ -35,6 +24,7 @@ export const TableRowActions: React.FunctionComponent<{
   onRequestDiagnosticsClick: () => void;
   onMigrateAgentClick: () => void;
   onChangeAgentPrivilegeLevelClick: () => void;
+  onViewAgentJsonClick: () => void;
 }> = ({
   agent,
   agentPolicy,
@@ -46,196 +36,54 @@ export const TableRowActions: React.FunctionComponent<{
   onRequestDiagnosticsClick,
   onMigrateAgentClick,
   onChangeAgentPrivilegeLevelClick,
+  onViewAgentJsonClick,
 }) => {
   const { getHref } = useLink();
-  const authz = useAuthz();
-  const licenseService = useLicense();
-  const isUnenrolling = agent.status === 'unenrolling';
-  const agentPrivilegeLevelChangeEnabled =
-    ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuItems = [
-    <EuiContextMenuItem
-      icon="inspect"
-      href={getHref('agent_details', { agentId: agent.id })}
-      key="viewAgent"
-    >
-      <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
-    </EuiContextMenuItem>,
-  ];
 
-  if (authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="cluster"
-        onClick={() => {
-          onMigrateAgentClick();
-          setIsMenuOpen(false);
-        }}
-        disabled={!agent.active || !licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)}
-        key="migrateAgent"
-        data-test-subj="migrateAgentMenuItem"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.migrateAgentActionText"
-          defaultMessage="Migrate agent"
-        />
-      </EuiContextMenuItem>
-    );
-  }
+  // Build callbacks object for the hook
+  const callbacks: SingleAgentMenuCallbacks = useMemo(
+    () => ({
+      onViewAgentClick: () => {
+        window.location.href = getHref('agent_details', { agentId: agent.id });
+      },
+      onAddRemoveTagsClick,
+      onReassignClick,
+      onUpgradeClick,
+      onViewAgentJsonClick,
+      onMigrateAgentClick,
+      onRequestDiagnosticsClick,
+      onChangeAgentPrivilegeLevelClick,
+      onUnenrollClick,
+      onUninstallClick: onGetUninstallCommandClick,
+    }),
+    [
+      agent.id,
+      getHref,
+      onAddRemoveTagsClick,
+      onReassignClick,
+      onUpgradeClick,
+      onViewAgentJsonClick,
+      onMigrateAgentClick,
+      onRequestDiagnosticsClick,
+      onChangeAgentPrivilegeLevelClick,
+      onUnenrollClick,
+      onGetUninstallCommandClick,
+    ]
+  );
 
-  if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="tag"
-        onClick={(event) => {
-          onAddRemoveTagsClick((event.target as Element).closest('button')!);
-        }}
-        disabled={!agent.active}
-        key="addRemoveTags"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.addRemoveTagsActionText"
-          defaultMessage="Add / remove tags"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="pencil"
-        onClick={() => {
-          onReassignClick();
-        }}
-        disabled={!agent.active || agentPolicy?.supports_agentless === true}
-        key="reassignPolicy"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.reassignActionText"
-          defaultMessage="Assign to new policy"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="agentUnenrollBtn"
-        disabled={!agent.active || agentPolicy?.supports_agentless === true}
-        icon="trash"
-        onClick={() => {
-          onUnenrollClick();
-        }}
-      >
-        {isUnenrolling ? (
-          <FormattedMessage
-            id="xpack.fleet.agentList.forceUnenrollOneButton"
-            defaultMessage="Force unenroll"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.agentList.unenrollOneButton"
-            defaultMessage="Unenroll agent"
-          />
-        )}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="agentUpgradeBtn"
-        icon="refresh"
-        disabled={!isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true}
-        onClick={() => {
-          onUpgradeClick();
-        }}
-        data-test-subj="upgradeBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.upgradeOneButton"
-          defaultMessage="Upgrade agent"
-        />
-      </EuiContextMenuItem>
-    );
-
-    if (authz.fleet.allAgents && isStuckInUpdating(agent)) {
-      menuItems.push(
-        <EuiContextMenuItem
-          key="agentRestartUpgradeBtn"
-          icon="refresh"
-          onClick={() => {
-            onUpgradeClick();
-          }}
-          data-test-subj="restartUpgradeBtn"
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.restartUpgradeOneButton"
-            defaultMessage="Restart upgrade"
-          />
-        </EuiContextMenuItem>
-      );
-    }
-
-    if (authz.fleet.allAgents && agent.policy_id && !agentPolicy?.supports_agentless) {
-      menuItems.push(
-        <EuiContextMenuItem
-          icon="minusInCircle"
-          onClick={() => {
-            onGetUninstallCommandClick();
-            setIsMenuOpen(false);
-          }}
-          disabled={!agent.active}
-          key="getUninstallCommand"
-          data-test-subj="uninstallAgentMenuItem"
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.getUninstallCommand"
-            defaultMessage="Uninstall agent"
-          />
-        </EuiContextMenuItem>
-      );
-    }
-  }
-
-  if (
-    authz.fleet.allAgents &&
-    isAgentEligibleForPrivilegeLevelChange(agent, agentPolicy) &&
-    agentPrivilegeLevelChangeEnabled
-  ) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="lock"
-        onClick={() => {
-          onChangeAgentPrivilegeLevelClick();
-          setIsMenuOpen(false);
-        }}
-        disabled={!agent.active}
-        key="changeAgentPrivilegeLevel"
-        data-test-subj="changeAgentPrivilegeLevelMenuItem"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
-          defaultMessage="Remove root privilege"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (authz.fleet.readAgents) {
-    menuItems.push(
-      <EuiContextMenuItem
-        key="requestAgentDiagnosticsBtn"
-        icon="download"
-        data-test-subj="requestAgentDiagnosticsBtn"
-        disabled={!isAgentRequestDiagnosticsSupported(agent)}
-        onClick={() => {
-          onRequestDiagnosticsClick();
-        }}
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.diagnosticsOneButton"
-          defaultMessage="Request diagnostics .zip"
-        />
-      </EuiContextMenuItem>
-    );
-  }
+  const menuItems = useSingleAgentMenuItems({
+    agent,
+    agentPolicy,
+    callbacks,
+  });
 
   return (
-    <ContextMenuActions
-      isOpen={isMenuOpen}
-      onChange={(isOpen) => setIsMenuOpen(isOpen)}
+    <HierarchicalActionsMenu
       items={menuItems}
+      isOpen={isMenuOpen}
+      onToggle={setIsMenuOpen}
+      data-test-subj="agentActionsBtn"
     />
   );
 };

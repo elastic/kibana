@@ -29,17 +29,13 @@ export class PrivateLocationTestService {
 
   async installSyntheticsPackage() {
     await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-    const response = await this.supertest
-      .get(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
+    // Attempt to delete any existing package so we can install a specific version
+    await this.supertest.delete(`/api/fleet/epm/packages/synthetics`).set('kbn-xsrf', 'true');
+    await this.supertest
+      .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
       .set('kbn-xsrf', 'true')
+      .send({ force: true })
       .expect(200);
-    if (response.body.item.status !== 'installed') {
-      await this.supertest
-        .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
-    }
   }
 
   async addFleetPolicy(name?: string, spaceIds?: string[]) {

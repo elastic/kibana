@@ -13,3 +13,12 @@ export enum GapRangeValue {
 }
 
 export const defaultRangeValue = GapRangeValue.LAST_90_D;
+
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_NAME = 'Security Solution Gap Auto Fill Scheduler';
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_INTERVAL = '5m';
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_MAX_BACKFILLS = 100;
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_NUM_RETRIES = 3;
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_GAP_FILL_RANGE = 'now-90d';
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_SCOPE = ['security_solution'];
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX =
+  'security-solution-gap-auto-fill-scheduler';

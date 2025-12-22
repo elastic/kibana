@@ -2363,7 +2363,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
-        mockSchedule
+        mockSchedule,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -2449,7 +2450,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
-        mockSchedule
+        mockSchedule,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);

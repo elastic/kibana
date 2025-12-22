@@ -27,6 +27,7 @@ export const platformCoreTools = {
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
+  integrationKnowledge: platformCoreTool('integration_knowledge'),
 } as const;
 
 /**
@@ -36,6 +37,7 @@ export const editableToolTypes: ToolType[] = [
   ToolType.esql,
   ToolType.index_search,
   ToolType.workflow,
+  ToolType.mcp,
 ];
 
 export const defaultAgentToolIds = [

@@ -10,7 +10,7 @@ import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-p
 /**
  * Domain ID for all onechat usage counters
  */
-export const ONECHAT_USAGE_DOMAIN = 'onechat';
+export const ONECHAT_USAGE_DOMAIN = 'agent_builder';
 
 /**
  * Create usage counter for onechat plugin

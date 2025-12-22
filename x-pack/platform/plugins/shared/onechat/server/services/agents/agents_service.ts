@@ -10,6 +10,8 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
   KibanaRequest,
+  UiSettingsServiceStart,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/onechat-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -34,6 +36,8 @@ export interface AgentsServiceStartDeps {
   security: SecurityServiceStart;
   spaces?: SpacesPluginStart;
   elasticsearch: ElasticsearchServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
   getRunner: () => Runner;
   toolsService: ToolsServiceStart;
 }
@@ -69,7 +73,8 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch, spaces, toolsService } = startDeps;
+    const { getRunner, security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } =
+      startDeps;
 
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
@@ -83,7 +88,9 @@ export class AgentsService {
       const space = getCurrentSpaceId({ request, spaces });
       return createAgentRegistry({
         request,
-        space,
+        spaceId: space,
+        uiSettings,
+        savedObjects,
         builtinProvider: await builtinProviderFn({ request, space }),
         persistedProvider: await persistedProviderFn({ request, space }),
       });

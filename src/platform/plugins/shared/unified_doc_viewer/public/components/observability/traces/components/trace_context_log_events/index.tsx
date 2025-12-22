@@ -11,9 +11,9 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useLogsQuery } from '../../hooks/use_logs_query';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
 import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
 

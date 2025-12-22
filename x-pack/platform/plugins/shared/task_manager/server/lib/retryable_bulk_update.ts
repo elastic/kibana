@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { ConcreteTaskInstance } from '../task';
+import type { ApiKeyOptions, ConcreteTaskInstance } from '../task';
 import type { TaskStore, BulkUpdateResult, BulkGetResult } from '../task_store';
 import { isErr, isOk, asErr } from './result_type';
 import type { BulkUpdateTaskResult } from '../task_scheduling';
@@ -21,6 +21,7 @@ export interface RetryableBulkUpdateOpts {
   store: TaskStore;
   validate: boolean;
   mergeAttributes?: boolean;
+  options?: ApiKeyOptions;
 }
 
 export async function retryableBulkUpdate({
@@ -31,6 +32,7 @@ export async function retryableBulkUpdate({
   store,
   validate,
   mergeAttributes,
+  options,
 }: RetryableBulkUpdateOpts): Promise<BulkUpdateTaskResult> {
   const resultMap: Record<string, BulkUpdateResult> = {};
 
@@ -46,7 +48,11 @@ export async function retryableBulkUpdate({
       }, [])
       .filter(filter)
       .map(map);
-    const bulkUpdateResult = await store.bulkUpdate(tasksToUpdate, { validate, mergeAttributes });
+    const bulkUpdateResult = await store.bulkUpdate(tasksToUpdate, {
+      validate,
+      mergeAttributes,
+      options,
+    });
     for (const result of bulkUpdateResult) {
       const taskId = getId(result);
       resultMap[taskId] = result;

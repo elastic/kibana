@@ -104,7 +104,7 @@ dependsOn:
   - '@kbn/logs-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/discover-shared-plugin'
   - '@kbn/response-ops-rule-form'
   - '@kbn/embeddable-enhanced-plugin'
@@ -127,6 +127,7 @@ dependsOn:
   - '@kbn/unified-metrics-grid'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/react-query'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

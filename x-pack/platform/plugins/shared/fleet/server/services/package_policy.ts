@@ -189,6 +189,7 @@ import {
   deleteSecretsIfNotReferenced as deleteSecrets,
   isSecretStorageEnabled,
 } from './secrets';
+import { extractAccountType } from './cloud_connectors/integration_helpers';
 import { getAgentTemplateAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
@@ -198,6 +199,7 @@ import {
 } from './spaces/policy_namespaces';
 import {
   getSpaceForPackagePolicy,
+  getSpaceForPackagePolicySO,
   isSpaceAwarenessEnabled,
   isSpaceAwarenessMigrationPending,
 } from './spaces/helpers';
@@ -2833,7 +2835,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Create temporary SOs with id `id:copy` to allow cancellation in case rollback fails.
     const policiesToCreate: Record<
       string,
-      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes> & { initialNamespaces?: string[] }>
     > = {};
     const policiesToUpdate: Record<
       string,
@@ -2845,36 +2847,36 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     > = {};
 
     packagePolicies.forEach((policy) => {
-      const namespace = policy.namespaces?.[0] || policy.attributes.namespace;
-      if (namespace) {
-        if (!policy.id.endsWith(':prev')) {
-          const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
-          if (previousRevision?.attributes) {
-            if (!policiesToCreate[namespace]) {
-              policiesToCreate[namespace] = [];
-            }
-            policiesToCreate[namespace].push({
-              ...policy,
-              id: `${policy.id}:copy`,
-            });
-            if (!policiesToUpdate[namespace]) {
-              policiesToUpdate[namespace] = [];
-            }
-            policiesToUpdate[namespace].push({
-              ...policy,
-              attributes: {
-                ...previousRevision?.attributes,
-                revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
-                latest_revision: true,
-              },
-            });
+      const namespace = getSpaceForPackagePolicySO(policy);
+
+      if (!policy.id.endsWith(':prev')) {
+        const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
+        if (previousRevision?.attributes) {
+          if (!policiesToCreate[namespace]) {
+            policiesToCreate[namespace] = [];
           }
-        } else {
-          if (!previousVersionPolicies[namespace]) {
-            previousVersionPolicies[namespace] = [];
+          policiesToCreate[namespace].push({
+            ...policy,
+            id: `${policy.id}:copy`,
+            initialNamespaces: policy.namespaces,
+          });
+          if (!policiesToUpdate[namespace]) {
+            policiesToUpdate[namespace] = [];
           }
-          previousVersionPolicies[namespace].push(policy);
+          policiesToUpdate[namespace].push({
+            ...policy,
+            attributes: {
+              ...previousRevision?.attributes,
+              revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
+              latest_revision: true,
+            },
+          });
         }
+      } else {
+        if (!previousVersionPolicies[namespace]) {
+          previousVersionPolicies[namespace] = [];
+        }
+        previousVersionPolicies[namespace].push(policy);
       }
     });
 
@@ -2883,6 +2885,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await soClient
         .bulkCreate<PackagePolicySOAttributes>(policies, { namespace })
         .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
+
       for (const policy of policies) {
         auditLoggingService.writeCustomSoAuditLog({
           action: 'create',
@@ -2923,7 +2926,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(copiedPolicies)) {
       // Update policies with copied data.
       const policiesToUpdate = policies.map((policy) => ({
-        ...policy,
+        ...omit(policy, 'initialNamespaces'),
         id: policy.id.replace(':copy', ''),
       }));
       await soClient
@@ -3045,6 +3048,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        // Extract account type from package policy vars
+        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy);
         try {
           // Extract cloud connector name from package policy
           const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
@@ -3055,6 +3060,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
             vars: cloudConnectorVars,
             cloudProvider,
+            accountType,
           });
           logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
           return cloudConnector;

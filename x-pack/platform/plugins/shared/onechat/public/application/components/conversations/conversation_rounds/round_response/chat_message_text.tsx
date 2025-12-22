@@ -22,14 +22,16 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
-import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
+import { visualizationElement, dashboardElement } from '@kbn/onechat-common/tools/tool_result';
 import { useOnechatServices } from '../../../../hooks/use_onechat_service';
 import {
   Cursor,
   esqlLanguagePlugin,
   createVisualizationRenderer,
+  createDashboardRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
+  dashboardTagParser,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 
@@ -125,6 +127,10 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
+      [dashboardElement.tagName]: createDashboardRenderer({
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
     };
 
     return {
@@ -132,6 +138,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
+        dashboardTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

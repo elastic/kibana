@@ -386,6 +386,16 @@ export default function ({ getService }: FtrProviderContext) {
             .cspm_cloud_connector_usage_stats
         )
       ).to.be(true);
+
+      // When cloud connectors exist, each item should have these fields:
+      // - id: string
+      // - created_at: string
+      // - updated_at: string
+      // - hasCredentials: boolean
+      // - cloud_provider: string
+      // - account_type: 'single' | 'organization' | undefined
+      // - packagePolicyIds: string[]
+      // - packagePolicyCount: number
     });
 
     it('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {

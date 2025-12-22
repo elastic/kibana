@@ -11,10 +11,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useChartLayersFromEsql } from './use_chart_layers_from_esql';
 import * as esqlModule from '@kbn/esql-utils';
 import * as esqlHook from '../../../hooks';
-import type { ChartSectionProps, UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { DIMENSIONS_COLUMN } from '../../../common/utils';
+import type { UnifiedMetricsGridProps } from '../../../types';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
@@ -36,7 +37,7 @@ const servicesMock: Partial<UnifiedHistogramServices> = {
 };
 
 describe('useChartLayers', () => {
-  const mockServices: Pick<ChartSectionProps, 'services'> = {
+  const mockServices: Pick<UnifiedMetricsGridProps, 'services'> = {
     services: servicesMock as UnifiedHistogramServices,
   };
 

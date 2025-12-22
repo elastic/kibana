@@ -7,13 +7,15 @@
 
 const getRandomNumberId = () => Math.floor(Math.random() * 1000000);
 
-const getMockQRadarRuleDataXml = (ruleName: string) =>
-  `<rule buildingBlock="true" enabled="true" id="${getRandomNumberId()}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
+const getMockQRadarRuleDataXml = (ruleName: string) => {
+  const id = getRandomNumberId();
+  return {
+    normal: `<rule buildingBlock="true" enabled="true" id="${id}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
   <name>${ruleName}</name>
   <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
   <testDefinitions>
     <test group="Event Property Tests" id="21" name="com.q1labs.sem.semces.cre.tests.EventCategory_Test" uid="0">
-      <text>when the event category for the event is one of the following &lt;a href='javascript:editParameter("0", "1")' class='dynamic'&gt;Authentication.Admin Login Success Events</text>
+      <text>when the event category&lt;a href='javascript:editParameter("0", "1")' class='dynamic'> for the event is one of the following &lt;a href='javascript:editParameter("0", "1")' class='dynamic'&gt;Authentication.Admin Login Success Events</text>
       <parameter id="1">
         <initialText>categories</initialText>
         <selectionLabel>Select a category and click 'Add'</selectionLabel>
@@ -29,12 +31,36 @@ const getMockQRadarRuleDataXml = (ruleName: string) =>
     <newevent contributeOffenseName="true" credibility="10" describeOffense="true" description="Create an offense" forceOffenseCreation="true" lowLevelCategory="20013" name="Some Offense" offenseMapping="0" overrideOffenseName="false" qid="67555192" relevance="10" ></newevent>
   </responses>
 </rule>
-`;
+`,
+    sanitized: `<rule buildingBlock="true" enabled="true" id="${id}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
+  <name>${ruleName}</name>
+  <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
+  <testDefinitions>
+    <test group="Event Property Tests" id="21" name="com.q1labs.sem.semces.cre.tests.EventCategory_Test" uid="0">
+      <text>when the event category for the event is one of the following Authentication.Admin Login Success Events</text>
+      <parameter id="1">
+        <initialText>categories</initialText>
+        <selectionLabel>Select a category and click 'Add'</selectionLabel>
+        <userOptions format="CustomizerParameter-Categories.jsp" method="com.q1labs.sem.ui.servlets.UISemServices.getCategories" multiscreen="true" source="class"/>
+        <userSelection>1014, 12-2</userSelection>
+        <userSelectionTypes/>
+        <userSelectionId>0</userSelectionId>
+      </parameter>
+    </test>
+  </testDefinitions>
+  <actions flowAnalysisInterval="0" forceOffenseCreation="true" includeAttackerEventsInterval="0" offenseMapping="0"></actions>
+  <responses referenceMap="false" referenceMapOfMaps="false" referenceMapOfMapsRemove="false" referenceMapOfSets="false" referenceMapOfSetsRemove="false" referenceMapRemove="false" referenceTable="false" referenceTableRemove="false">
+    <newevent contributeOffenseName="true" credibility="10" describeOffense="true" description="Create an offense" forceOffenseCreation="true" lowLevelCategory="20013" name="Some Offense" offenseMapping="0" overrideOffenseName="false" qid="67555192" relevance="10" ></newevent>
+  </responses>
+</rule>
+`,
+  };
+};
 
 export const getMockQRadarXml = (ruleNames: string[]) => {
   const mockRuleDataXmls = ruleNames.map((ruleName) => getMockQRadarRuleDataXml(ruleName));
   const mockRuleDataBase64s = mockRuleDataXmls.map((mockRuleDataXml) =>
-    Buffer.from(mockRuleDataXml).toString('base64')
+    Buffer.from(mockRuleDataXml.normal).toString('base64')
   );
   return {
     mockQradarXml: `<content>
@@ -88,6 +114,7 @@ export const getMockQRadarXml = (ruleNames: string[]) => {
                   .join('\n')}
           </content> `,
     mockRuleDataBase64s,
-    mockRuleDataXmls,
+    mockRuleDataXmls: mockRuleDataXmls.map((data) => data.normal),
+    mockRuleDataXmlsSanitized: mockRuleDataXmls.map((data) => data.sanitized),
   };
 };

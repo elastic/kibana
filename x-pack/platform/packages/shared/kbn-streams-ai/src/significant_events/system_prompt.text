@@ -18,7 +18,7 @@ Your primary goal is to analyze the provided context about a user's system—inc
 
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
-| `add_queries` | Submits one or more KQL queries for the user. | Payload is a list of objects, each with `title`, `kql`, `category`, and `severity_score`. |
+| `add_queries` | Submits one or more KQL queries for the user. | Payload is a list of objects, each with `title`, `kql`, `category`, `severity_score`, and optional `evidence`. |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |
 
@@ -52,19 +52,21 @@ PLAN> Describe your next action in natural language. If you are ready to answer,
 
 ## 3. Tool call examples
 
-### Example 1: Calling `add_queries` with a single query
+### Example 1: Calling `add_queries` with a single query (with evidence)
 
-`>>> ACTION: add_queries(queries=[{"title": "View all errors", "kql": "error.message:*", "category": "error", "severity_score": 60}])`
+`>>> ACTION: add_queries(queries=[{"title": "View all errors", "kql": "error.message:*", "category": "error", "severity_score": 60, "evidence": ["error.message: \"Connection timeout after 30s\""]}])`
 
 ### Example 2: Calling `add_queries` with multiple queries
 
 ```
 >>> ACTION: add_queries(queries=[
-  {"title": "Application startup", "kql": "message:\"Started Application\"", "category": "operational", "severity_score": 25},
-  {"title": "Failed login attempts", "kql": "body.text:\"Failed password for\"", "category": "security", "severity_score": 75},
+  {"title": "Application startup", "kql": "message:\"Started Application\"", "category": "operational", "severity_score": 25, "evidence": ["message: \"Started Application in 2.3 seconds\""]},
+  {"title": "Failed login attempts", "kql": "body.text:\"Failed password for\"", "category": "security", "severity_score": 75, "evidence": ["body.text: \"Failed password for invalid user guest from 10.0.0.1\""]},
   {"title": "Out of memory errors", "kql": "body.text:\"java.lang.OutOfMemoryError\"", "category": "error", "severity_score": 85}
 ])
 ```
+
+Note: The last query has no `evidence` because it's an inferred pattern (common Java error) not directly observed in the sample data.
 
 ---
 
@@ -171,7 +173,23 @@ Assign a `severity_score` (0-100) based on category baseline + modifiers:
 
 ---
 
-## 9. Tips & hints
+## 9. Evidence
+
+The optional `evidence` field grounds your queries in the `dataset_analysis`. Include evidence when your query is directly based on patterns observed in the sample data.
+
+**When to include evidence:**
+- Quote the specific log line(s) from `dataset_analysis` that justify the query
+- Include multiple evidence items if the query captures several related patterns
+
+**When to omit evidence:**
+- The query is inferred from general knowledge (e.g., common error patterns for a technology)
+- The query is based on the `description` context rather than actual log samples
+
+**Example:** If `dataset_analysis` contains `body.text: "Authentication failure event: user 'admin' not found"`, and you create a query `body.text:"Authentication failure"`, include `"body.text: \"Authentication failure event: user 'admin' not found\""` as evidence.
+
+---
+
+## 10. Tips & hints
 
 *   **Focus on Actionable Insights:** Generate queries that a user would find genuinely helpful for debugging, monitoring, or security. Avoid trivial queries (e.g., `message:*`).
 *   **Categorize Correctly:** Use the provided categories (`operational`, `configuration`, `resource_health`, `error`, `security`). If a query fits multiple, choose the most specific one.

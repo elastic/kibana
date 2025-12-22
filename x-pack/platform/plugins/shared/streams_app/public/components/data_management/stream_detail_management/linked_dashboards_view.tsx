@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { Streams } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -21,18 +22,40 @@ import {
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAttachmentsFetch } from '../../../hooks/use_attachments_fetch';
 
+const DASHBOARD_FILTERS = {
+  attachmentTypes: ['dashboard' as const],
+};
+
 export function LinkedDashboardsView({ definition }: { definition: Streams.all.GetResponse }) {
   const context = useKibana();
+  const { onPageReady } = usePerformanceContext();
   const attachmentsFetch = useAttachmentsFetch({
-    name: definition.stream.name,
-    attachmentType: 'dashboard',
+    streamName: definition.stream.name,
+    filters: DASHBOARD_FILTERS,
   });
   const dashboardsLocator =
     context.dependencies.start.share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (attachmentsFetch.value && !attachmentsFetch.loading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'linked_dashboards_count',
+          value1: attachmentsFetch.value?.attachments.length ?? 0,
+        },
+      });
+    }
+  }, [attachmentsFetch.value, attachmentsFetch.loading, onPageReady, definition.stream]);
 
   if (attachmentsFetch.loading) {
     return <EuiLoadingSpinner />;

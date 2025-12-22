@@ -30,7 +30,7 @@ import {
 } from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel, VerticalRule } from '../../shared';
-import { StreamNameFormRow } from '../stream_name_form_row';
+import { StreamNameFormRow, useChildStreamInput } from '../stream_name_form_row';
 import { RoutingConditionEditor } from '../routing_condition_editor';
 import { processCondition } from '../utils';
 import { EditSuggestedRuleControls } from '../control_bars';
@@ -53,7 +53,7 @@ export function SuggestedStreamPanel({
   onSave?: () => void;
 }) {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { changeSuggestionName, changeSuggestionCondition, reviewSuggestedRule } =
+  const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
     useStreamRoutingEvents();
 
   const editedSuggestion = routingSnapshot.context.editedSuggestion;
@@ -70,22 +70,6 @@ export function SuggestedStreamPanel({
       selectedPreview.type === 'suggestion' &&
       selectedPreview.name === currentSuggestion.name
   );
-
-  const nameError = React.useMemo(() => {
-    if (!isEditing) return undefined;
-
-    const isDuplicateName = routingSnapshot.context.routing.some(
-      (r) => r.destination === currentSuggestion.name
-    );
-
-    if (isDuplicateName) {
-      return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
-        defaultMessage: 'A stream with this name already exists',
-      });
-    }
-
-    return undefined;
-  }, [isEditing, currentSuggestion.name, routingSnapshot.context.routing]);
 
   const conditionError = React.useMemo(() => {
     if (!isEditing) return undefined;
@@ -104,7 +88,7 @@ export function SuggestedStreamPanel({
 
   const handleNameChange = (name: string) => {
     if (!isEditing) return;
-    changeSuggestionName(name);
+    changeSuggestionNameDebounced(name);
   };
 
   const handleConditionChange = (condition: any) => {
@@ -112,16 +96,22 @@ export function SuggestedStreamPanel({
     changeSuggestionCondition(condition);
   };
 
+  const { isStreamNameValid, setLocalStreamName, partitionName, prefix, helpText, errorMessage } =
+    useChildStreamInput(currentSuggestion.name, false);
+
   if (isEditing) {
     return (
       <SelectablePanel paddingSize="m" isSelected={isSelected}>
         <EuiFlexGroup direction="column" gutterSize="m">
           <StreamNameFormRow
-            value={currentSuggestion.name}
             onChange={handleNameChange}
+            setLocalStreamName={setLocalStreamName}
+            partitionName={partitionName}
+            prefix={prefix}
+            helpText={helpText}
+            errorMessage={errorMessage}
             autoFocus
-            error={nameError}
-            isInvalid={!!nameError}
+            isStreamNameValid={isStreamNameValid}
           />
           <RoutingConditionEditor
             status="enabled"
@@ -133,8 +123,8 @@ export function SuggestedStreamPanel({
           <EditSuggestedRuleControls
             onSave={onSave}
             onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
-            nameError={nameError}
             conditionError={conditionError}
+            isStreamNameValid={isStreamNameValid}
           />
         </EuiFlexGroup>
       </SelectablePanel>

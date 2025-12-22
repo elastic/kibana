@@ -11,7 +11,7 @@
       "groups": "__flag__",
       "include_segment_file_sizes": "__flag__",
       "level": [
-        "cluster",
+        "node",
         "indices",
         "shards"
       ],

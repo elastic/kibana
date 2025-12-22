@@ -8,14 +8,14 @@
  */
 
 import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricUnit } from '../../../types';
 import { useEsqlQueryInfo } from '../../../hooks';
 import { DIMENSIONS_COLUMN, getLensMetricFormat } from '../../../common/utils';
+import type { UnifiedMetricsGridProps } from '../../../types';
 
 export const useChartLayersFromEsql = ({
   query,
@@ -31,9 +31,9 @@ export const useChartLayersFromEsql = ({
   unit?: MetricUnit;
   timeRange: TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
-  services: ChartSectionProps['services'];
+  services: UnifiedMetricsGridProps['services'];
   abortController?: AbortController;
-} & Pick<ChartSectionProps, 'services'>): LensSeriesLayer[] => {
+} & Pick<UnifiedMetricsGridProps, 'services'>): LensSeriesLayer[] => {
   const queryInfo = useEsqlQueryInfo({ query });
 
   const { value: columns = [] } = useAsync(

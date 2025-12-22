@@ -45,7 +45,7 @@ export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: Middlewar
     // store stopped loading and external context is not subscribed to yet - do it now
     if (!store.getState().lens.isLoading && !unsubscribeFromExternalContext) {
       unsubscribeFromExternalContext = subscribeToExternalContext(
-        storeDeps.lensServices.data,
+        storeDeps.lensServices,
         store.getState,
         store.dispatch
       );

@@ -161,7 +161,44 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.DEFAULT_QUICK_ACTION_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_QUICK_ACTION_IDS",
+        "description": [],
+        "signature": [
+          "{ view?: ",
+          "QuickActionIds",
+          " | undefined; edit?: ",
+          "QuickActionIds",
+          " | undefined; }"
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.PresentationPanelQuickActionContext",
+        "type": "Object",
+        "tags": [],
+        "label": "PresentationPanelQuickActionContext",
+        "description": [],
+        "signature": [
+          "React.Context<",
+          "PresentationPanelQuickActionIds",
+          " | undefined>"
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_quick_action_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],

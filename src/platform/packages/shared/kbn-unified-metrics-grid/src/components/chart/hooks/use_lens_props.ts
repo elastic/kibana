@@ -9,7 +9,6 @@
 
 import type { LensAttributes, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -33,6 +32,8 @@ import type {
   LensYBoundsConfig,
   LensESQLDataset,
 } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { UnifiedMetricsGridProps } from '../../../types';
+
 export type LensProps = Pick<
   EmbeddableComponentProps,
   | 'id'
@@ -59,11 +60,11 @@ export const useLensProps = ({
 }: {
   title: string;
   query: string;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
-} & Pick<ChartSectionProps, 'services' | 'fetchParams'>) => {
+} & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 

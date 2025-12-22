@@ -96,16 +96,20 @@ export const useConversationTitle = () => {
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const { pendingMessage, error } = useSendMessage();
+  const { pendingMessage, error, errorSteps } = useSendMessage();
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
-      const pendingRound = createNewRound({ userMessage: pendingMessage, roundId: '' });
+      const pendingRound = createNewRound({
+        userMessage: pendingMessage,
+        roundId: '',
+        steps: errorSteps,
+      });
       return [...rounds, pendingRound];
     }
     return rounds;
-  }, [conversation?.rounds, error, pendingMessage]);
+  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
 
   return conversationRounds;
 };
@@ -122,7 +126,12 @@ export const useStepsFromPrevRounds = () => {
 };
 
 export const useHasActiveConversation = () => {
-  const conversationId = useConversationId();
+  const hasPersistedConversation = useHasPersistedConversation();
   const conversationRounds = useConversationRounds();
-  return Boolean(conversationId || conversationRounds.length > 0);
+  return hasPersistedConversation || conversationRounds.length > 0;
+};
+
+export const useHasPersistedConversation = () => {
+  const conversationId = useConversationId();
+  return Boolean(conversationId);
 };

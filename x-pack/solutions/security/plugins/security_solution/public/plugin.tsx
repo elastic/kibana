@@ -67,6 +67,7 @@ import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
+import { registerAttachmentUiDefinitions } from './agent_builder/attachment_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -212,15 +213,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       hideFromGlobalSearch: !this.isServerless,
       order: 1,
       mount: async (params) => {
+        const [coreStart] = await core.getStartServices();
         const { renderApp, services, store } = await mountDependencies();
         const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+        const { RedirectIfUnauthorized } = await import(
+          './assistant/stack_management/redirect_if_unauthorized'
+        );
 
         return renderApp({
           ...params,
           services,
           store,
           usageCollection,
-          children: <ManagementSettings />,
+          children: (
+            <RedirectIfUnauthorized coreStart={coreStart}>
+              <ManagementSettings />
+            </RedirectIfUnauthorized>
+          ),
         });
       },
     });
@@ -261,6 +270,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
+
+    if (plugins.onechat?.attachments) {
+      registerAttachmentUiDefinitions({
+        attachments: plugins.onechat.attachments,
+      });
+    }
+
     return this.contract.getStartContract(core);
   }
 
@@ -340,7 +356,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
-      cloudDefend: subPlugins.cloudDefend.start(),
+      cloudDefend: subPlugins.cloudDefend.start(this.isServerless),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),

@@ -379,6 +379,13 @@ export class AutomaticImportSavedObjectService {
    */
 
   /**
+   * Generate composite ID for data stream: integration_id-data_stream_id
+   */
+  private getDataStreamCompositeId(integrationId: string, dataStreamId: string): string {
+    return `${integrationId}-${dataStreamId}`;
+  }
+
+  /**
    * Create a data stream
    * @param request - The Kibana request object
    * @param data - The data stream data. Must include an integration_id and data_stream_id.
@@ -400,21 +407,6 @@ export class AutomaticImportSavedObjectService {
     if (!dataStreamId) {
       throw new Error('Data stream ID is required');
     }
-
-    let existingIntegration: IntegrationAttributes | null = null;
-    // Check for existing integration
-    try {
-      existingIntegration = await this.getIntegration(integrationId);
-      this.logger.debug(
-        `Integration ${integrationId} found, will update count after data stream creation`
-      );
-    } catch (error) {
-      this.logger.debug(
-        `Integration ${integrationId} not found, will create after data stream creation`
-      );
-    }
-
-    // Create the data stream first since we need it before we need to create a missing integration
     try {
       this.logger.debug(`Creating data stream: ${dataStreamId}`);
 
@@ -437,157 +429,21 @@ export class AutomaticImportSavedObjectService {
         },
       };
 
-      // Create automatically checks if there is an existing data stream with the same id and will throw an error if so
-      const createdDataStream = await this.savedObjectsClient.create<DataStreamAttributes>(
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      return await this.savedObjectsClient.create<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         initialDataStreamData,
         {
           ...options,
-          id: dataStreamId,
+          id: compositeId,
         }
       );
-
-      // After successful data stream creation, update data stream count in the integration
-      // or create a new integration if it doesn't exist
-      try {
-        if (existingIntegration) {
-          this.logger.debug(
-            `Data stream created successfully, incrementing integration ${integrationId} count`
-          );
-
-          const updatedIntegrationData: IntegrationAttributes = {
-            ...existingIntegration,
-            data_stream_count: (existingIntegration.data_stream_count ?? 0) + 1,
-          };
-
-          await this.updateIntegration(
-            updatedIntegrationData,
-            existingIntegration.metadata?.version || '0.0.0'
-          );
-        } else {
-          this.logger.debug(
-            `Data stream created successfully, creating new integration ${integrationId}`
-          );
-
-          const integrationParams: IntegrationParams = {
-            integrationId,
-            title: `Auto-generated integration ${integrationId}`,
-            description: '',
-          };
-
-          await this.insertIntegration(integrationParams, authenticatedUser);
-
-          // Increment the data_stream_count for the newly created integration
-          const newIntegration = await this.getIntegration(integrationId);
-          const updatedIntegrationData: IntegrationAttributes = {
-            ...newIntegration,
-            data_stream_count: 1,
-          };
-          await this.updateIntegration(
-            updatedIntegrationData,
-            newIntegration.metadata?.version || '0.0.0'
-          );
-        }
-      } catch (integrationError) {
-        this.logger.error(
-          `Failed to update/create integration ${integrationId} after creating data stream ${dataStreamId}: ${integrationError}`
-        );
-      }
-
-      return createdDataStream;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isConflictError(error)) {
         throw new Error(`Data stream ${dataStreamId} already exists`);
       }
-      throw error;
-    }
-  }
-
-  /**
-   * Update a data stream
-   * @param data - The data stream data. Must include an integration_id and data_stream_id.
-   * @param expectedVersion - The expected version for optimistic concurrency control at the application layer. Required to ensure data consistency.
-   * @param versionUpdate - Optional: specify which version part to increment ('major' | 'minor' | 'patch').  Defaults to incrementing 'patch'.
-   * @param options - The options for the update.
-   * @returns The updated data stream
-   */
-  public async updateDataStream(
-    data: DataStreamAttributes,
-    expectedVersion: string,
-    versionUpdate?: 'major' | 'minor' | 'patch',
-    options?: SavedObjectsUpdateOptions<DataStreamAttributes>
-  ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
-    const {
-      integration_id: integrationId,
-      data_stream_id: dataStreamId,
-      job_info: jobInfo,
-      metadata = { sample_count: 0 },
-      result = {},
-      title,
-      description,
-      input_types: inputTypes,
-    } = data;
-
-    if (!integrationId) {
-      throw new Error('Integration ID is required');
-    }
-
-    if (!dataStreamId) {
-      throw new Error('Data stream ID is required');
-    }
-    try {
-      this.logger.debug(`Updating data stream: ${dataStreamId}`);
-
-      // A Data Stream must always be associated with an Integration
-      const integrationTarget = await this.getIntegration(integrationId);
-      if (!integrationTarget) {
-        throw new Error(`Integration associated with this data stream ${integrationId} not found`);
-      }
-
-      const existingDataStream = await this.getDataStream(dataStreamId);
-      const currentVersion = existingDataStream.attributes.metadata?.version || '0.0.0';
-
-      if (currentVersion !== expectedVersion) {
-        throw new Error(
-          `Version conflict: Data stream ${dataStreamId} has been updated. Expected version ${expectedVersion}, but current version is ${currentVersion}. Please fetch the latest version and try again.`
-        );
-      }
-
-      const newVersion = this.incrementSemanticVersion(currentVersion, versionUpdate);
-
-      const dataStreamData: DataStreamAttributes = {
-        integration_id: integrationId,
-        data_stream_id: dataStreamId,
-        created_by: existingDataStream.attributes.created_by,
-        job_info: jobInfo,
-        metadata: {
-          ...metadata,
-          created_at: existingDataStream.attributes.metadata.created_at,
-          version: newVersion,
-        },
-        result: result || {},
-        title: title || existingDataStream.attributes.title,
-        description: description || existingDataStream.attributes.description,
-        input_types: inputTypes || existingDataStream.attributes.input_types,
-      };
-
-      const internalVersion = existingDataStream.version;
-      return await this.savedObjectsClient.update<DataStreamAttributes>(
-        DATA_STREAM_SAVED_OBJECT_TYPE,
-        dataStreamId,
-        dataStreamData,
-        {
-          ...options,
-          version: internalVersion,
-        }
-      );
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isConflictError(error)) {
-        throw new Error(
-          `Data stream ${dataStreamId} has been updated since you last fetched it. Please fetch the latest version and try again.`
-        );
-      }
-      this.logger.error(`Failed to update data stream: ${error}`);
+      this.logger.error(`Failed to create data stream: ${error}`);
       throw error;
     }
   }
@@ -595,16 +451,24 @@ export class AutomaticImportSavedObjectService {
   /**
    * Get a data stream by ID
    * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
    * @returns The data stream
    */
-  public async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
+  public async getDataStream(
+    dataStreamId: string,
+    integrationId: string
+  ): Promise<SavedObject<DataStreamAttributes>> {
     try {
       this.logger.debug(`Getting data stream: ${dataStreamId}`);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
       return await this.savedObjectsClient.get<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
-        dataStreamId
+        compositeId
       );
     } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw new Error(`Data stream ${dataStreamId} not found`);
+      }
       this.logger.error(`Failed to get data stream ${dataStreamId}: ${error}`);
       throw error;
     }
@@ -658,21 +522,25 @@ export class AutomaticImportSavedObjectService {
 
   /**
    * Delete a data stream by ID
+   * @param integrationId - The ID of the integration
    * @param dataStreamId - The ID of the data stream
+   * @param authenticatedUser - The authenticated user
    * @param options - The options for the delete
    * @returns The deleted data stream
    */
   public async deleteDataStream(
+    integrationId: string,
     dataStreamId: string,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     let parentIntegrationId: string | undefined;
     try {
-      const dataStream = await this.getDataStream(dataStreamId);
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
       parentIntegrationId = dataStream.attributes.integration_id;
 
       this.logger.debug(`Deleting data stream with id:${dataStreamId}`);
-      await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, dataStreamId, options);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+      await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, compositeId, options);
     } catch (error) {
       this.logger.error(`Failed to delete data stream ${dataStreamId}: ${error}`);
       throw error;

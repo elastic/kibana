@@ -1765,7 +1765,7 @@
             "label": "csv",
             "description": [],
             "signature": [
-              "{ scroll: { duration: string; size: number; }; }"
+              "{ scroll: { duration: string; size: number; }; maxRows: number; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
             "deprecated": false,
