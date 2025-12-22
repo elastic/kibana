@@ -82,7 +82,29 @@ export function StreamListView() {
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
-      onPageReady();
+      const streams = streamsListFetch.value.streams ?? [];
+      const classicStreamsCount = streams.filter((item) =>
+        Streams.ClassicStream.Definition.is(item.stream)
+      ).length;
+      const wiredStreamsCount = streams.filter((item) =>
+        Streams.WiredStream.Definition.is(item.stream)
+      ).length;
+      const groupStreamsCount = streams.filter((item) =>
+        Streams.GroupStream.Definition.is(item.stream)
+      ).length;
+
+      onPageReady({
+        customMetrics: {
+          key1: 'total_streams_count',
+          value1: streams.length,
+          key2: 'classic_streams_count',
+          value2: classicStreamsCount,
+          key3: 'wired_streams_count',
+          value3: wiredStreamsCount,
+          key4: 'group_streams_count',
+          value4: groupStreamsCount,
+        },
+      });
     }
   }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
@@ -134,7 +156,7 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
@@ -193,7 +215,7 @@ export function StreamListView() {
               streams={streamsListFetch.value?.streams}
               canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
             />
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <>
                 <EuiSpacer size="l" />
                 <GroupStreamsCards streams={streamsListFetch.value?.streams} />

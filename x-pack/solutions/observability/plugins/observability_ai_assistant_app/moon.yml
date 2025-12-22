@@ -61,7 +61,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/es-query'
   - '@kbn/rule-registry-plugin'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/field-types'
   - '@kbn/security-plugin'
   - '@kbn/observability-plugin'
