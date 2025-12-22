@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerting-v2-plugin",
+  "owner": ["@elastic/response-ops"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "alerting-v2",
+    "browser": false,
+    "server": true,
+    "configPath": ["xpack", "alerting_v2"],
+    "requiredPlugins": [
+      "taskManager",
+      "features",
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "public/**/*",
+    "common/**/*"
+  ],
+  "kbn_references": []
+}

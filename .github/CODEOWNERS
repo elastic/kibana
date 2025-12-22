@@ -1039,6 +1039,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/plugins/shared/alerting_v2 @elastic/response-ops
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/automatic_import_v2 @elastic/integration-experience
