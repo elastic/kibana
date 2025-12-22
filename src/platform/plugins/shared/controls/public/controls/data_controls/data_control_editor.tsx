@@ -35,6 +35,7 @@ import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
 import { CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { type SerializedTitles } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
@@ -47,6 +48,7 @@ import {
   addControlMenuTrigger,
   type CreateControlTypeAction,
 } from '../../actions/control_panel_actions';
+import { confirmDeleteControl } from '../../common';
 import { coreServices, dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 
@@ -415,6 +417,24 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="s">
+              {controlId && (
+                <EuiButton
+                  aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => {
+                    confirmDeleteControl().then((confirmed) => {
+                      if (confirmed) {
+                        onCancel(initialState); // don't want to show "lost changes" warning
+                        if (apiIsPresentationContainer(parentApi))
+                          parentApi.removePanel(controlId!);
+                      }
+                    });
+                  }}
+                >
+                  {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
+                </EuiButton>
+              )}
               <EuiButton
                 aria-label={`save-${editorState.title ?? editorState.fieldName}`}
                 data-test-subj="control-editor-save"
