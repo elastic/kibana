@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { DataCatalog, DataTypeDefinition } from './data_catalog';
+import type { DataCatalog } from './data_catalog';
+import type { DataTypeDefinition } from '../common/data_types';
 
 export interface DataSourcesRegistryPluginSetup {
   register: (dataType: DataTypeDefinition) => void;

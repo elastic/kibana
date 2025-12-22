@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataTypeDefinition } from './data_type';
+import type { DataTypeDefinition } from '../../common/data_types';
 
 export interface DataCatalog {
   get(dataTypeId: string): DataTypeDefinition | undefined;
