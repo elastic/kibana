@@ -11,7 +11,6 @@ import type { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../storage/streams_storage_client';
 import type { QueryClient } from '../assets/query/query_client';
-import type { FeatureClient } from '../feature/feature_client';
 import type { AttachmentClient } from '../attachments/attachment_client';
 
 interface StreamUpsertChange {
@@ -33,7 +32,6 @@ export interface StateDependencies {
   storageClient: StreamsStorageClient;
   scopedClusterClient: IScopedClusterClient;
   attachmentClient: AttachmentClient;
-  featureClient: FeatureClient;
   queryClient: QueryClient;
   isServerless: boolean;
   isDev: boolean;

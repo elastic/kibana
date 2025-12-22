@@ -33,7 +33,6 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import type { FeatureClient } from './feature/feature_client';
 import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
@@ -74,7 +73,6 @@ export class StreamsClient {
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
-      featureClient: FeatureClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;

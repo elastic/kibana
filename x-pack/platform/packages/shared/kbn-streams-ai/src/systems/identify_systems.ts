@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DocumentAnalysis } from '@kbn/ai-tools';
-import { formatDocumentAnalysis } from '@kbn/ai-tools';
+
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import {
-  isFeatureWithFilter,
-  type Feature,
-  type Streams,
-  type SystemFeature,
-} from '@kbn/streams-schema';
+import { type Streams, type System } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { createIdentifySystemsPrompt } from './prompt';
@@ -22,47 +17,52 @@ import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { sumTokens } from '../helpers/sum_tokens';
 
-export interface IdentifyFeaturesOptions {
+export interface IdentifySystemsOptions {
   stream: Streams.all.Definition;
-  features?: Feature[];
+  systems?: System[];
   start: number;
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
   logger: Logger;
   signal: AbortSignal;
-  analysis: DocumentAnalysis;
   featurePromptOverride?: string;
   descriptionPromptOverride?: string;
 }
 
 /**
- * Identifies features in a stream, by:
+ * Identifies systems in a stream, by:
  * - describing the dataset (via sampled documents)
  * - clustering docs together on similarity
- * - asking the LLM to identify features by creating
+ * - asking the LLM to identify systems by creating
  * queries and validating the resulting clusters
  */
-export async function identifySystemFeatures({
+export async function identifySystems({
   stream,
-  features,
+  systems,
   start,
   end,
   esClient,
   inferenceClient,
   logger,
   signal,
-  analysis,
   featurePromptOverride,
-  dropUnmapped = false,
   maxSteps: initialMaxSteps,
-}: IdentifyFeaturesOptions & {
-  dropUnmapped?: boolean;
+}: IdentifySystemsOptions & {
   maxSteps?: number;
-}): Promise<{ features: SystemFeature[]; tokensUsed: ChatCompletionTokenCount }> {
-  logger.debug(`Identifying system features for stream ${stream.name}`);
+}): Promise<{ systems: System[]; tokensUsed: ChatCompletionTokenCount }> {
+  logger.debug(`Identifying systems for stream ${stream.name}`);
 
-  logger.trace('Performing initial clustering of logs for system feature identification');
+  const analysis = await withSpan('describe_dataset_for_system_identification', () =>
+    describeDataset({
+      start,
+      end,
+      esClient,
+      index: stream.name,
+    })
+  );
+
+  logger.trace('Performing initial clustering of logs for system identification');
   const initialClustering = await withSpan('initial_log_clustering', () =>
     clusterLogs({
       start,
@@ -70,18 +70,18 @@ export async function identifySystemFeatures({
       esClient,
       index: stream.name,
       partitions:
-        features?.filter(isFeatureWithFilter).map((feature) => {
+        systems?.map((system) => {
           return {
-            name: feature.name,
-            condition: feature.filter,
+            name: system.name,
+            condition: system.filter,
           };
         }) ?? [],
       logger,
-      dropUnmapped,
+      dropUnmapped: true,
     })
   );
 
-  logger.trace('Invoking reasoning agent to identify system features');
+  logger.trace('Invoking reasoning agent to identify systems');
   const response = await withSpan('invoke_reasoning_agent', () =>
     executeAsReasoningAgent({
       maxSteps: initialMaxSteps,
@@ -91,7 +91,7 @@ export async function identifySystemFeatures({
           description: stream.description || 'This stream has no description.',
         },
         dataset_analysis: JSON.stringify(
-          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
+          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped: true })
         ),
         initial_clustering: JSON.stringify(initialClustering),
         condition_schema: conditionSchemaText,
@@ -115,7 +115,7 @@ export async function identifySystemFeatures({
                 condition: system.filter as Condition,
               };
             }),
-            dropUnmapped,
+            dropUnmapped: true,
           });
 
           return {
@@ -139,21 +139,21 @@ export async function identifySystemFeatures({
     })
   );
 
-  const systems = response.toolCalls.flatMap((toolCall) =>
+  const identifiedSystems = response.toolCalls.flatMap((toolCall) =>
     toolCall.function.arguments.systems.map((args) => {
-      const feature = {
+      const system = {
         ...args,
         filter: args.filter as Condition,
         type: 'system' as const,
       };
-      return { ...feature, description: '' };
+      return { ...system, description: '' };
     })
   );
 
-  logger.debug(`Identified ${systems.length} system features for stream ${stream.name}`);
+  logger.debug(`Identified ${identifiedSystems.length} system features for stream ${stream.name}`);
 
   return {
-    features: systems,
+    systems: identifiedSystems,
     tokensUsed: sumTokens(
       {
         prompt: 0,
