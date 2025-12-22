@@ -19,6 +19,7 @@ export interface UseCriticalAlerts {
   signalIndexName: string | null;
   query?: Query;
   filters?: Filter[];
+  queryName?: string;
   to: GlobalTimeArgs['to'];
 }
 
@@ -28,6 +29,7 @@ export const useAlertCountQuery = ({
   signalIndexName,
   query,
   filters,
+  queryName = ALERTS_QUERY_NAMES.COUNT,
   to,
 }: UseCriticalAlerts): {
   alertCount: number;
@@ -71,7 +73,7 @@ export const useAlertCountQuery = ({
     query: currentQuery,
     indexName: signalIndexName,
     skip,
-    queryName: ALERTS_QUERY_NAMES.COUNT,
+    queryName,
   });
 
   useEffect(() => {

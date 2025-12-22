@@ -74,6 +74,15 @@ describe('useAlertCountQuery', () => {
     );
   });
 
+  it('returns queryName override to useQueryAlerts', () => {
+    renderHook(() => useAlertCountQuery({ ...defaultArgs, queryName: 'aiValue total override' }));
+    expect(mockUseQueryAlerts.useQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryName: 'aiValue total override',
+      })
+    );
+  });
+
   it('calls setQuery on effect', () => {
     renderHook(() => useAlertCountQuery(defaultArgs));
     expect(mockSetQuery).toHaveBeenCalled();
