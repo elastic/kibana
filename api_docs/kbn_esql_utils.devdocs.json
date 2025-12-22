@@ -690,9 +690,9 @@
         "signature": [
           "(renameFunction: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
@@ -700,17 +700,17 @@
           "FunctionSubtype",
           ", string>) => { original: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
           "; renamed: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
@@ -729,9 +729,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/esql-ast",
+                "pluginId": "@kbn/esql-language",
                 "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
+                "docId": "kibKbnEsqlLanguagePluginApi",
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
