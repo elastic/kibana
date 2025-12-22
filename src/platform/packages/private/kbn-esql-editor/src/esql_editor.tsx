@@ -135,7 +135,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection, kql } =
     kibana.services;
 
   const favoritesClient = useMemo(
@@ -1203,6 +1203,7 @@ const ESQLEditorInternal = function ESQLEditor({
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
+          kql={kql}
         />
       )}
       <EditorFooter

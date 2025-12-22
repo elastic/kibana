@@ -8,19 +8,12 @@
  */
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  useEuiTheme,
-  type EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { isEqual } from 'lodash';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 
@@ -35,24 +28,19 @@ export interface QuickSearchVisorProps {
   onClose: () => void;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
+  // Kql autocomplete service
+  kql: KqlPluginStart;
 }
 
 const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
   defaultMessage: 'Search...',
 });
 
-const clearSearchAriaLabel = i18n.translate('esqlEditor.visor.searchClearLabel', {
-  defaultMessage: 'Clear the search',
-});
-
-const closeQuickSearchLabel = i18n.translate('esqlEditor.visor.closeSearchLabel', {
-  defaultMessage: 'Close quick search',
-});
-
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isVisible,
+  kql,
   onClose,
   onUpdateAndSubmitQuery,
 }: QuickSearchVisorProps) {
@@ -60,37 +48,23 @@ export function QuickSearchVisor({
   const { euiTheme } = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const kqlInputRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
+  const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
-  const onSearchValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
+  const onKqlValueChange = useCallback((kqlQuery: string) => {
+    setSearchValue(kqlQuery);
   }, []);
 
-  const onSearchClick = useCallback(() => {
-    // Focus after popover closes
-    setTimeout(() => {
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
-    }, 150);
-  }, []);
-
-  const onVisorClose = useCallback(() => {
-    onClose();
-    // Reset user selection tracking when visor closes
-    userSelectedSourceRef.current = false;
-  }, [onClose]);
-
-  const onSearchKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && selectedSources.length > 0 && searchValue.trim()) {
+  const onKqlSubmit = useCallback(
+    (kqlQuery: string) => {
+      if (selectedSources.length > 0 && kqlQuery.trim()) {
         const selectedSourceNames = selectedSources.map((source) => source.label).join(', ');
-        if (selectedSourceNames && searchValue.trim()) {
+        if (selectedSourceNames && kqlQuery.trim()) {
           // Support of time_series
           const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
-          const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("""${searchValue.trim()}""")`;
+          const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("""${kqlQuery.trim()}""")`;
           onUpdateAndSubmitQuery(newQuery);
           // Clear the search value after submitting the query
           setSearchValue('');
@@ -99,7 +73,7 @@ export function QuickSearchVisor({
         }
       }
     },
-    [selectedSources, searchValue, query, onUpdateAndSubmitQuery]
+    [selectedSources, query, onUpdateAndSubmitQuery]
   );
 
   useEffect(() => {
@@ -122,8 +96,15 @@ export function QuickSearchVisor({
   }, [query, selectedSources]);
 
   useEffect(() => {
-    if (isVisible && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (isVisible && kqlInputRef.current) {
+      // Find the textarea within the KQL input and focus it
+      const textArea = kqlInputRef.current.querySelector('textarea');
+      if (textArea) {
+        // Small delay to ensure the component is fully rendered
+        setTimeout(() => {
+          textArea.focus();
+        }, 0);
+      }
     }
   }, [isVisible]);
 
@@ -140,6 +121,10 @@ export function QuickSearchVisor({
     isVisible,
     isDarkMode
   );
+
+  if (!KQLComponent) {
+    return null;
+  }
 
   return (
     <div css={styles.visorContainer} data-test-subj="ESQLEditor-quick-search-visor">
@@ -161,30 +146,28 @@ export function QuickSearchVisor({
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={styles.separator} />
         <EuiFlexItem css={styles.searchWrapper}>
-          <EuiFieldText
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={onSearchValueChange}
-            onKeyDown={onSearchKeyDown}
-            onClick={onSearchClick}
-            aria-label={searchPlaceholder}
-            inputRef={searchInputRef}
-            compressed
-            fullWidth
-            css={styles.searchFieldStyles}
-            data-test-subj="ESQLEditor-visor-search-input"
-            append={
-              <EuiToolTip position="top" content={closeQuickSearchLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  color="text"
-                  iconSize="m"
-                  onClick={onVisorClose}
-                  iconType="cross"
-                  aria-label={clearSearchAriaLabel}
-                />
-              </EuiToolTip>
-            }
-          />
+          <div ref={kqlInputRef}>
+            <KQLComponent
+              iconType="search"
+              disableLanguageSwitcher={true}
+              indexPatterns={selectedSources.map((source) => source.label)}
+              bubbleSubmitEvent={false}
+              query={{
+                query: searchValue,
+                language: 'kuery',
+              }}
+              disableAutoFocus={false}
+              placeholder={searchPlaceholder}
+              onChange={(newQuery) => {
+                onKqlValueChange(newQuery.query as string);
+              }}
+              onSubmit={(newQuery) => {
+                onKqlSubmit(newQuery.query as string);
+              }}
+              appName="esqlEditorVisor"
+              dataTestSubj="esqlVisorKQLQueryInput"
+            />
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
 import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
@@ -45,6 +46,7 @@ interface EsqlPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
+  kql: KqlPluginStart;
 }
 
 export interface EsqlPluginStart {
@@ -76,6 +78,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       fileUpload,
       fieldFormats,
       share,
+      kql,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -125,7 +128,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getLicense: async () => await licensing?.getLicense(),
     };
 
-    setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
+    setKibanaServices(start, core, data, storage, uiActions, kql, fieldsMetadata, usageCollection);
 
     return start;
   }
