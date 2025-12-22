@@ -9,6 +9,8 @@
 
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export interface ObservableLike<T> {
   subscribe: (listener: (value: T) => void) => {
     unsubscribe: () => void;
@@ -32,20 +34,22 @@ export function useObservable<T>(observable$: BehaviorSubjectLike<T>): T;
 export function useObservable<T>(observable$: ObservableLike<T>): T | undefined;
 export function useObservable<T>(observable$: ObservableLike<T>, initialValue: T): T;
 export function useObservable<T>(observable$: ObservableLike<T>, initialValue?: T): T | undefined {
-  // Dev-only warning when observable$ identity changes.
-  const prevObservableRef = useRef<ObservableLike<T> | null>(null);
-  useEffect(() => {
-    if (prevObservableRef.current && prevObservableRef.current !== observable$) {
-      if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') {
+  if (isDev) {
+    // Dev-only warning when observable$ identity changes.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const prevObservableRef = useRef<ObservableLike<T> | null>(null);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      if (prevObservableRef.current && prevObservableRef.current !== observable$) {
         // eslint-disable-next-line no-console
         console.warn(
           'useObservable: observable$ instance changed between renders. ' +
             'This causes a resubscribe. Prefer a stable reference (e.g. useMemo/useRef).'
         );
       }
-    }
-    prevObservableRef.current = observable$;
-  }, [observable$]);
+      prevObservableRef.current = observable$;
+    }, [observable$]);
+  }
 
   // For non-subject observables we hold the current value here.
   // Seed once from initialValue for the first observable instance.
