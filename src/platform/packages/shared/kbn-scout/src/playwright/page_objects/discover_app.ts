@@ -252,21 +252,9 @@ export class DiscoverApp {
     }
   }
 
-  async waitForDataGridRowWithRetry(
-    rowLocator: Locator,
-    options?: { retryWithRefresh?: boolean; timeout?: number }
-  ) {
-    const { retryWithRefresh = true, timeout = 30_000 } = options ?? {};
-    try {
-      await rowLocator.waitFor({ state: 'visible', timeout: 10_000 });
-    } catch {
-      if (retryWithRefresh) {
-        await this.page.testSubj.click('querySubmitButton');
-        await this.waitUntilSearchingHasFinished();
-        await rowLocator.waitFor({ state: 'visible', timeout });
-      } else {
-        throw new Error('Data grid row not visible after timeout');
-      }
-    }
+  async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
+    await this.page.testSubj.click('querySubmitButton');
+    await this.waitUntilSearchingHasFinished();
+    await rowLocator.waitFor({ state: 'visible', timeout });
   }
 }

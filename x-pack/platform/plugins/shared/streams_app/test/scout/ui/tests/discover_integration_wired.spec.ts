@@ -53,7 +53,7 @@ test.describe(
 
       // Wait for the row to be rendered before clicking
       // Stream routing may take time, so we use retry with page refresh
-      await pageObjects.discover.waitForDataGridRowWithRetry(expandButton);
+      await pageObjects.discover.waitForDataGridRowWithRefresh(expandButton);
       await expandButton.click();
 
       // Verify the doc viewer flyout is open
