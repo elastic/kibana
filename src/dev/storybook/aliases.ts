@@ -18,6 +18,8 @@ export const storybookAliases = {
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
   coloring: 'src/platform/packages/shared/kbn-coloring/.storybook',
+  content_management:
+    'src/platform/packages/shared/content-management/kbn-content-management-storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
   classic_stream_flyout: 'x-pack/platform/packages/shared/kbn-classic-stream-flyout/.storybook',
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
