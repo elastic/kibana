@@ -27,12 +27,12 @@ type ContextResolver = (
  * custom autocompletion handlers.
  *
  * For each hint we need to provide:
- * - a suggestionResolver to generate the autocomplettion items to shown for that param.
+ * - a suggestionResolver to generate the autocompletion items for this param.
  * - optionally, a contextResolver that populates the context with the data needed by the suggestionResolver.
  *
  * Important!
  * Be mindful while implementing context resolvers, context is shared by the command and all functions used within it.
- * If the data you need is already present, don't overwrite it, preffer merging it.
+ * If the data you need is already present, don't overwrite it, prefer merging it.
  */
 export const parametersFromHintsResolvers: Partial<
   Record<

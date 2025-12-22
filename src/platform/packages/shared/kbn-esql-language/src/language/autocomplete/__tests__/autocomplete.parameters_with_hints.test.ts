@@ -24,7 +24,7 @@ const allUniqueParameterHints = uniqBy(
   'entityType'
 );
 
-describe('function parameters built from hints', () => {
+describe('function parameters autocomplete from hints', () => {
   const callbacks: ESQLCallbacks = {
     getInferenceEndpoints: async () => {
       return {
