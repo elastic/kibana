@@ -231,6 +231,7 @@ describe('getAgentStatusForAgentPolicy', () => {
             }),
           }),
         }),
+        timeout: expect.any(String),
       })
     );
   });

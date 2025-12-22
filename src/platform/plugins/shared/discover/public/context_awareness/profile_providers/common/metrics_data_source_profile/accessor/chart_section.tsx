@@ -9,14 +9,11 @@
 
 import React from 'react';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
-import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection =
-  (
-    metricsExperienceClient?: MetricsExperienceClient
-  ): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
+  (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev) =>
   (params) => {
     return {
@@ -33,12 +30,11 @@ export const createChartSection =
           <UnifiedMetricsExperienceGrid
             {...props}
             onFilter={handleFilter}
-            client={metricsExperienceClient}
             actions={params.actions}
           />
         );
       },
-      replaceDefaultChart: !!metricsExperienceClient,
+      replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
       defaultTopPanelHeight: 'max-content',
     };
