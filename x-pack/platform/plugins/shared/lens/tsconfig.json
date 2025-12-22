@@ -134,6 +134,7 @@
     "@kbn/react-kibana-context-common",
     "@kbn/unified-tabs",
     "@kbn/esql-composer",
+    "@kbn/cps",
   ],
   "exclude": ["target/**/*"]
 }

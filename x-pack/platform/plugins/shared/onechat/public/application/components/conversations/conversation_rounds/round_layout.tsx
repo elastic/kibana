@@ -34,25 +34,25 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   rawRound,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
-  const { steps, response, input, model_usage: modelUsage } = rawRound;
+  const { steps, response, input } = rawRound;
 
   const { isResponseLoading, error, retry: retrySendMessage } = useSendMessage();
-
-  useEffect(() => {
-    if (isCurrentRound && isResponseLoading) {
-      setRoundContainerMinHeight(scrollContainerHeight);
-    } else if (!isCurrentRound) {
-      setRoundContainerMinHeight(0);
-    }
-  }, [isCurrentRound, isResponseLoading, scrollContainerHeight]);
-
-  const roundContainerStyles = css`
-    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
-  `;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
 
+  useEffect(() => {
+    // Pending rounds and error rounds should have a min-height to match the scroll container height
+    if ((isCurrentRound && isResponseLoading) || isErrorCurrentRound) {
+      setRoundContainerMinHeight(scrollContainerHeight);
+    } else {
+      setRoundContainerMinHeight(0);
+    }
+  }, [isCurrentRound, isResponseLoading, scrollContainerHeight, isErrorCurrentRound]);
+
+  const roundContainerStyles = css`
+    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
+  `;
   return (
     <EuiFlexGroup
       direction="column"
@@ -68,7 +68,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       {/* Thinking */}
       <EuiFlexItem grow={false}>
         {isErrorCurrentRound ? (
-          <RoundError error={error} onRetry={retrySendMessage} />
+          <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
         ) : (
           <RoundThinking steps={steps} isLoading={isLoadingCurrentRound} rawRound={rawRound} />
         )}
@@ -78,9 +78,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       <EuiFlexItem grow={false}>
         <EuiFlexItem>
           <RoundResponse
+            hasError={isErrorCurrentRound}
             response={response}
             steps={steps}
-            modelUsage={modelUsage}
             isLoading={isLoadingCurrentRound}
           />
         </EuiFlexItem>

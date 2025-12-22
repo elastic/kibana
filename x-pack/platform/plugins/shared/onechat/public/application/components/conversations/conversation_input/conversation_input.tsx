@@ -24,9 +24,10 @@ import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { MessageEditor, useMessageEditor } from './message_editor';
 import { InputActions } from './input_actions';
-import { borderRadiusXlStyles } from '../conversation.styles';
+import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { useHasActiveConversation } from '../../../hooks/use_conversation';
 
 const INPUT_MIN_HEIGHT = '150px';
 const useInputBorderStyles = () => {
@@ -59,17 +60,16 @@ const containerAriaLabel = i18n.translate('xpack.onechat.conversationInput.conta
   defaultMessage: 'Message input form',
 });
 
-const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
-  children,
-  isDisabled,
-}) => {
+const InputContainer: React.FC<
+  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean }>
+> = ({ children, isDisabled, isCollapsed }) => {
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
     width: 100%;
-    min-height: ${INPUT_MIN_HEIGHT};
+    min-height: ${isCollapsed ? '0' : INPUT_MIN_HEIGHT};
     padding: ${euiTheme.size.base};
     flex-grow: 0;
-    transition: box-shadow 250ms, border-color 250ms;
+    transition: box-shadow 250ms, border-color 250ms, min-height 250ms ease-out;
     background-color: ${euiTheme.colors.backgroundBasePlain};
 
     ${useInputBorderStyles()}
@@ -122,6 +122,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();
+  const hasActiveConversation = useHasActiveConversation();
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
     useConversationContext();
 
@@ -133,16 +134,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
-  const { euiTheme } = useEuiTheme();
   const editorContainerStyles = css`
     display: flex;
     flex-direction: column;
     height: 100%;
-    /* Aligns editor text with action menus' text */
-    padding-left: ${euiTheme.size.m};
   `;
   // Hide attachments if there's an error from current round or if message has been just sent
   const shouldHideAttachments = Boolean(error) || isSendingMessage;
+
+  const shouldCollapseInput = isSendingMessage || hasActiveConversation;
 
   const visibleAttachments = useMemo(() => {
     if (!attachments || shouldHideAttachments) return [];
@@ -192,14 +192,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   };
 
   return (
-    <InputContainer isDisabled={isInputDisabled}>
+    <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
       {visibleAttachments.length > 0 && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            padding-left: ${euiTheme.size.m};
-          `}
-        >
+        <EuiFlexItem grow={false}>
           <AttachmentPillsRow attachments={visibleAttachments} removable />
         </EuiFlexItem>
       )}

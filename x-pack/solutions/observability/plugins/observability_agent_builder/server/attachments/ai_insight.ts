@@ -9,12 +9,12 @@ import { z } from '@kbn/zod';
 import dedent from 'dedent';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-
-export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
+import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../common';
 
 const aiInsightAttachmentDataSchema = z.object({
   context: z.string(),
   summary: z.string(),
+  attachmentLabel: z.string().optional(),
 });
 
 type AiInsightAttachmentData = z.infer<typeof aiInsightAttachmentDataSchema>;

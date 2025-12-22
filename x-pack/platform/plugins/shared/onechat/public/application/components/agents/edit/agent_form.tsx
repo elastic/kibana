@@ -412,11 +412,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               <EuiFlexItem grow={false}>
                 <AgentAvatar
                   size="l"
-                  agent={{
-                    name: agentName,
-                    avatar_symbol: agentAvatarSymbol,
-                    avatar_color: agentAvatarColor,
-                  }}
+                  name={agentName}
+                  symbol={agentAvatarSymbol}
+                  color={agentAvatarColor}
                 />
               </EuiFlexItem>
             )}

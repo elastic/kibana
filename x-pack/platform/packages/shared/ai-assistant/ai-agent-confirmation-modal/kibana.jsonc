@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/ai-agent-confirmation-modal",
+  "owner": "@elastic/appex-ai-infra",
+  "visibility": "shared",
+  "group": "platform"
+}

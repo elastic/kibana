@@ -5,8 +5,8 @@ synchronize_lexer_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
   source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/lexer"
-  destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_lexer.g4"
-  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
+  destination_file="./src/platform/packages/shared/kbn-esql-language/src/parser/antlr/esql_lexer.g4"
+  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-language/src/parser/antlr"
   destination_lib_dir="$destination_lib_parent_dir/lexer"
 
 
@@ -35,7 +35,7 @@ synchronize_lexer_grammar () {
 synchronize_promql_lexer_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/PromqlBaseLexer.g4"
-  destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/promql_lexer.g4"
+  destination_file="./src/platform/packages/shared/kbn-esql-language/src/parser/antlr/promql_lexer.g4"
 
   # Copy the file
   echo "Copying PromQL base lexer file..."
@@ -59,8 +59,8 @@ synchronize_parser_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseParser.g4"
   source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/parser"
-  destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_parser.g4"
-  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
+  destination_file="./src/platform/packages/shared/kbn-esql-language/src/parser/antlr/esql_parser.g4"
+  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-language/src/parser/antlr"
   destination_lib_dir="$destination_lib_parent_dir/parser"
 
   # Copy the files
@@ -90,7 +90,7 @@ synchronize_parser_grammar () {
 synchronize_promql_parser_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/PromqlBaseParser.g4"
-  destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/promql_parser.g4"
+  destination_file="./src/platform/packages/shared/kbn-esql-language/src/parser/antlr/promql_parser.g4"
 
   # Copy the file
   echo "Copying PromQL base parser file..."
@@ -142,7 +142,7 @@ main () {
   synchronize_promql_parser_grammar "$license_header"
 
   # Check for differences in grammar files
-  antlr_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
+  antlr_dir="./src/platform/packages/shared/kbn-esql-language/src/parser/antlr"
   set +e
   git diff --exit-code --quiet \
     "$antlr_dir/esql_lexer.g4" \
@@ -183,7 +183,7 @@ main () {
 
   # Note: We run build commands directly instead of `yarn build:antlr4` to skip
   # the prebuild:antlr4 hook which uses `brew` (macOS only). CI has antlr installed.
-  cd ./src/platform/packages/shared/kbn-esql-ast
+  cd ./src/platform/packages/shared/kbn-esql-language
   yarn build:antlr4:esql
   yarn build:antlr4:promql
 
@@ -192,7 +192,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add src/antlr/*
+  git add src/parser/antlr/*
   git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."

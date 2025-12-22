@@ -34,9 +34,17 @@ import {
   fromLensStateToAPI as fromGaugeLensStateToAPI,
 } from './transforms/charts/gauge';
 import {
+  fromAPItoLensState as fromHeatmapAPItoLensState,
+  fromLensStateToAPI as fromHeatmapLensStateToAPI,
+} from './transforms/charts/heatmap';
+import {
   fromAPItoLensState as fromTagcloudAPItoLensState,
   fromLensStateToAPI as fromTagcloudLensStateToAPI,
 } from './transforms/charts/tagcloud';
+import {
+  fromAPItoLensState as fromRegionMapAPItoLensState,
+  fromLensStateToAPI as fromRegionMapLensStateToAPI,
+} from './transforms/charts/region_map';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -46,7 +54,9 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
   lnsGauge: 'gauge',
+  lnsHeatmap: 'heatmap',
   lnsTagcloud: 'tagcloud',
+  lnsChoropleth: 'region_map',
 };
 
 /**
@@ -73,18 +83,19 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromGaugeAPItoLensState,
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
+  heatmap: {
+    fromAPItoLensState: fromHeatmapAPItoLensState,
+    fromLensStateToAPI: fromHeatmapLensStateToAPI,
+  },
   tagcloud: {
     fromAPItoLensState: fromTagcloudAPItoLensState,
     fromLensStateToAPI: fromTagcloudLensStateToAPI,
   },
+  region_map: {
+    fromAPItoLensState: fromRegionMapAPItoLensState,
+    fromLensStateToAPI: fromRegionMapLensStateToAPI,
+  },
 } as const;
-
-export const isSOChartTYpeSupported = (chartType?: string | null): boolean =>
-  Boolean(
-    chartType &&
-      chartType in compatibilityMap &&
-      compatibilityMap[chartType] in apiConvertersByChart
-  );
 
 export class LensConfigBuilder {
   private charts = {
@@ -202,13 +213,12 @@ export class LensConfigBuilder {
 
   toAPIFormat(config: LensAttributes): LensApiState {
     const visType = config.visualizationType;
-    const type = compatibilityMap[visType];
+    const type = compatibilityMap[visType] ?? visType;
 
     if (!type || !(type in this.apiConvertersByChart)) {
       throw new Error(`No API converter found for chart type: ${visType} as ${type}`);
     }
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
-    // @ts-expect-error upgrade typescript v5.9.3
     return {
       ...converter.fromLensStateToAPI(config),
       ...filtersAndQueryToApiFormat(config),

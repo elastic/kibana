@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiLink, EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiComboBox, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
@@ -18,7 +18,10 @@ import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
 import { configDrivenProcessors } from './config_driven';
-import { useGetStreamEnrichmentState } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useGetStreamEnrichmentState,
+  useInteractiveModeSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { isStepUnderEdit } from '../../../state_management/steps_state_machine';
@@ -46,7 +49,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     Streams.WiredStream.GetResponse.is(snapshot.context.definition)
   );
 
-  const isWithinWhereBlock = useStreamEnrichmentSelector((state) => {
+  const isWithinWhereBlock = useInteractiveModeSelector((state) => {
     const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
       isStepUnderEdit(stepRef.getSnapshot())
     );
@@ -309,6 +312,30 @@ const getAvailableProcessors: (
       );
     },
   },
+  math: {
+    type: 'math' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.mathInputDisplay',
+      {
+        defaultMessage: 'Math',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
+          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (for example, {example}). The result is written to the target field."
+          values={{
+            example: (
+              <>
+                <EuiCode>bytes / duration </EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -347,6 +374,7 @@ const PROCESSOR_GROUP_MAP: Record<
   append: 'set',
   set: 'set',
   rename: 'set',
+  math: 'set',
   manual_ingest_pipeline: 'other',
 };
 

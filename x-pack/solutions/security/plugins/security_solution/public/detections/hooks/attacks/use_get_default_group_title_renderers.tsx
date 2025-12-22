@@ -24,6 +24,8 @@ const EMPTY_ARRAY: AttackDiscoveryAlert[] = [];
 export interface UseGetDefaultGroupTitleRenderersProps {
   /** Optional array of attack IDs to pre-fetch and cache for rendering */
   attackIds?: string[];
+  /** When true, displays anonymized values in attack titles and summaries. When false, replaces anonymized values with their original values. Defaults to false. */
+  showAnonymized?: boolean;
 }
 
 /**
@@ -34,10 +36,12 @@ export interface UseGetDefaultGroupTitleRenderersProps {
  *
  * @param props - The hook props
  * @param props.attackIds - Optional array of attack IDs to pre-fetch and cache
+ * @param props.showAnonymized - When true, displays anonymized values; when false, displays original values
  * @returns An object containing the defaultGroupTitleRenderers function for rendering group titles
  */
 export const useGetDefaultGroupTitleRenderers = ({
   attackIds,
+  showAnonymized,
 }: UseGetDefaultGroupTitleRenderersProps) => {
   const { assistantAvailability, http } = useAssistantContext();
 
@@ -67,11 +71,17 @@ export const useGetDefaultGroupTitleRenderers = ({
           if (!attack) {
             return undefined;
           }
-          return <AttackGroupContent attack={attack} dataTestSubj="attack" />;
+          return (
+            <AttackGroupContent
+              attack={attack}
+              dataTestSubj="attack"
+              showAnonymized={showAnonymized}
+            />
+          );
         }
       }
     },
-    [attacks]
+    [attacks, showAnonymized]
   );
 
   return { defaultGroupTitleRenderers };

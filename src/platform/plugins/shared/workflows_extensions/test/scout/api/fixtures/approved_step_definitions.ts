@@ -16,13 +16,28 @@
  * 2. Get approval from the workflows-eng team
  *
  * If the handler implementation changes, the handler hash must be updated, and get the approval again.
+ *
+ * Example of an approved step definition entry:
+ * {
+ *   id: 'example.setVariable',
+ *   handlerHash: '3af06ca579302a96b18923de3ce7d04433519528e6eec309cb8a937be6514cda',
+ * },
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
-  /**
-   * Example:
-   * {
-   *   id: 'example.setVariable',
-   *   handlerHash: '3af06ca579302a96b18923de3ce7d04433519528e6eec309cb8a937be6514cda',
-   * },
-   */
+  {
+    id: 'ai.prompt',
+    handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
+  },
+  {
+    id: 'data.dedupe',
+    handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
+  },
+  {
+    id: 'data.map',
+    handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
+  },
+  {
+    id: 'onechat.runAgent',
+    handlerHash: '601727d71e669530e8ba222ae72d3c8a549145d3ea2e8f6a3dd5109d93e1ceff',
+  },
 ];

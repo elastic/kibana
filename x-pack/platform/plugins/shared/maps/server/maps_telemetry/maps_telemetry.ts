@@ -17,7 +17,9 @@ export async function getMapsTelemetry(): Promise<MapsUsage> {
   const mapStatsCollector = new MapStatsCollector();
   await findMaps(getSavedObjectClient(), (savedObject) => {
     mapStatsCollector.push(
-      transformMapAttributesOut(savedObject.attributes, savedObject.references)
+      transformMapAttributesOut(savedObject.attributes, (targetName: string) =>
+        savedObject.references.find(({ name }) => name === targetName)
+      )
     );
   });
 

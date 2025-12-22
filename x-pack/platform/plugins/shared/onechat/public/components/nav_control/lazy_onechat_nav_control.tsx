@@ -6,8 +6,10 @@
  */
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { OnechatStartDependencies } from '../../types';
 import type { OnechatPluginStart } from '../../types';
 
@@ -28,6 +30,23 @@ export const OnechatNavControlInitiator = ({
   pluginsStart,
   onechatService,
 }: OnechatNavControlInitiatorProps) => {
+  const [isAgentsExperience, setIsAgentsExperience] = useState(false);
+
+  useEffect(() => {
+    const sub = coreStart.settings.client
+      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE)
+      .subscribe((chatExperience) => {
+        setIsAgentsExperience(chatExperience === AIChatExperience.Agent);
+      });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [coreStart.settings.client]);
+
+  if (!isAgentsExperience) {
+    return null;
+  }
   return (
     <LazyOnechatNavControlWithProvider
       coreStart={coreStart}

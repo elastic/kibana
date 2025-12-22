@@ -37,11 +37,10 @@ export const useMessageEditor = (): MessageEditorInstance => {
   const [isEmpty, setIsEmpty] = useState(true);
 
   const syncIsEmpty = useCallback(() => {
-    if (!ref?.current?.textContent) {
-      setIsEmpty(true);
+    if (!ref?.current) {
       return;
     }
-    const nextIsEmpty = ref.current.textContent.trim() === '';
+    const nextIsEmpty = !ref.current.textContent || ref.current.textContent.trim() === '';
     if (nextIsEmpty) {
       // If current text content is empty clear innerHTML
       // This is required so the :empty pseudo-class gets reset and the placeholder is shown

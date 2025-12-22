@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": ["target/**/*"],
+  "exclude": ["cypress.config.ts", "cypress.config.space_awareness.ts", "target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -14,6 +14,8 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
+    "cypress.config.ts",
+    "cypress.config.space_awareness.ts",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -125,6 +127,6 @@
     "@kbn/spaces-utils",
     "@kbn/setup-node-env",
     "@kbn/react-query",
-    "@kbn/fs"
+    "@kbn/fs",
   ]
 }

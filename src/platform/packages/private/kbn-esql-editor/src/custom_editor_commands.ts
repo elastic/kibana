@@ -85,6 +85,25 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     })
   );
 
+  // Execute multiple commands
+  // The payload is expected to be of the form:
+  // {
+  //   commands: JSON.stringify([
+  //     { id: 'commandId1', payload: { ... } },
+  //     { id: 'commandId2', payload: { ... } },
+  //     ...
+  //   ])
+  // }
+  commandDisposables.push(
+    monaco.editor.registerCommand('esql.multiCommands', (...args) => {
+      const [, { commands }] = args;
+      const commandsToExecute: { id: string; payload?: unknown }[] = JSON.parse(commands);
+      commandsToExecute.forEach((command) => {
+        editorRef.current?.trigger(undefined, command.id, command.payload ?? {});
+      });
+    })
+  );
+
   // ESQL Control creation commands
   const controlCommands = [
     {

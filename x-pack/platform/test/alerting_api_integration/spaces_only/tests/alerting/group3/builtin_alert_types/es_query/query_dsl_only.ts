@@ -9,44 +9,44 @@ import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { pull } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-
 import { Spaces } from '../../../../../scenarios';
+
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
-import type { CreateRuleParams } from './common';
 import {
   createConnector,
   ES_GROUPS_TO_WRITE,
   ES_TEST_DATA_STREAM_NAME,
-  ES_TEST_INDEX_REFERENCE,
-  ES_TEST_INDEX_SOURCE,
   ES_TEST_OUTPUT_INDEX_NAME,
   getRuleServices,
-  RULE_INTERVALS_TO_WRITE,
-  RULE_INTERVAL_MILLIS,
-  RULE_INTERVAL_SECONDS,
-  RULE_TYPE_ID,
+  createDSLRule,
 } from './common';
 
 const TEST_HOSTNAME = 'test.alerting.example.com';
 
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
   const {
     es,
     esTestIndexTool,
     esTestIndexToolOutput,
     createEsDocumentsInGroups,
     waitForDocs,
-    waitForAADDocs,
+    getAADDocsForRule,
     removeAllAADDocs,
+    deleteDocs,
+    getEndDate,
   } = getRuleServices(getService);
 
   describe('Query DSL only', () => {
-    let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
+
+    before(async () => {
+      await removeAllAADDocs();
+    });
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -56,17 +56,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esTestIndexToolOutput.setup();
 
       connectorId = await createConnector(supertest, objectRemover, ES_TEST_OUTPUT_INDEX_NAME);
-
-      // write documents in the future, figure out the end date
-      const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
-      endDate = new Date(endDateMillis).toISOString();
-
       await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
-
-      await removeAllAADDocs();
     });
 
     afterEach(async () => {
+      await deleteDocs();
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
@@ -75,9 +69,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it(`runs correctly: runtime fields for esQuery search type`, async () => {
-      // write documents from now to the future end date in groups
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-      await createRule({
+      // this test runs the rules twice, injecting data between each run
+      // the rule should fire each time, triggering an index action each time
+
+      // Run 1:
+      // 1 - write source documents
+      // 2 - create the rules - they run one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      const ruleId = await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
           {
@@ -100,12 +100,22 @@ export default function ruleTests({ getService }: FtrProviderContext) {
                 "match_all": { }
             }
         }`.replace(`"`, `\"`),
-        size: 100,
         thresholdComparator: '>',
-        threshold: [-1],
+        threshold: [0],
+        wrapInBrackets: true,
       });
+      let docs = await waitForDocs(1);
 
-      const docs = await waitForDocs(2);
+      // Run 2:
+      // 1 - write source documents, dated now
+      // 2 - manually run the rules with runSoon
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await runSoon(ruleId);
+
+      // a total of 2 index actions should have been triggered, resulting in 2 docs in the output index
+      docs = await waitForDocs(2);
+
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
         const { name, title } = doc._source.params;
@@ -129,9 +139,15 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it(`runs correctly: fetches wildcard fields in esQuery search type`, async () => {
-      // write documents from now to the future end date in groups
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-      await createRule({
+      // this test runs the rule once, injecting data before the run
+      // the rule should fire each time, triggering an index action each time
+
+      // Run 1:
+      // 1 - write source documents
+      // 2 - create the rules - they run one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
           {
@@ -140,42 +156,45 @@ export default function ruleTests({ getService }: FtrProviderContext) {
                 "match_all": { }
             }
         }`.replace(`"`, `\"`),
-        size: 100,
         thresholdComparator: '>',
-        threshold: [-1],
+        threshold: [0],
+        wrapInBrackets: true,
       });
 
-      const docs = await waitForDocs(2);
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { name, title } = doc._source.params;
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
+      const docs = await waitForDocs(1);
+      const doc = docs[0];
+      const { name, title } = doc._source.params;
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
 
-        const hits = JSON.parse(doc._source.hits);
-        expect(hits).not.to.be.empty();
-        hits.forEach((hit: any) => {
-          expect(hit.fields).not.to.be.empty();
-          expect(
-            pull(
-              // remove nested fields
-              Object.keys(hit.fields),
-              'host.hostname',
-              'host.hostname.keyword',
-              'host.id',
-              'host.name'
-            ).sort()
-          ).to.eql(Object.keys(hit._source).sort());
-        });
-      }
+      const hits = JSON.parse(doc._source.hits);
+      expect(hits).not.to.be.empty();
+      hits.forEach((hit: any) => {
+        expect(hit.fields).not.to.be.empty();
+        expect(
+          pull(
+            // remove nested fields
+            Object.keys(hit.fields),
+            'host.hostname',
+            'host.hostname.keyword',
+            'host.id',
+            'host.name'
+          ).sort()
+        ).to.eql(Object.keys(hit._source).sort());
+      });
     });
 
     it(`runs correctly: fetches field formatting in esQuery search type`, async () => {
-      const reIsNumeric = /^\d+$/;
+      // this test runs the rule once, injecting data before the run
+      // the rule should fire each time, triggering an index action each time
 
-      // write documents from now to the future end date in groups
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-      await createRule({
+      // Run 1:
+      // 1 - write source documents
+      // 2 - create the rules - they run one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      const reIsNumeric = /^\d+$/;
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
           {
@@ -189,34 +208,38 @@ export default function ruleTests({ getService }: FtrProviderContext) {
                 "match_all": { }
             }
         }`.replace(`"`, `\"`),
-        size: 100,
         thresholdComparator: '>',
-        threshold: [-1],
+        threshold: [0],
+        wrapInBrackets: true,
       });
 
-      const docs = await waitForDocs(2);
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { name, title } = doc._source.params;
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
+      const docs = await waitForDocs(1);
+      const doc = docs[0];
+      const { name, title } = doc._source.params;
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
 
-        const hits = JSON.parse(doc._source.hits);
-        expect(hits).not.to.be.empty();
+      const hits = JSON.parse(doc._source.hits);
+      expect(hits).not.to.be.empty();
 
-        hits.forEach((hit: any) => {
-          expect(hit.fields).not.to.be.empty();
-          hit.fields['@timestamp'].forEach((timestamp: string) => {
-            expect(reIsNumeric.test(timestamp)).to.be(true);
-          });
+      hits.forEach((hit: any) => {
+        expect(hit.fields).not.to.be.empty();
+        hit.fields['@timestamp'].forEach((timestamp: string) => {
+          expect(reIsNumeric.test(timestamp)).to.be(true);
         });
-      }
+      });
     });
 
     it(`runs correctly: _source: false field for esQuery search type`, async () => {
-      // write documents from now to the future end date in groups
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-      await createRule({
+      // this test runs the rule once, injecting data before the run
+      // the rule should fire each time, triggering an index action each time
+
+      // Run 1:
+      // 1 - write source documents
+      // 2 - create the rules - they run one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
           {
@@ -225,30 +248,34 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             },
             "_source": false
         }`.replace(`"`, `\"`),
-        size: 100,
         thresholdComparator: '>',
-        threshold: [-1],
+        threshold: [0],
+        wrapInBrackets: true,
       });
 
-      const docs = await waitForDocs(2);
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { name, title } = doc._source.params;
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
+      const docs = await waitForDocs(1);
+      const doc = docs[0];
+      const { name, title } = doc._source.params;
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
 
-        const hits = JSON.parse(doc._source.hits);
-        expect(hits).not.to.be.empty();
-        hits.forEach((hit: any) => {
-          expect(hit._source).to.be(undefined);
-        });
-      }
+      const hits = JSON.parse(doc._source.hits);
+      expect(hits).not.to.be.empty();
+      hits.forEach((hit: any) => {
+        expect(hit._source).to.be(undefined);
+      });
     });
 
     it(`runs correctly: _source field for esQuery search type`, async () => {
-      // write documents from now to the future end date in groups
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
-      await createRule({
+      // this test runs the rule once, injecting data before the run
+      // the rule should fire each time, triggering an index action each time
+
+      // Run 1:
+      // 1 - write source documents
+      // 2 - create the rules - they run one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await createDSLRule(supertest, objectRemover, connectorId, {
         name: 'always fire',
         esQuery: `
           {
@@ -257,35 +284,40 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             },
             "_source": "testedValue*"
         }`.replace(`"`, `\"`),
-        size: 100,
         thresholdComparator: '>',
-        threshold: [-1],
+        threshold: [0],
+        wrapInBrackets: true,
       });
 
-      const docs = await waitForDocs(2);
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { name, title } = doc._source.params;
-        expect(name).to.be('always fire');
-        expect(title).to.be(`rule 'always fire' matched query`);
+      const docs = await waitForDocs(1);
+      const doc = docs[0];
+      const { name, title } = doc._source.params;
+      expect(name).to.be('always fire');
+      expect(title).to.be(`rule 'always fire' matched query`);
 
-        const hits = JSON.parse(doc._source.hits);
-        expect(hits).not.to.be.empty();
-        hits.forEach((hit: any) => {
-          expect(hit._source).not.to.be.empty();
-          Object.keys(hit._source).forEach((key) => {
-            expect(key.startsWith('testedValue')).to.be(true);
-          });
+      const hits = JSON.parse(doc._source.hits);
+      expect(hits).not.to.be.empty();
+      hits.forEach((hit: any) => {
+        expect(hit._source).not.to.be.empty();
+        Object.keys(hit._source).forEach((key) => {
+          expect(key.startsWith('testedValue')).to.be(true);
         });
-      }
+      });
     });
 
     it(`runs correctly: copies fields from groups into alerts`, async () => {
+      // this test runs the rule once, injecting data before the run
+      // the rule should fire each time, triggering an index action each time
+
+      // Run 1:
+      // 1 - write source documents
+      // 2 - create the rules - they run one time on creation
+      // 3 - wait for output doc to be written, indicating rule is done running
       const tag = 'example-tag-A';
       const ruleName = 'group by tag';
       await createDocWithTags([tag]);
 
-      await createRule({
+      const ruleId = await createDSLRule(supertest, objectRemover, connectorId, {
         name: ruleName,
         esQuery: JSON.stringify({ query: { match_all: {} } }),
         timeField: '@timestamp',
@@ -296,10 +328,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         termField: 'tags',
         termSize: 3,
         sourceFields: [{ label: 'host.hostname', searchPath: 'host.hostname.keyword' }],
+        wrapInBrackets: true,
       });
 
-      const docs = await waitForAADDocs(1);
-      const alert = docs[0]._source || {};
+      const aadDocs = await getAADDocsForRule(ruleId, 1);
+      const alert = aadDocs.body.hits.hits[0]._source || {};
       expect(alert['kibana.alert.rule.name']).to.be(ruleName);
       expect(alert['kibana.alert.evaluation.value']).to.be('1');
 
@@ -314,99 +347,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(hostname.length).to.be(1);
       expect(hostname[0]).to.be(TEST_HOSTNAME);
     });
-
-    async function createRule(params: CreateRuleParams): Promise<string> {
-      const action = {
-        id: connectorId,
-        group: 'query matched',
-        params: {
-          documents: [
-            {
-              source: ES_TEST_INDEX_SOURCE,
-              reference: ES_TEST_INDEX_REFERENCE,
-              params: {
-                name: '{{{rule.name}}}',
-                value: '{{{context.value}}}',
-                title: '{{{context.title}}}',
-                message: '{{{context.message}}}',
-              },
-              // wrap in brackets
-              hits: '[{{context.hits}}]',
-              date: '{{{context.date}}}',
-              previousTimestamp: '{{{state.latestTimestamp}}}',
-            },
-          ],
-        },
-      };
-
-      const recoveryAction = {
-        id: connectorId,
-        group: 'recovered',
-        params: {
-          documents: [
-            {
-              source: ES_TEST_INDEX_SOURCE,
-              reference: ES_TEST_INDEX_REFERENCE,
-              params: {
-                name: '{{{rule.name}}}',
-                value: '{{{context.value}}}',
-                title: '{{{context.title}}}',
-                message: '{{{context.message}}}',
-              },
-              // wrap in brackets
-              hits: '[{{context.hits}}]',
-              date: '{{{context.date}}}',
-            },
-          ],
-        },
-      };
-
-      const ruleParams =
-        params.searchType === 'searchSource'
-          ? {
-              searchConfiguration: params.searchConfiguration,
-            }
-          : {
-              index: [params.indexName || ES_TEST_INDEX_NAME],
-              timeField: params.timeField || 'date',
-              esQuery: params.esQuery,
-            };
-
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: params.name,
-          consumer: 'alerts',
-          enabled: true,
-          rule_type_id: RULE_TYPE_ID,
-          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
-          actions: [action, recoveryAction],
-          notify_when: params.notifyWhen || 'onActiveAlert',
-          params: {
-            size: params.size,
-            timeWindowSize: params.timeWindowSize || RULE_INTERVAL_SECONDS * 5,
-            timeWindowUnit: 's',
-            thresholdComparator: params.thresholdComparator,
-            threshold: params.threshold,
-            searchType: params.searchType,
-            aggType: params.aggType || 'count',
-            groupBy: params.groupBy || 'all',
-            termField: params.termField,
-            termSize: params.termSize,
-            sourceFields: params.sourceFields,
-            ...ruleParams,
-          },
-        });
-
-      const { body: createdRule, statusCode } = response;
-      expect(statusCode).to.be(200);
-
-      const ruleId = createdRule.id;
-      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
-
-      return ruleId;
-    }
 
     async function createDocWithTags(tags: string[]) {
       const document = {
@@ -428,6 +368,16 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       if (response.result !== 'created') {
         throw new Error(`document not created: ${JSON.stringify(response)}`);
       }
+    }
+
+    async function runSoon(ruleId: string) {
+      await retry.try(async () => {
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        const runSoonResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(runSoonResponse.status).to.eql(204);
+      });
     }
   });
 }

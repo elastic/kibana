@@ -19,7 +19,6 @@ import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
 import { McpConnectionButton } from './mcp_server/mcp_connection_button';
-import { TechPreviewTitle } from '../common/tech_preview';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 
 const manageAgentsLabel = i18n.translate('xpack.onechat.tools.manageAgentsLabel', {
@@ -36,7 +35,7 @@ export const OnechatTools = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderToolsPage">
       <KibanaPageTemplate.Header
-        pageTitle={<TechPreviewTitle title={labels.tools.title} />}
+        pageTitle={labels.tools.title}
         description={
           <FormattedMessage
             id="xpack.onechat.tools.toolsDescription"
