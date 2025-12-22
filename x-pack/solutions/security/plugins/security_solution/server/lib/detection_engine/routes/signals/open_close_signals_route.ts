@@ -11,7 +11,6 @@ import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/s
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
-import type { SetAlertsStatusByIds } from '../../../../../common/api/detection_engine/signals';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -105,10 +104,7 @@ export const setSignalsStatusRoute = (
             const getIndexPattern = async () => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
             return setWorkflowStatusHandler({
               context,
-              request: {
-                ...request,
-                body: request.body as SetAlertsStatusByIds,
-              },
+              request,
               response,
               getIndexPattern,
             });

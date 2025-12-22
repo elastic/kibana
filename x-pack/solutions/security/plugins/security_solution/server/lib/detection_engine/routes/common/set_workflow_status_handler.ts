@@ -17,12 +17,15 @@ import {
 
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
-import type { SetAlertsStatusByIds } from '../../../../../common/api/detection_engine/signals';
+import {
+  SetAlertsStatusByIds,
+  type SetAlertsStatusRequestBody,
+} from '../../../../../common/api/detection_engine/signals';
 import { buildSiemResponse } from '../utils';
 
 interface SetWorkflowStatusProps {
   context: SecuritySolutionRequestHandlerContext;
-  request: KibanaRequest<unknown, unknown, SetAlertsStatusByIds>;
+  request: KibanaRequest<unknown, unknown, SetAlertsStatusRequestBody>;
   response: KibanaResponseFactory;
   getIndexPattern: () => Promise<Indices>;
 }
@@ -36,11 +39,12 @@ export const setWorkflowStatusHandler = async ({
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   const siemResponse = buildSiemResponse(response);
 
-  const { status, signal_ids: signalIds } = request.body;
+  const body = SetAlertsStatusByIds.parse(request.body);
+  const { status, signal_ids: signalIds } = body;
   let reason: string | undefined;
 
-  if (status === AlertStatusEnum.closed && 'reason' in request.body) {
-    reason = request.body.reason;
+  if (status === AlertStatusEnum.closed && 'reason' in body) {
+    reason = body.reason;
   }
 
   const core = await context.core;
