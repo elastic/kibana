@@ -62,7 +62,7 @@ while read -r config; do
   # Warning: Closing file descriptor 24 on garbage collection
   cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
 
-  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+  if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] ; then
     cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
   fi
 

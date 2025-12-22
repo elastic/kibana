@@ -1,0 +1,45 @@
+{
+  "lastModified": "2025-12-11T11:36:55.632Z",
+  "sha1": "e3eef55afb9aff7120f57047f887ed182c1c6081",
+  "tests": [
+    {
+      "id": "3cc9409cebf2cef-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "47b65e37e90cb72-c36c58dbd044c62",
+      "title": "Classic Streams full flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/classic.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "288b5b4ed9b1996-c95d5913e0efb8b",
+      "title": "Wired Streams full flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/wired.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    }
+  ]
+}

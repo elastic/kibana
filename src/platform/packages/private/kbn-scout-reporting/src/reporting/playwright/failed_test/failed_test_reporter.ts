@@ -26,11 +26,11 @@ import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
 import {
+  computeTestID,
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
   getRunTarget,
-  getTestIDForTitle,
   parseStdout,
   stripFilePath,
   stripRunCommand,
@@ -115,8 +115,13 @@ export class ScoutFailedTestReporter implements Reporter {
       return;
     }
 
+    // We don't include the first three elements in the title path (root suite, project, test file path)
+    // for full test titles in Scout, especially not when calculating test IDs
+    const fullTestTitle = test.titlePath().slice(3).join(' ');
+    const testFilePath = path.relative(REPO_ROOT, test.location.file);
+
     const testFailure: TestFailure = {
-      id: getTestIDForTitle(test.titlePath().join(' ')),
+      id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
       title: test.title,
       target: this.target,

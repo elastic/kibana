@@ -127,5 +127,6 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
 };
 
 ElementSettings.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   element: PropTypes.object,
 };

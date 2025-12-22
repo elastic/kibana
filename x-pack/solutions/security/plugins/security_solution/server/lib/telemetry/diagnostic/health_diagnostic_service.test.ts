@@ -213,7 +213,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
 
         expect(result).toEqual([]);
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          'Error getting health diagnostic queries: Artifact not found',
+          'Error getting health diagnostic queries',
           expect.any(Object)
         );
       });
