@@ -511,18 +511,6 @@ export function getFormBasedDatasource({
         nowInstant,
         searchSessionId,
         forceDSL
-      ),
-
-    toESQL: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) => {
-      return toExpression(
-        state,
-        layerId,
-        indexPatterns,
-        uiSettings,
-        dateRange,
-        nowInstant,
-        searchSessionId,
-        true
       );
     },
 
@@ -626,7 +614,8 @@ export function getFormBasedDatasource({
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<FormBasedPrivateState>) => {
-      if (true) {
+      // ES|QL layers don't show the layer panel (data view selector)
+      if (props.layerId && props.state.layers[props.layerId]?.query) {
         return null;
       }
       const { onChangeIndexPattern, ...otherProps } = props;
