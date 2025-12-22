@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/lock-manager'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/deeplinks-management'
   - '@kbn/react-query'
 tags:
