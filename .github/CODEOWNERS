@@ -408,9 +408,11 @@ src/platform/packages/shared/content-management/access_control/access_control_se
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
+src/platform/packages/shared/content-management/kbn-content-management-storybook @elastic/appex-sharedux
 src/platform/packages/shared/content-management/tabbed_table_list_view @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
@@ -504,8 +506,8 @@ src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-query-constants @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-query-server @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
-src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-composer @elastic/obs-presentation-team @elastic/obs-ai-team
+src/platform/packages/shared/kbn-esql-language @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
@@ -690,6 +692,7 @@ src/platform/packages/shared/shared-ux/file/image/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/mocks @elastic/appex-sharedux
@@ -785,7 +788,6 @@ src/platform/plugins/shared/inspector @elastic/kibana-presentation
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
-src/platform/plugins/shared/metrics_experience @elastic/obs-presentation-team
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/platform/plugins/shared/no_data_page @elastic/appex-sharedux
@@ -1254,11 +1256,6 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 /src/platform/test/functional/apps/management @elastic/kibana-management
-
-# Metrics Experience
-/src/platform/plugins/shared/metrics_experience @elastic/obs-exploration-team
-/src/platform/test/api_integration/apis/metrics_experience @elastic/obs-exploration-team
-/src/platform/test/api_integration/fixtures/es_archiver/metrics_experience @elastic/obs-exploration-team
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
@@ -2729,21 +2726,22 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 
 ## Generative AI owner connectors
 # OpenAI
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/src/platform/packages/shared/kbn-connector-schemas/openai @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-connector-schemas/openai @elastic/security-generative-ai
+
 # Bedrock
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/src/platform/packages/shared/kbn-connector-schemas/bedrock @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-connector-schemas/bedrock @elastic/security-generative-ai
 
 # Gemini
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
-/src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai @elastic/obs-ai-team @elastic/appex-ai-infra
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai
+/src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai
 
 # Inference API
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
