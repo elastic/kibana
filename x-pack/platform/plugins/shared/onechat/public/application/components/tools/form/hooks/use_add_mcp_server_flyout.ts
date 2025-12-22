@@ -13,7 +13,13 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useFlyoutState } from '../../../../hooks/use_flyout_state';
 import { queryKeys } from '../../../../query_keys';
 
-export const useAddMcpServerFlyout = () => {
+export interface UseAddMcpServerFlyoutOptions {
+  onConnectorCreated?: (connector: ActionConnector) => void;
+}
+
+export const useAddMcpServerFlyout = ({
+  onConnectorCreated,
+}: UseAddMcpServerFlyoutOptions = {}) => {
   const {
     services: {
       plugins: { triggersActionsUi },
@@ -25,12 +31,13 @@ export const useAddMcpServerFlyout = () => {
 
   // Refresh the list of MCP connectors when a new MCP connector is created
   const handleConnectorCreated = useCallback(
-    (_: ActionConnector) => {
+    (connector: ActionConnector) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tools.connectors.list(MCP_CONNECTOR_TYPE),
       });
+      onConnectorCreated?.(connector);
     },
-    [queryClient]
+    [queryClient, onConnectorCreated]
   );
 
   const flyout = useMemo(

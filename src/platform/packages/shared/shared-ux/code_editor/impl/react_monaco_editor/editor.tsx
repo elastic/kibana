@@ -29,9 +29,9 @@
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
 import { monaco, defaultThemesResolvers, initializeSupportedLanguages } from '@kbn/monaco';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiPortal, type EuiPortalProps } from '@elastic/eui';
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 
 if (process.env.NODE_ENV !== 'production') {
   import(
@@ -127,6 +127,8 @@ export interface MonacoEditorProps {
 // initialize supported languages
 initializeSupportedLanguages();
 
+export const OVERFLOW_WIDGETS_TEST_ID = 'kbnCodeEditorEditorOverflowWidgetsContainer';
+
 export function MonacoEditor({
   width = '100%',
   height = '100%',
@@ -142,6 +144,8 @@ export function MonacoEditor({
   className,
 }: MonacoEditorProps) {
   const containerElement = useRef<HTMLDivElement | null>(null);
+  const overflowWidgetsDomNode = useRef<HTMLDivElement | null>(null);
+
   const euiTheme = useEuiTheme();
 
   const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -202,7 +206,12 @@ export function MonacoEditor({
   const initMonaco = () => {
     const finalValue = value !== null ? value : defaultValue;
 
-    if (containerElement.current) {
+    if (containerElement.current && overflowWidgetsDomNode.current) {
+      // add the monaco class name to the overflow widgets dom node so that styles,
+      // for it's widgets still apply
+      overflowWidgetsDomNode.current?.classList.add('monaco-editor');
+      overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
+
       // Before initializing monaco editor
       const finalOptions = { ...options, ...handleEditorWillMount() };
 
@@ -213,6 +222,7 @@ export function MonacoEditor({
         ...(className ? { extraEditorClassName: className } : {}),
         ...finalOptions,
         ...(theme ? { theme } : {}),
+        overflowWidgetsDomNode: overflowWidgetsDomNode.current,
       });
 
       monaco.editor.onDidChangeMarkers(() => {
@@ -235,6 +245,7 @@ export function MonacoEditor({
           textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
         }
       });
+
       // After initializing monaco editor
       handleEditorDidMount();
     }
@@ -316,7 +327,20 @@ export function MonacoEditor({
     []
   );
 
-  return <div ref={containerElement} style={style} className="react-monaco-editor-container" />;
+  const setOverflowWidgetsDomNode: NonNullable<EuiPortalProps['portalRef']> = useCallback(
+    (node) => {
+      overflowWidgetsDomNode.current = node;
+    },
+    []
+  );
+
+  return (
+    <>
+      <div ref={containerElement} style={style} className="react-monaco-editor-container" />
+      {/** @ts-expect-error -- we are using the portal component to render elements produced by monaco here, so no need to provide the expected children prop  */}
+      <EuiPortal portalRef={setOverflowWidgetsDomNode} />
+    </>
+  );
 }
 
 MonacoEditor.displayName = 'MonacoEditor';

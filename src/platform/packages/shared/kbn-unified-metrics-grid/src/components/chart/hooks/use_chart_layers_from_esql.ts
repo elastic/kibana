@@ -12,7 +12,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricUnit } from '../../../types';
 import { useEsqlQueryInfo } from '../../../hooks';
 import { DIMENSIONS_COLUMN, getLensMetricFormat } from '../../../common/utils';
 import type { UnifiedMetricsGridProps } from '../../../types';

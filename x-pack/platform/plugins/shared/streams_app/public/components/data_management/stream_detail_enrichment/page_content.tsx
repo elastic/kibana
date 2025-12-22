@@ -159,9 +159,18 @@ export function StreamDetailEnrichmentContentImpl() {
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (isReady && definition) {
-      onPageReady();
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'schemaEditorFields',
+          value1: schemaEditorFields.length,
+        },
+      });
     }
-  }, [isReady, definition, onPageReady]);
+  }, [isReady, definition, onPageReady, schemaEditorFields.length]);
 
   const hasDefinitionError = useSimulatorSelector((snapshot) =>
     Boolean(snapshot.context.simulation?.definition_error)

@@ -50,6 +50,7 @@
       "cloud",
       "profilingDataAccess",
       "observabilityAIAssistant",
+      "observabilityAgentBuilder",
       "licenseManagement",
       "serverless"
     ],

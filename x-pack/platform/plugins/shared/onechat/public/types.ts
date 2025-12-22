@@ -49,7 +49,7 @@ export interface OnechatSetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
-  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -101,6 +101,12 @@ export interface OnechatPluginStart {
    * ```
    */
   openConversationFlyout: (options?: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  /**
+   * Toggles the conversation flyout.
+   *
+   * If the flyout is open, it will be closed. Otherwise, it will be opened.
+   */
+  toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => void;
   setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
   clearConversationFlyoutActiveConfig: () => void;
 }

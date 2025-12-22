@@ -19,44 +19,38 @@ export interface UseListConnectorsOptions {
 }
 export const useListConnectors = ({ type }: UseListConnectorsOptions) => {
   const { toolsService } = useOnechatServices();
-  const { data, isLoading, error, isError } = useQuery({
+  const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.connectors.list(type),
     queryFn: () => toolsService.listConnectors({ type }),
   });
   return {
     connectors: data?.connectors ?? EMPTY_CONNECTORS,
-    isLoading,
-    error,
-    isError,
+    ...queryFields,
   };
 };
 
 export const useGetConnector = ({ connectorId }: { connectorId: string }) => {
   const { toolsService } = useOnechatServices();
-  const { data, isLoading, error, isError } = useQuery({
+  const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.connectors.get(connectorId),
     queryFn: () => toolsService.getConnector({ connectorId }),
     enabled: !!connectorId,
   });
   return {
     connector: data?.connector,
-    isLoading,
-    error,
-    isError,
+    ...queryFields,
   };
 };
 
 export const useListMcpTools = ({ connectorId }: { connectorId: string }) => {
   const { toolsService } = useOnechatServices();
-  const { data, isLoading, error, isError } = useQuery({
+  const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.connectors.listMcpTools(connectorId),
     queryFn: () => toolsService.listMcpTools({ connectorId }),
     enabled: !!connectorId,
   });
   return {
     mcpTools: data?.mcpTools ?? EMPTY_TOOLS,
-    isLoading,
-    error,
-    isError,
+    ...queryFields,
   };
 };
