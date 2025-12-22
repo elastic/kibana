@@ -96,7 +96,7 @@ describe('AIValueMetrics', () => {
     } as Partial<StartServices>);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     useAIValueExportContextMock.mockReturnValue(undefined);
     mockUseKibana.mockReturnValue(createMockKibanaServices());
 
@@ -210,7 +210,7 @@ describe('AIValueMetrics', () => {
     };
     useAIValueExportContextMock.mockReturnValue({
       forwardedState: {
-        timeRange,
+        timeRange: { kind: 'absolute', ...timeRange },
       },
     });
 
@@ -237,8 +237,9 @@ describe('AIValueMetrics', () => {
       useAIValueExportContextMock.mockReturnValue({
         forwardedState: {
           timeRange: {
-            from: 'now-7d',
-            to: 'now',
+            kind: 'relative',
+            fromStr: 'now-7d',
+            toStr: 'now',
           },
         },
       });

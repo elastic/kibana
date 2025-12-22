@@ -67,6 +67,8 @@ const TestComponent = ({
 
 describe('useDownloadAIValueReport', () => {
   beforeEach(() => {
+    jest.resetAllMocks();
+
     // We set all the conditions so that the report is enabled.
     // Then we toggle each condition off in the subsequent describe statements as needed
     mockKibana(shareServiceMock, false);

@@ -23,7 +23,6 @@ import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LocatorParams, BaseParamsV2 } from '@kbn/reporting-common/types';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type { Serializable } from '@kbn/utility-types';
 
 import type { SharePluginSetup } from '../shared_imports';
 
@@ -93,8 +92,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
         // export-only fields (insight + reportDataHash) that would otherwise force the destination
         // page into an "export mode" UI. Strip these for user navigation.
         if (isUserRedirect && locatorParams.id === AI_VALUE_REPORT_LOCATOR) {
-          const timeRange = (locatorParams.params as { timeRange?: Serializable } | undefined)
-            ?.timeRange;
+          const timeRange = locatorParams.params?.timeRange;
           locatorParams = {
             ...locatorParams,
             params: timeRange ? { timeRange } : {},
