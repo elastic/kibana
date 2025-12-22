@@ -30,7 +30,6 @@
       "triggersActionsUi",
       "security",
       "share",
-      "kql",
       "visualizations",
       "dashboard",
       "expressions",
@@ -65,7 +64,7 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
+      "kql",
       "stackAlerts",
       "spaces",
       "observabilityAgentBuilder"
