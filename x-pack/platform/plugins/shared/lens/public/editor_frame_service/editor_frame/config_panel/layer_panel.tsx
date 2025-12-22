@@ -35,6 +35,7 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -514,7 +515,6 @@ export function LayerPanel(props: LayerPanelProps) {
       visualizationState,
       updateVisualization,
       props.registerLibraryAnnotationGroup,
-      isSaveable,
       core,
       layerIndex,
       isOnlyLayer,
