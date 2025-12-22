@@ -7407,10 +7407,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/metrics-experience-plugin@link:src/platform/plugins/shared/metrics_experience":
-  version "0.0.0"
-  uid ""
-
 "@kbn/metrics@link:src/platform/packages/private/opentelemetry/kbn-metrics":
   version "0.0.0"
   uid ""

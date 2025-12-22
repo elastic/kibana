@@ -744,7 +744,6 @@
     "@kbn/metrics": "link:src/platform/packages/private/opentelemetry/kbn-metrics",
     "@kbn/metrics-config": "link:src/platform/packages/private/opentelemetry/kbn-metrics-config",
     "@kbn/metrics-data-access-plugin": "link:x-pack/solutions/observability/plugins/metrics_data_access",
-    "@kbn/metrics-experience-plugin": "link:src/platform/plugins/shared/metrics_experience",
     "@kbn/ml-agg-utils": "link:x-pack/platform/packages/private/ml/agg_utils",
     "@kbn/ml-anomaly-utils": "link:x-pack/platform/packages/shared/ml/anomaly_utils",
     "@kbn/ml-cancellable-search": "link:x-pack/platform/packages/private/ml/cancellable_search",
