@@ -22,6 +22,19 @@ paths:
           application/json:
             schema:
               $ref: '../../model/set_alert_tags_body.schema.yaml#/components/schemas/SetAlertTagsBody'
+            examples:
+              add:
+                value:
+                  tags:
+                    tags_to_add: ['Duplicate']
+                    tags_to_remove: []
+                  ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
+              remove:
+                value:
+                  tags:
+                    tags_to_add: []
+                    tags_to_remove: ['Duplicate']
+                  ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
       responses:
         200:
           description: Successful response
