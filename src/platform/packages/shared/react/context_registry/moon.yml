@@ -19,7 +19,7 @@ project:
     sourceRoot: src/platform/packages/shared/react/context_registry
 dependsOn: []
 tags:
-  - shared-browser
+  - shared-common
   - package
   - prod
   - group-platform
