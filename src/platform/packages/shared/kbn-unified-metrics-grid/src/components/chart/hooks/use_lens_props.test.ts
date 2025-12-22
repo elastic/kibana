@@ -267,7 +267,7 @@ describe('useLensProps', () => {
     });
   });
 
-  it('builds Lens attributes when forceNoDatasource is true', async () => {
+  it('builds Lens attributes when forcing Lens to build with no datasource on error', async () => {
     const chartRef = createMockChartRef();
 
     const { result } = renderHook(() =>
