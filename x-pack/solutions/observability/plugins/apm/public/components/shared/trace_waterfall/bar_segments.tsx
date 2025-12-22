@@ -11,15 +11,12 @@ import React from 'react';
 import type { BarSegment } from './bar';
 
 interface BarSegmentsProps {
-  segments?: BarSegment[];
+  segments: BarSegment[];
 }
 
 export function BarSegments({ segments }: BarSegmentsProps) {
   const { euiTheme } = useEuiTheme();
 
-  if (!segments?.length) {
-    return null;
-  }
 
   return (
     <div
