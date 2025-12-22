@@ -18,7 +18,6 @@ import { getValueApiColumn } from '../../../columns/esql_column';
 import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
 import { isMetricColumn } from '../helpers';
-
 type APIMetricRowCommonProps = Partial<
   Pick<DatatableState['metrics'][number], 'visible' | 'alignment'>
 >;
@@ -72,25 +71,44 @@ function buildRowsAPI(column: ColumnState): APIRowProps {
   };
 }
 
-type DatatableColumnsNoESQL = Pick<DatatableStateNoESQL, 'metrics' | 'rows' | 'split_metrics_by'>;
-type DatatableColumnsESQL = Pick<DatatableStateESQL, 'metrics' | 'rows' | 'split_metrics_by'>;
+type DatatableColumnsNoESQLAndMapping = Pick<
+  DatatableStateNoESQL,
+  'metrics' | 'rows' | 'split_metrics_by'
+> & { columnIdMapping: ColumnIdMapping };
+type DatatableColumnsESQLAndMapping = Pick<
+  DatatableStateESQL,
+  'metrics' | 'rows' | 'split_metrics_by'
+> & { columnIdMapping: ColumnIdMapping };
+
+/**
+ * Maps old column IDs to their new type and index in the API format.
+ * Used to translate sorting column references during transformation.
+ */
+export interface ColumnIdMapping {
+  [oldColumnId: string]: {
+    type: 'metric' | 'row' | 'split_metrics_by';
+    index: number;
+  };
+}
 
 export function convertDatatableColumnsToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'>,
   visualization: DatatableVisualizationState
-): DatatableColumnsNoESQL;
+): DatatableColumnsNoESQLAndMapping;
 export function convertDatatableColumnsToAPI(
   layer: TextBasedLayer,
   visualization: DatatableVisualizationState
-): DatatableColumnsESQL;
+): DatatableColumnsESQLAndMapping;
 export function convertDatatableColumnsToAPI(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: DatatableVisualizationState
-): DatatableColumnsNoESQL | DatatableColumnsESQL {
+): DatatableColumnsNoESQLAndMapping | DatatableColumnsESQLAndMapping {
   const { columns } = visualization;
   if (columns.length === 0) {
     throw new Error('Datatable must have at least one metric column');
   }
+
+  const columnIdMapping: ColumnIdMapping = {};
 
   if (isFormBasedLayer(layer)) {
     const metrics: DatatableStateNoESQL['metrics'] = [];
@@ -107,6 +125,7 @@ export function convertDatatableColumnsToAPI(
           throw new Error(
             `Metric column ${columnId} must be a metric operation (got ${apiOperation.operation})`
           );
+        columnIdMapping[columnId] = { type: 'metric', index: metrics.length };
         metrics.push({
           ...apiOperation,
           ...buildMetricsAPI(column),
@@ -116,12 +135,14 @@ export function convertDatatableColumnsToAPI(
           throw new Error(
             `Split metric column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
           );
+        columnIdMapping[columnId] = { type: 'split_metrics_by', index: splitMetricsBy.length };
         splitMetricsBy.push(apiOperation);
       } else {
         if (!isAPIColumnOfBucketType(apiOperation))
           throw new Error(
             `Row column ${columnId} must be a bucket operation (got ${apiOperation.operation})`
           );
+        columnIdMapping[columnId] = { type: 'row', index: rows.length };
         rows.push({
           ...apiOperation,
           ...buildRowsAPI(column),
@@ -133,6 +154,7 @@ export function convertDatatableColumnsToAPI(
       metrics,
       ...(rows.length > 0 ? { rows } : {}),
       ...(splitMetricsBy.length > 0 ? { split_metrics_by: splitMetricsBy } : {}),
+      columnIdMapping,
     };
   }
 
@@ -146,13 +168,16 @@ export function convertDatatableColumnsToAPI(
     if (!apiOperation) throw new Error('Column not found');
 
     if (isMetricColumn(column, false)) {
+      columnIdMapping[columnId] = { type: 'metric', index: metrics.length };
       metrics.push({
         ...apiOperation,
         ...buildMetricsAPI(column),
       });
     } else if (column.isTransposed) {
+      columnIdMapping[columnId] = { type: 'split_metrics_by', index: splitMetricsBy.length };
       splitMetricsBy.push(apiOperation);
     } else {
+      columnIdMapping[columnId] = { type: 'row', index: rows.length };
       rows.push({ ...apiOperation, ...buildRowsAPI(column) });
     }
   }
@@ -161,5 +186,6 @@ export function convertDatatableColumnsToAPI(
     metrics,
     ...(rows.length > 0 ? { rows } : {}),
     ...(splitMetricsBy.length > 0 ? { split_metrics_by: splitMetricsBy } : {}),
+    columnIdMapping,
   };
 }

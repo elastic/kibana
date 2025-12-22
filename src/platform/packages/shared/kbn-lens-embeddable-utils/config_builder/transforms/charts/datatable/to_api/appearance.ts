@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableVisualizationState, ColumnState } from '@kbn/lens-common';
+import type { DatatableVisualizationState } from '@kbn/lens-common';
 import {
   LENS_ROW_HEIGHT_MODE,
   LEGACY_SINGLE_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
 import type { DatatableState } from '../../../../schema';
-import { isMetricColumn, getAccessorName } from '../helpers';
-import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
+import type { ColumnIdMapping } from './columns';
 
 function parseDensityToAPI(
   visualization: Pick<
@@ -70,40 +69,38 @@ function parseDensityToAPI(
   };
 }
 
-function parseColumnIndex(columnId: string, prefix: string): number | undefined {
-  if (!columnId.startsWith(prefix)) {
-    return undefined;
-  }
-  const index = parseInt(columnId.slice(prefix.length), 10);
-  return isNaN(index) ? undefined : index;
-}
-
+/**
+ * Parses split_metrics_by sorting format: value1---value2---...---metricColumnId
+ */
 function parseSplitMetricsBySorting(
   columnId: string,
-  metricColumnIds: (string | undefined)[]
+  columnIdMapping: ColumnIdMapping
 ): { values: string[]; metricIndex: number } | undefined {
-  // Format: value1---value2---...---metricColumnId
   const parts = columnId.split('---');
   if (parts.length < 2) {
     return undefined;
   }
 
+  // The last part is the metric column ID
   const metricColumnId = parts[parts.length - 1];
-  const metricIndex = metricColumnIds.indexOf(metricColumnId);
-  if (metricIndex === -1) {
+  const mapped = columnIdMapping[metricColumnId];
+
+  if (!mapped || mapped.type !== 'metric') {
     return undefined;
   }
 
   return {
     values: parts.slice(0, -1),
-    metricIndex,
+    metricIndex: mapped.index,
   };
 }
 
+/**
+ * Converts sorting from old SO format to new API format using the columnIdMapping which maps old column IDs to their new API type and index.
+ */
 function parseSortingToAPI(
   sorting: DatatableVisualizationState['sorting'],
-  columns: ColumnState[],
-  isFormBased: boolean
+  columnIdMapping: ColumnIdMapping
 ): DatatableState['sorting'] | undefined {
   if (!sorting?.columnId || sorting.direction === 'none') {
     return;
@@ -113,12 +110,7 @@ function parseSortingToAPI(
 
   // Split_metrics_by sorting (contains ---)
   if (columnId.includes('---')) {
-    const metricColumnIds = columns
-      // @TODO: fix how to correctly identify metric columns
-      .filter((col) => isMetricColumn(col, isFormBased))
-      .map((col) => col.columnId);
-
-    const parsed = parseSplitMetricsBySorting(columnId, metricColumnIds);
+    const parsed = parseSplitMetricsBySorting(columnId, columnIdMapping);
     return parsed
       ? {
           by: 'split_metrics_by',
@@ -129,29 +121,31 @@ function parseSortingToAPI(
       : undefined;
   }
 
-  // Metric column sorting
-  const metricIndex = parseColumnIndex(columnId, `${getAccessorName(METRIC_ACCESSOR_PREFIX)}_`);
-  if (metricIndex !== undefined) {
-    return { by: 'metric', index: metricIndex, direction };
+  // Look up the columnId in the mapping
+  const mapped = columnIdMapping[columnId];
+  if (!mapped) {
+    return undefined;
   }
 
-  // Row column sorting
-  const rowIndex = parseColumnIndex(columnId, `${getAccessorName(ROW_ACCESSOR_PREFIX)}_`);
-  if (rowIndex !== undefined) {
-    return { by: 'row', index: rowIndex, direction };
+  if (mapped.type === 'metric') {
+    return { by: 'metric', index: mapped.index, direction };
   }
 
-  return;
+  if (mapped.type === 'row') {
+    return { by: 'row', index: mapped.index, direction };
+  }
+
+  return undefined;
 }
 
 export function convertAppearanceToAPIFormat(
   visualization: DatatableVisualizationState,
-  isFormBased: boolean
+  columnIdMapping: ColumnIdMapping
 ): Pick<DatatableState, 'density' | 'paging' | 'sorting'> {
-  const { paging, sorting, columns } = visualization;
+  const { paging, sorting } = visualization;
 
   const densityAPI = parseDensityToAPI(visualization);
-  const sortingAPI = parseSortingToAPI(sorting, columns, isFormBased);
+  const sortingAPI = parseSortingToAPI(sorting, columnIdMapping);
 
   const isValidPagingSize = (size: number): size is 10 | 20 | 30 | 50 | 100 => {
     return [10, 20, 30, 50, 100].includes(size);

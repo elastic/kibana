@@ -30,12 +30,14 @@ export function buildVisualizationAPI(
   if (isTextBasedLayer(layer)) {
     const dataset = buildDatasetStateESQL(layer);
 
+    const { columnIdMapping, ...columns } = convertDatatableColumnsToAPI(layer, visualization);
+
     return {
       type: 'datatable',
       dataset,
       ...generateApiLayer(layer),
-      ...convertAppearanceToAPIFormat(visualization, false),
-      ...convertDatatableColumnsToAPI(layer, visualization),
+      ...columns,
+      ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
     };
   }
 
@@ -46,11 +48,14 @@ export function buildVisualizationAPI(
     references,
     adhocReferences
   );
+
+  const { columnIdMapping, ...columns } = convertDatatableColumnsToAPI(layer, visualization);
+
   return {
     type: 'datatable',
     dataset,
     ...generateApiLayer(layer),
-    ...convertAppearanceToAPIFormat(visualization, true),
-    ...convertDatatableColumnsToAPI(layer, visualization),
+    ...columns,
+    ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
   };
 }
