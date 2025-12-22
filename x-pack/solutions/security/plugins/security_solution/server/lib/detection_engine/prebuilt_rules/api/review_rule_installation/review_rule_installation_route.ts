@@ -25,7 +25,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
         },
       },
       options: {
-        tags: [routeLimitedConcurrencyTag(4)],
+        tags: [routeLimitedConcurrencyTag(5)],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
