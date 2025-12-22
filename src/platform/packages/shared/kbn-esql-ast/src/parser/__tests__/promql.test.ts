@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
-import { printAst } from '../../debug/print_ast';
+import { EsqlQuery } from '../../composer/query';
+import { printAst } from '../../shared/debug/print_ast';
 import type { ESQLCommand, ESQLMap, ESQLMapEntry, ESQLParens } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 
 describe('PROMQL <params>... ( <query> )', () => {
   describe('correctly formatted', () => {

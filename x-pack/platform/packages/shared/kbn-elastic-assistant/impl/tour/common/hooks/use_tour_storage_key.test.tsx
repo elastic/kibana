@@ -52,6 +52,11 @@ const testFeatures = [
         NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_AUTOMATIC_TROUBLESHOOTING
       ],
   },
+  {
+    featureKey: NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR,
+    expectedStorageKey:
+      NEW_TOUR_FEATURES_TOUR_STORAGE_KEYS[NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR],
+  },
 ];
 
 describe('useTourStorageKey', () => {

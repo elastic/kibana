@@ -26,6 +26,11 @@ const LazyIconProductCloudInfra = lazy(() =>
     default: iconProductCloudInfra,
   }))
 );
+const LazyAgentBuilderIcon = lazy(() =>
+  import('@kbn/ai-insights/src/icons/robot_icon').then(({ RobotIcon }) => ({
+    default: RobotIcon,
+  }))
+);
 
 export function filterForFeatureAvailability(
   node: NodeDefinition,
@@ -41,10 +46,12 @@ export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
   isCasesAvailable = true,
+  showAiAssistant = true,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
+  showAiAssistant?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -191,13 +198,24 @@ export const createNavigationTree = ({
           },
         ],
       },
-      {
-        link: 'observabilityAIAssistant',
-        title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
-          defaultMessage: 'AI Assistant',
-        }),
-        icon: 'sparkles',
-      },
+      ...filterForFeatureAvailability(
+        {
+          link: 'observabilityAIAssistant',
+          title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+            defaultMessage: 'AI Assistant',
+          }),
+          icon: 'sparkles',
+        },
+        showAiAssistant
+      ),
+      ...filterForFeatureAvailability(
+        {
+          link: 'agent_builder',
+          icon: LazyAgentBuilderIcon, // Temp svg until we have the icon in EUI
+          badgeType: 'techPreview',
+        },
+        !showAiAssistant
+      ),
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',
@@ -441,24 +459,25 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
-          ...filterForFeatureAvailability(
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
-                defaultMessage: 'AI',
-              }),
-              children: [
-                {
-                  link: 'management:genAiSettings',
-                  breadcrumbStatus: 'hidden',
-                },
-                {
-                  link: 'management:observabilityAiAssistantManagement',
-                  breadcrumbStatus: 'hidden',
-                },
-              ],
-            },
-            overviewAvailable
-          ),
+          {
+            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
+              defaultMessage: 'AI',
+            }),
+            children: [
+              {
+                link: 'management:genAiSettings' as const,
+                breadcrumbStatus: 'hidden' as const,
+              },
+              ...(showAiAssistant
+                ? [
+                    {
+                      link: 'management:observabilityAiAssistantManagement' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ]
+                : []),
+            ],
+          },
           {
             id: 'content',
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {

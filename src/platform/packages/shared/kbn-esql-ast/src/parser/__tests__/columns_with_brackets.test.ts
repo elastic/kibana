@@ -8,7 +8,7 @@
  */
 
 import { Parser } from '..';
-import { printAst } from '../../debug';
+import { printAst } from '../../shared/debug';
 
 describe('Column Bracketed Syntax: [qualifier].[name]', () => {
   describe('STATS', () => {
@@ -121,6 +121,49 @@ query 0-9
    └─ column 18-34 "[qualifier].[col]"
       ├─ identifier 19-27 "qualifier"
       └─ identifier 31-33 "col"`);
+    });
+  });
+
+  describe('Boolean expressions', () => {
+    it('can parse a column with qualifier in the left side of boolean expression', () => {
+      const text = 'FROM index | WHERE [qualifier].[col] == 10 AND [qualifier2].[col2] > 5';
+      const { root } = Parser.parse(text);
+
+      expect('\n' + printAst(root)).toBe(`
+query 0-9
+├─ command 0-9 "from"
+│  └─ source 5-9 "index"
+│     └─ literal 5-9 ""index""
+└─ command 13-69 "where"
+   └─ function 19-69 "and"
+      ├─ function 19-41 "=="
+      │  ├─ column 19-35 "[qualifier].[col]"
+      │  │  ├─ identifier 20-28 "qualifier"
+      │  │  └─ identifier 32-34 "col"
+      │  └─ literal 40-41 "10"
+      └─ function 47-69 ">"
+         ├─ column 47-65 "[qualifier2].[col2]"
+         │  ├─ identifier 48-57 "qualifier2"
+         │  └─ identifier 61-64 "col2"
+         └─ literal 69-69 "5"`);
+    });
+
+    it('can parse a column with qualifier in the right side of boolean expression', () => {
+      const text = 'FROM index | WHERE col1 == [qualifier].[col2]';
+      const { root } = Parser.parse(text);
+
+      expect('\n' + printAst(root)).toBe(`
+query 0-9
+├─ command 0-9 "from"
+│  └─ source 5-9 "index"
+│     └─ literal 5-9 ""index""
+└─ command 13-44 "where"
+   └─ function 19-44 "=="
+      ├─ column 19-22 "col1"
+      │  └─ identifier 19-22 "col1"
+      └─ column 27-44 "[qualifier].[col2]"
+         ├─ identifier 28-36 "qualifier"
+         └─ identifier 40-43 "col2"`);
     });
   });
 });

@@ -117,7 +117,9 @@
                 "section": "def-common.EncryptedSavedObjectsClient",
                 "text": "EncryptedSavedObjectsClient"
               },
-              ") => void; }"
+              ") => void; registerApiKeyInvalidateFn: (fn?: ",
+              "ApiKeyInvalidationFn",
+              " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
             "deprecated": false,
@@ -177,7 +179,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; find: (params?: Readonly<{ search?: string | undefined; page?: number | undefined; perPage?: number | undefined; searchFields?: string[] | undefined; status?: (\"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\")[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { page: number; data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; find: (params?: Readonly<{ search?: string | undefined; page?: number | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; searchFields?: string[] | undefined; status?: (\"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\")[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { page: number; data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -278,7 +280,7 @@
           "signature": [
             "(request: ",
             "KibanaRequest",
-            "<unknown, unknown, unknown, any>) => ",
+            "<unknown, unknown, unknown, any>, excludedExtension?: string[] | undefined) => ",
             "MaintenanceWindowClientApi"
           ],
           "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
@@ -300,6 +302,21 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            },
+            {
+              "parentPluginId": "maintenanceWindows",
+              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientInternal.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "excludedExtension",
+              "description": [],
+              "signature": [
+                "string[] | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []

@@ -16,6 +16,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  MathProcessor,
   RenameProcessor,
   SetProcessor,
   RemoveByPrefixProcessor,
@@ -35,6 +36,7 @@ import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_pre
 import { convertRemoveProcessorToESQL } from './processors/remove';
 import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
 import { convertReplaceProcessorToESQL } from './processors/replace';
+import { convertMathProcessorToESQL } from './processors/math';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -58,6 +60,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'grok':
       return convertGrokProcessorToESQL(processor as GrokProcessor);
+
+    case 'math':
+      return convertMathProcessorToESQL(processor as MathProcessor);
 
     case 'remove_by_prefix':
       return convertRemoveByPrefixProcessorToESQL(processor as RemoveByPrefixProcessor);

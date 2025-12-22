@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
@@ -23,7 +23,7 @@ import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | SLODefinitionResponse;
+  slo: SLOWithSummaryResponse;
 }
 
 export function SloIndicatorTypeBadge({ slo }: Props) {

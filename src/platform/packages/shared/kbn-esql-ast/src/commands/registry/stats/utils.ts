@@ -25,7 +25,7 @@ import {
   isAssignment,
   isColumn,
 } from '../../../ast/is';
-import { Walker } from '../../../walker';
+import { Walker } from '../../../ast/walker';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';

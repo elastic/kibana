@@ -62,7 +62,6 @@ import { conditionToESQLAst } from '../condition_to_esql';
 export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAstCommand[] {
   const {
     from,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default: false (field must exist)
   } = processor;
 

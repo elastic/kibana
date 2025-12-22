@@ -1082,7 +1082,7 @@
         "label": "TextFieldWithMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, index, inputTargetValue, editAction, errors, formRowProps, defaultValue, wrapField, showButtonTitle, }: Props) => React.JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, index, inputTargetValue, editAction, errors, formRowProps, defaultValue, wrapField, showButtonTitle, \"aria-label\": ariaLabel, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/text_field_with_message_variables.tsx",
         "deprecated": false,
@@ -1093,7 +1093,7 @@
             "id": "def-public.TextFieldWithMessageVariables.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  index,\n  inputTargetValue,\n  editAction,\n  errors,\n  formRowProps,\n  defaultValue,\n  wrapField = false,\n  showButtonTitle,\n}",
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  index,\n  inputTargetValue,\n  editAction,\n  errors,\n  formRowProps,\n  defaultValue,\n  wrapField = false,\n  showButtonTitle,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "Props"

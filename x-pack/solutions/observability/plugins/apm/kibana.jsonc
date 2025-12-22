@@ -37,7 +37,8 @@
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared"
+      "discoverShared",
+      "observabilityAgentBuilder"
     ],
     "optionalPlugins": [
       "actions",

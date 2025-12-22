@@ -63,6 +63,17 @@ function termsQuery<T extends string>(
   return [{ terms: { [field]: filteredValues } }];
 }
 
+function wildcardQuery<T extends string>(
+  field: T,
+  value: TermQueryFieldValue | undefined
+): QueryDslQueryContainer[] {
+  if (value === null || value === undefined || value === '') {
+    return [];
+  }
+
+  return [{ wildcard: { [field]: { value: `*${value}*`, case_insensitive: true } } }];
+}
+
 export function getAssetLinkUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
   return objectHash({
     [STREAM_NAME]: name,
@@ -275,6 +286,31 @@ export class AssetClient {
     return assetsResponse.hits.hits.map(
       (hit) => fromStorage(hit._source) as Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>
     );
+  }
+
+  async findQueries(name: string, query: string) {
+    const assetsResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      runtime_mappings: {
+        [QUERY_FEATURE_NAME]: { type: 'keyword' },
+        [QUERY_FEATURE_FILTER]: { type: 'keyword' },
+      },
+      query: {
+        bool: {
+          filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')],
+          should: [
+            ...wildcardQuery(QUERY_TITLE, query),
+            ...wildcardQuery(QUERY_KQL_BODY, query),
+            ...wildcardQuery(QUERY_FEATURE_NAME, query),
+            ...wildcardQuery(QUERY_FEATURE_FILTER, query),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source) as QueryLink);
   }
 
   async bulk(name: string, operations: AssetBulkOperation[]) {

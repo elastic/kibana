@@ -15,7 +15,7 @@ import {
   isParamLiteral,
 } from '../../../ast/is';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../types';
-import { lastItem } from '../../../visitor/utils';
+import { lastItem } from '../../../ast/visitor/utils';
 import type {
   FunctionDefinition,
   FunctionParameterType,
@@ -27,7 +27,7 @@ import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
-import { Walker } from '../../../walker';
+import { Walker } from '../../../ast/walker';
 import { isMarkerNode } from './ast';
 
 // #region type detection

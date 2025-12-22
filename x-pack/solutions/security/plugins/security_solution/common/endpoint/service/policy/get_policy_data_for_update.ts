@@ -14,7 +14,6 @@ import type { MaybeImmutable, NewPolicyData, PolicyData } from '../../types';
  * @param policy
  */
 export const getPolicyDataForUpdate = (policy: MaybeImmutable<PolicyData>): NewPolicyData => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, revision, created_by, created_at, updated_by, updated_at, ...rest } =
     policy as PolicyData;
 

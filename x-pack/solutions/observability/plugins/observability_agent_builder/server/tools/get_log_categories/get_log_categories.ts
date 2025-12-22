@@ -22,6 +22,7 @@ import { getShouldMatchOrNotExistFilter } from '../../utils/get_should_match_or_
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
 import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_schemas';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
@@ -62,9 +63,29 @@ export function createGetLogCategoriesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
     id: OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves and categorizes log messages into distinct patterns for a specified time range, providing counts and samples for each category. Useful for identifying high-volume or recurring log events.`,
+    description: `Compresses thousands of logs into a small set of categories to provide a high-level overview of what's being logged.
+
+When to use:
+- Getting a quick summary of log activity in a service or time range
+- Identifying the types of events occurring without reading individual logs
+- Discovering unexpected log patterns or new error types
+- Answering "what kinds of things are happening?" rather than "what exactly happened?"
+
+How it works:
+Groups similar log messages together using pattern recognition, returning representative categories with counts.
+
+Do NOT use for:
+- Understanding the sequence of events for a specific error (use get_correlated_logs)
+- Investigating a specific incident in detail (use get_correlated_logs)
+- Analyzing changes in log volume over time (use run_log_rate_analysis)`,
     schema: getLogsSchema,
     tags: ['observability', 'logs'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       { index, start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, terms },
       { esClient }

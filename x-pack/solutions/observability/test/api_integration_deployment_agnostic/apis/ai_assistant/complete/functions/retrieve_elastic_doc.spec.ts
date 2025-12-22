@@ -26,7 +26,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('tool: retrieve_elastic_doc', function () {
+  // Skipping temporarily: https://github.com/elastic/kibana/issues/246177
+  describe.skip('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context

@@ -8,38 +8,56 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AiInsight } from '@kbn/ai-insights';
+import {
+  createRepositoryClient,
+  type DefaultClientOptions,
+} from '@kbn/server-route-repository-client';
+import type { ObservabilityAgentBuilderServerRouteRepository } from '@kbn/observability-agent-builder-plugin/server';
+import {
+  OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../utils/kibana_react';
-// Constants in the observability_agent_builder plugin:
-// TODO: remove after removing data access plugins' dependencies on observability
-const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
-const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = 'observability.alert';
-const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
-const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
+import { useLicense } from '../../hooks/use_license';
 
 export function AlertAiInsight({ alert }: { alert: AlertData }) {
   const {
-    services: { onechat, http, featureFlags },
+    services: { onechat, http },
   } = useKibana();
+  const observabilityAgentBuilderApiClient = createRepositoryClient<
+    ObservabilityAgentBuilderServerRouteRepository,
+    DefaultClientOptions
+  >({ http });
+
+  const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+  const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
+
+  const { getLicense } = useLicense();
+  const license = getLicense();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
 
-  // Using http.post to avoid circular dependency with observability_agent_builder plugin
-  // TODO: use typed client once data access plugin dependencies on observability are removed
   const onOpen = async () => {
     setIsLoading(true);
     setError(undefined);
     try {
       const alertId = alert.formatted.fields['kibana.alert.uuid'];
-      const response = await http.post<{ summary: string; context: string }>(
-        '/internal/observability_agent_builder/ai_insights/alert',
+      const response = await observabilityAgentBuilderApiClient.fetch(
+        'POST /internal/observability_agent_builder/ai_insights/alert',
         {
-          body: JSON.stringify({
-            alertId,
-          }),
+          signal: null,
+          params: {
+            body: {
+              alertId,
+            },
+          },
         }
       );
       setSummary(response.summary);
@@ -75,12 +93,7 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
     });
   };
 
-  const isObservabilityAgentEnabled = featureFlags.getBooleanValue(
-    OBSERVABILITY_AGENT_FEATURE_FLAG,
-    OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT
-  );
-
-  if (!onechat || !isObservabilityAgentEnabled) {
+  if (!onechat || !isAgentChatExperienceEnabled) {
     return null;
   }
 
@@ -92,12 +105,12 @@ export function AlertAiInsight({ alert }: { alert: AlertData }) {
       description={i18n.translate('xpack.observability.alertAiInsight.descriptionLabel', {
         defaultMessage: 'Get helpful insights from our Elastic AI Agent.',
       })}
+      license={license}
       content={summary}
       isLoading={isLoading}
       error={error}
       onOpen={onOpen}
       onStartConversation={onStartConversation}
-      data-test-subj="obsAlertAiInsight"
     />
   );
 }

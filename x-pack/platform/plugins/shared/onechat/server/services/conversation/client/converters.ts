@@ -102,6 +102,7 @@ export const fromEs = (document: Document): Conversation => {
   return {
     ...base,
     rounds: deserializeStepResults(rounds),
+    ...(document._source!.attachments && { attachments: document._source!.attachments }),
   };
 };
 
@@ -121,6 +122,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     // Explicitly omit rounds to ensure migration
     rounds: undefined,
     conversation_rounds: serializeStepResults(conversation.rounds),
+    attachments: conversation.attachments ?? [],
   };
 };
 
@@ -139,7 +141,7 @@ export const updateConversation = ({
     ...conversation,
     ...update,
     space,
-    updatedAt: updateDate.toISOString(),
+    updated_at: updateDate.toISOString(),
   };
 
   return updated;
@@ -165,5 +167,6 @@ export const createRequestToEs = ({
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
+    attachments: conversation.attachments ?? [],
   };
 };

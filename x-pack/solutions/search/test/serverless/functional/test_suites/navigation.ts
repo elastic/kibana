@@ -173,6 +173,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
     });
 
+    it('does not show cloud connect in sidebar navigation', async () => {
+      // Cloud Connect should NOT appear in serverless deployments
+      expect(await testSubjects.missingOrFail('cloud_connect'));
+    });
+
     it('renders a feedback callout', async function () {
       await solutionNavigation.sidenav.feedbackCallout.reset();
       await solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });

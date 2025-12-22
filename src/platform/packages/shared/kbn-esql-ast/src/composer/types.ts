@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as synth from '../synth';
+import type * as synth from './synth';
 import type { ESQLAstCommand, ESQLCommand, ESQLOrderExpression, ESQLSource } from '../types';
 import type { ComposerQuery } from './composer_query';
 import type { ParameterHole, DoubleParameterHole } from './parameter_hole';
@@ -88,7 +88,7 @@ export type ComposerQueryGenerator<Return = ComposerQuery> = (
   paramsValues?: Record<string, unknown>
 ) => Return;
 
-type SynthMethods = typeof import('../synth');
+type SynthMethods = typeof import('./synth');
 
 /**
  * Methods available of the `esql` tagged template function.
@@ -188,7 +188,10 @@ export type ComposerSourceShorthand = string | ESQLSource;
  * A shorthand for specifying a column in the query.
  * It can be a string a simple column or an array of strings for a nested column.
  */
-export type ComposerColumnShorthand = string | synth.SynthColumnShorthand;
+export type ComposerColumnShorthand =
+  | string
+  | synth.SynthColumnShorthand
+  | synth.SynthQualifiedColumnShorthand;
 
 /**
  * A shorthand for specifying a rename expression in the `RENAME` command.

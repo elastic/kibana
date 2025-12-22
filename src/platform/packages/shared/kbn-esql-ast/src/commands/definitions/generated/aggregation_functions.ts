@@ -122,6 +122,17 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: 'Expression that outputs values to be checked for absence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description: 'Expression that outputs values to be checked for absence.',
@@ -661,6 +672,17 @@ const avgDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'double',
+          optional: false,
+          description: 'Expression that outputs values to average.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
           optional: false,
           description: 'Expression that outputs values to average.',
         },
@@ -2090,6 +2112,17 @@ const maxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description: '',
@@ -2187,6 +2220,17 @@ const medianDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'double',
+          optional: false,
+          description: 'Expression that outputs values to calculate the median of.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
           optional: false,
           description: 'Expression that outputs values to calculate the median of.',
         },
@@ -2344,6 +2388,17 @@ const minDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
           description: '',
@@ -2477,6 +2532,60 @@ const percentileDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'double',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'percentile',
+          type: 'long',
+          optional: false,
+          description: '',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'percentile',
+          type: 'double',
+          optional: false,
+          description: '',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
+          optional: false,
+          description: '',
+        },
+        {
+          name: 'percentile',
+          type: 'integer',
+          optional: false,
+          description: '',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
           optional: false,
           description: '',
         },
@@ -2688,6 +2797,17 @@ const presentDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
+          optional: false,
+          description: 'Expression that outputs values to be checked for presence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'exponential_histogram',
           optional: false,
           description: 'Expression that outputs values to be checked for presence.',
         },
@@ -3332,6 +3452,17 @@ const sumDefinition: FunctionDefinition = {
         {
           name: 'number',
           type: 'double',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'exponential_histogram',
           optional: false,
           description: '',
         },

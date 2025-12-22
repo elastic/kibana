@@ -19,6 +19,8 @@ project:
     sourceRoot: x-pack/platform/packages/shared/ai-insights
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/licensing-types'
+  - '@kbn/kibana-react-plugin'
 tags:
   - shared-browser
   - package

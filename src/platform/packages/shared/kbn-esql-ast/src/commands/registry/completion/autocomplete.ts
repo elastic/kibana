@@ -45,7 +45,7 @@ import {
 import { ESQL_VARIABLES_PREFIX } from '../constants';
 import { getExpressionType, isExpressionComplete } from '../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
-import { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../shared/sorting/types';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',

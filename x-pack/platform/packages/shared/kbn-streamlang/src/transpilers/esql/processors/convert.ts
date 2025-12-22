@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
 import { isAlwaysCondition } from '../../../..';

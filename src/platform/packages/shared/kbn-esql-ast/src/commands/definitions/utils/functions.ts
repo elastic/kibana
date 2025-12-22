@@ -32,7 +32,7 @@ import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../../ast/is';
-import { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../shared/sorting/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,

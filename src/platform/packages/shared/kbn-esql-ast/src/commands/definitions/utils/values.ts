@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../registry/types';
-import { SuggestionCategory } from '../../../sorting/types';
+import { SuggestionCategory } from '../../../shared/sorting/types';
 
 export const buildValueDefinitions = (
   values: string[],

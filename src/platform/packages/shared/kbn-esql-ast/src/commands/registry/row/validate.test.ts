@@ -10,7 +10,7 @@ import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { capitalize } from 'lodash';
-import { DATE_PERIOD_UNITS, TIME_DURATION_UNITS } from '../../../parser/constants';
+import { DATE_PERIOD_UNITS, TIME_DURATION_UNITS } from '../../../parser';
 import { getNoValidCallSignatureError } from '../../definitions/utils/validation/utils';
 
 const rowExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {

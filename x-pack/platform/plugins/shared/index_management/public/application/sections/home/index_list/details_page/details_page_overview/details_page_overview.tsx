@@ -27,7 +27,9 @@ import {
   CodeBox,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
+  EisCloudConnectPromoCallout,
 } from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
@@ -82,6 +84,13 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   return (
     <>
+      <EisCloudConnectPromoCallout
+        promoId="indexDetailsOverview"
+        isSelfManaged={!plugins.cloud?.isCloudEnabled}
+        direction="row"
+        navigateToApp={() => core.application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+        addSpacer="bottom"
+      />
       <EuiFlexGrid columns={isLarge ? 3 : 1}>
         <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
 

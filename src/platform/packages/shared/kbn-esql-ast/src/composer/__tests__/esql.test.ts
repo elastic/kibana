@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { Builder } from '../../builder';
+import { Builder } from '../../ast/builder';
 import type { ESQLLiteral } from '../../types';
 import { ComposerQuery } from '../composer_query';
 import { esql, e } from '../esql';

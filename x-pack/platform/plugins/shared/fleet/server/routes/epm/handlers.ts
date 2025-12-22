@@ -37,6 +37,7 @@ import type {
   AssetSOObject,
   PackageSpecCategory,
   RollbackAvailableCheckResponse,
+  BulkRollbackAvailableCheckResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -90,6 +91,7 @@ import {
 } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import {
+  bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
   rollbackAvailableCheck,
   rollbackInstallation,
@@ -763,5 +765,20 @@ export const rollbackAvailableCheckHandler: FleetRequestHandler<
     const reason = `Failed to check if rollback is available for ${pkgName} integration`;
     appContextService.getLogger().warn(`${reason}: ${error}`);
     return response.ok({ body: { isAvailable: false, reason } });
+  }
+};
+
+export const bulkRollbackAvailableCheckHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const body: BulkRollbackAvailableCheckResponse = await bulkRollbackAvailableCheck();
+    return response.ok({ body });
+  } catch (error) {
+    const reason = `Failed to check if rollback is available for installed integrations`;
+    appContextService.getLogger().warn(`${reason}: ${error}`);
+    return response.ok({ body: {} });
   }
 };

@@ -22,7 +22,7 @@ import {
   NOT_IN_REGEX,
   IS_NOT_REGEX,
 } from '../utils';
-import { Builder } from '../../../../../../../builder';
+import { Builder } from '../../../../../../../ast/builder';
 
 // Regex to extract field name before operator: match[1] = fieldName
 // Matches with or without opening parenthesis

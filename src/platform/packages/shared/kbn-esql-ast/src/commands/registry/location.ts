@@ -10,7 +10,7 @@
 import { isFunctionExpression, isOptionNode } from '../../ast/is';
 import { within } from '../../ast/location';
 import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 import { Location } from './types';
 
 const commandOptionNameToLocation: Record<string, Location> = {

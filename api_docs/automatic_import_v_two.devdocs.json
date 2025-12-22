@@ -267,7 +267,9 @@
                 "section": "def-common.EncryptedSavedObjectsClient",
                 "text": "EncryptedSavedObjectsClient"
               },
-              ") => void; }"
+              ") => void; registerApiKeyInvalidateFn: (fn?: ",
+              "ApiKeyInvalidationFn",
+              " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
             "deprecated": false,

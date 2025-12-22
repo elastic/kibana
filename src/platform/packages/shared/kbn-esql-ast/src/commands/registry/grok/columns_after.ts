@@ -10,7 +10,7 @@ import type { EsqlFieldType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import { type ESQLCommand } from '../../../types';
 import type { GrokDataType } from '../../definitions/types';
-import { walk } from '../../../walker';
+import { walk } from '../../../ast/walker';
 import type { ESQLColumnData } from '../types';
 
 function unquoteTemplate(inputString: string): string {

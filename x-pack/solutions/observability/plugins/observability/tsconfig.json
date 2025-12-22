@@ -140,8 +140,12 @@
     "@kbn/react-query",
     "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
     "@kbn/onechat-plugin",
     "@kbn/ai-insights",
+    "@kbn/observability-agent-builder-plugin",
+    "@kbn/server-route-repository-client",
   ],
   "exclude": ["target/**/*"]
 }

@@ -11,7 +11,7 @@ import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { within } from '../../../ast/location';
 import { isOptionNode } from '../../../ast/is';
 import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
-import * as mutate from '../../../mutate';
+import * as mutate from '../../../ast/mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import type {
   ESQLAstAllCommands,

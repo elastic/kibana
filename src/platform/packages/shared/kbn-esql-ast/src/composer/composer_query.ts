@@ -8,10 +8,10 @@
  */
 
 import { printTree } from 'tree-dump';
-import * as synth from '../synth';
+import * as synth from './synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { composerQuerySymbol, processTemplateHoles, validateParamName } from './util';
-import { Builder } from '../builder';
+import { Builder } from '../ast/builder';
 import type {
   ESQLAstExpression,
   ESQLAstHeaderCommand,
@@ -29,7 +29,7 @@ import type {
   QueryCommandTag,
   QueryCommandTagParametrized,
 } from './types';
-import { Walker } from '../walker';
+import { Walker } from '../ast/walker';
 import {
   isBinaryExpression,
   isBooleanLiteral,
@@ -42,9 +42,9 @@ import {
   isProperNode,
   isStringLiteral,
 } from '../ast/is';
-import { replaceProperties } from '../walker/helpers';
-import { resolveItem } from '../visitor/utils';
-import { printAst } from '../debug';
+import { replaceProperties } from '../ast/walker/helpers';
+import { resolveItem } from '../ast/visitor/utils';
+import { printAst } from '../shared/debug';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -277,10 +277,10 @@ export class ComposerQuery {
       as?: [type: ComposerColumnShorthand, pvalue: ComposerColumnShorthand];
     } = {}
   ): ComposerQuery => {
-    const val = Builder.expression.column(value);
-    const key = options.on ? Builder.expression.column(options.on) : void 0;
-    const type = options.as ? Builder.expression.column(options.as[0]) : void 0;
-    const pvalue = options.as ? Builder.expression.column(options.as[1]) : void 0;
+    const val = synth.col(value);
+    const key = options.on ? synth.col(options.on) : void 0;
+    const type = options.as ? synth.col(options.as[0]) : void 0;
+    const pvalue = options.as ? synth.col(options.as[1]) : void 0;
 
     if (type && pvalue && key) {
       return this.pipe`CHANGE_POINT ${val} ON ${key} AS ${type}, ${pvalue}`;
@@ -356,7 +356,7 @@ export class ComposerQuery {
       APPEND_SEPARATOR?: string;
     } = {}
   ): ComposerQuery => {
-    const inputColumn = Builder.expression.column(input);
+    const inputColumn = synth.col(input);
 
     if (options.APPEND_SEPARATOR) {
       return this
@@ -393,7 +393,7 @@ export class ComposerQuery {
    * @returns The updated ComposerQuery instance.
    */
   public readonly grok = (input: ComposerColumnShorthand, pattern: string): ComposerQuery => {
-    const inputColumn = Builder.expression.column(input);
+    const inputColumn = synth.col(input);
 
     return this.pipe`GROK ${inputColumn} ${pattern}`;
   };
@@ -455,7 +455,7 @@ export class ComposerQuery {
     } = {}
   ): ComposerQuery => {
     const index = Builder.expression.source.node({ sourceType: 'policy', index: policy });
-    const onArgs = options.on ? Builder.expression.column(options.on) : void 0;
+    const onArgs = options.on ? synth.col(options.on) : void 0;
     const withArgs = options.with
       ? Object.entries(options.with).reduce((acc, [key, value]) => {
           const expression = synth.exp`${synth.col(key)} = ${synth.col(value)}`;
@@ -551,7 +551,7 @@ export class ComposerQuery {
     ...columns: Array<ComposerColumnShorthand>
   ): ComposerQuery => {
     const nodes = [column, ...columns].map((name) => {
-      return Builder.expression.column(name);
+      return synth.col(name);
     });
 
     return this.pipe`KEEP ${nodes}`;
@@ -609,7 +609,7 @@ export class ComposerQuery {
    * @returns The updated ComposerQuery instance.
    */
   public readonly mv_expand = (column: ComposerColumnShorthand): ComposerQuery => {
-    const node = Builder.expression.column(column);
+    const node = synth.col(column);
 
     return this.pipe`MV_EXPAND ${node}`;
   };
@@ -692,7 +692,7 @@ export class ComposerQuery {
       const [column, order = '', nulls = ''] = Array.isArray(shorthand)
         ? shorthand
         : [shorthand, '', ''];
-      const columnNode = Builder.expression.column(column);
+      const columnNode = synth.col(column);
       const orderNode = Builder.expression.order(columnNode, { order, nulls });
 
       return orderNode;
@@ -721,6 +721,10 @@ export class ComposerQuery {
    * // Join using a nested column
    * query.lookup_join('other_index', ['user', 'id']);
    * // Result: ... | LOOKUP JOIN other_index ON user.id | ...
+   *
+   * // Join using a qualified column
+   * query.lookup_join('other_index', ['usersIndex', ['id']]);
+   * // Result: ... | LOOKUP JOIN other_index ON [usersIndex].[id] | ...
    * ```
    *
    * @param lookupIndex The name of the index to join with.

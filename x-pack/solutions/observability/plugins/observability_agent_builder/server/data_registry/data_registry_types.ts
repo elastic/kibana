@@ -8,6 +8,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 
+type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
+
 interface TimeseriesChangePoint {
   change_point?: number | undefined;
   r_value?: number | undefined;
@@ -84,6 +86,24 @@ interface APMTransaction {
   };
 }
 
+interface ServicesItemsItem {
+  serviceName: string;
+  transactionType?: string;
+  environments?: string[];
+  agentName?: string;
+  latency?: number | null;
+  transactionErrorRate?: number;
+  throughput?: number;
+  healthStatus?: ServiceHealthStatus;
+  alertsCount?: number;
+}
+
+interface ServicesItemsResponse {
+  items: ServicesItemsItem[];
+  maxCountExceeded: boolean;
+  serviceOverflowCount: number;
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -137,4 +157,13 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     start: string;
     end: string;
   }) => Promise<ChangePointGrouping[]>;
+
+  servicesItems: (params: {
+    request: KibanaRequest;
+    environment?: string;
+    kuery?: string;
+    start: string;
+    end: string;
+    searchQuery?: string;
+  }) => Promise<ServicesItemsResponse>;
 }

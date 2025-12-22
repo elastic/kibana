@@ -763,7 +763,7 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          "; options?: { compatibleWithCSV?: boolean | undefined; } | undefined; }) => ConvertedResult"
+          "; options?: { compatibleWithCSV?: boolean | undefined; compatibleWithMarkdown?: boolean | undefined; } | undefined; }) => ConvertedResult"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/convert_value_to_string.ts",
         "deprecated": false,
@@ -893,7 +893,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ compatibleWithCSV?: boolean | undefined; } | undefined"
+                  "{ compatibleWithCSV?: boolean | undefined; compatibleWithMarkdown?: boolean | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/convert_value_to_string.ts",
                 "deprecated": false,

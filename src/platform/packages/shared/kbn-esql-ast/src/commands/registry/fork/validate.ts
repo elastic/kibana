@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAst, ESQLAstAllCommands, ESQLAstForkCommand, ESQLMessage } from '../../../types';
-import { Walker } from '../../../walker';
+import { Walker } from '../../../ast/walker';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { esqlCommandRegistry } from '..';

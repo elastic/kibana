@@ -685,7 +685,9 @@
               " | ",
               "SavedObjectsImportMissingReferencesError",
               " | ",
-              "SavedObjectsImportUnknownError"
+              "SavedObjectsImportUnknownError",
+              " | ",
+              "SavedObjectsImportUnexpectedAccessControlMetadataError"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,

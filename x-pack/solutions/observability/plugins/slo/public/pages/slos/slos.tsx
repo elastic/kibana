@@ -76,10 +76,11 @@ export function SlosPage() {
         pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
         rightSideItems: [<CreateSloBtn />],
       }}
-      topSearchBar={<SloListSearchBar />}
     >
       <HeaderMenu />
       <SloOutdatedCallout />
+      <SloListSearchBar />
+      <EuiSpacer size="m" />
       <SLOsOverview />
       <EuiSpacer size="m" />
       <SloList />
