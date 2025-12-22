@@ -53,6 +53,7 @@ const CaseContainerComponent: React.FC = () => {
   const { openFlyout } = useExpandableFlyoutApi();
   const {
     timelinePrivileges: { read: canSeeTimeline },
+    rulesPrivileges: { read: canReadRules },
   } = useUserPrivileges();
   const { hasAlertsRead } = useAlertsPrivileges();
 
@@ -112,11 +113,11 @@ const CaseContainerComponent: React.FC = () => {
 
   const onRuleDetailsClick = useCallback(
     (ruleId: string | null | undefined) => {
-      if (ruleId) {
+      if (ruleId && canReadRules) {
         openFlyout({ right: { id: RulePanelKey, params: { ruleId } } });
       }
     },
-    [openFlyout]
+    [openFlyout, canReadRules]
   );
 
   const { onLoad: onAlertsTableLoaded } = useFetchNotes();
