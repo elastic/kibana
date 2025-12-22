@@ -107,6 +107,7 @@ function parseSortingToAPI(
   }
 
   const { columnId, direction } = sorting;
+  const DEFAULT_DIRECTION = 'asc' as const;
 
   // Split_metrics_by sorting (contains ---)
   if (columnId.includes('---')) {
@@ -116,7 +117,7 @@ function parseSortingToAPI(
           by: 'split_metrics_by',
           metric_index: parsed.metricIndex,
           values: parsed.values,
-          direction,
+          direction: direction || DEFAULT_DIRECTION,
         }
       : undefined;
   }
@@ -127,7 +128,7 @@ function parseSortingToAPI(
     return undefined;
   }
 
-  return { by: mapped.type, index: mapped.index, direction };
+  return { by: mapped.type, index: mapped.index, direction: direction || DEFAULT_DIRECTION };
 }
 
 export function convertAppearanceToAPIFormat(
