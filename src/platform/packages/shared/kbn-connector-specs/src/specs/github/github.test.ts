@@ -10,6 +10,13 @@
 import type { ActionContext } from '../../connector_spec';
 import { GithubConnector } from './github';
 
+interface HttpError extends Error {
+  response?: {
+    status: number;
+    data?: unknown;
+  };
+}
+
 describe('GithubConnector', () => {
   const mockClient = {
     get: jest.fn(),
@@ -58,7 +65,7 @@ describe('GithubConnector', () => {
     });
 
     it('should throw error when owner is not found', async () => {
-      const error: any = new Error('Not found');
+      const error: HttpError = new Error('Not found');
       error.response = { status: 404 };
       mockClient.get.mockRejectedValue(error);
 
@@ -70,7 +77,7 @@ describe('GithubConnector', () => {
     });
 
     it('should rethrow non-404 errors', async () => {
-      const error: any = new Error('Server error');
+      const error: HttpError = new Error('Server error');
       error.response = { status: 500 };
       mockClient.get.mockRejectedValue(error);
 
@@ -138,7 +145,7 @@ describe('GithubConnector', () => {
     });
 
     it('should handle invalid search query', async () => {
-      const error: any = new Error('Validation failed');
+      const error: HttpError = new Error('Validation failed');
       error.response = {
         status: 422,
         data: {
@@ -157,7 +164,7 @@ describe('GithubConnector', () => {
     });
 
     it('should handle 422 error without message', async () => {
-      const error: any = new Error('Validation failed');
+      const error: HttpError = new Error('Validation failed');
       error.response = {
         status: 422,
         data: {},
@@ -173,7 +180,7 @@ describe('GithubConnector', () => {
     });
 
     it('should rethrow non-422 errors', async () => {
-      const error: any = new Error('Server error');
+      const error: HttpError = new Error('Server error');
       error.response = { status: 500 };
       mockClient.get.mockRejectedValue(error);
 
