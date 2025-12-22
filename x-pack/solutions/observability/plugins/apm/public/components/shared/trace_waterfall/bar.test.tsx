@@ -46,6 +46,11 @@ describe('Bar', () => {
       expect(barDiv.children).toHaveLength(0);
     });
 
+    it('renders without segments when empty array is provided', () => {
+      const barDiv = renderBar({ width: 50, left: 10, color: 'red', segments: [] });
+      expect(barDiv.children).toHaveLength(0);
+    });
+
     it('renders segments with correct positioning and color', () => {
       const segments = [
         { id: 'segment-1', left: 0.1, width: 0.2, color: 'blue' },

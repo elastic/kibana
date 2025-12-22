@@ -17,7 +17,6 @@ interface BarSegmentsProps {
 export function BarSegments({ segments }: BarSegmentsProps) {
   const { euiTheme } = useEuiTheme();
 
-
   return (
     <div
       css={css`

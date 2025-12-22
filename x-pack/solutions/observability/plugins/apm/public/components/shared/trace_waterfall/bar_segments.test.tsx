@@ -17,16 +17,6 @@ function renderBarSegments(props: ComponentProps<typeof BarSegments>) {
 }
 
 describe('BarSegments', () => {
-  it('renders null when segments is undefined', () => {
-    const result = renderBarSegments({ segments: undefined });
-    expect(result).toBeNull();
-  });
-
-  it('renders null when segments is an empty array', () => {
-    const result = renderBarSegments({ segments: [] });
-    expect(result).toBeNull();
-  });
-
   it('renders segments with correct positioning and colors', () => {
     const segments = [
       { id: 'segment-1', left: 0.1, width: 0.2, color: 'blue' },
