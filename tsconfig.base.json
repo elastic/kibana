@@ -1446,8 +1446,6 @@
       "@kbn/metrics-config/*": ["src/platform/packages/private/opentelemetry/kbn-metrics-config/*"],
       "@kbn/metrics-data-access-plugin": ["x-pack/solutions/observability/plugins/metrics_data_access"],
       "@kbn/metrics-data-access-plugin/*": ["x-pack/solutions/observability/plugins/metrics_data_access/*"],
-      "@kbn/metrics-experience-plugin": ["src/platform/plugins/shared/metrics_experience"],
-      "@kbn/metrics-experience-plugin/*": ["src/platform/plugins/shared/metrics_experience/*"],
       "@kbn/migrator-test-kit": ["src/platform/packages/private/kbn-migrator-test-kit"],
       "@kbn/migrator-test-kit/*": ["src/platform/packages/private/kbn-migrator-test-kit/*"],
       "@kbn/ml-agg-utils": ["x-pack/platform/packages/private/ml/agg_utils"],

@@ -788,7 +788,6 @@ src/platform/plugins/shared/inspector @elastic/kibana-presentation
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
-src/platform/plugins/shared/metrics_experience @elastic/obs-presentation-team
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/platform/plugins/shared/no_data_page @elastic/appex-sharedux
@@ -1257,11 +1256,6 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 /src/platform/test/functional/apps/management @elastic/kibana-management
-
-# Metrics Experience
-/src/platform/plugins/shared/metrics_experience @elastic/obs-exploration-team
-/src/platform/test/api_integration/apis/metrics_experience @elastic/obs-exploration-team
-/src/platform/test/api_integration/fixtures/es_archiver/metrics_experience @elastic/obs-exploration-team
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
