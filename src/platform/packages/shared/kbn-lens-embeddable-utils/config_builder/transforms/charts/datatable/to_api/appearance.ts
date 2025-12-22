@@ -107,6 +107,7 @@ function parseSortingToAPI(
   }
 
   const { columnId, direction } = sorting;
+  // Old SOs can have a missing direction, so we default to asc
   const DEFAULT_DIRECTION = 'asc' as const;
 
   // Split_metrics_by sorting (contains ---)
