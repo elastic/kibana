@@ -312,36 +312,21 @@ async function deleteRelatedResources(
   // Delete workflows (idempotent)
   if (workflowIds.length > 0) {
     logger.info(`Attempting to delete ${workflowIds.length} workflow(s)`);
-    // Delete workflows individually for better error handling
-    const workflowResults = await Promise.all(
-      workflowIds.map((workflowId) =>
-        deleteSingleResource(
-          () => workflowManagement.management.deleteWorkflows([workflowId], spaceId, request),
-          workflowId,
-          'workflow',
-          logger
-        )
-      )
+
+    // Delete all workflows at once - the API now handles partial failures gracefully
+    const deleteResult = await workflowManagement.management.deleteWorkflows(
+      workflowIds,
+      spaceId,
+      request
     );
 
-    workflowResults.forEach((res) => {
-      if (res.success) {
-        result.deletedWorkflowIds.push(res.id);
-      } else {
-        result.failedWorkflowIds.push(res.id);
-        result.allSucceeded = false;
-      }
-    });
+    logger.info(`Deleted ${deleteResult.deleted}/${deleteResult.total} workflow(s)`);
 
-    if (result.deletedWorkflowIds.length > 0) {
-      logger.info(`Deleted ${result.deletedWorkflowIds.length} workflow(s)`);
-    }
-    if (result.failedWorkflowIds.length > 0) {
-      logger.warn(
-        `Failed to delete ${
-          result.failedWorkflowIds.length
-        } workflow(s): ${result.failedWorkflowIds.join(', ')}`
-      );
+    if (deleteResult.failures.length > 0) {
+      const failedIds = deleteResult.failures.map((f) => f.id);
+      result.failedWorkflowIds.push(...failedIds);
+      result.allSucceeded = false;
+      logger.warn(`Failed to delete ${failedIds.length} workflow(s): ${failedIds.join(', ')}`);
     }
   }
 

@@ -334,7 +334,11 @@ describe('deleteConnectorAndRelatedResources', () => {
 
     mockActionsClient.delete.mockResolvedValue(undefined);
     mockToolRegistry.delete.mockResolvedValue(undefined);
-    mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue(undefined);
+    mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue({
+      total: 1,
+      deleted: 1,
+      failures: [],
+    });
     mockSavedObjectsClient.delete.mockResolvedValue({});
 
     const result = await deleteConnectorAndRelatedResources({
@@ -371,7 +375,11 @@ describe('deleteConnectorAndRelatedResources', () => {
 
     mockActionsClient.delete.mockRejectedValue(new Error('KSC deletion failed'));
     mockToolRegistry.delete.mockResolvedValue(undefined);
-    mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue(undefined);
+    mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue({
+      total: 1,
+      deleted: 1,
+      failures: [],
+    });
     mockSavedObjectsClient.update.mockResolvedValue({} as any);
 
     const result = await deleteConnectorAndRelatedResources({
@@ -418,9 +426,12 @@ describe('deleteConnectorAndRelatedResources', () => {
 
     mockActionsClient.delete.mockRejectedValue(new Error('404 Not Found'));
     mockToolRegistry.delete.mockRejectedValue(new Error('Tool not found'));
-    mockWorkflowManagement.management.deleteWorkflows.mockRejectedValue(
-      new Error('Workflow does not exist')
-    );
+    // deleteWorkflows now handles 404s gracefully and returns success
+    mockWorkflowManagement.management.deleteWorkflows.mockResolvedValue({
+      total: 1,
+      deleted: 1,
+      failures: [],
+    });
     mockSavedObjectsClient.delete.mockResolvedValue({});
 
     const result = await deleteConnectorAndRelatedResources({
