@@ -17,5 +17,7 @@ export const DATA_CONNECTORS_SHORT_TITLE = i18n.translate('xpack.dataConnectors.
   defaultMessage: 'Connectors',
 });
 
+export const API_BASE_PATH = '/api/data_connectors';
+
 // Pagination constants
 export const PAGINATION_ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];

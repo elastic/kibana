@@ -31,8 +31,17 @@ const CONNECTOR_NAME_TO_ICON: Record<string, string> = {
   Salesforce: 'users',
 };
 
-// Map of connector types to fallback icons
+// Map of connector types to icons
 const CONNECTOR_TYPE_TO_ICON: Record<string, string> = {
+  // Connector-spec IDs (from @kbn/connector-specs)
+  '.notion': 'documents',
+  notion: 'documents',
+  '.github': 'logoGithub',
+  '.slack': 'logoSlack',
+  '.jira': 'listAdd',
+  '.salesforce': 'users',
+  '.dropbox': 'document',
+  '.box': 'folderClosed',
   Jira: 'listAdd',
   Salesforce: 'users',
   'File import': 'document',

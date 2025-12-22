@@ -18,6 +18,7 @@ import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
+import { API_BASE_PATH } from '../../common/constants';
 
 /**
  * Builds the secrets object for a connector based on its spec
@@ -71,10 +72,88 @@ export function registerRoutes(
   logger: Logger,
   getStartServices: StartServicesAccessor<DataConnectorsServerStartDependencies>
 ) {
+  // List available connector types from Data Sources Registry
+  router.get(
+    {
+      path: `${API_BASE_PATH}/types`,
+      validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [, { dataSourcesRegistry }] = await getStartServices();
+        const dataCatalog = dataSourcesRegistry.getCatalog();
+        const types = dataCatalog.list();
+
+        return response.ok({
+          body: types,
+        });
+      } catch (error) {
+        logger.error(`Failed to list connector types: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to list connector types: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
+  // Get a specific connector type by ID
+  router.get(
+    {
+      path: `${API_BASE_PATH}/types/{id}`,
+      validate: { params: schema.object({ id: schema.string() }) },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [, { dataSourcesRegistry }] = await getStartServices();
+        const dataCatalog = dataSourcesRegistry.getCatalog();
+        const type = dataCatalog.get(request.params.id);
+
+        if (!type) {
+          return response.notFound({
+            body: { message: `Connector type "${request.params.id}" not found` },
+          });
+        }
+
+        // Include workflow information
+        const workflowInfos = type.generateWorkflows('<fake-stack-connector-id>');
+
+        return response.ok({
+          body: {
+            ...type,
+            workflowInfos,
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to get connector type: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to get connector type: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
   // List all data connectors
   router.get(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
@@ -119,7 +198,7 @@ export function registerRoutes(
   // Get one data connector by ID
   router.get(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
@@ -156,7 +235,7 @@ export function registerRoutes(
   // Create data connector
   router.post(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: {
         body: createDataConnectorRequestSchema,
       },
@@ -234,7 +313,7 @@ export function registerRoutes(
   // Delete all data connectors
   router.delete(
     {
-      path: '/api/data_connectors',
+      path: API_BASE_PATH,
       validate: false,
       security: {
         authz: {
@@ -291,7 +370,7 @@ export function registerRoutes(
   // Delete data connector by ID
   router.delete(
     {
-      path: '/api/data_connectors/{id}',
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {
