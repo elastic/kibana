@@ -80,6 +80,10 @@ export function ErrorSampleAiInsight({
       data: {
         summary,
         context,
+        attachmentLabel: i18n.translate(
+          'xpack.observabilityAgentBuilder.errorAiInsight.attachmentLabel',
+          { defaultMessage: 'Error summary' }
+        ),
       },
     },
     {

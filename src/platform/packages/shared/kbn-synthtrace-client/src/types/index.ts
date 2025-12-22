@@ -18,6 +18,9 @@ export type ESDocumentWithOperation<TFields extends Fields> = {
   _index?: string;
   _action?: SynthtraceESAction;
   _dynamicTemplates?: SynthtraceDynamicTemplate;
+  ['data_stream.type']?: string;
+  ['data_stream.dataset']?: string;
+  ['data_stream.namespace']?: string;
 } & TFields;
 
 export type SynthtraceGenerator<TFields extends Fields> = Generator<Serializable<TFields>>;
