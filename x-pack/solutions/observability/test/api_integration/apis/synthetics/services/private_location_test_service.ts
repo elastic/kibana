@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import type { KibanaSupertestProvider, RetryService } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
