@@ -40,7 +40,7 @@ export function Bar({
         margin-left: ${left}%;
       `}
     >
-      <BarSegments segments={segments} />
+      {segments?.length ? <BarSegments segments={segments} /> : null}
     </div>
   );
 }
