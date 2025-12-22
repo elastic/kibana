@@ -25,8 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  // Skipping temporarily: https://github.com/elastic/kibana/issues/246720
-  describe.skip('tool: recall', function () {
+  describe('tool: recall', function () {
     // fails/flaky on MKI, see https://github.com/elastic/kibana/issues/232588
     this.tags(['failsOnMKI']);
 
