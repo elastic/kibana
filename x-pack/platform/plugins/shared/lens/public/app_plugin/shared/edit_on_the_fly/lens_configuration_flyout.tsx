@@ -40,8 +40,9 @@ import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
-import type { Layer } from './convert_to_esql_modal';
+import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
+import { layerTypes } from '../../..';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -311,12 +312,12 @@ export function LensEditConfigurationFlyout({
   // The button is disabled when the visualization cannot be converted to ES|QL
   const {
     isConvertToEsqlButtonDisabled,
-    resultLayers,
-  }: { isConvertToEsqlButtonDisabled: boolean; resultLayers: Layer[] } = useMemo(() => {
+    convertibleLayers,
+  }: { isConvertToEsqlButtonDisabled: boolean; convertibleLayers: ConvertibleLayer[] } = useMemo(() => {
     const datasourceState = datasourceStates[datasourceId].state;
 
     if (!isSingleLayerVisualization || textBasedMode || !datasourceState) {
-      return { isConvertToEsqlButtonDisabled: true, resultLayers: [] };
+      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
     }
 
     // Validate datasourceState structure
@@ -326,7 +327,7 @@ export function LensEditConfigurationFlyout({
       !('layers' in datasourceState) ||
       !datasourceState.layers
     ) {
-      return { isConvertToEsqlButtonDisabled: true, resultLayers: [] };
+      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
     }
 
     // Access the single layer safely
@@ -334,12 +335,12 @@ export function LensEditConfigurationFlyout({
     const layerId = layerIds[0];
 
     if (!layerId || !(layerId in layers)) {
-      return { isConvertToEsqlButtonDisabled: true, resultLayers: [] };
+      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
     }
 
     const singleLayer = layers[layerId];
     if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
-      return { isConvertToEsqlButtonDisabled: true, resultLayers: [] };
+      return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
     }
 
     // Get the esAggEntries
@@ -362,16 +363,19 @@ export function LensEditConfigurationFlyout({
       startDependencies.data.nowProvider.get()
     );
 
-    const resultLayer: Layer = {
+    const convertibleLayer: ConvertibleLayer = {
       id: layerId,
       icon: 'layers',
-      name: 'layer 1',
-      type: 'data',
+      name: '',
+      type: layerTypes.DATA,
       query: esqlLayer ? esqlLayer.esql : '',
       isConvertibleToEsql: !!esqlLayer,
     };
 
-    return { isConvertToEsqlButtonDisabled: !esqlLayer, resultLayers: [resultLayer] };
+    return {
+      isConvertToEsqlButtonDisabled: !esqlLayer,
+      convertibleLayers: [convertibleLayer]
+    };
   }, [
     coreStart.uiSettings,
     datasourceId,
@@ -657,7 +661,7 @@ export function LensEditConfigurationFlyout({
           </EuiFlexItem>
         </EuiFlexGroup>
         {isModalVisible ? (
-          <ConvertToEsqlModal layers={resultLayers} onCancel={closeModal} onConfirm={closeModal} />
+          <ConvertToEsqlModal layers={convertibleLayers} onCancel={closeModal} onConfirm={closeModal} />
         ) : null}
       </FlyoutWrapper>
     </>

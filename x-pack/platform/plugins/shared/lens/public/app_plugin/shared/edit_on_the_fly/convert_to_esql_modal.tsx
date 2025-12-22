@@ -34,7 +34,7 @@ import { layerTypes } from '../../..';
 
 type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
 
-export interface Layer {
+export interface ConvertibleLayer {
   id: string;
   icon: IconType;
   name: string;
@@ -62,7 +62,7 @@ const typeLabels: Record<LayerType, (count: number) => string> = {
 };
 
 export const ConvertToEsqlModal: React.FunctionComponent<{
-  layers: Layer[];
+  layers: ConvertibleLayer[];
   onCancel: EuiConfirmModalProps['onCancel'];
   /**
    * Callback invoked when user confirms the conversion.
@@ -72,8 +72,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
 }> = ({ layers, onCancel, onConfirm }) => {
   const { euiTheme } = useEuiTheme();
 
-  const [selectedItems, setSelectedItems] = useState<Layer[]>([]);
-  const onSelectionChange = useCallback((items: Layer[]) => {
+  const [selectedItems, setSelectedItems] = useState<ConvertibleLayer[]>([]);
+  const onSelectionChange = useCallback((items: ConvertibleLayer[]) => {
     setSelectedItems(items);
   }, []);
 
@@ -82,7 +82,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   );
 
   const toggleDetails = useCallback(
-    (layer: Layer) => {
+    (layer: ConvertibleLayer) => {
       const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
       if (itemIdToExpandedRowMapValues[layer.id]) {
@@ -102,7 +102,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
     [itemIdToExpandedRowMap]
   );
 
-  const columns: Array<EuiBasicTableColumn<Layer>> = [
+  const columns: Array<EuiBasicTableColumn<ConvertibleLayer>> = [
     {
       field: 'icon',
       name: '',
@@ -134,7 +134,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           </p>
         </EuiScreenReaderOnly>
       ),
-      render: (layer: Layer) => {
+      render: (layer: ConvertibleLayer) => {
         const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
 
         return (
@@ -157,11 +157,11 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
     },
   ];
 
-  const selection: EuiTableSelectionType<Layer> = {
-    selectable: (layer: Layer) => {
+  const selection: EuiTableSelectionType<ConvertibleLayer> = {
+    selectable: (layer: ConvertibleLayer) => {
       return layer.type === layerTypes.DATA && layer.isConvertibleToEsql;
     },
-    selectableMessage: (selectable: boolean, layer: Layer) => {
+    selectableMessage: (selectable: boolean, layer: ConvertibleLayer) => {
       return !selectable
         ? layer.type === layerTypes.DATA
           ? i18n.translate('xpack.lens.config.cannotBeSwitchedAriaLabel', {
