@@ -136,4 +136,46 @@ describe('Load from JSON ModalProvider', () => {
       }
     `);
   });
+
+  it('passes through a valid pipeline object with triple-quoted strings (xJSON)', () => {
+    const { find, exists } = testBed;
+    find('button').simulate('click');
+    expect(exists('loadJsonConfirmationModal'));
+    const validPipelineWithTripleQuotes = `{
+      "processors": [
+        {
+          "script": {
+            "description": "add a test_field",
+            "lang": "painless",
+            "source": """
+              ctx['test_field'] = 'This is a test'
+            """
+          }
+        }
+      ]
+    }`;
+    find('mockCodeEditor')
+      .getDOMNode()
+      .setAttribute('data-currentvalue', validPipelineWithTripleQuotes);
+    find('mockCodeEditor').simulate('change');
+
+    find('confirmModalConfirmButton').simulate('click');
+    expect(!exists('loadJsonConfirmationModal'));
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onDone.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "processors": Array [
+          Object {
+            "script": Object {
+              "description": "add a test_field",
+              "lang": "painless",
+              "source": "
+                    ctx['test_field'] = 'This is a test'
+                  ",
+            },
+          },
+        ],
+      }
+    `);
+  });
 });
