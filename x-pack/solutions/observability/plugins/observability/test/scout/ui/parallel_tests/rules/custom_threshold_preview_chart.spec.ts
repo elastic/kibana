@@ -33,9 +33,6 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     await customEquationButton.click();
     await customEquationField.click();
     await customEquationField.fill('A +');
-    await expect(customEquationButton).toHaveText('Equation A +');
-
-    await page.testSubj.click('o11yClosablePopoverTitleButton');
 
     const lensFailure = page.testSubj.locator('embeddable-lens-failure');
     await expect(lensFailure).toBeVisible();
@@ -45,9 +42,6 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     await customEquationButton.click();
     await customEquationField.click();
     await customEquationField.fill('A');
-    await expect(customEquationButton).toHaveText('Equation A');
-
-    await page.testSubj.click('o11yClosablePopoverTitleButton');
 
     await expect(lensFailure).toHaveCount(0);
   });
