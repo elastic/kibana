@@ -8,4 +8,4 @@
  */
 export { useSidebar, useSidebarWidth } from './use_sidebar';
 export type { UseSidebarWidthResult, UseSidebarResult } from './use_sidebar';
-export { useSidebarApp, type UseSidebarAppResult } from './use_sidebar_app';
+export { useSidebarApp } from './use_sidebar_app';
