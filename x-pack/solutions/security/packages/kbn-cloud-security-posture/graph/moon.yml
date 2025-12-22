@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/fleet-plugin'
   - '@kbn/core-http-browser'
+  - '@kbn/kql'
 tags:
   - shared-browser
   - package
