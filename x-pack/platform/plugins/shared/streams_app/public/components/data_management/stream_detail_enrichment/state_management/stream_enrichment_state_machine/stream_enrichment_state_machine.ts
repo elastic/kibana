@@ -401,6 +401,8 @@ export const streamEnrichmentMachine = setup({
                   definition: context.definition,
                   streamlangDSL: context.nextStreamlangDSL,
                   fields: getUpsertFields(context),
+                  configurationMode:
+                    context.interactiveModeRef !== undefined ? 'interactive' : 'yaml',
                 }),
                 onDone: {
                   target: 'idle',

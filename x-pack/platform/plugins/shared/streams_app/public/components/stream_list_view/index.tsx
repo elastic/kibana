@@ -158,7 +158,7 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
@@ -226,7 +226,7 @@ export function StreamListView() {
               streams={streamsListFetch.value?.streams}
               canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
             />
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <>
                 <EuiSpacer size="l" />
                 <GroupStreamsCards streams={streamsListFetch.value?.streams} />
