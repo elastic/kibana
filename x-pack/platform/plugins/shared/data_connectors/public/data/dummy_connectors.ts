@@ -7,74 +7,65 @@
 
 import type { Connector } from '../types/connector';
 
-// TODO: This is temporary dummy data. Replace with API integration when backend is ready.
+// TODO: This is temporary dummy data for "All" connectors section.
+// "Popular" connectors are now populated from the connector registry.
 export const DUMMY_CONNECTORS: Connector[] = [
-  // Popular connectors
   {
     id: 'google-drive',
     name: 'Google Drive',
     type: 'File import',
     icon: 'logoGoogleG',
-    category: 'popular',
+    category: 'all',
   },
   {
     id: 'gmail',
     name: 'Gmail',
     type: 'Web crawler',
     icon: 'email',
-    category: 'popular',
+    category: 'all',
   },
   {
     id: 'github',
     name: 'Github',
     type: 'Github',
     icon: 'logoGithub',
-    category: 'popular',
+    category: 'all',
   },
   {
     id: 'asana',
     name: 'Asana',
     type: 'Web crawler',
     icon: 'apps',
-    category: 'popular',
-  },
-  {
-    id: 'notion',
-    name: 'Notion',
-    type: 'Web crawler',
-    icon: 'documents',
-    category: 'popular',
+    category: 'all',
   },
   {
     id: 'slack',
     name: 'Slack',
     type: 'Slack',
     icon: 'logoSlack',
-    category: 'popular',
+    category: 'all',
   },
   {
     id: 'dropbox',
     name: 'Dropbox',
     type: 'File import',
     icon: 'document',
-    category: 'popular',
+    category: 'all',
   },
   {
     id: 'hubspot',
     name: 'Hubspot',
     type: 'Web crawler',
     icon: 'database',
-    category: 'popular',
+    category: 'all',
   },
   {
     id: 'sharepoint',
     name: 'Sharepoint',
     type: 'File import',
     icon: 'logoBusiness',
-    category: 'popular',
+    category: 'all',
   },
-
-  // All connectors (includes popular + additional ones)
   {
     id: 'airbnb',
     name: 'Airbnb',
