@@ -8,14 +8,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { AIValueUpsellingPageESS } from './index';
+import { AIValueUpsellingPageESS } from '.';
 
 jest.mock('../attack_discovery/upgrade_actions', () => ({
-  UpgradeActions: () => <button type="button">Upgrade</button>,
+  UpgradeActions: () => <button type="button">{'Upgrade'}</button>,
 }));
 
 jest.mock('@kbn/shared-ux-page-kibana-template', () => {
   const KibanaPageTemplate = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  // eslint-disable-next-line react/display-name
   KibanaPageTemplate.Section = ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   );
@@ -29,5 +30,3 @@ describe('AIValueUpsellingPageESS', () => {
     expect(screen.getByTestId('assistantAvatar')).toBeInTheDocument();
   });
 });
-
-
