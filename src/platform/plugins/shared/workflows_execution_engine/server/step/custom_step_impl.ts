@@ -75,6 +75,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   private createHandlerContext(input: unknown): StepHandlerContext {
     return {
       input,
+      rawInput: this.node.configuration.with || {},
       config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
       contextManager: {
         getContext: () => {
@@ -83,8 +84,11 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         getScopedEsClient: () => {
           return this.stepExecutionRuntime.contextManager.getEsClientAsUser();
         },
-        renderInputTemplate: (value) => {
-          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value);
+        renderInputTemplate: (value, additionalContext) => {
+          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+            value,
+            additionalContext
+          );
         },
         getFakeRequest: () => {
           return this.stepExecutionRuntime.contextManager.getFakeRequest();
