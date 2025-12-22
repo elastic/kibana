@@ -31,14 +31,14 @@ import {
   CONNECT_BUTTON,
   API_KEY_PLACEHOLDER,
 } from './translations';
-import { buildClusterQueryParams } from './utils';
+import { buildClusterQueryParams, buildLoginQueryParams } from './utils';
 
 interface ConnectionWizardProps {
   onConnect: () => void;
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService } =
+  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService, organizationId } =
     useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -116,7 +116,10 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              href={`${cloudUrl}/login?redirectTo=${encodedRedirectUrl}`}
+              href={`${cloudUrl}/login?${buildLoginQueryParams({
+                redirectTo: encodedRedirectUrl,
+                organizationId,
+              })}`}
               target="_blank"
               iconType="popout"
               iconSide="right"
@@ -178,6 +181,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               title="Authentication failed"
               color="danger"
               iconType="error"

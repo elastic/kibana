@@ -35,3 +35,20 @@ export const buildClusterQueryParams = (
 
   return params.toString();
 };
+
+interface LoginQueryParams {
+  redirectTo: string;
+  organizationId?: string;
+}
+
+export const buildLoginQueryParams = ({ redirectTo, organizationId }: LoginQueryParams): string => {
+  const params = new URLSearchParams({
+    redirectTo,
+  });
+
+  if (organizationId) {
+    params.append('organization_id', organizationId);
+  }
+
+  return params.toString();
+};
