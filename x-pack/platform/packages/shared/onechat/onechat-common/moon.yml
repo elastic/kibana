@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/sse-utils'
   - '@kbn/visualization-utils'
   - '@kbn/zod'
+  - '@kbn/core'
 tags:
   - shared-common
   - package

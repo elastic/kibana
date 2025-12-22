@@ -8,9 +8,8 @@
   "kbn_references": [
     "@kbn/field-types",
     "@kbn/unified-histogram",
-    "@kbn/metrics-experience-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/chart-icons",
