@@ -8,7 +8,7 @@
 import { calculateAuto } from '@kbn/calculate-auto';
 import type { AbsoluteTimeRange } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import type { Feature, SignificantEventsPreviewResponse } from '@kbn/streams-schema';
+import type { System, SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 import moment from 'moment';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -24,7 +24,7 @@ export function useSignificantEventPreviewFetch({
   noOfBuckets?: number;
   name: string;
   kqlQuery: string;
-  feature?: Omit<Feature, 'description'>;
+  feature?: Omit<System, 'description'>;
   timeRange: AbsoluteTimeRange;
   isQueryValid: boolean;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {

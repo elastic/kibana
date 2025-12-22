@@ -59,7 +59,7 @@ interface GeneratedSignificantEventQuery {
   feature?: {
     name: string;
     filter: Condition;
-    type: FeatureType;
+    type: 'system';
   };
   severity_score: number;
   evidence?: string[];

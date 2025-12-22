@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,7 +22,7 @@ interface Props {
   isSubmitting: boolean;
   setQueries: (queries: StreamQueryKql[]) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Omit<System, 'description'>[];
   dataViews: DataView[];
 }
 

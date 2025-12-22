@@ -7,7 +7,7 @@
 
 import { EuiFormRow, EuiText, EuiSpacer, EuiComboBox, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type Feature } from '@kbn/streams-schema';
+import { type System } from '@kbn/streams-schema';
 import React from 'react';
 
 export const ALL_DATA_OPTION = {
@@ -16,9 +16,9 @@ export const ALL_DATA_OPTION = {
 };
 
 export interface FeatureSelectorProps {
-  features: Feature[];
-  selectedFeatures: Feature[];
-  onFeaturesChange: (features: Feature[]) => void;
+  features: System[];
+  selectedFeatures: System[];
+  onFeaturesChange: (features: System[]) => void;
 }
 
 export function FeaturesSelector({
@@ -57,7 +57,7 @@ export function FeaturesSelector({
             value: feature,
           }))}
           onChange={(selected) => {
-            onFeaturesChange(selected.map((option) => option.value as Feature));
+            onFeaturesChange(selected.map((option) => option.value as System));
           }}
         />
       </>

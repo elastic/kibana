@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -46,7 +46,7 @@ export async function generateSignificantEvents({
   logger,
 }: {
   stream: Streams.all.Definition;
-  feature?: Feature;
+  feature?: System;
   start: number;
   end: number;
   esClient: ElasticsearchClient;

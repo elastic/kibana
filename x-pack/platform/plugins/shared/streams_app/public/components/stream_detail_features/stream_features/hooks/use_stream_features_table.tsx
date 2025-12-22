@@ -6,31 +6,29 @@
  */
 
 import React from 'react';
-import { isFeatureWithFilter, type Feature, type Streams } from '@kbn/streams-schema';
+import { type System, type Streams } from '@kbn/streams-schema';
 import { EuiMarkdownFormat, type EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../../data_management/shared';
 import { FeatureEventsSparklineLast24hrs } from '../feature_events_sparkline';
 
 export const useStreamFeaturesTable = ({ definition }: { definition: Streams.all.Definition }) => {
-  const nameColumn: EuiBasicTableColumn<Feature> = {
+  const nameColumn: EuiBasicTableColumn<System> = {
     field: 'name',
     name: TITLE_LABEL,
     sortable: true,
     truncateText: true,
   };
 
-  const filterColumn: EuiBasicTableColumn<Feature> = {
+  const filterColumn: EuiBasicTableColumn<System> = {
     name: FILTER_LABEL,
     width: '30%',
-    render: (feature: Feature) => {
-      if (isFeatureWithFilter(feature)) {
-        return <ConditionPanel condition={feature.filter} />;
-      }
+    render: (feature: System) => {
+      return <ConditionPanel condition={feature.filter} />;
     },
   };
 
-  const descriptionColumn: EuiBasicTableColumn<Feature> = {
+  const descriptionColumn: EuiBasicTableColumn<System> = {
     field: 'description',
     name: DESCRIPTION_LABEL,
     truncateText: {
@@ -41,13 +39,11 @@ export const useStreamFeaturesTable = ({ definition }: { definition: Streams.all
     ),
   };
 
-  const eventsLast24HoursColumn: EuiBasicTableColumn<Feature> = {
+  const eventsLast24HoursColumn: EuiBasicTableColumn<System> = {
     name: EVENTS_LAST_24_HOURS_LABEL,
     width: '15%',
-    render: (feature: Feature) => {
-      if (isFeatureWithFilter(feature)) {
-        return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
-      }
+    render: (feature: System) => {
+      return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
     },
   };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import type { AbsoluteTimeRange } from '@kbn/es-query';
 import React, { useMemo } from 'react';
 import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
@@ -19,7 +19,7 @@ export const FeatureEventsSparklineLast24hrs = ({
   hideAxis = true,
   height = 100,
 }: {
-  feature: Feature;
+  feature: System;
   definition: Streams.all.Definition;
   hideAxis?: boolean;
   height?: number;
