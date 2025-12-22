@@ -9,8 +9,8 @@ import { useEffect, useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { buildEsQuery, type Filter, type Query } from '@kbn/es-query';
 import { useKibana } from '../../common/lib/kibana';
+import type { AlertsQueryName } from '../../detections/containers/detection_engine/alerts/use_query';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
 
 export interface UseCriticalAlerts {
@@ -19,7 +19,7 @@ export interface UseCriticalAlerts {
   signalIndexName: string | null;
   query?: Query;
   filters?: Filter[];
-  queryName?: string;
+  queryName: AlertsQueryName;
   to: GlobalTimeArgs['to'];
 }
 
@@ -29,7 +29,7 @@ export const useAlertCountQuery = ({
   signalIndexName,
   query,
   filters,
-  queryName = ALERTS_QUERY_NAMES.COUNT,
+  queryName,
   to,
 }: UseCriticalAlerts): {
   alertCount: number;

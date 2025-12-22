@@ -76,7 +76,7 @@ export const useValueMetrics = ({
     from,
     signalIndexName,
     filters,
-    queryName: `${ALERTS_QUERY_NAMES.COUNT} aiValue filtered`,
+    queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE,
   });
 
   const { alertCount: filteredAlertsCountCompare } = useAlertCountQuery({
@@ -84,20 +84,20 @@ export const useValueMetrics = ({
     from: compareTimeRange.from,
     signalIndexName,
     filters: filtersCompare,
-    queryName: `${ALERTS_QUERY_NAMES.COUNT} aiValue filtered compare`,
+    queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_COMPARE,
   });
 
   const { alertCount, isLoading: isLoadingAlerts } = useAlertCountQuery({
     to,
     from,
     signalIndexName,
-    queryName: `${ALERTS_QUERY_NAMES.COUNT} aiValue total`,
+    queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_TOTAL,
   });
   const { alertCount: alertCountCompare, isLoading: isLoadingAlertsCompare } = useAlertCountQuery({
     to: compareTimeRange.to,
     from: compareTimeRange.from,
     signalIndexName,
-    queryName: `${ALERTS_QUERY_NAMES.COUNT} aiValue total compare`,
+    queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_TOTAL_COMPARE,
   });
   const isLoading = useMemo(
     () =>

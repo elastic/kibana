@@ -26,6 +26,7 @@ const defaultArgs: UseCriticalAlerts = {
   from: 'now-15m',
   to: 'now',
   signalIndexName: 'test-signal-index',
+  queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE,
 };
 
 describe('useAlertCountQuery', () => {
@@ -69,16 +70,21 @@ describe('useAlertCountQuery', () => {
       expect.objectContaining({
         indexName: defaultArgs.signalIndexName,
         skip: false,
-        queryName: ALERTS_QUERY_NAMES.COUNT,
+        queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE,
       })
     );
   });
 
-  it('returns queryName override to useQueryAlerts', () => {
-    renderHook(() => useAlertCountQuery({ ...defaultArgs, queryName: 'aiValue total override' }));
+  it('returns queryName total compare to useQueryAlerts', () => {
+    renderHook(() =>
+      useAlertCountQuery({
+        ...defaultArgs,
+        queryName: ALERTS_QUERY_NAMES.COUNT_AI_VALUE_TOTAL_COMPARE,
+      })
+    );
     expect(mockUseQueryAlerts.useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
-        queryName: 'aiValue total override',
+        queryName: 'securitySolutionUI aiValue total compare',
       })
     );
   });
