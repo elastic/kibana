@@ -272,7 +272,7 @@ export const createCaseSavedObjectType = (
         },
       },
       template: {
-        type: 'nested',
+        type: 'object',
         properties: {
           id: {
             type: 'keyword',
@@ -281,6 +281,10 @@ export const createCaseSavedObjectType = (
             type: 'integer',
           },
         },
+      },
+      templateFields: {
+        type: 'object',
+        properties: {},
       },
     },
   },
