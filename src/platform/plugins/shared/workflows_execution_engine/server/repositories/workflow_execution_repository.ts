@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
@@ -136,13 +136,7 @@ export class WorkflowExecutionRepository {
           must_not: [
             {
               terms: {
-                status: [
-                  ExecutionStatus.COMPLETED,
-                  ExecutionStatus.FAILED,
-                  ExecutionStatus.CANCELLED,
-                  ExecutionStatus.SKIPPED,
-                  ExecutionStatus.TIMED_OUT,
-                ],
+                status: TerminalExecutionStatuses,
               },
             },
           ],

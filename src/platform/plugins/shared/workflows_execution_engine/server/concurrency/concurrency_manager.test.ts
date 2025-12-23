@@ -7,24 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
 
 describe('ConcurrencyManager', () => {
-  let logger: jest.Mocked<Logger>;
   let concurrencyManager: ConcurrencyManager;
   let mockContext: WorkflowContext;
 
   beforeEach(() => {
-    // Logger mock - following common pattern in workflow execution engine tests
-    logger = {
-      debug: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
-
     concurrencyManager = new ConcurrencyManager();
 
     mockContext = {

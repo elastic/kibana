@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -183,13 +183,7 @@ describe('WorkflowExecutionRepository', () => {
             must_not: [
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.COMPLETED,
-                    ExecutionStatus.FAILED,
-                    ExecutionStatus.CANCELLED,
-                    ExecutionStatus.SKIPPED,
-                    ExecutionStatus.TIMED_OUT,
-                  ],
+                  status: TerminalExecutionStatuses,
                 },
               },
             ],
@@ -234,13 +228,7 @@ describe('WorkflowExecutionRepository', () => {
             must_not: [
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.COMPLETED,
-                    ExecutionStatus.FAILED,
-                    ExecutionStatus.CANCELLED,
-                    ExecutionStatus.SKIPPED,
-                    ExecutionStatus.TIMED_OUT,
-                  ],
+                  status: TerminalExecutionStatuses,
                 },
               },
             ],
