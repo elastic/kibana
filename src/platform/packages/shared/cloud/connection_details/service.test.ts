@@ -206,11 +206,15 @@ describe('ConnectionDetailsService', () => {
   });
 
   describe('setTab', () => {
-    it('should update tabId$', () => {
+    it('should allow switching to apiKeys immediately', () => {
       const service = new ConnectionDetailsService(createMockOpts());
 
       service.setTab('apiKeys');
       expect(service.tabId$.getValue()).toBe('apiKeys');
+    });
+
+    it('should allow switching to endpoints immediately', () => {
+      const service = new ConnectionDetailsService(createMockOpts());
 
       service.setTab('endpoints');
       expect(service.tabId$.getValue()).toBe('endpoints');
