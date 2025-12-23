@@ -69,11 +69,11 @@ export const DIRECTORY_ACTIVE_INACTIVE_QUERY = `FROM .kibana_alert_transitions
   | RENAME last_event_timestamp AS @timestamp, candidate_state AS end_state,
       last_tracked_state AS start_state, rule.id AS rule_id`;
 
-export interface CreateIndicesOpts {
+export interface AlertDirectorOpts {
   esClient: ElasticsearchClient;
 }
 
-export function alertDirector({ esClient }: CreateIndicesOpts) {
+export function alertDirector({ esClient }: AlertDirectorOpts) {
   setInterval(async () => {
     try {
       const result = await esClient.esql.query({

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_EVENTS_INDEX } from './create_indices';
 
-export interface CreateIndicesOpts {
+export interface ESQLRuleOpts {
   esClient: ElasticsearchClient;
 }
 
@@ -17,7 +17,7 @@ export const RULE_INTERVAL = 1000;
 export const ESQL_QUERY = `FROM .kibana-event-log* METADATA _id, _index`;
 export const RULE_LOOKBACK = '5m';
 
-export function esqlRule({ esClient }: CreateIndicesOpts) {
+export function esqlRule({ esClient }: ESQLRuleOpts) {
   setInterval(async () => {
     try {
       const result = await esClient.esql.query({

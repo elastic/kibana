@@ -18,7 +18,7 @@ export const NOTIFICATION_POLICY_INDEX = '.kibana_notification_policies';
 
 export async function createIndices({ esClient }: CreateIndicesOpts) {
   await esClient.indices.delete({ index: ALERT_EVENTS_INDEX }, { ignore: [404] });
-
+  await new Promise((resolve) => setTimeout(resolve, 100));
   await esClient.indices.create({
     index: ALERT_EVENTS_INDEX,
     settings: {
@@ -50,9 +50,12 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
   });
 
   await esClient.indices.delete({ index: ALERT_ACTIONS_INDEX }, { ignore: [404] });
-
+  await new Promise((resolve) => setTimeout(resolve, 100));
   await esClient.indices.create({
     index: ALERT_ACTIONS_INDEX,
+    settings: {
+      mode: 'lookup',
+    },
     mappings: {
       dynamic: false,
       properties: {
@@ -76,7 +79,7 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
   });
 
   await esClient.indices.delete({ index: ALERT_TRANSITIONS_INDEX }, { ignore: [404] });
-
+  await new Promise((resolve) => setTimeout(resolve, 100));
   await esClient.indices.create({
     index: ALERT_TRANSITIONS_INDEX,
     settings: {
@@ -98,7 +101,7 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
   });
 
   await esClient.indices.delete({ index: NOTIFICATION_POLICY_INDEX }, { ignore: [404] });
-
+  await new Promise((resolve) => setTimeout(resolve, 100));
   await esClient.indices.create({
     index: NOTIFICATION_POLICY_INDEX,
     mappings: {

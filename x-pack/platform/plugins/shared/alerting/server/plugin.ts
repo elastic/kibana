@@ -117,6 +117,7 @@ import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_
 import { createIndices } from './v2/create_indices';
 import { esqlRule } from './v2/esql_rule';
 import { alertDirector } from './v2/alert_director';
+import { alertDispatcher } from './v2/alert_dispatcher';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -751,8 +752,11 @@ export class AlertingPlugin {
       () => {}
     ); // it shouldn't reject, but just in case
 
-    esqlRule({ esClient: core.elasticsearch.client.asInternalUser });
-    alertDirector({ esClient: core.elasticsearch.client.asInternalUser });
+    setTimeout(() => {
+      esqlRule({ esClient: core.elasticsearch.client.asInternalUser });
+      alertDirector({ esClient: core.elasticsearch.client.asInternalUser });
+      alertDispatcher({ esClient: core.elasticsearch.client.asInternalUser });
+    }, 5000);
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
