@@ -43,7 +43,7 @@ export interface UseGetDefaultGroupTitleRenderersProps {
 export const useGetDefaultGroupTitleRenderers = ({
   getAttack,
   showAnonymized,
-  isLoading,
+  isLoading = false,
 }: UseGetDefaultGroupTitleRenderersProps) => {
   const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> = useCallback(
     (selectedGroup, bucket) => {
@@ -66,13 +66,15 @@ export const useGetDefaultGroupTitleRenderers = ({
             </div>
           }
           loadedContent={
-            attack && (
-              <AttackGroupContent
-                attack={attack}
-                dataTestSubj="attack"
-                showAnonymized={showAnonymized}
-              />
-            )
+            <>
+              {attack && (
+                <AttackGroupContent
+                  attack={attack}
+                  dataTestSubj="attack"
+                  showAnonymized={showAnonymized}
+                />
+              )}
+            </>
           }
         />
       );

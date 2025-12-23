@@ -167,5 +167,23 @@ describe('useGetDefaultGroupTitleRenderers', () => {
       const { getByTestId } = render(rendered as React.ReactElement);
       expect(getByTestId(`attack${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeInTheDocument();
     });
+
+    it('should render a loading spinner when isLoading is true even if attack is present', () => {
+      mockGetAttack.mockReturnValue(mockAttacks[0]);
+
+      const { result } = renderHook(() =>
+        useGetDefaultGroupTitleRenderers({
+          getAttack: mockGetAttack,
+          isLoading: true,
+        })
+      );
+
+      const renderer = result.current.defaultGroupTitleRenderers;
+      const bucket = { key: [mockAttacks[0].id], doc_count: 1 };
+      const rendered = renderer(ALERT_ATTACK_IDS, bucket);
+
+      const { getByTestId } = render(rendered as React.ReactElement);
+      expect(getByTestId(ATTACK_GROUP_LOADING_SPINNER_TEST_ID)).toBeInTheDocument();
+    });
   });
 });
