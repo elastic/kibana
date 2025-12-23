@@ -27,6 +27,7 @@ import {
   mockedMigrationTranslationStats,
 } from '../../common/mocks/migration_result.data';
 import * as useGetMissingResourcesModule from '../../common/hooks/use_get_missing_resources';
+import type { SiemMigrationsService } from '../../service';
 
 jest.mock('../../../common/components/page_wrapper', () => {
   return {
@@ -114,10 +115,10 @@ const startServicesMock = {
       hasMissingCapabilities: jest.fn().mockReturnValue(false),
       getMissingCapabilities: jest.fn().mockReturnValue([]),
     },
-  },
+  } as unknown as SiemMigrationsService,
 };
 
-const TestProviderWrapper = ({ children }: { children: React.ReactNode }) => (
+const TestProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProviders startServices={startServicesMock}>{children}</TestProviders>
 );
 
