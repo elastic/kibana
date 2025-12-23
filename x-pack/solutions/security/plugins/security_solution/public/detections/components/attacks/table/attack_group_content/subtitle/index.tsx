@@ -10,11 +10,17 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
+import { i18n } from '@kbn/i18n';
 
 import { getFormattedDate } from '../../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 import { useDateFormat } from '../../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
-import * as i18n from './translations';
+
+export const DETECTED_ON_LABEL = (timestamp: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.attacks.group.subtitle.detectedOnLabel', {
+    defaultMessage: 'Detected on {timestamp}',
+    values: { timestamp },
+  });
 
 export interface SubtitleProps {
   /**
@@ -53,7 +59,7 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
       return summary ?? '';
     }
     const summaryText = summary ? ` • ${summary}` : '';
-    return `${i18n.DETECTED_ON_LABEL(formattedTimestamp)}${summaryText}`;
+    return `${DETECTED_ON_LABEL(formattedTimestamp)}${summaryText}`;
   }, [
     attack.entitySummaryMarkdown,
     attack.replacements,
