@@ -162,7 +162,8 @@ export const postActionsConnectorExecuteRoute = (
           onLlmResponse = async (
             content: string,
             traceData: Message['traceData'] = {},
-            isError = false
+            isError = false,
+            refusal?: string
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
@@ -174,6 +175,7 @@ export const postActionsConnectorExecuteRoute = (
                 conversationId,
                 conversationsDataClient,
                 messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,
