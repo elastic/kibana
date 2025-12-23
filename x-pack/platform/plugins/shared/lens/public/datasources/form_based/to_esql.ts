@@ -38,22 +38,53 @@ export function getESQLForLayer(
   dateRange: DateRange,
   nowInstant: Date
 ) {
+  // eslint-disable-next-line no-console
+  console.log('[getESQLForLayer] Starting conversion:', {
+    esAggEntriesCount: esAggEntries.length,
+    indexPatternTitle: indexPattern.title,
+    indexPatternId: indexPattern.id,
+    hasTimeField: !!indexPattern.timeFieldName,
+    timeFieldName: indexPattern.timeFieldName,
+    totalColumns: Object.keys(layer.columns).length,
+  });
+
   // esql mode variables
   const partialRows = true;
 
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   const utcOffset = moment.tz(timeZone).utcOffset() / 60;
-  if (utcOffset !== 0) return;
-
-  if (
-    Object.values(layer.columns).find(
-      (col) =>
-        col.operationType === 'formula' ||
-        col.timeShift ||
-        ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)
-    )
-  )
+  if (utcOffset !== 0) {
+    // eslint-disable-next-line no-console
+    console.log('[getESQLForLayer] ❌ Non-UTC timezone detected:', {
+      timeZone,
+      utcOffset,
+      message: 'ES|QL conversion requires UTC timezone',
+      fix: 'Set timezone to UTC in Kibana Advanced Settings (dateFormat:tz)',
+    });
     return;
+  }
+
+  const unsupportedColumn = Object.values(layer.columns).find(
+    (col) =>
+      col.operationType === 'formula' ||
+      col.timeShift ||
+      ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)
+  );
+
+  if (unsupportedColumn) {
+    // eslint-disable-next-line no-console
+    console.log('[getESQLForLayer] ❌ Unsupported column operation detected:', {
+      columnId: Object.keys(layer.columns).find((k) => layer.columns[k] === unsupportedColumn),
+      operationType: unsupportedColumn.operationType,
+      hasFormula: unsupportedColumn.operationType === 'formula',
+      hasTimeShift: !!unsupportedColumn.timeShift,
+      hasRuntimeField:
+        'sourceField' in unsupportedColumn &&
+        !!indexPattern.getFieldByName(unsupportedColumn.sourceField)?.runtime,
+      message: 'This column type is not supported for ES|QL conversion',
+    });
+    return;
+  }
 
   // indexPattern.title is the actual es pattern
   let esqlCompose = from(indexPattern.title);
@@ -168,7 +199,20 @@ export function getESQLForLayer(
     return metricESQL;
   });
 
-  if (metrics.some((m) => !m)) return;
+  if (metrics.some((m) => !m)) {
+    // eslint-disable-next-line no-console
+    console.log('[getESQLForLayer] ❌ One or more metric operations failed to convert:', {
+      totalMetrics: metrics.length,
+      failedMetrics: metrics.filter((m) => !m).length,
+      metricOperations: metricEsAggsEntries.map(([colId, col]) => ({
+        columnId: colId,
+        operationType: col.operationType,
+        hasToESQLMethod: !!operationDefinitionMap[col.operationType]?.toESQL,
+      })),
+      message: 'Some metric aggregations are not supported for ES|QL conversion',
+    });
+    return;
+  }
 
   const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
@@ -278,10 +322,30 @@ export function getESQLForLayer(
     );
   });
 
-  if (buckets.some((m) => !m)) return;
+  if (buckets.some((m) => !m)) {
+    // eslint-disable-next-line no-console
+    console.log('[getESQLForLayer] ❌ One or more bucket operations failed to convert:', {
+      totalBuckets: buckets.length,
+      failedBuckets: buckets.filter((m) => !m).length,
+      bucketOperations: bucketEsAggsEntries.map(([colId, col]) => ({
+        columnId: colId,
+        operationType: col.operationType,
+        hasToESQLMethod: !!operationDefinitionMap[col.operationType]?.toESQL,
+      })),
+      message: 'Some bucket aggregations are not supported for ES|QL conversion',
+    });
+    return;
+  }
 
   if (buckets.length > 0) {
-    if (buckets.some((b) => !b || b.includes('undefined'))) return;
+    if (buckets.some((b) => !b || b.includes('undefined'))) {
+      // eslint-disable-next-line no-console
+      console.log('[getESQLForLayer] ❌ Bucket conversion resulted in undefined values:', {
+        buckets,
+        message: 'One or more buckets contain undefined or invalid ES|QL expressions',
+      });
+      return;
+    }
 
     if (metrics.length > 0) {
       esqlCompose = esqlCompose.pipe(stats(`${metrics.join(', ')} BY ${buckets.join(', ')}`));
@@ -308,12 +372,27 @@ export function getESQLForLayer(
   }
 
   try {
-    return {
+    const result = {
       esql: esqlCompose.toString(),
       partialRows,
       esAggsIdMap,
     };
+
+    // eslint-disable-next-line no-console
+    console.log('[getESQLForLayer] ✅ Conversion successful:', {
+      generatedQuery: result.esql,
+      columnMappingsCount: Object.keys(result.esAggsIdMap).length,
+      partialRows: result.partialRows,
+    });
+
+    return result;
   } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('[getESQLForLayer] ❌ Exception during ES|QL composition:', {
+      error: e instanceof Error ? e.message : String(e),
+      stack: e instanceof Error ? e.stack : undefined,
+      message: 'An error occurred while building the ES|QL query',
+    });
     return;
   }
 }

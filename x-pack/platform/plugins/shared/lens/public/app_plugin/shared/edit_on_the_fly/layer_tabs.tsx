@@ -169,6 +169,13 @@ export function LayerTabs({
     const visualizationState = visualization.state;
 
     return visibleLayerConfigs.map((layerConfig, layerIndex) => {
+      // eslint-disable-next-line no-console
+      console.log('[Convert to ES|QL] Building actions for layer:', {
+        layerId: layerConfig.layerId,
+        layerType: layerConfig.layerType,
+        willShowConvertAction: layerConfig.layerType === 'data',
+      });
+
       const compatibleActions: LayerAction[] = [
         // Convert to ES|QL action - only for data layers that aren't already ES|QL
         ...(layerConfig.layerType === 'data'
@@ -179,20 +186,44 @@ export function LayerTabs({
                     framePublicAPI.datasourceLayers?.[layerConfig.layerId];
                   const datasourceId = datasourcePublicAPI?.datasourceId;
 
-                  if (!datasourceId) return;
+                  if (!datasourceId) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] No datasource ID found for layer:', layerConfig.layerId);
+                    return;
+                  }
 
                   const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
-                  if (!layerDatasourceState) return;
+                  if (!layerDatasourceState) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] No datasource state found for datasource:', datasourceId);
+                    return;
+                  }
 
                   // Check if layer is already ES|QL
-                  if (layerDatasourceState.layers[layerConfig.layerId]?.query) return;
+                  if (layerDatasourceState.layers[layerConfig.layerId]?.query) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Layer is already ES|QL, skipping conversion');
+                    return;
+                  }
 
                   const layer = layerDatasourceState.layers[layerConfig.layerId] as FormBasedLayer;
-                  if (!layer || !layer.columnOrder || !layer.columns) return;
+                  if (!layer || !layer.columnOrder || !layer.columns) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Invalid layer structure:', { 
+                      hasLayer: !!layer, 
+                      hasColumnOrder: !!layer?.columnOrder, 
+                      hasColumns: !!layer?.columns 
+                    });
+                    return;
+                  }
 
                   // Get the index pattern
                   const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
-                  if (!indexPattern) return;
+                  if (!indexPattern) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Index pattern not found:', layer.indexPatternId);
+                    return;
+                  }
 
                   // Partition columns to get esAggEntries (exclude fullReference and managedReference)
                   const { columnOrder } = layer;
@@ -208,6 +239,14 @@ export function LayerTabs({
                   );
 
                   // Call getESQLForLayer to get the conversion result
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] Attempting conversion with:', {
+                    layerId: layerConfig.layerId,
+                    esAggEntriesCount: esAggEntries.length,
+                    indexPatternTitle: indexPattern.title,
+                    hasTimeField: !!indexPattern.timeFieldName,
+                  });
+
                   const esqlResult = getESQLForLayer(
                     esAggEntries,
                     layer,
@@ -217,7 +256,23 @@ export function LayerTabs({
                     new Date()
                   );
 
-                  if (!esqlResult) return;
+                  if (!esqlResult) {
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Conversion failed - getESQLForLayer returned null');
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Common reasons:');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Non-UTC timezone');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Contains formulas');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Contains time shifts');
+                    // eslint-disable-next-line no-console
+                    console.log('  - Uses runtime fields');
+                    // eslint-disable-next-line no-console
+                    console.log('[Convert to ES|QL] Layer columns:', layer.columns);
+                    return;
+                  }
 
                   const newColumns = Object.keys(esqlResult.esAggsIdMap).map((key) => {
                     return {
@@ -248,6 +303,13 @@ export function LayerTabs({
                       },
                     },
                   };
+
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] ✅ Conversion successful!');
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] Generated ES|QL query:', esqlResult.esql);
+                  // eslint-disable-next-line no-console
+                  console.log('[Convert to ES|QL] Column mappings:', esqlResult.esAggsIdMap);
 
                   dispatchLens(
                     updateDatasourceState({ newDatasourceState: newState, datasourceId })
