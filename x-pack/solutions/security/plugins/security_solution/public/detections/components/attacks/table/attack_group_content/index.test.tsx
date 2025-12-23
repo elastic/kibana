@@ -14,6 +14,8 @@ import {
   ATTACK_DESCRIPTION_TEST_ID_SUFFIX,
   ATTACK_TITLE_TEST_ID_SUFFIX,
   ATTACK_GROUP_TEST_ID_SUFFIX,
+  ATTACK_STATUS_TEST_ID_SUFFIX,
+  ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX,
 } from '.';
 
 jest.mock(
@@ -41,6 +43,11 @@ describe('AttackGroupContent', () => {
     expect(getByTestId(`test_id${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`)).toHaveTextContent(
       'Malware and credential theft detected on {{ host.name SRVMAC08 }}.'
     );
+    expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toBeInTheDocument();
+    expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toHaveTextContent(
+      mockAttack.alertWorkflowStatus!
+    );
+    expect(getByTestId(`test_id${ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX}`)).toBeInTheDocument();
   });
 
   it('should render an empty state when the attack title is empty', () => {
