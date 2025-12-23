@@ -30,11 +30,6 @@ const retryResponseStatuses = [
   504, // GatewayTimeout
 ];
 
-const temporarySearchPhaseExecutionExceptionReasons = [
-  'Search rejected due to missing shards',
-  'all shards failed',
-];
-
 export const catchRetryableEsClientErrors = (
   e: EsErrors.ElasticsearchClientError
 ): Either.Either<RetryableEsClientError, never> => {
@@ -52,12 +47,7 @@ export const catchRetryableEsClientErrors = (
 export const catchRetryableSearchPhaseExecutionException = (
   e: EsErrors.ResponseError
 ): Either.Either<RetryableEsClientError, never> => {
-  if (
-    e?.body?.error?.type === 'search_phase_execution_exception' &&
-    temporarySearchPhaseExecutionExceptionReasons.some((reason) =>
-      e?.body?.error?.caused_by?.reason?.includes(reason)
-    )
-  ) {
+  if (e?.body?.error?.type === 'search_phase_execution_exception') {
     return Either.left({
       type: 'retryable_es_client_error' as const,
       message: e?.message,

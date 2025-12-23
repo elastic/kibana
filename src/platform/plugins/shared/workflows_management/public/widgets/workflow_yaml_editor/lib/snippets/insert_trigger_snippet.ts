@@ -61,12 +61,12 @@ function isEmptyItem(item: unknown): boolean {
   if (!item) {
     return true;
   }
-  
+
   if (isNode(item) && isScalar(item)) {
     const value = item.value;
     return value === null || value === undefined || value === '';
   }
-  
+
   if (isNode(item) && isMap(item)) {
     if (!('items' in item) || !item.items || item.items.length === 0) {
       return true;
@@ -77,7 +77,7 @@ function isEmptyItem(item: unknown): boolean {
     );
     return !hasTypeField;
   }
-  
+
   return false;
 }
 
@@ -169,7 +169,7 @@ function getInsertRangeAndText(
     // Single comment/trigger or no special handling needed
     const currentLineContent = model.getLineContent(insertAtLineNumber);
     const nextLineNumber = insertAtLineNumber + 1;
-    
+
     // If the next line exists and is empty, replace it to avoid extra blank lines
     if (nextLineNumber <= model.getLineCount()) {
       const nextLineContent = model.getLineContent(nextLineNumber);
@@ -185,7 +185,7 @@ function getInsertRangeAndText(
         }
       }
     }
-    
+
     const lineEndColumn = model.getLineMaxColumn(insertAtLineNumber);
     const range = new monaco.Range(
       insertAtLineNumber,
@@ -193,21 +193,26 @@ function getInsertRangeAndText(
       insertAtLineNumber,
       lineEndColumn
     );
-    const text = currentLineContent.trim() ? '\n' + insertText : insertText;
+    const text = currentLineContent.trim() ? `\n${insertText}` : insertText;
     return { range, text };
   }
 
   if (insertAtLineNumber > model.getLineCount()) {
     const lastLineNumber = model.getLineCount();
     const lastLineEndColumn = model.getLineMaxColumn(lastLineNumber);
-    const range = new monaco.Range(lastLineNumber, lastLineEndColumn, lastLineNumber, lastLineEndColumn);
-    return { range, text: '\n' + insertText };
+    const range = new monaco.Range(
+      lastLineNumber,
+      lastLineEndColumn,
+      lastLineNumber,
+      lastLineEndColumn
+    );
+    return { range, text: `\n${insertText}` };
   }
 
   const range = new monaco.Range(insertAtLineNumber, 1, insertAtLineNumber, 1);
   const targetLine = model.getLineContent(insertAtLineNumber);
   if (targetLine.trim()) {
-    return { range, text: insertText + '\n' };
+    return { range, text: `${insertText}\n` };
   }
 
   return { range, text: insertText };
@@ -343,7 +348,7 @@ export function insertTriggerSnippet(
     editor.pushUndoStop();
   }
 
-  let insertText = insertTriggersSection
+  const insertText = insertTriggersSection
     ? triggerSnippet
     : prependIndentToLines(triggerSnippet, indentLevel);
 

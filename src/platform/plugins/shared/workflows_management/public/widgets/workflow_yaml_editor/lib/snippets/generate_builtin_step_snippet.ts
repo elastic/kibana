@@ -63,6 +63,14 @@ export function generateBuiltInStepSnippet(
         steps: [{ name: 'merge-step', type: '# Add step type here' }],
       };
       break;
+    case 'data.set':
+      parameters = {
+        with: {
+          variable_name: 'value',
+          another_variable: '{{steps.previous_step.output}}',
+        },
+      };
+      break;
     case 'http':
       parameters = {
         with: { url: 'https://api.example.com', method: 'GET' },

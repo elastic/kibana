@@ -23,6 +23,53 @@
       "types": "",
       "include_unloaded_segments": "__flag__"
     },
+    "url_components": {
+      "metric": [
+        "_all",
+        "_none",
+        "indices",
+        "os",
+        "process",
+        "jvm",
+        "thread_pool",
+        "fs",
+        "transport",
+        "http",
+        "breaker",
+        "script",
+        "discovery",
+        "ingest",
+        "adaptive_selection",
+        "script_cache",
+        "indexing_pressure",
+        "repositories",
+        "allocations"
+      ],
+      "index_metric": [
+        "_all",
+        "store",
+        "indexing",
+        "get",
+        "search",
+        "merge",
+        "flush",
+        "refresh",
+        "query_cache",
+        "fielddata",
+        "docs",
+        "warmer",
+        "completion",
+        "segments",
+        "translog",
+        "request_cache",
+        "recovery",
+        "bulk",
+        "shard_stats",
+        "mappings",
+        "dense_vector",
+        "sparse_vector"
+      ]
+    },
     "methods": [
       "GET"
     ],

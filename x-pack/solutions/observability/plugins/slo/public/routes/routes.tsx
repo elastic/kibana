@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   SLOS_MANAGEMENT_PATH,
   SLOS_PATH,
@@ -14,7 +13,8 @@ import {
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
   SLO_SETTINGS_PATH,
-} from '../../common/locators/paths';
+} from '@kbn/slo-shared-plugin/common/locators/paths';
+import React from 'react';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';

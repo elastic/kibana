@@ -132,19 +132,7 @@ components:
         matchers:
           type: array
           items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                  
-              values:
-                type: array
-                items:
-                  type: string                
+            $ref: '#/components/schemas/Matcher'              
         filter:
           type: object
           properties:
@@ -175,19 +163,7 @@ components:
         matchers:
           type: array
           items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                  
-              values:
-                type: array
-                items:
-                  type: string                
+           $ref: '#/components/schemas/Matcher'
         filter:
           type: object
           properties:
@@ -238,10 +214,18 @@ components:
           items:
             type: string
         values:
-          type: array
-          items:
-            type: string
-
+          description: >
+            Matcher values. Must be either an array of strings
+            (e.g. group or role names) or an array of booleans
+            (e.g. integration-derived flags like privileged_group_member).
+            Mixed types are intentionally not supported for simplicity and predictability.
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: array
+              items:
+                type: boolean
     MonitoringEntitySourceNoId:
       allOf:
       - $ref: '#/components/schemas/MonitoringEntitySourceProperties'
