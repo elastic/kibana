@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-ast';
-import { Builder } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import type { TrimProcessor } from '../../../..';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter } from './common';
