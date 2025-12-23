@@ -15,7 +15,6 @@ globalSetupHook(
     log.info('Generating Observability data...');
     await generateRulesData(apiServices);
 
-    // Generate logs data into .alerts-* indices
     log.info('Generating sample data into .alerts-observability.test index...');
     await esClient.index({
       index: '.alerts-observability.test',
@@ -27,7 +26,6 @@ globalSetupHook(
       refresh: true,
     });
 
-    // Create a dummy data view
     log.info('Creating dummy data view for ad-hoc data view tests...');
     await createDataView(kbnClient, {
       name: 'test-data-view-name_1',

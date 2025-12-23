@@ -47,12 +47,8 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
     // Type the pattern to trigger "Explore matching indices" button
     await pageObjects.rulesPage.setIndexPatternAndWaitForButton(AD_HOC_DATA_VIEW_PATTERN);
 
-    // Click the button to create an ad-hoc data view
-    await pageObjects.rulesPage.clickExploreMatchingIndices();
-
-    // Verify the data view was selected
-    const dataViewText = await pageObjects.rulesPage.dataViewExpression.textContent();
-    expect(dataViewText).toContain(AD_HOC_DATA_VIEW_PATTERN);
+    // Click the button to create an ad-hoc data view and verify it was selected
+    await pageObjects.rulesPage.clickExploreMatchingIndices(AD_HOC_DATA_VIEW_PATTERN);
 
     // Save the rule (navigates to rule details page)
     await pageObjects.rulesPage.saveRule();
