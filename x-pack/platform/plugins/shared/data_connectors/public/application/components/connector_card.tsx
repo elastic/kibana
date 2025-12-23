@@ -13,9 +13,14 @@ import type { Connector } from '../../types/connector';
 interface ConnectorCardProps {
   connector: Connector;
   onClick?: (connector: Connector) => void;
+  isDisabled?: boolean;
 }
 
-export const ConnectorCard: React.FC<ConnectorCardProps> = ({ connector, onClick }) => {
+export const ConnectorCard: React.FC<ConnectorCardProps> = ({
+  connector,
+  onClick,
+  isDisabled = false,
+}) => {
   // Resolve icon at render time to properly handle lazy components, require clean up later
   const iconComponent = useMemo(() => {
     if (connector.connectorSpecId) {
@@ -38,19 +43,22 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({ connector, onClick
     <EuiPanel
       css={({ euiTheme }) => ({
         height: '122px',
-        cursor: 'pointer',
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        opacity: isDisabled ? 0.5 : 1,
         border: `1px solid ${euiTheme.colors.borderBasePlain}`,
         transition: 'all 0.2s ease',
-        '&:hover': {
-          boxShadow: `0 2px 8px rgba(0, 0, 0, 0.1)`,
-          transform: 'translateY(-2px)',
-          borderColor: euiTheme.colors.primary,
-        },
+        '&:hover': isDisabled
+          ? {}
+          : {
+              boxShadow: `0 2px 8px rgba(0, 0, 0, 0.1)`,
+              transform: 'translateY(-2px)',
+              borderColor: euiTheme.colors.primary,
+            },
       })}
       paddingSize="l"
       hasShadow={false}
       hasBorder={false}
-      onClick={() => onClick?.(connector)}
+      onClick={() => !isDisabled && onClick?.(connector)}
       data-test-subj={`connectorCard-${connector.id}`}
     >
       <div

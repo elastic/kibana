@@ -7,10 +7,14 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+
 export interface DataConnectorsPluginSetup {}
 
 export interface DataConnectorsPluginStart {}
 
 export interface DataConnectorsPluginSetupDependencies {}
 
-export interface DataConnectorsPluginStartDependencies {}
+export interface DataConnectorsPluginStartDependencies {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+}

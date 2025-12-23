@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -19,11 +19,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ConnectorCard } from './connector_card';
 import { useConnectors } from '../hooks/use_connectors';
+import { useAddConnectorFlyout } from '../hooks/use_add_connector_flyout';
 import type { Connector } from '../../types/connector';
 import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
 
 export const ConnectorsView: React.FC = () => {
   const { popularConnectors, allConnectors, isLoading } = useConnectors();
+  const { openFlyout, flyout } = useAddConnectorFlyout();
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -39,9 +41,14 @@ export const ConnectorsView: React.FC = () => {
     setActivePage(0); // Reset to first page when changing page size
   };
 
-  const handleConnectorClick = (connector: Connector) => {
-    // TODO: Implement connector configuration/setup flow
-  };
+  const handleConnectorClick = useCallback(
+    (connector: Connector) => {
+      // Open the flyout with the connector's action type ID
+      // For popular connectors from registry, this will be the stackConnector.type (e.g., '.notion')
+      openFlyout(connector.type);
+    },
+    [openFlyout]
+  );
 
   if (isLoading) {
     return (
@@ -88,7 +95,11 @@ export const ConnectorsView: React.FC = () => {
               <EuiFlexGrid columns={4} gutterSize="m">
                 {popularConnectors.map((connector) => (
                   <EuiFlexItem key={connector.id}>
-                    <ConnectorCard connector={connector} onClick={handleConnectorClick} />
+                    <ConnectorCard
+                      connector={connector}
+                      onClick={handleConnectorClick}
+                      isDisabled={false}
+                    />
                   </EuiFlexItem>
                 ))}
               </EuiFlexGrid>
@@ -109,7 +120,11 @@ export const ConnectorsView: React.FC = () => {
               <EuiFlexGrid columns={4} gutterSize="m">
                 {paginatedAllConnectors.map((connector) => (
                   <EuiFlexItem key={connector.id}>
-                    <ConnectorCard connector={connector} onClick={handleConnectorClick} />
+                    <ConnectorCard
+                      connector={connector}
+                      onClick={handleConnectorClick}
+                      isDisabled={true}
+                    />
                   </EuiFlexItem>
                 ))}
               </EuiFlexGrid>
@@ -135,6 +150,9 @@ export const ConnectorsView: React.FC = () => {
           )}
         </>
       )}
+
+      {/* Connector creation flyout */}
+      {flyout}
     </>
   );
 };
