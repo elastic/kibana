@@ -24,7 +24,7 @@ import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -42,7 +42,6 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
-import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
