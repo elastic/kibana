@@ -31,6 +31,20 @@ jest.mock('./bar_details', () => ({
     <div data-test-subj="bar-details" data-item={item.id} data-left={left} />
   ),
 }));
+jest.mock('./toggle_accordion_button', () => ({
+  TOGGLE_BUTTON_WIDTH: 20,
+  ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
+    <div
+      data-test-subj="toggle-btn"
+      data-open={isOpen}
+      data-count={childrenCount}
+      onClick={onClick}
+      onKeyDown={onClick}
+      role="button"
+      tabIndex={0}
+    />
+  ),
+}));
 jest.mock('./trace_waterfall_context');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -99,7 +113,9 @@ describe('TraceItemRow', () => {
     const { getByTestId } = render(
       <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={jest.fn()} />
     );
-    expect(getByTestId('toggleAccordionButton')).toBeInTheDocument();
+    expect(getByTestId('toggle-btn')).toBeInTheDocument();
+    expect(getByTestId('toggle-btn')).toHaveAttribute('data-open', 'true');
+    expect(getByTestId('toggle-btn')).toHaveAttribute('data-count', '2');
   });
 
   it('calls onToggle when ToggleAccordionButton is clicked', () => {
@@ -107,7 +123,7 @@ describe('TraceItemRow', () => {
     const { getByTestId } = render(
       <TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={onToggle} />
     );
-    fireEvent.click(getByTestId('toggleAccordionButton'));
+    fireEvent.click(getByTestId('toggle-btn'));
     expect(onToggle).toHaveBeenCalledWith('span-1');
   });
 
