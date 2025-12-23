@@ -18,6 +18,19 @@ import { NewAgentActionSchema } from '../models';
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
+const ActionIdSchema = schema.object({
+  actionId: schema.string(),
+});
+
+const ActionIdOrMessageSchema = schema.oneOf([
+  schema.object({
+    actionId: schema.string(),
+  }),
+  schema.object({
+    message: schema.string(),
+  }),
+]);
+
 export const GetAgentsRequestSchema = {
   query: schema.object(
     {
@@ -87,6 +100,7 @@ export const GetAgentsRequestSchema = {
     }
   ),
 };
+
 export const MigrateOptionsSchema = {
   ca_sha256: schema.maybe(schema.string()),
   certificate_authorities: schema.maybe(schema.string()),
@@ -102,6 +116,7 @@ export const MigrateOptionsSchema = {
   tags: schema.maybe(schema.arrayOf(schema.string())),
   replace_token: schema.maybe(schema.string()),
 };
+
 export const BulkMigrateOptionsSchema = {
   ca_sha256: schema.maybe(schema.string()),
   certificate_authorities: schema.maybe(schema.string()),
@@ -116,6 +131,7 @@ export const BulkMigrateOptionsSchema = {
   staging: schema.maybe(schema.string()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
 };
+
 export const AgentComponentStateSchema = schema.oneOf([
   schema.literal('STARTING'),
   schema.literal('CONFIGURING'),
@@ -125,6 +141,7 @@ export const AgentComponentStateSchema = schema.oneOf([
   schema.literal('STOPPING'),
   schema.literal('STOPPED'),
 ]);
+
 export const AgentUpgradeStateTypeSchema = schema.oneOf([
   schema.literal('UPG_REQUESTED'),
   schema.literal('UPG_SCHEDULED'),
@@ -136,6 +153,7 @@ export const AgentUpgradeStateTypeSchema = schema.oneOf([
   schema.literal('UPG_WATCHING'),
   schema.literal('UPG_ROLLBACK'),
 ]);
+
 export const AgentStatusSchema = schema.oneOf([
   schema.literal('offline'),
   schema.literal('error'),
@@ -292,6 +310,18 @@ export const AgentResponseSchema = schema.object({
     ])
   ),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  upgrade: schema.maybe(
+    schema.object({
+      rollbacks: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            valid_until: schema.string(),
+            version: schema.string(),
+          })
+        )
+      ),
+    })
+  ),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
@@ -557,6 +587,7 @@ export const UpdateAgentRequestSchema = {
     tags: schema.maybe(schema.arrayOf(schema.string())),
   }),
 };
+
 export const MigrateSingleAgentRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
@@ -567,9 +598,8 @@ export const MigrateSingleAgentRequestSchema = {
     settings: schema.maybe(schema.object(MigrateOptionsSchema)),
   }),
 };
-export const MigrateSingleAgentResponseSchema = schema.object({
-  actionId: schema.string(),
-});
+
+export const MigrateSingleAgentResponseSchema = ActionIdSchema;
 
 export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
@@ -580,9 +610,8 @@ export const BulkMigrateAgentsRequestSchema = {
     batchSize: schema.maybe(schema.number()),
   }),
 };
-export const BulkMigrateAgentsResponseSchema = schema.object({
-  actionId: schema.string(),
-});
+
+export const BulkMigrateAgentsResponseSchema = ActionIdSchema;
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
@@ -594,9 +623,7 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
   }),
 };
 
-export const PostBulkActionResponseSchema = schema.object({
-  actionId: schema.string(),
-});
+export const PostBulkActionResponseSchema = ActionIdSchema;
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
@@ -805,18 +832,7 @@ export const ChangeAgentPrivilegeLevelRequestSchema = {
   ),
 };
 
-/**
- * Returns an object with either the actionId (if an action was created),
- * or an information message (if no action was needed).
- */
-export const ChangeAgentPrivilegeLevelResponseSchema = schema.oneOf([
-  schema.object({
-    actionId: schema.string(),
-  }),
-  schema.object({
-    message: schema.string(),
-  }),
-]);
+export const ChangeAgentPrivilegeLevelResponseSchema = ActionIdOrMessageSchema;
 
 export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   body: schema.object({
@@ -831,3 +847,25 @@ export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
     ),
   }),
 };
+
+export const BulkChangeAgentsPrivilegeLevelResponseSchema = ActionIdSchema;
+
+export const PostAgentRollbackRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
+export const PostAgentRollbackResponseSchema = ActionIdOrMessageSchema;
+
+export const PostBulkAgentRollbackRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const PostBulkAgentRollbackResponseSchema = schema.object({
+  actionIds: schema.arrayOf(schema.string()),
+});
