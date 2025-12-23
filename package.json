@@ -2046,7 +2046,7 @@
     "sinon": "^19.0.2",
     "sort-package-json": "^3.2.1",
     "source-map": "^0.7.6",
-    "storybook": "^8.6.14",
+    "storybook": "^8.6.15",
     "style-loader": "^4.0.0",
     "stylelint": "^14.16.1",
     "stylelint-scss": "^4.3.0",
