@@ -273,7 +273,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
 };
 
 /**
- * Full config datatable and ad hoc dataView
+ * Full config datatable and dataView
  */
 export const fullConfigDatatableWithDataView: DatatableState = {
   title: 'Multiple metrics, rows, split by with full config',
