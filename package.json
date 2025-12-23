@@ -74,7 +74,7 @@
   },
   "engines": {
     "node": "22.21.1",
-    "yarn": "1.22.19"
+    "yarn": "1.22.22"
   },
   "resolutions": {
     "**/@babel/parser": "7.24.7",
