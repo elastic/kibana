@@ -263,13 +263,7 @@ describe('WorkflowExecutionRepository', () => {
               must_not: [
                 {
                   terms: {
-                    status: [
-                      ExecutionStatus.COMPLETED,
-                      ExecutionStatus.FAILED,
-                      ExecutionStatus.CANCELLED,
-                      ExecutionStatus.SKIPPED,
-                      ExecutionStatus.TIMED_OUT,
-                    ],
+                    status: TerminalExecutionStatuses,
                   },
                 },
               ],
@@ -329,7 +323,7 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('getRunningExecutionsByConcurrencyGroup', () => {
-    it('should query for RUNNING executions by concurrency group key', async () => {
+    it('should query for non-terminal executions by concurrency group key', async () => {
       const mockExecutions = [
         {
           _source: {
@@ -345,7 +339,7 @@ describe('WorkflowExecutionRepository', () => {
             id: 'exec-2',
             concurrencyGroupKey: 'server-1',
             spaceId: 'default',
-            status: ExecutionStatus.RUNNING,
+            status: ExecutionStatus.PENDING,
             createdAt: '2024-01-01T01:00:00Z',
           },
         },
@@ -361,10 +355,13 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [
-              { term: { concurrencyGroupKey: 'server-1' } },
-              { term: { spaceId: 'default' } },
-              { term: { status: ExecutionStatus.RUNNING } },
+            must: [{ term: { concurrencyGroupKey: 'server-1' } }, { term: { spaceId: 'default' } }],
+            must_not: [
+              {
+                terms: {
+                  status: TerminalExecutionStatuses,
+                },
+              },
             ],
           },
         },
@@ -400,12 +397,15 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [
-              { term: { concurrencyGroupKey: 'server-1' } },
-              { term: { spaceId: 'default' } },
-              { term: { status: ExecutionStatus.RUNNING } },
+            must: [{ term: { concurrencyGroupKey: 'server-1' } }, { term: { spaceId: 'default' } }],
+            must_not: [
+              {
+                terms: {
+                  status: TerminalExecutionStatuses,
+                },
+              },
+              { term: { id: 'exec-1' } },
             ],
-            must_not: [{ term: { id: 'exec-1' } }],
           },
         },
         sort: [{ createdAt: { order: 'asc' } }],
