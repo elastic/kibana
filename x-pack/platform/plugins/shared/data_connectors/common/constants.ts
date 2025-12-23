@@ -11,10 +11,10 @@ export const DATA_CONNECTORS_APP_ID = 'data_connectors';
 export const DATA_CONNECTORS_PATH = '/app/data_connectors';
 
 export const DATA_CONNECTORS_FULL_TITLE = i18n.translate('xpack.dataConnectors.app.fullTitle', {
-  defaultMessage: 'Data Connectors',
+  defaultMessage: 'Sources',
 });
 export const DATA_CONNECTORS_SHORT_TITLE = i18n.translate('xpack.dataConnectors.app.shortTitle', {
-  defaultMessage: 'Connectors',
+  defaultMessage: 'Sources',
 });
 
 export const API_BASE_PATH = '/api/data_connectors';
