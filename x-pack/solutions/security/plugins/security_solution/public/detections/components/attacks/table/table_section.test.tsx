@@ -12,7 +12,7 @@ import type { GroupingBucket, ParsedGroupingAggregation } from '@kbn/grouping/sr
 
 import { TestProviders } from '../../../../common/mock';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
+import { EXPAND_ATTACK_BUTTON_TEST_ID, TABLE_SECTION_TEST_ID, TableSection } from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
@@ -48,7 +48,11 @@ describe('<TableSection />', () => {
       isLoading: false,
     });
     mockGroupedAlertsTable.mockImplementation((props) => (
-      <div data-test-subj="mock-grouped-alerts-table">{props.additionalToolbarControls}</div>
+      <div data-test-subj="mock-grouped-alerts-table">
+        {props.additionalToolbarControls?.map((control: React.ReactNode, index: number) => (
+          <React.Fragment key={index}>{control}</React.Fragment>
+        ))}
+      </div>
     ));
     (useUserData as jest.Mock).mockReturnValue([
       {
@@ -428,6 +432,119 @@ describe('<TableSection />', () => {
           enforcedGroups: [ALERT_ATTACK_IDS],
         });
       });
+    });
+  });
+
+  describe('getAdditionalActionButtons', () => {
+    it('should return an empty array for null group buckets', async () => {
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(GroupedAlertsTable).toHaveBeenCalled();
+      });
+
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const { getAdditionalActionButtons } = props;
+
+      const groupingBucket = {
+        key: ['some-key'],
+        doc_count: 10,
+        selectedGroup: 'some-group',
+        key_as_string: 'some-key',
+        isNullGroup: true,
+      };
+
+      expect(getAdditionalActionButtons('some-key', groupingBucket)).toEqual([]);
+    });
+
+    it('should return an expand button for non-null grouping buckets', async () => {
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(GroupedAlertsTable).toHaveBeenCalled();
+      });
+
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const { getAdditionalActionButtons } = props;
+
+      const groupingBucket = {
+        key: ['some-key'],
+        doc_count: 10,
+        selectedGroup: 'some-group',
+        key_as_string: 'some-key',
+        isNullGroup: false,
+      };
+
+      const buttons = getAdditionalActionButtons('some-key', groupingBucket);
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].props['data-test-subj']).toBe(EXPAND_ATTACK_BUTTON_TEST_ID);
+    });
+
+    it('should return an empty array for non-grouping buckets', async () => {
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(GroupedAlertsTable).toHaveBeenCalled();
+      });
+
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const { getAdditionalActionButtons } = props;
+
+      // Case 1: Not a grouping bucket (missing selectedGroup or key is not array)
+      const bucket1 = { key: 'k', doc_count: 1 };
+      const buttons1 = getAdditionalActionButtons('k', bucket1);
+      expect(buttons1).toEqual([]);
+    });
+
+    it('should call getAttack when expand button is clicked', async () => {
+      const getAttackMock = jest.fn();
+      mockUseAttackGroupHandler.mockReturnValue({
+        getAttack: getAttackMock,
+        isLoading: false,
+      });
+
+      render(
+        <TestProviders>
+          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(GroupedAlertsTable).toHaveBeenCalled();
+      });
+
+      const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[0];
+      const { getAdditionalActionButtons } = props;
+
+      const groupingBucket = {
+        key: ['some-key'],
+        doc_count: 10,
+        selectedGroup: 'some-group',
+        key_as_string: 'some-key',
+        isNullGroup: false,
+      };
+
+      const buttons = getAdditionalActionButtons('some-key', groupingBucket);
+      const { getByTestId } = render(<div>{buttons}</div>);
+
+      const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
+      await act(async () => {
+        button.click();
+      });
+
+      expect(getAttackMock).toHaveBeenCalledWith('some-key', groupingBucket);
     });
   });
 });

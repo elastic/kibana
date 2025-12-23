@@ -15,6 +15,7 @@ import {
 import { IconSparkles } from '../../../../../common/icons/sparkles';
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
+import { Subtitle } from './subtitle';
 
 export const ATTACK_GROUP_TEST_ID_SUFFIX = '-group-renderer' as const;
 export const ATTACK_TITLE_TEST_ID_SUFFIX = '-title' as const;
@@ -36,17 +37,6 @@ export const AttackGroupContent = React.memo<{
             replacements: attack.replacements,
           }),
     [attack.replacements, attack.title, showAnonymized]
-  );
-
-  const summary = useMemo(
-    () =>
-      showAnonymized
-        ? attack.summaryMarkdown
-        : replaceAnonymizedValuesWithOriginalValues({
-            messageContent: attack.summaryMarkdown,
-            replacements: attack.replacements,
-          }),
-    [attack.summaryMarkdown, attack.replacements, showAnonymized]
   );
 
   return (
@@ -79,7 +69,7 @@ export const AttackGroupContent = React.memo<{
         grow={false}
         data-test-subj={`${dataTestSubj}${ATTACK_DESCRIPTION_TEST_ID_SUFFIX}`}
       >
-        <AttackDiscoveryMarkdownFormatter disableActions={true} markdown={summary} />
+        <Subtitle attack={attack} showAnonymized={showAnonymized} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
