@@ -239,10 +239,10 @@ describe('barrel transform plugin', () => {
       expect(result?.code).not.toContain('restricted-lib/internal/helper');
     });
 
-    it('transforms when package has NO exports field (uses file path fallback)', () => {
-      const indexWithoutExportsField: TestBarrelIndex = {
+    it('transforms when barrel has NO packageName (uses relative path fallback)', () => {
+      const indexWithoutPackageName: TestBarrelIndex = {
         [RESTRICTED_BARREL_PATH]: {
-          // No packageName/packageRoot - Kibana internal barrel (no exports field)
+          // Internal barrel without packageName - uses relative paths
           exports: {
             helper: {
               path: '/test/src/restricted-lib/internal/helper.ts',
@@ -257,11 +257,11 @@ describe('barrel transform plugin', () => {
 
       const result = transform({
         code: `import { helper } from './restricted-lib';`,
-        barrelIndex: indexWithoutExportsField,
+        barrelIndex: indexWithoutPackageName,
         filename: '/test/src/file.ts',
       });
 
-      // Should transform using file path fallback
+      // Should transform using relative path (internal barrel without packageName)
       expect(result?.code).toContain('./restricted-lib/internal/helper');
     });
 
@@ -315,6 +315,62 @@ describe('barrel transform plugin', () => {
       expect(deserialized[RXJS_BARREL_PATH].exports.Observable.publicSubpath).toBe(
         'internal/Observable'
       );
+    });
+  });
+
+  describe('internal package transformations with packageName', () => {
+    // Simulates @kbn/* packages which have packageName set in the barrel index
+    // When packageName is present, transforms should use package paths, not relative
+    const KBN_PACKAGE_BARREL_PATH = '/test/src/kbn-workflows/index.ts';
+    const KBN_PACKAGE_ROOT = '/test/src/kbn-workflows';
+
+    const packageWithNameIndex: TestBarrelIndex = {
+      [KBN_PACKAGE_BARREL_PATH]: {
+        packageName: '@kbn/workflows',
+        packageRoot: KBN_PACKAGE_ROOT,
+        exports: {
+          WorkflowRepository: {
+            path: `${KBN_PACKAGE_ROOT}/server/repositories/workflow_repository.ts`,
+            type: 'named',
+            localName: 'WorkflowRepository',
+            importedName: 'WorkflowRepository',
+            expectedPath: '@kbn/workflows/server/repositories/workflow_repository',
+          },
+          ExecutionStatus: {
+            path: `${KBN_PACKAGE_ROOT}/common/constants.ts`,
+            type: 'named',
+            localName: 'ExecutionStatus',
+            importedName: 'ExecutionStatus',
+            expectedPath: '@kbn/workflows/common/constants',
+          },
+        },
+      },
+    };
+
+    it('uses packageName for import path when available (not relative path)', () => {
+      // Using relative import that resolves to the barrel path
+      const result = transform({
+        code: `import { WorkflowRepository } from './kbn-workflows';`,
+        barrelIndex: packageWithNameIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      // Should generate package path because packageName is set
+      expect(result?.code).toContain('@kbn/workflows/server/repositories/workflow_repository');
+      // Should NOT generate relative path like '../kbn-workflows/server/...'
+      expect(result?.code).not.toContain('./kbn-workflows/server');
+      expect(result?.code).not.toContain('../');
+    });
+
+    it('uses packageName for multiple imports', () => {
+      const result = transform({
+        code: `import { WorkflowRepository, ExecutionStatus } from './kbn-workflows';`,
+        barrelIndex: packageWithNameIndex,
+        filename: '/test/src/file.ts',
+      });
+
+      expect(result?.code).toContain('@kbn/workflows/server/repositories/workflow_repository');
+      expect(result?.code).toContain('@kbn/workflows/common/constants');
     });
   });
 });
