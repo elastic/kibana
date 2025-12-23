@@ -429,14 +429,11 @@ export class RulesPage {
 
   /**
    * Clicks the explore matching indices button to create ad-hoc data view
-   * @param expectedPattern - The expected data view pattern (e.g., '.alerts-*')
    */
-  async clickExploreMatchingIndices(expectedPattern: string) {
+  async clickExploreMatchingIndices() {
     await this.exploreMatchingIndicesButton.click();
-    // Wait for data view to be selected - verify the exact pattern is displayed
-    await expect(this.dataViewExpression).toContainText(expectedPattern, {
-      timeout: SHORTER_TIMEOUT,
-    });
+    // Wait for data view to be selected
+    await expect(this.dataViewExpression).toContainText('.alerts-*', { timeout: SHORTER_TIMEOUT });
   }
 
   /**
