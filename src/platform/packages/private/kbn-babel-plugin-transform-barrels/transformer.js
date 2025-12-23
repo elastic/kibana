@@ -162,15 +162,19 @@ function resolveToBarrelEntry(importSource, fromDir, barrelIndex) {
     return tryResolveBarrel(path.resolve(fromDir, importSource), barrelIndex);
   }
 
-  // For @kbn/* packages, resolve symlinks manually (they only have .ts files)
+  // For @kbn/* packages, walk up to find node_modules
   if (importSource.startsWith('@kbn/')) {
-    const pkgDir = path.resolve(fromDir, 'node_modules', importSource);
-    try {
-      if (fs.existsSync(pkgDir)) {
-        return tryResolveBarrel(fs.realpathSync(pkgDir), barrelIndex);
+    let currentDir = fromDir;
+    while (currentDir !== path.dirname(currentDir)) {
+      const pkgDir = path.join(currentDir, 'node_modules', importSource);
+      try {
+        if (fs.existsSync(pkgDir)) {
+          return tryResolveBarrel(fs.realpathSync(pkgDir), barrelIndex);
+        }
+      } catch {
+        // Continue searching up
       }
-    } catch {
-      // Package not found
+      currentDir = path.dirname(currentDir);
     }
   }
 
