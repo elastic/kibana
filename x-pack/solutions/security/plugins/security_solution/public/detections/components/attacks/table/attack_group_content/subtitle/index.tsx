@@ -32,36 +32,35 @@ export interface SubtitleProps {
  * A component that displays the subtitle for an attack group, including the detection timestamp and a summary.
  */
 export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = false }) => {
-  const summary = useMemo(() => {
-    if (!attack.entitySummaryMarkdown) {
-      return null;
-    }
-    return showAnonymized
-      ? attack.entitySummaryMarkdown
-      : replaceAnonymizedValuesWithOriginalValues({
-          messageContent: attack.entitySummaryMarkdown,
-          replacements: attack.replacements,
-        });
-  }, [attack.entitySummaryMarkdown, attack.replacements, showAnonymized]);
-
   const dateFormat = useDateFormat();
 
-  const formattedTimestamp = useMemo(
-    () =>
-      getFormattedDate({
-        date: attack.timestamp,
-        dateFormat,
-      }),
-    [attack.timestamp, dateFormat]
-  );
-
   const subtitleMarkdownText = useMemo(() => {
+    const summary = attack.entitySummaryMarkdown
+      ? showAnonymized
+        ? attack.entitySummaryMarkdown
+        : replaceAnonymizedValuesWithOriginalValues({
+            messageContent: attack.entitySummaryMarkdown,
+            replacements: attack.replacements,
+          })
+      : null;
+
+    const formattedTimestamp = getFormattedDate({
+      date: attack.timestamp,
+      dateFormat,
+    });
+
     if (!formattedTimestamp) {
       return summary ?? '';
     }
     const summaryText = summary ? ` • ${summary}` : '';
     return `${i18n.DETECTED_ON_LABEL(formattedTimestamp)}${summaryText}`;
-  }, [formattedTimestamp, summary]);
+  }, [
+    attack.entitySummaryMarkdown,
+    attack.replacements,
+    attack.timestamp,
+    dateFormat,
+    showAnonymized,
+  ]);
 
   return <AttackDiscoveryMarkdownFormatter disableActions={true} markdown={subtitleMarkdownText} />;
 });
