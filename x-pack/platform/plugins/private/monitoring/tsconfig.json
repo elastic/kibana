@@ -33,7 +33,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/safer-lodash-set",
     "@kbn/core-http-browser",
-    "@kbn/unified-search-plugin",
     "@kbn/config-schema",
     "@kbn/rule-registry-plugin",
     "@kbn/telemetry-collection-manager-plugin",

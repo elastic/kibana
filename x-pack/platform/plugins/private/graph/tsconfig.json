@@ -23,7 +23,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/unified-search-plugin",
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/i18n-react",
