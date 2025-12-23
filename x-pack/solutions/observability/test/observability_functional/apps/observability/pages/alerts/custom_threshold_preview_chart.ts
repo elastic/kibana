@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  console.log('Foo');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
