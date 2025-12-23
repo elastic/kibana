@@ -21,6 +21,12 @@ import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
+import type { InfraEntityMetricType } from '../../../common/http_api/infra';
+
+// Network metrics that are not supported for semconv schema
+// These require derivative aggregations with histogram parents which would
+// significantly impact performance and could cause max bucket exceptions
+const UNSUPPORTED_SEMCONV_METRICS: InfraEntityMetricType[] = ['rxV2', 'txV2'];
 
 export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -37,6 +43,12 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     async (context, request, response) => {
       const { from, to, metrics, limit, query, schema } = request.body;
 
+      // Filter out unsupported metrics for semconv schema
+      const filteredMetrics =
+        schema === 'semconv'
+          ? metrics.filter((metric) => !UNSUPPORTED_SEMCONV_METRICS.includes(metric))
+          : metrics;
+
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
 
@@ -49,7 +61,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         const hosts = await getHosts({
           from,
           to,
-          metrics,
+          metrics: filteredMetrics,
           limit,
           query,
           alertsClient,
