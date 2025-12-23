@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Walker, type ESQLAstQueryExpression } from '@kbn/esql-ast';
+import { Walker, type ESQLAstQueryExpression } from '@kbn/esql-language';
 import { isDateTruncFunctionNode, isBucketFunctionNode, isStringLiteralNode } from '../typeguards';
 import type { ESQLDateTruncFunction, ESQLBucketFunction } from '../types';
 import { stringToTimespanLiteral, isTimespanString } from '../ast_tools/timespan';

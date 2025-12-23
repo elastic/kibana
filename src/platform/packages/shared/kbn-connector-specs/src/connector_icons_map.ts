@@ -34,4 +34,14 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
+  [
+    '.brave-search',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
+    ),
+  ],
+  [
+    '.github',
+    lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
+  ],
 ]);

@@ -390,6 +390,21 @@ export default function (providerContext: FtrProviderContext) {
             'Rollback not available because some integration policies are not upgraded to version 0.2.0',
         });
       });
+
+      it('should return bulk rollback available check for installed packages', async () => {
+        await createPackagePolicies(policyIds, pkgName, oldPkgVersion);
+        await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, true);
+
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/_bulk_rollback/available_check`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(res.body.multiple_versions).to.eql({
+          isAvailable: true,
+        });
+      });
     });
   });
 }

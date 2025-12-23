@@ -12,7 +12,6 @@ import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
  * This server-managed timestamp should not be displayed in the editor.
  */
 export function stripUpdatedAt(dsl: StreamlangDSL): StreamlangDSL {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { updated_at, ...rest } = dsl as StreamlangDSL & { updated_at?: string };
   return rest;
 }
