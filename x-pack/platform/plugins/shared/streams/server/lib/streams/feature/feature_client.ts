@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { termQuery } from '@kbn/es-query';
 import type {
   IStorageClient,
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import type { Feature, FeatureType } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/streams-schema';
 import { FeatureNotFoundError } from '../errors/feature_not_found_error';
 import { STREAM_NAME, FEATURE_UUID } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
@@ -21,7 +22,7 @@ interface FeatureBulkIndexOperation {
   index: { feature: Feature };
 }
 interface FeatureBulkDeleteOperation {
-  delete: { feature: { type: FeatureType; name: string } };
+  delete: { id: string };
 }
 
 export type FeatureBulkOperation = FeatureBulkIndexOperation | FeatureBulkDeleteOperation;
@@ -63,7 +64,7 @@ export class FeatureClient {
 
     const operations: FeatureBulkOperation[] = [
       ...featuresDeleted.map((feature) => ({
-        delete: { feature: this.registry.fromStorage(feature), name },
+        delete: { id: feature[FEATURE_UUID] },
       })),
       ...nextFeatures.map((feature) => ({
         index: { feature: this.registry.fromStorage(feature), name },
@@ -92,7 +93,7 @@ export class FeatureClient {
   }
 
   async unlinkFeature(name: string, feature: Feature): Promise<void> {
-    const id = this.registry.getHandler(feature.type).getFeatureUuid(name, feature.name);
+    const id = this.registry.getHandler(feature.type).getFeatureUuid(name, feature);
 
     const { result } = await this.clients.storageClient.delete({ id });
     if (result === 'not_found') {
@@ -117,12 +118,9 @@ export class FeatureClient {
           };
         }
 
-        const id = this.registry
-          .getHandler(operation.delete.feature.type)
-          .getFeatureUuid(name, operation.delete.feature.name);
         return {
           delete: {
-            _id: id,
+            _id: operation.delete.id,
           },
         };
       }),
@@ -130,23 +128,17 @@ export class FeatureClient {
     });
   }
 
-  async getFeature(name: string, feature: { type: string; name: string }): Promise<Feature> {
-    const id = this.registry.getHandler(feature.type).getFeatureUuid(name, feature.name);
+  async getFeature(id: string): Promise<Feature> {
     const hit = await this.clients.storageClient.get({ id });
-
     return this.registry.fromStorage(hit._source!);
   }
 
-  async deleteFeature(
-    name: string,
-    feature: { type: string; name: string }
-  ): Promise<StorageClientDeleteResponse> {
-    const id = this.registry.getHandler(feature.type).getFeatureUuid(name, feature.name);
+  async deleteFeature(name: string, id: string): Promise<StorageClientDeleteResponse> {
     return await this.clients.storageClient.delete({ id });
   }
 
   async updateFeature(name: string, feature: Feature): Promise<StorageClientIndexResponse> {
-    const id = this.registry.getHandler(feature.type).getFeatureUuid(name, feature.name);
+    const id = this.registry.getHandler(feature.type).getFeatureUuid(name, feature);
     return await this.clients.storageClient.index({
       document: this.registry.toStorage(name, feature),
       id,

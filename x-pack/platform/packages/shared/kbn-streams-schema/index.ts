@@ -139,9 +139,14 @@ export { emptyAssets } from './src/helpers/empty_assets';
 export {
   type Feature,
   type FeatureType,
+  type InfrastructureFeature,
+  type TechnologyFeature,
+  type FeatureStatus,
+  featureTypes,
   isFeature,
   featureSchema,
   featureTypeSchema,
+  featureStatusSchema,
 } from './src/feature';
 
 export { type System, systemSchema, isSystem } from './src/system';

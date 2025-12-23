@@ -6,12 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import {
-  streamObjectNameSchema,
-  featureSchema,
-  type Feature,
-  featureTypeSchema,
-} from '@kbn/streams-schema';
+import { featureSchema, type Feature } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -22,8 +17,6 @@ import type { Observable } from 'rxjs';
 import { from, map, catchError } from 'rxjs';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
-import { StatusError } from '../../../../lib/streams/errors/status_error';
-import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -31,11 +24,12 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import type { IdentifiedFeaturesEvent, StreamDescriptionEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
 export const getFeatureRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features/{featureType}/{featureName}',
+  endpoint: 'GET /internal/streams/{name}/features/{id}',
   options: {
     access: 'internal',
     summary: 'Get a feature for a stream',
@@ -49,8 +43,7 @@ export const getFeatureRoute = createServerRoute({
   params: z.object({
     path: z.object({
       name: z.string(),
-      featureType: featureTypeSchema,
-      featureName: streamObjectNameSchema,
+      id: z.string(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ feature: Feature }> => {
@@ -61,22 +54,19 @@ export const getFeatureRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name, featureType, featureName } = params.path;
-
+    const { name, id } = params.path;
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
 
-    const feature = await featureClient.getFeature(name, { type: featureType, name: featureName });
-
+    const feature = await featureClient.getFeature(id);
     return { feature };
   },
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{featureType}/{featureName}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
   options: {
     access: 'internal',
     summary: 'Delete a feature for a stream',
@@ -90,8 +80,7 @@ export const deleteFeatureRoute = createServerRoute({
   params: z.object({
     path: z.object({
       name: z.string(),
-      featureType: z.string(),
-      featureName: streamObjectNameSchema,
+      id: z.string(),
     }),
   }),
   handler: async ({
@@ -99,7 +88,6 @@ export const deleteFeatureRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
   }): Promise<StorageClientDeleteResponse> => {
     const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -108,23 +96,18 @@ export const deleteFeatureRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { name, featureName, featureType } = params.path;
-
+    const { name, id } = params.path;
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
       throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
     }
 
-    logger
-      .get('feature_identification')
-      .debug(`Deleting feature ${featureType}/${featureName} for stream ${name}`);
-    return await featureClient.deleteFeature(name, { type: featureType, name: featureName });
+    return await featureClient.deleteFeature(name, id);
   },
 });
 
 export const upsertFeatureRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
+  endpoint: 'POST /internal/streams/{name}/features',
   options: {
     access: 'internal',
     summary: 'Upserts a feature for a stream',
@@ -136,7 +119,7 @@ export const upsertFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), featureType: featureTypeSchema, featureName: z.string() }),
+    path: z.object({ name: z.string() }),
     body: featureSchema,
   }),
   handler: async ({
@@ -153,16 +136,11 @@ export const upsertFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
-      path: { name, featureType, featureName },
+      path: { name },
       body,
     } = params;
 
-    if (body.type !== featureType || body.name !== featureName) {
-      throw new StatusError(`Feature type and name must match the path parameters`, 400);
-    }
-
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
@@ -239,10 +217,7 @@ export const bulkFeaturesRoute = createServerRoute({
           }),
           z.object({
             delete: z.object({
-              feature: z.object({
-                type: featureTypeSchema,
-                name: streamObjectNameSchema,
-              }),
+              id: z.string(),
             }),
           }),
         ])
@@ -267,18 +242,11 @@ export const bulkFeaturesRoute = createServerRoute({
       path: { name },
       body: { operations },
     } = params;
-
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
-    logger
-      .get('feature_identification')
-      .debug(
-        `Performing bulk feature operation with ${operations.length} operations for stream ${name}`
-      );
     return await featureClient.bulk(name, operations);
   },
 });
@@ -317,10 +285,7 @@ export const identifyFeaturesRoute = createServerRoute({
       uiSettingsClient,
       streamsClient,
       inferenceClient,
-      soClient,
-    } = await getScopedClients({
-      request,
-    });
+    } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -330,45 +295,40 @@ export const identifyFeaturesRoute = createServerRoute({
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
-    // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const [{ hits }, stream] = await Promise.all([
-      featureClient.getFeatures(name),
+    const [stream, connector] = await Promise.all([
       streamsClient.getStream(name),
+      inferenceClient.getConnectorById(connectorId),
     ]);
 
+    const featureRegistry = getDefaultFeatureRegistry();
     const esClient = scopedClusterClient.asCurrentUser;
-
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
     const signal = getRequestAbortSignal(request);
-    const featureRegistry = getDefaultFeatureRegistry();
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
-      logger,
-    });
-
-    const { featurePromptOverride, descriptionPromptOverride } =
-      await promptsConfigService.getPrompt();
 
     return from(
-      featureRegistry.identifyFeatures({
-        start: start.getTime(),
-        end: end.getTime(),
-        esClient,
-        inferenceClient: boundInferenceClient,
-        logger: logger.get('feature_identification'),
-        stream,
-        features: hits,
-        signal,
-        featurePromptOverride,
-        descriptionPromptOverride,
-      })
+      featureRegistry
+        .identifyFeatures({
+          start: start.getTime(),
+          end: end.getTime(),
+          esClient,
+          inferenceClient: boundInferenceClient,
+          logger: logger.get('feature_identification'),
+          stream,
+          signal,
+        })
+        .then(async ({ features, tokensUsed }) => {
+          await featureClient.bulk(
+            name,
+            features.map((feature) => ({
+              index: { feature },
+            }))
+          );
+          return { features, tokensUsed };
+        })
     ).pipe(
       map(({ features, tokensUsed }) => {
         return {

@@ -9,24 +9,29 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { types } from '@kbn/storage-adapter';
 import {
   STREAM_NAME,
-  FEATURE_DESCRIPTION,
-  FEATURE_FILTER,
   FEATURE_NAME,
   FEATURE_TYPE,
   FEATURE_UUID,
+  FEATURE_VALUE,
+  FEATURE_CONFIDENCE,
+  FEATURE_EVIDENCE,
+  FEATURE_STATUS,
+  FEATURE_LAST_SEEN,
 } from './fields';
 
 export const featureStorageSettings = {
-  // Initially features were called systems, for backward compatibility we need to keep the same index name
-  name: '.kibana_streams_systems',
+  name: '.kibana_streams_features',
   schema: {
     properties: {
       [FEATURE_UUID]: types.keyword(),
       [STREAM_NAME]: types.keyword(),
       [FEATURE_TYPE]: types.keyword(),
       [FEATURE_NAME]: types.keyword(),
-      [FEATURE_DESCRIPTION]: types.text(),
-      [FEATURE_FILTER]: types.object({ enabled: false }),
+      [FEATURE_VALUE]: types.text(),
+      [FEATURE_CONFIDENCE]: types.long(),
+      [FEATURE_EVIDENCE]: types.keyword(),
+      [FEATURE_STATUS]: types.keyword(),
+      [FEATURE_LAST_SEEN]: types.date(),
     },
   },
 } satisfies IndexStorageSettings;

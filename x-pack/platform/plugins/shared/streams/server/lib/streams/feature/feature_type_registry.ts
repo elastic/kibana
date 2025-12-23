@@ -7,12 +7,14 @@
 
 import type { Feature } from '@kbn/streams-schema';
 import { describeDataset } from '@kbn/ai-tools';
-import { sumTokens } from '@kbn/streams-ai';
+import { IdentifyFeaturesOptionsBase, sumTokens } from '@kbn/streams-ai';
 import { withSpan } from '@kbn/apm-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
 import { FEATURE_TYPE } from './fields';
+import { InfrastructureFeatureHandler } from './handlers/infrastructure';
+import { TechnologyFeatureHandler } from './handlers/technology';
 
 export class FeatureTypeRegistry {
   private handlers = new Map<string, FeatureTypeHandler>();
@@ -56,7 +58,7 @@ export class FeatureTypeRegistry {
   }
 
   async identifyFeatures(
-    options: any
+    options: IdentifyFeaturesOptionsBase
   ): Promise<{ features: Feature[]; tokensUsed: ChatCompletionTokenCount }> {
     options.logger.debug(`Identifying features for stream ${options.stream.name}`);
 
@@ -95,6 +97,8 @@ export class FeatureTypeRegistry {
 }
 
 const defaultRegistry = new FeatureTypeRegistry();
+defaultRegistry.register(new InfrastructureFeatureHandler());
+defaultRegistry.register(new TechnologyFeatureHandler());
 
 export function getDefaultFeatureRegistry() {
   return defaultRegistry;
