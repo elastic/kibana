@@ -49,7 +49,7 @@ export const useAttackGroupHandler = ({
 }: UseAttackGroupHandlerProps): UseAttackGroupHandlerReturn => {
   const { assistantAvailability, http } = useAssistantContext();
 
-  const { data: attacksData, isLoading: isLoadingAttacks } = useFindAttackDiscoveries({
+  const { data: attacksData, isLoading } = useFindAttackDiscoveries({
     ids: attackIds,
     http,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
@@ -57,14 +57,14 @@ export const useAttackGroupHandler = ({
   });
 
   const attacksRecord = useMemo(() => {
-    if (isLoadingAttacks || !attacksData?.data.length) {
+    if (isLoading || !attacksData?.data.length) {
       return EMPTY_RECORD;
     }
     return attacksData.data.reduce<Record<string, AttackDiscoveryAlert>>((acc, attack) => {
       acc[attack.id] = attack;
       return acc;
     }, {});
-  }, [attacksData?.data, isLoadingAttacks]);
+  }, [attacksData?.data, isLoading]);
 
   const getAttack = useCallback<AttackForGroup>(
     (selectedGroup, bucket) => {
@@ -80,5 +80,5 @@ export const useAttackGroupHandler = ({
     [attacksRecord]
   );
 
-  return { isLoading: isLoadingAttacks, getAttack };
+  return { isLoading, getAttack };
 };
