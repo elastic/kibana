@@ -8,10 +8,10 @@
 import { ActionsMenuGroup, type PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { RunAgentStepTypeId, runAgentStepCommonDefinition } from '../../common/step_types';
-import type { OnechatInternalService } from '../services/types';
+import type { RegisterWorkflowStepsDependencies } from '.';
 
 export const getRunAgentStepDefinition = (
-  getInternalService: () => OnechatInternalService
+  deps: RegisterWorkflowStepsDependencies
 ): PublicStepDefinition => {
   return {
     ...runAgentStepCommonDefinition,
@@ -46,16 +46,38 @@ export const getRunAgentStepDefinition = (
 \`\`\``,
       ],
     },
-    completions: {
+    propertyHandlers: {
       config: {
-        agent_id: async () => {
-          const internalService = getInternalService();
-          const agents = await internalService.agentService.list();
-          return agents.map((agent) => ({
-            label: agent.name,
-            value: agent.id,
-            detail: agent.description,
-          }));
+        agent_id: {
+          getCompletions: async () => {
+            const internalService = deps.getInternalService();
+            const agents = await internalService.agentService.list();
+            return agents.map((agent) => ({
+              label: agent.id,
+              value: agent.id,
+              detail: agent.name,
+              documentation: agent.description,
+            }));
+          },
+          validate: async (value, context) => {
+            if (typeof value !== 'string') {
+              return { severity: 'error', message: 'Agent ID must be a string' };
+            }
+            try {
+              const internalService = deps.getInternalService();
+              await internalService.agentService.get(value);
+              return { severity: null, afterMessage: '✓ Agent connected' };
+            } catch (error) {
+              if (error?.response?.status === 404) {
+                return {
+                  severity: 'error',
+                  message: `Agent ${value} not found. Select an existing agent or create a new one.`,
+                  hoverMessage: `[Open agents management](${await deps.getAgentsManagementUrl()})`,
+                };
+              }
+              return { severity: 'warning', message: 'Cannot validate an agent ID' };
+            }
+          },
         },
       },
     },

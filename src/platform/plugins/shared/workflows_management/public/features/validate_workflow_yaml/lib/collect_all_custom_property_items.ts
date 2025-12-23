@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { LineCounter } from 'yaml';
+import type { StepPropertyHandler } from '@kbn/workflows';
+import type { WorkflowLookup } from '../../../entities/workflows/store';
+import type { CustomPropertyItem } from '../model/types';
+
+export function collectAllCustomPropertyItems(
+  workflowLookup: WorkflowLookup,
+  lineCounter: LineCounter,
+  getPropertyHandler: (
+    stepType: string,
+    scope: 'config' | 'input',
+    key: string
+  ) => StepPropertyHandler | null
+): CustomPropertyItem[] {
+  const customPropertyItems: CustomPropertyItem[] = [];
+
+  const steps = Object.values(workflowLookup.steps);
+  for (const step of steps) {
+    for (const [_, prop] of Object.entries(step.propInfos)) {
+      if (
+        prop.keyNode.range &&
+        typeof prop.keyNode.value === 'string' &&
+        prop.keyNode.value !== 'name' &&
+        prop.keyNode.value !== 'type' &&
+        prop.keyNode.value !== 'with' &&
+        prop.valueNode.range
+      ) {
+        const scope = prop.path.length > 0 && prop.path[0] === 'with' ? 'input' : 'config';
+        const key = prop.keyNode.value as string;
+        const propertyHandler = getPropertyHandler(step.stepType, scope, key);
+        if (propertyHandler) {
+          const [startOffset, endOffset] = prop.valueNode.range;
+          const startPos = lineCounter.linePos(startOffset);
+          const endPos = lineCounter.linePos(endOffset);
+          customPropertyItems.push({
+            id: `${step.stepId}-${key}-${startPos.line}-${startPos.col}-${endPos.line}-${endPos.col}`,
+            startLineNumber: startPos.line,
+            startColumn: startPos.col,
+            endLineNumber: endPos.line,
+            endColumn: endPos.col,
+            type: 'custom-property',
+            scope,
+            stepType: step.stepType,
+            propertyKey: key,
+            propertyValue: prop.valueNode.value,
+            validator: propertyHandler.validate,
+            yamlPath: prop.path,
+            key: prop.keyNode.value,
+          });
+        }
+      }
+    }
+  }
+  return customPropertyItems;
+}

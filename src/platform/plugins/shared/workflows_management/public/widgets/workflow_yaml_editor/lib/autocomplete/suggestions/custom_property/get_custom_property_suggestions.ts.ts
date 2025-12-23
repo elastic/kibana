@@ -8,41 +8,58 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { stepSchemas } from '../../../../../../../common/step_schemas';
+import type { StepPropertyHandler } from '@kbn/workflows';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
-export async function getDynamicCompletions(
-  autocompleteContext: AutocompleteContext
+export async function getCustomPropertySuggestions(
+  autocompleteContext: AutocompleteContext,
+  getPropertyHandler: (
+    stepType: string,
+    scope: 'config' | 'input',
+    key: string
+  ) => StepPropertyHandler | null
 ): Promise<monaco.languages.CompletionItem[]> {
-  const { focusedStepInfo, focusedYamlPair } = autocompleteContext;
+  const { focusedStepInfo, focusedYamlPair, yamlLineCounter } = autocompleteContext;
 
-  if (!focusedStepInfo || !focusedStepInfo.stepType || !focusedYamlPair) {
-    return [];
-  }
-
-  const completionFnRecord = stepSchemas
-    .getAllConnectorsMapCache()
-    ?.get(focusedStepInfo.stepType)?.completions;
-  if (!completionFnRecord) {
+  if (
+    !focusedStepInfo ||
+    !focusedStepInfo.stepType ||
+    !focusedYamlPair ||
+    !focusedYamlPair.valueNode?.range ||
+    !yamlLineCounter
+  ) {
     return [];
   }
 
   const key = focusedYamlPair.keyNode.value as string;
   // if the key is in config, it's on a root level, so path will be equal to the key
   const isInConfig = focusedYamlPair.path.length > 0 && focusedYamlPair.path[0] === key;
-  const completionFn = isInConfig
-    ? completionFnRecord.config?.[key]
-    : completionFnRecord.input?.[key];
-  if (!completionFn) {
+
+  const propertyHandler = getPropertyHandler(
+    focusedStepInfo.stepType,
+    isInConfig ? 'config' : 'input',
+    key
+  );
+  if (!propertyHandler) {
     return [];
   }
-  const completions = await completionFn();
+  const [startOffset, endOffset] = focusedYamlPair.valueNode.range;
+  const startPos = yamlLineCounter?.linePos(startOffset);
+  const endPos = yamlLineCounter?.linePos(endOffset);
+  // replace the whole value with the suggestion
+  const replaceRange = {
+    startLineNumber: startPos.line,
+    startColumn: startPos.col,
+    endLineNumber: endPos.line,
+    endColumn: endPos.col,
+  };
+  const completions = await propertyHandler.getCompletions();
   return completions.map((completion) => ({
     label: completion.label,
     value: completion.value,
     kind: monaco.languages.CompletionItemKind.Value,
     insertText: completion.value,
-    range: autocompleteContext.range,
+    range: replaceRange,
     detail: completion.detail,
     documentation: completion.documentation,
   }));

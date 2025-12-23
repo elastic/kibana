@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
+import type {
+  BaseConnectorContract,
+  ConnectorContractUnion,
+  ConnectorTypeInfo,
+  StepPropertyHandler,
+} from '@kbn/workflows';
 import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
 } from '@kbn/workflows';
-import type { BaseConnectorContract } from '@kbn/workflows/types/v1';
 import { z } from '@kbn/zod/v4';
 
 // Import connector schemas from the organized structure
@@ -102,7 +106,7 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
         examples: stepDefinition.documentation?.examples
           ? { snippet: stepDefinition.documentation?.examples.join('\n') }
           : undefined,
-        completions: stepDefinition.completions,
+        propertyHandlers: stepDefinition.propertyHandlers,
       };
     }
     return definition;
@@ -386,4 +390,13 @@ export const getWorkflowZodSchemaLoose = (
 ): z.ZodTypeAny => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
+};
+
+export const getPropertyHandler = (
+  stepType: string,
+  scope: 'config' | 'input',
+  propertyKey: string
+): StepPropertyHandler | null => {
+  const connector = stepSchemas.getAllConnectorsMapCache()?.get(stepType);
+  return connector?.propertyHandlers?.[scope]?.[propertyKey] ?? null;
 };

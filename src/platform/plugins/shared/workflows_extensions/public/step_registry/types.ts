@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StepPropertyHandler } from '@kbn/workflows';
 import type { CommonStepDefinition } from '../../common';
 
 /**
@@ -45,15 +46,14 @@ export interface PublicStepDefinition extends CommonStepDefinition {
    */
   actionsMenuGroup?: ActionsMenuGroup;
 
-  completions?: {
-    config?: Record<string, CompletionFn>;
-    input?: Record<string, CompletionFn>;
+  /**
+   * Property handlers for the step.
+   */
+  propertyHandlers?: {
+    config?: Record<string, StepPropertyHandler>;
+    input?: Record<string, StepPropertyHandler>;
   };
 }
-
-type CompletionFn = () => Promise<
-  Array<{ label: string; value: string; detail?: string; documentation?: string }>
->;
 
 /**
  * The catalog under which the step is displayed in the actions menu

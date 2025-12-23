@@ -53,6 +53,10 @@ export type {
   DynamicConnectorContract,
   BaseConnectorContract,
   HttpMethod,
+  StepPropertyHandler,
+  PropertyValidationResult,
+  PropertyCompletionOption,
+  PropertyValidationContext,
 } from './v1';
 
 // exported full to use enum as values

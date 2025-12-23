@@ -9,10 +9,15 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import { getRunAgentStepDefinition } from './run_agent_step';
 import type { OnechatInternalService } from '../services/types';
 
+export interface RegisterWorkflowStepsDependencies {
+  getInternalService: () => OnechatInternalService;
+  getAgentsManagementUrl: () => Promise<string>;
+}
+
 export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
-  getInternalService: () => OnechatInternalService
+  dependencies: RegisterWorkflowStepsDependencies
 ): void {
   // Register steps
-  workflowsExtensions.registerStepDefinition(getRunAgentStepDefinition(getInternalService));
+  workflowsExtensions.registerStepDefinition(getRunAgentStepDefinition(dependencies));
 }

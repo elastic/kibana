@@ -10,7 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
-import { getDynamicCompletions } from './dynamic_completions/get_dynamic_completions';
+import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions.ts';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
@@ -20,6 +20,7 @@ import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_sugg
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
+import { getPropertyHandler } from '../../../../../../common/schema';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
 // eslint-disable-next-line complexity
@@ -151,7 +152,11 @@ export async function getSuggestions(
 
   // Dynamic completions
   if (autocompleteContext.dynamicConnectorTypes) {
-    return getDynamicCompletions(autocompleteContext);
+    return getCustomPropertySuggestions(
+      autocompleteContext,
+      (stepType: string, scope: 'config' | 'input', key: string) =>
+        getPropertyHandler(stepType, scope, key)
+    );
   }
 
   // TODO: Implement connector with block completion

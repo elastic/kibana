@@ -1,0 +1,108 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { collectAllCustomPropertyItems } from './collect_all_custom_property_items';
+import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
+
+describe('collectAllCustomPropertyItems', () => {
+  it('should collect zero custom property items from steps if no handlers exist in schemas', () => {
+    const yaml = `
+name: test-workflow
+steps:
+  - name: run-agent
+    type: run-agent
+    agent-id: 123
+    with:
+      message: "Hello, world!"
+`;
+    const getPropertyHandler = jest.fn();
+    const computedData = performComputation(yaml);
+    const { workflowLookup, yamlLineCounter } = computedData;
+    const customPropertyItems = collectAllCustomPropertyItems(
+      workflowLookup!,
+      yamlLineCounter!,
+      getPropertyHandler
+    );
+    expect(customPropertyItems).toHaveLength(0);
+  });
+  it('should collect custom property items at step level from steps if handlers exist in schemas', () => {
+    const yaml = `
+name: test-workflow
+steps:
+  - name: run-agent
+    type: run-agent
+    agent-id: great-agent
+    with:
+      message: "Hello, world!"
+`;
+    const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
+    const validator = jest.fn();
+    const getPropertyHandler = jest.fn();
+    getPropertyHandler.mockImplementation(
+      (stepType: string, scope: 'config' | 'input', key: string) => {
+        if (stepType === 'run-agent' && scope === 'config' && key === 'agent-id') {
+          return { validate: validator };
+        }
+        return null;
+      }
+    );
+    const customPropertyItems = collectAllCustomPropertyItems(
+      workflowLookup!,
+      yamlLineCounter!,
+      getPropertyHandler
+    );
+    expect(customPropertyItems).toHaveLength(1);
+    expect(customPropertyItems[0]).toMatchObject({
+      propertyKey: 'agent-id',
+      propertyValue: 'great-agent',
+      stepType: 'run-agent',
+      scope: 'config',
+      validator,
+      yamlPath: ['agent-id'],
+      key: 'agent-id',
+    });
+  });
+  it('should collect custom property items at "with" level if handlers exist in schemas', () => {
+    const yaml = `
+name: test-workflow
+steps:
+  - name: run-agent
+    type: run-agent
+    with:
+      message: "Hello, world!"
+      debug: true
+`;
+    const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
+    const validator = jest.fn();
+    const getPropertyHandler = jest.fn();
+    getPropertyHandler.mockImplementation(
+      (stepType: string, scope: 'config' | 'input', key: string) => {
+        if (stepType === 'run-agent' && scope === 'input' && key === 'debug') {
+          return { validate: validator };
+        }
+        return null;
+      }
+    );
+    const customPropertyItems = collectAllCustomPropertyItems(
+      workflowLookup!,
+      yamlLineCounter!,
+      getPropertyHandler
+    );
+    expect(customPropertyItems).toHaveLength(1);
+    expect(customPropertyItems[0]).toMatchObject({
+      propertyKey: 'debug',
+      propertyValue: true,
+      stepType: 'run-agent',
+      scope: 'input',
+      validator,
+      yamlPath: ['with', 'debug'],
+      key: 'debug',
+    });
+  });
+});

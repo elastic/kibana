@@ -384,9 +384,10 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   examples?: ConnectorExamples;
-  completions?: {
-    config?: Record<string, CompletionFn>;
-    input?: Record<string, CompletionFn>;
+  // Rich property handlers for completions, validation and decorations
+  propertyHandlers?: {
+    config?: Record<string, StepPropertyHandler>;
+    input?: Record<string, StepPropertyHandler>;
   };
 }
 
@@ -429,6 +430,55 @@ export interface InternalConnectorContract extends BaseConnectorContract {
     urlParams: string[];
     bodyParams: string[];
   };
+}
+
+export interface StepPropertyHandler<T = unknown> {
+  /**
+   * Fetch available options for autocompletion.
+   * Called lazily when the user triggers completion.
+   */
+  getCompletions?: () => Promise<PropertyCompletionOption[]>;
+
+  /**
+   * Validate a value and return decoration/error info.
+   * Called when the YAML document changes.
+   * Returns null if no validation is needed (static Zod validation is sufficient).
+   */
+  validate?: (
+    value: T,
+    context: PropertyValidationContext
+  ) => Promise<PropertyValidationResult | null>;
+}
+
+export interface PropertyCompletionOption {
+  /** The value that will be stored in the yaml */
+  value: string;
+  /** The label displayed in the completion popup */
+  label: string;
+  /** Brief detail shown inline in completion popup (optional) */
+  detail?: string;
+  /** Extended documentation shown in side panel (optional) */
+  documentation?: string;
+}
+
+export interface PropertyValidationResult {
+  /** null = valid (show success decoration), 'error'|'warning'|'info' = show error */
+  severity: 'error' | 'warning' | 'info' | null;
+  /** Error message for markers panel (only when severity is not null) */
+  message?: string;
+  /** Decoration text shown after the value (e.g., "✓ Connected (agent ID: xyz)") */
+  afterMessage?: string;
+  /** Hover tooltip (markdown supported) */
+  hoverMessage?: string;
+}
+
+export interface PropertyValidationContext {
+  /** The step type ID (e.g., "onechat.runAgent") */
+  stepType: string;
+  /** The property path ("config" or "input") */
+  scope: 'config' | 'input';
+  /** The property key (e.g., "agent_id") */
+  propertyKey: string;
 }
 
 export interface ConnectorExamples {
