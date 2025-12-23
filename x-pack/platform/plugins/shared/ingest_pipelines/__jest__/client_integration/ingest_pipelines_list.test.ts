@@ -73,7 +73,7 @@ describe('<PipelinesList />', () => {
 
       // Verify app title
       expect(exists('appTitle')).toBe(true);
-      expect(find('appTitle').text()).toEqual('Ingest Pipelines');
+      expect(find('appTitle').text()).toEqual('Ingest pipelines');
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);

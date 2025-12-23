@@ -27,11 +27,11 @@ import { AgentKeysPage } from './page_objects/agent_keys';
 import { AnomalyDetectionPage } from './page_objects/anomaly_detection';
 import { ErrorsPage } from './page_objects/errors';
 import { TransactionsOverviewPage } from './page_objects/transactions_overview';
-import { APM_ROLES } from './constants';
 import { TransactionDetailsPage } from './page_objects/transaction_details';
-import { ServiceDetailsPage } from './page_objects/service_details';
+import { ServiceDetailsPage } from './page_objects/service_details/service_details';
 import { DependenciesInventoryPage } from './page_objects/dependencies_inventory';
-import { DependencyDetailsPage } from './page_objects/dependency_details';
+import { APM_ROLES } from './constants';
+import { DependencyDetailsPage } from './page_objects/dependency_details/dependency_details';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;

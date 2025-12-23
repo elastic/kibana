@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient, InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetHostsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_hosts/get_hosts';
+import type { GetHostsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_hosts/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createSyntheticInfraData, type HostConfig } from '../utils/synthtrace_scenarios';

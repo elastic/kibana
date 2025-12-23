@@ -261,7 +261,9 @@ export async function getEditLensConfiguration(
                 visualizationMap={visualizationMap}
               >
                 <RootDragDropProvider>
-                  <LensEditConfigurationFlyout {...configPanelProps} />
+                  {coreStart.rendering.addContext(
+                    <LensEditConfigurationFlyout {...configPanelProps} />
+                  )}
                 </RootDragDropProvider>
               </EditorFrameServiceProvider>
             </KibanaContextProvider>
