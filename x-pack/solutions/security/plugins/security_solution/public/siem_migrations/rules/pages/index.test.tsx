@@ -19,6 +19,7 @@ import * as useMissingPrivilegesModule from '../../../common/hooks/use_missing_p
 import * as useGetMigrationMissingPrivilegesModule from '../logic/use_get_migration_privileges';
 import * as useCallOutStorageModule from '../../../common/components/callouts/use_callout_storage';
 import { TestProviders } from '../../../common/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import {
   mockedLatestStats,
   mockedLatestStatsEmpty,
@@ -102,6 +103,24 @@ const mockHiddenCallStorageResult = {
   getVisibleMessageIds: jest.fn(() => []),
 };
 
+const defaultStartServicesMock = createStartServicesMock();
+
+const startServicesMock = {
+  ...defaultStartServicesMock,
+  siemMigrations: {
+    ...defaultStartServicesMock.siemMigrations,
+    rules: {
+      ...defaultStartServicesMock.siemMigrations.rules,
+      hasMissingCapabilities: jest.fn().mockReturnValue(false),
+      getMissingCapabilities: jest.fn().mockReturnValue([]),
+    },
+  },
+};
+
+const TestProviderWrapper = ({ children }: { children: React.ReactNode }) => (
+  <TestProviders startServices={startServicesMock}>{children}</TestProviders>
+);
+
 function renderTestComponent(args?: { migrationId?: string; wrapper?: React.ComponentType }) {
   const finalProps = {
     ...defaultProps,
@@ -113,9 +132,9 @@ function renderTestComponent(args?: { migrationId?: string; wrapper?: React.Comp
     },
   };
   return render(
-    <TestProviders>
+    <TestProviderWrapper>
       <MigrationRulesPage {...finalProps} />
-    </TestProviders>,
+    </TestProviderWrapper>,
     {
       wrapper: args?.wrapper,
     }
@@ -179,7 +198,7 @@ describe('Migrations: Translated Rules Page', () => {
   describe('With No MigrationId', () => {
     test('should render empty page when no translated rules are available', () => {
       renderTestComponent({
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       expect(screen.getByTestId('siemMigrationsTranslatedRulesEmptyPageHeader')).toBeVisible();
@@ -216,7 +235,7 @@ describe('Migrations: Translated Rules Page', () => {
       const missingPrivilegesHash = hash(mockMissingPrivileges);
 
       renderTestComponent({
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       expect(useCalloutStorageSpy).toHaveBeenCalled();
@@ -242,7 +261,7 @@ describe('Migrations: Translated Rules Page', () => {
       useLatestStatsSpy.mockReturnValue(mockedLatestStats);
       renderTestComponent({
         migrationId: '1',
-        wrapper: TestProviders,
+        wrapper: TestProviderWrapper,
       });
 
       await waitFor(() => {
