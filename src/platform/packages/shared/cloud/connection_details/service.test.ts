@@ -203,17 +203,19 @@ describe('ConnectionDetailsService', () => {
   });
 
   describe('setTab', () => {
-    it('should allow switching to apiKeys immediately', () => {
+    it('should block switching to apiKeys without permission', async () => {
       const service = new ConnectionDetailsService(createMockOpts());
 
-      service.setTab('apiKeys');
+      await service.setTab('apiKeys');
+
       expect(service.tabId$.getValue()).toBe('endpoints');
     });
 
-    it('should allow switching to endpoints immediately', () => {
+    it('should allow switching to endpoints immediately', async () => {
       const service = new ConnectionDetailsService(createMockOpts());
 
-      service.setTab('endpoints');
+      await service.setTab('endpoints');
+
       expect(service.tabId$.getValue()).toBe('endpoints');
     });
   });
