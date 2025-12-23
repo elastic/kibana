@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { wildcardQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { AWSIndexName } from '../../../common/aws_firehose';
 import {
   AWS_INDEX_NAME_LIST,
@@ -53,7 +52,6 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
   }): Promise<CreateFirehoseOnboardingFlowRouteResponse> {
     const {
       elasticsearch: { client },
-      savedObjects,
     } = await context.core;
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
 
@@ -63,7 +61,6 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
       );
     }
 
-    const spaceId = savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const fleetPluginStart = await plugins.fleet.start();
 
     // Check Fleet integration privileges before attempting to install packages
@@ -79,7 +76,7 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
 
     const [{ encoded: apiKeyEncoded }] = await Promise.all([
       createShipperApiKey(client.asCurrentUser, 'firehose'),
-      packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose', spaceId }),
+      packageClient.ensureInstalledPackage({ pkgName: 'awsfirehose' }),
     ]);
 
     /**
@@ -89,8 +86,13 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
      * and can be installed separately in case it fails to install
      * during onboarding.
      */
-    packageClient.ensureInstalledPackage({ pkgName: 'aws', spaceId }).catch((error) => {
-      logger.error(`Failed installing AWS package: ${error}`);
+    packageClient.ensureInstalledPackage({ pkgName: 'aws' }).catch((error) => {
+      // Conflict errors are expected when the package was already installed in another space
+      if (error.constructor?.name === 'PackageSavedObjectConflictError') {
+        logger.debug(`AWS package already installed: ${error.message}`);
+      } else {
+        logger.error(`Failed installing AWS package: ${error}`);
+      }
     });
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl

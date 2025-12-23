@@ -13,7 +13,6 @@ import {
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
 import { dump } from 'js-yaml';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
@@ -327,8 +326,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     }
 
     const packageClient = fleetStart.packageService.asScoped(request);
-    const { savedObjects } = await context.core;
-    const spaceId = savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
 
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
@@ -360,7 +357,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
         packageClient,
-        spaceId,
         metricsEnabled
       );
       installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
@@ -447,7 +443,6 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
   packageClient: PackageClient,
-  spaceId: string,
   metricsEnabled: boolean = true
 ): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
   return Promise.allSettled(
@@ -455,7 +450,7 @@ async function ensureInstalledIntegrations(
       const { pkgName, installSource } = integration;
 
       if (installSource === 'registry') {
-        const installation = await packageClient.ensureInstalledPackage({ pkgName, spaceId });
+        const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
         const config = await packageClient.getAgentPolicyConfigYAML(
           pkg.name,
@@ -520,7 +515,6 @@ async function ensureInstalledIntegrations(
       try {
         await packageClient.installCustomIntegration({
           pkgName,
-          spaceId,
           datasets: [{ name: dataStream.dataset, type: dataStream.type as PackageDataStreamTypes }],
         });
         return installed;
