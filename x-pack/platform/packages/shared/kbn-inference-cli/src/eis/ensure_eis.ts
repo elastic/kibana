@@ -6,12 +6,41 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import https from 'https';
 import execa from 'execa';
 import chalk from 'chalk';
 
 interface ElasticsearchCredentials {
   username: string;
   password: string;
+}
+
+function httpsRequest(
+  url: string,
+  options: https.RequestOptions,
+  body?: string
+): Promise<{ statusCode: number; data: string }> {
+  return new Promise((resolve, reject) => {
+    const req = https.request(url, options, (res) => {
+      let data = '';
+
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        resolve({ statusCode: res.statusCode || 0, data });
+      });
+    });
+
+    req.on('error', reject);
+
+    if (body) {
+      req.write(body);
+    }
+
+    req.end();
+  });
 }
 
 async function getElasticsearchCredentials(log: ToolingLog): Promise<ElasticsearchCredentials> {
@@ -35,12 +64,18 @@ async function getElasticsearchCredentials(log: ToolingLog): Promise<Elasticsear
   for (const credentials of credentialsToTry) {
     log.debug(`Trying credentials: ${credentials.username}`);
     try {
-      const result = await execa.command(
-        `curl -k -s -o /dev/null -w "%{http_code}" -u ${credentials.username}:${credentials.password} https://localhost:9200`,
-        { shell: true }
+      const auth = Buffer.from(`${credentials.username}:${credentials.password}`).toString(
+        'base64'
       );
+      const { statusCode } = await httpsRequest('https://localhost:9200', {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+        rejectUnauthorized: false,
+      });
 
-      if (result.stdout === '200') {
+      if (statusCode === 200) {
         log.debug(`Credentials ${credentials.username} authorized`);
         return credentials;
       }
@@ -86,13 +121,31 @@ async function setCcmApiKey(
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      await execa.command(
-        `curl -k -XPUT "https://localhost:9200/_inference/_ccm" -u ${credentials.username}:${credentials.password} -H "Content-Type: application/json" -d '{"api_key": "${apiKey}"}'`,
-        { shell: true }
+      const auth = Buffer.from(`${credentials.username}:${credentials.password}`).toString(
+        'base64'
+      );
+      const body = JSON.stringify({ api_key: apiKey });
+
+      const { statusCode } = await httpsRequest(
+        'https://localhost:9200/_inference/_ccm',
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Basic ${auth}`,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(body),
+          },
+          rejectUnauthorized: false,
+        },
+        body
       );
 
-      log.debug('Successfully set CCM API key');
-      return;
+      if (statusCode >= 200 && statusCode < 300) {
+        log.debug('Successfully set CCM API key');
+        return;
+      }
+
+      throw new Error(`HTTP ${statusCode}`);
     } catch (error) {
       if (attempt < maxRetries) {
         log.debug(`Attempt ${attempt} failed, retrying in ${retryDelayMs}ms...`);
