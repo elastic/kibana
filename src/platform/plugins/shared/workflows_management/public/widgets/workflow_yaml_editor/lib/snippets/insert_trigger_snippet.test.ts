@@ -82,7 +82,7 @@ describe('insertTriggerSnippet', () => {
 
     expect(model.pushEditOperations).toHaveBeenCalledWith(
       null,
-      [{ range: new monaco.Range(1, 1, 1, 1), text: expectedSnippet }],
+      [{ range: new monaco.Range(1, 1, 1, 1), text: `${expectedSnippet}\n` }],
       expect.any(Function)
     );
   });
@@ -317,7 +317,7 @@ describe('insertTriggerSnippet', () => {
     });
 
     it('should replace empty item with trailing spaces and comment', () => {
-      const inputYaml = `triggers:\n  -  # comment\n`;
+      const inputYaml = `triggers:         \n  -  # comment\n`;
       const model = createFakeMonacoModel(inputYaml);
       const yamlDocument = parseDocument(inputYaml);
 
@@ -349,7 +349,7 @@ describe('insertTriggerSnippet', () => {
 
   describe('when triggers section exists but is empty', () => {
     it('should insert trigger when triggers: [] (empty array)', () => {
-      const inputYaml = `triggers: []`;
+      const inputYaml = `triggers:`;
       const model = createFakeMonacoModel(inputYaml);
       const yamlDocument = parseDocument(inputYaml);
 
@@ -370,8 +370,8 @@ describe('insertTriggerSnippet', () => {
         null,
         [
           {
-            range: new monaco.Range(2, 1, 2, 1),
-            text: `  ${expectedSnippet}`,
+            range: new monaco.Range(1, 10, 1, 10),
+            text: `\n  ${expectedSnippet}`,
           },
         ],
         expect.any(Function)
@@ -400,7 +400,33 @@ describe('insertTriggerSnippet', () => {
         null,
         [
           {
-            range: new monaco.Range(4, 1, 4, 1),
+            range: new monaco.Range(3, 1, 3, 1), // End of line 2 (after "# comment")
+            text: `  ${expectedSnippet}`,
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+
+    it('should insert trigger after comment when triggers has trailing spaces', () => {
+      const inputYaml = `triggers:    \n  # comment\n`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+
+      insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+      const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+      });
+
+      // Should insert at the end of line 2 (the comment line) with a newline
+      // This will place the trigger after the comment
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: new monaco.Range(3, 1, 3, 1), // End of line 2 (after "# comment")
             text: `  ${expectedSnippet}`,
           },
         ],
@@ -460,7 +486,7 @@ describe('insertTriggerSnippet', () => {
         null,
         [
           {
-            range: new monaco.Range(3, 1, 3, 1),
+            range: new monaco.Range(2, 1, 2, 1),
             text: `  ${expectedSnippet}`,
           },
         ],
@@ -524,7 +550,7 @@ describe('insertTriggerSnippet', () => {
         [
           {
             range: new monaco.Range(1, 1, 1, 1),
-            text: expectedSnippet,
+            text: `${expectedSnippet}\n`,
           },
         ],
         expect.any(Function)
