@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
@@ -24,35 +24,38 @@ export class ConnectionDetailsService {
   public readonly apiKeyHasAccess$ = new BehaviorSubject<null | boolean>(null);
 
   constructor(public readonly opts: ConnectionDetailsOpts) {
-    // Don't set default tab to apiKeys yet - wait for permission check to avoid flash
-    const shouldDeferDefaultTab = opts.defaultTabId === 'apiKeys';
-
-    if (opts.defaultTabId && !shouldDeferDefaultTab) {
-      this.tabId$.next(opts.defaultTabId);
+    this.checkApiKeyAccess();
+    if (this.opts.defaultTabId) {
+      this.setTab(this.opts.defaultTabId);
     }
-
-    opts.apiKeys
-      ?.hasPermission()
-      .then((hasAccess) => {
-        this.apiKeyHasAccess$.next(hasAccess);
-
-        // Now set the deferred default tab if user has access
-        if (shouldDeferDefaultTab && hasAccess) {
-          this.tabId$.next('apiKeys');
-        } else if (!hasAccess && this.tabId$.getValue() === 'apiKeys') {
-          // If user doesn't have permission and is on the apiKeys tab, switch to endpoints
-          this.tabId$.next('endpoints');
-        }
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error('Error checking API key creation permissions', error);
-        this.apiKeyHasAccess$.next(false);
-      });
   }
 
-  public readonly setTab = (tab: TabID) => {
-    this.tabId$.next(tab);
+  private async checkApiKeyAccess() {
+    let hasAccess: boolean = false;
+    try {
+      if (this.opts.apiKeys) {
+        // call server-side to verify if we have access to check/create API keys
+        hasAccess = await this.opts.apiKeys.hasPermission();
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error checking API key creation permissions', error);
+    }
+    this.apiKeyHasAccess$.next(hasAccess);
+  }
+
+  public readonly setTab = async (tab: TabID) => {
+    switch (tab) {
+      case 'endpoints':
+        // we can switch to the tab straight away, no permissions required
+        this.tabId$.next(tab);
+        break;
+      case 'apiKeys':
+        const hasAccess = await firstValueFrom(
+          this.apiKeyHasAccess$.pipe(filter((value) => value !== null))
+        );
+        this.tabId$.next(hasAccess ? 'apiKeys' : 'endpoints');
+    }
   };
 
   public readonly toggleShowCloudId = () => {
