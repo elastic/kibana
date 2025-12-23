@@ -142,14 +142,10 @@ async function buildBarrelIndex(repoRoot) {
       followSymbolicLinks: false,
     }),
     // node_modules package.json files
-    fg('node_modules/**/package.json', {
+    fg('node_modules/{*,@*/*}/package.json', {
       cwd: repoRoot,
-      ignore: [
-        // Avoid deeply nested node_modules (dependencies of dependencies)
-        '**/node_modules/**/node_modules/**',
-      ],
       absolute: true,
-      followSymbolicLinks: false,
+      followSymbolicLinks: true,
     }),
   ]);
 
