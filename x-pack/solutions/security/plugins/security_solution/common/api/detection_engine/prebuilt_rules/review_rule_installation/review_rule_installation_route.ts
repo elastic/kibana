@@ -33,7 +33,7 @@ export const ReviewRuleInstallationRequestBody = z
      */
     sort: ReviewPrebuiltRuleInstallationSort.optional(),
   })
-  .optional();
+  .nullable();
 
 export interface ReviewRuleInstallationResponseBody {
   /** Current page number */
