@@ -206,7 +206,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     <>
       <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
-        <EuiFlexItem grow={false} css={{ minWidth: 300 }}>
+        <EuiFlexItem grow={false} css={{ minWidth: euiTheme.base * 19 }}>
           <EuiPopover
             button={
               <>
