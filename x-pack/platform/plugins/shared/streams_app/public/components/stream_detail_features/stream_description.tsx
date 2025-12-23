@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiMarkdownEditor,
   EuiPanel,
   EuiText,
@@ -57,6 +58,13 @@ const GENERATE_DESCRIPTION_BUTTON_LABEL = i18n.translate(
   }
 );
 
+const STOP_GENERATION_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.streamDetailView.streamDescription.stopGenerationButtonLabel',
+  {
+    defaultMessage: 'Stop',
+  }
+);
+
 const SAVE_DESCRIPTION_BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailView.streamDescription.saveDescriptionButtonLabel',
   {
@@ -85,6 +93,50 @@ const CANCEL_LABEL = i18n.translate(
   }
 );
 
+const GenerateDescriptionButton: React.FC<{
+  size: 's' | 'm';
+  isGenerating: boolean;
+  isDisabled: boolean;
+  onGenerate: () => void;
+  onStop: () => void;
+  aiFeatures: AIFeatures | null;
+}> = ({ size, isGenerating, isDisabled, onGenerate, onStop, aiFeatures }) => {
+  return (
+    <ConnectorListButtonBase
+      buttonProps={
+        isGenerating
+          ? {
+              size,
+              children: (
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  justifyContent="center"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{STOP_GENERATION_BUTTON_LABEL}</EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              onClick: onStop,
+              'data-test-subj': 'stream_description_stop_button',
+            }
+          : {
+              size,
+              iconType: 'sparkles',
+              children: GENERATE_DESCRIPTION_BUTTON_LABEL,
+              onClick: onGenerate,
+              isDisabled,
+              'data-test-subj': 'stream_description_generate_button',
+            }
+      }
+      aiFeatures={aiFeatures}
+    />
+  );
+};
+
 export const StreamDescription: React.FC<AISummaryProps> = ({
   definition,
   refreshDefinition,
@@ -101,6 +153,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
     onSaveDescription,
     onStartEditing,
     areButtonsDisabled,
+    abort,
   } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures });
 
   return (
@@ -145,16 +198,12 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                       </EuiFlexItem>
                     )}
                     <EuiFlexItem grow={false}>
-                      <ConnectorListButtonBase
-                        buttonProps={{
-                          size: 's',
-                          iconType: 'sparkles',
-                          children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                          onClick: onGenerateDescription,
-                          isDisabled: areButtonsDisabled,
-                          isLoading: isGenerating,
-                          'data-test-subj': 'stream_description_generate_button',
-                        }}
+                      <GenerateDescriptionButton
+                        size="s"
+                        isGenerating={isGenerating}
+                        isDisabled={areButtonsDisabled}
+                        onGenerate={onGenerateDescription}
+                        onStop={abort}
                         aiFeatures={aiFeatures}
                       />
                     </EuiFlexItem>
@@ -209,16 +258,12 @@ export const StreamDescription: React.FC<AISummaryProps> = ({
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ConnectorListButtonBase
-                    buttonProps={{
-                      size: 'm',
-                      iconType: 'sparkles',
-                      children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                      onClick: onGenerateDescription,
-                      isDisabled: areButtonsDisabled,
-                      isLoading: isGenerating,
-                      'data-test-subj': 'stream_description_generate_button',
-                    }}
+                  <GenerateDescriptionButton
+                    size="m"
+                    isGenerating={isGenerating}
+                    isDisabled={areButtonsDisabled}
+                    onGenerate={onGenerateDescription}
+                    onStop={abort}
                     aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
