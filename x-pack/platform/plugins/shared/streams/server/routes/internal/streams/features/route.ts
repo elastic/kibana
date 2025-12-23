@@ -344,6 +344,7 @@ export const identifyFeaturesRoute = createServerRoute({
     const connectorId = await resolveConnectorId({
       connectorId: connectorIdParam,
       uiSettingsClient,
+      logger,
     });
 
     // Get connector info for error enrichment
@@ -456,6 +457,7 @@ export const describeStreamRoute = createServerRoute({
     const connectorId = await resolveConnectorId({
       connectorId: connectorIdParam,
       uiSettingsClient,
+      logger,
     });
 
     // Get connector info for error enrichment

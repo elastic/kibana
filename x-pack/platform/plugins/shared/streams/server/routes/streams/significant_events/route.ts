@@ -216,6 +216,7 @@ const generateSignificantEventsRoute = createServerRoute({
     const connectorId = await resolveConnectorId({
       connectorId: params.query.connectorId,
       uiSettingsClient,
+      logger,
     });
 
     const promptsConfigService = new PromptsConfigService({

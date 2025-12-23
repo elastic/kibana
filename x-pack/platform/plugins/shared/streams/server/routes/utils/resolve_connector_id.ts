@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
@@ -21,12 +21,18 @@ import { StatusError } from '../../lib/streams/errors/status_error';
  * @returns The resolved connector ID
  * @throws StatusError if no connector ID is provided and no default is configured
  */
+
+// TODO: Import from gen-ai-settings-plugin (package) once available
+const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+
 export async function resolveConnectorId({
   connectorId,
   uiSettingsClient,
+  logger,
 }: {
   connectorId?: string;
   uiSettingsClient: IUiSettingsClient;
+  logger: Logger;
 }): Promise<string> {
   if (connectorId) {
     return connectorId;
@@ -34,7 +40,8 @@ export async function resolveConnectorId({
 
   const defaultConnector = await uiSettingsClient.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
 
-  if (defaultConnector && defaultConnector !== 'NO_DEFAULT_CONNECTOR') {
+  if (defaultConnector && defaultConnector !== NO_DEFAULT_CONNECTOR) {
+    logger.debug(`No connector ID provided, using default AI connector: ${defaultConnector}`);
     return defaultConnector;
   }
 
