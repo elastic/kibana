@@ -26,22 +26,23 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
   });
 
   test('should handle the error message correctly', async ({ page }) => {
-    const customEquationButton = page.testSubj.locator('customEquation');
     const customEquationField = page.testSubj.locator('thresholdRuleCustomEquationEditorFieldText');
 
     // Introduce an error in the equation
-    await customEquationButton.click();
+    await page.testSubj.click('customEquation');
     await customEquationField.click();
     await customEquationField.fill('A +');
+    await page.testSubj.click('o11yClosablePopoverTitleButton');
 
     const lensFailure = page.testSubj.locator('embeddable-lens-failure');
     await expect(lensFailure).toBeVisible();
     await expect(lensFailure).toContainText('An error occurred while rendering the chart');
 
     // Fix the introduced error
-    await customEquationButton.click();
+    await page.testSubj.click('customEquation');
     await customEquationField.click();
     await customEquationField.fill('A');
+    await page.testSubj.click('o11yClosablePopoverTitleButton');
 
     await expect(lensFailure).toHaveCount(0);
   });
