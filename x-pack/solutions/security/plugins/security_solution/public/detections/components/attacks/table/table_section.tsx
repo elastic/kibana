@@ -39,6 +39,7 @@ import * as i18n from './translations';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
+export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 
 export interface TableSectionProps {
   /**
@@ -169,9 +170,15 @@ export const TableSection = React.memo(
       return dataView.toSpec(true);
     }, [dataView]);
 
-    const openAttackDetailsFlyout = useCallback((selectedGroup: string) => {
-      // TODO: open attack details flyout logic
-    }, []);
+    const openAttackDetailsFlyout = useCallback(
+      (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
+        const attack = getAttack(selectedGroup, bucket);
+        if (attack) {
+          // TODO: open attack details flyout logic
+        }
+      },
+      [getAttack]
+    );
 
     const getAdditionalActionButtons = useCallback(
       (selectedGroup: string, fieldBucket: RawBucket<AlertsGroupingAggregation>) => {
@@ -179,10 +186,11 @@ export const TableSection = React.memo(
           ? []
           : [
               <EuiButtonIcon
-                aria-label={'expand button'}
-                data-test-subj="expand-attack-button"
+                key="expand-attack-button"
+                aria-label={i18n.EXPAND_BUTTON_ARIAL_LABEL}
+                data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
                 iconType="expand"
-                onClick={() => openAttackDetailsFlyout(selectedGroup)}
+                onClick={() => openAttackDetailsFlyout(selectedGroup, fieldBucket)}
                 size="s"
                 color="text"
               />,
