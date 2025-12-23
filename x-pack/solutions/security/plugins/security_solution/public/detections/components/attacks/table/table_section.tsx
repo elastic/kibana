@@ -36,6 +36,7 @@ import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_sett
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
+import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -86,6 +87,7 @@ export const TableSection = React.memo(
     const showAnonymizedSwitch = useMemo(() => {
       return (
         <EuiSwitch
+          key="show-anonymized-switch"
           checked={showAnonymized}
           compressed={true}
           data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
@@ -96,9 +98,11 @@ export const TableSection = React.memo(
     }, [onToggleShowAnonymized, showAnonymized]);
 
     const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
+    const { getAttack, isLoading: isAttacksLoading } = useAttackGroupHandler({ attackIds });
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
-      attackIds,
+      getAttack,
       showAnonymized,
+      isLoading: isAttacksLoading,
     });
 
     const onAggregationsChange = useCallback(
