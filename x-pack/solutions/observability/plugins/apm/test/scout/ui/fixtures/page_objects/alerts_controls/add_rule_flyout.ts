@@ -14,12 +14,20 @@ export class AddRuleFlyout {
   public readonly saveButton: Locator;
 
   public readonly isAboveExpression: Locator;
+  public readonly isAboveInput: Locator;
+
+  public readonly scheduleValueInput: Locator;
+  public readonly scheduleUnitSelect: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = this.page.getByRole('dialog');
     this.saveButton = this.flyout.getByTestId('ruleFlyoutFooterSaveButton');
 
     this.isAboveExpression = this.flyout.getByTestId('apmIsAboveExpression');
+    this.isAboveInput = this.flyout.getByTestId('apmIsAboveFieldFieldNumber');
+
+    this.scheduleValueInput = this.flyout.getByTestId('ruleScheduleNumberInput');
+    this.scheduleUnitSelect = this.flyout.getByTestId('ruleScheduleUnitInput');
   }
 
   public async waitForErrorCountToLoad() {
@@ -28,7 +36,12 @@ export class AddRuleFlyout {
 
   public async fillIsAbove(amount: number) {
     await this.isAboveExpression.click();
-    await this.flyout.getByTestId('apmIsAboveFieldFieldNumber').fill(amount.toString());
+    await this.isAboveInput.fill(amount.toString());
+  }
+
+  public async fillRuleSchedule(value: number, unit: 's' | 'm' | 'h' | 'd') {
+    await this.scheduleValueInput.fill(value.toString());
+    await this.scheduleUnitSelect.selectOption(unit);
   }
 
   public async jumpToStep(step: AddRuleFlyoutStep) {

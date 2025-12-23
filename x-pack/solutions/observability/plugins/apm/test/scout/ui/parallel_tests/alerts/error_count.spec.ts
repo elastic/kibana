@@ -29,6 +29,7 @@ test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
   test("Can create, trigger and view an 'Error count' alert from service inventory", async ({
     page,
     pageObjects: { serviceInventoryPage, alertsControls, serviceDetailsPage },
+    apiServices,
   }) => {
     await test.step('land on service inventory and opens alerts context menu', async () => {
       await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(START_DATE, END_DATE);
@@ -52,6 +53,19 @@ test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
       await alertsControls.addRuleFlyout.jumpToStep('details');
       await alertsControls.addRuleFlyout.saveRule({ saveEmptyActions: true });
       await expect(page.getByTestId('euiToastHeader')).toHaveText(`Created rule "${RULE_NAME}"`);
+    });
+
+    await test.step('wait for the rule to be executed', async () => {
+      const foundResponse = await apiServices.alerting.rules.find({
+        search: RULE_NAME,
+        search_fields: ['name'],
+        per_page: 1,
+        page: 1,
+      });
+      const alert = foundResponse.data.data.find((obj: any) => obj.name === RULE_NAME);
+      expect(alert).toBeDefined();
+      await apiServices.alerting.rules.runSoon(alert!.id);
+      await apiServices.alerting.waiting.waitForNextExecution(alert!.id);
     });
 
     await test.step('see alert in service alerts tab', async () => {
