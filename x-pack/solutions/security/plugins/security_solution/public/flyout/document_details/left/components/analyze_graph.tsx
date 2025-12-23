@@ -17,8 +17,6 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { PageScope } from '../../../../data_view_manager/constants';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
