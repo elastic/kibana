@@ -1,0 +1,112 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies run key or startup key registry modifications. In order to survive reboots and other system interrupts, attackers will modify run keys within the registry or leverage startup folder items as a form of persistence.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Startup or Run Key Registry Modification",
+        "note": "## Triage and analysis\n\n### Investigating Startup or Run Key Registry Modification\n\nAdversaries may achieve persistence by referencing a program with a registry run key. Adding an entry to the run keys in the registry will cause the program referenced to be executed when a user logs in. These programs will executed under the context of the user and will have the account's permissions. This rule looks for this behavior by monitoring a range of registry run keys.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Validate if the activity is not related to planned patches, updates, network administrator activity, or legitimate software installations.\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the process executable using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n- Investigate potentially compromised accounts. Analysts can do this by searching for login events (for example, 4624) to the target host after the registry modification.\n\n\n### False positive analysis\n\n- There is a high possibility of benign legitimate programs being added to registry run keys. This activity could be based on new software installations, patches, or any kind of network administrator related activity. Before undertaking further investigation, verify that this activity is not benign.\n\n### Related rules\n\n- Suspicious Startup Shell Folder Modification - c8b150f0-0164-475b-a75e-74b47800a9ff\n- Persistent Scripts in the Startup Directory - f7c4dc5a-a58d-491d-9f14-9b66507121c0\n- Startup Folder Persistence via Unsigned Process - 2fba96c0-ade5-4bce-b92f-a5df2509da3f\n- Startup Persistence by a Suspicious Process - 440e2db4-bc7f-4c96-a068-65b78da59bde\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "registry where host.os.type == \"windows\" and registry.data.strings != null and\n registry.path : (\n     /* Machine Hive */\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n     \"HKLM\\\\Software\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\\\\*\",\n     /* Users Hive */\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\*\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnce\\\\*\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\RunOnceEx\\\\*\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\Explorer\\\\Run\\\\*\",\n     \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\\\\*\"\n     ) and\n  /* add common legitimate changes without being too restrictive as this is one of the most abused AESPs */\n  not registry.data.strings : \"ctfmon.exe /n\" and\n  not (registry.value : \"Application Restart #*\" and process.name : \"csrss.exe\") and\n  not user.id : (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\") and\n  not registry.data.strings : (\"?:\\\\Program Files\\\\*.exe\", \"?:\\\\Program Files (x86)\\\\*.exe\") and\n  not process.executable : (\"?:\\\\Windows\\\\System32\\\\msiexec.exe\", \"?:\\\\Windows\\\\SysWOW64\\\\msiexec.exe\") and\n  not (\n    /* Logitech G Hub */\n    (\n      process.code_signature.trusted == true and process.code_signature.subject_name == \"Logitech Inc\" and\n      process.name : \"lghub_agent.exe\" and registry.data.strings : (\n        \"\\\"?:\\\\Program Files\\\\LGHUB\\\\lghub.exe\\\" --background\"\n      )\n    ) or\n\n    /* Google Drive File Stream, Chrome, and Google Update */\n    (\n      process.code_signature.trusted == true and process.code_signature.subject_name == \"Google LLC\" and\n      (\n        process.name : \"GoogleDriveFS.exe\" and registry.data.strings : (\n        \"\\\"?:\\\\Program Files\\\\Google\\\\Drive File Stream\\\\*\\\\GoogleDriveFS.exe\\\" --startup_mode\"\n        ) or\n\n        process.name : \"chrome.exe\" and registry.data.strings : (\n          \"\\\"?:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\\\" --no-startup-window /prefetch:5\",\n          \"\\\"?:\\\\Program Files (x86)\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\\\" --no-startup-window /prefetch:5\"\n        ) or\n\n        process.name : \"GoogleUpdate.exe\" and registry.data.strings : (\n          \"\\\"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Google\\\\Update\\\\*\\\\GoogleUpdateCore.exe\\\"\"\n        )\n      )\n    ) or\n\n    /* MS Programs */\n    (\n      process.code_signature.trusted == true and process.code_signature.subject_name in (\"Microsoft Windows\", \"Microsoft Corporation\") and\n      (\n        process.name : \"msedge.exe\" and registry.data.strings : (\n          \"\\\"?:\\\\Program Files (x86)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\\\" --no-startup-window --win-session-start /prefetch:5\"\n        ) or\n\n        process.name : (\"Update.exe\", \"Teams.exe\") and registry.data.strings : (\n          \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\Teams\\\\Update.exe --processStart \\\"Teams.exe\\\" --process-start-args \\\"--system-initiated\\\"\"\n        ) or\n\n        process.name : \"OneDriveStandaloneUpdater.exe\" and registry.data.strings : (\n          \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\OneDrive\\\\*\\\\Microsoft.SharePoint.exe\"\n        ) or\n\n        process.name : \"OneDriveSetup.exe\" and\n          registry.value : (\n            \"Delete Cached Standalone Update Binary\", \"Delete Cached Update Binary\", \"amd64\", \"Uninstall *\", \"i386\", \"OneDrive\"\n          ) and\n          registry.data.strings : (\n            \"?:\\\\Windows\\\\system32\\\\cmd.exe /q /c * \\\"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\OneDrive\\\\*\\\"\",\n            \"?:\\\\Program Files (x86)\\\\Microsoft OneDrive\\\\OneDrive.exe /background *\",\n            \"\\\"?:\\\\Program Files (x86)\\\\Microsoft OneDrive\\\\OneDrive.exe\\\" /background *\",\n            \"?:\\\\Program Files\\\\Microsoft OneDrive\\\\OneDrive.exe /background *\"\n          )\n      )\n    ) or\n\n    /* Slack */\n    (\n      process.code_signature.trusted == true and process.code_signature.subject_name in (\n       \"Slack Technologies, Inc.\", \"Slack Technologies, LLC\"\n      ) and process.name : \"slack.exe\" and registry.data.strings : (\n        \"\\\"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\slack\\\\slack.exe\\\" --process-start-args --startup\"\n      )\n    ) or\n\n    /* WebEx */\n    (\n      process.code_signature.trusted == true and process.code_signature.subject_name in (\"Cisco WebEx LLC\", \"Cisco Systems, Inc.\") and\n      process.name : \"WebexHost.exe\" and registry.data.strings : (\n        \"\\\"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\WebEx\\\\WebexHost.exe\\\" /daemon /runFrom=autorun\"\n      )\n    )\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.data.strings",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.value",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "97fc44d3-8dae-4019-ae83-298c3015600f",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1547",
+                        "name": "Boot or Logon Autostart Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1547/",
+                        "subtechnique": [
+                            {
+                                "id": "T1547.001",
+                                "name": "Registry Run Keys / Startup Folder",
+                                "reference": "https://attack.mitre.org/techniques/T1547/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timeline_id": "3e47ef71-ebfc-4520-975c-cb27fc090799",
+        "timeline_title": "Comprehensive Registry Timeline",
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 108
+    },
+    "id": "97fc44d3-8dae-4019-ae83-298c3015600f_108",
+    "type": "security-rule"
+}

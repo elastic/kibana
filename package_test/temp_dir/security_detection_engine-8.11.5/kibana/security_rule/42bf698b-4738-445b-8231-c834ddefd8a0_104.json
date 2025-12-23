@@ -1,0 +1,85 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies a high number of failed Okta user authentication attempts from a single IP address, which could be indicative of a brute force or password spraying attack. An adversary may attempt a brute force or password spraying attack to obtain unauthorized access to user accounts.",
+        "false_positives": [
+            "Automated processes that attempt to authenticate using expired credentials and unbounded retries may lead to false positives."
+        ],
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Okta Brute Force or Password Spraying Attack",
+        "note": "## Triage and analysis\n\n### Investigating Okta Brute Force or Password Spraying Attack\n\nThis rule alerts when a high number of failed Okta user authentication attempts occur from a single IP address. This could be indicative of a brute force or password spraying attack, where an adversary may attempt to gain unauthorized access to user accounts by guessing the passwords.\n\n#### Possible investigation steps:\n\n- Review the `source.ip` field to identify the IP address from which the high volume of failed login attempts originated.\n- Look into the `event.outcome` field to verify that these are indeed failed authentication attempts.\n- Determine the `user.name` or `user.email` related to these failed login attempts. If the attempts are spread across multiple accounts, it might indicate a password spraying attack.\n- Check the timeline of the events. Are the failed attempts spread out evenly, or are there burst periods, which might indicate an automated tool?\n- Determine the geographical location of the source IP. Is this location consistent with the user's typical login location?\n- Analyze any previous successful logins from this IP. Was this IP previously associated with successful logins?\n\n### False positive analysis:\n\n- A single user or automated process that attempts to authenticate using expired or wrong credentials multiple times may trigger a false positive.\n- Analyze the behavior of the source IP. If the IP is associated with legitimate users or services, it may be a false positive.\n\n### Response and remediation:\n\n- If you identify unauthorized access attempts, consider blocking the source IP at the firewall level.\n- Notify the users who are targeted by the attack. Ask them to change their passwords and ensure they use unique, complex passwords.\n- Enhance monitoring on the affected user accounts for any suspicious activity.\n- If the attack is persistent, consider implementing CAPTCHA or account lockouts after a certain number of failed login attempts.\n- If the attack is persistent, consider implementing multi-factor authentication (MFA) for the affected user accounts.\n- Review and update your security policies based on the findings from the incident.",
+        "query": "event.dataset:okta.system and event.category:authentication and event.outcome:failure\n",
+        "references": [
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^1.3.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.outcome",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "42bf698b-4738-445b-8231-c834ddefd8a0",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Use Case: Identity and Access Audit",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/"
+                    }
+                ]
+            }
+        ],
+        "threshold": {
+            "field": [
+                "source.ip"
+            ],
+            "value": 25
+        },
+        "type": "threshold",
+        "version": 104
+    },
+    "id": "42bf698b-4738-445b-8231-c834ddefd8a0_104",
+    "type": "security-rule"
+}

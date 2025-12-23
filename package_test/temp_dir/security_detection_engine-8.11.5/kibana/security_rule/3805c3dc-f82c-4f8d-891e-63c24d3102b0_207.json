@@ -1,0 +1,71 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects attempts to bypass Okta multi-factor authentication (MFA). An adversary may attempt to bypass the Okta MFA policies configured for an organization in order to obtain unauthorized access to an application.",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Attempted Bypass of Okta MFA",
+        "note": "## Triage and analysis\n\n### Investigating Attempted Bypass of Okta MFA\n\nMulti-factor authentication (MFA) is a crucial security measure in preventing unauthorized access. Okta MFA, like other MFA solutions, requires the user to provide multiple means of identification at login. An adversary might attempt to bypass Okta MFA to gain unauthorized access to an application.\n\nThis rule detects attempts to bypass Okta MFA. It might indicate a serious attempt to compromise a user account within the organization's network.\n\n#### Possible investigation steps\n\n- Identify the actor related to the alert by reviewing `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, or `okta.actor.display_name` fields in the alert.\n- Review the `okta.client.user_agent.raw_user_agent` field to understand the device and software used by the actor.\n- Examine the `okta.outcome.reason` field for additional context around the bypass attempt.\n- Check the `okta.outcome.result` field to confirm the MFA bypass attempt.\n- Check if there are multiple unsuccessful MFA attempts from the same actor or IP address (`okta.client.ip`).\n- Check for successful logins immediately following the MFA bypass attempt.\n- Verify whether the actor's activity aligns with typical behavior or if any unusual activity took place around the time of the bypass attempt.\n\n### False positive analysis\n\n- Check if there were issues with the MFA system at the time of the bypass attempt. This could indicate a system error rather than a genuine bypass attempt.\n- Check the geographical location (`okta.request.ip_chain.geographical_context`) and time of the login attempt. If these match the actor's normal behavior, it might be a false positive.\n- Verify the actor's MFA settings to ensure they are correctly configured.\n\n### Response and remediation\n\n- If unauthorized access is confirmed, initiate the incident response process.\n- Immediately lock the affected actor account and require a password change.\n- Consider resetting MFA tokens for the actor and require re-enrollment.\n- Check if the compromised account was used to access or alter any sensitive data or systems.\n- If a specific MFA bypass technique was used, ensure your systems are patched or configured to prevent such techniques.\n- Assess the criticality of affected services and servers.\n- Work with your IT team to minimize the impact on users and maintain business continuity.\n- If multiple accounts are affected, consider a broader reset or audit of MFA tokens.\n- Implement security best practices [outlined](https://www.okta.com/blog/2019/10/9-admin-best-practices-to-keep-your-org-secure/) by Okta.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).",
+        "query": "event.dataset:okta.system and event.action:user.mfa.attempt_bypass\n",
+        "references": [
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "3805c3dc-f82c-4f8d-891e-63c24d3102b0",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "high",
+        "tags": [
+            "Data Source: Okta",
+            "Use Case: Identity and Access Audit",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1111",
+                        "name": "Multi-Factor Authentication Interception",
+                        "reference": "https://attack.mitre.org/techniques/T1111/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 207
+    },
+    "id": "3805c3dc-f82c-4f8d-891e-63c24d3102b0_207",
+    "type": "security-rule"
+}

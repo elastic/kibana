@@ -1,0 +1,77 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when a new member is added to a GitHub organization as an owner. This role provides admin level privileges. Any new owner roles should be investigated to determine it's validity. Unauthorized owner roles could indicate compromise within your organization and provide unlimited access to data and settings.",
+        "from": "now-9m",
+        "index": [
+            "logs-github.audit-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "New GitHub Owner Added",
+        "query": "iam where event.dataset == \"github.audit\" and event.action == \"org.add_member\" and github.permission == \"admin\"\n",
+        "related_integrations": [
+            {
+                "package": "github",
+                "version": "^1.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "github.permission",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "24401eca-ad0b-4ff9-9431-487a8e183af9",
+        "severity": "medium",
+        "tags": [
+            "Domain: Cloud",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Github"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1136",
+                        "name": "Create Account",
+                        "reference": "https://attack.mitre.org/techniques/T1136/",
+                        "subtechnique": [
+                            {
+                                "id": "T1136.003",
+                                "name": "Cloud Account",
+                                "reference": "https://attack.mitre.org/techniques/T1136/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "24401eca-ad0b-4ff9-9431-487a8e183af9_1",
+    "type": "security-rule"
+}

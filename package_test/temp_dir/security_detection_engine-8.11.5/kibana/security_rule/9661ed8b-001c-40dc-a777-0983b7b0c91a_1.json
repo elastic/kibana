@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects the use of system search utilities like grep and find to search for private SSH keys or passwords inside a container. Unauthorized access to these sensitive files could lead to further compromise of the container environment or facilitate a container breakout to the underlying host machine.",
+        "from": "now-6m",
+        "index": [
+            "logs-cloud_defend*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Sensitive Keys Or Passwords Searched For Inside A Container",
+        "query": "process where container.id: \"*\" and event.type== \"start\" and\n((\n/*account for tools that execute utilities as a subprocess, in this case the target utility name will appear as a process arg*/  \n  (process.name in (\"grep\", \"egrep\", \"fgrep\") or process.args in (\"grep\", \"egrep\", \"fgrep\")) \n    and process.args : (\"*BEGIN PRIVATE*\", \"*BEGIN OPENSSH PRIVATE*\", \"*BEGIN RSA PRIVATE*\", \n\"*BEGIN DSA PRIVATE*\", \"*BEGIN EC PRIVATE*\", \"*pass*\", \"*ssh*\", \"*user*\")\n) \nor \n(\n/*account for tools that execute utilities as a subprocess, in this case the target utility name will appear as a process arg*/\n  (process.name in (\"find\", \"locate\", \"mlocate\") or process.args in (\"find\", \"locate\", \"mlocate\")) \n    and process.args : (\"*id_rsa*\", \"*id_dsa*\")\n))\n",
+        "references": [
+            "https://sysdig.com/blog/cve-2021-25741-kubelet-falco/"
+        ],
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "container.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "9661ed8b-001c-40dc-a777-0983b7b0c91a",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Linux",
+            "Container",
+            "Threat Detection",
+            "Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1552",
+                        "name": "Unsecured Credentials",
+                        "reference": "https://attack.mitre.org/techniques/T1552/",
+                        "subtechnique": [
+                            {
+                                "id": "T1552.001",
+                                "name": "Credentials In Files",
+                                "reference": "https://attack.mitre.org/techniques/T1552/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "9661ed8b-001c-40dc-a777-0983b7b0c91a_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,93 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the execution of the unshadow utility which is part of John the Ripper, a password-cracking tool on the host machine. Malicious actors can use the utility to retrieve the combined contents of the '/etc/shadow' and '/etc/password' files. Using the combined file generated from the utility, the malicious threat actors can use them as input for password-cracking utilities or prepare themselves for future operations by gathering credential information of the victim.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Linux Credential Dumping via Unshadow",
+        "query": "process where host.os.type == \"linux\" and process.name == \"unshadow\" and\n  event.type == \"start\" and event.action == \"exec\" and process.args_count \u003e= 2\n",
+        "references": [
+            "https://www.cyberciti.biz/faq/unix-linux-password-cracking-john-the-ripper/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args_count",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "e7cb3cfd-aaa3-4d7b-af18-23b89955062c",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Elastic Endgame",
+            "Host",
+            "Linux",
+            "Threat Detection",
+            "Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.008",
+                                "name": "/etc/passwd and /etc/shadow",
+                                "reference": "https://attack.mitre.org/techniques/T1003/008/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "e7cb3cfd-aaa3-4d7b-af18-23b89955062c_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,62 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule uses alert data to determine when multiple different alerts involving the same user are triggered. Analysts can use this to prioritize triage and response, as these users are more likely to be compromised.",
+        "false_positives": [
+            "False positives can occur with Generic built-in accounts, such as Administrator, admin, etc. if they are widespread used in your environment. As a best practice, they shouldn't be used in day-to-day tasks, as it prevents the ability to quickly identify and contact the account owner to find out if an alert is a planned activity, regular business activity, or an upcoming incident."
+        ],
+        "from": "now-24h",
+        "index": [
+            ".alerts-security.*"
+        ],
+        "interval": "1h",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Multiple Alerts Involving a User",
+        "query": "signal.rule.name:* and user.name:* and not user.id:(\"S-1-5-18\" or \"S-1-5-19\" or \"S-1-5-20\")\n",
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "signal.rule.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "0d160033-fab7-4e72-85a3-3a9d80c8bff7",
+        "severity": "high",
+        "tags": [
+            "Elastic",
+            "Threat Detection",
+            "Higher-Order Rules"
+        ],
+        "threshold": {
+            "cardinality": [
+                {
+                    "field": "signal.rule.rule_id",
+                    "value": 5
+                }
+            ],
+            "field": [
+                "user.name"
+            ],
+            "value": 1
+        },
+        "timestamp_override": "event.ingested",
+        "type": "threshold",
+        "version": 2
+    },
+    "id": "0d160033-fab7-4e72-85a3-3a9d80c8bff7_2",
+    "type": "security-rule"
+}

@@ -1,0 +1,110 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies processes loading Active Directory related modules followed by a network connection to the ADWS dedicated TCP port. Adversaries may abuse the ADWS Windows service that allows Active Directory to be queried via this web service.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.library-*",
+      "logs-endpoint.events.network-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Enumeration via Active Directory Web Service",
+    "query": "sequence by process.entity_id with maxspan=3m\n [library where host.os.type == \"windows\" and \n  dll.name : (\"System.DirectoryServices*.dll\", \"System.IdentityModel*.dll\") and \n  not user.id in (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\") and \n  not process.executable : \n                (\"?:\\\\windows\\\\system32\\\\dsac.exe\", \n                 \"?:\\\\program files\\\\powershell\\\\?\\\\pwsh.exe\", \n                 \"?:\\\\windows\\\\system32\\\\windowspowershell\\\\*.exe\", \n                 \"?:\\\\windows\\\\syswow64\\\\windowspowershell\\\\*.exe\", \n                 \"?:\\\\program files\\\\microsoft monitoring agent\\\\*.exe\", \n                 \"?:\\\\windows\\\\adws\\\\microsoft.activedirectory.webservices.exe\")]\n [network where host.os.type == \"windows\" and destination.port == 9389 and source.port >= 49152 and\n  network.direction == \"egress\" and network.transport == \"tcp\" and not cidrmatch(destination.ip, \"127.0.0.0/8\", \"::1/128\")]\n",
+    "references": [
+      "https://github.com/FalconForceTeam/SOAPHound"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "destination.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "destination.port",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "dll.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "network.direction",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "network.transport",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "source.port",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "9c951837-7d13-4b0c-be7a-f346623c8795",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1018",
+            "name": "Remote System Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1018/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 2
+  },
+  "id": "9c951837-7d13-4b0c-be7a-f346623c8795_2",
+  "type": "security-rule"
+}

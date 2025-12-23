@@ -1,0 +1,136 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule is triggered when a URL indicator from the Threat Intel Filebeat module or integrations has a match against an event that contains URL data, like DNS events, network logs, etc.",
+        "from": "now-65m",
+        "index": [
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+        ],
+        "interval": "1h",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Threat Intel URL Indicator Match",
+        "note": "## Triage and Analysis\n\n### Investigating Threat Intel URL Indicator Match\n\nThreat Intel indicator match rules allow matching from a local observation, such as an endpoint event that records a file hash with an entry of a file hash stored within the Threat Intel integrations index. \n\nMatches are based on threat intelligence data that's been ingested during the last 30 days. Some integrations don't place expiration dates on their threat indicators, so we strongly recommend validating ingested threat indicators and reviewing match results. When reviewing match results, check associated activity to determine whether the event requires additional investigation.\n\nThis rule is triggered when a URL indicator from the Threat Intel Filebeat module or a threat intelligence integration matches against an event that contains URL data, like DNS events, network logs, etc.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Investigate the URL, which can be found in the `threat.indicator.matched.atomic` field:\n  - Identify the type of malicious activity related to the URL (phishing, malware, etc.).\n  - Check the reputation of the IP address in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc. \n  - Execute a WHOIS lookup to retrieve information about the domain registration and contacts to report abuse.\n  - If dealing with a phishing incident:\n    - Contact the user to gain more information around the delivery method, information sent, etc.\n    - Analyze whether the URL is trying to impersonate a legitimate address. Look for typosquatting, extra or unusual subdomains, or other anomalies that could lure the user.\n    - Investigate the phishing page to identify which information may have been sent to the attacker by the user.\n- Identify the process responsible for the connection, and investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Retrieve the involved process executable and examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the process executable using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n- Using the data collected through the analysis, scope users targeted and other machines infected in the environment.\n\n### False Positive Analysis\n\n- False positives might occur after large and publicly written campaigns if curious employees interact with attacker infrastructure.\n- Some feeds may include internal or known benign addresses by mistake (e.g., 8.8.8.8, google.com, 127.0.0.1, etc.). Make sure you understand how blocking a specific domain or address might impact the organization or normal system functioning.\n\n### Response and Remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Consider reporting the address for abuse using the provided contact information.\n- Remove and block malicious artifacts identified during triage.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\nThis rule needs threat intelligence indicators to work. Threat intelligence indicators can be collected using an [Elastic Agent integration](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html#agent-ti-integration), the [Threat Intel module](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html#ti-mod-integration), or a [custom integration](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html#custom-ti-integration).\n\nMore information can be found [here](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html).",
+        "query": "url.full:*\n",
+        "references": [
+            "https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-threatintel.html",
+            "https://www.elastic.co/guide/en/security/master/es-threat-intel-integrations.html",
+            "https://www.elastic.co/security/tip"
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "url.full",
+                "type": "wildcard"
+            }
+        ],
+        "risk_score": 99,
+        "rule_id": "f3e22c8b-ea47-45d1-b502-b57b6de950b3",
+        "setup": "This rule needs threat intelligence indicators to work. Threat intelligence indicators can be collected using an Elastic Agent integration, the Threat Intel module, or a custom integration.\n\nMore information can be found here.",
+        "severity": "critical",
+        "tags": [
+            "OS: Windows",
+            "Data Source: Elastic Endgame",
+            "Rule Type: Indicator Match"
+        ],
+        "threat_filters": [
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.category",
+                    "negate": false,
+                    "params": {
+                        "query": "threat"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.category": "threat"
+                    }
+                }
+            },
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.kind",
+                    "negate": false,
+                    "params": {
+                        "query": "enrichment"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.kind": "enrichment"
+                    }
+                }
+            },
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.type",
+                    "negate": false,
+                    "params": {
+                        "query": "indicator"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.type": "indicator"
+                    }
+                }
+            }
+        ],
+        "threat_index": [
+            "filebeat-*",
+            "logs-ti_*"
+        ],
+        "threat_indicator_path": "threat.indicator",
+        "threat_language": "kuery",
+        "threat_mapping": [
+            {
+                "entries": [
+                    {
+                        "field": "url.full",
+                        "type": "mapping",
+                        "value": "threat.indicator.url.full"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "url.original",
+                        "type": "mapping",
+                        "value": "threat.indicator.url.original"
+                    }
+                ]
+            }
+        ],
+        "threat_query": "@timestamp \u003e= \"now-30d/d\" and event.module:(threatintel or ti_*) and threat.indicator.url.full:* and not labels.is_ioc_transform_source:\"true\"",
+        "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
+        "timeline_title": "Generic Threat Match Timeline",
+        "type": "threat_match",
+        "version": 3
+    },
+    "id": "f3e22c8b-ea47-45d1-b502-b57b6de950b3_3",
+    "type": "security-rule"
+}

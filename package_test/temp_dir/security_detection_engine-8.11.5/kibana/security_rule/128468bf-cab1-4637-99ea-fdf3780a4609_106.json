@@ -1,0 +1,103 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies access attempts to LSASS handle, this may indicate an attempt to dump credentials from Lsass memory.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Lsass Process Access",
+        "query": "process where host.os.type == \"windows\" and event.code == \"10\" and\n  winlog.event_data.TargetImage : \"?:\\\\WINDOWS\\\\system32\\\\lsass.exe\" and\n  not winlog.event_data.GrantedAccess :\n                (\"0x1000\", \"0x1400\", \"0x101400\", \"0x101000\", \"0x101001\", \"0x100000\", \"0x100040\", \"0x3200\", \"0x40\", \"0x3200\") and\n  not process.name : (\"procexp64.exe\", \"procmon.exe\", \"procexp.exe\", \"Microsoft.Identity.AadConnect.Health.AadSync.Host.ex\") and\n  not process.executable : (\n        \"?:\\\\ProgramData\\\\Microsoft\\\\Windows Defender\\\\platform\\\\*\",\n        \"?:\\\\ProgramData\\\\WebEx\\\\webex\\\\*\",\n        \"?:\\\\Program Files (x86)\\\\*\",\n        \"?:\\\\Program Files\\\\*\",\n        \"?:\\\\Windows\\\\CCM\\\\CcmExec.exe\",\n        \"?:\\\\Windows\\\\LTSvc\\\\LTSVC.exe\",\n        \"?:\\\\Windows\\\\Sysmon.exe\",\n        \"?:\\\\Windows\\\\Sysmon64.exe\",\n        \"?:\\\\Windows\\\\system32\\\\csrss.exe\",\n        \"?:\\\\Windows\\\\System32\\\\lsm.exe\",\n        \"?:\\\\Windows\\\\system32\\\\MRT.exe\",\n        \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n        \"?:\\\\Windows\\\\system32\\\\wbem\\\\wmiprvse.exe\",\n        \"?:\\\\Windows\\\\system32\\\\wininit.exe\",\n        \"?:\\\\Windows\\\\SystemTemp\\\\GUM*.tmp\\\\GoogleUpdate.exe\",\n        \"?:\\\\Windows\\\\sysWOW64\\\\wbem\\\\wmiprvse.exe\"\n  ) and\n  not winlog.event_data.CallTrace : (\"*mpengine.dll*\", \"*appresolver.dll*\", \"*sysmain.dll*\")\n",
+        "references": [
+            "https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.001/T1003.001.md"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.code",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.CallTrace",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.GrantedAccess",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.TargetImage",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "128468bf-cab1-4637-99ea-fdf3780a4609",
+        "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2,\nevents will not define `event.ingested` and default fallback for EQL rules was not added until version 8.2.\nHence for this rule to work effectively, users will need to add a custom ingest pipeline to populate\n`event.ingested` to @timestamp.\nFor more details on adding a custom ingest pipeline refer - https://www.elastic.co/guide/en/fleet/current/data-streams-pipeline-tutorial.html\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Data Source: Sysmon Only"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.001",
+                                "name": "LSASS Memory",
+                                "reference": "https://attack.mitre.org/techniques/T1003/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 106
+    },
+    "id": "128468bf-cab1-4637-99ea-fdf3780a4609_106",
+    "type": "security-rule"
+}

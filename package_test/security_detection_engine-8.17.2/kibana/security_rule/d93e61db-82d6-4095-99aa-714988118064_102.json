@@ -1,0 +1,144 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of wbadmin to access the NTDS.dit file in a domain controller. Attackers with privileges from groups like Backup Operators can abuse the utility to perform credential access and compromise the domain.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.forwarded*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "NTDS Dump via Wbadmin",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n    (process.name : \"wbadmin.exe\" or ?process.pe.original_file_name : \"wbadmin.exe\") and \n     process.args : \"recovery\" and process.command_line : \"*ntds.dit*\"\n",
+    "references": [
+      "https://medium.com/r3d-buck3t/windows-privesc-with-sebackupprivilege-65d2cd1eb960"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.pe.original_file_name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "d93e61db-82d6-4095-99aa-714988118064",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: System",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1003",
+            "name": "OS Credential Dumping",
+            "reference": "https://attack.mitre.org/techniques/T1003/",
+            "subtechnique": [
+              {
+                "id": "T1003.002",
+                "name": "Security Account Manager",
+                "reference": "https://attack.mitre.org/techniques/T1003/002/"
+              },
+              {
+                "id": "T1003.003",
+                "name": "NTDS",
+                "reference": "https://attack.mitre.org/techniques/T1003/003/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1006",
+            "name": "Direct Volume Access",
+            "reference": "https://attack.mitre.org/techniques/T1006/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 102
+  },
+  "id": "d93e61db-82d6-4095-99aa-714988118064_102",
+  "type": "security-rule"
+}

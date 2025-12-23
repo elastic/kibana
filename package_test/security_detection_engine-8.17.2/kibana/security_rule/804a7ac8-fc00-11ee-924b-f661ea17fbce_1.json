@@ -1,0 +1,99 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the first occurrence of an AWS resource establishing a session via SSM to an EC2 instance. Adversaries may use AWS Systems Manager to establish a session to an EC2 instance to execute commands on the instance. This can be used to gain access to the instance and perform actions such as privilege escalation. This rule helps detect the first occurrence of this activity for a given AWS resource.",
+    "false_positives": [
+      "Legitimate use of AWS Systems Manager to establish a session to an EC2 instance."
+    ],
+    "from": "now-60m",
+    "history_window_start": "now-10d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "SSM Session Started to EC2 Instance",
+    "new_terms_fields": [
+      "aws.cloudtrail.user_identity.arn"
+    ],
+    "note": "## Triage and Analysis\n\n### Investigating SSM Session Started to EC2 Instance\n\nThis rule detects the first instance of an AWS resource initiating an SSM session to an EC2 instance, which could be indicative of legitimate administrative activities or potential malicious actions like command execution or lateral movement.\n\n#### Possible Investigation Steps\n\n- **Examine the Session Start Event**: Review the AWS CloudTrail log for the event.\n    - Look for the `StartSession` action and verify details such as the `user_identity.arn`, `event.action`, and the target EC2 instance (`aws.cloudtrail.flattened.request_parameters`).\n- **Verify User Identity and Role**: Check the user’s ARN and access key ID (`aws.cloudtrail.user_identity.access_key_id`).\n    - Cross-reference this with IAM to verify if the user had the necessary permissions and if their role typically requires initiating SSM sessions.\n- **Assess Geographic and IP Context**: Analyze the source IP (`source.ip`) and geographic location (`source.geo`) from which the session was initiated.\n    - Determine if these are consistent with typical user locations or if they raise suspicions of compromise or misuse.\n- **Review Session Details**: Examine details like the session ID and stream URL (`aws.cloudtrail.flattened.response_elements`) to understand the scope and nature of the session.\n    - Check if any commands executed during the session were unauthorized or out of ordinary practices.\n- **Correlate with Other Security Events**: Look for other related security events around the time of the session start to identify any pattern or broader attack vector that may involve this user or EC2 instance.\n\n### False Positive Analysis\n\n- **Legitimate Administrative Activities**: Confirm whether the SSM session was initiated for valid administrative purposes such as system maintenance, patching, or configuration updates. Verify with the respective teams or personnel.\n\n### Response and Remediation\n\n- **Immediate Session Review**: If the session initiation seems suspicious, review all actions taken during the session.\n    - If possible, terminate the session to prevent any potential harm.\n- **Validate and Reinforce Security Policies**: Ensure that policies around SSM session initiation are strict and adhere to the principle of least privilege.\n    - Update IAM policies if necessary to tighten controls.\n- **Incident Response Activation**: If malicious intent or actions are confirmed, activate the incident response protocol.\n    - This includes containment of the threat, eradication of the adversary’s presence, recovery of affected systems, and a thorough investigation.\n- **Enhance Monitoring and Alerts**: Improve monitoring of SSM sessions, particularly focusing on sessions that involve sensitive or critical EC2 instances.\n    - Adjust alerting mechanisms to flag unusual session initiations promptly.\n\n### Additional Information\n\nFor more in-depth understanding of managing SSM sessions and security best practices, refer to the [AWS Systems Manager documentation](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_StartSession.html). Additionally, consider the security implications and best practices outlined in [AWS SSM privilege escalation techniques](https://cloud.hacktricks.xyz/pentesting-cloud/aws-security/aws-privilege-escalation/aws-ssm-privesc).\n\n",
+    "query": "event.dataset:\"aws.cloudtrail\" and event.provider:\"ssm.amazonaws.com\"\n    and event.action:\"StartSession\" and event.outcome:\"success\"\n",
+    "references": [
+      "https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_StartSession.html",
+      "https://hackingthe.cloud/aws/post_exploitation/intercept_ssm_communications/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "804a7ac8-fc00-11ee-924b-f661ea17fbce",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS SSM",
+      "Use Case: Threat Detection",
+      "Tactic: Lateral Movement"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1021",
+            "name": "Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1021/",
+            "subtechnique": [
+              {
+                "id": "T1021.007",
+                "name": "Cloud Services",
+                "reference": "https://attack.mitre.org/techniques/T1021/007/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "804a7ac8-fc00-11ee-924b-f661ea17fbce_1",
+  "type": "security-rule"
+}

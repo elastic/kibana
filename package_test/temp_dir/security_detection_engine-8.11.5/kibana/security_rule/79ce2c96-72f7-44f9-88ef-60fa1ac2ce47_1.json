@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies suspicious instances of default system32 executables, either unsigned or signed with non-MS certificates. This could indicate the attempt to masquerade as system executables or backdoored and resigned legitimate executables.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Masquerading as System32 Executable",
+        "query": "process where event.type == \"start\" and process.code_signature.status : \"*\" and\n  process.name: (\n      \"agentactivationruntimestarter.exe\", \"agentservice.exe\", \"aitstatic.exe\", \"alg.exe\", \"apphostregistrationverifier.exe\", \"appidcertstorecheck.exe\", \"appidpolicyconverter.exe\", \"appidtel.exe\", \"applicationframehost.exe\", \"applysettingstemplatecatalog.exe\", \"applytrustoffline.exe\", \"approvechildrequest.exe\", \"appvclient.exe\", \"appvdllsurrogate.exe\", \"appvnice.exe\", \"appvshnotify.exe\", \"arp.exe\", \"assignedaccessguard.exe\", \"at.exe\", \"atbroker.exe\", \"attrib.exe\", \"audiodg.exe\", \"auditpol.exe\", \"authhost.exe\", \"autochk.exe\", \"autoconv.exe\", \"autofmt.exe\", \"axinstui.exe\", \"baaupdate.exe\", \"backgroundtaskhost.exe\", \"backgroundtransferhost.exe\", \"bcdboot.exe\", \"bcdedit.exe\", \"bdechangepin.exe\", \"bdehdcfg.exe\", \"bdeuisrv.exe\", \"bdeunlock.exe\", \"bioiso.exe\", \"bitlockerdeviceencryption.exe\", \"bitlockerwizard.exe\", \"bitlockerwizardelev.exe\", \"bitsadmin.exe\", \"bootcfg.exe\", \"bootim.exe\", \"bootsect.exe\", \"bridgeunattend.exe\", \"browserexport.exe\", \"browser_broker.exe\", \"bthudtask.exe\", \"bytecodegenerator.exe\", \"cacls.exe\", \"calc.exe\", \"camerasettingsuihost.exe\", \"castsrv.exe\", \"certenrollctrl.exe\", \"certreq.exe\", \"certutil.exe\", \"change.exe\", \"changepk.exe\", \"charmap.exe\", \"checknetisolation.exe\", \"chglogon.exe\", \"chgport.exe\", \"chgusr.exe\", \"chkdsk.exe\", \"chkntfs.exe\", \"choice.exe\", \"cidiag.exe\", \"cipher.exe\", \"cleanmgr.exe\", \"cliconfg.exe\", \"clip.exe\", \"clipup.exe\", \"cloudexperiencehostbroker.exe\", \"cloudnotifications.exe\", \"cmd.exe\", \"cmdkey.exe\", \"cmdl32.exe\", \"cmmon32.exe\", \"cmstp.exe\", \"cofire.exe\", \"colorcpl.exe\", \"comp.exe\", \"compact.exe\", \"compattelrunner.exe\", \"compmgmtlauncher.exe\", \"comppkgsrv.exe\", \"computerdefaults.exe\", \"conhost.exe\", \"consent.exe\", \"control.exe\", \"convert.exe\", \"convertvhd.exe\", \"coredpussvr.exe\", \"credentialenrollmentmanager.exe\", \"credentialuibroker.exe\", \"credwiz.exe\", \"cscript.exe\", \"csrss.exe\", \"ctfmon.exe\", \"cttune.exe\", \"cttunesvr.exe\", \"custominstallexec.exe\", \"customshellhost.exe\", \"dashost.exe\", \"dataexchangehost.exe\", \"datastorecachedumptool.exe\", \"dccw.exe\", \"dcomcnfg.exe\", \"ddodiag.exe\", \"defrag.exe\", \"deploymentcsphelper.exe\", \"desktopimgdownldr.exe\", \"devicecensus.exe\", \"devicecredentialdeployment.exe\", \"deviceeject.exe\", \"deviceenroller.exe\", \"devicepairingwizard.exe\", \"deviceproperties.exe\", \"dfdwiz.exe\", \"dfrgui.exe\", \"dialer.exe\", \"directxdatabaseupdater.exe\", \"diskpart.exe\", \"diskperf.exe\", \"diskraid.exe\", \"disksnapshot.exe\", \"dism.exe\", \"dispdiag.exe\", \"displayswitch.exe\", \"djoin.exe\", \"dllhost.exe\", \"dllhst3g.exe\", \"dmcertinst.exe\", \"dmcfghost.exe\", \"dmclient.exe\", \"dmnotificationbroker.exe\", \"dmomacpmo.exe\", \"dnscacheugc.exe\", \"doskey.exe\", \"dpapimig.exe\", \"dpiscaling.exe\", \"dpnsvr.exe\", \"driverquery.exe\", \"drvinst.exe\", \"dsmusertask.exe\", \"dsregcmd.exe\", \"dstokenclean.exe\", \"dusmtask.exe\", \"dvdplay.exe\", \"dwm.exe\", \"dwwin.exe\", \"dxdiag.exe\", \"dxgiadaptercache.exe\", \"dxpserver.exe\", \"eap3host.exe\", \"easeofaccessdialog.exe\", \"easinvoker.exe\", \"easpolicymanagerbrokerhost.exe\", \"edpcleanup.exe\", \"edpnotify.exe\", \"eduprintprov.exe\", \"efsui.exe\", \"ehstorauthn.exe\", \"eoaexperiences.exe\", \"esentutl.exe\", \"eudcedit.exe\", \"eventcreate.exe\", \"eventvwr.exe\", \"expand.exe\", \"extrac32.exe\", \"fc.exe\", \"fclip.exe\", \"fhmanagew.exe\", \"filehistory.exe\", \"find.exe\", \"findstr.exe\", \"finger.exe\", \"fixmapi.exe\", \"fltmc.exe\", \"fodhelper.exe\", \"fondue.exe\", \"fontdrvhost.exe\", \"fontview.exe\", \"forfiles.exe\", \"fsavailux.exe\", \"fsiso.exe\", \"fsquirt.exe\", \"fsutil.exe\", \"ftp.exe\", \"fvenotify.exe\", \"fveprompt.exe\", \"gamebarpresencewriter.exe\", \"gamepanel.exe\", \"genvalobj.exe\", \"getmac.exe\", \"gpresult.exe\", \"gpscript.exe\", \"gpupdate.exe\", \"grpconv.exe\", \"hdwwiz.exe\", \"help.exe\", \"hostname.exe\", \"hvax64.exe\", \"hvix64.exe\", \"hvsievaluator.exe\", \"icacls.exe\", \"icsentitlementhost.exe\", \"icsunattend.exe\", \"ie4uinit.exe\", \"ie4ushowie.exe\", \"iesettingsync.exe\", \"ieunatt.exe\", \"iexpress.exe\", \"immersivetpmvscmgrsvr.exe\", \"infdefaultinstall.exe\", \"inputswitchtoasthandler.exe\", \"iotstartup.exe\", \"ipconfig.exe\", \"iscsicli.exe\", \"iscsicpl.exe\", \"isoburn.exe\", \"klist.exe\", \"ksetup.exe\", \"ktmutil.exe\", \"label.exe\", \"languagecomponentsinstallercomhandler.exe\", \"launchtm.exe\", \"launchwinapp.exe\", \"legacynetuxhost.exe\", \"licensemanagershellext.exe\", \"licensingdiag.exe\", \"licensingui.exe\", \"locationnotificationwindows.exe\", \"locator.exe\", \"lockapphost.exe\", \"lockscreencontentserver.exe\", \"lodctr.exe\", \"logagent.exe\", \"logman.exe\", \"logoff.exe\", \"logonui.exe\", \"lpkinstall.exe\", \"lpksetup.exe\", \"lpremove.exe\", \"lsaiso.exe\", \"lsass.exe\", \"magnify.exe\", \"makecab.exe\", \"manage-bde.exe\", \"mavinject.exe\", \"mbaeparsertask.exe\", \"mblctr.exe\", \"mbr2gpt.exe\", \"mcbuilder.exe\", \"mdeserver.exe\", \"mdmagent.exe\", \"mdmappinstaller.exe\", \"mdmdiagnosticstool.exe\", \"mdres.exe\", \"mdsched.exe\", \"mfpmp.exe\", \"microsoft.uev.cscunpintool.exe\", \"microsoft.uev.synccontroller.exe\", \"microsoftedgebchost.exe\", \"microsoftedgecp.exe\", \"microsoftedgedevtools.exe\", \"microsoftedgesh.exe\", \"mmc.exe\", \"mmgaserver.exe\", \"mobsync.exe\", \"mountvol.exe\", \"mousocoreworker.exe\", \"mpnotify.exe\", \"mpsigstub.exe\", \"mrinfo.exe\", \"mschedexe.exe\", \"msconfig.exe\", \"msdt.exe\", \"msdtc.exe\", \"msfeedssync.exe\", \"msg.exe\", \"mshta.exe\", \"msiexec.exe\", \"msinfo32.exe\", \"mspaint.exe\", \"msra.exe\", \"msspellcheckinghost.exe\", \"mstsc.exe\", \"mtstocom.exe\", \"muiunattend.exe\", \"multidigimon.exe\", \"musnotification.exe\", \"musnotificationux.exe\", \"musnotifyicon.exe\", \"narrator.exe\", \"nbtstat.exe\", \"ndadmin.exe\", \"ndkping.exe\", \"net.exe\", \"net1.exe\", \"netbtugc.exe\", \"netcfg.exe\", \"netcfgnotifyobjecthost.exe\", \"netevtfwdr.exe\", \"nethost.exe\", \"netiougc.exe\", \"netplwiz.exe\", \"netsh.exe\", \"netstat.exe\", \"newdev.exe\", \"ngciso.exe\", \"nltest.exe\", \"notepad.exe\", \"nslookup.exe\", \"ntoskrnl.exe\", \"ntprint.exe\", \"odbcad32.exe\", \"odbcconf.exe\", \"ofdeploy.exe\", \"omadmclient.exe\", \"omadmprc.exe\", \"openfiles.exe\", \"openwith.exe\", \"optionalfeatures.exe\", \"osk.exe\", \"pacjsworker.exe\", \"packagedcwalauncher.exe\", \"packageinspector.exe\", \"passwordonwakesettingflyout.exe\", \"pathping.exe\", \"pcalua.exe\", \"pcaui.exe\", \"pcwrun.exe\", \"perfmon.exe\", \"phoneactivate.exe\", \"pickerhost.exe\", \"pinenrollmentbroker.exe\", \"ping.exe\", \"pkgmgr.exe\", \"pktmon.exe\", \"plasrv.exe\", \"pnpunattend.exe\", \"pnputil.exe\", \"poqexec.exe\", \"pospaymentsworker.exe\", \"powercfg.exe\", \"presentationhost.exe\", \"presentationsettings.exe\", \"prevhost.exe\", \"printbrmui.exe\", \"printfilterpipelinesvc.exe\", \"printisolationhost.exe\", \"printui.exe\", \"proquota.exe\", \"provlaunch.exe\", \"provtool.exe\", \"proximityuxhost.exe\", \"prproc.exe\", \"psr.exe\", \"pwlauncher.exe\", \"qappsrv.exe\", \"qprocess.exe\", \"query.exe\", \"quser.exe\", \"qwinsta.exe\", \"rasautou.exe\", \"rasdial.exe\", \"raserver.exe\", \"rasphone.exe\", \"rdpclip.exe\", \"rdpinit.exe\", \"rdpinput.exe\", \"rdpsa.exe\", \"rdpsaproxy.exe\", \"rdpsauachelper.exe\", \"rdpshell.exe\", \"rdpsign.exe\", \"rdrleakdiag.exe\", \"reagentc.exe\", \"recdisc.exe\", \"recover.exe\", \"recoverydrive.exe\", \"refsutil.exe\", \"reg.exe\", \"regedt32.exe\", \"regini.exe\", \"register-cimprovider.exe\", \"regsvr32.exe\", \"rekeywiz.exe\", \"relog.exe\", \"relpost.exe\", \"remoteapplifetimemanager.exe\", \"remoteposworker.exe\", \"repair-bde.exe\", \"replace.exe\", \"reset.exe\", \"resetengine.exe\", \"resmon.exe\", \"rmactivate.exe\", \"rmactivate_isv.exe\", \"rmactivate_ssp.exe\", \"rmactivate_ssp_isv.exe\", \"rmclient.exe\", \"rmttpmvscmgrsvr.exe\", \"robocopy.exe\", \"route.exe\", \"rpcping.exe\", \"rrinstaller.exe\", \"rstrui.exe\", \"runas.exe\", \"rundll32.exe\", \"runexehelper.exe\", \"runlegacycplelevated.exe\", \"runonce.exe\", \"runtimebroker.exe\", \"rwinsta.exe\", \"sc.exe\", \"schtasks.exe\", \"scriptrunner.exe\", \"sdbinst.exe\", \"sdchange.exe\", \"sdclt.exe\", \"sdiagnhost.exe\", \"searchfilterhost.exe\", \"searchindexer.exe\", \"searchprotocolhost.exe\", \"secedit.exe\", \"secinit.exe\", \"securekernel.exe\", \"securityhealthhost.exe\", \"securityhealthservice.exe\", \"securityhealthsystray.exe\", \"sensordataservice.exe\", \"services.exe\", \"sessionmsg.exe\", \"sethc.exe\", \"setspn.exe\", \"settingsynchost.exe\", \"setupcl.exe\", \"setupugc.exe\", \"setx.exe\", \"sfc.exe\", \"sgrmbroker.exe\", \"sgrmlpac.exe\", \"shellappruntime.exe\", \"shrpubw.exe\", \"shutdown.exe\", \"sigverif.exe\", \"sihclient.exe\", \"sihost.exe\", \"slidetoshutdown.exe\", \"slui.exe\", \"smartscreen.exe\", \"smss.exe\", \"sndvol.exe\", \"snippingtool.exe\", \"snmptrap.exe\", \"sort.exe\", \"spaceagent.exe\", \"spaceman.exe\", \"spatialaudiolicensesrv.exe\", \"spectrum.exe\", \"spoolsv.exe\", \"sppextcomobj.exe\", \"sppsvc.exe\", \"srdelayed.exe\", \"srtasks.exe\", \"stordiag.exe\", \"subst.exe\", \"svchost.exe\", \"sxstrace.exe\", \"syncappvpublishingserver.exe\", \"synchost.exe\", \"sysreseterr.exe\", \"systeminfo.exe\", \"systempropertiesadvanced.exe\", \"systempropertiescomputername.exe\", \"systempropertiesdataexecutionprevention.exe\", \"systempropertieshardware.exe\", \"systempropertiesperformance.exe\", \"systempropertiesprotection.exe\", \"systempropertiesremote.exe\", \"systemreset.exe\", \"systemsettingsadminflows.exe\", \"systemsettingsbroker.exe\", \"systemsettingsremovedevice.exe\", \"systemuwplauncher.exe\", \"systray.exe\", \"tabcal.exe\", \"takeown.exe\", \"tapiunattend.exe\", \"tar.exe\", \"taskhostw.exe\", \"taskkill.exe\", \"tasklist.exe\", \"taskmgr.exe\", \"tcblaunch.exe\", \"tcmsetup.exe\", \"tcpsvcs.exe\", \"thumbnailextractionhost.exe\", \"tieringengineservice.exe\", \"timeout.exe\", \"tokenbrokercookies.exe\", \"tpminit.exe\", \"tpmtool.exe\", \"tpmvscmgr.exe\", \"tpmvscmgrsvr.exe\", \"tracerpt.exe\", \"tracert.exe\", \"tscon.exe\", \"tsdiscon.exe\", \"tskill.exe\", \"tstheme.exe\", \"tswbprxy.exe\", \"ttdinject.exe\", \"tttracer.exe\", \"typeperf.exe\", \"tzsync.exe\", \"tzutil.exe\", \"ucsvc.exe\", \"uevagentpolicygenerator.exe\", \"uevappmonitor.exe\", \"uevtemplatebaselinegenerator.exe\", \"uevtemplateconfigitemgenerator.exe\", \"uimgrbroker.exe\", \"unlodctr.exe\", \"unregmp2.exe\", \"upfc.exe\", \"upgraderesultsui.exe\", \"upnpcont.exe\", \"upprinterinstaller.exe\", \"useraccountbroker.exe\", \"useraccountcontrolsettings.exe\", \"userinit.exe\", \"usoclient.exe\", \"utcdecoderhost.exe\", \"utilman.exe\", \"vaultcmd.exe\", \"vds.exe\", \"vdsldr.exe\", \"verclsid.exe\", \"verifier.exe\", \"verifiergui.exe\", \"vssadmin.exe\", \"vssvc.exe\", \"w32tm.exe\", \"waasmedicagent.exe\", \"waitfor.exe\", \"wallpaperhost.exe\", \"wbadmin.exe\", \"wbengine.exe\", \"wecutil.exe\", \"werfault.exe\", \"werfaultsecure.exe\", \"wermgr.exe\", \"wevtutil.exe\", \"wextract.exe\", \"where.exe\", \"whoami.exe\", \"wiaacmgr.exe\", \"wiawow64.exe\", \"wifitask.exe\", \"wimserv.exe\", \"winbiodatamodeloobe.exe\", \"windows.media.backgroundplayback.exe\", \"windows.warp.jitservice.exe\", \"windowsactiondialog.exe\", \"windowsupdateelevatedinstaller.exe\", \"wininit.exe\", \"winload.exe\", \"winlogon.exe\", \"winresume.exe\", \"winrs.exe\", \"winrshost.exe\", \"winrtnetmuahostserver.exe\", \"winsat.exe\", \"winver.exe\", \"wkspbroker.exe\", \"wksprt.exe\", \"wlanext.exe\", \"wlrmdr.exe\", \"wmpdmc.exe\", \"workfolders.exe\", \"wowreg32.exe\", \"wpcmon.exe\", \"wpctok.exe\", \"wpdshextautoplay.exe\", \"wpnpinst.exe\", \"wpr.exe\", \"write.exe\", \"wscadminui.exe\", \"wscollect.exe\", \"wscript.exe\", \"wsl.exe\", \"wsmanhttpconfig.exe\", \"wsmprovhost.exe\", \"wsqmcons.exe\", \"wsreset.exe\", \"wuapihost.exe\", \"wuauclt.exe\", \"wudfcompanionhost.exe\", \"wudfhost.exe\", \"wusa.exe\", \"wwahost.exe\", \"xblgamesavetask.exe\", \"xcopy.exe\", \"xwizard.exe\", \"aggregatorhost.exe\", \"diskusage.exe\", \"dtdump.exe\", \"ism.exe\", \"ndkperfcmd.exe\", \"ntkrla57.exe\", \"securekernella57.exe\", \"spaceutil.exe\", \"configure-smremoting.exe\", \"dcgpofix.exe\", \"dcpromo.exe\", \"dimc.exe\", \"diskshadow.exe\", \"drvcfg.exe\", \"escunattend.exe\", \"iashost.exe\", \"ktpass.exe\", \"lbfoadmin.exe\", \"netdom.exe\", \"rdspnf.exe\", \"rsopprov.exe\", \"sacsess.exe\", \"servermanager.exe\", \"servermanagerlauncher.exe\", \"setres.exe\", \"tsecimp.exe\", \"vssuirun.exe\", \"webcache.exe\", \"win32calc.exe\", \"certoc.exe\", \"sdndiagnosticstask.exe\", \"xpsrchvw.exe\"\n    ) and\n  not (\n    process.code_signature.subject_name in (\n      \"Microsoft Windows\",\n      \"Microsoft Corporation\",\n      \"Microsoft Windows Publisher\"\n    ) and process.code_signature.trusted == true\n  ) and not process.code_signature.status: (\"errorCode_endpoint*\", \"errorUntrustedRoot\", \"errorChaining\") and\n  not\n  (\n    process.executable: (\n      \"?:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\hostname.exe\",\n      \"?:\\\\Windows\\\\Temp\\\\{*}\\\\taskkill.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\{*}\\\\taskkill.exe\",\n      \"?:\\\\$WINDOWS.~BT\\\\NewOS\\\\Windows\\\\System32\\\\ie4ushowIE.exe\",\n      \"?:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\find.exe\"\n    )\n  ) and\n  not\n  (\n    (process.name: \"ucsvc.exe\" and process.code_signature.subject_name == \"Wellbia.com Co., Ltd.\" and process.code_signature.status: \"trusted\") or\n    (process.name: \"pnputil.exe\" and process.code_signature.subject_name: \"Lenovo\" and process.code_signature.status: \"trusted\")\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "79ce2c96-72f7-44f9-88ef-60fa1ac2ce47",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "Data Source: Elastic Defend",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "79ce2c96-72f7-44f9-88ef-60fa1ac2ce47_1",
+    "type": "security-rule"
+}

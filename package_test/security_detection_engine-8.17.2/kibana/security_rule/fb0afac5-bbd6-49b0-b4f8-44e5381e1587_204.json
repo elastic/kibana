@@ -1,0 +1,93 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects a high number of unique private repo clone events originating from a single personal access token within a short time period.",
+    "from": "now-6m",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "High Number of Cloned GitHub Repos From PAT",
+    "query": "event.dataset:\"github.audit\" and event.category:\"configuration\" and event.action:\"git.clone\" and\ngithub.programmatic_access_type:(\"OAuth access token\" or \"Fine-grained personal access token\") and\ngithub.repository_public:false\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.programmatic_access_type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.repository_public",
+        "type": "boolean"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "fb0afac5-bbd6-49b0-b4f8-44e5381e1587",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Execution",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1648",
+            "name": "Serverless Execution",
+            "reference": "https://attack.mitre.org/techniques/T1648/"
+          }
+        ]
+      }
+    ],
+    "threshold": {
+      "cardinality": [
+        {
+          "field": "github.repo",
+          "value": 10
+        }
+      ],
+      "field": [
+        "github.hashed_token"
+      ],
+      "value": 1
+    },
+    "timestamp_override": "event.ingested",
+    "type": "threshold",
+    "version": 204
+  },
+  "id": "fb0afac5-bbd6-49b0-b4f8-44e5381e1587_204",
+  "type": "security-rule"
+}

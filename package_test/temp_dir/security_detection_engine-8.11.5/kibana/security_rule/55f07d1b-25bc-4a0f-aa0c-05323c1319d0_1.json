@@ -1,0 +1,108 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the execution of an installer from an archive or with suspicious properties. Adversaries may abuse msiexec.exe to launch local or network accessible MSI files in an attempt to bypass application whitelisting.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Windows Installer with Suspicious Properties",
+        "query": "sequence with maxspan=1m\n  [registry where host.os.type == \"windows\" and process.name : \"msiexec.exe\" and\n   (\n    (registry.value : \"InstallSource\" and\n     registry.data.strings : (\"?:\\\\Users\\\\*\\\\Temp\\\\Temp?_*.zip\\\\*\",\n                             \"?:\\\\Users\\\\*\\\\*.7z\\\\*\",\n                             \"?:\\\\Users\\\\*\\\\*.rar\\\\*\")) or\n\n    (registry.value : (\"DisplayName\", \"ProductName\") and registry.data.strings : \"SetupTest\")\n    )]\n  [process where host.os.type == \"windows\" and event.action == \"start\" and\n    process.parent.name : \"msiexec.exe\" and\n    not process.name : \"msiexec.exe\" and\n    not (process.executable : (\"?:\\\\Program Files (x86)\\\\*.exe\", \"?:\\\\Program Files\\\\*.exe\") and process.code_signature.trusted == true)]\n",
+        "references": [
+            "https://lolbas-project.github.io/lolbas/Binaries/Msiexec/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.data.strings",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "registry.value",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "55f07d1b-25bc-4a0f-aa0c-05323c1319d0",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1218",
+                        "name": "System Binary Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1218/",
+                        "subtechnique": [
+                            {
+                                "id": "T1218.007",
+                                "name": "Msiexec",
+                                "reference": "https://attack.mitre.org/techniques/T1218/007/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "55f07d1b-25bc-4a0f-aa0c-05323c1319d0_1",
+    "type": "security-rule"
+}

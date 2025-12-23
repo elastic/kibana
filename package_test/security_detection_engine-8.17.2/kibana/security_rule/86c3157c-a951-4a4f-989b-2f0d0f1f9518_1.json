@@ -1,0 +1,151 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Monitors for a sequence of network activity on atypical ports, prior to receiving a single packet on such a non-standard port, which potentially indicates signal port knocking activity. Port knocking is a covert method of externally opening ports by sending a sequence of packets to previously closed ports, which adversaries may leverage to discreetly gain access without directly alerting traditional monitoring systems.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*",
+      "logs-network_traffic.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Linux Reverse Connection through Port Knocking",
+    "query": "sequence by host.id with maxspan=10s\n  [network where host.os.type == \"linux\" and event.action in (\"connection_accepted\", \"connection_attempted\") and \n    event.type == \"start\" and process.name : \"*\" and (\n      process.name : (\n        \"python*\", \"php*\", \"perl*\", \"ruby\", \"lua*\", \"openssl\", \"nc\", \"netcat\", \"ncat\", \"telnet\",\n        \"awk\", \"gawk\", \"mawk\", \"nawk\", \"bash\", \"dash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\"\n      ) or not process.executable : (\"/usr/bin/*\", \"/bin/*\")\n    ) and not (\n       cidrmatch(destination.ip, \"127.0.0.0/8\", \"169.254.0.0/16\", \"224.0.0.0/4\", \"::1\") or destination.port in (\n         20, 21, 22, 23, 25, 53, 67, 68, 69, 80, 110, 123, 137, 138, 139, 143, 161, 162, 179, 443, 445, 465, 514, 515,\n         587,636, 989, 990, 993, 995, 1025, 1026, 1080, 1194, 1433, 1434, 1521, 1701, 1723, 1812, 1813, 2082, 2083, 2086,\n         2087, 2095, 2096, 2121, 2483, 2484, 3306, 3389, 3478, 3497, 3544, 3689, 3784, 3785, 389, 3998, 5060, 5061, 5190,\n         5222, 5223, 5228, 5432, 5500, 554, 5631, 5632, 5800, 5801, 5900, 5901, 8000, 8008, 8080, 8081, 8443, 8888, 9100,\n         9200, 9443, 10000\n       ) or source.port in (\n         20, 21, 22, 23, 25, 53, 67, 68, 69, 80, 110, 123, 137, 138, 139, 143, 161, 162, 179, 443, 445, 465, 514, 515,\n         587, 636, 989, 990, 993, 995, 1025, 1026, 1080, 1194, 1433, 1434, 1521, 1701, 1723, 1812, 1813, 2082, 2083, 2086,\n         2087, 2095, 2096, 2121, 2483, 2484, 3306, 3389, 3478, 3497, 3544, 3689, 3784, 3785, 389, 3998, 5060, 5061, 5190,\n         5222, 5223, 5228, 5432, 5500, 554, 5631, 5632, 5800, 5801, 5900, 5901, 8000, 8008, 8080, 8081, 8443, 8888, 9100,\n         9200, 9443, 10000)\n      )\n  ] by destination.ip\n  [network where event.dataset == \"network_traffic.flow\" and host.os.type == \"linux\" and event.action == \"network_flow\"\n    and event.type == \"connection\" and source.packets == 1 and flow.final == false and not (\n      cidrmatch(destination.ip, \"127.0.0.0/8\", \"169.254.0.0/16\", \"224.0.0.0/4\", \"::1\") or destination.port in (\n        20, 21, 22, 23, 25, 53, 67, 68, 69, 80, 110, 123, 137, 138, 139, 143, 161, 162, 179, 443, 445, 465, 514, 515,\n        587,636, 989, 990, 993, 995, 1025, 1026, 1080, 1194, 1433, 1434, 1521, 1701, 1723, 1812, 1813, 2082, 2083, 2086,\n        2087, 2095, 2096, 2121, 2483, 2484, 3306, 3389, 3478, 3497, 3544, 3689, 3784, 3785, 389, 3998, 5060, 5061, 5190,\n        5222, 5223, 5228, 5432, 5500, 554, 5631, 5632, 5800, 5801, 5900, 5901, 8000, 8008, 8080, 8081, 8443, 8888, 9100,\n        9200, 9443, 10000\n      ) or source.port in (\n        20, 21, 22, 23, 25, 53, 67, 68, 69, 80, 110, 123, 137, 138, 139, 143, 161, 162, 179, 443, 445, 465, 514, 515,\n        587, 636, 989, 990, 993, 995, 1025, 1026, 1080, 1194, 1433, 1434, 1521, 1701, 1723, 1812, 1813, 2082, 2083, 2086,\n        2087, 2095, 2096, 2121, 2483, 2484, 3306, 3389, 3478, 3497, 3544, 3689, 3784, 3785, 389, 3998, 5060, 5061, 5190,\n        5222, 5223, 5228, 5432, 5500, 554, 5631, 5632, 5800, 5801, 5900, 5901, 8000, 8008, 8080, 8081, 8443, 8888, 9100,\n        9200, 9443, 10000)\n      )\n  ] by source.ip\n",
+    "references": [
+      "https://github.com/f0rb1dd3n/Reptile"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "network_traffic",
+        "version": "^1.1.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "destination.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "destination.port",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "flow.final",
+        "type": "boolean"
+      },
+      {
+        "ecs": true,
+        "name": "host.id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "source.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "source.packets",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "source.port",
+        "type": "long"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "86c3157c-a951-4a4f-989b-2f0d0f1f9518",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control",
+      "Data Source: Elastic Defend",
+      "Rule Type: BBR"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1571",
+            "name": "Non-Standard Port",
+            "reference": "https://attack.mitre.org/techniques/T1571/"
+          },
+          {
+            "id": "T1205",
+            "name": "Traffic Signaling",
+            "reference": "https://attack.mitre.org/techniques/T1205/",
+            "subtechnique": [
+              {
+                "id": "T1205.001",
+                "name": "Port Knocking",
+                "reference": "https://attack.mitre.org/techniques/T1205/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": []
+      }
+    ],
+    "type": "eql",
+    "version": 1
+  },
+  "id": "86c3157c-a951-4a4f-989b-2f0d0f1f9518_1",
+  "type": "security-rule"
+}

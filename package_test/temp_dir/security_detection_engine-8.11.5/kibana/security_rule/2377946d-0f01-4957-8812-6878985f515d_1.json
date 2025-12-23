@@ -1,0 +1,79 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Discovery of files created by a remote host on sensitive directories and folders. Remote file creation in these directories could indicate a malicious binary or script trying to compromise the system.",
+        "from": "now-10m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Remote File Creation on a Sensitive Directory",
+        "query": "file where (event.action == \"creation\" or event.action == \"modification\") and\nprocess.name:(\"System\", \"scp\", \"sshd\", \"smbd\", \"vsftpd\", \"sftp-server\") and not\nuser.name:(\"SYSTEM\", \"root\") and\n(file.path : (\"C*\\\\Users\\\\*\\\\AppData\\\\Roaming*\", \"C*\\\\Program*Files\\\\*\",\n    \"C*\\\\Windows\\\\*\", \"C*\\\\Windows\\\\System\\\\*\",\n    \"C*\\\\Windows\\\\System32\\\\*\", \"/etc/*\", \"/tmp*\",\n    \"/var/tmp*\", \"/home/*/.*\", \"/home/.*\", \"/usr/bin/*\",\n    \"/sbin/*\", \"/bin/*\", \"/usr/lib/*\", \"/usr/sbin/*\",\n    \"/usr/share/*\", \"/usr/local/*\", \"/var/lib/dpkg/*\",\n    \"/lib/systemd/*\"\n    )\n)\n",
+        "references": [
+            "https://www.elastic.co/es/blog/remote-desktop-protocol-connections-elastic-security"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "2377946d-0f01-4957-8812-6878985f515d",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "Use Case: Lateral Movement Detection",
+            "Tactic: Lateral Movement",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1210",
+                        "name": "Exploitation of Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1210/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "2377946d-0f01-4957-8812-6878985f515d_1",
+    "type": "security-rule"
+}

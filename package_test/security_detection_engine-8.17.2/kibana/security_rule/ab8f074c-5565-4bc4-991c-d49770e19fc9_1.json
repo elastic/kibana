@@ -1,0 +1,58 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies `CopyObject` events within an S3 bucket using an AWS KMS key from an external account for encryption. Adversaries with access to a misconfigured S3 bucket and the proper permissions may encrypt objects with an external KMS key to deny their victims access to their own data.",
+    "false_positives": [
+      "Administrators within an AWS Organization structure may legitimately encrypt bucket objects with a key from an account different from the target bucket. Ensure that this behavior is not part of a legitimate operation before taking action."
+    ],
+    "from": "now-9m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS S3 Object Encryption Using External KMS Key",
+    "note": "\n## Triage and Analysis\n\n### Investigating AWS S3 Object Encryption Using External KMS Key\n\nThis rule detects the use of an external AWS KMS key to encrypt objects within an S3 bucket. Adversaries with access to a misconfigured S3 bucket may use an external key to copy objects within a bucket and deny victims the ability to access their own data.\nThis rule uses [ES|QL](https://www.elastic.co/guide/en/security/master/rules-ui-create.html#create-esql-rule) to look for use of the `CopyObject` operation where the target bucket's `cloud.account.id` is different from the `key.account.id` dissected from the AWS KMS key used for encryption.\n\n#### Possible Investigation Steps:\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id` fields to identify who performed the action. Verify if this actor typically performs such actions and if they have the necessary permissions.\n- **Review the Request Details**: Examine the `aws.cloudtrail.request_parameters` to understand the specific details of the `CopyObject` action. Look for any unusual parameters that could suggest unauthorized or malicious modifications or usage of an unknown KMS keyId.\n- **Analyze the Source of the Request**: Investigate the `source.ip` and `source.geo` fields to determine the geographical origin of the request. An external or unexpected location might indicate compromised credentials or unauthorized access.\n- **Contextualize with Timestamp**: Use the `@timestamp` field to check when the object was copied. Changes during non-business hours or outside regular maintenance windows might require further scrutiny.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this action to see if the same actor or IP address engaged in other potentially suspicious activities.\n- **Check for Object Deletion or Access**: Look for `DeleteObject`, `DeleteObjects`, or `GetObject` API calls to the same S3 bucket that may indicate the adversary accessing and destroying objects including older object versions.\n- **Interview Relevant Personnel**: If the copy event was initiated by a user, verify the intent and authorization for this action with the person or team responsible for managing S3 buckets.\n\n### False Positive Analysis:\n\n- **Legitimate Administrative Actions**: Confirm if the `CopyObject` action aligns with scheduled updates, maintenance activities, or legitimate administrative tasks documented in change management systems.\n- **Consistency Check**: Compare the action against historical data of similar activities performed by the user or within the organization. If the action is consistent with past legitimate activities, it might indicate a false alarm.\n\n### Response and Remediation:\n\n- **Immediate Review**: If the activity was unauthorized, search for potential ransom note placed in S3 bucket and review the bucket's access logs for any suspicious activity.\n- **Enhance Monitoring and Alerts**: Adjust monitoring systems to alert on similar `CopyObject` actions, especially those involving sensitive data or unusual file extensions.\n- **Educate and Train**: Provide additional training to users with administrative rights on the importance of security best practices concerning S3 bucket management and the risks of ransomware.\n- **Audit S3 Bucket Policies and Permissions**: Conduct a comprehensive audit of all S3 bucket policies and associated permissions to ensure they adhere to the principle of least privilege.\n- **Incident Response**: If there's an indication of malicious intent or a security breach, initiate the incident response protocol to mitigate any damage and prevent future occurrences.\n\n### Additional Information:\n\nFor further guidance on managing S3 bucket security and protecting against ransomware, refer to the [AWS S3 documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) and AWS best practices for security. Additionally, consult the following resources for specific details on S3 ransomware protection:\n- [ERMETIC REPORT - AWS S3 Ransomware Exposure in the Wild](https://s3.amazonaws.com/bizzabo.file.upload/PtZzA0eFQwV2RA5ysNeo_ERMETIC%20REPORT%20-%20AWS%20S3%20Ransomware%20Exposure%20in%20the%20Wild.pdf)\n- [S3 Ransomware Part 1: Attack Vector](https://rhinosecuritylabs.com/aws/s3-ransomware-part-1-attack-vector/)\n",
+    "query": "from logs-aws.cloudtrail-*\n\n// any successful copy event\n| where event.dataset == \"aws.cloudtrail\" \n    and event.provider == \"s3.amazonaws.com\" \n    and event.action == \"CopyObject\" \n    and event.outcome == \"success\"\n\n// abstract key account id, key id, encrypted object bucket name and object name\n| dissect aws.cloudtrail.request_parameters \"{%{?bucketName}=%{target.bucketName},%{?x-amz-server-side-encryption-aws-kms-key-id}=%{?arn}:%{?aws}:%{?kms}:%{?region}:%{key.account.id}:%{?key}/%{keyId},%{?Host}=%{?tls.client.server_name},%{?x-amz-server-side-encryption}=%{?server-side-encryption},%{?x-amz-copy-source}=%{?bucket.objectName},%{?key}=%{target.objectName}}\"\n\n// filter for s3 objects whose account id is different from the encryption key's account id\n// add exceptions based on key.account.id or keyId for known external accounts or encryption keys\n| where cloud.account.id != key.account.id \n",
+    "references": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html/",
+      "https://docs.aws.amazon.com/kms/latest/APIReference/API_GenerateDataKey.html/",
+      "https://www.gem.security/post/cloud-ransomware-a-new-take-on-an-old-attack-pattern/",
+      "https://rhinosecuritylabs.com/aws/s3-ransomware-part-1-attack-vector/"
+    ],
+    "risk_score": 47,
+    "rule_id": "ab8f074c-5565-4bc4-991c-d49770e19fc9",
+    "setup": "AWS S3 data event types need to be enabled in the CloudTrail trail configuration.",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS S3",
+      "Data Source: AWS KMS",
+      "Use Case: Threat Detection",
+      "Tactic: Impact"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0040",
+          "name": "Impact",
+          "reference": "https://attack.mitre.org/tactics/TA0040/"
+        },
+        "technique": [
+          {
+            "id": "T1486",
+            "name": "Data Encrypted for Impact",
+            "reference": "https://attack.mitre.org/techniques/T1486/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "ab8f074c-5565-4bc4-991c-d49770e19fc9_1",
+  "type": "security-rule"
+}

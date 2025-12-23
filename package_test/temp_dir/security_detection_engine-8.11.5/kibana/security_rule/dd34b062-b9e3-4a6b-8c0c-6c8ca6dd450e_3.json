@@ -1,0 +1,91 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects attempts to install or use Kali Linux via Windows Subsystem for Linux. Adversaries may enable and use WSL for Linux to avoid detection.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Attempt to Install Kali Linux via WSL",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n(\n (process.name : \"wsl.exe\" and process.args : (\"-d\", \"--distribution\", \"-i\", \"--install\") and process.args : \"kali*\") or \n process.executable : \n        (\"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\packages\\\\kalilinux*\", \n         \"?:\\\\Users\\\\*\\\\AppDara\\\\Local\\\\Microsoft\\\\WindowsApps\\\\kali.exe\",\n         \"?:\\\\Program Files*\\\\WindowsApps\\\\KaliLinux.*\\\\kali.exe\")\n )\n",
+        "references": [
+            "https://learn.microsoft.com/en-us/windows/wsl/wsl-config"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "dd34b062-b9e3-4a6b-8c0c-6c8ca6dd450e",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1202",
+                        "name": "Indirect Command Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1202/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "dd34b062-b9e3-4a6b-8c0c-6c8ca6dd450e_3",
+    "type": "security-rule"
+}

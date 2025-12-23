@@ -1,0 +1,89 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when an Lambda Layer is added to an existing Lambda function. AWS layers are a way to share code and data across multiple functions. By adding a layer to an existing function, an attacker can persist or execute code in the context of the function.",
+    "false_positives": [
+      "Lambda function owners may add layers to their functions for legitimate purposes."
+    ],
+    "from": "now-60m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS Lambda Layer Added to Existing Function",
+    "note": "\n## Triage and Analysis\n\n### Investigating AWS Lambda Layer Added to Existing Function\n\nThis rule detects when a Lambda layer is added to an existing Lambda function. AWS Lambda layers are a mechanism for sharing code and data across multiple functions. By adding a layer to an existing function, an attacker can persist or execute code in the context of the function. Understanding the context and legitimacy of such changes is crucial to determine if the action is benign or malicious.\n\n#### Possible Investigation Steps:\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id` fields to identify who made the change. Verify if this actor typically performs such actions and if they have the necessary permissions.\n- **Review the Request Details**: Examine the `aws.cloudtrail.request_parameters` to understand the specific layer added to the Lambda function. Look for any unusual parameters that could suggest unauthorized or malicious modifications.\n- **Analyze the Source of the Request**: Investigate the `source.ip` and `source.geo` fields to determine the geographical origin of the request. An external or unexpected location might indicate compromised credentials or unauthorized access.\n- **Contextualize with Timestamp**: Use the `@timestamp` field to check when the change occurred. Modifications during non-business hours or outside regular maintenance windows might require further scrutiny.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this change to see if the same actor or IP address engaged in other potentially suspicious activities.\n\n### False Positive Analysis:\n\n- **Legitimate Administrative Actions**: Confirm if the addition of the Lambda layer aligns with scheduled updates, development activities, or legitimate administrative tasks documented in change management systems.\n- **Consistency Check**: Compare the action against historical data of similar actions performed by the user or within the organization. If the action is consistent with past legitimate activities, it might indicate a false alarm.\n- **Verify through Outcomes**: Check the `aws.cloudtrail.response_elements` and the `event.outcome` to confirm if the change was successful and intended according to policy.\n\n### Response and Remediation:\n\n- **Immediate Review and Reversal if Necessary**: If the change was unauthorized, remove the added layer from the Lambda function to mitigate any unintended code execution or persistence.\n- **Enhance Monitoring and Alerts**: Adjust monitoring systems to alert on similar actions, especially those involving sensitive functions or layers.\n- **Educate and Train**: Provide additional training to users with administrative rights on the importance of security best practices concerning Lambda function management and the use of layers.\n- **Audit Lambda Functions and Policies**: Conduct a comprehensive audit of all Lambda functions and associated policies to ensure they adhere to the principle of least privilege.\n- **Incident Response**: If there's an indication of malicious intent or a security breach, initiate the incident response protocol to mitigate any damage and prevent future occurrences.\n\n### Additional Information:\n\nFor further guidance on managing Lambda functions and securing AWS environments, refer to the [AWS Lambda documentation](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html) and AWS best practices for security. Additionally, consult the following resources for specific details on Lambda layers and persistence techniques:\n- [AWS Lambda Layers Persistence](https://cloud.hacktricks.xyz/pentesting-cloud/aws-security/aws-persistence/aws-lambda-persistence/aws-lambda-layers-persistence)\n- [AWS API PublishLayerVersion](https://docs.aws.amazon.com/lambda/latest/api/API_PublishLayerVersion.html)\n- [AWS API UpdateFunctionConfiguration](https://docs.aws.amazon.com/lambda/latest/api/API_UpdateFunctionConfiguration.html)\n\n",
+    "query": "event.dataset: aws.cloudtrail\n    and event.provider: lambda.amazonaws.com\n    and event.outcome: success\n    and event.action: (PublishLayerVersion* or UpdateFunctionConfiguration)\n",
+    "references": [
+      "https://cloud.hacktricks.xyz/pentesting-cloud/aws-security/aws-persistence/aws-lambda-persistence/aws-lambda-layers-persistence",
+      "https://docs.aws.amazon.com/lambda/latest/api/API_PublishLayerVersion.html",
+      "https://docs.aws.amazon.com/lambda/latest/api/API_UpdateFunctionConfiguration.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "7d091a76-0737-11ef-8469-f661ea17fbcc",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS Lambda",
+      "Use Case: Threat Detection",
+      "Tactic: Execution"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1648",
+            "name": "Serverless Execution",
+            "reference": "https://attack.mitre.org/techniques/T1648/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "7d091a76-0737-11ef-8469-f661ea17fbcc_1",
+  "type": "security-rule"
+}

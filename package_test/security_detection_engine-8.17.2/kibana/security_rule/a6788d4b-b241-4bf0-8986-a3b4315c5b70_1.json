@@ -1,0 +1,94 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when server access logging is disabled for an Amazon S3 bucket. Server access logs provide a detailed record of requests made to an S3 bucket. When server access logging is disabled for a bucket, it could indicate an adversary's attempt to impair defenses by disabling logs that contain evidence of malicious activity.",
+    "false_positives": [
+      "Bucket logging may be disabled by a system or network administrator. Verify whether the user identity and/or user agent should be making changes in your environment. Bucket component deletions by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "from": "now-6m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "AWS S3 Bucket Server Access Logging Disabled",
+    "note": "\n## Triage and Analysis\n\n### Investigating AWS S3 Bucket Server Access Logging Disabled\n\nThis rule detects when server access logging is disabled for an S3 bucket in AWS. Such configurations could potentially hide evidence of unauthorized access or malicious activity by preventing the recording of those requests.\n\n#### Detailed Investigation Steps\n\n- **Review the Affected S3 Bucket**: Check the bucket details (`bucketName`) where server access logging has been disabled.\n    - Determine the contents and importance of the data stored in this bucket to assess the impact of disabled logging.\n- **Review User Identity and Activity**:\n  - Investigate the user (`user_identity.arn`) who made the change. Determine whether this user's role typically involves managing S3 bucket configurations.\n  - Examine the authentication method and whether the access key used (`access_key_id`) is routinely used for such configurations or if it has deviated from normal usage patterns.\n  - Contact the account owner and confirm whether they are aware of this activity.\n  - Considering the source IP address and geolocation of the user who issued the command:\n      - Do they look normal for the calling user?\n      - If the source is an EC2 IP address, is it associated with an EC2 instance in one of your accounts or is the source IP from an EC2 instance that's not under your control?\n      - If it is an authorized EC2 instance, is the activity associated with normal behavior for the instance role or roles? Are there any other alerts or signs of suspicious activity involving this instance?\n- **Contextualize with Recent Changes**: Compare this event against recent changes in S3 configurations. Look for any other recent permissions changes or unusual administrative actions.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this change to see if the same actor or IP address engaged in other potentially suspicious activities.\n  - Assess whether this behavior is prevalent in the environment by looking for similar occurrences involving other users.\n\n### False Positive Analysis\n\n- Verify the operational requirements that might necessitate disabling access logging, especially in environments where data retention policies are strictly governed for compliance and cost-saving reasons.\n\n### Response and Remediation\n\n- **Immediate Review**: If the change was unauthorized, consider reverting the change immediately to prevent potential data loss.\n- **Enhance Monitoring**: Implement monitoring to alert on changes to logging configurations across your S3 environments.\n- **User Education**: Ensure that users with access to critical resources like S3 buckets are aware of the best practices and company policies regarding data retention and security.\n\n### Additional Information\n\nFor further guidance on monitoring Amazon S3 and ensuring compliance with organizational data retention and security policies, refer to the AWS official documentation on [Monitoring Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/monitoring-overview.html).\n",
+    "query": "any where event.dataset == \"aws.cloudtrail\" \n   and event.action == \"PutBucketLogging\" \n   and event.outcome == \"success\" \n   and not stringContains(aws.cloudtrail.request_parameters, \"LoggingEnabled\")\n",
+    "references": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketLogging.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "a6788d4b-b241-4bf0-8986-a3b4315c5b70",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: Amazon S3",
+      "Use Case: Asset Visibility",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.008",
+                "name": "Disable or Modify Cloud Logs",
+                "reference": "https://attack.mitre.org/techniques/T1562/008/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "a6788d4b-b241-4bf0-8986-a3b4315c5b70_1",
+  "type": "security-rule"
+}

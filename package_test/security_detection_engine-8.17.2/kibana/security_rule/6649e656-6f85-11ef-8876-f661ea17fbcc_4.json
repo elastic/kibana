@@ -1,0 +1,119 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies a failed OAuth 2.0 token grant attempt for a public client app using client credentials. This event is generated when a public client app attempts to exchange a client credentials grant for an OAuth 2.0 access token, but the request is denied due to the lack of required scopes. This could indicate compromised client credentials in which an adversary is attempting to obtain an access token for unauthorized scopes. This is a [New Terms](https://www.elastic.co/guide/en/security/master/rules-ui-create.html#create-new-terms-rule) rule where the `okta.actor.display_name` field value has not been seen in the last 14 days regarding this event.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "filebeat-*",
+      "logs-okta*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Unauthorized Scope for Public App OAuth2 Token Grant with Client Credentials",
+    "new_terms_fields": [
+      "okta.actor.display_name"
+    ],
+    "query": "event.dataset: okta.system\n    and event.action: \"app.oauth2.as.token.grant\"\n    and okta.actor.type: \"PublicClientApp\"\n    and okta.debug_context.debug_data.flattened.grantType: \"client_credentials\"\n    and okta.outcome.result: \"FAILURE\"\n    and not okta.client.user_agent.raw_user_agent: \"Okta-Integrations\"\n    and not okta.actor.display_name: (Okta* or Datadog)\n    and not okta.debug_context.debug_data.flattened.requestedScopes: (\"okta.logs.read\" or \"okta.eventHooks.read\" or \"okta.inlineHooks.read\")\n    and okta.outcome.reason: \"no_matching_scope\"\n",
+    "references": [
+      "https://github.blog/news-insights/company-news/security-alert-stolen-oauth-user-tokens/",
+      "https://developer.okta.com/docs/reference/api/event-types/",
+      "https://www.elastic.co/security-labs/monitoring-okta-threats-with-elastic-security",
+      "https://www.elastic.co/security-labs/starter-guide-to-understanding-okta"
+    ],
+    "related_integrations": [
+      {
+        "package": "okta",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.actor.display_name",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.actor.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.client.user_agent.raw_user_agent",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.debug_context.debug_data.flattened.grantType",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "okta.debug_context.debug_data.flattened.requestedScopes",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "okta.outcome.reason",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.outcome.result",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "6649e656-6f85-11ef-8876-f661ea17fbcc",
+    "severity": "medium",
+    "tags": [
+      "Domain: SaaS",
+      "Data Source: Okta",
+      "Use Case: Threat Detection",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.001",
+                "name": "Application Access Token",
+                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 4
+  },
+  "id": "6649e656-6f85-11ef-8876-f661ea17fbcc_4",
+  "type": "security-rule"
+}

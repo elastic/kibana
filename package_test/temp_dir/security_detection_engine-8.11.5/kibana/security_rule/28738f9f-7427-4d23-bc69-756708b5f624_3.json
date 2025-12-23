@@ -1,0 +1,94 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule identifies a sequence of 100 file extension rename events within a set of common file paths by the same process in a timespan of 1 second. Ransomware is a type of malware that encrypts a victim's files or systems and demands payment (usually in cryptocurrency) in exchange for the decryption key. One important indicator of a ransomware attack is the mass encryption of the file system, after which a new file extension is added to the file.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious File Changes Activity Detected",
+        "query": "sequence by host.id, process.entity_id with maxspan=1s \n  [ file where host.os.type == \"linux\" and event.type == \"change\" and\n    event.action == \"rename\" and file.extension != \"\" and \n    file.path : (\n      \"/home/*\", \"/etc/*\", \"/root/*\", \"/opt/*\", \"/var/backups/*\", \"/var/lib/log/*\"\n      ) and not \n    file.extension : (\n      \"xml\", \"json\", \"conf\", \"dat\", \"gz\", \"info\", \"mod\", \"final\",\n      \"php\", \"pyc\", \"log\", \"bak\", \"bin\", \"csv\", \"pdf\", \"cfg\", \"*old\"\n      ) and not \n    process.name : (\n      \"dpkg\",  \"yum\", \"dnf\", \"rpm\", \"dockerd\"\n    ) ] with runs=100 | tail 1\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "28738f9f-7427-4d23-bc69-756708b5f624",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Impact"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0040",
+                    "name": "Impact",
+                    "reference": "https://attack.mitre.org/tactics/TA0040/"
+                },
+                "technique": [
+                    {
+                        "id": "T1486",
+                        "name": "Data Encrypted for Impact",
+                        "reference": "https://attack.mitre.org/techniques/T1486/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 3
+    },
+    "id": "28738f9f-7427-4d23-bc69-756708b5f624_3",
+    "type": "security-rule"
+}

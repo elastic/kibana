@@ -1,0 +1,97 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies process execution from a removable media and by an unusual process. Adversaries may move onto systems, possibly those on disconnected or air-gapped networks, by copying malware to removable media and taking advantage of Autorun features when the media is inserted into a system and executes.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Execution from a Removable Media with Network Connection",
+        "query": "sequence by process.entity_id with maxspan=5m\n [process where host.os.type == \"windows\" and event.action == \"start\" and\n  \n  /* Direct Exec from USB */\n  (process.Ext.device.bus_type : \"usb\" or process.Ext.device.product_id : \"USB *\") and\n  (process.code_signature.trusted == false or process.code_signature.exists == false) and \n  \n  not process.code_signature.status : (\"errorExpired\", \"errorCode_endpoint*\")]\n [network where host.os.type == \"windows\" and event.action == \"connection_attempted\"]\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.device.bus_type",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.device.product_id",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.exists",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "1542fa53-955e-4330-8e4d-b2d812adeb5f",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Initial Access",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1091",
+                        "name": "Replication Through Removable Media",
+                        "reference": "https://attack.mitre.org/techniques/T1091/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "1542fa53-955e-4330-8e4d-b2d812adeb5f_1",
+    "type": "security-rule"
+}

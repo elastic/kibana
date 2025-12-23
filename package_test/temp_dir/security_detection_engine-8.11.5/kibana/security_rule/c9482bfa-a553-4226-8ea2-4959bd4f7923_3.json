@@ -1,0 +1,83 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies suspicious instances of communications apps, both unsigned and renamed ones, that can indicate an attempt to conceal malicious activity, bypass security features such as allowlists, or trick users into executing malware.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Masquerading as Communication Apps",
+        "query": "process where host.os.type == \"windows\" and\n  event.type == \"start\" and\n  (\n    /* Slack */\n    (process.name : \"slack.exe\" and not\n      (process.code_signature.subject_name in (\n        \"Slack Technologies, Inc.\",\n        \"Slack Technologies, LLC\"\n       ) and process.code_signature.trusted == true)\n    ) or\n\n    /* WebEx */\n    (process.name : \"WebexHost.exe\" and not\n      (process.code_signature.subject_name in (\"Cisco WebEx LLC\", \"Cisco Systems, Inc.\") and process.code_signature.trusted == true)\n    ) or\n\n    /* Teams */\n    (process.name : \"Teams.exe\" and not\n      (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Discord */\n    (process.name : \"Discord.exe\" and not\n      (process.code_signature.subject_name == \"Discord Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* RocketChat */\n    (process.name : \"Rocket.Chat.exe\" and not\n      (process.code_signature.subject_name == \"Rocket.Chat Technologies Corp.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Mattermost */\n    (process.name : \"Mattermost.exe\" and not\n      (process.code_signature.subject_name == \"Mattermost, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* WhatsApp */\n    (process.name : \"WhatsApp.exe\" and not\n      (process.code_signature.subject_name in (\n        \"WhatsApp LLC\",\n        \"WhatsApp, Inc\",\n        \"24803D75-212C-471A-BC57-9EF86AB91435\"\n       ) and process.code_signature.trusted == true)\n    ) or\n\n    /* Zoom */\n    (process.name : \"Zoom.exe\" and not\n      (process.code_signature.subject_name == \"Zoom Video Communications, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Outlook */\n    (process.name : \"outlook.exe\" and not\n      (process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Thunderbird */\n    (process.name : \"thunderbird.exe\" and not\n      (process.code_signature.subject_name == \"Mozilla Corporation\" and process.code_signature.trusted == true)\n    )\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "c9482bfa-a553-4226-8ea2-4959bd4f7923",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "c9482bfa-a553-4226-8ea2-4959bd4f7923_3",
+    "type": "security-rule"
+}

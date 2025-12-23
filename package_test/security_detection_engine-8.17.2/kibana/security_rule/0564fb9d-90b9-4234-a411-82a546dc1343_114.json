@@ -1,0 +1,100 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies the Internet Information Services (IIS) command-line tool, AppCmd, being used to list passwords. An attacker with IIS web server access via a web shell can decrypt and dump the IIS AppPool service account password using AppCmd.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.*",
+      "endgame-*",
+      "logs-system.security*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Microsoft IIS Service Account Password Dumped",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n   (process.name : \"appcmd.exe\" or ?process.pe.original_file_name == \"appcmd.exe\") and\n   process.args : \"list\" and process.args : \"/text*\"\n",
+    "references": [
+      "https://blog.netspi.com/decrypting-iis-passwords-to-break-out-of-the-dmz-part-1/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.pe.original_file_name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "0564fb9d-90b9-4234-a411-82a546dc1343",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Rule Type: BBR",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1003",
+            "name": "OS Credential Dumping",
+            "reference": "https://attack.mitre.org/techniques/T1003/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 114
+  },
+  "id": "0564fb9d-90b9-4234-a411-82a546dc1343_114",
+  "type": "security-rule"
+}

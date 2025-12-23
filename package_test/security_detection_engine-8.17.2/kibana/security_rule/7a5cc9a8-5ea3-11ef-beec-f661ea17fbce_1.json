@@ -1,0 +1,88 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the first occurrence of an AWS Security Token Service (STS) `GetFederationToken` request made by a user within the last 10 days. The `GetFederationToken` API call allows users to request temporary security credentials to access AWS resources. Adversaries may use this API to obtain temporary credentials to access resources they would not normally have access to.",
+    "from": "now-9m",
+    "history_window_start": "now-10d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "First Occurrence of STS GetFederationToken Request by User",
+    "new_terms_fields": [
+      "aws.cloudtrail.user_identity.arn"
+    ],
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: sts.amazonaws.com\n    and event.action: GetFederationToken\n",
+    "references": [
+      "https://hackingthe.cloud/aws/post_exploitation/survive_access_key_deletion_with_sts_getfederationtoken/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "7a5cc9a8-5ea3-11ef-beec-f661ea17fbce",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS",
+      "Data Source: AWS STS",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.001",
+                "name": "Application Access Token",
+                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "7a5cc9a8-5ea3-11ef-beec-f661ea17fbce_1",
+  "type": "security-rule"
+}

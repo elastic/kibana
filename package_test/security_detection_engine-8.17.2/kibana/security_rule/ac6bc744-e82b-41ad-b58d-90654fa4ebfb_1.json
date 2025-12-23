@@ -1,0 +1,112 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the load of a remote library by the WPS Office promecefpluginhost.exe executable. This may indicate the successful exploitation of CVE-2024-7262 or CVE-2024-7263 via DLL hijack abusing the ksoqing custom protocol handler.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.library-*",
+      "logs-windows.sysmon_operational-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "WPS Office Exploitation via DLL Hijack",
+    "query": "any where host.os.type == \"windows\" and process.name : \"promecefpluginhost.exe\" and \n(\n (event.category == \"library\" and \n  ?dll.path : \n     (\"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\wps\\\\INetCache\\\\*\", \n      \"\\\\Device\\\\Mup\\\\**\", \"\\\\\\\\*\")) or \n\n  ((event.category == \"process\" and event.action : \"Image loaded*\") and \n  ?file.path : \n     (\"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\wps\\\\INetCache\\\\*\", \n      \"\\\\Device\\\\Mup\\\\**\", \"\\\\\\\\*\"))\n)\n",
+    "references": [
+      "https://www.welivesecurity.com/en/eset-research/analysis-of-two-arbitrary-code-execution-vulnerabilities-affecting-wps-office/",
+      "https://mp.weixin.qq.com/s/F8hNyESBdKhwXkQPgtGpew"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "dll.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "ac6bc744-e82b-41ad-b58d-90654fa4ebfb",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Initial Access",
+      "Tactic: Execution",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1203",
+            "name": "Exploitation for Client Execution",
+            "reference": "https://attack.mitre.org/techniques/T1203/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1189",
+            "name": "Drive-by Compromise",
+            "reference": "https://attack.mitre.org/techniques/T1189/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "ac6bc744-e82b-41ad-b58d-90654fa4ebfb_1",
+  "type": "security-rule"
+}

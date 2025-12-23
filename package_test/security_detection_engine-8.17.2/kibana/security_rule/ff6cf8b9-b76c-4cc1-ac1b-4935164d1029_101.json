@@ -1,0 +1,113 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the creation of an Alternate Data Stream (ADS) at a volume root directory, which can indicate the attempt to hide tools and malware, as ADSs created in this directory are not displayed by system utilities.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-endpoint.events.file-*",
+      "logs-windows.sysmon_operational-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "endgame-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Alternate Data Stream Creation/Execution at Volume Root Directory",
+    "query": "any where host.os.type == \"windows\" and event.category in (\"file\", \"process\") and \n  (\n    (event.type == \"creation\" and file.path regex~ \"\"\"[A-Z]:\\\\:.+\"\"\") or \n    (event.type == \"start\" and process.executable regex~ \"\"\"[A-Z]:\\\\:.+\"\"\")\n  )\n",
+    "references": [
+      "https://www.crowdstrike.com/blog/anatomy-of-alpha-spider-ransomware/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "ff6cf8b9-b76c-4cc1-ac1b-4935164d1029",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: SentinelOne",
+      "Data Source: Elastic Endgame"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1564",
+            "name": "Hide Artifacts",
+            "reference": "https://attack.mitre.org/techniques/T1564/",
+            "subtechnique": [
+              {
+                "id": "T1564.004",
+                "name": "NTFS File Attributes",
+                "reference": "https://attack.mitre.org/techniques/T1564/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 101
+  },
+  "id": "ff6cf8b9-b76c-4cc1-ac1b-4935164d1029_101",
+  "type": "security-rule"
+}

@@ -1,0 +1,107 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies interactive logon attempt with alternate credentials and by an unusual process. Adversaries may create a new token to escalate privileges and bypass access controls.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-system.*",
+      "logs-windows.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Interactive Logon by an Unusual Process",
+    "query": "authentication where \n host.os.type : \"windows\" and winlog.event_data.LogonProcessName : \"Advapi*\" and \n winlog.logon.type == \"Interactive\" and winlog.event_data.SubjectUserSid : (\"S-1-5-21*\", \"S-1-12-*\") and \n winlog.event_data.TargetUserSid : (\"S-1-5-21*\", \"S-1-12-*\")  and process.executable : \"C:\\\\*\" and \n not startswith~(winlog.event_data.SubjectUserSid, winlog.event_data.TargetUserSid) and \n not process.executable : \n            (\"?:\\\\Windows\\\\System32\\\\winlogon.exe\", \n             \"?:\\\\Windows\\\\System32\\\\wininit.exe\", \n             \"?:\\\\Program Files\\\\*.exe\", \n             \"?:\\\\Program Files (x86)\\\\*.exe\", \n             \"?:\\\\Windows\\\\SysWOW64\\\\inetsrv\\\\w3wp.exe\", \n             \"?:\\\\Windows\\\\System32\\\\inetsrv\\\\w3wp.exe\", \n             \"?:\\\\Windows\\\\SysWOW64\\\\msiexec.exe\")\n",
+    "references": [
+      "https://attack.mitre.org/techniques/T1134/002/"
+    ],
+    "related_integrations": [
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.LogonProcessName",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.SubjectUserSid",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.TargetUserSid",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.logon.type",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "61766ef9-48a5-4247-ad74-3349de7eb2ad",
+    "setup": "## Setup\n\nAudit event 4624 is needed to trigger this rule.\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2,\nevents will not define `event.ingested` and default fallback for EQL rules was not added until version 8.2.\nHence for this rule to work effectively, users will need to add a custom ingest pipeline to populate\n`event.ingested` to @timestamp.\nFor more details on adding a custom ingest pipeline refer - https://www.elastic.co/guide/en/fleet/current/data-streams-pipeline-tutorial.html\n",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1134",
+            "name": "Access Token Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1134/",
+            "subtechnique": [
+              {
+                "id": "T1134.002",
+                "name": "Create Process with Token",
+                "reference": "https://attack.mitre.org/techniques/T1134/002/"
+              },
+              {
+                "id": "T1134.003",
+                "name": "Make and Impersonate Token",
+                "reference": "https://attack.mitre.org/techniques/T1134/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 3
+  },
+  "id": "61766ef9-48a5-4247-ad74-3349de7eb2ad_3",
+  "type": "security-rule"
+}

@@ -1,0 +1,101 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when a user copies a Google spreadsheet, form, document or script from an external drive. An adversary may send a phishing email to the victim with a Drive object link where \"copy\" is included in the URI, thus copying the object to the victim's drive.",
+        "false_positives": [
+            "Google Workspace users typically share Drive resources with a shareable link where parameters are edited to indicate when it is viewable or editable by the intended recipient. It is uncommon for a user in an organization to manually copy a Drive object from an external drive to their corporate drive. This may happen where users find a useful spreadsheet in a public drive, for example, and replicate it to their Drive."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Google Workspace Resource Copied from External Drive",
+        "note": "### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "file where event.dataset == \"google_workspace.drive\" and event.action == \"copy\" and\n\n    /* Should only match if the object lives in a Drive that is external to the user's GWS organization */\n    google_workspace.drive.owner_is_team_drive == \"false\" and google_workspace.drive.copy_type == \"external\" and\n\n    /* Google Script, Forms, Sheets and Document can have container-bound scripts */\n    google_workspace.drive.file.type: (\"script\", \"form\", \"spreadsheet\", \"document\")\n",
+        "references": [
+            "https://www.elastic.co/security-labs/google-workspace-attack-surface-part-one",
+            "https://developers.google.com/apps-script/guides/bound",
+            "https://support.google.com/a/users/answer/13004165#share_make_a_copy_links"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.drive.copy_type",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.drive.file.type",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.drive.owner_is_team_drive",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "f33e68a4-bd19-11ed-b02f-f661ea17fbcc",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Initial Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1566",
+                        "name": "Phishing",
+                        "reference": "https://attack.mitre.org/techniques/T1566/",
+                        "subtechnique": [
+                            {
+                                "id": "T1566.002",
+                                "name": "Spearphishing Link",
+                                "reference": "https://attack.mitre.org/techniques/T1566/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "f33e68a4-bd19-11ed-b02f-f661ea17fbcc_1",
+    "type": "security-rule"
+}

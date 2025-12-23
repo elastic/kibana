@@ -1,0 +1,120 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when an EC2 instance interacts with the AWS IAM service via an assumed role. This is uncommon behavior and could indicate an attacker using compromised credentials to further exploit an environment. For example, an assumed role could be used to create new users for persistence or add permissions for privilege escalation. An EC2 instance assumes a role using their EC2 ID as the session name. This rule looks for the pattern \"i-\" which is the beginning pattern for assumed role sessions started by an EC2 instance.",
+    "false_positives": [
+      "Administrators may use EC2 instances to interact with IAM services as part of an automation workflow, ensure validity of the triggered event and include exceptions where necessary."
+    ],
+    "from": "now-6m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "AWS EC2 Instance Interaction with IAM Service",
+    "query": "any where event.dataset == \"aws.cloudtrail\"\n   and event.provider == \"iam.amazonaws.com\"\n   and aws.cloudtrail.user_identity.type == \"AssumedRole\"\n   and stringContains (user.id, \":i-\")\n",
+    "references": [
+      "https://redcanary.com/blog/aws-sts/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.user_identity.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "a44bcb58-5109-4870-a7c6-11f5fe7dd4b1",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS EC2",
+      "Data Source: AWS IAM",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Privilege Escalation",
+      "Tactic: Persistence"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/",
+            "subtechnique": [
+              {
+                "id": "T1098.001",
+                "name": "Additional Cloud Credentials",
+                "reference": "https://attack.mitre.org/techniques/T1098/001/"
+              },
+              {
+                "id": "T1098.003",
+                "name": "Additional Cloud Roles",
+                "reference": "https://attack.mitre.org/techniques/T1098/003/"
+              }
+            ]
+          },
+          {
+            "id": "T1078",
+            "name": "Valid Accounts",
+            "reference": "https://attack.mitre.org/techniques/T1078/",
+            "subtechnique": [
+              {
+                "id": "T1078.004",
+                "name": "Cloud Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/004/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": []
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "a44bcb58-5109-4870-a7c6-11f5fe7dd4b1_1",
+  "type": "security-rule"
+}

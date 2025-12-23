@@ -1,0 +1,112 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the creation of a process running as SYSTEM and impersonating a Windows core binary privileges. Adversaries may create a new process with a different token to escalate privileges and bypass access controls.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Process Created with an Elevated Token",
+        "query": "/* This rule is only compatible with Elastic Endpoint 8.4+ */\n\nprocess where host.os.type == \"windows\" and event.action == \"start\" and\n\n /* CreateProcessWithToken and effective parent is a privileged MS native binary used as a target for token theft */\n user.id : \"S-1-5-18\"  and\n\n /* Token Theft target process usually running as service are located in one of the following paths */\n process.Ext.effective_parent.executable :\n                (\"?:\\\\Windows\\\\*.exe\",\n                 \"?:\\\\Program Files\\\\*.exe\",\n                 \"?:\\\\Program Files (x86)\\\\*.exe\",\n                 \"?:\\\\ProgramData\\\\*\") and\n\n/* Ignores Utility Manager in Windows running in debug mode */\n not (process.Ext.effective_parent.executable : \"?:\\\\Windows\\\\System32\\\\Utilman.exe\" and\n      process.parent.executable : \"?:\\\\Windows\\\\System32\\\\Utilman.exe\" and process.parent.args : \"/debug\") and\n\n/* Ignores Windows print spooler service with correlation to Access Intelligent Form */\nnot (process.parent.executable : \"?\\\\Windows\\\\System32\\\\spoolsv.exe\" and\n     process.executable: \"?:\\\\Program Files*\\\\Access\\\\Intelligent Form\\\\*\\\\LaunchCreate.exe\") and \n\n/* Ignores Windows error reporting executables */\n not process.executable : (\"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n                           \"?:\\\\Windows\\\\SysWOW64\\\\WerFault.exe\",\n                           \"?:\\\\Windows\\\\System32\\\\WerFaultSecure.exe\",\n                           \"?:\\\\Windows\\\\SysWOW64\\\\WerFaultSecure.exe\",\n                           \"?:\\\\windows\\\\system32\\\\WerMgr.exe\",\n                           \"?:\\\\Windows\\\\SoftwareDistribution\\\\Download\\\\Install\\\\securityhealthsetup.exe\")  and\n\n /* Ignores Windows updates from TiWorker.exe that runs with elevated privileges */\n not (process.parent.executable : \"?:\\\\Windows\\\\WinSxS\\\\*\\\\TiWorker.exe\" and\n      process.executable : (\"?:\\\\Windows\\\\Microsoft.NET\\\\Framework*.exe\",\n                            \"?:\\\\Windows\\\\WinSxS\\\\*.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\inetsrv\\\\iissetup.exe\",\n                            \"?:\\\\Windows\\\\SysWOW64\\\\inetsrv\\\\iissetup.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\inetsrv\\\\aspnetca.exe\",\n                            \"?:\\\\Windows\\\\SysWOW64\\\\inetsrv\\\\aspnetca.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\lodctr.exe\",\n                            \"?:\\\\Windows\\\\SysWOW64\\\\lodctr.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\netcfg.exe\",\n                            \"?:\\\\Windows\\\\Microsoft.NET\\\\Framework*\\\\*\\\\ngen.exe\",\n                            \"?:\\\\Windows\\\\Microsoft.NET\\\\Framework*\\\\*\\\\aspnet_regiis.exe\")) and\n\n\n/* Ignores additional parent executables that run with elevated privileges */\n not process.parent.executable : \n               (\"?:\\\\Windows\\\\System32\\\\AtBroker.exe\", \n                \"?:\\\\Windows\\\\system32\\\\svchost.exe\", \n                \"?:\\\\Program Files (x86)\\\\*.exe\", \n                \"?:\\\\Program Files\\\\*.exe\", \n                \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n                \"?:\\\\Windows\\\\System32\\\\DriverStore\\\\*\") and\n\n/* Ignores Windows binaries with a trusted signature and specific signature name */\n not (process.code_signature.trusted == true and\n      process.code_signature.subject_name : \n                (\"philandro Software GmbH\", \n                 \"Freedom Scientific Inc.\", \n                 \"TeamViewer Germany GmbH\", \n                 \"Projector.is, Inc.\", \n                 \"TeamViewer GmbH\", \n                 \"Cisco WebEx LLC\", \n                 \"Dell Inc\"))\n",
+        "references": [
+            "https://lengjibo.github.io/token/",
+            "https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.effective_parent.executable",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "02a23ee7-c8f8-4701-b99d-e9038ce313cb",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Privilege Escalation",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1134",
+                        "name": "Access Token Manipulation",
+                        "reference": "https://attack.mitre.org/techniques/T1134/",
+                        "subtechnique": [
+                            {
+                                "id": "T1134.002",
+                                "name": "Create Process with Token",
+                                "reference": "https://attack.mitre.org/techniques/T1134/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 5
+    },
+    "id": "02a23ee7-c8f8-4701-b99d-e9038ce313cb_5",
+    "type": "security-rule"
+}

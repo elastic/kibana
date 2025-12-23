@@ -1,0 +1,90 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Detects a new user agent used for a GitHub user not previously seen in the last 14 days.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "First Occurrence of User-Agent For a GitHub User",
+    "new_terms_fields": [
+      "user.name",
+      "github.user_agent"
+    ],
+    "query": "event.dataset:\"github.audit\" and event.category:\"configuration\" and\ngithub.user_agent:* and user.name:*\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.user_agent",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "41761cd3-380f-4d4d-89f3-46d6853ee35d",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Initial Access",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1078",
+            "name": "Valid Accounts",
+            "reference": "https://attack.mitre.org/techniques/T1078/",
+            "subtechnique": [
+              {
+                "id": "T1078.004",
+                "name": "Cloud Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 204
+  },
+  "id": "41761cd3-380f-4d4d-89f3-46d6853ee35d_204",
+  "type": "security-rule"
+}

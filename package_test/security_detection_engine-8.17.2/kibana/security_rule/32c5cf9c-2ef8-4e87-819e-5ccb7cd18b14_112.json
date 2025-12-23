@@ -1,0 +1,99 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies execution from a directory masquerading as the Windows Program Files directories. These paths are trusted and usually host trusted third party programs. An adversary may leverage masquerading, along with low privileges to bypass detections allowlisting those folders.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-m365_defender.event-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Program Files Directory Masquerading",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.executable : \"C:\\\\*Program*Files*\\\\*.exe\" and\n  not process.executable : (\n        \"?:\\\\Program Files\\\\*.exe\",\n        \"?:\\\\Program Files (x86)\\\\*.exe\",\n        \"?:\\\\Users\\\\*.exe\",\n        \"?:\\\\ProgramData\\\\*.exe\",\n        \"?:\\\\Windows\\\\Downloaded Program Files\\\\*.exe\",\n        \"?:\\\\Windows\\\\Temp\\\\.opera\\\\????????????\\\\CProgram?FilesOpera*\\\\*.exe\",\n        \"?:\\\\Windows\\\\Temp\\\\.opera\\\\????????????\\\\CProgram?Files?(x86)Opera*\\\\*.exe\"\n  )\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "32c5cf9c-2ef8-4e87-819e-5ccb7cd18b14",
+    "setup": "## Setup\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2,\nevents will not define `event.ingested` and default fallback for EQL rules was not added until version 8.2.\nHence for this rule to work effectively, users will need to add a custom ingest pipeline to populate\n`event.ingested` to @timestamp.\nFor more details on adding a custom ingest pipeline refer - https://www.elastic.co/guide/en/fleet/current/data-streams-pipeline-tutorial.html\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1036",
+            "name": "Masquerading",
+            "reference": "https://attack.mitre.org/techniques/T1036/",
+            "subtechnique": [
+              {
+                "id": "T1036.005",
+                "name": "Match Legitimate Name or Location",
+                "reference": "https://attack.mitre.org/techniques/T1036/005/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 112
+  },
+  "id": "32c5cf9c-2ef8-4e87-819e-5ccb7cd18b14_112",
+  "type": "security-rule"
+}

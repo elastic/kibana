@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the change of permissions/ownership of files/folders through built-in Windows utilities. Threat actors may require permission modification of files/folders to change, modify or delete them.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "File and Directory Permissions Modification",
+        "query": "process where event.type == \"start\" and host.os.type == \"windows\" and\n(\n  ((process.name: \"icacls.exe\" or process.pe.original_file_name == \"iCACLS.EXE\") and process.args: (\"*:F\", \"/reset\", \"/setowner\", \"*grant*\")) or\n  ((process.name: \"cacls.exe\" or process.pe.original_file_name == \"CACLS.EXE\") and process.args: (\"/g\", \"*:f\")) or\n  ((process.name: \"takeown.exe\" or process.pe.original_file_name == \"takeown.exe\") and process.args: (\"/F\")) or\n  ((process.name: \"attrib.exe\" or process.pe.original_file_name== \"ATTRIB.EXE\") and process.args: \"-r\")\n) and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "bc9e4f5a-e263-4213-a2ac-1edf9b417ada",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1222",
+                        "name": "File and Directory Permissions Modification",
+                        "reference": "https://attack.mitre.org/techniques/T1222/",
+                        "subtechnique": [
+                            {
+                                "id": "T1222.001",
+                                "name": "Windows File and Directory Permissions Modification",
+                                "reference": "https://attack.mitre.org/techniques/T1222/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "bc9e4f5a-e263-4213-a2ac-1edf9b417ada_1",
+    "type": "security-rule"
+}

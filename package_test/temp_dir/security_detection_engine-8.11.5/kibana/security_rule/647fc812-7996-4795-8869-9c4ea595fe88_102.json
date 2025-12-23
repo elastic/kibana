@@ -1,0 +1,63 @@
+{
+    "attributes": {
+        "anomaly_threshold": 50,
+        "author": [
+            "Elastic"
+        ],
+        "description": "Searches for rare processes running on multiple Linux hosts in an entire fleet or network. This reduces the detection of false positives since automated maintenance processes usually only run occasionally on a single machine but are common to all or many hosts in a fleet.",
+        "false_positives": [
+            "A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this alert."
+        ],
+        "from": "now-45m",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": [
+            "v3_linux_anomalous_process_all_hosts"
+        ],
+        "name": "Anomalous Process For a Linux Population",
+        "note": "## Triage and analysis\n\n### Investigating Anomalous Process For a Linux Population\n\nSearching for abnormal Linux processes is a good methodology to find potentially malicious activity within a network. Understanding what is commonly run within an environment and developing baselines for legitimate activity can help uncover potential malware and suspicious behaviors.\n\nThis rule uses a machine learning job to detect a Linux process that is rare and unusual for all of the monitored Linux hosts in your fleet.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, and whether they are located in expected locations.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Consider the user as identified by the `user.name` field. Is this program part of an expected workflow for the user who ran this program on this host?\n- Validate the activity is not related to planned patches, updates, network administrator activity, or legitimate software installations.\n- Validate if the activity has a consistent cadence (for example, if it runs monthly or quarterly), as it could be part of a monthly or quarterly business process.\n- Examine the arguments and working directory of the process. These may provide indications as to the source of the program or the nature of the tasks it is performing.\n\n### False Positive Analysis\n\n- If this activity is related to new benign software installation activity, consider adding exceptions \u2014 preferably with a combination of user and command line conditions.\n- Try to understand the context of the execution by thinking about the user, machine, or business purpose. A small number of endpoints, such as servers with unique software, might appear unusual but satisfy a specific business need.\n\n### Response and Remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that   attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+        ],
+        "risk_score": 21,
+        "rule_id": "647fc812-7996-4795-8869-9c4ea595fe88",
+        "severity": "low",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Linux",
+            "Threat Detection",
+            "ML",
+            "Machine Learning",
+            "Persistence"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.003",
+                                "name": "Windows Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 102
+    },
+    "id": "647fc812-7996-4795-8869-9c4ea595fe88_102",
+    "type": "security-rule"
+}

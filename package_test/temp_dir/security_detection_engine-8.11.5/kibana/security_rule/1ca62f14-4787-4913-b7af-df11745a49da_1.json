@@ -1,0 +1,65 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects when a new GitHub App has been installed in your organization account. GitHub Apps extend GitHub's functionality both within and outside of GitHub. When an app is installed it is granted permissions to read or modify your repository and organization data. Only trusted apps should be installed and any newly installed apps should be investigated to verify their legitimacy. Unauthorized app installation could lower your organization's security posture and leave you exposed for future attacks.",
+        "from": "now-9m",
+        "index": [
+            "logs-github.audit-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "New GitHub App Installed",
+        "query": "configuration where event.dataset == \"github.audit\" and event.action == \"integration_installation.create\"\n",
+        "related_integrations": [
+            {
+                "package": "github",
+                "version": "^1.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "1ca62f14-4787-4913-b7af-df11745a49da",
+        "severity": "medium",
+        "tags": [
+            "Domain: Cloud",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Github"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1072",
+                        "name": "Software Deployment Tools",
+                        "reference": "https://attack.mitre.org/techniques/T1072/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "1ca62f14-4787-4913-b7af-df11745a49da_1",
+    "type": "security-rule"
+}

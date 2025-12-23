@@ -1,0 +1,110 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects a sequence of suspicious activities on Windows hosts indicative of credential compromise, followed by efforts to undermine multi-factor authentication (MFA) and single sign-on (SSO) mechanisms for an Okta user account.",
+    "false_positives": [
+      "A Windows administrator may have triggered a low-fidelity credential access alert during a legitimate administrative action. Following this, the administrator may have reset the MFA credentials for themselves and then logged into the Okta console for AD directory services integration management."
+    ],
+    "from": "now-12h",
+    "index": [
+      "filebeat-*",
+      "logs-okta*",
+      ".alerts-security.*",
+      "logs-endpoint.events.*"
+    ],
+    "interval": "6h",
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Stolen Credentials Used to Login to Okta Account After MFA Reset",
+    "note": "## Triage and analysis\n\n### Investigating Stolen Credentials Used to Login to Okta Account After MFA Reset\n\nThis rule detects a sequence of suspicious activities on Windows hosts indicative of credential compromise, followed by efforts to undermine multi-factor authentication (MFA) and single sign-on (SSO) mechanisms for an Okta user account.\n\nTypically, adversaries initially extract credentials from targeted endpoints through various means. Subsequently, leveraging social engineering, they may seek to reset the MFA credentials associated with an Okta account, especially in scenarios where Active Directory (AD) services are integrated with Okta. Successfully resetting MFA allows the unauthorized use of stolen credentials to gain access to the compromised Okta account. The attacker can then register their own device for MFA, paving the way for unfettered access to the user's Okta account and any associated SaaS applications. This is particularly alarming if the compromised account has administrative rights, as it could lead to widespread access to organizational resources and configurations.\n\n#### Possible investigation steps:\n- Identify the user account associated with the Okta login attempt by examining the `user.name` field.\n- Identify the endpoint for the Credential Access alert for this user by examining the `host.name` and `host.id` fields from the alert document.\n- Cross-examine the Okta user and endpoint user to confirm that they are the same person.\n- Reach out to the user to confirm if they have intentionally reset their MFA credentials recently or asked for help in doing so.\n- If the user is unaware of the MFA reset, incident response may be required immediately to prevent further compromise.\n\n### False positive analysis:\n- A Windows administrator may have triggered a low-fidelity credential access alert during a legitimate administrative action. Following this, the administrator may have reset the MFA credentials for themselves and then logged into the Okta console for AD directory services integration management.\n\n### Response and remediation:\n- If confirmed that the user did not intentionally have their MFA factor reset, deactivate the user account.\n- After deactivation, reset the user's password and MFA factor to regain control of the account.\n    - Ensure that all user sessions are stopped during this process.\n- Immediately reset the user's AD password as well if Okta does not sync back to AD.\n- Forensic analysis on the user's endpoint may be required to determine the root cause of the compromise and identify the scope of the compromise.\n- Review Okta system logs to identify any other suspicious activity associated with the user account, such as creation of a backup account.\n- With the device ID captured from the MFA factor reset, search across all Okta logs for any other activity associated with the device ID.\n\n## Setup",
+    "query": "sequence by user.name with maxspan=12h\n    [any where host.os.type == \"windows\" and signal.rule.threat.tactic.name == \"Credential Access\"]\n    [any where event.dataset == \"okta.system\" and okta.event_type == \"user.mfa.factor.update\"]\n    [any where event.dataset == \"okta.system\" and okta.event_type: (\"user.session.start\", \"user.authentication*\")]\n",
+    "references": [
+      "https://developer.okta.com/docs/reference/api/system-log/",
+      "https://developer.okta.com/docs/reference/api/event-types/",
+      "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+      "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection",
+      "https://www.elastic.co/security-labs/monitoring-okta-threats-with-elastic-security",
+      "https://www.elastic.co/security-labs/starter-guide-to-understanding-okta"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "okta",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.event_type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "signal.rule.threat.tactic.name",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "user.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "5610b192-7f18-11ee-825b-f661ea17fbcd",
+    "setup": "The Okta and Elastic Defend fleet integration structured data is required to be compatible with this rule. Directory services integration in Okta with AD synced is also required for this rule to be effective as it relies on triaging `user.name` from Okta and Elastic Defend events.",
+    "severity": "high",
+    "tags": [
+      "Tactic: Persistence",
+      "Use Case: Identity and Access Audit",
+      "Data Source: Okta",
+      "Data Source: Elastic Defend",
+      "Rule Type: Higher-Order Rule",
+      "Domain: Endpoint",
+      "Domain: Cloud"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1556",
+            "name": "Modify Authentication Process",
+            "reference": "https://attack.mitre.org/techniques/T1556/",
+            "subtechnique": [
+              {
+                "id": "T1556.006",
+                "name": "Multi-Factor Authentication",
+                "reference": "https://attack.mitre.org/techniques/T1556/006/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "type": "eql",
+    "version": 105
+  },
+  "id": "5610b192-7f18-11ee-825b-f661ea17fbcd_105",
+  "type": "security-rule"
+}

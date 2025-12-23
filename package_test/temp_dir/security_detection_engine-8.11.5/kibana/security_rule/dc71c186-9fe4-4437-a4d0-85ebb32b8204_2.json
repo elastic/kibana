@@ -1,0 +1,78 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the execution of mount process with hidepid parameter, which can make processes invisible to other users from the system. Adversaries using Linux kernel version 3.2+ (or RHEL/CentOS v6.5+ above) can hide the process from other users. When hidepid=2 option is executed to mount the /proc filesystem, only the root user can see all processes and the logged-in user can only see their own process. This provides a defense evasion mechanism for the adversaries to hide their process executions from all other commands such as ps, top, pgrep and more. With the Linux kernel hardening hidepid option all the user has to do is remount the /proc filesystem with the option, which can now be monitored and detected.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Hidden Process via Mount Hidepid",
+        "query": "process where process.name==\"mount\" and event.action ==\"exec\" and\n    process.args: ( \"/proc\") and process.args: (\"-o\") and process.args:(\"*hidepid=2*\") and\n    host.os.type == \"linux\"\n",
+        "references": [
+            "https://www.cyberciti.biz/faq/linux-hide-processes-from-other-users/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "dc71c186-9fe4-4437-a4d0-85ebb32b8204",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1564",
+                        "name": "Hide Artifacts",
+                        "reference": "https://attack.mitre.org/techniques/T1564/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "dc71c186-9fe4-4437-a4d0-85ebb32b8204_2",
+    "type": "security-rule"
+}

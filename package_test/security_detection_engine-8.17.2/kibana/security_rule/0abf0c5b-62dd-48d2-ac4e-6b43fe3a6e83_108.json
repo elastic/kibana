@@ -1,0 +1,162 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies the use of Cmdlets and methods related to remote execution activities using WinRM. Attackers can abuse WinRM to perform lateral movement using built-in tools.",
+    "filters": [
+      {
+        "meta": {
+          "negate": true
+        },
+        "query": {
+          "wildcard": {
+            "file.path": {
+              "case_insensitive": true,
+              "value": "?:\\\\Program Files\\\\WindowsPowerShell\\\\Modules\\\\dbatools\\\\*\\\\allcommands.ps1"
+            }
+          }
+        }
+      },
+      {
+        "meta": {
+          "negate": true
+        },
+        "query": {
+          "wildcard": {
+            "file.directory": {
+              "case_insensitive": true,
+              "value": "?:\\\\Program Files\\\\Microsoft\\\\Exchange Server\\\\*\\\\bin"
+            }
+          }
+        }
+      },
+      {
+        "meta": {
+          "negate": true
+        },
+        "query": {
+          "wildcard": {
+            "file.directory": {
+              "case_insensitive": true,
+              "value": "?:\\\\ExchangeServer\\\\bin*"
+            }
+          }
+        }
+      }
+    ],
+    "from": "now-119m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.powershell*"
+    ],
+    "interval": "60m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "PowerShell Script with Remote Execution Capabilities via WinRM",
+    "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    (\"Invoke-WmiMethod\" or \"Invoke-Command\" or \"Enter-PSSession\") and \"ComputerName\"\n  ) and\n  not user.id : \"S-1-5-18\" and\n  not file.directory : (\n    \"C:\\\\Program Files\\\\LogicMonitor\\\\Agent\\\\tmp\"\n  ) and not\n  powershell.file.script_block_text : (\n    \"Export-ModuleMember -Function @('Invoke-Expression''Invoke-Command')\" and\n    \"function Invoke-Command {\"\n  )\n",
+    "references": [
+      "https://attack.mitre.org/techniques/T1021/006/",
+      "https://github.com/cobbr/SharpSploit/blob/master/SharpSploit/LateralMovement/PowerShellRemoting.cs",
+      "https://github.com/BC-SECURITY/Empire/blob/main/empire/server/modules/powershell/lateral_movement/invoke_psremoting.py"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.directory",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "0abf0c5b-62dd-48d2-ac4e-6b43fe3a6e83",
+    "setup": "## Setup\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nAdministrative Templates >\nWindows PowerShell >\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Lateral Movement",
+      "Tactic: Execution",
+      "Data Source: PowerShell Logs",
+      "Rule Type: BBR"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1021",
+            "name": "Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1021/",
+            "subtechnique": [
+              {
+                "id": "T1021.006",
+                "name": "Windows Remote Management",
+                "reference": "https://attack.mitre.org/techniques/T1021/006/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 108
+  },
+  "id": "0abf0c5b-62dd-48d2-ac4e-6b43fe3a6e83_108",
+  "type": "security-rule"
+}

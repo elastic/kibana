@@ -1,0 +1,90 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identify read access to a high number of Active Directory object attributes. The knowledge of objects properties can help adversaries find vulnerabilities, elevate privileges or collect sensitive information.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-system.security*",
+      "logs-windows.forwarded*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious Access to LDAP Attributes",
+    "query": "any where event.action == \"Directory Service Access\" and\n event.code == \"4662\" and not winlog.event_data.SubjectUserSid : \"S-1-5-18\" and\n winlog.event_data.AccessMaskDescription == \"Read Property\" and length(winlog.event_data.Properties) >= 2000\n",
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.code",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.AccessMaskDescription",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.Properties",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.SubjectUserSid",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "68ad737b-f90a-4fe5-bda6-a68fa460044e",
+    "setup": "The 'Audit Directory Service Changes' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nDS Access >\nAudit Directory Service Changes (Success,Failure)\n",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Discovery",
+      "Data Source: System",
+      "Data Source: Active Directory",
+      "Data Source: Windows"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1069",
+            "name": "Permission Groups Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1069/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "68ad737b-f90a-4fe5-bda6-a68fa460044e_1",
+  "type": "security-rule"
+}

@@ -1,0 +1,91 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Message of the day (MOTD) is the message that is presented to the user when a user connects to a Linux server via SSH or a serial connection. Linux systems contain several default MOTD files located in the \"/etc/update-motd.d/\" and \"/usr/lib/update-notifier/\" directories. These scripts run as the root user every time a user connects over SSH or a serial connection. Adversaries may create malicious MOTD files that grant them persistence onto the target every time a user connects to the system by executing a backdoor script or command. This rule detects the creation of potentially malicious files within the default MOTD file directories.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Potential Persistence Through MOTD File Creation Detected",
+        "new_terms_fields": [
+            "file.path",
+            "process.name"
+        ],
+        "note": "## Triage and analysis\n\n### Investigating Potential Persistence Through MOTD File Creation Detected\n\nThe message-of-the-day (MOTD) is used to display a customizable system-wide message or information to users upon login in Linux.\n\nAttackers can abuse message-of-the-day (motd) files to run scripts, commands or malicious software every time a user connects to a system over SSH or a serial connection, by creating a new file within the `/etc/update-motd.d/` or `/usr/lib/update-notifier/` directory. Executable files in these directories automatically run with root privileges.\n\nThis rule identifies the creation of new files within the `/etc/update-motd.d/` or `/usr/lib/update-notifier/` directories.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\u003e This investigation guide uses [placeholder fields](https://www.elastic.co/guide/en/security/current/osquery-placeholder-fields.html) to dynamically pass alert data into Osquery queries. Placeholder fields were introduced in Elastic Stack version 8.7.0. If you're using Elastic Stack version 8.6.0 or earlier, you'll need to manually adjust this investigation guide's queries to ensure they properly run.\n\n#### Possible Investigation Steps\n\n- Investigate the file that was created or modified.\n  - !{osquery{\"label\":\"Osquery - Retrieve File Information\",\"query\":\"SELECT * FROM file WHERE path = {{file.path}}\"}}\n- Investigate whether any other files in the `/etc/update-motd.d/` or `/usr/lib/update-notifier/` directories have been altered.\n  - !{osquery{\"label\":\"Osquery - Retrieve File Listing Information\",\"query\":\"SELECT * FROM file WHERE (path LIKE '/etc/update-motd.d/%' OR path LIKE '/usr/lib/update-notifier/%')\"}}\n  - !{osquery{\"label\":\"Osquery - Retrieve Additional File Listing Information\",\"query\":\"SELECT\\n  f.path,\\n  u.username AS file_owner,\\n  g.groupname AS group_owner,\\n  datetime(f.atime, 'unixepoch') AS file_last_access_time,\\n  datetime(f.mtime, 'unixepoch') AS file_last_modified_time,\\n  datetime(f.ctime, 'unixepoch') AS file_last_status_change_time,\\n  datetime(f.btime, 'unixepoch') AS file_created_time,\\n  f.size AS size_bytes\\nFROM\\n  file f\\n  LEFT JOIN users u ON f.uid = u.uid\\n  LEFT JOIN groups g ON f.gid = g.gid\\nWHERE (path LIKE '/etc/update-motd.d/%' OR path LIKE '/usr/lib/update-notifier/%')\\n\"}}\n- Investigate the script execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence and whether they are located in expected locations.\n  - !{osquery{\"label\":\"Osquery - Retrieve Running Processes by User\",\"query\":\"SELECT pid, username, name FROM processes p JOIN users u ON u.uid = p.uid ORDER BY username\"}}\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Investigate whether the modified scripts call other malicious scripts elsewhere on the file system. \n  - If scripts or executables were dropped, retrieve the files and determine if they are malicious:\n    - Use a private sandboxed malware analysis system to perform analysis.\n      - Observe and collect information about the following activities:\n        - Attempts to contact external domains and addresses.\n          - Check if the domain is newly registered or unexpected.\n          - Check the reputation of the domain or IP address.\n        - File access, modification, and creation activities.\n        - Cron jobs, services and other persistence mechanisms.\n            - !{osquery{\"label\":\"Osquery - Retrieve Crontab Information\",\"query\":\"SELECT * FROM crontab\"}}\n\n### Related Rules\n\n- Suspicious Process Spawned from MOTD Detected - 4ec47004-b34a-42e6-8003-376a123ea447\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Any activity that triggered the alert and is not inherently malicious must be monitored by the security team.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Delete the MOTD files or restore their original configuration.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Leverage the incident response data and logging to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "host.os.type :\"linux\" and event.action:(\"creation\" or \"file_create_event\" or \"rename\" or \"file_rename_event\") and \nfile.path : (/etc/update-motd.d/* or /usr/lib/update-notifier/*) and not \nprocess.executable : (\"/usr/bin/dpkg\" or \"/usr/bin/dockerd\" or \"/bin/rpm\" or \"/kaniko/executor\") and not \nfile.extension : (\"swp\" or \"swx\")\n",
+        "references": [
+            "https://pberba.github.io/security/2022/02/06/linux-threat-hunting-for-persistence-initialization-scripts-and-shell-configuration/#10-boot-or-logon-initialization-scripts-motd"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "96d11d31-9a79-480f-8401-da28b194608f",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame",
+            "Resources: Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1037",
+                        "name": "Boot or Logon Initialization Scripts",
+                        "reference": "https://attack.mitre.org/techniques/T1037/"
+                    }
+                ]
+            }
+        ],
+        "type": "new_terms",
+        "version": 4
+    },
+    "id": "96d11d31-9a79-480f-8401-da28b194608f_4",
+    "type": "security-rule"
+}

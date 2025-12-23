@@ -1,0 +1,86 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Message of the day (MOTD) is the message that is presented to the user when a user connects to a Linux server via SSH or a serial connection. Linux systems contain several default MOTD files located in the \"/etc/update-motd.d/\" and \"/usr/lib/update-notifier/\" directories. These scripts run as the root user every time a user connects over SSH or a serial connection. Adversaries may create malicious MOTD files that grant them persistence onto the target every time a user connects to the system by executing a backdoor script or command. This rule detects the execution of potentially malicious processes through the MOTD utility.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Process Spawned from MOTD Detected",
+        "query": "process where host.os.type == \"linux\" and \nevent.type == \"start\" and event.action : (\"exec\", \"exec_event\") and\nprocess.parent.executable : (\"/etc/update-motd.d/*\", \"/usr/lib/update-notifier/*\") and\nprocess.executable : (\"*sh\", \"python*\", \"perl\", \"php*\")\n",
+        "references": [
+            "https://pberba.github.io/security/2022/02/06/linux-threat-hunting-for-persistence-initialization-scripts-and-shell-configuration/#10-boot-or-logon-initialization-scripts-motd"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "4ec47004-b34a-42e6-8003-376a123ea447",
+        "severity": "high",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Linux",
+            "Threat Detection",
+            "Persistence",
+            "Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1037",
+                        "name": "Boot or Logon Initialization Scripts",
+                        "reference": "https://attack.mitre.org/techniques/T1037/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "4ec47004-b34a-42e6-8003-376a123ea447_1",
+    "type": "security-rule"
+}

@@ -1,0 +1,94 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies LSASS loading an unsigned or untrusted DLL. Windows Security Support Provider (SSP) DLLs are loaded into LSSAS process at system start. Once loaded into the LSA, SSP DLLs have access to encrypted and plaintext passwords that are stored in Windows, such as any logged-on user's Domain password or smart card PINs.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Module Loaded by LSASS",
+        "note": "",
+        "query": "library where host.os.type == \"windows\" and process.executable : \"?:\\\\Windows\\\\System32\\\\lsass.exe\" and\n  not (dll.code_signature.subject_name :\n               (\"Microsoft Windows\",\n                \"Microsoft Corporation\",\n                \"Microsoft Windows Publisher\",\n                \"Microsoft Windows Software Compatibility Publisher\",\n                \"Microsoft Windows Hardware Compatibility Publisher\",\n                \"McAfee, Inc.\",\n                \"SecMaker AB\",\n                \"HID Global Corporation\",\n                \"HID Global\",\n                \"Apple Inc.\",\n                \"Citrix Systems, Inc.\",\n                \"Dell Inc\",\n                \"Hewlett-Packard Company\",\n                \"Symantec Corporation\",\n                \"National Instruments Corporation\",\n                \"DigitalPersona, Inc.\",\n                \"Novell, Inc.\",\n                \"gemalto\",\n                \"EasyAntiCheat Oy\",\n                \"Entrust Datacard Corporation\",\n                \"AuriStor, Inc.\",\n                \"LogMeIn, Inc.\",\n                \"VMware, Inc.\",\n                \"Istituto Poligrafico e Zecca dello Stato S.p.A.\",\n                \"Nubeva Technologies Ltd\",\n                \"Micro Focus (US), Inc.\",\n                \"Yubico AB\",\n                \"GEMALTO SA\",\n                \"Secure Endpoints, Inc.\",\n                \"Sophos Ltd\",\n                \"Morphisec Information Security 2014 Ltd\",\n                \"Entrust, Inc.\",\n                \"Nubeva Technologies Ltd\",\n                \"Micro Focus (US), Inc.\",\n                \"F5 Networks Inc\",\n                \"Bit4id\",\n                \"Thales DIS CPL USA, Inc.\",\n                \"Micro Focus International plc\",\n                \"HYPR Corp\",\n                \"Intel(R) Software Development Products\",\n                \"PGP Corporation\",\n                \"Parallels International GmbH\",\n                \"FrontRange Solutions Deutschland GmbH\",\n                \"SecureLink, Inc.\",\n                \"Tidexa OU\",\n                \"Amazon Web Services, Inc.\",\n                \"SentryBay Limited\",\n                \"Audinate Pty Ltd\",\n                \"CyberArk Software Ltd.\",\n                \"McAfeeSysPrep\",\n                \"NVIDIA Corporation PE Sign v2016\") and\n       dll.code_signature.status : (\"trusted\", \"errorExpired\", \"errorCode_endpoint*\", \"errorChaining\")) and\n\n     not dll.hash.sha256 :\n                (\"811a03a5d7c03802676d2613d741be690b3461022ea925eb6b2651a5be740a4c\",\n                 \"1181542d9cfd63fb00c76242567446513e6773ea37db6211545629ba2ecf26a1\",\n                 \"ed6e735aa6233ed262f50f67585949712f1622751035db256811b4088c214ce3\",\n                 \"26be2e4383728eebe191c0ab19706188f0e9592add2e0bf86b37442083ae5e12\",\n                 \"9367e78b84ef30cf38ab27776605f2645e52e3f6e93369c674972b668a444faa\",\n                 \"d46cc934765c5ecd53867070f540e8d6f7701e834831c51c2b0552aba871921b\",\n                 \"0f77a3826d7a5cd0533990be0269d951a88a5c277bc47cff94553330b715ec61\",\n                 \"4aca034d3d85a9e9127b5d7a10882c2ef4c3e0daa3329ae2ac1d0797398695fb\",\n                 \"86031e69914d9d33c34c2f4ac4ae523cef855254d411f88ac26684265c981d95\")\n",
+        "references": [
+            "https://blog.xpnsec.com/exploring-mimikatz-part-2/",
+            "https://github.com/jas502n/mimikat_ssp"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "dll.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.hash.sha256",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "3a6001a0-0939-4bbe-86f4-47d8faeb7b97",
+        "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.001",
+                                "name": "LSASS Memory",
+                                "reference": "https://attack.mitre.org/techniques/T1003/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 4
+    },
+    "id": "3a6001a0-0939-4bbe-86f4-47d8faeb7b97_4",
+    "type": "security-rule"
+}

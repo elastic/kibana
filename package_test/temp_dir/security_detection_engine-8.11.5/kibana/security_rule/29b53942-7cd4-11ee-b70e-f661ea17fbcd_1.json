@@ -1,0 +1,86 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects the creation of a new Identity Provider (IdP) by a Super Administrator or Organization Administrator within Okta.",
+        "from": "now-30m",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "interval": "15m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "New Okta Identity Provider (IdP) Added by Admin",
+        "note": "## Triage and analysis\n\n### Investigating New Okta Identity Provider (IdP) Added by Admin\n\nThis rule detects the creation of a new Identity Provider (IdP) by a Super Administrator or Organization Administrator within Okta.\n\n#### Possible investigation steps:\n- Identify the actor associated with the IdP creation by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, and `okta.actor.display_name` fields.\n- Identify the IdP added by reviewing the `okta.target` field and determing if this IdP is authorized.\n- Determine the client used by the actor. Review the `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.zone`, `okta.client.device`, and `okta.client.id` fields.\n- If the client is a device, check the `okta.device.id`, `okta.device.name`, `okta.device.os_platform`, `okta.device.os_version`, and `okta.device.managed` fields.\n- Review the past activities of the actor involved in this action by checking their previous actions logged in the `okta.target` field.\n- Examine the `okta.request.ip_chain` field to potentially determine if the actor used a proxy or VPN to perform this action.\n- Evaluate the actions that happened just before and after this event in the `okta.event_type` field to help understand the full context of the activity.\n\n### False positive analysis:\n- It might be a false positive if the action was part of a planned activity or performed by an authorized person.\n- Several unsuccessful attempts prior to this success, may indicate an adversary attempting to add an unauthorized IdP multiple times.\n\n### Response and remediation:\n- If the IdP is unauthorized, deactivate it immediately via the Okta console.\n- If the IdP is authorized, ensure that the actor who created it is authorized to do so.\n- If the actor is unauthorized, deactivate their account via the Okta console.\n- If the actor is authorized, ensure that the actor's account is not compromised.\n- Reset the user's password and enforce MFA re-enrollment, if applicable.\n- Block the IP address or device used in the attempts if they appear suspicious, using the data from the `okta.client.ip` and `okta.device.id` fields.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.\n- If the deactivated IdP was crucial to the organization, consider adding a new IdP and removing the unauthorized IdP.",
+        "query": "event.dataset: \"okta.system\" and event.action: \"system.idp.lifecycle.create\" and okta.outcome.result: \"SUCCESS\"\n",
+        "references": [
+            "https://blog.cloudflare.com/cloudflare-investigation-of-the-january-2022-okta-compromise/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+            "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection",
+            "https://unit42.paloaltonetworks.com/muddled-libra/"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "okta.outcome.result",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "29b53942-7cd4-11ee-b70e-f661ea17fbcd",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Tactic: Persistence",
+            "Data Source: Okta"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1556",
+                        "name": "Modify Authentication Process",
+                        "reference": "https://attack.mitre.org/techniques/T1556/",
+                        "subtechnique": [
+                            {
+                                "id": "T1556.007",
+                                "name": "Hybrid Identity",
+                                "reference": "https://attack.mitre.org/techniques/T1556/007/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 1
+    },
+    "id": "29b53942-7cd4-11ee-b70e-f661ea17fbcd_1",
+    "type": "security-rule"
+}

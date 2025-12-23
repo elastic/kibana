@@ -1,0 +1,97 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies an AWS S3 bucket policy change to share permissions with an external account. Adversaries may attempt to backdoor an S3 bucket by sharing it with an external account. This can be used to exfiltrate data or to provide access to other adversaries. This rule identifies changes to a bucket policy via the `PutBucketPolicy` API call where the policy includes an `Effect=Allow` statement that does not contain the AWS account ID of the bucket owner.",
+    "false_positives": [
+      "Legitimate changes to share an S3 bucket with an external account may be identified as false positive but are not best practice."
+    ],
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "AWS S3 Bucket Policy Added to Share with External Account",
+    "note": "\n## Triage and Analysis\n\n### Investigating AWS S3 Bucket Policy Change to Share with External Account\n\nThis rule detects when an AWS S3 bucket policy is changed to share permissions with an external account. Adversaries may attempt to backdoor an S3 bucket by sharing it with an external account to exfiltrate data or provide access to other adversaries. This rule identifies changes to a bucket policy via the `PutBucketPolicy` API call where the policy includes an `Effect=Allow` statement that does not contain the AWS account ID of the bucket owner.\n\n#### Possible Investigation Steps:\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id` fields to identify who made the change. Verify if this actor typically performs such actions and if they have the necessary permissions.\n- **Review the Request Details**: Examine the `aws.cloudtrail.request_parameters` to understand the specific changes made to the bucket policy. Look for any unusual parameters that could suggest unauthorized or malicious modifications.\n- **Analyze the Source of the Request**: Investigate the `source.ip` and `source.geo` fields to determine the geographical origin of the request. An external or unexpected location might indicate compromised credentials or unauthorized access.\n- **Contextualize with Timestamp**: Use the `@timestamp` field to check when the change occurred. Modifications during non-business hours or outside regular maintenance windows might require further scrutiny.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this change to see if the same actor or IP address engaged in other potentially suspicious activities.\n\n### False Positive Analysis:\n\n- **Legitimate Administrative Actions**: Confirm if the bucket policy change aligns with scheduled updates, development activities, or legitimate administrative tasks documented in change management systems.\n- **Consistency Check**: Compare the action against historical data of similar actions performed by the user or within the organization. If the action is consistent with past legitimate activities, it might indicate a false alarm.\n- **Verify through Outcomes**: Check the `aws.cloudtrail.response_elements` and the `event.outcome` to confirm if the change was successful and intended according to policy.\n\n### Response and Remediation:\n\n- **Immediate Review and Reversal if Necessary**: If the change was unauthorized, update the bucket policy to remove any unauthorized permissions and restore it to its previous state.\n- **Enhance Monitoring and Alerts**: Adjust monitoring systems to alert on similar actions, especially those involving sensitive data or permissions.\n- **Educate and Train**: Provide additional training to users with administrative rights on the importance of security best practices concerning bucket policy management and sharing permissions.\n- **Audit Bucket Policies and Permissions**: Conduct a comprehensive audit of all bucket policies and associated permissions to ensure they adhere to the principle of least privilege.\n- **Incident Response**: If there's an indication of malicious intent or a security breach, initiate the incident response protocol to mitigate any damage and prevent future occurrences.\n\n### Additional Information:\n\nFor further guidance on managing S3 bucket policies and securing AWS environments, refer to the [AWS S3 documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-cloudtrail-logging-for-s3.html) and AWS best practices for security.\n",
+    "query": "any where event.dataset == \"aws.cloudtrail\"\n    and event.provider == \"s3.amazonaws.com\"\n    and event.action == \"PutBucketPolicy\" and event.outcome == \"success\"\n    and stringContains(aws.cloudtrail.request_parameters, \"Effect=Allow\")\n    and not stringContains(aws.cloudtrail.request_parameters, aws.cloudtrail.recipient_account_id)\n",
+    "references": [
+      "https://stratus-red-team.cloud/attack-techniques/AWS/aws.exfiltration.s3-backdoor-bucket-policy/",
+      "https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketPolicy.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.recipient_account_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "e8c9ff14-fd1e-11ee-a0df-f661ea17fbce",
+    "setup": "\n## Setup\n\nS3 data event types must be collected in the AWS CloudTrail logs. Please refer to [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-cloudtrail-logging-for-s3.html) for more information.\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS S3",
+      "Use Case: Threat Detection",
+      "Tactic: Exfiltration"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0010",
+          "name": "Exfiltration",
+          "reference": "https://attack.mitre.org/tactics/TA0010/"
+        },
+        "technique": [
+          {
+            "id": "T1537",
+            "name": "Transfer Data to Cloud Account",
+            "reference": "https://attack.mitre.org/techniques/T1537/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "e8c9ff14-fd1e-11ee-a0df-f661ea17fbce_1",
+  "type": "security-rule"
+}

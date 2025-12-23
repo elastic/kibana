@@ -1,0 +1,130 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects PowerShell scripts that can execute pass-the-hash (PtH) attacks, intercept and relay NTLM challenges, and carry out other man-in-the-middle (MitM) attacks.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.powershell*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Potential PowerShell Pass-the-Hash/Relay Script",
+    "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    (\"NTLMSSPNegotiate\" and (\"NegotiateSMB\" or \"NegotiateSMB2\")) or\n    \"4E544C4D53535000\" or\n    \"0x4e,0x54,0x4c,0x4d,0x53,0x53,0x50\" or\n    \"0x4e,0x54,0x20,0x4c,0x4d\" or\n    \"0x53,0x4d,0x42,0x20,0x32\" or\n    \"0x81,0xbb,0x7a,0x36,0x44,0x98,0xf1,0x35,0xad,0x32,0x98,0xf0,0x38\"\n  ) and\n  not file.directory : \"C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\Downloads\"\n",
+    "references": [
+      "https://github.com/Kevin-Robertson/Invoke-TheHash/blob/master/Invoke-WMIExec.ps1",
+      "https://github.com/Kevin-Robertson/Invoke-TheHash/blob/master/Invoke-SMBExec.ps1",
+      "https://github.com/dafthack/Check-LocalAdminHash/blob/master/Check-LocalAdminHash.ps1",
+      "https://github.com/nettitude/PoshC2/blob/master/resources/modules/Invoke-Tater.ps1",
+      "https://github.com/Kevin-Robertson/Inveigh/blob/master/Inveigh.ps1"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.directory",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "951779c2-82ad-4a6c-82b8-296c1f691449",
+    "setup": "## Setup\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nAdministrative Templates >\nWindows PowerShell >\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Resources: Investigation Guide",
+      "Data Source: PowerShell Logs"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1557",
+            "name": "Adversary-in-the-Middle",
+            "reference": "https://attack.mitre.org/techniques/T1557/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.002",
+                "name": "Pass the Hash",
+                "reference": "https://attack.mitre.org/techniques/T1550/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 4
+  },
+  "id": "951779c2-82ad-4a6c-82b8-296c1f691449_4",
+  "type": "security-rule"
+}

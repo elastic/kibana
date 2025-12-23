@@ -1,0 +1,110 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "An FTP (file transfer protocol) brute force attack is a method where an attacker systematically tries different combinations of usernames and passwords to gain unauthorized access to an FTP server, and if successful, the impact can include unauthorized data access, manipulation, or theft, compromising the security and integrity of the server and potentially exposing sensitive information. This rule identifies multiple consecutive authentication failures targeting a specific user account from the same source address and within a short time interval, followed by a successful authentication.",
+        "from": "now-9m",
+        "index": [
+            "auditbeat-*",
+            "logs-auditd_manager.auditd-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Successful Linux FTP Brute Force Attack Detected",
+        "note": "### Auditbeat Setup\nAuditbeat is a lightweight shipper that you can install on your servers to audit the activities of users and processes on your systems. For example, you can use Auditbeat to collect and centralize audit events from the Linux Audit Framework. You can also use Auditbeat to detect changes to critical files, like binaries and configuration files, and identify potential security policy violations.\n\n#### The following steps should be executed in order to add the Auditbeat for Linux System:\n- Elastic provides repositories available for APT and YUM-based distributions. Note that we provide binary packages, but no source packages.\n- To install the APT and YUM repositories follow the setup instructions in this [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/setup-repositories.html).\n- To run Auditbeat on Docker follow the setup instructions in the [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/running-on-docker.html).\n- To run Auditbeat on Kubernetes follow the setup instructions in the [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/running-on-kubernetes.html).\n- For complete Setup and Run Auditbeat information refer to the [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/setting-up-and-running.html).\n\n### Auditd Manager Integration Setup\nThe Auditd Manager Integration receives audit events from the Linux Audit Framework which is a part of the Linux kernel.\nAuditd Manager provides a user-friendly interface and automation capabilities for configuring and monitoring system auditing through the auditd daemon. With `auditd_manager`, administrators can easily define audit rules, track system events, and generate comprehensive audit reports, improving overall security and compliance in the system.\n\n#### The following steps should be executed in order to add the Elastic Agent System integration \"auditd_manager\" on a Linux System:\n- Go to the Kibana home page and click Add integrations.\n- In the query bar, search for Auditd Manager and select the integration to see more details about it.\n- Click Add Auditd Manager.\n- Configure the integration name and optionally add a description.\n- Review optional and advanced settings accordingly.\n- Add the newly installed `auditd manager` to an existing or a new agent policy, and deploy the agent on a Linux system from which auditd log files are desirable.\n- Click Save and Continue.\n- For more details on the integeration refer to the [helper guide](https://docs.elastic.co/integrations/auditd_manager).\n\n#### Rule Specific Setup Note\nAuditd Manager subscribes to the kernel and receives events as they occur without any additional configuration.\nHowever, if more advanced configuration is required to detect specific behavior, audit rules can be added to the integration in either the \"audit rules\" configuration box or the \"auditd rule files\" box by specifying a file to read the audit rules from.\n- For this detection rule no additional audit rules are required to be added to the integration.",
+        "query": "sequence by host.id, auditd.data.addr, related.user with maxspan=5s\n  [authentication where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and \n   event.action == \"authenticated\" and auditd.data.terminal == \"ftp\" and event.outcome == \"failure\" and \n   auditd.data.addr != null and auditd.data.addr != \"0.0.0.0\" and auditd.data.addr != \"::\"] with runs=10\n  [authentication where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and \n   event.action  == \"authenticated\" and auditd.data.terminal == \"ftp\" and event.outcome == \"success\" and \n   auditd.data.addr != null and auditd.data.addr != \"0.0.0.0\" and auditd.data.addr != \"::\"] | tail 1\n",
+        "related_integrations": [
+            {
+                "integration": "auditd",
+                "package": "auditd_manager",
+                "version": "^1.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "auditd.data.addr",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "auditd.data.terminal",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.outcome",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "related.user",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "66712812-e7f2-4a1d-bbda-dd0b5cf20c5d",
+        "setup": "This rule requires data coming in either from Auditbeat integration, or Auditd Manager integration.",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/",
+                        "subtechnique": [
+                            {
+                                "id": "T1110.001",
+                                "name": "Password Guessing",
+                                "reference": "https://attack.mitre.org/techniques/T1110/001/"
+                            },
+                            {
+                                "id": "T1110.003",
+                                "name": "Password Spraying",
+                                "reference": "https://attack.mitre.org/techniques/T1110/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 2
+    },
+    "id": "66712812-e7f2-4a1d-bbda-dd0b5cf20c5d_2",
+    "type": "security-rule"
+}

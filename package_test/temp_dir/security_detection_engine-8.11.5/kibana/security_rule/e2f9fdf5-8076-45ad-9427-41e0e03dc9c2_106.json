@@ -1,0 +1,94 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies suspicious psexec activity which is executing from the psexec service that has been renamed, possibly to evade detection.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Process Execution via Renamed PsExec Executable",
+        "note": "## Triage and analysis\n\n### Investigating PsExec Network Connection\n\nPsExec is a remote administration tool that enables the execution of commands with both regular and SYSTEM privileges on Windows systems. It operates by executing a service component `Psexecsvc` on a remote system, which then runs a specified process and returns the results to the local system. Microsoft develops PsExec as part of the Sysinternals Suite. Although commonly used by administrators, PsExec is frequently used by attackers to enable lateral movement and execute commands as SYSTEM to disable defenses and bypass security protections.\n\nThis rule identifies instances where the PsExec service component is executed using a custom name. This behavior can indicate an attempt to bypass security controls or detections that look for the default PsExec service component name.\n\n#### Possible investigation steps\n\n- Check if the usage of this tool complies with the organization's administration policy.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Identify the target computer and its role in the IT environment.\n- Investigate what commands were run, and assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. As long as the analyst did not identify suspicious activity related to the user or involved hosts, and the tool is allowed by the organization's policy, such alerts can be dismissed.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n  - Prioritize cases involving critical servers and users.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Review the privileges assigned to the user to ensure that the least privilege principle is being followed.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.pe.original_file_name : \"psexesvc.exe\" and not process.name : \"PSEXESVC.exe\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "e2f9fdf5-8076-45ad-9427-41e0e03dc9c2",
+        "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Elastic Endgame",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1569",
+                        "name": "System Services",
+                        "reference": "https://attack.mitre.org/techniques/T1569/",
+                        "subtechnique": [
+                            {
+                                "id": "T1569.002",
+                                "name": "Service Execution",
+                                "reference": "https://attack.mitre.org/techniques/T1569/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 106
+    },
+    "id": "e2f9fdf5-8076-45ad-9427-41e0e03dc9c2_106",
+    "type": "security-rule"
+}

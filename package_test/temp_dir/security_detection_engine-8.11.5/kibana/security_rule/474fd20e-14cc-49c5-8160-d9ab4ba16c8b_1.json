@@ -1,0 +1,93 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Files that are placed in the /etc/init.d/ directory in Unix can be used to start custom applications, services, scripts or commands during start-up. Init.d has been mostly replaced in favor of Systemd, however, through the \"systemd-sysv-generator\" init.d files can be converted to service unit files that run at boot. Adversaries may add or alter files located in the /etc/init.d/ directory to execute malicious code on boot time in order to gain persistence onto the system.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Potential Persistence Through init.d Detected",
+        "new_terms_fields": [
+            "file.path",
+            "process.name"
+        ],
+        "query": "host.os.type :\"linux\" and event.action:(\"creation\" or \"file_create_event\" or \"rename\" or \"file_rename_event\") and \nfile.path : /etc/init.d/* and not process.executable : (\"/usr/bin/dpkg\" or \"/usr/bin/dockerd\" or \"/bin/rpm\") and not \nfile.extension : \"swp\"\n",
+        "references": [
+            "https://www.intezer.com/blog/malware-analysis/hiddenwasp-malware-targeting-linux-systems/",
+            "https://pberba.github.io/security/2022/02/06/linux-threat-hunting-for-persistence-initialization-scripts-and-shell-configuration/#8-boot-or-logon-initialization-scripts-rc-scripts",
+            "https://www.cyberciti.biz/faq/how-to-enable-rc-local-shell-script-on-systemd-while-booting-linux-system/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "474fd20e-14cc-49c5-8160-d9ab4ba16c8b",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Linux",
+            "Threat Detection",
+            "Persistence",
+            "Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1037",
+                        "name": "Boot or Logon Initialization Scripts",
+                        "reference": "https://attack.mitre.org/techniques/T1037/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 1
+    },
+    "id": "474fd20e-14cc-49c5-8160-d9ab4ba16c8b_1",
+    "type": "security-rule"
+}

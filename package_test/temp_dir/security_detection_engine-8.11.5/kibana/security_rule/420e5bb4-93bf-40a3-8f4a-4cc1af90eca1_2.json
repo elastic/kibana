@@ -1,0 +1,101 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects interactive 'exec' events launched against a container using the 'exec' command. Using the 'exec' command in a pod allows a user to establish a temporary shell session and execute any process/command inside the container. This rule specifically targets higher-risk interactive commands that allow real-time interaction with a container's shell. A malicious actor could use this level of access to further compromise the container environment or attempt a container breakout.",
+        "false_positives": [
+            "An administrator may need to exec into a pod for a legitimate reason like debugging purposes. Containers built from Linux and Windows OS images, tend to include debugging utilities. In this case, an admin may choose to run commands inside a specific container with kubectl exec ${POD_NAME} -c ${CONTAINER_NAME} -- ${CMD} ${ARG1} ${ARG2} ... ${ARGN}. For example, the following command can be used to look at logs from a running Cassandra pod: kubectl exec cassandra --cat /var/log/cassandra/system.log . Additionally, the -i and -t arguments might be used to run a shell connected to the terminal: kubectl exec -i -t cassandra -- sh"
+        ],
+        "from": "now-6m",
+        "index": [
+            "logs-cloud_defend*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Interactive Exec Command Launched Against A Running Container",
+        "query": "process where container.id : \"*\" and event.type== \"start\" and \n\n/* use of kubectl exec to enter a container */\nprocess.entry_leader.entry_meta.type : \"container\" and \n\n/* process is the inital process run in a container */\nprocess.entry_leader.same_as_process== true and\n\n/* interactive process */\nprocess.interactive == true\n",
+        "references": [
+            "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+            "https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/"
+        ],
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "container.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entry_leader.entry_meta.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entry_leader.same_as_process",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.interactive",
+                "type": "boolean"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "420e5bb4-93bf-40a3-8f4a-4cc1af90eca1",
+        "severity": "high",
+        "tags": [
+            "Data Source: Elastic Defend for Containers",
+            "Domain: Container",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1609",
+                        "name": "Container Administration Command",
+                        "reference": "https://attack.mitre.org/techniques/T1609/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "420e5bb4-93bf-40a3-8f4a-4cc1af90eca1_2",
+    "type": "security-rule"
+}

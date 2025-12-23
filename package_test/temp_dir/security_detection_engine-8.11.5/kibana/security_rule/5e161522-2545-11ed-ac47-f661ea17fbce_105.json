@@ -1,0 +1,79 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Google Workspace admins may setup 2-step verification (2SV) to add an extra layer of security to user accounts by asking users to verify their identity when they use login credentials. Admins have the ability to enforce 2SV from the admin console as well as the methods acceptable for verification and enrollment period. 2SV requires enablement on admin accounts prior to it being enabled for users within organization units. Adversaries may disable 2SV to lower the security requirements to access a valid account.",
+        "false_positives": [
+            "Administrators may remove 2-step verification (2SV) temporarily for testing or during maintenance. If 2SV was previously enabled, it is not common to disable this policy for extended periods of time."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Google Workspace 2SV Policy Disabled",
+        "note": "## Triage and analysis\n\n### Investigating Google Workspace 2SV Policy Disabled\n\nGoogle Workspace administrators manage password policies to enforce password requirements for an organization's compliance needs. Administrators have the capability to set restrictions on password length, reset frequencies, reuse capability, expiration, and much more. Google Workspace also allows multi-factor authentication (MFA) and 2-step verification (2SV) for authentication. 2SV allows users to verify their identity using security keys, Google prompt, authentication codes, text messages, and more.\n\n2SV adds an extra authentication layer for Google Workspace users to verify their identity. If 2SV or MFA aren't implemented, users only authenticate with their user name and password credentials. This authentication method has often been compromised and can be susceptible to credential access techniques when weak password policies are used.\n\nThis rule detects when a 2SV policy is disabled in Google Workspace.\n\n#### Possible investigation steps\n\n- Identify the associated user account(s) by reviewing `user.name` or `source.user.email` in the alert.\n- Identify what password setting was created or adjusted by reviewing `google_workspace.admin.setting.name`.\n- Review if a password setting was enabled or disabled by reviewing `google_workspace.admin.new_value` and `google_workspace.admin.old_value`.\n- After identifying the involved user account, verify administrative privileges are scoped properly.\n- Filter `event.dataset` for `google_workspace.login` and aggregate by `user.name`, `event.action`.\n  - The `google_workspace.login.challenge_method` field can be used to identify the challenge method that was used for failed and successful logins.\n\n### False positive analysis\n\n- After finding the user account that updated the password policy, verify whether the action was intentional.\n- Verify whether the user should have Google Workspace administrative privileges that allow them to modify password policies.\n- Review organizational units or groups the role may have been added to and ensure its privileges are properly aligned.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with your IT teams to minimize the impact on business operations during these actions.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://support.google.com/a/answer/7587183) by Google.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\n\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "event.dataset:\"google_workspace.login\" and event.action:\"2sv_disable\"\n",
+        "references": [
+            "https://support.google.com/a/answer/9176657?hl=en"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "5e161522-2545-11ed-ac47-f661ea17fbce",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Configuration Audit",
+            "Persistence",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1556",
+                        "name": "Modify Authentication Process",
+                        "reference": "https://attack.mitre.org/techniques/T1556/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 105
+    },
+    "id": "5e161522-2545-11ed-ac47-f661ea17fbce_105",
+    "type": "security-rule"
+}

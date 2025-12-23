@@ -1,0 +1,74 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the install of browser extensions. Malicious browser extensions can be installed via app store downloads masquerading as legitimate extensions, social engineering, or by an adversary that has already compromised a system.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Browser Extension Install",
+        "query": "file where event.action : \"creation\" and \n(\n  /* Firefox-Based Browsers */\n  (\n    file.name : \"*.xpi\" and\n    file.path : \"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\*\\\\Profiles\\\\*\\\\Extensions\\\\*.xpi\"\n  ) or\n  /* Chromium-Based Browsers */\n  (\n    file.name : \"*.crx\" and\n    file.path : \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\*\\\\*\\\\User Data\\\\Webstore Downloads\\\\*\"\n  )\n)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "f97504ac-1053-498f-aeaa-c6d01e76b379",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1176",
+                        "name": "Browser Extensions",
+                        "reference": "https://attack.mitre.org/techniques/T1176/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "f97504ac-1053-498f-aeaa-c6d01e76b379_1",
+    "type": "security-rule"
+}

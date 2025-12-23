@@ -1,0 +1,131 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the creation of a process impersonating the token of another user logon session. Adversaries may create a new process with a different token to escalate privileges and bypass access controls.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Process Created with a Duplicated Token",
+        "query": "/* This rule is only compatible with Elastic Endpoint 8.4+ */\n\nprocess where host.os.type == \"windows\" and event.action == \"start\" and\n\n user.id : (\"S-1-5-21-*\", \"S-1-12-1-*\") and\n\n (process.Ext.effective_parent.executable regex~ \"\"\"[C-Z]:\\\\Windows\\\\(System32|SysWOW64)\\\\[a-zA-Z0-9\\-\\_\\.]+\\.exe\"\"\" or\n  process.Ext.effective_parent.executable : \"?:\\\\Windows\\\\explorer.exe\") and\n\n (\n  process.name : (\"powershell.exe\", \"cmd.exe\", \"rundll32.exe\", \"notepad.exe\", \"net.exe\", \"ntdsutil.exe\",\n                  \"tasklist.exe\", \"reg.exe\", \"certutil.exe\", \"bitsadmin.exe\", \"msbuild.exe\", \"esentutl.exe\") or\n\n  ((process.Ext.relative_file_creation_time \u003c= 900 or process.Ext.relative_file_name_modify_time \u003c= 900) and\n   not process.code_signature.status : (\"trusted\", \"errorExpired\", \"errorCode_endpoint*\") and\n   not process.executable : (\"?:\\\\Program Files\\\\*\", \"?:\\\\Program Files (x86)\\\\*\"))\n ) and\n not (process.name : \"rundll32.exe\" and\n      process.command_line : (\"*davclnt.dll,DavSetCookie*\", \"*?:\\\\Program Files*\",\n                              \"*\\\\Windows\\\\System32\\\\winethc.dll*\", \"*\\\\Windows\\\\SYSTEM32\\\\EDGEHTML.dll*\",\n                              \"*shell32.dll,SHCreateLocalServerRunDll*\")) and\n not startswith~(process.Ext.effective_parent.name, process.parent.name)\n",
+        "references": [
+            "https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.effective_parent.executable",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.effective_parent.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.relative_file_creation_time",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.relative_file_name_modify_time",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.command_line",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "1b0b4818-5655-409b-9c73-341cac4bb73f",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Privilege Escalation",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1134",
+                        "name": "Access Token Manipulation",
+                        "reference": "https://attack.mitre.org/techniques/T1134/",
+                        "subtechnique": [
+                            {
+                                "id": "T1134.001",
+                                "name": "Token Impersonation/Theft",
+                                "reference": "https://attack.mitre.org/techniques/T1134/001/"
+                            },
+                            {
+                                "id": "T1134.002",
+                                "name": "Create Process with Token",
+                                "reference": "https://attack.mitre.org/techniques/T1134/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "1b0b4818-5655-409b-9c73-341cac4bb73f_1",
+    "type": "security-rule"
+}

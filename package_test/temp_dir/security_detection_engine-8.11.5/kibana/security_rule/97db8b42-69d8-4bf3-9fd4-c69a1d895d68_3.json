@@ -1,0 +1,86 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies instances where VMware-related files, such as those with extensions like \".vmdk\", \".vmx\", \".vmxf\", \".vmsd\", \".vmsn\", \".vswp\", \".vmss\", \".nvram\", and \".vmem\", are renamed on a Linux system. The rule monitors for the \"rename\" event action associated with these file types, which could indicate malicious activity.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Renaming of ESXI Files",
+        "query": "file where host.os.type == \"linux\" and event.action == \"rename\" and\nfile.Ext.original.name : (\"*.vmdk\", \"*.vmx\", \"*.vmxf\", \"*.vmsd\", \"*.vmsn\", \"*.vswp\", \"*.vmss\", \"*.nvram\", \"*.vmem\")\nand not file.name : (\"*.vmdk\", \"*.vmx\", \"*.vmxf\", \"*.vmsd\", \"*.vmsn\", \"*.vswp\", \"*.vmss\", \"*.nvram\", \"*.vmem\")\n",
+        "references": [
+            "https://www.bleepingcomputer.com/news/security/massive-esxiargs-ransomware-attack-targets-vmware-esxi-servers-worldwide/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "file.Ext.original.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "file.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "97db8b42-69d8-4bf3-9fd4-c69a1d895d68",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.003",
+                                "name": "Rename System Utilities",
+                                "reference": "https://attack.mitre.org/techniques/T1036/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "97db8b42-69d8-4bf3-9fd4-c69a1d895d68_3",
+    "type": "security-rule"
+}

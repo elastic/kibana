@@ -1,0 +1,109 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies potentially malicious processes communicating via a port paring typically not associated with HTTP/HTTPS. For example, HTTP over port 8443 or port 440 as opposed to the traditional port 80 , 443. Adversaries may make changes to the standard port a protocol uses to bypass filtering or muddle analysis/parsing of network data.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Non-Standard Port HTTP/HTTPS connection",
+        "query": "network where process.name : (\"http\", \"https\")\n  and destination.port not in (80, 443)\n  and event.action in (\"connection_attempted\", \"connection_accepted\")\n  and destination.ip != \"127.0.0.1\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "destination.ip",
+                "type": "ip"
+            },
+            {
+                "ecs": true,
+                "name": "destination.port",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "62b68eb2-1e47-4da7-85b6-8f478db5b272",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "OS: macOS",
+            "Use Case: Threat Detection",
+            "Tactic: Command and Control",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1571",
+                        "name": "Non-Standard Port",
+                        "reference": "https://attack.mitre.org/techniques/T1571/"
+                    },
+                    {
+                        "id": "T1071",
+                        "name": "Application Layer Protocol",
+                        "reference": "https://attack.mitre.org/techniques/T1071/",
+                        "subtechnique": [
+                            {
+                                "id": "T1071.001",
+                                "name": "Web Protocols",
+                                "reference": "https://attack.mitre.org/techniques/T1071/001/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1573",
+                        "name": "Encrypted Channel",
+                        "reference": "https://attack.mitre.org/techniques/T1573/",
+                        "subtechnique": [
+                            {
+                                "id": "T1573.001",
+                                "name": "Symmetric Cryptography",
+                                "reference": "https://attack.mitre.org/techniques/T1573/001/"
+                            },
+                            {
+                                "id": "T1573.002",
+                                "name": "Asymmetric Cryptography",
+                                "reference": "https://attack.mitre.org/techniques/T1573/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "62b68eb2-1e47-4da7-85b6-8f478db5b272_2",
+    "type": "security-rule"
+}

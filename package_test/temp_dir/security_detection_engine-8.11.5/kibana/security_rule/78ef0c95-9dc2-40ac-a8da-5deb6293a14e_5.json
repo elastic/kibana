@@ -1,0 +1,144 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies an unsigned library created in the last 5 minutes and subsequently loaded by a shared windows service (svchost). Adversaries may use this technique to maintain persistence or run with System privileges.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unsigned DLL Loaded by Svchost",
+        "query": "library where host.os.type == \"windows\" and\n\n process.executable : \n     (\"?:\\\\Windows\\\\System32\\\\svchost.exe\", \"?:\\\\Windows\\\\Syswow64\\\\svchost.exe\") and \n     \n dll.code_signature.trusted != true and \n \n not dll.code_signature.status : (\"trusted\", \"errorExpired\", \"errorCode_endpoint*\") and \n \n dll.hash.sha256 != null and \n \n (\n       /* DLL created within 5 minutes of the library load event - compatible with Elastic Endpoint 8.4+ */\n       dll.Ext.relative_file_creation_time \u003c= 300 or \n   \n       /* unusual paths */\n       dll.path :(\"?:\\\\ProgramData\\\\*\",\n                  \"?:\\\\Users\\\\*\",\n                  \"?:\\\\PerfLogs\\\\*\",\n                  \"?:\\\\Windows\\\\Tasks\\\\*\",\n                  \"?:\\\\Intel\\\\*\",\n                  \"?:\\\\AMD\\\\Temp\\\\*\",\n                  \"?:\\\\Windows\\\\AppReadiness\\\\*\",\n                  \"?:\\\\Windows\\\\ServiceState\\\\*\",\n                  \"?:\\\\Windows\\\\security\\\\*\",\n                  \"?:\\\\Windows\\\\IdentityCRL\\\\*\",\n                  \"?:\\\\Windows\\\\Branding\\\\*\",\n                  \"?:\\\\Windows\\\\csc\\\\*\",\n                  \"?:\\\\Windows\\\\DigitalLocker\\\\*\",\n                  \"?:\\\\Windows\\\\en-US\\\\*\",\n                  \"?:\\\\Windows\\\\wlansvc\\\\*\",\n                  \"?:\\\\Windows\\\\Prefetch\\\\*\",\n                  \"?:\\\\Windows\\\\Fonts\\\\*\",\n                  \"?:\\\\Windows\\\\diagnostics\\\\*\",\n                  \"?:\\\\Windows\\\\TAPI\\\\*\",\n                  \"?:\\\\Windows\\\\INF\\\\*\",\n                  \"?:\\\\Windows\\\\System32\\\\Speech\\\\*\",\n                  \"?:\\\\windows\\\\tracing\\\\*\",\n                  \"?:\\\\windows\\\\IME\\\\*\",\n                  \"?:\\\\Windows\\\\Performance\\\\*\",\n                  \"?:\\\\windows\\\\intel\\\\*\",\n                  \"?:\\\\windows\\\\ms\\\\*\",\n                  \"?:\\\\Windows\\\\dot3svc\\\\*\",\n                  \"?:\\\\Windows\\\\panther\\\\*\",\n                  \"?:\\\\Windows\\\\RemotePackages\\\\*\",\n                  \"?:\\\\Windows\\\\OCR\\\\*\",\n                  \"?:\\\\Windows\\\\appcompat\\\\*\",\n                  \"?:\\\\Windows\\\\apppatch\\\\*\",\n                  \"?:\\\\Windows\\\\addins\\\\*\",\n                  \"?:\\\\Windows\\\\Setup\\\\*\",\n                  \"?:\\\\Windows\\\\Help\\\\*\",\n                  \"?:\\\\Windows\\\\SKB\\\\*\",\n                  \"?:\\\\Windows\\\\Vss\\\\*\",\n                  \"?:\\\\Windows\\\\servicing\\\\*\",\n                  \"?:\\\\Windows\\\\CbsTemp\\\\*\",\n                  \"?:\\\\Windows\\\\Logs\\\\*\",\n                  \"?:\\\\Windows\\\\WaaS\\\\*\",\n                  \"?:\\\\Windows\\\\twain_32\\\\*\",\n                  \"?:\\\\Windows\\\\ShellExperiences\\\\*\",\n                  \"?:\\\\Windows\\\\ShellComponents\\\\*\",\n                  \"?:\\\\Windows\\\\PLA\\\\*\",\n                  \"?:\\\\Windows\\\\Migration\\\\*\",\n                  \"?:\\\\Windows\\\\debug\\\\*\",\n                  \"?:\\\\Windows\\\\Cursors\\\\*\",\n                  \"?:\\\\Windows\\\\Containers\\\\*\",\n                  \"?:\\\\Windows\\\\Boot\\\\*\",\n                  \"?:\\\\Windows\\\\bcastdvr\\\\*\",\n                  \"?:\\\\Windows\\\\TextInput\\\\*\",\n                  \"?:\\\\Windows\\\\security\\\\*\",\n                  \"?:\\\\Windows\\\\schemas\\\\*\",\n                  \"?:\\\\Windows\\\\SchCache\\\\*\",\n                  \"?:\\\\Windows\\\\Resources\\\\*\",\n                  \"?:\\\\Windows\\\\rescache\\\\*\",\n                  \"?:\\\\Windows\\\\Provisioning\\\\*\",\n                  \"?:\\\\Windows\\\\PrintDialog\\\\*\",\n                  \"?:\\\\Windows\\\\PolicyDefinitions\\\\*\",\n                  \"?:\\\\Windows\\\\media\\\\*\",\n                  \"?:\\\\Windows\\\\Globalization\\\\*\",\n                  \"?:\\\\Windows\\\\L2Schemas\\\\*\",\n                  \"?:\\\\Windows\\\\LiveKernelReports\\\\*\",\n                  \"?:\\\\Windows\\\\ModemLogs\\\\*\",\n                  \"?:\\\\Windows\\\\ImmersiveControlPanel\\\\*\",\n                  \"?:\\\\$Recycle.Bin\\\\*\")\n  ) and \n  \n  not dll.hash.sha256 : \n            (\"3ed33e71641645367442e65dca6dab0d326b22b48ef9a4c2a2488e67383aa9a6\", \n             \"b4db053f6032964df1b254ac44cb995ffaeb4f3ade09597670aba4f172cf65e4\", \n             \"214c75f678bc596bbe667a3b520aaaf09a0e50c364a28ac738a02f867a085eba\", \n             \"23aa95b637a1bf6188b386c21c4e87967ede80242327c55447a5bb70d9439244\", \n             \"5050b025909e81ae5481db37beb807a80c52fc6dd30c8aa47c9f7841e2a31be7\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "dll.Ext.relative_file_creation_time",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "dll.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "dll.hash.sha256",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "78ef0c95-9dc2-40ac-a8da-5deb6293a14e",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Tactic: Defense Evasion",
+            "Tactic: Execution",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.003",
+                                "name": "Windows Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/003/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.001",
+                                "name": "Invalid Code Signature",
+                                "reference": "https://attack.mitre.org/techniques/T1036/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1569",
+                        "name": "System Services",
+                        "reference": "https://attack.mitre.org/techniques/T1569/",
+                        "subtechnique": [
+                            {
+                                "id": "T1569.002",
+                                "name": "Service Execution",
+                                "reference": "https://attack.mitre.org/techniques/T1569/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 5
+    },
+    "id": "78ef0c95-9dc2-40ac-a8da-5deb6293a14e_5",
+    "type": "security-rule"
+}

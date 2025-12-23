@@ -1,0 +1,104 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for the execution of several commonly used system commands executed by a previously unknown executable located in commonly abused directories. An alert from this rule can indicate the presence of potentially malicious activity, such as the execution of unauthorized or suspicious processes attempting to run malicious code. Detecting and investigating such behavior can help identify and mitigate potential security threats, protecting the system and its data from potential compromise.",
+        "from": "now-9m",
+        "history_window_start": "now-14d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Suspicious System Commands Executed by Previously Unknown Executable",
+        "new_terms_fields": [
+            "process.executable"
+        ],
+        "query": "host.os.type:linux and event.category:process and event.action:(exec or exec_event or fork or fork_event) and \nprocess.executable:(\n  /bin/* or /usr/bin/* or /usr/share/* or /tmp/* or /var/tmp/* or /dev/shm/* or\n  /etc/init.d/* or /etc/rc*.d/* or /etc/crontab or /etc/cron.*/* or /etc/update-motd.d/* or \n  /usr/lib/update-notifier/* or /home/*/.* or /boot/* or /srv/* or /run/*) \n  and process.args:(whoami or id or hostname or uptime or top or ifconfig or netstat or route or ps or pwd or ls) and \n  not process.name:(sudo or which or whoami or id or hostname or uptime or top or netstat or ps or pwd or ls or apt or \n  dpkg or yum or rpm or dnf or dockerd or docker or snapd or snap) and\n  not process.parent.executable:(/bin/* or /usr/bin/* or /run/k3s/* or /etc/network/* or /opt/Elastic/*)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "e9001ee6-2d00-4d2f-849e-b8b1fb05234c",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 2
+    },
+    "id": "e9001ee6-2d00-4d2f-849e-b8b1fb05234c_2",
+    "type": "security-rule"
+}

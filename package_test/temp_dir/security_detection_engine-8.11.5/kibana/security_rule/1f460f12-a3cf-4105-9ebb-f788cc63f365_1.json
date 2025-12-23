@@ -1,0 +1,79 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies unusual processes running from the WBEM path, uncommon outside WMI-related Windows processes.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unusual Process Execution on WBEM Path",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.executable : (\"?:\\\\Windows\\\\System32\\\\wbem\\\\*\", \"?:\\\\Windows\\\\SysWow64\\\\wbem\\\\*\") and\n  not process.name : (\n    \"mofcomp.exe\",\n    \"scrcons.exe\",\n    \"unsecapp.exe\",\n    \"wbemtest.exe\",\n    \"winmgmt.exe\",\n    \"wmiadap.exe\",\n    \"wmiapsrv.exe\",\n    \"wmic.exe\",\n    \"wmiprvse.exe\"\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "1f460f12-a3cf-4105-9ebb-f788cc63f365",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "1f460f12-a3cf-4105-9ebb-f788cc63f365_1",
+    "type": "security-rule"
+}

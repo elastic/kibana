@@ -1,0 +1,24 @@
+categories:
+  - security
+conditions:
+  elastic:
+    capabilities:
+      - security
+    subscription: basic
+  kibana:
+    version: ^8.17.0
+description: Prebuilt detection rules for Elastic Security
+format_version: 3.0.0
+icons:
+  - size: 16x16
+    src: /img/security-logo-color-64px.svg
+    type: image/svg+xml
+name: security_detection_engine
+owner:
+  github: elastic/protections
+  type: elastic
+source:
+  license: Elastic-2.0
+title: Prebuilt Security Detection Rules
+type: integration
+version: 8.17.2

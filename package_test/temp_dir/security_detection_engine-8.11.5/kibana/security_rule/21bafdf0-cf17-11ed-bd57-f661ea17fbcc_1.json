@@ -1,0 +1,123 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects the first time a third-party application logs in and authenticated with OAuth. OAuth is used to grant permissions to specific resources and services in Google Workspace. Compromised credentials or service accounts could allow an adversary to authenticate to Google Workspace as a valid user and inherit their privileges.",
+        "false_positives": [
+            "Developers may leverage third-party applications for legitimate purposes in Google Workspace such as for administrative tasks."
+        ],
+        "from": "now-130m",
+        "history_window_start": "now-15d",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "First Time Seen Google Workspace OAuth Login from Third-Party Application",
+        "new_terms_fields": [
+            "google_workspace.token.client.id"
+        ],
+        "note": "## Setup\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "event.dataset: \"google_workspace.token\" and event.action: \"authorize\" and\ngoogle_workspace.token.scope.data.scope_name: *Login and google_workspace.token.client.id: *apps.googleusercontent.com\n",
+        "references": [
+            "https://www.elastic.co/security-labs/google-workspace-attack-surface-part-one",
+            "https://developers.google.com/apps-script/guides/bound",
+            "https://developers.google.com/identity/protocols/oauth2"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.token.client.id",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.token.scope.data.scope_name",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "21bafdf0-cf17-11ed-bd57-f661ea17fbcc",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Defense Evasion",
+            "Initial Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1550",
+                        "name": "Use Alternate Authentication Material",
+                        "reference": "https://attack.mitre.org/techniques/T1550/",
+                        "subtechnique": [
+                            {
+                                "id": "T1550.001",
+                                "name": "Application Access Token",
+                                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1078",
+                        "name": "Valid Accounts",
+                        "reference": "https://attack.mitre.org/techniques/T1078/",
+                        "subtechnique": [
+                            {
+                                "id": "T1078.004",
+                                "name": "Cloud Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 1
+    },
+    "id": "21bafdf0-cf17-11ed-bd57-f661ea17fbcc_1",
+    "type": "security-rule"
+}

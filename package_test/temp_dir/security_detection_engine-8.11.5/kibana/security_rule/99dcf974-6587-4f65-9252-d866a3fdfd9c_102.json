@@ -1,0 +1,53 @@
+{
+    "attributes": {
+        "anomaly_threshold": 75,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job found an unusually large spike in authentication failure events. This can be due to password spraying, user enumeration or brute force activity and may be a precursor to account takeover or credentialed access.",
+        "false_positives": [
+            "A misconfigured service account can trigger this alert. A password change on an account used by an email client can trigger this alert. Security test cycles that include brute force or password spraying activities may trigger this alert."
+        ],
+        "from": "now-30m",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "auth_high_count_logon_fails",
+        "name": "Spike in Failed Logon Events",
+        "note": "## Triage and analysis\n\n### Investigating Spike in Failed Logon Events\n\nThis rule uses a machine learning job to detect a substantial spike in failed authentication events. This could indicate attempts to enumerate users, password spraying, brute force, etc.\n\n#### Possible investigation steps\n\n- Identify the users involved and if the activity targets a specific user or a set of users.\n- Check if the authentication comes from different sources.\n- Investigate if the host where the failed authentication events occur is exposed to the internet.\n  - If the host is exposed to the internet, and the source of these attempts is external, the activity can be related to bot activity and possibly not directed at your organization.\n  - If the host is not exposed to the internet, investigate the hosts where the authentication attempts are coming from, as this can indicate that they are compromised and the attacker is trying to move laterally.\n- Investigate other alerts associated with the involved users and hosts during the past 48 hours.\n- Check whether the involved credentials are used in automation or scheduled tasks.\n- If this activity is suspicious, contact the account owner and confirm whether they are aware of it.\n- Investigate whether there are successful authentication events from the involved sources. This could indicate a successful brute force or password spraying attack.\n\n### False positive analysis\n\n- If the account is used in automation tasks, it is possible that they are using expired credentials, causing a spike in authentication failures.\n- Authentication failures can be related to permission issues.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Assess whether the asset should be exposed to the internet, and take action to reduce your attack surface.\n  - If the asset needs to be exposed to the internet, restrict access to remote login services to specific IPs.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+        ],
+        "risk_score": 21,
+        "rule_id": "99dcf974-6587-4f65-9252-d866a3fdfd9c",
+        "severity": "low",
+        "tags": [
+            "Elastic",
+            "Authentication",
+            "Threat Detection",
+            "ML",
+            "Machine Learning",
+            "Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/"
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 102
+    },
+    "id": "99dcf974-6587-4f65-9252-d866a3fdfd9c_102",
+    "type": "security-rule"
+}

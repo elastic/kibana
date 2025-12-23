@@ -1,0 +1,97 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when an external (anonymous) user has viewed, copied or downloaded an encryption key file from a Google Workspace drive. Adversaries may gain access to encryption keys stored in private drives from rogue access links that do not have an expiration. Access to encryption keys may allow adversaries to access sensitive data or authenticate on behalf of users.",
+        "false_positives": [
+            "A user may generate a shared access link to encryption key files to share with others. It is unlikely that the intended recipient is an external or anonymous user."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Google Workspace Drive Encryption Key(s) Accessed from Anonymous User",
+        "note": "### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "file where event.dataset == \"google_workspace.drive\" and event.action : (\"copy\", \"view\", \"download\") and\n    google_workspace.drive.visibility: \"people_with_link\" and source.user.email == \"\" and\n    file.extension: (\n        \"token\",\"assig\", \"pssc\", \"keystore\", \"pub\", \"pgp.asc\", \"ps1xml\", \"pem\", \"gpg.sig\", \"der\", \"key\",\n        \"p7r\", \"p12\", \"asc\", \"jks\", \"p7b\", \"signature\", \"gpg\", \"pgp.sig\", \"sst\", \"pgp\", \"gpgz\", \"pfx\", \"crt\",\n        \"p8\", \"sig\", \"pkcs7\", \"jceks\", \"pkcs8\", \"psc1\", \"p7c\", \"csr\", \"cer\", \"spc\", \"ps2xml\")\n",
+        "references": [
+            "https://support.google.com/drive/answer/2494822"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.drive.visibility",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "source.user.email",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "980b70a0-c820-11ed-8799-f661ea17fbcc",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "high",
+        "tags": [
+            "Domain: Cloud",
+            "Data Source: Google Workspace",
+            "Use Case: Configuration Audit",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1552",
+                        "name": "Unsecured Credentials",
+                        "reference": "https://attack.mitre.org/techniques/T1552/",
+                        "subtechnique": [
+                            {
+                                "id": "T1552.004",
+                                "name": "Private Keys",
+                                "reference": "https://attack.mitre.org/techniques/T1552/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "980b70a0-c820-11ed-8799-f661ea17fbcc_2",
+    "type": "security-rule"
+}

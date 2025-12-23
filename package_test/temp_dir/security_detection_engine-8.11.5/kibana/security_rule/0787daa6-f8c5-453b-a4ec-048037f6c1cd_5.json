@@ -1,0 +1,102 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "This rule monitors for a rapid enumeration of 25 different proc cmd, stat, and exe files, which suggests an abnormal activity pattern. Such behavior could be an indicator of a malicious process scanning or gathering information about running processes, potentially for reconnaissance, privilege escalation, or identifying vulnerable targets.",
+        "from": "now-119m",
+        "index": [
+            "auditbeat-*",
+            "logs-auditd_manager.auditd-*"
+        ],
+        "interval": "60m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Suspicious Proc Pseudo File System Enumeration",
+        "query": "host.os.type:linux and event.category:file and event.action:\"opened-file\" and \nfile.path : (/proc/*/cmdline or /proc/*/stat or /proc/*/exe) and not process.name : (\n  ps or netstat or landscape-sysin or w or pgrep or pidof or needrestart or apparmor_status\n) and not process.parent.pid : 1\n",
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.pid",
+                "type": "long"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "0787daa6-f8c5-453b-a4ec-048037f6c1cd",
+        "setup": "\nThis rule requires the use of the `auditd_manager` integration. `Auditd_manager` is a tool designed to simplify and enhance the management of the audit subsystem in Linux systems. It provides a user-friendly interface and automation capabilities for configuring and monitoring system auditing through the auditd daemon. With `auditd_manager`, administrators can easily define audit rules, track system events, and generate comprehensive audit reports, improving overall security and compliance in the system. The following steps should be executed in order to install and deploy `auditd_manager` on a Linux system.\n\n```\nKibana --\u003e\nManagement --\u003e\nIntegrations --\u003e\nAuditd Manager --\u003e\nAdd Auditd Manager\n```\n\n`Auditd_manager` subscribes to the kernel and receives events as they occur without any additional configuration. However, if more advanced configuration is required to detect specific behavior, audit rules can be added to the integration in either the \"audit rules\" configuration box or the \"auditd rule files\" box by specifying a file to read the audit rules from.\n\nFor this detection rule to trigger, the following additional audit rules are required to be added to the integration:\n```\n-w /proc/ -p r -k audit_proc\n```\n\nAdd the newly installed `auditd manager` to an agent policy, and deploy the agent on a Linux system from which auditd log files are desirable.\n",
+        "severity": "low",
+        "tags": [
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1057",
+                        "name": "Process Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1057/"
+                    },
+                    {
+                        "id": "T1082",
+                        "name": "System Information Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1082/"
+                    }
+                ]
+            }
+        ],
+        "threshold": {
+            "cardinality": [
+                {
+                    "field": "file.path",
+                    "value": 100
+                }
+            ],
+            "field": [
+                "host.id",
+                "process.pid",
+                "process.name"
+            ],
+            "value": 1
+        },
+        "timestamp_override": "event.ingested",
+        "type": "threshold",
+        "version": 5
+    },
+    "id": "0787daa6-f8c5-453b-a4ec-048037f6c1cd_5",
+    "type": "security-rule"
+}

@@ -1,0 +1,112 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies instances of an unusual process enumerating built-in Windows privileged local groups membership like Administrators or Remote Desktop users.",
+        "from": "now-9m",
+        "history_window_start": "now-14d",
+        "index": [
+            "winlogbeat-*",
+            "logs-system.*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Enumeration of Privileged Local Groups Membership",
+        "new_terms_fields": [
+            "host.id",
+            "winlog.event_data.SubjectUserName",
+            "winlog.event_data.CallerProcessName"
+        ],
+        "note": "## Triage and analysis\n\n### Investigating Enumeration of Privileged Local Groups Membership\n\nAfter successfully compromising an environment, attackers may try to gain situational awareness to plan their next steps. This can happen by running commands to enumerate network resources, users, connections, files, and installed security software.\n\nThis rule looks for the enumeration of privileged local groups' membership by suspicious processes, and excludes known legitimate utilities and programs installed. Attackers can use this information to decide the next steps of the attack, such as mapping targets for credential compromise and other post-exploitation activities.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Identify the process, host and user involved on the event.\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Investigate any abnormal account behavior, such as command executions, file creations or modifications, and network connections.\n- Examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the process executable using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - !{osquery{\"label\":\"Osquery - Retrieve DNS Cache\",\"query\":\"SELECT * FROM dns_cache\"}}\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - !{osquery{\"label\":\"Osquery - Retrieve All Services\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Services Running on User Accounts\",\"query\":\"SELECT description, display_name, name, path, pid, service_type, start_type, status, user_account FROM services WHERE\\nNOT (user_account LIKE '%LocalSystem' OR user_account LIKE '%LocalService' OR user_account LIKE '%NetworkService' OR\\nuser_account == null)\\n\"}}\n      - !{osquery{\"label\":\"Osquery - Retrieve Service Unsigned Executables with Virustotal Link\",\"query\":\"SELECT concat('https://www.virustotal.com/gui/file/', sha1) AS VtLink, name, description, start_type, status, pid,\\nservices.path FROM services JOIN authenticode ON services.path = authenticode.path OR services.module_path =\\nauthenticode.path JOIN hash ON services.path = hash.path WHERE authenticode.result != 'trusted'\\n\"}}\n  - Retrieve the files' SHA-256 hash values using the PowerShell `Get-FileHash` cmdlet and search for the existence and reputation of the hashes in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n- Investigate potentially compromised accounts. Analysts can do this by searching for login events (for example, 4624) to the target host after the registry modification.\n\n### False positive analysis\n\n- Discovery activities are not inherently malicious if they occur in isolation. As long as the analyst did not identify suspicious activity related to the user or host, such alerts can be dismissed.\n- If this rule is noisy in your environment due to expected activity, consider adding exceptions \u2014 preferably with a combination of user and command line conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\n",
+        "query": "host.os.type:windows and event.category:iam and event.action:user-member-enumerated and \n  (\n    group.name:(*Admin* or \"RemoteDesktopUsers\") or\n    winlog.event_data.TargetSid:(\"S-1-5-32-544\" or \"S-1-5-32-555\")\n  ) and \n  not (winlog.event_data.SubjectUserName: (*$ or \"LOCAL SERVICE\" or \"NETWORK SERVICE\") or \n  winlog.event_data.CallerProcessName:(\"-\" or \n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\VSSVC.exe or \n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\SearchIndexer.exe or \n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\CompatTelRunner.exe or \n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\oobe\\\\\\\\msoobe.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\net1.exe or \n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\svchost.exe or \n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\Netplwiz.exe or \n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\msiexec.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\CloudExperienceHostBroker.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\wbem\\\\\\\\WmiPrvSE.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\SrTasks.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\diskshadow.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\dfsrs.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\vssadmin.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\dllhost.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\mmc.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\SettingSyncHost.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\inetsrv\\\\\\\\w3wp.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\wsmprovhost.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\spool\\\\\\\\drivers\\\\\\\\x64\\\\\\\\3\\\\\\\\x3jobt3?.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\mstsc.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\esentutl.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\RecoveryDrive.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\System32\\\\\\\\SystemPropertiesComputerName.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\SysWOW64\\\\\\\\msiexec.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\ImmersiveControlPanel\\\\\\\\SystemSettings.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\Temp\\\\\\\\rubrik_vmware???\\\\\\\\snaptool.exe or\n                                       *\\:\\\\\\\\Windows\\\\\\\\VeeamVssSupport\\\\\\\\VeeamGuestHelper.exe or\n                                       ?\\:\\\\\\\\WindowsAzure\\\\\\\\*WaAppAgent.exe or\n                                       ?\\:\\\\\\\\Program?Files?\\(x86\\)\\\\\\\\*.exe or\n                                       ?\\:\\\\\\\\Program?Files\\\\\\\\*.exe or\n                                       ?\\:\\\\\\\\$WINDOWS.~BT\\\\\\\\Sources\\\\\\\\*.exe\n                                      )\n  )\n",
+        "related_integrations": [
+            {
+                "package": "system",
+                "version": "^1.6.4"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "group.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.CallerProcessName",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.SubjectUserName",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.TargetSid",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "291a0de9-937a-4189-94c0-3e847c8b13e4",
+        "setup": "\nThe 'Audit Security Group Management' audit policy must be configured (Success).\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nPolicies \u003e\nWindows Settings \u003e\nSecurity Settings \u003e\nAdvanced Audit Policies Configuration \u003e\nAudit Policies \u003e\nAccount Management \u003e\nAudit Security Group Management (Success)\n```\n\nMicrosoft introduced the [event used](https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4799) in this detection rule on Windows 10 and Windows Server 2016 or later operating systems.\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2,\nevents will not define `event.ingested` and default fallback for EQL rules was not added until version 8.2.\nHence for this rule to work effectively, users will need to add a custom ingest pipeline to populate\n`event.ingested` to @timestamp.\nFor more details on adding a custom ingest pipeline refer - https://www.elastic.co/guide/en/fleet/current/data-streams-pipeline-tutorial.html\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Resources: Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1069",
+                        "name": "Permission Groups Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1069/",
+                        "subtechnique": [
+                            {
+                                "id": "T1069.001",
+                                "name": "Local Groups",
+                                "reference": "https://attack.mitre.org/techniques/T1069/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 209
+    },
+    "id": "291a0de9-937a-4189-94c0-3e847c8b13e4_209",
+    "type": "security-rule"
+}

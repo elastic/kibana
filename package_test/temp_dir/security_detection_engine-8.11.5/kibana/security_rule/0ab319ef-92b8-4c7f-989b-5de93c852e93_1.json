@@ -1,0 +1,73 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "A statistical model has identified command-and-control (C2) beaconing activity with high confidence. Beaconing can help attackers maintain stealthy communication with their C2 servers, receive instructions and payloads, exfiltrate data and maintain persistence in a network.",
+        "from": "now-1h",
+        "index": [
+            "ml_beaconing.all"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Statistical Model Detected C2 Beaconing Activity with High Confidence",
+        "note": "",
+        "query": "beacon_stats.beaconing_score: 3\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/beaconing",
+            "https://www.elastic.co/security-labs/identifying-beaconing-malware-using-elastic"
+        ],
+        "related_integrations": [
+            {
+                "package": "beaconing",
+                "version": "^1.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "beacon_stats.beaconing_score",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "0ab319ef-92b8-4c7f-989b-5de93c852e93",
+        "setup": "The Beaconing integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "Domain: Network",
+            "Use Case: C2 Beaconing Detection",
+            "Tactic: Command and Control"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1102",
+                        "name": "Web Service",
+                        "reference": "https://attack.mitre.org/techniques/T1102/",
+                        "subtechnique": [
+                            {
+                                "id": "T1102.002",
+                                "name": "Bidirectional Communication",
+                                "reference": "https://attack.mitre.org/techniques/T1102/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 1
+    },
+    "id": "0ab319ef-92b8-4c7f-989b-5de93c852e93_1",
+    "type": "security-rule"
+}

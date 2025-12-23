@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 63.1 (92452) - https://sketch.com -->
+    <title>security-logo-color-64px</title>
+    <desc>Created with Sketch.</desc>
+    <g id="security-logo-color-64px" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="bounding-box" x="0" y="0" width="64" height="64"></rect>
+        <g id="Group" transform="translate(9.000000, 4.000000)">
+            <path d="M11,13 L11,5.68434189e-14 L47,5.68434189e-14 L47,30 C47,37.0111899 34.7467341,41.6043834 30,43 L30,13 L11,13 Z" id="Shape" fill="#FA744E"></path>
+            <path d="M0,35.3983993 L0,18 L25,18 L25,56 C8.33333333,49.0564437 0,42.1892435 0,35.3983993 Z" id="Path" fill="#1DBAB0"></path>
+            <path d="M10,18 L25,18 L25,43 C19.4060122,40.9626041 10,36.2920291 10,30.4224321 L10,18 Z" id="Path" fill="#343741"></path>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,129 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Monitors for the elevation of regular user permissions to root permissions through a previously unknown executable. Attackers may attempt to evade detection by hijacking the execution flow and hooking certain functions/syscalls through a rootkit in order to provide easy access to root via a special modified command.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "UID Elevation from Previously Unknown Executable",
+    "new_terms_fields": [
+      "process.executable"
+    ],
+    "query": "host.os.type:\"linux\" and event.category:\"process\" and event.action:\"uid_change\" and event.type:\"change\" and user.id:\"0\"\nand process.parent.name:(\"bash\" or \"dash\" or \"sh\" or \"tcsh\" or \"csh\" or \"zsh\" or \"ksh\" or \"fish\") and not (\n  process.executable:(\n    /bin/* or /usr/bin/* or /sbin/* or /usr/sbin/* or /snap/* or /tmp/newroot/* or /var/lib/docker/* or /usr/local/* or\n    /opt/psa/admin/* or /usr/lib/snapd/snap-confine or /opt/dynatrace/* or /opt/microsoft/* or\n    /var/lib/snapd/snap/bin/node or /opt/gitlab/embedded/sbin/logrotate or /etc/apt/universal-hooks/* or\n    /opt/puppetlabs/puppet/bin/puppet or /opt/cisco/* or /run/k3s/containerd/* or /usr/lib/postfix/sbin/master or\n    /usr/libexec/postfix/local\n  ) or\n  process.name:(\n    \"bash\" or \"dash\" or \"sh\" or \"tcsh\" or \"csh\" or \"zsh\" or \"ksh\" or \"fish\" or \"sudo\" or \"su\" or \"apt\" or \"apt-get\" or\n    \"aptitude\" or \"squid\" or \"snap\" or \"fusermount\" or \"pkexec\" or \"umount\" or \"master\" or \"omsbaseline\" or \"dzdo\" or\n    \"sandfly\" or \"logrotate\"\n  ) or\n  process.args:/usr/bin/python*\n)\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "7787362c-90ff-4b1a-b313-8808b1020e64",
+    "setup": "## Setup\n\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows\nthe Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click Add integrations.\n- In the query bar, search for Elastic Defend and select the integration to see more details about it.\n- Click Add Elastic Defend.\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either Traditional Endpoints or Cloud Workloads.\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest to select \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in New agent policy name. If other agent policies already exist, you can click the Existing hosts tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click Save and Continue.\n- To complete the integration, select Add Elastic Agent to your hosts and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1574",
+            "name": "Hijack Execution Flow",
+            "reference": "https://attack.mitre.org/techniques/T1574/",
+            "subtechnique": [
+              {
+                "id": "T1574.013",
+                "name": "KernelCallbackTable",
+                "reference": "https://attack.mitre.org/techniques/T1574/013/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1014",
+            "name": "Rootkit",
+            "reference": "https://attack.mitre.org/techniques/T1014/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 3
+  },
+  "id": "7787362c-90ff-4b1a-b313-8808b1020e64_3",
+  "type": "security-rule"
+}

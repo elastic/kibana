@@ -1,0 +1,113 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for the copying or moving of a system binary to a suspicious directory. Adversaries may copy/move and rename system binaries to evade detection. Copying a system binary to a different location should not occur often, so if it does, the activity should be investigated.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "System Binary Copied and/or Moved to Suspicious Directory",
+        "query": "sequence by host.id, process.entity_id with maxspan=1s\n  [process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \n   process.name in (\"cp\", \"mv\") and process.args : (\n   // Shells\n   \"/bin/*sh\", \"/usr/bin/*sh\", \n\n   // Interpreters\n   \"/bin/python*\", \"/usr/bin/python*\", \"/bin/php*\", \"/usr/bin/php*\", \"/bin/ruby*\", \"/usr/bin/ruby*\", \"/bin/perl*\",\n   \"/usr/bin/perl*\", \"/bin/lua*\", \"/usr/bin/lua*\", \"/bin/java*\", \"/usr/bin/java*\", \n\n   // Compilers\n   \"/bin/gcc*\", \"/usr/bin/gcc*\", \"/bin/g++*\", \"/usr/bin/g++*\", \"/bin/cc\", \"/usr/bin/cc\",\n\n   // Suspicious utilities\n   \"/bin/nc\", \"/usr/bin/nc\", \"/bin/ncat\", \"/usr/bin/ncat\", \"/bin/netcat\", \"/usr/bin/netcat\", \"/bin/nc.openbsd\",\n   \"/usr/bin/nc.openbsd\", \"/bin/*awk\", \"/usr/bin/*awk\", \"/bin/socat\", \"/usr/bin/socat\", \"/bin/openssl\",\n   \"/usr/bin/openssl\", \"/bin/telnet\", \"/usr/bin/telnet\", \"/bin/mkfifo\", \"/usr/bin/mkfifo\", \"/bin/mknod\",\n   \"/usr/bin/mknod\", \"/bin/ping*\", \"/usr/bin/ping*\", \"/bin/nmap\", \"/usr/bin/nmap\",\n\n   // System utilities\n   \"/bin/ls\", \"/usr/bin/ls\", \"/bin/cat\", \"/usr/bin/cat\", \"/bin/sudo\", \"/usr/bin/sudo\", \"/bin/curl\", \"/usr/bin/curl\",\n   \"/bin/wget\", \"/usr/bin/wget\", \"/bin/tmux\", \"/usr/bin/tmux\", \"/bin/screen\", \"/usr/bin/screen\", \"/bin/ssh\",\n   \"/usr/bin/ssh\", \"/bin/ftp\", \"/usr/bin/ftp\"\n  ) and not process.parent.name in (\"dracut-install\", \"apticron\", \"generate-from-dir\", \"platform-python\")]\n  [file where host.os.type == \"linux\" and event.action == \"creation\" and file.path : (\n    \"/dev/shm/*\", \"/run/shm/*\", \"/tmp/*\", \"/var/tmp/*\", \"/run/*\", \"/var/run/*\", \"/var/www/*\", \"/proc/*/fd/*\"\n  )]\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "fda1d332-5e08-4f27-8a9b-8c802e3292a6",
+        "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows\nthe Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click Add integrations.\n- In the query bar, search for Elastic Defend and select the integration to see more details about it.\n- Click Add Elastic Defend.\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either Traditional Endpoints or Cloud Workloads.\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest to select \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in New agent policy name. If other agent policies already exist, you can click the Existing hosts tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click Save and Continue.\n- To complete the integration, select Add Elastic Agent to your hosts and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1564",
+                        "name": "Hide Artifacts",
+                        "reference": "https://attack.mitre.org/techniques/T1564/"
+                    },
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.003",
+                                "name": "Rename System Utilities",
+                                "reference": "https://attack.mitre.org/techniques/T1036/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 2
+    },
+    "id": "fda1d332-5e08-4f27-8a9b-8c802e3292a6_2",
+    "type": "security-rule"
+}

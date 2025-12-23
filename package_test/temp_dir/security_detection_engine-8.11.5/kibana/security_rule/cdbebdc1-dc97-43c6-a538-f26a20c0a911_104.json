@@ -1,0 +1,67 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "A user has initiated a session impersonation granting them access to the environment with the permissions of the user they are impersonating. This would likely indicate Okta administrative access and should only ever occur if requested and expected.",
+        "from": "now-30m",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "interval": "15m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Okta User Session Impersonation",
+        "note": "## Triage and analysis\n\n### Investigating Okta User Session Impersonation\n\nThe detection of an Okta User Session Impersonation indicates that a user has initiated a session impersonation which grants them access with the permissions of the user they are impersonating. This type of activity typically indicates Okta administrative access and should only ever occur if requested and expected.\n\n#### Possible investigation steps\n\n- Identify the actor associated with the impersonation event by checking the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, or `okta.actor.display_name` fields.\n- Review the `event.action` field to confirm the initiation of the impersonation event.\n- Check the `event.time` field to understand the timing of the event.\n- Check the `okta.target.id`, `okta.target.type`, `okta.target.alternate_id`, or `okta.target.display_name` to identify the user who was impersonated.\n- Review any activities that occurred during the impersonation session. Look for any activities related to the impersonated user's account during and after the impersonation event.\n\n### False positive analysis\n\n- Verify if the session impersonation was part of an approved activity. Check if it was associated with any documented administrative tasks or troubleshooting efforts.\n- Ensure that the impersonation session was initiated by an authorized individual. You can check this by verifying the `okta.actor.id` or `okta.actor.display_name` against the list of approved administrators.\n\n### Response and remediation\n\n- If the impersonation was not authorized, consider it as a breach. Suspend the user account of the impersonator immediately.\n- Reset the user session and invalidate any active sessions related to the impersonated user.\n- If a specific impersonation technique was used, ensure that systems are patched or configured to prevent such techniques.\n- Conduct a thorough investigation to understand the extent of the breach and the potential impact on the systems and data.\n- Review and update your security policies to prevent such incidents in the future.\n- Implement additional monitoring and logging of Okta events to improve visibility of user actions.",
+        "query": "event.dataset:okta.system and event.action:user.session.impersonation.initiate\n",
+        "references": [
+            "https://blog.cloudflare.com/cloudflare-investigation-of-the-january-2022-okta-compromise/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^1.3.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "cdbebdc1-dc97-43c6-a538-f26a20c0a911",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "high",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Use Case: Identity and Access Audit",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": []
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 104
+    },
+    "id": "cdbebdc1-dc97-43c6-a538-f26a20c0a911_104",
+    "type": "security-rule"
+}

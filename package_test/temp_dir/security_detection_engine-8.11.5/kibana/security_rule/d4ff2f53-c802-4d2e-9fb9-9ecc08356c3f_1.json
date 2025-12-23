@@ -1,0 +1,65 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for the potential memory dump of the init process (PID 1) through gdb. Attackers may leverage memory dumping techniques to attempt secret extraction from privileged processes. Tools that display this behavior include \"truffleproc\" and \"bash-memory-dump\". This behavior should not happen by default, and should be investigated thoroughly.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Linux init (PID 1) Secret Dump via GDB",
+        "query": "process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \nprocess.name == \"gdb\" and process.args in (\"--pid\", \"-p\") and process.args == \"1\"\n",
+        "references": [
+            "https://github.com/controlplaneio/truffleproc",
+            "https://github.com/hajzer/bash-memory-dump"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "d4ff2f53-c802-4d2e-9fb9-9ecc08356c3f",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.007",
+                                "name": "Proc Filesystem",
+                                "reference": "https://attack.mitre.org/techniques/T1003/007/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "d4ff2f53-c802-4d2e-9fb9-9ecc08356c3f_1",
+    "type": "security-rule"
+}

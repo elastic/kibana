@@ -1,0 +1,100 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the creation or modification of a medium size memory dump file which can indicate an attempt to access credentials from a process memory.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Credential Access via Memory Dump File Creation",
+        "query": "file where host.os.type == \"windows\" and event.type == \"creation\" and\n\n  /* MDMP header */\n  file.Ext.header_bytes : \"4d444d50*\" and file.size \u003e= 30000 and\n  not\n\n  (\n    (\n      process.executable : (\n        \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n        \"?:\\\\Windows\\\\SysWOW64\\\\WerFault.exe\",\n        \"?:\\\\Windows\\\\System32\\\\Wermgr.exe\",\n        \"?:\\\\Windows\\\\SysWOW64\\\\Wermgr.exe\",\n        \"?:\\\\Windows\\\\System32\\\\WerFaultSecure.exe\",\n        \"?:\\\\Windows\\\\System32\\\\WUDFHost.exe\",\n        \"?:\\\\Windows\\\\System32\\\\Taskmgr.exe\",\n        \"?:\\\\Windows\\\\SysWOW64\\\\Taskmgr.exe\",\n        \"?:\\\\Program Files\\\\*.exe\",\n        \"?:\\\\Program Files (x86)\\\\*.exe\",\n        \"?:\\\\Windows\\\\SystemApps\\\\*.exe\",\n        \"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Zoom\\\\bin\\\\zCrashReport64.exe\"\n      ) and process.code_signature.trusted == true\n    ) or\n    (\n      file.path : (\n        \"?:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\WER\\\\*\",\n        \"?:\\\\ProgramData\\\\Microsoft\\\\WDF\\\\*\",\n        \"?:\\\\ProgramData\\\\Alteryx\\\\ErrorLogs\\\\*\",\n        \"?:\\\\ProgramData\\\\Goodix\\\\*\",\n        \"?:\\\\Windows\\\\system32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\CrashDumps\\\\*\",\n        \"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Zoom\\\\logs\\\\zoomcrash*\",\n        \"?:\\\\Users\\\\*\\\\AppData\\\\*\\\\Crashpad\\\\*\",\n        \"?:\\\\Users\\\\*\\\\AppData\\\\*\\\\crashpaddb\\\\*\",\n        \"?:\\\\Users\\\\*\\\\AppData\\\\*\\\\HungReports\\\\*\",\n        \"?:\\\\Users\\\\*\\\\AppData\\\\*\\\\CrashDumps\\\\*\",\n        \"?:\\\\Users\\\\*\\\\AppData\\\\*\\\\NativeCrashReporting\\\\*\"\n      ) and (process.code_signature.trusted == true or process.executable == null)\n    )\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "file.Ext.header_bytes",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.size",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "e707a7be-cc52-41ac-8ab3-d34b38c20005",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.001",
+                                "name": "LSASS Memory",
+                                "reference": "https://attack.mitre.org/techniques/T1003/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "e707a7be-cc52-41ac-8ab3-d34b38c20005_1",
+    "type": "security-rule"
+}

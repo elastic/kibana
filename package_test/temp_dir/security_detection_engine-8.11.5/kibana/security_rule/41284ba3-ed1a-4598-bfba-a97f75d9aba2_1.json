@@ -1,0 +1,83 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "This rule monitors for inter-process communication via Unix sockets. Adversaries may attempt to communicate with local Unix sockets to enumerate application details, find vulnerabilities/configuration mistakes and potentially escalate privileges or set up malicious communication channels via Unix sockets for inter-process communication to attempt to evade detection.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unix Socket Connection",
+        "query": "process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and (\n  (process.name in (\"nc\", \"ncat\", \"netcat\", \"nc.openbsd\") and \n   process.args == \"-U\" and process.args : (\"/usr/local/*\", \"/run/*\", \"/var/run/*\")) or\n  (process.name == \"socat\" and \n   process.args == \"-\" and process.args : (\"UNIX-CLIENT:/usr/local/*\", \"UNIX-CLIENT:/run/*\", \"UNIX-CLIENT:/var/run/*\"))\n)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "41284ba3-ed1a-4598-bfba-a97f75d9aba2",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1559",
+                        "name": "Inter-Process Communication",
+                        "reference": "https://attack.mitre.org/techniques/T1559/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "41284ba3-ed1a-4598-bfba-a97f75d9aba2_1",
+    "type": "security-rule"
+}

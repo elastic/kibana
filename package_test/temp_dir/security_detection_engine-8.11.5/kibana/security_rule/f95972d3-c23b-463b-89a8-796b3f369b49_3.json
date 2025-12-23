@@ -1,0 +1,114 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies downloads of executable and archive files via the Windows Background Intelligent Transfer Service (BITS). Adversaries could leverage Windows BITS transfer jobs to download remote payloads.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Ingress Transfer via Windows BITS",
+        "query": "file where host.os.type == \"windows\" and event.action == \"rename\" and\n\nprocess.name : \"svchost.exe\" and file.Ext.original.name : \"BIT*.tmp\" and \n (file.extension :(\"exe\", \"zip\", \"rar\", \"bat\", \"dll\", \"ps1\", \"vbs\", \"wsh\", \"js\", \"vbe\", \"pif\", \"scr\", \"cmd\", \"cpl\") or file.Ext.header_bytes : \"4d5a*\") and \n \n /* noisy paths, for hunting purposes you can use the same query without the following exclusions */\n not file.path : (\"?:\\\\Program Files\\\\*\", \"?:\\\\Program Files (x86)\\\\*\", \"?:\\\\Windows\\\\*\", \"?:\\\\ProgramData\\\\*\\\\*\") and \n \n /* lot of third party SW use BITS to download executables with a long file name */\n not length(file.name) \u003e 30\n",
+        "references": [
+            "https://attack.mitre.org/techniques/T1197/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "file.Ext.header_bytes",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "file.Ext.original.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "f95972d3-c23b-463b-89a8-796b3f369b49",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Tactic: Command and Control"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1105",
+                        "name": "Ingress Tool Transfer",
+                        "reference": "https://attack.mitre.org/techniques/T1105/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1197",
+                        "name": "BITS Jobs",
+                        "reference": "https://attack.mitre.org/techniques/T1197/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "f95972d3-c23b-463b-89a8-796b3f369b49_3",
+    "type": "security-rule"
+}

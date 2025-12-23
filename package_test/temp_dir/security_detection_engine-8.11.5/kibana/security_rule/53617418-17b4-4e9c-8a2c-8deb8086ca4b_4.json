@@ -1,0 +1,102 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule monitors for network connectivity to the internet from a previously unknown executable located in a suspicious directory to a previously unknown destination ip. An alert from this rule can indicate the presence of potentially malicious activity, such as the execution of unauthorized or suspicious processes attempting to establish connections to unknown or suspicious destinations such as a command and control server. Detecting and investigating such behavior can help identify and mitigate potential security threats, protecting the system and its data from potential compromise.",
+        "from": "now-59m",
+        "history_window_start": "now-14d",
+        "index": [
+            "auditbeat-*",
+            "filebeat-*",
+            "packetbeat-*",
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Suspicious Network Activity to the Internet by Previously Unknown Executable",
+        "new_terms_fields": [
+            "host.id",
+            "destination.ip",
+            "process.executable"
+        ],
+        "query": "host.os.type:linux and event.category:network and event.action:(connection_attempted or ipv4_connection_attempt_event) and \nprocess.executable:(\n  (/etc/crontab or /etc/rc.local or ./* or /boot/* or /dev/shm/* or /etc/cron.*/* or /etc/init.d/* or /etc/rc*.d/* or \n   /etc/update-motd.d/* or /home/*/.* or /run/* or /srv/* or /tmp/* or /usr/lib/update-notifier/* or /var/tmp/*\n  ) and not (/tmp/newroot/* or /tmp/snap.rootfs*)\n ) and \nsource.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and \nnot process.name:(\n apt or chrome or curl or dnf or dockerd or dpkg or firefox-bin or java or kite-update or kited or node or rpm or\n saml2aws or wget or yum or ansible* or aws* or php* or pip* or python* or steam* or terraform*\n) and \nnot destination.ip:(\n   10.0.0.0/8 or 100.64.0.0/10 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.0.0.0/24 or 192.0.0.0/29 or \n   192.0.0.10/32 or 192.0.0.170/32 or 192.0.0.171/32 or 192.0.0.8/32 or 192.0.0.9/32 or 192.0.2.0/24 or \n   192.168.0.0/16 or 192.175.48.0/24 or 192.31.196.0/24 or 192.52.193.0/24 or 192.88.99.0/24 or 198.18.0.0/15 or \n   198.51.100.0/24 or 203.0.113.0/24 or 224.0.0.0/4 or 240.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\"\n)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "destination.ip",
+                "type": "ip"
+            },
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "source.ip",
+                "type": "ip"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "53617418-17b4-4e9c-8a2c-8deb8086ca4b",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Command and Control",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1071",
+                        "name": "Application Layer Protocol",
+                        "reference": "https://attack.mitre.org/techniques/T1071/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 4
+    },
+    "id": "53617418-17b4-4e9c-8a2c-8deb8086ca4b_4",
+    "type": "security-rule"
+}

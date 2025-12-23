@@ -1,0 +1,107 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule attempts to identify rapid secret retrieval attempts from AWS SecretsManager. Adversaries may attempt to retrieve secrets from the Secrets Manager programmatically using the `GetSecretValue` or `BatchGetSecretValue` API actions.",
+    "false_positives": [
+      "Verify whether the user identity, user agent, and/or hostname should be using GetSecretString or BatchGetSecretValue APIs for the specified SecretId. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "from": "now-5m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Rapid Secret Retrieval Attempts from AWS SecretsManager",
+    "note": "## Triage and analysis\n\n### Investigating Rapid Secret Retrieval Attempts from AWS SecretsManager\n\nAWS Secrets Manager is a service that enables the replacement of hardcoded credentials in code, including passwords, with an API call to Secrets Manager to retrieve the secret programmatically.\n\nThis rule looks for the rapid retrieval of credentials using `GetSecretValue` or `BatchGetSecretValue` actions in Secrets Manager programmatically. This is a [Threshold](https://www.elastic.co/guide/en/security/master/rules-ui-create.html#create-threshold-rule) rule indicating 20 or more successful attempts to retrieve a secret value from Secrets Manager by the same user identity within a short timespan. \n\n#### Possible investigation steps\n\n- Identify the account and its role in the environment, and inspect the related policy.\n- Identify the applications that should use this account.\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Investigate abnormal values in the `user_agent.original` field by comparing them with the intended and authorized usage and historical data. Suspicious user agent values include non-SDK, AWS CLI, custom user agents, etc.\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences involving other users.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Considering the source IP address and geolocation of the user who issued the command:\n    - Do they look normal for the calling user?\n    - If the source is an EC2 IP address, is it associated with an EC2 instance in one of your accounts or is the source IP from an EC2 instance that's not under your control?\n    - If it is an authorized EC2 instance, is the activity associated with normal behavior for the instance role or roles? Are there any other alerts or signs of suspicious activity involving this instance?\n- Review IAM permission policies for the user identity and specific secrets accessed.\n- Examine the request parameters. These might indicate the source of the program or the nature of its tasks.\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking servers, services, and data accessed by the account in the last 24 hours.\n\n### False positive analysis\n\n- False positives may occur due to the intended usage of the service. Tuning is needed in order to have higher confidence. Consider adding exceptions — preferably with a combination of user agent and IP address conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Rotate secrets or delete API keys as needed to revoke the attacker's access to the environment. Work with your IT teams to minimize the impact on business operations during these actions.\n- Check if unauthorized new users were created, remove unauthorized new accounts, and request password resets for other IAM users.\n- Consider enabling multi-factor authentication for users.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://aws.amazon.com/premiumsupport/knowledge-center/security-best-practices/) by AWS.\n- Take the actions needed to return affected systems, data, or services to their normal operational levels.\n- Identify the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "event.dataset:aws.cloudtrail and event.provider:secretsmanager.amazonaws.com and\n    event.action: (GetSecretValue or BatchGetSecretValue) and event.outcome:success and\n    not user_agent.name: (\"Chrome\" or \"Firefox\" or \"Safari\" or \"Edge\" or \"Brave\" or \"Opera\")\n",
+    "references": [
+      "https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html",
+      "https://detectioninthe.cloud/ttps/credential_access/access_secret_in_secrets_manager/",
+      "https://cloud.hacktricks.xyz/pentesting-cloud/aws-security/aws-services/aws-secrets-manager-enum",
+      "https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_BatchGetSecretValue.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user_agent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "185c782e-f86a-11ee-9d9f-f661ea17fbce",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS Secrets Manager",
+      "Tactic: Credential Access",
+      "Resources: Investigation Guide"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1555",
+            "name": "Credentials from Password Stores",
+            "reference": "https://attack.mitre.org/techniques/T1555/",
+            "subtechnique": [
+              {
+                "id": "T1555.006",
+                "name": "Cloud Secrets Management Stores",
+                "reference": "https://attack.mitre.org/techniques/T1555/006/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "threshold": {
+      "field": [
+        "user.id"
+      ],
+      "value": 20
+    },
+    "timestamp_override": "event.ingested",
+    "type": "threshold",
+    "version": 1
+  },
+  "id": "185c782e-f86a-11ee-9d9f-f661ea17fbce_1",
+  "type": "security-rule"
+}

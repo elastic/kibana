@@ -1,0 +1,93 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic",
+      "Matteo Potito Giorgio"
+    ],
+    "description": "Identifies when a user is observed for the first time in the last 14 days authenticating using the deviceCode protocol. The device code authentication flow can be abused by attackers to phish users and steal access tokens to impersonate the victim. By its very nature, device code should only be used when logging in to devices without keyboards, where it is difficult to enter emails and passwords.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "filebeat-*",
+      "logs-azure.signinlogs-*",
+      "logs-azure.activitylogs-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "First Occurrence of Entra ID Auth via DeviceCode Protocol",
+    "new_terms_fields": [
+      "azure.signinlogs.properties.user_principal_name"
+    ],
+    "query": " event.dataset:(azure.activitylogs or azure.signinlogs) and \n     (azure.signinlogs.properties.authentication_protocol:deviceCode or azure.activitylogs.properties.authentication_protocol:deviceCode) and event.outcome:success\n",
+    "references": [
+      "https://aadinternals.com/post/phishing/",
+      "https://www.blackhillsinfosec.com/dynamic-device-code-phishing/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "activitylogs",
+        "package": "azure",
+        "version": "^1.0.0"
+      },
+      {
+        "package": "azure",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "azure.activitylogs.properties.authentication_protocol",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "azure.signinlogs.properties.authentication_protocol",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "af22d970-7106-45b4-b5e3-460d15333727",
+    "setup": "This rule optionally requires Azure Sign-In logs from the Azure integration. Ensure that the Azure integration is correctly set up and that the required data is being collected.\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: Azure",
+      "Data Source: Microsoft Entra ID",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Credential Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1528",
+            "name": "Steal Application Access Token",
+            "reference": "https://attack.mitre.org/techniques/T1528/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "af22d970-7106-45b4-b5e3-460d15333727_1",
+  "type": "security-rule"
+}

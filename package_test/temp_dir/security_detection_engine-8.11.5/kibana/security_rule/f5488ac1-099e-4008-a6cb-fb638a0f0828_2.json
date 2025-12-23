@@ -1,0 +1,116 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects an incoming SSH connection established inside a running container. Running an ssh daemon inside a container should be avoided and monitored closely if necessary. If an attacker gains valid credentials they can use it to gain initial access or establish persistence within a compromised environment.",
+        "false_positives": [
+            "SSH usage may be legitimate depending on the environment. Access patterns and follow-on activity should be analyzed to distinguish between authorized and potentially malicious behavior."
+        ],
+        "from": "now-6m",
+        "index": [
+            "logs-cloud_defend*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "SSH Connection Established Inside A Running Container",
+        "query": "process where container.id: \"*\" and event.type == \"start\" and \n\n/* use of sshd to enter a container*/\nprocess.entry_leader.entry_meta.type: \"sshd\"  and \n\n/* process is the initial process run in a container or start of a new session*/\n(process.entry_leader.same_as_process== true or process.session_leader.same_as_process== true) and \n\n/* interactive process*/\nprocess.interactive== true\n",
+        "references": [
+            "https://microsoft.github.io/Threat-Matrix-for-Kubernetes/techniques/SSH%20server%20running%20inside%20container/"
+        ],
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "container.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entry_leader.entry_meta.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entry_leader.same_as_process",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.interactive",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.session_leader.same_as_process",
+                "type": "boolean"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "f5488ac1-099e-4008-a6cb-fb638a0f0828",
+        "severity": "high",
+        "tags": [
+            "Data Source: Elastic Defend for Containers",
+            "Domain: Container",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Initial Access",
+            "Tactic: Lateral Movement"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1133",
+                        "name": "External Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1133/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1021",
+                        "name": "Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1021/",
+                        "subtechnique": [
+                            {
+                                "id": "T1021.004",
+                                "name": "SSH",
+                                "reference": "https://attack.mitre.org/techniques/T1021/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "f5488ac1-099e-4008-a6cb-fb638a0f0828_2",
+    "type": "security-rule"
+}

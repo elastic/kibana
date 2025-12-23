@@ -1,0 +1,42 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects repeated compliance violation 'BLOCKED' actions coupled with specific policy name such as 'word_policy', indicating persistent misuse or attempts to probe the model's denied topics.",
+    "false_positives": [
+      "New model deployments.",
+      "Testing updates to compliance policies."
+    ],
+    "from": "now-60m",
+    "interval": "10m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "Unusual High Word Policy Blocks Detected",
+    "note": "## Triage and analysis\n\n### Investigating Amazon Bedrock Guardrail High Word Policy Blocks.\n\nAmazon Bedrock Guardrail is a set of features within Amazon Bedrock designed to help businesses apply robust safety and privacy controls to their generative AI applications.\n\nIt enables users to set guidelines and filters that manage content quality, relevancy, and adherence to responsible AI practices.\n\nThrough Guardrail, organizations can define \"word filters\" to prevent the model from generating content on profanity, undesired subjects,\nand they can establish thresholds for harmful content categories, including hate speech, violence, or offensive language.\n\n#### Possible investigation steps\n\n- Identify the user account whose prompts contained profanity and whether it should perform this kind of action.\n- Investigate other alerts associated with the user account during the past 48 hours.\n- Consider the time of day. If the user is a human (not a program or script), did the activity take place during a normal time of day?\n- Examine the account's prompts and responses in the last 24 hours.\n- If you suspect the account has been compromised, scope potentially compromised assets by tracking Amazon Bedrock model access, prompts generated, and responses to the prompts by the account in the last 24 hours.\n\n### False positive analysis\n\n- Verify the user account that queried denied topics, is not testing any new model deployments or updated compliance policies in Amazon Bedrock guardrails.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Identify if the attacker is moving laterally and compromising other Amazon Bedrock Services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Review the permissions assigned to the implicated user group or role behind these requests to ensure they are authorized and expected to access bedrock and ensure that the least privilege principle is being followed.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "from logs-aws_bedrock.invocation-*\n| MV_EXPAND gen_ai.policy.name \n| where gen_ai.policy.action == \"BLOCKED\" and gen_ai.compliance.violation_detected == \"true\" and gen_ai.policy.name == \"word_policy\"\n| keep user.id\n| stats profanity_words= count() by user.id\n| where profanity_words > 5\n| sort profanity_words desc\n",
+    "references": [
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
+      "https://atlas.mitre.org/techniques/AML.T0051",
+      "https://atlas.mitre.org/techniques/AML.T0054",
+      "https://www.elastic.co/security-labs/elastic-advances-llm-security"
+    ],
+    "risk_score": 47,
+    "rule_id": "3216949c-9300-4c53-b57a-221e364c6457",
+    "setup": "## Setup\n\nThis rule requires that guardrails are configured in AWS Bedrock. For more information, see the AWS Bedrock documentation:\n\nhttps://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: LLM",
+      "Data Source: AWS Bedrock",
+      "Data Source: AWS S3",
+      "Use Case: Policy Violation",
+      "Mitre Atlas: T0051",
+      "Mitre Atlas: T0054"
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "3216949c-9300-4c53-b57a-221e364c6457_1",
+  "type": "security-rule"
+}

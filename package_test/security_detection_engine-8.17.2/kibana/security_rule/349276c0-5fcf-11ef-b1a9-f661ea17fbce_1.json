@@ -1,0 +1,83 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the use of the AWS CLI with the `--endpoint-url` argument, which allows users to specify a custom endpoint URL for AWS services. This can be leveraged by adversaries to redirect API requests to non-standard or malicious endpoints, potentially bypassing typical security controls and logging mechanisms. This behavior may indicate an attempt to interact with unauthorized or compromised infrastructure, exfiltrate data, or perform other malicious activities under the guise of legitimate AWS operations.",
+    "from": "now-9m",
+    "history_window_start": "now-10d",
+    "index": [
+      "logs-endpoint.events.process-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS CLI Command with Custom Endpoint URL",
+    "new_terms_fields": [
+      "user.name"
+    ],
+    "query": "host.os.type: \"linux\" and event.category: \"process\" and process.name: \"aws\" and process.args:  \"--endpoint-url\"\n",
+    "references": [
+      "https://sysdig.com/blog/scarleteel-2-0/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "349276c0-5fcf-11ef-b1a9-f661ea17fbce",
+    "severity": "medium",
+    "tags": [
+      "Data Source: Elastic Defend",
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1102",
+            "name": "Web Service",
+            "reference": "https://attack.mitre.org/techniques/T1102/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "349276c0-5fcf-11ef-b1a9-f661ea17fbce_1",
+  "type": "security-rule"
+}

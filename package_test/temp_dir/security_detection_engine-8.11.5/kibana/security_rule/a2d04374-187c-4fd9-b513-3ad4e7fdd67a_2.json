@@ -1,0 +1,114 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects PowerShell scripts that can be used to collect data from mailboxes. Adversaries may target user email to collect sensitive information.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "PowerShell Mailbox Collection Script",
+        "note": "## Triage and analysis\n\n### Investigating PowerShell Mailbox Collection Script\n\nPowerShell is one of the main tools system administrators use for automation, report routines, and other tasks. This makes it available for use in various environments, and creates an attractive way for attackers to execute code.\n\nEmail mailboxes and their information can be valuable assets for attackers. Company mailboxes often contain sensitive information such as login credentials, intellectual property, financial data, and personal information, making them high-value targets for malicious actors.\n\nThis rule identifies scripts that contains methods and classes that can be abused to collect emails from local and remote mailboxes.\n\n#### Possible investigation steps\n\n- Examine the script content that triggered the detection; look for suspicious DLL imports, collection or exfiltration capabilities, suspicious functions, encoded or compressed data, and other potentially malicious characteristics.\n- Investigate the script execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Determine whether the script was executed and capture relevant information, such as arguments that reveal intent or are indicators of compromise (IoCs).\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Evaluate whether the user needs to use PowerShell to complete tasks.\n- Determine whether the script stores the captured data locally.\n- Investigate whether the script contains exfiltration capabilities and identify the exfiltration server.\n  - Assess network data to determine if the host communicated with the exfiltration server.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Analysts can dismiss the alert if the administrator is aware of the activity and it is done with proper approval.\n\n### Related rules\n\n- Exporting Exchange Mailbox via PowerShell - 6aace640-e631-4870-ba8e-5fdda09325db\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- If the involved host is not the Exchange server, isolate the host to prevent further post-compromise behavior.\n- Prioritize cases that involve personally identifiable information (PII) or other classified data.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).",
+        "query": "event.category:process and host.os.type:windows and\n  (\n   powershell.file.script_block_text : (\n      \"Microsoft.Office.Interop.Outlook\" or\n      \"Interop.Outlook.olDefaultFolders\" or\n      \"::olFolderInBox\"\n   ) or\n   powershell.file.script_block_text : (\n      \"Microsoft.Exchange.WebServices.Data.Folder\" or\n      \"Microsoft.Exchange.WebServices.Data.FileAttachment\"\n   )\n   )\n",
+        "references": [
+            "https://github.com/dafthack/MailSniper/blob/master/MailSniper.ps1",
+            "https://github.com/center-for-threat-informed-defense/adversary_emulation_library/blob/master/apt29/Archive/CALDERA_DIY/evals/payloads/stepSeventeen_email.ps1"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "a2d04374-187c-4fd9-b513-3ad4e7fdd67a",
+        "setup": "The 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nAdministrative Templates \u003e\nWindows PowerShell \u003e\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Collection",
+            "PowerShell",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0009",
+                    "name": "Collection",
+                    "reference": "https://attack.mitre.org/tactics/TA0009/"
+                },
+                "technique": [
+                    {
+                        "id": "T1114",
+                        "name": "Email Collection",
+                        "reference": "https://attack.mitre.org/techniques/T1114/",
+                        "subtechnique": [
+                            {
+                                "id": "T1114.001",
+                                "name": "Local Email Collection",
+                                "reference": "https://attack.mitre.org/techniques/T1114/001/"
+                            },
+                            {
+                                "id": "T1114.002",
+                                "name": "Remote Email Collection",
+                                "reference": "https://attack.mitre.org/techniques/T1114/002/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.001",
+                                "name": "PowerShell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 2
+    },
+    "id": "a2d04374-187c-4fd9-b513-3ad4e7fdd67a_2",
+    "type": "security-rule"
+}

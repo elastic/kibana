@@ -1,0 +1,88 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Detects a new private repo interaction for a GitHub user not seen in the last 14 days.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "First Occurrence of GitHub User Interaction with Private Repo",
+    "new_terms_fields": [
+      "user.name",
+      "github.repo"
+    ],
+    "query": "event.dataset:\"github.audit\" and event.category:\"configuration\" and\ngithub.repo:* and user.name:* and \ngithub.repository_public:false\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.repo",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.repository_public",
+        "type": "boolean"
+      },
+      {
+        "ecs": true,
+        "name": "user.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "01c49712-25bc-49d2-a27d-d7ce52f5dc49",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Execution",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1648",
+            "name": "Serverless Execution",
+            "reference": "https://attack.mitre.org/techniques/T1648/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "01c49712-25bc-49d2-a27d-d7ce52f5dc49_1",
+  "type": "security-rule"
+}

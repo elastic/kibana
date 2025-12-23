@@ -1,0 +1,112 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the execution of the VScode portable binary with the tunnel command line option indicating an attempt to establish a remote tunnel session to Github or a remote VScode instance.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "winlogbeat-*",
+      "logs-windows.sysmon_operational-*",
+      "logs-system.security*",
+      "endgame-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Attempt to Establish VScode Remote Tunnel",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.args : \"tunnel\" and (process.args : \"--accept-server-license-terms\" or process.name : \"code*.exe\") and \n  not (process.name == \"code-tunnel.exe\" and process.args == \"status\" and process.parent.name == \"Code.exe\")\n",
+    "references": [
+      "https://badoption.eu/blog/2023/01/31/code_c2.html",
+      "https://code.visualstudio.com/docs/remote/tunnels"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "0b96dfd8-5b8c-4485-9a1c-69ff7839786a",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1219",
+            "name": "Remote Access Software",
+            "reference": "https://attack.mitre.org/techniques/T1219/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 3
+  },
+  "id": "0b96dfd8-5b8c-4485-9a1c-69ff7839786a_3",
+  "type": "security-rule"
+}

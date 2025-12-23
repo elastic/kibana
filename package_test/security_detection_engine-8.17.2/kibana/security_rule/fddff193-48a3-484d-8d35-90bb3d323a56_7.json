@@ -1,0 +1,104 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects PowerShell scripts that have the capability of dumping Kerberos tickets from LSA, which potentially indicates an attacker's attempt to acquire credentials for lateral movement.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.powershell*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "PowerShell Kerberos Ticket Dump",
+    "note": "## Triage and analysis\n\n### Investigating PowerShell Kerberos Ticket Dump\n\nKerberos is an authentication protocol that relies on tickets to grant access to network resources. Adversaries may abuse this protocol to acquire credentials for lateral movement within a network.\n\nThis rule indicates the use of scripts that contain code capable of dumping Kerberos tickets, which can indicate potential PowerShell abuse for credential theft.\n\n### Possible investigation steps\n\n- Examine the script content that triggered the detection; look for suspicious DLL imports, collection or exfiltration capabilities, suspicious functions, encoded or compressed data, and other potentially malicious characteristics.\n- Investigate the script execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Investigate if the script was executed, and if so, which account was targeted.\n- Identify the account involved and contact the owner to confirm whether they are aware of this activity.\n- Check if the script has any other functionality that can be potentially malicious.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Investigate other potentially compromised accounts and hosts. Review login events (like 4624) for suspicious events involving the subject and target accounts.\n\n### False positive analysis\n\n- If this activity is expected and noisy in your environment, consider adding exceptions — preferably with a combination of file path and user ID conditions.\n\n### Related Rules\n\n- PowerShell Kerberos Ticket Request - eb610e70-f9e6-4949-82b9-f1c5bcd37c39\n\n### Response and Remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n  - If malicious activity is confirmed, perform a broader investigation to identify the scope of the compromise and determine the appropriate remediation steps.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- Disable or limit involved accounts during the investigation and response.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Reimage the host operating system or restore the compromised files to clean versions.\n- Restrict PowerShell usage outside of IT and engineering business units using GPOs, AppLocker, Intune, or similar software.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    \"LsaCallAuthenticationPackage\" and\n    (\n      \"KerbRetrieveEncodedTicketMessage\" or\n      \"KerbQueryTicketCacheMessage\" or\n      \"KerbQueryTicketCacheExMessage\" or\n      \"KerbQueryTicketCacheEx2Message\" or\n      \"KerbRetrieveTicketMessage\" or\n      \"KerbDecryptDataMessage\"\n    )\n  )\n",
+    "references": [
+      "https://github.com/MzHmO/PowershellKerberos/blob/main/dumper.ps1"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "fddff193-48a3-484d-8d35-90bb3d323a56",
+    "setup": "## Setup\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nAdministrative Templates >\nWindows PowerShell >\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: PowerShell Logs"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1003",
+            "name": "OS Credential Dumping",
+            "reference": "https://attack.mitre.org/techniques/T1003/"
+          },
+          {
+            "id": "T1558",
+            "name": "Steal or Forge Kerberos Tickets",
+            "reference": "https://attack.mitre.org/techniques/T1558/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 7
+  },
+  "id": "fddff193-48a3-484d-8d35-90bb3d323a56_7",
+  "type": "security-rule"
+}

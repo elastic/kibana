@@ -1,0 +1,89 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies role chaining activity. Role chaining is when you use one assumed role to assume a second role through the AWS CLI or API. While this a recognized functionality in AWS, role chaining can be abused for privilege escalation if the subsequent assumed role provides additional privileges. Role chaining can also be used as a persistence mechanism as each AssumeRole action results in a refreshed session token with a 1 hour maximum duration. This rule looks for role chaining activity happening within a single account, to eliminate false positives produced by common cross-account behavior.",
+    "false_positives": [
+      "Role chaining can be used as an access control. Ensure that this behavior is not part of a legitimate operation before taking action."
+    ],
+    "from": "now-6m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS STS Role Chaining",
+    "note": "",
+    "query": "from logs-aws.cloudtrail-* metadata _id, _version, _index\n\n// filter for AssumeRole API calls where access key id is a short term token beginning with ASIA\n| where event.dataset == \"aws.cloudtrail\" and event.provider == \"sts.amazonaws.com\" and event.action == \"AssumeRole\" and aws.cloudtrail.resources.account_id == aws.cloudtrail.recipient_account_id and aws.cloudtrail.user_identity.access_key_id like \"ASIA*\"\n\n// keep only the relevant fields\n| keep aws.cloudtrail.user_identity.arn, cloud.region, aws.cloudtrail.resources.account_id, aws.cloudtrail.recipient_account_id, aws.cloudtrail.user_identity.access_key_id\n",
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html#id_roles_terms-and-concepts",
+      "https://www.uptycs.com/blog/detecting-anomalous-aws-sessions-temporary-credentials",
+      "https://hackingthe.cloud/aws/post_exploitation/role-chain-juggling/"
+    ],
+    "risk_score": 47,
+    "rule_id": "ba5a0b0c-b477-4729-a3dc-0147c2049cf1",
+    "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS STS",
+      "Use Case: Threat Detection",
+      "Tactic: Persistence",
+      "Tactic: Privilege Escalation",
+      "Tactic: Lateral Movement"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1548",
+            "name": "Abuse Elevation Control Mechanism",
+            "reference": "https://attack.mitre.org/techniques/T1548/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.001",
+                "name": "Application Access Token",
+                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": []
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "ba5a0b0c-b477-4729-a3dc-0147c2049cf1_1",
+  "type": "security-rule"
+}

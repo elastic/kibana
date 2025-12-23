@@ -1,0 +1,119 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies multiple consecutive logon failures from the same source address and within a short time interval. Adversaries will often brute force login attempts across multiple users with a common or known password, in an attempt to gain access to accounts.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-system.*",
+            "logs-windows.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Multiple Logon Failure from the same Source Address",
+        "note": "## Triage and analysis\n\n### Investigating Multiple Logon Failure from the same Source Address\n\nAdversaries with no prior knowledge of legitimate credentials within the system or environment may guess passwords to attempt access to accounts. Without knowledge of the password for an account, an adversary may opt to guess the password using a repetitive or iterative mechanism systematically. More details can be found [here](https://attack.mitre.org/techniques/T1110/001/).\n\nThis rule identifies potential password guessing/brute force activity from a single address.\n\n\u003e **Note**:\n\u003e This investigation guide uses the [Osquery Markdown Plugin](https://www.elastic.co/guide/en/security/master/invest-guide-run-osquery.html) introduced in Elastic Stack version 8.5.0. Older Elastic Stack versions will display unrendered Markdown in this guide.\n\n#### Possible investigation steps\n\n- Investigate the logon failure reason code and the targeted user names.\n  - Prioritize the investigation if the account is critical or has administrative privileges over the domain.\n- Investigate the source IP address of the failed Network Logon attempts.\n  - Identify whether these attempts are coming from the internet or are internal.\n- Investigate other alerts associated with the involved users and source host during the past 48 hours.\n- Identify the source and the target computer and their roles in the IT environment.\n- Check whether the involved credentials are used in automation or scheduled tasks.\n- If this activity is suspicious, contact the account owner and confirm whether they are aware of it.\n- Examine the source host for derived artifacts that indicate compromise:\n  - Observe and collect information about the following activities in the alert source host:\n    - Attempts to contact external domains and addresses.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - $osquery_0\n    - Examine the host services for suspicious or anomalous entries.\n      - $osquery_1\n      - $osquery_2\n      - $osquery_3\n- Investigate potentially compromised accounts. Analysts can do this by searching for login events (for example, 4624) to the host which is the source of this activity\n\n### False positive analysis\n\n- Understand the context of the authentications by contacting the asset owners. This activity can be related to a new or existing automation or business process that is in a failing state.\n- Authentication misconfiguration or obsolete credentials.\n- Service account password expired.\n- Domain trust relationship issues.\n- Infrastructure or availability issues.\n\n### Related rules\n\n- Multiple Logon Failure Followed by Logon Success - 4e85dc8a-3e41-40d8-bc28-91af7ac6cf60\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the source host to prevent further post-compromise behavior.\n- If the asset is exposed to the internet with RDP or other remote services available, take the necessary measures to restrict access to the asset. If not possible, limit the access via the firewall to only the needed IP addresses. Also, ensure the system uses robust authentication mechanisms and is patched regularly.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).",
+        "query": "sequence by winlog.computer_name, source.ip with maxspan=10s\n  [authentication where host.os.type == \"windows\" and event.action == \"logon-failed\" and\n    /* event 4625 need to be logged */\n    winlog.logon.type : \"Network\" and\n    source.ip != null and source.ip != \"127.0.0.1\" and source.ip != \"::1\" and\n    not user.name : (\"ANONYMOUS LOGON\", \"-\", \"*$\") and not user.domain == \"NT AUTHORITY\" and\n\n    /*\n    noisy failure status codes often associated to authentication misconfiguration :\n     0xC000015B - The user has not been granted the requested logon type (also called the logon right) at this machine.\n     0XC000005E\t- There are currently no logon servers available to service the logon request.\n     0XC0000133\t- Clocks between DC and other computer too far out of sync.\n     0XC0000192\tAn attempt was made to logon, but the Netlogon service was not started.\n    */\n    not winlog.event_data.Status : (\"0xC000015B\", \"0XC000005E\", \"0XC0000133\", \"0XC0000192\")] with runs=10\n",
+        "references": [
+            "https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4625"
+        ],
+        "related_integrations": [
+            {
+                "package": "system",
+                "version": "^1.6.4"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "source.ip",
+                "type": "ip"
+            },
+            {
+                "ecs": true,
+                "name": "user.domain",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.computer_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.Status",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.logon.type",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "48b6edfc-079d-4907-b43c-baffa243270d",
+        "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions \u003c8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Credential Access",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/",
+                        "subtechnique": [
+                            {
+                                "id": "T1110.001",
+                                "name": "Password Guessing",
+                                "reference": "https://attack.mitre.org/techniques/T1110/001/"
+                            },
+                            {
+                                "id": "T1110.003",
+                                "name": "Password Spraying",
+                                "reference": "https://attack.mitre.org/techniques/T1110/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 4
+    },
+    "id": "48b6edfc-079d-4907-b43c-baffa243270d_4",
+    "type": "security-rule"
+}
