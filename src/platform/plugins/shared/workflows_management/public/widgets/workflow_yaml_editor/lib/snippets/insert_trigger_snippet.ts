@@ -140,7 +140,7 @@ function getInsertRangeAndText(
 ): { range: monaco.Range; text: string } {
   if (replaceRange) {
     // When replacing a flow-style empty array ([]), prepend newline to start on a new line
-    const text = isReplacingFlowArray ? '\n' + insertText : insertText;
+    const text = isReplacingFlowArray ? `\n${insertText}` : insertText;
     return { range: replaceRange, text };
   }
 
@@ -281,7 +281,7 @@ export function insertTriggerSnippet(
   let triggersKeyRange: monaco.Range | null = null;
   let insertAfterComment = false;
   let replaceRange: monaco.Range | null = null;
-  let commentCount: number | undefined = undefined;
+  let commentCount: number | undefined;
   let isReplacingFlowArray = false;
 
   if (triggersPair) {

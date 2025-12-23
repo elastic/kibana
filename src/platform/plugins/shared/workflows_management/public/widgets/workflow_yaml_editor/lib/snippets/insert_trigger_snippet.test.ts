@@ -400,7 +400,7 @@ describe('insertTriggerSnippet', () => {
         null,
         [
           {
-            range: new monaco.Range(1, 11, 1, 13), 
+            range: new monaco.Range(1, 11, 1, 13),
             text: `\n  ${expectedSnippet}`,
           },
         ],
