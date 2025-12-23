@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
-import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useKibana } from '../../hooks/use_kibana';
 import type { AIFeatures } from '../../hooks/use_ai_features';
@@ -51,14 +50,9 @@ export const EditSignificantEventFlyout = ({
     core: { notifications },
     services: { telemetryClient },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
 
   const { upsertQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
-    start,
-    end,
   });
 
   return isEditFlyoutOpen ? (

@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { firstValueFrom } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { getLast24HoursTimeRange } from '../../../util/time_range';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export const useStreamDescriptionApi = ({
   definition,
@@ -45,8 +45,6 @@ export const useStreamDescriptionApi = ({
     },
     services: { telemetryClient },
   } = useKibana();
-
-  const { timeState } = useTimefilter();
 
   const [description, setDescription] = useState(definition.stream.description || '');
 
@@ -135,6 +133,7 @@ export const useStreamDescriptionApi = ({
     setIsGenerating(true);
 
     try {
+      const { from, to } = getLast24HoursTimeRange();
       const { description: generatedDescription, tokensUsed } = await firstValueFrom(
         streams.streamsRepositoryClient.stream('POST /internal/streams/{name}/_describe_stream', {
           signal,
@@ -144,8 +143,8 @@ export const useStreamDescriptionApi = ({
             },
             query: {
               connectorId: aiFeatures.genAiConnectors.selectedConnector,
-              from: timeState.asAbsoluteTimeRange.from,
-              to: timeState.asAbsoluteTimeRange.to,
+              from,
+              to,
             },
           },
         })
@@ -184,8 +183,6 @@ export const useStreamDescriptionApi = ({
     streams.streamsRepositoryClient,
     signal,
     definition.stream,
-    timeState.asAbsoluteTimeRange.from,
-    timeState.asAbsoluteTimeRange.to,
     telemetryClient,
     notifications.toasts,
   ]);
