@@ -180,7 +180,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     const field = indexPattern?.getFieldByName(column.sourceField);
     return field?.format ?? { id: 'number' };
   },
-  toESQL: (column, columnId, indexPattern) => {
+  toESQL: (column, columnId, indexPattern, layer) => {
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
@@ -189,6 +189,10 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       esql = `COUNT(*)`;
     } else {
       esql = `COUNT(${sanitazeESQLInput(field.name)})`;
+    }
+    if (column.filter) {
+      if (column.filter.language === 'kquery') return undefined;
+      return undefined; // esql += ` WHERE QSTR("${sanitazeESQLInput(column.filter.query)}")`;
     }
 
     return esql;

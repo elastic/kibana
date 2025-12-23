@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual, partition } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -21,12 +21,22 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { FormBasedLayer, TypedLensSerializedState } from '@kbn/lens-common';
+import { ESQLLangEditor } from '@kbn/esql/public';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
-import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
+import {
+  useLensSelector,
+  selectFramePublicAPI,
+  onActiveDataChange,
+  useLensDispatch,
+} from '../../../state_management';
 import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
@@ -38,6 +48,8 @@ import { useApplicationUserMessages } from '../../get_application_user_messages'
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
+import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
+import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers';
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 
@@ -62,6 +74,7 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
+  hideTimeFilterInfo,
   isReadOnly,
   parentApi,
   panelId,
@@ -69,13 +82,20 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
-
+  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
+  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
+  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+  const [errors, setErrors] = useState<Error[] | undefined>();
   const { datasourceMap, visualizationMap } = useEditorFrameService();
-
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
+  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
+  const datasourceState = attributes.state.datasourceStates[datasourceId];
+  const activeDatasource = datasourceMap[datasourceId];
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -89,7 +109,64 @@ export function LensEditConfigurationFlyout({
     startDependencies.data.query.timefilter.timefilter
   );
 
+  const layers = useMemo(
+    () => activeDatasource.getLayers(datasourceState),
+    [activeDatasource, datasourceState]
+  );
+
+  // needed for text based languages mode which works ONLY with adHoc dataviews
+  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
+
   const dispatch = useLensDispatch();
+  useEffect(() => {
+    const s = dataLoading$?.subscribe(() => {
+      const activeData: Record<string, Datatable> = {};
+      const adaptersTables = previousAdapters.current?.tables?.tables;
+      const [table] = Object.values(adaptersTables || {});
+      if (table) {
+        // there are cases where a query can return a big amount of columns
+        // at this case we don't suggest all columns in a table but the first
+        // MAX_NUM_OF_COLUMNS
+        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
+        layers.forEach((layer) => {
+          activeData[layer] = table;
+        });
+
+        dispatch(onActiveDataChange({ activeData }));
+      }
+    });
+    return () => s?.unsubscribe();
+  }, [dispatch, dataLoading$, layers]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const getESQLGridAttrs = async () => {
+      if (!dataGridAttrs && isOfAggregateQueryType(query)) {
+        const { dataView, columns, rows } = await getGridAttrs(
+          query,
+          adHocDataViews,
+          startDependencies.data,
+          coreStart.http,
+          coreStart.uiSettings,
+          abortController
+        );
+
+        setDataGridAttrs({
+          rows,
+          dataView,
+          columns,
+        });
+      }
+    };
+    getESQLGridAttrs();
+  }, [
+    adHocDataViews,
+    coreStart.http,
+    coreStart.uiSettings,
+    dataGridAttrs,
+    query,
+    startDependencies,
+  ]);
 
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
@@ -299,6 +376,39 @@ export function LensEditConfigurationFlyout({
       : [];
   }, [activeVisualization, visualization.state]);
 
+  const runQuery = useCallback(
+    async (q: AggregateQuery, abortController?: AbortController) => {
+      const attrs = await getSuggestions(
+        q,
+        startDependencies.data,
+        coreStart.http,
+        coreStart.uiSettings,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        setErrors,
+        abortController,
+        setDataGridAttrs
+      );
+      if (attrs) {
+        setCurrentAttributes?.(attrs);
+        setErrors([]);
+        updateSuggestion?.(attrs);
+      }
+      prevQuery.current = q;
+      setIsVisualizationLoading(false);
+    },
+    [
+      startDependencies,
+      coreStart,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      setCurrentAttributes,
+      updateSuggestion,
+    ]
+  );
+
   const isSingleLayerVisualization = layerIds.length === 1;
 
   const showConvertToEsqlButton = useMemo(() => {
@@ -307,9 +417,7 @@ export function LensEditConfigurationFlyout({
   }, [textBasedMode, isSingleLayerVisualization]);
 
   // The button is disabled when the visualization cannot be converted to ES|QL
-  const { isConvertToEsqlButtonDisbaled } = useMemo(() => {
-    const datasourceState = datasourceStates[datasourceId].state;
-
+  const { isConvertToEsqlButtonDisabled } = useMemo(() => {
     if (!isSingleLayerVisualization || textBasedMode || !datasourceState) {
       return { isConvertToEsqlButtonDisabled: true };
     }
@@ -325,14 +433,14 @@ export function LensEditConfigurationFlyout({
     }
 
     // Access the single layer safely
-    const layers = datasourceState.layers as Record<string, FormBasedLayer>;
+    const datasourceStateLayers = datasourceState.layers as Record<string, FormBasedLayer>;
     const layerId = layerIds[0];
 
-    if (!layerId || !(layerId in layers)) {
+    if (!layerId || !(layerId in datasourceStateLayers)) {
       return { isConvertToEsqlButtonDisabled: true };
     }
 
-    const singleLayer = layers[layerId];
+    const singleLayer = datasourceStateLayers[layerId];
     if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
       return { isConvertToEsqlButtonDisabled: true };
     }
@@ -357,11 +465,10 @@ export function LensEditConfigurationFlyout({
       startDependencies.data.nowProvider.get()
     );
 
-    return { isConvertToEsqlButtonDisbaled: !esqlLayer };
+    return { isConvertToEsqlButtonDisabled: !esqlLayer };
   }, [
     coreStart.uiSettings,
-    datasourceId,
-    datasourceStates,
+    datasourceState,
     framePublicAPI.dataViews.indexPatterns,
     framePublicAPI.dateRange,
     isSingleLayerVisualization,
@@ -382,7 +489,7 @@ export function LensEditConfigurationFlyout({
         <EuiToolTip
           position="top"
           content={
-            isConvertToEsqlButtonDisbaled ? (
+            isConvertToEsqlButtonDisabled ? (
               <p>
                 {i18n.translate('xpack.lens.config.cannotConvertToEsqlDescription', {
                   defaultMessage: 'This visualization cannot be converted to ES|QL',
@@ -406,7 +513,7 @@ export function LensEditConfigurationFlyout({
               aria-label={i18n.translate('xpack.lens.config.convertToEsqlLabel', {
                 defaultMessage: 'Convert to ES|QL',
               })}
-              isDisabled={isConvertToEsqlButtonDisbaled}
+              isDisabled={isConvertToEsqlButtonDisabled}
             />
           </EuiFlexItem>
         </EuiToolTip>
@@ -524,6 +631,56 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
+            <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
+              <ESQLLangEditor
+                query={query}
+                onTextLangQueryChange={(q) => {
+                  setQuery(q);
+                }}
+                detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
+                hideTimeFilterInfo={hideTimeFilterInfo}
+                errors={errors}
+                warning={
+                  suggestsLimitedColumns
+                    ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                        defaultMessage:
+                          'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                      })
+                    : undefined
+                }
+                editorIsInline
+                hideRunQueryText
+                onTextLangQuerySubmit={async (q, a) => {
+                  // do not run the suggestions if the query is the same as the previous one
+                  if (q && !isEqual(q, prevQuery.current)) {
+                    setIsVisualizationLoading(true);
+                    await runQuery(q, a);
+                  }
+                }}
+                isDisabled={false}
+                allowQueryCancellation
+                isLoading={isVisualizationLoading}
+              />
+            </EuiFlexItem>
+          )}
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && dataGridAttrs && (
+            <ESQLDataGridAccordion
+              dataGridAttrs={dataGridAttrs}
+              isAccordionOpen={isESQLResultsAccordionOpen}
+              setIsAccordionOpen={setIsESQLResultsAccordionOpen}
+              query={query}
+              isTableView={attributes.visualizationType !== 'lnsDatatable'}
+              onAccordionToggleCb={(status) => {
+                if (status && isSuggestionsAccordionOpen) {
+                  setIsSuggestionsAccordionOpen(!status);
+                }
+                if (status && isLayerAccordionOpen) {
+                  setIsLayerAccordionOpen(!status);
+                }
+              }}
+            />
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
               css={css`

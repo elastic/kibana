@@ -27,6 +27,9 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { TextBasedDimensionTrigger } from '../text_based/components/dimension_trigger';
+import { TextBasedDimensionEditor } from '../text_based/components/dimension_editor';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -64,6 +67,7 @@ import {
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
+import { toExpression as toExpressionESQL } from '../text_based/to_expression';
 import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
 import {
@@ -222,6 +226,7 @@ export function getFormBasedDatasource({
   charts,
   dataViewFieldEditor,
   uiActions,
+  expressions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -233,6 +238,7 @@ export function getFormBasedDatasource({
   charts: ChartsPluginSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
+  expressions: ExpressionsStart;
 }) {
   const { uiSettings, featureFlags } = core;
 
@@ -273,13 +279,14 @@ export function getFormBasedDatasource({
     insertLayer(
       state: FormBasedPrivateState,
       newLayerId: string,
-      linkToLayers: string[] | undefined
+      linkToLayers: string[] | undefined,
+      visLayerType: string = 'data'
     ) {
       return {
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(state.currentIndexPatternId, linkToLayers),
+          [newLayerId]: blankLayer(state.currentIndexPatternId, linkToLayers, visLayerType),
         },
       };
     },
@@ -477,16 +484,11 @@ export function getFormBasedDatasource({
       );
     },
 
-    toExpression: (
-      state,
-      layerId,
-      indexPatterns,
-      dateRange,
-      nowInstant,
-      searchSessionId,
-      forceDSL
-    ) =>
-      toExpression(
+    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId, forceDSL) => {
+      if (state.layers[layerId].query) {
+        return toExpressionESQL(state, layerId);
+      }
+      return toExpression(
         state,
         layerId,
         indexPatterns,
@@ -496,9 +498,13 @@ export function getFormBasedDatasource({
         nowInstant,
         searchSessionId,
         forceDSL
-      ),
+      );
+    },
 
     LayerSettingsComponent(props) {
+      if (props.layerId && props.state.layers[props.layerId].query) {
+        return null;
+      }
       return <LayerSettingsPanel {...props} />;
     },
     DataPanelComponent(props: DatasourceDataPanelProps<FormBasedPrivateState, Query>) {
@@ -529,17 +535,24 @@ export function getFormBasedDatasource({
         if (!layer.columns) {
           return;
         }
-        Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = uniqueLabelGenerator(
-            column.customLabel
-              ? column.label
-              : operationDefinitionMap[column.operationType].getDefaultLabel(
-                  column,
-                  layer.columns,
-                  indexPatternsMap[layer.indexPatternId]
-                )
-          );
-        });
+
+        if (layer.query) {
+          Object.values(layer.columns).forEach((column) => {
+            columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          });
+        } else {
+          Object.entries(layer.columns).forEach(([columnId, column]) => {
+            columnLabelMap[columnId] = uniqueLabelGenerator(
+              column.customLabel
+                ? column.label
+                : operationDefinitionMap[column.operationType].getDefaultLabel(
+                    column,
+                    layer.columns,
+                    indexPatternsMap[layer.indexPatternId]
+                  )
+            );
+          });
+        }
       });
 
       return columnLabelMap;
@@ -550,11 +563,25 @@ export function getFormBasedDatasource({
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
+      if (props.layerId && props.state.layers[props.layerId].query) {
+        return (
+          <TextBasedDimensionTrigger
+            {...props}
+            expressions={expressions}
+            columnLabelMap={columnLabelMap}
+          />
+        );
+      }
+
       return <DimensionTrigger id={props.columnId} label={formattedLabel} />;
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<FormBasedPrivateState>) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
+
+      if (props.layerId && props.state.layers[props.layerId].query) {
+        return <TextBasedDimensionEditor {...props} expressions={expressions} />;
+      }
 
       return (
         <FormBasedDimensionEditor
@@ -573,6 +600,10 @@ export function getFormBasedDatasource({
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<FormBasedPrivateState>) => {
+      // ES|QL layers don't show the layer panel (data view selector)
+      if (props.layerId && props.state.layers[props.layerId]?.query) {
+        return null;
+      }
       const { onChangeIndexPattern, ...otherProps } = props;
       return (
         <LayerPanel
@@ -712,6 +743,14 @@ export function getFormBasedDatasource({
         datasourceId: DATASOURCE_ID,
         datasourceAliasIds: ALIAS_IDS,
         getTableSpec: () => {
+          if (Array.isArray(layer.columns)) {
+            return (
+              layer.columns.map((column) => ({
+                columnId: column.columnId,
+                fields: [column.fieldName],
+              })) || []
+            );
+          }
           // consider also referenced columns in this case
           // but map fields to the top referencing column
           const fieldsPerColumn: Record<string, string[]> = {};
@@ -734,8 +773,22 @@ export function getFormBasedDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
-        isTextBasedLanguage: () => false,
+        isTextBasedLanguage: () => {
+          if (layer && Array.isArray(layer.columns)) return true;
+          return false;
+        },
         getOperationForColumnId: (columnId: string) => {
+          if (layer && Array.isArray(layer.columns)) {
+            const column = layer.columns.find((c) => c.columnId === columnId);
+            if (!column) {
+              return null;
+            }
+            return {
+              scale: 'interval',
+              dataType: column.meta.type,
+              isBucketed: true,
+            };
+          }
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(
@@ -944,7 +997,22 @@ export function getFormBasedDatasource({
   return formBasedDatasource;
 }
 
-function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedLayer {
+function blankLayer(
+  indexPatternId: string,
+  linkToLayers?: string[],
+  visLayerType: string
+): FormBasedLayer {
+  if (visLayerType === 'esql') {
+    return {
+      indexPatternId,
+      linkToLayers,
+      columns: [],
+      columnOrder: [],
+      sampling: 1,
+      ignoreGlobalFilters: false,
+      query: { esql: '' },
+    };
+  }
   return {
     indexPatternId,
     linkToLayers,
@@ -966,10 +1034,26 @@ function getLayerErrorMessages(
 
   const layerErrors: UserMessage[][] = Object.entries(state.layers)
     .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
-    .map(([layerId, layer]) =>
-      (
-        getErrorMessages(layer, indexPatterns[layer.indexPatternId], state, layerId, core, data) ??
-        []
+    .map(([layerId, layer]) => {
+      const esqlErrors = [];
+      if (layer.query) {
+        Object.values(state.layers).forEach((layer) => {
+          if (layer.errors && layer.errors.length > 0) {
+            esqlErrors.push(...layer.errors);
+          }
+        });
+      }
+      return (
+        layer.query
+          ? esqlErrors
+          : getErrorMessages(
+              layer,
+              indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core,
+              data
+            ) ?? []
       ).map((error) => {
         const message: UserMessage = {
           uniqueId: typeof error === 'string' ? error : error.uniqueId,
@@ -1004,8 +1088,8 @@ function getLayerErrorMessages(
         };
 
         return message;
-      })
-    );
+      });
+    });
 
   let errorMessages: UserMessage[];
   if (layerErrors.length <= 1) {

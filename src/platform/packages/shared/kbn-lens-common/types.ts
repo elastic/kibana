@@ -684,7 +684,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; references: Reference[] };
 
-  insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
+  insertLayer: (state: T, newLayerId: string, linkToLayers?: string[], layerType?: string) => T;
   createEmptyLayer: (indexPatternId: string) => T;
   removeLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
   clearLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
@@ -776,6 +776,15 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     forceDSL?: boolean,
     projectRouting?: ProjectRouting
   ) => ExpressionAstExpression | string | null;
+
+  toESQL: (
+    state: T,
+    layerId: string,
+    indexPatterns: IndexPatternMap,
+    dateRange: DateRange,
+    nowInstant: Date,
+    searchSessionId?: string
+  ) => string | null;
 
   getDatasourceSuggestionsForField: (
     state: T,
