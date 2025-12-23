@@ -18,16 +18,13 @@ test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () =
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await test.step('land on service details page', async () => {
+    await test.step('navigate to service details and show alerts tab', async () => {
       await serviceDetailsPage.goToPage();
+      await expect(serviceDetailsPage.alertsTab.getTab()).toBeVisible();
     });
 
     await test.step('navigate to alerts tab', async () => {
-      await expect(serviceDetailsPage.alertsTab.getTab()).toBeVisible();
       await serviceDetailsPage.alertsTab.clickTab();
-    });
-
-    await test.step('land on alerts tab', async () => {
       const url = new URL(page.url());
       expect(url.pathname).toContain(`/alerts`);
       await expect(serviceDetailsPage.alertsTab.tab).toHaveAttribute('aria-selected', 'true');
@@ -62,13 +59,8 @@ test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () =
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await test.step('land on alerts tab', async () => {
-      await serviceDetailsPage.alertsTab.goToTab();
-    });
-
-    await test.step('check a11y', async () => {
-      const { violations } = await page.checkA11y({ include: ['main'] });
-      expect(violations).toHaveLength(0);
-    });
+    await serviceDetailsPage.alertsTab.goToTab();
+    const { violations } = await page.checkA11y({ include: ['main'] });
+    expect(violations).toHaveLength(0);
   });
 });
