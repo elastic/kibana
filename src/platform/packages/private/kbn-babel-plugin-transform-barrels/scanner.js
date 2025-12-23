@@ -68,15 +68,15 @@ function resolvePackageBarrel(packageRoot, pkgJson) {
     barrelRelPath = pkgJson.main;
   }
 
+  // Default to index.js if nothing specified
+  if (!barrelRelPath) {
+    barrelRelPath = './index.js';
+  }
+
   // Some entry points are JSON, .d.ts or binary files, so we need to skip them
   const isParseableFile = /(?<!\.d)\.(js|jsx|ts|tsx|mjs|cjs)$/.test(barrelRelPath);
   if (!isParseableFile) {
     return null;
-  }
-
-  // Default to index.js if nothing specified
-  if (!barrelRelPath) {
-    barrelRelPath = './index.js';
   }
 
   // Resolve to absolute path
