@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.19.9",
+  "version": "8.19.10",
   "branch": "8.19",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -301,6 +301,7 @@
     "@kbn/core-elasticsearch-client-server-internal": "link:src/core/packages/elasticsearch/client-server-internal",
     "@kbn/core-elasticsearch-server": "link:src/core/packages/elasticsearch/server",
     "@kbn/core-elasticsearch-server-internal": "link:src/core/packages/elasticsearch/server-internal",
+    "@kbn/core-elasticsearch-server-utils": "link:src/core/packages/elasticsearch/server-utils",
     "@kbn/core-environment-server-internal": "link:src/core/packages/environment/server-internal",
     "@kbn/core-execution-context-browser": "link:src/core/packages/execution-context/browser",
     "@kbn/core-execution-context-browser-internal": "link:src/core/packages/execution-context/browser-internal",
