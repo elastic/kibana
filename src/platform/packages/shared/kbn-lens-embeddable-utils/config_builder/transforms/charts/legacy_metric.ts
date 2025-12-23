@@ -12,6 +12,7 @@ import type {
   LegacyMetricState as LegacyMetricVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -35,12 +36,16 @@ import type {
   LegacyMetricStateESQL,
   LegacyMetricStateNoESQL,
 } from '../../schema/charts/legacy_metric';
-import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+import {
+  getSharedChartLensStateToAPI,
+  getSharedChartAPIToLensState,
+  getLensStateLayer,
+  getDatasourceLayers,
+} from './utils';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import { isEsqlTableTypeDataset } from '../../utils';
 
-const ACCESSOR = 'metric_formula_accessor';
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
+const ACCESSOR = 'legacy_metric_accessor';
 
 function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisualizationState {
   const layer = config;
@@ -63,7 +68,7 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
 
 function reverseBuildVisualizationState(
   visualization: LegacyMetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -73,7 +78,7 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
   if (!dataset || dataset.type == null) {
     throw new Error('Unsupported dataset type');
@@ -131,7 +136,18 @@ function getValueColumns(layer: LegacyMetricStateESQL) {
   return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
 }
 
-export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
+type LegacyMetricAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsLegacyMetric' }
+>;
+
+type LegacyMetricAttributesWithoutFiltersAndQuery = Omit<LegacyMetricAttributes, 'state'> & {
+  state: Omit<LegacyMetricAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(
+  config: LegacyMetricState
+): LegacyMetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as LegacyMetricStateNoESQL);
 
@@ -144,7 +160,7 @@ export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -154,8 +170,6 @@ export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
@@ -167,21 +181,15 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'legacy_metric' }> {
   const { state } = config;
   const visualization = state.visualization as LegacyMetricVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  const [layerId, layer] = Object.entries(layers)[0];
+  const layers = getDatasourceLayers(state);
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

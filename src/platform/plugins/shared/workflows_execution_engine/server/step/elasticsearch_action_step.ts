@@ -77,7 +77,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const stepType = (this.step as any).configuration?.type || this.step.type;
       const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
-      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error as Error, {
+      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
         tags: ['elasticsearch', 'internal-action', 'error'],
         labels: {

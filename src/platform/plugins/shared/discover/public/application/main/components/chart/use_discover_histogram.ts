@@ -19,7 +19,7 @@ import {
   UnifiedHistogramFetchStatus,
   type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
-import { isEqual } from 'lodash';
+import { isEqual, intersection } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
@@ -34,10 +34,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import {
-  type DiscoverAppState,
-  useAppStateSelector,
-} from '../../state_management/discover_app_state_container';
+import { type DiscoverAppState, useAppStateSelector } from '../../state_management/redux';
 import type {
   DataDocumentsMsg,
   DiscoverLatestFetchDetails,
@@ -56,6 +53,11 @@ import { useDataState } from '../../hooks/use_data_state';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
+const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
+  'externalVisContext',
+  'breakdownField',
+  'timeInterval',
+];
 
 export interface UseUnifiedHistogramOptions {
   initialLayoutProps?: InitialUnifiedHistogramLayoutProps;
@@ -73,6 +75,8 @@ export const useDiscoverHistogram = (
   } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
   const isChartLoading = useMemo(() => {
     return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
@@ -93,7 +97,7 @@ export const useDiscoverHistogram = (
       unifiedHistogramApi?.state$
     )?.subscribe((changes) => {
       const { lensRequestAdapter, ...stateChanges } = changes;
-      const appState = stateContainer.appState.get();
+      const appState = stateContainer.getCurrentTab().appState;
       const oldState = {
         hideChart: appState.hideChart,
       };
@@ -104,32 +108,30 @@ export const useDiscoverHistogram = (
       }
 
       if (!isEqual(oldState, newState)) {
-        stateContainer.appState.update(newState);
+        dispatch(updateAppState({ appState: newState }));
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [inspectorAdapters, stateContainer.appState, unifiedHistogramApi?.state$]);
+  }, [dispatch, inspectorAdapters, stateContainer, unifiedHistogramApi?.state$, updateAppState]);
 
   /**
    * Sync URL query params with Unified Histogram
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
-      (changes) => {
-        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogramApi?.setChartHidden(changes.chartHidden);
-        }
+    const subscription = createAppStateObservable(stateContainer.appState$).subscribe((changes) => {
+      if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+        unifiedHistogramApi?.setChartHidden(changes.chartHidden);
       }
-    );
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [stateContainer.appState.state$, unifiedHistogramApi]);
+  }, [stateContainer.appState$, unifiedHistogramApi]);
 
   /**
    * Total hits
@@ -185,14 +187,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription?.unsubscribe();
     };
-  }, [
-    isEsqlMode,
-    main$,
-    totalHits$,
-    setTotalHitsError,
-    stateContainer.appState,
-    unifiedHistogramApi?.state$,
-  ]);
+  }, [isEsqlMode, main$, totalHits$, setTotalHitsError, unifiedHistogramApi?.state$]);
 
   /**
    * Request params
@@ -272,7 +267,7 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
-      const visContext = latestFetchDetails?.visContext ?? savedSearchState?.visContext;
+      const visContext = collectedFetchParams?.externalVisContext ?? savedSearchState?.visContext;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
         isEsqlMode,
@@ -321,17 +316,20 @@ export const useDiscoverHistogram = (
       );
     });
 
-    if (changedParams.length === 1 && changedParams[0] === 'externalVisContext') {
-      triggerUnifiedHistogramFetch.current({
-        visContext: collectedFetchParams.externalVisContext,
-      });
+    if (
+      changedParams.length > 0 &&
+      intersection(changedParams, TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH).length ===
+        changedParams.length
+    ) {
+      // if changes happen only in the TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH attributes, then trigger a separate chart refetch
+      // as we know that for these attributes we don't refetch documents (hence no fetchChart$ emission will happen)
+      triggerUnifiedHistogramFetch.current(undefined);
     }
   }, [collectedFetchParams, triggerUnifiedHistogramFetch]);
 
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
-  const dispatch = useInternalStateDispatch();
 
   const onVisContextChanged = useCallback(
     (
@@ -387,10 +385,10 @@ export const useDiscoverHistogram = (
   >(
     (nextBreakdownField) => {
       if (nextBreakdownField !== breakdownField) {
-        stateContainer.appState.update({ breakdownField: nextBreakdownField });
+        dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
       }
     },
-    [breakdownField, stateContainer.appState]
+    [breakdownField, dispatch, updateAppState]
   );
 
   const onTimeIntervalChange = useCallback<
@@ -398,10 +396,10 @@ export const useDiscoverHistogram = (
   >(
     (nextTimeInterval) => {
       if (nextTimeInterval !== timeInterval) {
-        stateContainer.appState.update({ interval: nextTimeInterval });
+        dispatch(updateAppState({ appState: { interval: nextTimeInterval } }));
       }
     },
-    [timeInterval, stateContainer.appState]
+    [timeInterval, dispatch, updateAppState]
   );
 
   return useMemo(

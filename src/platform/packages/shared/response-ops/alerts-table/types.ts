@@ -57,6 +57,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Case } from './apis/bulk_get_cases';
+import type { ItemsSelectionState } from './components/tags/items/types';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -278,6 +279,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   showAlertStatusWithFlapping?: boolean;
   /**
+   * Whether to fetch muted alerts for the table. Security Solution, for
+   * example, does not use muted alerts. Defaults to true.
+   */
+  isMutedAlertsEnabled?: boolean;
+  /**
    * Customizations to the data grid toolbar
    */
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
@@ -498,6 +504,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'services'
     | 'casesConfiguration'
     | 'openLinksInNewTab'
+    | 'isMutedAlertsEnabled'
   >,
   | 'columns'
   | 'pageIndex'
@@ -507,6 +514,7 @@ export type RenderContext<AC extends AdditionalContext> = {
   | 'openLinksInNewTab'
   | 'expandedAlertIndex'
   | 'onExpandedAlertIndexChange'
+  | 'isMutedAlertsEnabled'
 > &
   AC;
 
@@ -686,6 +694,12 @@ export interface BulkActionsState {
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
   updatedAt: number;
+}
+
+export interface BulkEditTagsFlyoutState {
+  isFlyoutOpen: boolean;
+  onClose: () => void;
+  onSaveTags: (itemsSelection: ItemsSelectionState) => void;
 }
 
 export interface AlertsTableFlyoutBaseProps {

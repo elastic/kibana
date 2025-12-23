@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
 import { useEffect } from 'react';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getStepIconBase64 } from '../../../shared/ui/step_icons/get_step_icon_base64';
+import {
+  getStepIconBase64,
+  type GetStepIconBase64Params,
+} from '../../../shared/ui/step_icons/get_step_icon_base64';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 
-export interface ConnectorTypeInfoMinimal {
-  actionTypeId: string;
+export interface ConnectorTypeInfoMinimal extends GetStepIconBase64Params {
   displayName: string;
-  icon?: IconType;
 }
 
 export const predefinedStepTypes = [
@@ -54,6 +54,10 @@ export const predefinedStepTypes = [
     displayName: 'Wait',
   },
   {
+    actionTypeId: 'data.set',
+    displayName: 'Set Variables',
+  },
+  {
     actionTypeId: 'http',
     displayName: 'HTTP',
   },
@@ -72,7 +76,9 @@ export const predefinedStepTypes = [
 ];
 
 export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefined) {
-  const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+  const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+  const { actionTypeRegistry } = triggersActionsUi;
+
   useEffect(() => {
     if (!connectorsData?.connectorTypes) {
       return;
@@ -86,14 +92,23 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
       };
     });
 
+    const registeredTypes = workflowsExtensions.getAllStepDefinitions().map((step) => ({
+      actionTypeId: step.id,
+      displayName: step.label,
+      fromRegistry: true,
+      icon: step.icon,
+    }));
+
+    const allTypes = [...predefinedStepTypes, ...connectorTypes, ...registeredTypes];
+
     // Run async functions
     (async () => {
       await Promise.all([
-        injectDynamicConnectorIcons([...predefinedStepTypes, ...connectorTypes]),
-        injectDynamicShadowIcons([...predefinedStepTypes, ...connectorTypes]),
+        injectDynamicConnectorIcons(allTypes),
+        injectDynamicShadowIcons(allTypes),
       ]);
     })();
-  }, [connectorsData?.connectorTypes, actionTypeRegistry]);
+  }, [connectorsData?.connectorTypes, actionTypeRegistry, workflowsExtensions]);
 }
 
 /**
@@ -122,17 +137,20 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
     // Generate CSS rule for this connector
     const iconBase64 = await getStepIconBase64(connector);
 
-    let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
-      .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon:before,
-      .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon:before,
-      .monaco-list .monaco-list-row[aria-label="${connectorType}"] .suggest-icon:before,
-      .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon:before`;
+    let selector = '';
     if (connectorType === 'elasticsearch') {
-      selector = '.codicon-symbol-struct:before';
+      // Target the codicon class for elasticsearch connectors AND any suggestion with "elasticsearch." in aria-label
+      selector = `.codicon-symbol-struct:before,
+        .monaco-list .monaco-list-row[aria-label^="elasticsearch."] .suggest-icon:before`;
     } else if (connectorType === 'kibana') {
-      selector = '.codicon-symbol-module:before';
+      // Target the codicon class for kibana connectors AND any suggestion with "kibana." in aria-label
+      selector = `.codicon-symbol-module:before,
+        .monaco-list .monaco-list-row[aria-label^="kibana."] .suggest-icon:before`;
     } else if (connectorType === 'console') {
       selector = '.codicon-symbol-variable:before';
+    } else {
+      selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType}"] .suggest-icon:before,
+      .monaco-list .monaco-list-row[aria-label^="${displayName}"] .suggest-icon:before`;
     }
 
     let cssProperties = '';

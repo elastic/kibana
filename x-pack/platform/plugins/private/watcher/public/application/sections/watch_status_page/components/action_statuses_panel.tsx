@@ -268,7 +268,7 @@ export const ActionStatusesPanel = () => {
         pagination={PAGINATION}
         sorting={true}
         data-test-subj="watchActionStatusTable"
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
             defaultMessage="No actions to show"

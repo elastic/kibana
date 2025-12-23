@@ -33,9 +33,11 @@ export {
   createAgentsServiceStartMock,
   createMockedAgentRegistry,
   createMockedAgent,
+  createMockedInternalAgent,
   type AgentsServiceStartMock,
   type AgentRegistryMock,
   type MockedAgent,
+  type MockedInternalAgent,
 } from './agents';
 export {
   createConversationClientMock,
@@ -44,3 +46,4 @@ export {
   type ConversationServiceMock,
   type ConversationClientMock,
 } from './conversations';
+export { createFormatContextMock } from './attachments';

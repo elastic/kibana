@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Lazy import to avoid bundling large generated file in main plugin bundle
+import { getElasticsearchConnectors } from '../spec/elasticsearch';
 
 /**
  * Builds an Elasticsearch request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
+// eslint-disable-next-line complexity
 export function buildRequestFromConnector(
   stepType: string,
   params: Record<string, unknown>
@@ -37,12 +38,10 @@ export function buildRequestFromConnector(
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated/elasticsearch_connectors');
+  const esConnectors = getElasticsearchConnectors();
 
   // Find the connector definition for this step type
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c: any) => c.type === stepType);
+  const connector = esConnectors.find((c) => c.type === stepType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)
@@ -50,7 +49,7 @@ export function buildRequestFromConnector(
     const bodyParamKeys = new Set<string>(connector.parameterTypes?.bodyParams || []);
 
     // Determine method (allow user override)
-    const method = params.method || connector.methods[0]; // User can override method
+    const method = typeof params.method === 'string' ? params.method : connector.methods[0]; // User can override method
 
     // Choose the best pattern based on available parameters
     let selectedPattern = selectBestPattern(connector.patterns, params);

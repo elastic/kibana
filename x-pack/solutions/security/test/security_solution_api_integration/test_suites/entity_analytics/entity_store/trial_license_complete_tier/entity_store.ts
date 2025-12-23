@@ -148,7 +148,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('start and stop', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/236432
+    describe.skip('start and stop', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });

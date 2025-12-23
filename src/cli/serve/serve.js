@@ -369,6 +369,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_SERVICE_URL,
     MOCK_IDP_UIAM_SHARED_SECRET,
     MOCK_IDP_UIAM_ORGANIZATION_ID,
     MOCK_IDP_UIAM_PROJECT_ID, // eslint-disable-next-line import/no-dynamic-require
@@ -445,7 +446,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
 
     if (!_.has(rawConfig, 'xpack.security.uiam.url')) {
-      lodashSet(rawConfig, 'xpack.security.uiam.url', 'http://localhost:8080');
+      lodashSet(rawConfig, 'xpack.security.uiam.url', MOCK_IDP_UIAM_SERVICE_URL);
     }
 
     if (!_.has(rawConfig, 'xpack.security.uiam.sharedSecret')) {

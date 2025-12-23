@@ -51,16 +51,16 @@ export class DataViewsService extends FtrService {
       return isInvalid !== 'true';
     });
 
-    if (hasTimeField) {
-      await this.retry.waitFor('timestamp field loaded', async () => {
-        const timestampField = await this.testSubjects.find('timestampField');
-        return !(await timestampField.elementHasClass('euiComboBox-isDisabled'));
-      });
+    await this.testSubjects.waitForAttributeToChange('timestampField', 'data-is-loading', '0');
 
-      if (changeTimestampField) {
-        await this.comboBox.set('timestampField', changeTimestampField);
+    if (await this.testSubjects.isEnabled('timestampField > comboBoxSearchInput')) {
+      if (!hasTimeField) {
+        await this.comboBox.set('timestampField', "--- I don't want to use the time filter ---");
+      } else if (changeTimestampField) {
+        await this.comboBox.set('timestampField', changeTimestampField!);
       }
     }
+
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -134,11 +134,6 @@ export class DataViewsService extends FtrService {
    * Switch Data View from top search bar
    */
   public async switchTo(name: string) {
-    // TODO: remove in https://github.com/elastic/kibana/issues/239313
-    if (await this.testSubjects.exists('nav-tour-skip-button')) {
-      await this.testSubjects.click('nav-tour-skip-button');
-      await this.testSubjects.waitForDeleted('nav-tour-skip-button');
-    }
     const selectedDataView = await this.getSelectedName();
     if (name === selectedDataView) {
       return;

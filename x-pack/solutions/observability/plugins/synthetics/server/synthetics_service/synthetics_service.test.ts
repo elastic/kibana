@@ -18,6 +18,7 @@ import { LocationStatus } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
 import type { SyntheticsServerSetup } from '../types';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 jest.mock('axios', () => jest.fn());
 
@@ -254,7 +255,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
       expect(axios).not.toHaveBeenCalled();
 
@@ -277,7 +278,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
       expect(serverMock.logger.debug).toBeCalledWith(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
@@ -350,7 +351,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -400,7 +401,7 @@ describe('SyntheticsService', () => {
 
         (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-        await expect(service.pushConfigs()).rejects.toThrow(errorMessage);
+        await expect(service.pushConfigs(ALL_SPACES_ID)).rejects.toThrow(errorMessage);
       }
     );
   });
@@ -566,7 +567,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.pushConfigs();
+      await service.pushConfigs(ALL_SPACES_ID);
 
       expect(syncSpy).toHaveBeenCalledTimes(72);
       expect(axios).toHaveBeenCalledTimes(72);

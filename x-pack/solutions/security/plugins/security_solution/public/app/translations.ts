@@ -209,6 +209,10 @@ export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
   }
 );
 
+export const SCRIPTS_LIBRARY = i18n.translate('xpack.securitySolution.navigation.scriptsLibrary', {
+  defaultMessage: 'Scripts library',
+});
+
 export const PROTECTION_UPDATES = i18n.translate(
   'xpack.securitySolution.navigation.protectionUpdates',
   {

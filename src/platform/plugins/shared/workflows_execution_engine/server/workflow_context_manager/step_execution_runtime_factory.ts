@@ -84,8 +84,8 @@ export class StepExecutionRuntimeFactory {
       workflowExecutionGraph: WorkflowGraph;
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
-      fakeRequest?: KibanaRequest;
-      coreStart?: CoreStart;
+      fakeRequest: KibanaRequest;
+      coreStart: CoreStart;
       dependencies: ContextDependencies;
     }
   ) {}

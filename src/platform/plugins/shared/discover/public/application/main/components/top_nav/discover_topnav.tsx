@@ -21,7 +21,7 @@ import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useESQLVariables } from './use_esql_variables';
@@ -153,19 +153,22 @@ export const DiscoverTopNav = ({
     [editField, canEditDataView]
   );
 
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appState } = stateContainer;
-    if (newSavedQueryId) {
-      appState.update({ savedQuery: newSavedQueryId });
-    } else {
-      // remove savedQueryId from state
-      const newState = {
-        ...appState.get(),
-      };
-      delete newState.savedQuery;
-      appState.set(newState);
-    }
-  };
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const setAppState = useCurrentTabAction(internalStateActions.setAppState);
+
+  const updateSavedQueryId = useCallback(
+    (newSavedQueryId: string | undefined) => {
+      if (newSavedQueryId) {
+        dispatch(updateAppState({ appState: { savedQuery: newSavedQueryId } }));
+      } else {
+        // remove savedQueryId from state
+        const newState = { ...stateContainer.getCurrentTab().appState };
+        delete newState.savedQuery;
+        dispatch(setAppState({ appState: newState }));
+      }
+    },
+    [dispatch, setAppState, stateContainer, updateAppState]
+  );
 
   const onESQLToDataViewTransitionModalClose = useCallback(
     (shouldDismissModal?: boolean, needsSave?: boolean) => {

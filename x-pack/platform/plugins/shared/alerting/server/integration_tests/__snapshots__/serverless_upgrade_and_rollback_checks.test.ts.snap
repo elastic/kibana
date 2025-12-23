@@ -4822,6 +4822,19 @@ Object {
                     ],
                     "type": "string",
                   },
+                  "managed": Object {
+                    "flags": Object {
+                      "default": [Function],
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
+                    "type": "boolean",
+                  },
                   "name": Object {
                     "flags": Object {
                       "default": [Function],

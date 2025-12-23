@@ -12,9 +12,9 @@ import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { isOtelStream } from '@kbn/streams-schema';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import {
-  determineOtelFieldNameUsage,
   callInferenceWithPrompt,
   fetchFieldMetadata,
   normalizeFieldName,
@@ -74,36 +74,28 @@ export const handleProcessingGrokSuggestions = async ({
   signal,
   logger,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
-  // Determine if we should use OTEL field names
-  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
+  const stream = await streamsClient.getStream(params.path.name);
 
-  try {
-    // Call LLM inference to review fields
-    const reviewResult = await callInferenceWithPrompt(
-      inferenceClient,
-      params.body.connector_id,
-      ReviewFieldsPrompt,
-      params.body.sample_messages,
-      params.body.review_fields,
-      signal
-    );
+  // Call LLM inference to review fields
+  const reviewResult = await callInferenceWithPrompt(
+    inferenceClient,
+    params.body.connector_id,
+    ReviewFieldsPrompt,
+    params.body.sample_messages,
+    params.body.review_fields,
+    signal
+  );
 
-    // Fetch field metadata for ECS/OTEL field name resolution
-    const fieldMetadata = await fetchFieldMetadata(
-      fieldsMetadataClient,
-      reviewResult.fields.map((field: { ecs_field: string }) => field.ecs_field)
-    );
+  // Fetch field metadata for ECS/OTEL field name resolution
+  const fieldMetadata = await fetchFieldMetadata(
+    fieldsMetadataClient,
+    reviewResult.fields.map((field: { ecs_field: string }) => field.ecs_field)
+  );
 
-    return {
-      log_source: reviewResult.log_source,
-      fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames),
-    };
-  } catch (error) {
-    logger.error(error);
-    throw new Error(
-      'Failed to generate grok suggestions due to error with the AI generation, please try again later.'
-    );
-  }
+  return {
+    log_source: reviewResult.log_source,
+    fields: mapFields(reviewResult.fields, fieldMetadata, isOtelStream(stream)),
+  };
 };
 
 export function mapFields(

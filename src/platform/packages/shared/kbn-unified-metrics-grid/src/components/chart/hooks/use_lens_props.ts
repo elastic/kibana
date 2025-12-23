@@ -9,11 +9,11 @@
 
 import type { LensAttributes, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useStableCallback } from '@kbn/unified-histogram';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   filter,
   Observable,
@@ -32,12 +32,15 @@ import type {
   LensYBoundsConfig,
   LensESQLDataset,
 } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { UnifiedMetricsGridProps } from '../../../types';
+
 export type LensProps = Pick<
   EmbeddableComponentProps,
   | 'id'
   | 'viewMode'
   | 'timeRange'
   | 'attributes'
+  | 'esqlVariables'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
@@ -54,23 +57,29 @@ export const useLensProps = ({
   chartRef,
   chartLayers,
   yBounds,
+  error,
 }: {
   title: string;
   query: string;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
-} & Pick<ChartSectionProps, 'services' | 'fetchParams'>) => {
+  error?: Error;
+} & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds]);
+  }, [query, title, chartLayers, yBounds, error]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
+    // keep Lens from building if there are no chart layers and no error
+    // force Lens to build with no datasource on error to show the error message
+    if (!chartLayers.length && !error) return null;
+
     const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -79,6 +88,7 @@ export const useLensProps = ({
         esql: (lensParams.dataset as LensESQLDataset).esql,
       },
     })) as LensAttributes;
+
     return result;
   });
 
@@ -87,11 +97,17 @@ export const useLensProps = ({
       return getLensProps({
         searchSessionId: fetchParams.searchSessionId,
         timeRange: fetchParams.relativeTimeRange, // same as in the time picker
+        esqlVariables: fetchParams.esqlVariables,
         attributes,
-        lastReloadRequestTime: Date.now(),
+        lastReloadRequestTime: fetchParams.lastReloadRequestTime,
       });
     },
-    [fetchParams.searchSessionId, fetchParams.relativeTimeRange]
+    [
+      fetchParams.searchSessionId,
+      fetchParams.relativeTimeRange,
+      fetchParams.lastReloadRequestTime,
+      fetchParams.esqlVariables,
+    ]
   );
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -128,7 +144,8 @@ export const useLensProps = ({
       discoverFetch$
     ).pipe(
       // any new emission cancels previous load to avoid race conditions
-      switchMap(() => from(buildAttributesFn.current()))
+      switchMap(() => from(buildAttributesFn.current())),
+      filter((attributes): attributes is LensAttributes => attributes !== null)
     );
 
     // Update Lens props when new attributes load AND chart is visible
@@ -186,9 +203,11 @@ const getLensProps = ({
   timeRange,
   attributes,
   lastReloadRequestTime,
+  esqlVariables,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
+  esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
 }): LensProps => ({
@@ -197,6 +216,7 @@ const getLensProps = ({
   timeRange,
   attributes,
   noPadding: true,
+  esqlVariables,
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',

@@ -6,9 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
+import type { Dispatch, SetStateAction } from 'react';
 import { useMemo, useEffect, useState } from 'react';
-import type { SetStateAction } from 'react';
-import type React from 'react';
 import type { fetchQueryUnifiedAlerts, fetchQueryRuleRegistryAlerts } from './api';
 import { fetchQueryAlerts } from './api';
 import type { AlertSearchResponse, QueryAlerts } from './types';
@@ -20,13 +19,13 @@ type Func = () => Promise<void>;
 export interface ReturnQueryAlerts<Hit, Aggs> {
   loading: boolean;
   data: AlertSearchResponse<Hit, Aggs> | null;
-  setQuery: React.Dispatch<SetStateAction<object>>;
+  setQuery: Dispatch<SetStateAction<object>>;
   response: string;
   request: string;
   refetch: Func | null;
 }
 
-type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QUERY_NAMES];
+export type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QUERY_NAMES];
 
 type FetchMethod =
   | typeof fetchQueryAlerts
@@ -112,7 +111,11 @@ export const useQueryAlerts = <Hit, Aggs>({
           setAlerts({
             data: alertResponse,
             response: JSON.stringify(alertResponse, null, 2),
-            request: JSON.stringify({ index: [indexName] ?? [''], body: query }, null, 2),
+            request: JSON.stringify(
+              { index: indexName ? [indexName] : [''], body: query },
+              null,
+              2
+            ),
             setQuery,
             refetch: fetchData,
           });

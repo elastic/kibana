@@ -37,6 +37,7 @@ export function NoSuggestionsCallout({
       className={css`
         min-block-size: auto; /* Prevent background clipping */
       `}
+      data-test-subj="streamsAppNoSuggestionsCallout"
     >
       <EuiText size="s">
         {i18n.translate(

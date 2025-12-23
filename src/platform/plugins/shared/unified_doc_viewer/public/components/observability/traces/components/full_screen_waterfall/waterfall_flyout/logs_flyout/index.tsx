@@ -15,7 +15,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { WaterfallFlyout } from '..';
 import LogsOverview from '../../../../../../doc_viewer_logs_overview';
-import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
+import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
 import { useAdhocDataView } from '../../hooks/use_adhoc_data_view';
 import { useFetchLog } from '../../hooks/use_fetch_log';
 

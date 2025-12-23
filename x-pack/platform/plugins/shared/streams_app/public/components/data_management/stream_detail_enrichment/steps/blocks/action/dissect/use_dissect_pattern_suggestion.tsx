@@ -13,6 +13,7 @@ import {
   groupMessagesByPattern,
 } from '@kbn/dissect-heuristics';
 import { lastValueFrom } from 'rxjs';
+import type { useAbortController } from '@kbn/react-hooks';
 import { showErrorToast } from '../../../../../../../hooks/use_streams_app_fetch';
 import {
   usePatternSuggestionDependencies,
@@ -28,12 +29,13 @@ export interface DissectPatternSuggestionParams {
   fieldName: string;
 }
 
-export function useDissectPatternSuggestion() {
+export function useDissectPatternSuggestion(
+  abortController: ReturnType<typeof useAbortController>
+) {
   const {
     notifications,
     telemetryClient,
     streamsRepositoryClient,
-    abortController,
     stepsWithoutCurrent,
     previewDocsFilter,
     originalSamples,

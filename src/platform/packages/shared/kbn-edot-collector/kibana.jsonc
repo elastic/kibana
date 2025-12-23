@@ -1,7 +1,7 @@
 {
   "type": "shared-server",
   "id": "@kbn/edot-collector",
-  "owner": "@elastic/obs-ai-assistant",
+  "owner": "@elastic/obs-ai-team",
   "group": "platform",
   "visibility": "shared",
   "devOnly": true

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/synthtrace';
 import Url from 'url';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { createEsClientForFtrConfig } from '@kbn/test';

@@ -27,6 +27,7 @@ import {
 import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
 import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
+import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 
 const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
   if (!cloud) return undefined;
@@ -80,6 +81,18 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
 
   return (
     <>
+      <CloudConnectorNameField
+        value={credentials?.name || ''}
+        onChange={(name, isValid, error) => {
+          if (credentials && setCredentials) {
+            setCredentials({
+              ...credentials,
+              name,
+            });
+          }
+        }}
+      />
+      <EuiSpacer size="m" />
       <EuiAccordion
         id="armTemplateAccordianInstructions"
         data-test-subj={AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ}

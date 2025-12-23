@@ -10,6 +10,9 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
+    title: {
+      type: 'text',
+    },
     createdBy: {
       type: 'keyword',
     },

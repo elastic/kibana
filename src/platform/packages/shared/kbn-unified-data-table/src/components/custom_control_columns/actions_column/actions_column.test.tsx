@@ -231,6 +231,42 @@ describe('getActionsColumn', () => {
       ],
       description: '2 of each column type',
     },
+    {
+      description: 'additional leading column with custom width',
+      baseColumns: [],
+      rowAdditionalLeadingControls: [
+        {
+          id: 'row-control-column',
+          render: () => <div>Row control column</div>,
+          width: 80,
+        },
+      ],
+      externalControlColumns: [],
+      expectedWidth: 80,
+      expectedTexts: ['Row control column'],
+    },
+    {
+      description: 'additional leading column with custom width + extra options',
+      baseColumns: [],
+      rowAdditionalLeadingControls: [
+        {
+          id: 'row-control-column',
+          render: () => <div>Row control column</div>,
+          width: 80,
+        },
+        {
+          id: 'row-control-column-2',
+          render: () => <div>Row control column 2</div>,
+        },
+        {
+          id: 'row-control-column-2',
+          render: () => <div>Row control column 2</div>,
+        },
+      ],
+      externalControlColumns: [],
+      expectedWidth: 104, // 80 from the first column + 24 from the menu column
+      expectedTexts: ['Row control column'],
+    },
   ])(
     'given $description',
     ({

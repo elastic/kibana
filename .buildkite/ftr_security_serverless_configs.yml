@@ -14,9 +14,6 @@ disabled:
   - x-pack/solutions/security/test/security_solution_cypress/serverless_config.ts
   - x-pack/solutions/security/test/security_solution_cypress/ai4dsoc_serverless_config.ts
 
-  # Playwright
-  - x-pack/solutions/security/test/security_solution_playwright/serverless_config.ts
-
   # QA suites that are run out-of-band
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.cloud.ts
 
@@ -42,6 +39,7 @@ enabled:
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.basic.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.essentials.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.agentless.ts
+  - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.complete.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts
@@ -111,13 +109,11 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/startup/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/knowledge_base/entries/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/knowledge_base/entries/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/privileges/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/privileges/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/serverless.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/conversations/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts

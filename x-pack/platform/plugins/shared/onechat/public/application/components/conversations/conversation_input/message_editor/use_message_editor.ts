@@ -37,8 +37,16 @@ export const useMessageEditor = (): MessageEditorInstance => {
   const [isEmpty, setIsEmpty] = useState(true);
 
   const syncIsEmpty = useCallback(() => {
-    const content = ref.current?.textContent?.trim() ?? '';
-    setIsEmpty(content === '');
+    if (!ref?.current) {
+      return;
+    }
+    const nextIsEmpty = !ref.current.textContent || ref.current.textContent.trim() === '';
+    if (nextIsEmpty) {
+      // If current text content is empty clear innerHTML
+      // This is required so the :empty pseudo-class gets reset and the placeholder is shown
+      ref.current.innerHTML = '';
+    }
+    setIsEmpty(nextIsEmpty);
   }, []);
 
   const instance = useMemo(
@@ -46,12 +54,6 @@ export const useMessageEditor = (): MessageEditorInstance => {
       _internal: {
         ref,
         onChange: () => {
-          // If current text content is empty clear innerHTML
-          // This is required so the :empty pseudo-class gets reset and the placeholder is shown
-          if (ref.current && ref.current.textContent === '') {
-            ref.current.innerHTML = '';
-          }
-
           syncIsEmpty();
         },
       },
@@ -65,6 +67,11 @@ export const useMessageEditor = (): MessageEditorInstance => {
         if (ref.current) {
           ref.current.textContent = text;
           syncIsEmpty();
+          // Set caret position at the end of the text
+          const selection = window.getSelection();
+          if (selection && ref.current.firstChild) {
+            selection.setPosition(ref.current.firstChild, text.length);
+          }
         }
       },
       clear: () => {

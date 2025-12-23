@@ -36,17 +36,31 @@ export interface BaseMetadata {
   widget?: WidgetType | string;
   label?: string;
   placeholder?: string;
-  default?: unknown;
   helpText?: string;
-  isDisabled?: boolean;
+  disabled?: boolean;
   sensitive?: boolean;
   order?: number;
+  hidden?: boolean;
+  [x: string]: unknown;
 }
 
-export function getMeta(schema: z.ZodTypeAny): BaseMetadata | undefined {
-  return z.globalRegistry.get(schema) as BaseMetadata | undefined;
+export function getMeta(schema: z.ZodType): BaseMetadata {
+  if (!z.globalRegistry.has(schema)) {
+    return {};
+  }
+  return z.globalRegistry.get(schema) || {};
 }
 
+export function setMeta<T extends z.ZodType>(schema: T, meta: BaseMetadata): T {
+  z.globalRegistry.add(schema, meta as Record<string, unknown>);
+  return schema;
+}
+
+export function addMeta<T extends z.ZodType>(schema: T, meta: Partial<BaseMetadata>): T {
+  const existing = getMeta(schema);
+  z.globalRegistry.add(schema, { ...existing, ...meta } as Record<string, unknown>);
+  return schema;
+}
 /**
  * Extended Zod type definition with UI metadata
  *

@@ -172,6 +172,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     ? getDurationUnitValue(action.frequency?.throttle)
     : 'h';
 
+  // @ts-expect-error upgrade typescript v5.9.3
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = [
     intervalNumber,
     intervalUnit,

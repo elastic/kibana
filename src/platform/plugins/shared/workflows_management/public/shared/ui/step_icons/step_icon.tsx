@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps, IconType } from '@elastic/eui';
 import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { Suspense } from 'react';
+import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getStepIconType } from './get_step_icon_type';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getExecutionStatusColors } from '../status_badge';
+import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
 
 interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
@@ -25,7 +27,13 @@ interface StepIconProps extends Omit<EuiIconProps, 'type'> {
 export const StepIcon = React.memo(
   ({ stepType, executionStatus, onClick, ...rest }: StepIconProps) => {
     const { euiTheme } = useEuiTheme();
-    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+    const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+    const { actionTypeRegistry } = triggersActionsUi;
+
+    // For Overview pseudo-step, show the execution status icon
+    if (stepType === '__overview' && executionStatus) {
+      return getExecutionStatusIcon(euiTheme, executionStatus);
+    }
 
     const shouldApplyColorToIcon = executionStatus !== undefined;
     if (executionStatus === ExecutionStatus.RUNNING) {
@@ -35,10 +43,22 @@ export const StepIcon = React.memo(
       return <EuiBeacon size={14} color="warning" />;
     }
 
-    const actionTypeId = stepType.startsWith('.') ? stepType : `.${stepType}`;
-    if (actionTypeRegistry.has(actionTypeId)) {
-      const actionType = actionTypeRegistry.get(actionTypeId);
-      return <EuiIcon type={actionType.iconClass} size="m" />;
+    const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
+    if (actionTypeIcon) {
+      return (
+        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+          <EuiIcon type={actionTypeIcon} size="m" />
+        </Suspense>
+      );
+    }
+
+    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
+    if (stepDefinition?.icon) {
+      return (
+        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+          <EuiIcon type={stepDefinition.icon} size="m" />
+        </Suspense>
+      );
     }
 
     const iconType = getStepIconType(stepType);
@@ -57,6 +77,7 @@ export const StepIcon = React.memo(
         />
       );
     }
+
     return (
       <EuiIcon
         type={iconType}
@@ -84,3 +105,17 @@ export const StepIcon = React.memo(
   }
 );
 StepIcon.displayName = 'StepIcon';
+
+// stepType is in the format of `.actionTypeId.actionTypeSubtype`
+function getActionTypeIcon(
+  stepType: string,
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>
+): IconType | undefined {
+  const action = stepType.startsWith('.') ? stepType.slice(1) : stepType;
+  const [actionTypeId] = action.split('.');
+  if (actionTypeRegistry.has(`.${actionTypeId}`)) {
+    const actionType = actionTypeRegistry.get(`.${actionTypeId}`);
+    return actionType.iconClass;
+  }
+  return undefined;
+}

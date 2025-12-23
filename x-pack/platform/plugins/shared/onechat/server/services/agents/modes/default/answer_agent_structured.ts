@@ -11,9 +11,10 @@ import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import { errorAction } from './actions';
+import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
+import { errorAction } from './actions';
 import { getStructuredAnswerPrompt } from './prompts';
 import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
@@ -38,6 +39,7 @@ export const createAnswerAgentStructured = ({
   capabilities,
   events,
   outputSchema,
+  attachmentTypes,
 }: {
   chatModel: InferenceChatModel;
   configuration: ResolvedConfiguration;
@@ -45,6 +47,7 @@ export const createAnswerAgentStructured = ({
   events: AgentEventEmitter;
   outputSchema?: Record<string, unknown>;
   logger: Logger;
+  attachmentTypes: ProcessedAttachmentType[];
 }) => {
   return async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {
@@ -82,6 +85,7 @@ export const createAnswerAgentStructured = ({
         initialMessages: state.initialMessages,
         actions: state.mainActions,
         answerActions: state.answerActions,
+        attachmentTypes,
       });
 
       const response = await structuredModel.invoke(prompt);

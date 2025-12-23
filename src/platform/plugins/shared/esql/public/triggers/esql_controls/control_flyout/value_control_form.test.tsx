@@ -12,7 +12,7 @@ import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { monaco } from '@kbn/monaco';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
@@ -61,6 +61,10 @@ describe('ValueControlForm', () => {
     core: coreMock.createStart(),
     data: dataMock,
   };
+
+  services.core.http.get = jest
+    .fn()
+    .mockImplementation((_url: string) => Promise.resolve({ timeField: '@timestamp' }));
 
   const defaultProps = {
     initialVariableType: ESQLVariableType.TIME_LITERAL,
@@ -360,6 +364,28 @@ describe('ValueControlForm', () => {
         if (queryEditor) {
           expect(queryEditor.textContent).toContain('custom-logs');
         }
+      });
+
+      it("should show the 'no results' callout", async () => {
+        (getESQLResults as jest.Mock).mockResolvedValueOnce({
+          response: {
+            columns: [],
+          },
+        });
+
+        const { findByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field.id  == 'lala' | STATS BY field.name"
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
       });
     });
   });

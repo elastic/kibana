@@ -11,7 +11,12 @@ import React, { forwardRef, useMemo } from 'react';
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type UseEuiTheme,
+} from '@elastic/eui';
 
 import { FooterItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
@@ -29,8 +34,14 @@ const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) 
   padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
 `;
 
+export interface FooterIds {
+  footerNavigationInstructionsId: string;
+}
+
+export type FooterChildren = ReactNode | ((ids: FooterIds) => ReactNode);
+
 export interface FooterProps {
-  children: ReactNode;
+  children: FooterChildren;
   isCollapsed: boolean;
 }
 
@@ -41,6 +52,9 @@ interface FooterComponent
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed }, ref) => {
   const { euiTheme } = useEuiTheme();
+  const footerNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'footer-navigation-instructions',
+  });
 
   const handleRef = (node: HTMLElement | null) => {
     if (typeof ref === 'function') {
@@ -60,20 +74,37 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed
     [euiTheme, isCollapsed]
   );
 
+  const renderChildren = () => {
+    if (typeof children === 'function') {
+      return children({ footerNavigationInstructionsId });
+    }
+    return children;
+  };
+
   return (
-    // The footer itself is not interactive but the children are
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-    <footer
-      aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
-        defaultMessage: 'Side navigation',
-      })}
-      css={wrapperStyles}
-      onKeyDown={handleRovingIndex}
-      ref={handleRef}
-      data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
-    >
-      {children}
-    </footer>
+    <>
+      <EuiScreenReaderOnly>
+        <p id={footerNavigationInstructionsId}>
+          {i18n.translate('core.ui.chrome.sideNavigation.footerInstructions', {
+            defaultMessage:
+              'You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.',
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+      {/* The footer itself is not interactive but the children are */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      <footer
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
+          defaultMessage: 'Side navigation',
+        })}
+        css={wrapperStyles}
+        onKeyDown={handleRovingIndex}
+        ref={handleRef}
+        data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-footer`}
+      >
+        {renderChildren()}
+      </footer>
+    </>
   );
 });
 

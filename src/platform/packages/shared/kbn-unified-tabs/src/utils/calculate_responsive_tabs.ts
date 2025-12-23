@@ -28,7 +28,10 @@ export const calculateResponsiveTabs = ({
   const availableContainerWidth =
     (containerWidth || window.innerWidth) - (hasReachedMaxItemsCount ? 0 : PLUS_BUTTON_SPACE);
 
-  const totalGapWidth = (horizontalGap || 0) * Math.max(items.length - 1, 0);
+  const gapWidth = horizontalGap ?? 0;
+  const gapWidthBetweenTabs = gapWidth * Math.max(items.length - 1, 0);
+  const gapWidthBeforeFirstTabAndAfterLastTab = gapWidth * 2;
+  const totalGapWidth = gapWidthBetweenTabs + gapWidthBeforeFirstTabAndAfterLastTab;
   const availableSpaceForTabs = Math.max(availableContainerWidth - totalGapWidth, 0);
 
   let wasSpaceEquallyDivided = items.length > 0;

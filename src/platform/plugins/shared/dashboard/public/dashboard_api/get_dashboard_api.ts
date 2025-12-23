@@ -19,9 +19,10 @@ import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
 } from './control_group_manager';
+import { initializeAccessControlManager } from './access_control_manager';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { getLastSavedState } from './default_dashboard_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
@@ -29,9 +30,15 @@ import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
-import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
+import type {
+  DashboardApi,
+  DashboardCreationOptions,
+  DashboardInternalApi,
+  DashboardUser,
+} from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
+import { initializeProjectRoutingManager } from './project_routing_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
@@ -44,22 +51,34 @@ export function getDashboardApi({
   initialState,
   readResult,
   savedObjectId,
+  user,
+  isAccessControlEnabled,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   readResult?: DashboardReadResponseBody;
   savedObjectId?: string;
+  user?: DashboardUser;
+  isAccessControlEnabled?: boolean;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
+  const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
+
   const viewModeManager = initializeViewModeManager({
     incomingEmbeddables,
     isManaged,
     savedObjectId,
+    accessControl: {
+      accessMode: readResult?.data?.access_control?.access_mode,
+      owner: readResult?.data?.access_control?.owner,
+    },
+    createdBy: readResult?.meta?.created_by,
+    user,
   });
   const trackPanel = initializeTrackPanel(async (id: string) => {
     await layoutManager.api.getChildApi(id);
@@ -111,24 +130,32 @@ export function getDashboardApi({
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
+  const projectRoutingManager = initializeProjectRoutingManager(
+    initialState,
+    settingsManager.api.projectRoutingRestore$
+  );
+
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
-    lastSavedState: readResult?.data ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: getLastSavedState(readResult),
     layoutManager,
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
+    projectRoutingManager,
     getReferences,
   });
 
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
+    const projectRoutingState = projectRoutingManager?.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
+      ...projectRoutingState,
       panels,
     };
 
@@ -153,6 +180,7 @@ export function getDashboardApi({
     ...trackPanel,
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,
+    ...projectRoutingManager?.api,
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
     ...controlGroupManager.api,
@@ -180,18 +208,28 @@ export function getDashboardApi({
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 
-      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
+      const {
+        description,
+        tags,
+        time_restore: timeRestore,
+        project_routing_restore: projectRoutingRestore,
+        title,
+      } = settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
         description,
         isManaged,
         lastSavedId: savedObjectId$.value,
         serializeState: getState,
         setTimeRestore: (newTimeRestore: boolean) =>
-          settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+          settingsManager.api.setSettings({ time_restore: newTimeRestore }),
+        setProjectRoutingRestore: (newProjectRoutingRestore: boolean) =>
+          settingsManager.api.setSettings({ project_routing_restore: newProjectRoutingRestore }),
         tags,
         timeRestore,
+        projectRoutingRestore,
         title,
         viewMode: viewModeManager.api.viewMode$.value,
+        accessControl: accessControlManager.api.accessControl$.value,
       });
 
       if (!saveResult || saveResult.error) {
@@ -204,7 +242,7 @@ export function getDashboardApi({
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
-          hidePanelTitles: settings.hidePanelTitles ?? false,
+          hide_panel_titles: settings.hide_panel_titles ?? false,
           description: saveResult.savedState.description,
           tags: saveResult.savedState.tags,
           title: saveResult.savedState.title,
@@ -222,6 +260,7 @@ export function getDashboardApi({
         references,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
+        accessMode: accessControlManager.api.accessControl$.value?.accessMode,
       });
 
       if (saveResult?.error) return;
@@ -241,6 +280,12 @@ export function getDashboardApi({
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
+    createdBy: readResult?.meta?.created_by,
+    user,
+    // TODO: accessControl$ and changeAccessMode should be moved to internalApi
+    accessControl$: accessControlManager.api.accessControl$,
+    changeAccessMode: accessControlManager.api.changeAccessMode,
+    isAccessControlEnabled: Boolean(isAccessControlEnabled),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
@@ -272,6 +317,7 @@ export function getDashboardApi({
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
       layoutManager.cleanup();
+      projectRoutingManager?.cleanup();
     },
   };
 }

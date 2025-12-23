@@ -105,8 +105,7 @@ export default function (providerContext: FtrProviderContext) {
     return await supertest.get(`/api/fleet/data_streams`).set('kbn-xsrf', 'xxxx');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/240001
-  describe.skip('data_streams_list', () => {
+  describe('data_streams_list', () => {
     skipIfNoDockerRegistry(providerContext);
 
     beforeEach(async () => {
@@ -192,7 +191,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.data_streams.length).to.eql(2);
 
         body.data_streams.forEach((dataStream: any) => {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { index, size_in_bytes, size_in_bytes_formatted, last_activity_ms, ...coreFields } =
             dataStream;
           expect(expectedStreamsByDataset[coreFields.dataset]).not.to.eql(undefined);

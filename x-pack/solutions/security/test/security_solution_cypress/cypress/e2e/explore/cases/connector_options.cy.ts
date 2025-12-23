@@ -51,10 +51,12 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
       'POST',
       `/api/actions/connector/${getConnectorIds().resilient}/_execute`,
       (req) => {
-        const response =
-          req.body.params.subAction === 'incidentTypes'
-            ? getExecuteResponses().resilient.incidentTypes
-            : getExecuteResponses().resilient.severity;
+        let response = {};
+        switch (req.body.params.subAction) {
+          case 'getFields':
+            response = getExecuteResponses().resilient.getFields;
+            break;
+        }
 
         req.reply(response);
       }
@@ -74,11 +76,15 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
     createCase();
 
     cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
+    cy.get(CONNECTOR_CARD_DETAILS).should('contain.text', `Incident types`);
     cy.get(CONNECTOR_CARD_DETAILS).should(
-      'have.text',
-      `Incident types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
-        getIbmResilientConnectorOptions().severity
-      }`
+      'contain.text',
+      getIbmResilientConnectorOptions().incidentTypes.join(', ')
+    );
+    cy.get(CONNECTOR_CARD_DETAILS).should('contain.text', `Severity`);
+    cy.get(CONNECTOR_CARD_DETAILS).should(
+      'contain.text',
+      getIbmResilientConnectorOptions().severity
     );
   });
 });

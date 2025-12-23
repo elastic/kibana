@@ -27,6 +27,7 @@ import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import { getAllUnsecured } from './get_all';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { createMockInMemoryConnector } from '../../mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -64,6 +65,9 @@ const eventLogClient = eventLogClientMock.create();
 const getEventLogClient = jest.fn();
 const connectorTokenClient = connectorTokenClientMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const getAxiosInstanceWithAuth = jest.fn();
+const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
 const actionTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
@@ -87,6 +91,9 @@ describe('getAll()', () => {
       usageCounter: mockUsageCounter,
       connectorTokenClient,
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
     (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -151,6 +158,9 @@ describe('getAll()', () => {
           ],
           connectorTokenClient: connectorTokenClientMock.create(),
           getEventLogClient,
+          encryptedSavedObjectsClient,
+          isESOCanEncrypt,
+          getAxiosInstanceWithAuth,
         });
         return actionsClient.getAll();
       }
@@ -304,6 +314,9 @@ describe('getAll()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll();
@@ -388,6 +401,9 @@ describe('getAll()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -471,6 +487,9 @@ describe('getAll()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -545,6 +564,9 @@ describe('getAll()', () => {
         inMemoryConnectors: [],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       await actionsClient.getAll();
@@ -606,6 +628,9 @@ describe('getAll()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -677,6 +702,9 @@ describe('getAll()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -735,6 +763,9 @@ describe('getAll()', () => {
           ],
           connectorTokenClient: connectorTokenClientMock.create(),
           getEventLogClient,
+          encryptedSavedObjectsClient,
+          isESOCanEncrypt,
+          getAxiosInstanceWithAuth,
         });
 
         return actionsClient.getAllSystemConnectors();
@@ -818,6 +849,9 @@ describe('getAll()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAllSystemConnectors();

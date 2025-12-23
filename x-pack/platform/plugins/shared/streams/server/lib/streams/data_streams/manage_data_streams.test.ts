@@ -13,9 +13,10 @@ import type { Streams } from '@kbn/streams-schema';
 const createMockWiredStream = (name: string): Streams.WiredStream.Definition => ({
   name,
   description: 'Test wired stream',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { inherit: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
     wired: { fields: {}, routing: [] },
     failure_store: { inherit: {} },
@@ -25,9 +26,10 @@ const createMockWiredStream = (name: string): Streams.WiredStream.Definition => 
 const createMockClassicStream = (name: string): Streams.ClassicStream.Definition => ({
   name,
   description: 'Test classic stream',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { inherit: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
     classic: {},
     failure_store: { inherit: {} },
@@ -349,28 +351,6 @@ describe('updateDataStreamsFailureStore', () => {
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Error updating data stream failure store: Template simulation error'
-    );
-  });
-
-  it('throws error when inherit is used for non-classic streams', async () => {
-    const failureStore: FailureStore = {
-      inherit: {},
-    };
-
-    await expect(
-      updateDataStreamsFailureStore({
-        esClient: mockEsClient,
-        logger: mockLogger,
-        failureStore,
-        stream: createMockWiredStream('test-stream'),
-        isServerless: false,
-      })
-    ).rejects.toThrow(
-      'Inherit failure store configuration is not supported for wired streams. Stream test-stream is a wired stream.'
-    );
-
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Error updating data stream failure store: Inherit failure store configuration is not supported for wired streams. Stream test-stream is a wired stream.'
     );
   });
 });

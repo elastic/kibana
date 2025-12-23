@@ -28,10 +28,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram/types';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
@@ -82,7 +81,6 @@ export interface DataTotalHitsMsg extends DataMsg {
 
 export interface DiscoverLatestFetchDetails {
   abortController?: AbortController;
-  visContext?: UnifiedHistogramVisContext;
 }
 
 export interface DiscoverDataStateContainer {
@@ -149,7 +147,6 @@ export interface DiscoverDataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
-  appStateContainer,
   internalState,
   runtimeStateManager,
   savedSearchContainer,
@@ -159,7 +156,6 @@ export function getDataStateContainer({
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  appStateContainer: DiscoverAppStateContainer;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
@@ -182,7 +178,7 @@ export function getDataStateContainer({
   const getInitialFetchStatus = () => {
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearchContainer.getState().id !== undefined ||
+      internalState.getState().persistedDiscoverSession?.id !== undefined ||
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
@@ -216,8 +212,8 @@ export function getDataStateContainer({
    */
   const { esqlFetchSubscribe, cleanupEsql } = buildEsqlFetchSubscribe({
     internalState,
-    appStateContainer,
     dataSubjects,
+    getCurrentTab,
     injectCurrentTab,
   });
 
@@ -240,7 +236,6 @@ export function getDataStateContainer({
     data,
     main$: dataSubjects.main$,
     refetch$,
-    searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
@@ -283,19 +278,20 @@ export function getDataStateContainer({
             inspectorAdapters,
             searchSessionId,
             services,
-            appStateContainer,
             internalState,
             savedSearch: savedSearchContainer.getState(),
             scopedProfilesManager,
             scopedEbtManager,
+            getCurrentTab,
           };
 
-          abortController?.abort();
-          abortControllerFetchMore?.abort();
+          abortController?.abort(AbortReason.REPLACED);
+          abortControllerFetchMore?.abort(AbortReason.REPLACED);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
+            const fetchMoreTracker =
+              scopedEbtManager.trackQueryPerformanceEvent('discoverFetchMore');
 
             // Calculate query range in seconds
             const timeRange = timefilter.getAbsoluteTime();
@@ -307,8 +303,8 @@ export function getDataStateContainer({
             });
 
             fetchMoreTracker.reportEvent({
-              key1: 'query_range_secs',
-              value1: queryRangeSeconds,
+              queryRangeSeconds,
+              requests: inspectorAdapters.requests?.getRequestsSince(fetchMoreTracker.startTime),
             });
 
             return;
@@ -327,9 +323,9 @@ export function getDataStateContainer({
 
           await scopedProfilesManager.resolveDataSourceProfile(
             {
-              dataSource: appStateContainer.get().dataSource,
-              dataView: savedSearchContainer.getState().searchSource.getField('index'),
-              query: appStateContainer.get().query,
+              dataSource: getCurrentTab().appState.dataSource,
+              dataView: currentDataView$.getValue(),
+              query: getCurrentTab().appState.query,
             },
             resetFetchChart$
           );
@@ -342,13 +338,17 @@ export function getDataStateContainer({
 
           if (preFetchStateUpdate) {
             disableNextFetchOnStateChange$.next(true);
-            await appStateContainer.replaceUrlState(preFetchStateUpdate);
+            await internalState.dispatch(
+              injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                appState: preFetchStateUpdate,
+              })
+            );
             disableNextFetchOnStateChange$.next(false);
           }
 
           abortController = new AbortController();
 
-          const isEsqlQuery = isOfAggregateQueryType(appStateContainer.get().query);
+          const isEsqlQuery = isOfAggregateQueryType(getCurrentTab().appState.query);
           const latestFetchDetails: DiscoverLatestFetchDetails = {
             abortController,
           };
@@ -361,7 +361,7 @@ export function getDataStateContainer({
           }
 
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
+          const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent('discoverFetchAll');
 
           // Calculate query range in seconds
           const timeRange = timefilter.getAbsoluteTime();
@@ -371,7 +371,6 @@ export function getDataStateContainer({
             ...commonFetchParams,
             reset: options.reset,
             abortController,
-            getCurrentTab,
             onFetchRecordsComplete: async () => {
               if (isEsqlQuery && !abortController.signal.aborted) {
                 // defer triggering chart fetching until after main request completes for ES|QL mode
@@ -392,7 +391,11 @@ export function getDataStateContainer({
               });
 
               if (postFetchStateUpdate) {
-                await appStateContainer.replaceUrlState(postFetchStateUpdate);
+                await internalState.dispatch(
+                  injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                    appState: postFetchStateUpdate,
+                  })
+                );
               }
 
               // Clear the default profile state flags after the data fetching
@@ -411,8 +414,8 @@ export function getDataStateContainer({
           });
 
           fetchAllTracker.reportEvent({
-            key1: 'query_range_secs',
-            value1: queryRangeSeconds,
+            queryRangeSeconds,
+            requests: inspectorAdapters.requests?.getRequestsSince(fetchAllTracker.startTime),
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
@@ -433,8 +436,9 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
-    const query = appStateContainer.get().query;
-    const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
+    const query = getCurrentTab().appState.query;
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+    const currentDataView = currentDataView$.getValue();
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
@@ -458,8 +462,8 @@ export function getDataStateContainer({
   };
 
   const cancel = () => {
-    abortController?.abort();
-    abortControllerFetchMore?.abort();
+    abortController?.abort(AbortReason.CANCELED);
+    abortControllerFetchMore?.abort(AbortReason.CANCELED);
   };
 
   const getAbortController = () => {

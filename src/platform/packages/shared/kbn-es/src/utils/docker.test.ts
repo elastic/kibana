@@ -13,12 +13,13 @@ import Fsp from 'fs/promises';
 import { basename } from 'path';
 
 import type { ServerlessOptions, ServerlessProjectType } from './docker';
+import * as dockerUiam from './docker_uiam';
 import {
   DOCKER_IMG,
   detectRunningNodes,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
-  printESImageInfo,
+  printDockerImageInfo,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
@@ -41,6 +42,7 @@ import {
   SERVERLESS_SECRETS_PATH,
   SERVERLESS_JWKS_PATH,
   SERVERLESS_IDP_METADATA_PATH,
+  SERVERLESS_OPERATOR_PATH,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
@@ -61,6 +63,17 @@ jest.mock('./wait_until_cluster_ready', () => ({
 jest.mock('./wait_for_security_index', () => ({
   waitForSecurityIndex: jest.fn(),
 }));
+
+jest.mock('./docker_uiam', () => {
+  const originalModule = jest.requireActual('./docker_uiam');
+  return {
+    ...originalModule,
+    runUiamContainer: jest
+      .fn()
+      .mockImplementation((_, container) => Promise.resolve(container.name)),
+    initializeUiamContainers: jest.fn(),
+  };
+});
 
 jest.mock('@kbn/mock-idp-utils');
 
@@ -105,7 +118,7 @@ const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, pa
 }, []);
 
 const volumeCmdTest = async (volumeCmd: string[]) => {
-  expect(volumeCmd).toHaveLength(22);
+  expect(volumeCmd).toHaveLength(24);
   expect(volumeCmd).toEqual(
     expect.arrayContaining([
       ...getESp12Volume(),
@@ -113,7 +126,8 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
       `${baseEsPath}:/objectstore:z`,
       `stateless.object_store.bucket=${serverlessDir}`,
       `${SERVERLESS_SECRETS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
-      `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`,
+      `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}jwks/jwks.json:z`,
+      `${SERVERLESS_OPERATOR_PATH}:${SERVERLESS_CONFIG_PATH}operator`,
     ])
   );
 
@@ -345,7 +359,7 @@ describe('detectRunningNodes()', () => {
     );
 
     await expect(detectRunningNodes(log, {})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ES has already been started, pass --kill to automatically stop the nodes on startup."`
+      `"ES has already been started, pass --kill to automatically stop the containers on startup."`
     );
   });
 });
@@ -468,7 +482,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/idp_metadata.xml",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
         "--env",
@@ -535,7 +549,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/idp_metadata.xml",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
         "--env",
@@ -552,6 +566,8 @@ describe('resolveEsArgs()', () => {
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
@@ -580,7 +596,7 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/idp_metadata.xml",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
         "--env",
@@ -604,15 +620,15 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
         "--env",
-        "serverless.organization_id=1234567890",
+        "serverless.organization_id=org1234567890",
         "--env",
-        "serverless.project_type=elasticsearch",
+        "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "serverless.project_id=abcde1234567890",
         "--env",
         "serverless.universal_iam_service.enabled=true",
         "--env",
-        "serverless.universal_iam_service.url=http://uiam-cosmosdb-gateway:8080",
+        "serverless.universal_iam_service.url=http://uiam:8080",
         "--env",
         "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
@@ -652,7 +668,7 @@ describe('setupServerlessVolumes()', () => {
       basePath: baseEsPath,
     });
 
-    volumeCmdTest(volumeCmd);
+    await volumeCmdTest(volumeCmd);
     await expect(Fsp.access(serverlessObjectStorePath)).resolves.not.toThrow();
   });
 
@@ -661,7 +677,7 @@ describe('setupServerlessVolumes()', () => {
 
     const volumeCmd = await setupServerlessVolumes(log, { projectType, basePath: baseEsPath });
 
-    volumeCmdTest(volumeCmd);
+    await volumeCmdTest(volumeCmd);
     await expect(
       Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
     ).resolves.not.toThrow();
@@ -676,7 +692,7 @@ describe('setupServerlessVolumes()', () => {
       clean: true,
     });
 
-    volumeCmdTest(volumeCmd);
+    await volumeCmdTest(volumeCmd);
     await expect(
       Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
     ).rejects.toThrowError();
@@ -705,7 +721,7 @@ describe('setupServerlessVolumes()', () => {
     const pathsNotIncludedInCmd = requiredPaths.filter(
       (path) => !volumeCmd.some((cmd) => cmd.includes(path))
     );
-    expect(volumeCmd).toHaveLength(24);
+    expect(volumeCmd).toHaveLength(26);
     expect(pathsNotIncludedInCmd).toEqual([]);
   });
 
@@ -791,6 +807,17 @@ describe('runServerlessEsNode()', () => {
 });
 
 describe('runServerlessCluster()', () => {
+  let runUiamContainerMock: jest.MockedFunction<typeof dockerUiam.runUiamContainer>;
+  let initializeUiamContainersMock: jest.MockedFunction<typeof dockerUiam.initializeUiamContainers>;
+  beforeEach(() => {
+    runUiamContainerMock = dockerUiam.runUiamContainer as jest.MockedFunction<
+      typeof dockerUiam.runUiamContainer
+    >;
+    initializeUiamContainersMock = dockerUiam.initializeUiamContainers as jest.MockedFunction<
+      typeof dockerUiam.initializeUiamContainers
+    >;
+  });
+
   test('should start 3 serverless nodes', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
@@ -802,13 +829,48 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (3)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(12);
+    expect(execa.mock.calls).toHaveLength(14);
+
+    // UIAM containers should not be started when `--uiam` is not passed
+    expect(runUiamContainerMock).not.toHaveBeenCalled();
+    expect(initializeUiamContainersMock).not.toHaveBeenCalled();
+  });
+
+  test('should start 3 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
+    waitUntilClusterReadyMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { projectType, basePath: baseEsPath, uiam: true });
+
+    // docker version (1)
+    // docker ps (1)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker network create (1)
+    // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
+    // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
+    // docker run (3)
+    // docker logs (1)
+    expect(execa.mock.calls).toHaveLength(17);
+
+    expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
+    expect(runUiamContainerMock).toHaveBeenCalledWith(
+      expect.anything(),
+      dockerUiam.UIAM_CONTAINERS[0]
+    );
+    expect(runUiamContainerMock).toHaveBeenCalledWith(
+      expect.anything(),
+      dockerUiam.UIAM_CONTAINERS[1]
+    );
+    expect(initializeUiamContainersMock).toHaveBeenCalledTimes(1);
   });
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
@@ -901,9 +963,24 @@ describe('teardownServerlessClusterSync()', () => {
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
     expect(execa.commandSync.mock.calls[0][0]).toEqual(
-      expect.stringContaining(ES_SERVERLESS_DEFAULT_IMAGE)
+      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --quiet`
     );
     expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${nodes.join(' ')}`);
+  });
+
+  test('should kill running serverless nodes and UIAM containers when in UIAM mode', () => {
+    const containers = ['es01', 'es02', 'es03', 'uiam-cosmosdb', 'uiam'];
+    execa.commandSync.mockImplementation(() => ({
+      stdout: containers.join('\n'),
+    }));
+
+    teardownServerlessClusterSync(log, { ...defaultOptions, uiam: true });
+
+    expect(execa.commandSync.mock.calls).toHaveLength(2);
+    expect(execa.commandSync.mock.calls[0][0]).toEqual(
+      `docker ps --filter status=running --filter ancestor=${ES_SERVERLESS_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.COSMOS_DB_EMULATOR_DEFAULT_IMAGE} --filter ancestor=${dockerUiam.UIAM_DEFAULT_IMAGE} --quiet`
+    );
+    expect(execa.commandSync.mock.calls[1][0]).toEqual(`docker kill ${containers.join(' ')}`);
   });
 
   test('should not kill if no serverless nodes', () => {
@@ -944,12 +1021,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (3)
+    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(9);
+    expect(execa.mock.calls).toHaveLength(11);
   });
 });
 
@@ -968,7 +1045,7 @@ describe('printESImageInfo', () => {
       })
     );
 
-    await printESImageInfo(
+    await printDockerImageInfo(
       log,
       'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest'
     );
@@ -992,7 +1069,7 @@ describe('printESImageInfo', () => {
       })
     );
 
-    await printESImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
+    await printDockerImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
 
     expect(execa.mock.calls).toHaveLength(1);
     expect(logWriter.messages[0]).toContain(

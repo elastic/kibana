@@ -233,7 +233,7 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/security-ai-prompts'
   - '@kbn/inference-common'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/inference-langchain'
   - '@kbn/scout-security'
   - '@kbn/custom-icons'
@@ -261,7 +261,15 @@ dependsOn:
   - '@kbn/response-ops-rule-form'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/connector-schemas'
+  - '@kbn/deeplinks-analytics'
   - '@kbn/tour-queue'
+  - '@kbn/shared-ux-file-types'
+  - '@kbn/onechat-common'
+  - '@kbn/onechat-plugin'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/onechat-browser'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/product-doc-common'
 tags:
   - plugin
   - prod

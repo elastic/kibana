@@ -27,6 +27,29 @@ import {
   trustedDevicesSubFeature,
   socManagementSubFeature,
 } from '../kibana_sub_features';
+import type { SubFeatureReplacements } from '../../types';
+import { SECURITY_FEATURE_ID_V5 } from '../../constants';
+import { addSubFeatureReplacements } from '../../utils';
+
+const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
+  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.workflowInsights]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.globalArtifactManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.trustedApplications]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.trustedDevices]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.blocklist]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.eventFilters]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.socManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+};
 
 /**
  * Sub-features that will always be available for Security
@@ -70,8 +93,10 @@ export const getSecurityV4SubFeaturesMap = ({
     securitySubFeaturesList.map(([id, originalSubFeature]) => {
       let subFeature = originalSubFeature;
 
-      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
-      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
+      const featureReplacements = replacements[id];
+      if (featureReplacements) {
+        subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
+      }
 
       return [id, subFeature];
     })
