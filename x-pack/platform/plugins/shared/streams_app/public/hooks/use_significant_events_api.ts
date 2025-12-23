@@ -9,6 +9,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
+import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface SignificantEventsApiBulkOperationCreate {
   index: StreamQueryKql;
@@ -81,7 +82,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
       });
     },
     generate: (connectorId: string, feature?: Feature) => {
-      const now = Date.now();
+      const { from, to } = getLast24HoursTimeRange();
       return streamsRepositoryClient.stream(
         `POST /api/streams/{name}/significant_events/_generate 2023-10-31`,
         {
@@ -92,8 +93,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
             },
             query: {
               connectorId,
-              from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-              to: new Date(now).toISOString(),
+              from,
+              to,
             },
             body: {
               feature,

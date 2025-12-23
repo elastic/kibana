@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { firstValueFrom } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { getLast24HoursTimeRange } from '../../../util/time_range';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { getFormattedError } from '../../../util/errors';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
@@ -132,7 +133,7 @@ export const useStreamDescriptionApi = ({
     setIsGenerating(true);
 
     try {
-      const now = Date.now();
+      const { from, to } = getLast24HoursTimeRange();
       const { description: generatedDescription, tokensUsed } = await firstValueFrom(
         streams.streamsRepositoryClient.stream('POST /internal/streams/{name}/_describe_stream', {
           signal,
@@ -142,8 +143,8 @@ export const useStreamDescriptionApi = ({
             },
             query: {
               connectorId: aiFeatures.genAiConnectors.selectedConnector,
-              from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
-              to: new Date(now).toISOString(),
+              from,
+              to,
             },
           },
         })
