@@ -53,7 +53,7 @@ export const useESQLVariables = ({
   onUpdateESQLQuery: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  getActivePanels: () => ControlPanelsState | undefined;
+  getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);

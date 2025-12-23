@@ -17,7 +17,7 @@ export const addControlsFromSavedSession = async (
   controlGroupJson: string,
   uuid?: string | undefined
 ): Promise<void> => {
-  const controlsState = JSON.parse(controlGroupJson) as ControlPanelsState;
+  const controlsState = JSON.parse(controlGroupJson) as ControlPanelsState<ESQLControlState>;
   const esqlVariables$ = container.esqlVariables$;
   const esqlVariables = esqlVariables$?.getValue();
 

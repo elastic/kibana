@@ -8,6 +8,7 @@
  */
 
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter } from '@kbn/es-query';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 
@@ -38,7 +39,7 @@ export const sampleOutputData: ControlGroupOutput = {
   ],
 };
 
-export const initialInputData: ControlGroupRuntimeState = {
+export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlState> = {
   initialChildControlState: {
     '0': {
       type: 'optionsListControl',
