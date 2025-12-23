@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSkeletonLoading, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
 
 import type { AlertsGroupingAggregation } from '../../components/alerts_table/grouping_settings/types';
@@ -47,15 +47,34 @@ export const useGetDefaultGroupTitleRenderers = ({
 }: UseGetDefaultGroupTitleRenderersProps) => {
   const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> = useCallback(
     (selectedGroup, bucket) => {
-      if (isLoading) {
-        return <EuiLoadingSpinner size="m" data-test-subj={ATTACK_GROUP_LOADING_SPINNER_TEST_ID} />;
-      }
       const attack = getAttack(selectedGroup, bucket);
-      if (!attack) {
+
+      // Fall back to the internal Grouping renderer if attacks data has been loaded
+      // and there is no attack for the selected group
+      if (!isLoading && !attack) {
         return undefined;
       }
+
       return (
-        <AttackGroupContent attack={attack} dataTestSubj="attack" showAnonymized={showAnonymized} />
+        <EuiSkeletonLoading
+          isLoading={isLoading}
+          loadingContent={
+            <div data-test-subj={ATTACK_GROUP_LOADING_SPINNER_TEST_ID}>
+              <EuiSkeletonRectangle height={16} width="50%" />
+              <EuiSpacer size="s" />
+              <EuiSkeletonRectangle height={16} width="100%" />
+            </div>
+          }
+          loadedContent={
+            attack && (
+              <AttackGroupContent
+                attack={attack}
+                dataTestSubj="attack"
+                showAnonymized={showAnonymized}
+              />
+            )
+          }
+        />
       );
     },
     [getAttack, showAnonymized, isLoading]
