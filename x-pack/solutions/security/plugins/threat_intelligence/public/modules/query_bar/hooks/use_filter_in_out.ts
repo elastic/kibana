@@ -12,6 +12,7 @@ import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_
 import { Indicator } from '../../../../common/types/indicator';
 import { FilterIn, FilterOut, updateFiltersArray } from '../utils/filter';
 import { useSourcererDataView } from '../../indicators/hooks/use_sourcerer_data_view';
+import { unwrapValue } from '../../indicators/utils/unwrap_value';
 
 export interface UseFilterInParam {
   /**
@@ -47,13 +48,13 @@ export const useFilterInOut = ({
   const { filterManager } = useIndicatorsFiltersContext();
   const { sourcererDataView } = useSourcererDataView();
 
-  const { key, value } =
-    typeof indicator === 'string'
-      ? { key: field, value: indicator }
-      : getIndicatorFieldAndValue(indicator, field);
+  const { key } =
+    typeof indicator === 'string' ? { key: field } : getIndicatorFieldAndValue(indicator, field);
+  const value = typeof indicator === 'string' ? indicator : unwrapValue(indicator, field);
 
   const filterFn = useCallback((): void => {
     const existingFilters = filterManager.getFilters();
+
     const newFilters: Filter[] = updateFiltersArray(
       existingFilters,
       key,
@@ -68,7 +69,5 @@ export const useFilterInOut = ({
     return {} as unknown as UseFilterInValue;
   }
 
-  return {
-    filterFn,
-  };
+  return { filterFn };
 };
