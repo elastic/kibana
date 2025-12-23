@@ -178,12 +178,12 @@ describe('createDataViewSelectedListener', () => {
     it('should store data view ID in storage when scope is analyzer', async () => {
       const analyzerListener = createDataViewSelectedListener({
         dataViews: mockDataViewsService,
-        scope: PageScope.analyzer,
+        scope: DataViewManagerScopeName.analyzer,
         storage: mockStorage,
       });
 
       await analyzerListener.effect(
-        selectDataViewAsync({ id: 'adhoc_test-*', scope: PageScope.analyzer }),
+        selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.analyzer }),
         mockListenerApi
       );
 
@@ -195,7 +195,7 @@ describe('createDataViewSelectedListener', () => {
 
     it('should not store data view ID in storage when scope is not analyzer', async () => {
       await listener.effect(
-        selectDataViewAsync({ id: 'adhoc_test-*', scope: PageScope.default }),
+        selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
         mockListenerApi
       );
 
@@ -205,12 +205,12 @@ describe('createDataViewSelectedListener', () => {
     it('should store resolved data view ID from cached view when scope is analyzer', async () => {
       const analyzerListener = createDataViewSelectedListener({
         dataViews: mockDataViewsService,
-        scope: PageScope.analyzer,
+        scope: DataViewManagerScopeName.analyzer,
         storage: mockStorage,
       });
 
       await analyzerListener.effect(
-        selectDataViewAsync({ id: 'persisted_test-*', scope: PageScope.analyzer }),
+        selectDataViewAsync({ id: 'persisted_test-*', scope: DataViewManagerScopeName.analyzer }),
         mockListenerApi
       );
 

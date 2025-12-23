@@ -13,7 +13,7 @@ import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
-import type { DataViewManagerScopeName } from '../../constants';
+import { DataViewManagerScopeName } from '../../constants';
 
 /**
  * Creates a Redux listener for handling data view selection logic in the data view manager.
@@ -132,7 +132,7 @@ export const createDataViewSelectedListener = (dependencies: {
         }
 
         listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
-        if (action.payload.scope === PageScope.analyzer) {
+        if (action.payload.scope === DataViewManagerScopeName.analyzer) {
           dependencies.storage.set(
             `securitySolution.dataViewManager.selectedDataView.${action.payload.scope}`,
             resolvedIdToUse
