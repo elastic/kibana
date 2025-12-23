@@ -74,6 +74,8 @@
       "@kbn/alerting-state-types/*": ["x-pack/platform/packages/private/kbn-alerting-state-types/*"],
       "@kbn/alerting-types": ["src/platform/packages/shared/kbn-alerting-types"],
       "@kbn/alerting-types/*": ["src/platform/packages/shared/kbn-alerting-types/*"],
+      "@kbn/alerting-v2-plugin": ["x-pack/platform/plugins/shared/alerting_v2"],
+      "@kbn/alerting-v2-plugin/*": ["x-pack/platform/plugins/shared/alerting_v2/*"],
       "@kbn/alerts-as-data-utils": ["src/platform/packages/shared/kbn-alerts-as-data-utils"],
       "@kbn/alerts-as-data-utils/*": ["src/platform/packages/shared/kbn-alerts-as-data-utils/*"],
       "@kbn/alerts-grouping": ["x-pack/solutions/observability/packages/kbn-alerts-grouping"],
