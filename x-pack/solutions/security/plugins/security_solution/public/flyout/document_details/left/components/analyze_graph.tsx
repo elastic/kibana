@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -67,6 +68,8 @@ export const AnalyzeGraph: FC = () => {
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalAnalyzerPatterns
     : oldAnalyzerPatterns;
+
+  const { dataView, status } = useDataView(SourcererScopeName.analyzer);
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 

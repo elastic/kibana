@@ -72,7 +72,7 @@ export const AnalyzerPreview: React.FC = () => {
     ? experimentalAnalyzerPatterns
     : oldAnalyzerPatterns;
 
-  const { dataView, status } = useDataView(PageScope.analyzer);
+  const { dataView, status } = useDataView(DataViewManagerScopeName.analyzer);
 
   const index = find({ category: 'kibana', field: RULE_INDICES }, data);
   const indices = index?.values ?? selectedPatterns;

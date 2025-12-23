@@ -27,6 +27,7 @@ jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockTreeValues = {
