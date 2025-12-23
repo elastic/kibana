@@ -19,6 +19,7 @@
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { registerStepDefinitions } from './step_types';
+import { ExampleExternalService } from '../common/external_service/external_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePublicPluginSetup {
@@ -53,7 +54,15 @@ export class WorkflowsExtensionsExamplePlugin
     plugins: WorkflowsExtensionsExamplePublicPluginSetupDeps
   ): WorkflowsExtensionsExamplePublicPluginSetup {
     // Register steps on setup phase
-    registerStepDefinitions(plugins.workflowsExtensions);
+    registerStepDefinitions(plugins.workflowsExtensions, {
+      externalService: new ExampleExternalService({
+        'my-proxy': 'https://example.com',
+        'my-other-proxy': 'https://example.com/other',
+        'my-third-proxy': 'https://example.com/third',
+        'my-fourth-proxy': 'https://example.com/fourth',
+        'my-fifth-proxy': 'https://example.com/fifth',
+      }),
+    });
 
     return {};
   }
