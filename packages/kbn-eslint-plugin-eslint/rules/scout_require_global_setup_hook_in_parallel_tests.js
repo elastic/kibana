@@ -14,10 +14,10 @@ const path = require('path');
 const fs = require('fs');
 
 const ERROR_MSG_MISSING_HOOK =
-  'Files named `global.setup.ts` in `parallel_tests` directories must call `globalSetupHook`. Without it, ES security indexes are not pre-generated and tests become flaky.';
+  '`global.setup.ts` must explicitly call `globalSetupHook`. Without it, ES security indexes are not pre-generated and tests become flaky.';
 
 const ERROR_MSG_MISSING_FILE =
-  'The `parallel_tests` directory must contain a `global.setup.ts` file. Without it, ES security indexes are not pre-generated and tests become flaky.';
+  'The `parallel_tests` directory must contain a `global.setup.ts` file and call `globalSetupHook`. Without it, ES security indexes are not pre-generated and tests become flaky.';
 
 /**
  * Gets the parallel_tests directory from a filename, if the file is inside one
