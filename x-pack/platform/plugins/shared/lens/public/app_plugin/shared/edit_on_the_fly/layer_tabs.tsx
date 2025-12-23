@@ -275,13 +275,14 @@ export function LayerTabs({
                   }
 
                   const newColumns = Object.keys(esqlResult.esAggsIdMap).map((key) => {
+                    const sourceColumn = esqlResult.esAggsIdMap[key][0];
+                    // Only include serializable properties - exclude functions
                     return {
-                      ...esqlResult.esAggsIdMap[key][0],
-                      columnId: esqlResult.esAggsIdMap[key][0].id,
+                      columnId: sourceColumn.id,
                       fieldName: key,
                       meta: {
-                        type: esqlResult.esAggsIdMap[key][0].dataType,
-                        label: esqlResult.esAggsIdMap[key][0].label,
+                        type: sourceColumn.dataType,
+                        label: sourceColumn.label,
                       },
                     };
                   });

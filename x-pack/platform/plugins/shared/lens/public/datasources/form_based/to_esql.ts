@@ -46,6 +46,11 @@ export function getESQLForLayer(
     hasTimeField: !!indexPattern.timeFieldName,
     timeFieldName: indexPattern.timeFieldName,
     totalColumns: Object.keys(layer.columns).length,
+    allColumns: Object.keys(layer.columns).map((colId) => ({
+      id: colId,
+      operationType: layer.columns[colId].operationType,
+      sourceField: 'sourceField' in layer.columns[colId] ? layer.columns[colId].sourceField : undefined,
+    })),
   });
 
   // esql mode variables
@@ -291,12 +296,38 @@ export function getESQLForLayer(
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const column = col;
+      const actualTimeField = indexPattern.getFieldByName(column.sourceField);
+      const isTimeField =
+        indexPattern.timeFieldName === actualTimeField?.name ||
+        indexPattern.timeFieldName === column.sourceField;
+
+      // eslint-disable-next-line no-console
+      console.log('[getESQLForLayer] 🔍 Date histogram check:', {
+        columnId: colId,
+        sourceField: column.sourceField,
+        dropPartials: column.params?.dropPartials,
+        ignoreTimeRange: column.params?.ignoreTimeRange,
+        indexPatternTimeField: indexPattern.timeFieldName,
+        actualFieldName: actualTimeField?.name,
+        isTimeFieldMatch: isTimeField,
+        willSkipDueToDropPartials:
+          column.params?.dropPartials && (isTimeField || !column.params?.ignoreTimeRange),
+        message: 'Checking if date histogram should be skipped',
+      });
+
       if (
         column.params?.dropPartials &&
         // set to false when detached from time picker
-        (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
-          !column.params?.ignoreTimeRange)
+        (isTimeField || !column.params?.ignoreTimeRange)
       ) {
+        // eslint-disable-next-line no-console
+        console.log('[getESQLForLayer] ⏭️ Skipping date histogram with dropPartials:', {
+          reason: 'ES|QL does not support partial bucket dropping',
+          sourceField: column.sourceField,
+          dropPartials: column.params?.dropPartials,
+          isTimeField,
+          fix: 'Disable "Drop partial buckets" in the date histogram configuration',
+        });
         return undefined;
       }
     }
@@ -320,6 +351,18 @@ export function getESQLForLayer(
         dateRange
       )
     );
+  });
+
+  // eslint-disable-next-line no-console
+  console.log('[getESQLForLayer] Bucket conversion results:', {
+    totalBuckets: buckets.length,
+    buckets: buckets.map((b, idx) => ({
+      index: idx,
+      value: b,
+      isUndefined: !b,
+      operation: bucketEsAggsEntries[idx]?.[1]?.operationType,
+      columnId: bucketEsAggsEntries[idx]?.[0],
+    })),
   });
 
   if (buckets.some((m) => !m)) {

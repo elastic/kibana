@@ -105,25 +105,46 @@ function getTimeZoneAndInterval(
 }
 
 export function mapToEsqlInterval(dateRange: DateRange, interval: string) {
+  // eslint-disable-next-line no-console
+  console.log('[mapToEsqlInterval] Converting interval:', {
+    input: interval,
+    dateRange,
+  });
+
   if (interval !== 'm' && interval.endsWith('m')) {
-    return interval.replace('m', ' minutes');
+    const result = interval.replace('m', ' minutes');
+    // eslint-disable-next-line no-console
+    console.log('[mapToEsqlInterval] Result (minutes):', result);
+    return result;
   }
+  
+  let result: string;
   switch (interval) {
     case '1M':
-      return '1 month';
+      result = '1 month';
+      break;
     case 'd':
-      return '1d';
+      result = '1d';
+      break;
     case 'h':
-      return '1h';
+      result = '1h';
+      break;
     case 'm':
-      return '1 minute';
+      result = '1 minute';
+      break;
     case 's':
-      return '1s';
+      result = '1s';
+      break;
     case 'ms':
-      return '1ms';
+      result = '1ms';
+      break;
     default:
-      return interval;
+      result = interval;
   }
+  
+  // eslint-disable-next-line no-console
+  console.log('[mapToEsqlInterval] Result:', result);
+  return result;
 }
 
 export const dateHistogramOperation: OperationDefinition<
@@ -229,20 +250,43 @@ export const dateHistogramOperation: OperationDefinition<
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
   toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
-    if (column.params?.includeEmptyRows) return;
+    // eslint-disable-next-line no-console
+    console.log('[date_histogram.toESQL] Called with:', {
+      columnId,
+      sourceField: column.sourceField,
+      includeEmptyRows: column.params?.includeEmptyRows,
+      intervalParam: column.params?.interval,
+    });
+
+    if (column.params?.includeEmptyRows) {
+      // eslint-disable-next-line no-console
+      console.log('[date_histogram.toESQL] Returning undefined (includeEmptyRows is true)');
+      return;
+    }
+
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
+    // eslint-disable-next-line no-console
+    console.log('[date_histogram.toESQL] Interval info:', {
+      interval,
+      isAuto: interval === 'auto',
+    });
+
     if (interval === 'auto') {
-      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-        dateRange,
-        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-      )})`;
+      const autoIntervalValue = calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h';
+      const esqlInterval = mapToEsqlInterval(dateRange, autoIntervalValue);
+      const result = `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${esqlInterval})`;
+      // eslint-disable-next-line no-console
+      console.log('[date_histogram.toESQL] Auto interval result:', result);
+      return result;
     }
-    return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-      dateRange,
-      interval
-    )})`;
+    
+    const esqlInterval = mapToEsqlInterval(dateRange, interval);
+    const result = `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${esqlInterval})`;
+    // eslint-disable-next-line no-console
+    console.log('[date_histogram.toESQL] Result:', result);
+    return result;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
