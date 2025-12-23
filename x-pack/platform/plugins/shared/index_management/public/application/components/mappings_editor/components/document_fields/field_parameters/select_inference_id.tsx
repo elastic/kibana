@@ -206,7 +206,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     <>
       <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ minWidth: 300 }}>
           <EuiPopover
             button={
               <>
@@ -226,6 +226,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     iconType="arrowDown"
                     iconSide="right"
                     color="text"
+                    fullWidth
                     data-test-subj="inferenceIdButton"
                     onClick={() => {
                       setIsInferencePopoverVisible((prev) => !prev);
