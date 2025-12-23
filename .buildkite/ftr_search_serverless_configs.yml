@@ -2,8 +2,6 @@ disabled:
   # Base config files, only necessary to inform config finding script
   - x-pack/platform/test/serverless/functional/config.search.base.ts
 
-defaultQueue: 'n2-4-spot'
-enabled:
   - x-pack/solutions/search/test/serverless/api_integration/configs/config.ts
   - x-pack/solutions/search/test/serverless/api_integration/configs/config.feature_flags.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.ts
@@ -28,3 +26,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group12.ts
   - x-pack/platform/test/onechat_api_integration/configs/config.serverless.ts
+
+defaultQueue: 'n2-4-spot'
+enabled:
