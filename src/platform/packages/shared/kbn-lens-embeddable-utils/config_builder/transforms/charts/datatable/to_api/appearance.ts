@@ -13,6 +13,7 @@ import {
   LEGACY_SINGLE_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
+import { last, initial } from 'lodash';
 import type { DatatableState } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
 
@@ -85,15 +86,15 @@ function parseSplitMetricsBySorting(
   }
 
   // The last part is the metric column ID
-  const metricColumnId = parts[parts.length - 1];
-  const mapped = columnIdMapping[metricColumnId];
+  const metricColumnId = last(parts);
+  const mapped = metricColumnId ? columnIdMapping[metricColumnId] : undefined;
 
   if (!mapped || mapped.type !== 'metric') {
     return undefined;
   }
 
   return {
-    values: parts.slice(0, -1),
+    values: initial(parts),
     metricIndex: mapped.index,
   };
 }
