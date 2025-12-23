@@ -50,7 +50,7 @@ describe('#start()', () => {
       analytics: mockAnalyticsSetup,
     });
     toasts.start({
-      rendering: mockRendering,
+      addRenderingContext: mockRendering.addContext,
       targetDomElement,
       overlays: mockOverlays,
       analytics: mockAnalytics,
@@ -71,7 +71,7 @@ describe('#start()', () => {
     ).toBeInstanceOf(ToastsApi);
     expect(
       toasts.start({
-        rendering: mockRendering,
+        addRenderingContext: mockRendering.addContext,
         targetDomElement,
         overlays: mockOverlays,
         analytics: mockAnalytics,
@@ -92,7 +92,7 @@ describe('#stop()', () => {
       analytics: mockAnalyticsSetup,
     });
     toasts.start({
-      rendering: mockRendering,
+      addRenderingContext: mockRendering.addContext,
       targetDomElement,
       overlays: mockOverlays,
       analytics: mockAnalytics,
@@ -120,7 +120,7 @@ describe('#stop()', () => {
       analytics: mockAnalyticsSetup,
     });
     toasts.start({
-      rendering: mockRendering,
+      addRenderingContext: mockRendering.addContext,
       targetDomElement,
       overlays: mockOverlays,
       analytics: mockAnalytics,

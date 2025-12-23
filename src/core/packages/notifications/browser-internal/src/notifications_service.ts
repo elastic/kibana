@@ -26,7 +26,7 @@ export interface SetupDeps {
 
 export interface StartDeps {
   overlays: OverlayStart;
-  rendering: RenderingService;
+  addRenderingContext: RenderingService['addContext'];
   analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
 }

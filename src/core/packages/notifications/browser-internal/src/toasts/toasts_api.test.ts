@@ -54,7 +54,7 @@ function toastDeps() {
 function startDeps() {
   return {
     overlays: {} as any,
-    rendering: renderingServiceMock.create(),
+    addRenderingContext: renderingServiceMock.create().addContext,
   };
 }
 

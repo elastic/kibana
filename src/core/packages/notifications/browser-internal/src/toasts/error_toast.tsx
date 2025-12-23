@@ -29,7 +29,7 @@ interface ErrorToastProps {
   error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
-  rendering: RenderingService;
+  addRenderingContext: RenderingService['addContext'];
 }
 
 interface RequestError extends Error {
@@ -53,8 +53,8 @@ export function showErrorDialog({
   title,
   error,
   openModal,
-  rendering,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'rendering'>) {
+  addRenderingContext,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'addRenderingContext'>) {
   let text = '';
 
   if (isRequestError(error)) {
@@ -68,7 +68,7 @@ export function showErrorDialog({
 
   const modal = openModal(
     mount(
-      rendering.addContext(
+      addRenderingContext(
         <>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
@@ -98,8 +98,14 @@ export function showErrorDialog({
   );
 }
 
-export function ErrorToast({ title, error, toastMessage, openModal, rendering }: ErrorToastProps) {
-  return rendering.addContext(
+export function ErrorToast({
+  title,
+  error,
+  toastMessage,
+  openModal,
+  addRenderingContext,
+}: ErrorToastProps) {
+  return addRenderingContext(
     <>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
       <div className="eui-textRight">
@@ -107,7 +113,7 @@ export function ErrorToast({ title, error, toastMessage, openModal, rendering }:
           size="s"
           color="danger"
           data-test-subj="errorToastBtn"
-          onClick={() => showErrorDialog({ title, error, openModal, rendering })}
+          onClick={() => showErrorDialog({ title, error, openModal, addRenderingContext })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"

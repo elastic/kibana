@@ -32,7 +32,7 @@ function getErrorToast(props: ErrorToastProps = {}) {
       error={props.error || new Error('error message')}
       title={props.title || 'An error occured'}
       toastMessage={props.toastMessage || 'This is the toast message'}
-      rendering={mockRendering}
+      addRenderingContext={mockRendering.addContext}
     />
   );
 }

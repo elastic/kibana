@@ -25,7 +25,7 @@ interface SetupDeps {
 
 interface StartDeps {
   overlays: OverlayStart;
-  rendering: RenderingService;
+  addRenderingContext: RenderingService['addContext'];
   analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
   notificationCoordinator: NotificationCoordinator;
@@ -45,11 +45,11 @@ export class ToastsService {
   public start({
     overlays,
     targetDomElement,
-    rendering,
+    addRenderingContext,
     analytics,
     notificationCoordinator,
   }: StartDeps) {
-    this.api!.start({ overlays, rendering });
+    this.api!.start({ overlays, addRenderingContext });
     this.targetDomElement = targetDomElement;
 
     const reportEvent = this.telemetry.start({ analytics });
@@ -62,7 +62,7 @@ export class ToastsService {
     });
 
     render(
-      rendering.addContext(
+      addRenderingContext(
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={toasts$}

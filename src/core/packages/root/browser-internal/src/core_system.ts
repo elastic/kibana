@@ -366,7 +366,7 @@ export class CoreSystem {
         analytics,
         overlays,
         targetDomElement: notificationsTargetDomElement,
-        rendering,
+        addRenderingContext: rendering.addContext,
       });
 
       const featureFlags = await this.featureFlags.start();

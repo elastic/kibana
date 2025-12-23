@@ -78,7 +78,7 @@ const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
 
 interface StartDeps {
   overlays: OverlayStart;
-  rendering: RenderingService;
+  addRenderingContext: RenderingService['addContext'];
 }
 
 /**
@@ -236,7 +236,7 @@ export class ToastsApi implements IToasts {
           error={error}
           title={options.title}
           toastMessage={message}
-          rendering={this.startDeps!.rendering}
+          addRenderingContext={this.startDeps!.addRenderingContext}
         />
       ),
       ...options,
