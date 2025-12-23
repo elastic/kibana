@@ -7,24 +7,24 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Subtitle } from '.';
-import { getMockAttackDiscoveryAlerts } from '../../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
+import { Subtitle } from './subtitle';
+import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 
-import { getFormattedDate } from '../../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
+import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 
 jest.mock(
-  '../../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time',
+  '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time',
   () => ({
     getFormattedDate: jest.fn(() => '2023-10-27 10:00:00'),
   })
 );
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
+jest.mock('../../../../../common/lib/kibana', () => ({
   useDateFormat: jest.fn(() => jest.fn()),
 }));
 
 jest.mock(
-  '../../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
+  '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
   () => ({
     AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
       <div data-test-subj="mock-markdown-formatter">{markdown}</div>

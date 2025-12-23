@@ -12,9 +12,9 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
 
-import { getFormattedDate } from '../../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
-import { useDateFormat } from '../../../../../../common/lib/kibana';
-import { AttackDiscoveryMarkdownFormatter } from '../../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
+import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
+import { useDateFormat } from '../../../../../common/lib/kibana';
+import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 
 export const DETECTED_ON_LABEL = (timestamp: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.attacks.group.subtitle.detectedOnLabel', {
