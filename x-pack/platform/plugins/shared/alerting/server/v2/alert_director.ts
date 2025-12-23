@@ -65,7 +65,7 @@ async function createAlertTransitions(
       return {
         '@timestamp': now,
         rule_id: row['rule.id'],
-        alert_series_id: row['alert_event.alert_series_id'],
+        alert_series_id: row.event_alert_series_id,
         // TODO: Find last episode..
         episode_id:
           row.last_tracked_state === 'inactive' && row.candidate_state === 'pending'

@@ -68,7 +68,8 @@ async function createAlertEvents(rows: Record<string, unknown>[], esClient: Elas
         ],
         data: row,
         status: 'breach',
-        alert_series_id: `${now.toISOString()}:${row._id}:${row._index}`,
+        // Can't have timestamp in here..
+        alert_series_id: `${row._id}:${row._index}`,
         source: 'rule',
       };
     });
