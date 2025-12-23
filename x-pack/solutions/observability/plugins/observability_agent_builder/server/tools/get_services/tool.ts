@@ -17,6 +17,7 @@ import type {
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
@@ -49,7 +50,7 @@ export function createGetServicesTool({
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Retrieves a list of monitored APM services, including their health status, environment, and active alert counts. Useful for high-level system overview and identifying unhealthy services.',
+      'Retrieves a list of monitored APM services, including their health status, active alert counts, and key performance metrics: latency, transaction error rate, and throughput. Useful for high-level system overview, identifying unhealthy services, and quantifying performance issues.',
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {
@@ -62,19 +63,13 @@ export function createGetServicesTool({
       const { request } = context;
 
       try {
-        const response = await dataRegistry.getData('servicesItems', {
+        const { services, maxCountExceeded, serviceOverflowCount } = await getToolHandler({
           request,
-          environment,
+          dataRegistry,
           start,
           end,
-        });
-
-        const services = (response?.items ?? []).filter((item) => {
-          if (!healthStatus) {
-            return true;
-          }
-
-          return healthStatus.includes(item.healthStatus ?? 'unknown');
+          environment,
+          healthStatus,
         });
 
         return {
@@ -83,8 +78,8 @@ export function createGetServicesTool({
               type: ToolResultType.other,
               data: {
                 services,
-                maxCountExceeded: response?.maxCountExceeded ?? false,
-                serviceOverflowCount: response?.serviceOverflowCount ?? 0,
+                maxCountExceeded,
+                serviceOverflowCount,
               },
             },
           ],
