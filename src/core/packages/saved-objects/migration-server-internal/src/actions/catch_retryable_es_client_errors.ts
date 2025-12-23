@@ -24,6 +24,7 @@ const retryResponseStatuses = [
   408, // RequestTimeout
   410, // Gone
   429, // TooManyRequests -> ES circuit breaker
+  502, // BadGateway
   503, // ServiceUnavailable
   504, // GatewayTimeout
 ];
