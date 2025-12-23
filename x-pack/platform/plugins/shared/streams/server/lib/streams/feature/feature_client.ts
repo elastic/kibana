@@ -11,9 +11,9 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, FeatureStatus } from '@kbn/streams-schema';
 import { FeatureNotFoundError } from '../errors/feature_not_found_error';
-import { STREAM_NAME, FEATURE_UUID } from './fields';
+import { STREAM_NAME, FEATURE_UUID, FEATURE_STATUS } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import type { FeatureTypeRegistry } from './feature_type_registry';
@@ -145,13 +145,19 @@ export class FeatureClient {
     });
   }
 
-  async getFeatures(name: string): Promise<{ hits: Feature[]; total: number }> {
+  async getFeatures(
+    name: string,
+    status?: FeatureStatus
+  ): Promise<{ hits: Feature[]; total: number }> {
     const featuresResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: true,
       query: {
         bool: {
-          filter: [...termQuery(STREAM_NAME, name)],
+          filter: [
+            ...termQuery(STREAM_NAME, name),
+            ...(status ? termQuery(FEATURE_STATUS, status) : []),
+          ],
         },
       },
     });

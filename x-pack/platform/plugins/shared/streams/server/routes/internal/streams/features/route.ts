@@ -6,12 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { featureSchema, type Feature } from '@kbn/streams-schema';
-import type {
-  StorageClientBulkResponse,
-  StorageClientDeleteResponse,
-  StorageClientIndexResponse,
-} from '@kbn/storage-adapter';
+import { featureSchema, featureStatusSchema, type Feature } from '@kbn/streams-schema';
+import type { StorageClientBulkResponse, StorageClientIndexResponse } from '@kbn/storage-adapter';
 import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map, catchError } from 'rxjs';
@@ -27,84 +23,6 @@ import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 
 const dateFromString = z.string().transform((input) => new Date(input));
-
-export const getFeatureRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/{name}/features/{id}',
-  options: {
-    access: 'internal',
-    summary: 'Get a feature for a stream',
-    description: 'Fetches the specified feature',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      name: z.string(),
-      id: z.string(),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ feature: Feature }> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { name, id } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
-
-    const feature = await featureClient.getFeature(id);
-    return { feature };
-  },
-});
-
-export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
-  options: {
-    access: 'internal',
-    summary: 'Delete a feature for a stream',
-    description: 'Deletes the specified feature',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      name: z.string(),
-      id: z.string(),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<StorageClientDeleteResponse> => {
-    const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { name, id } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
-    }
-
-    return await featureClient.deleteFeature(name, id);
-  },
-});
 
 export const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
@@ -163,6 +81,7 @@ export const listFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
+    query: z.optional(z.object({ status: featureStatusSchema.optional() })),
   }),
   handler: async ({
     params,
@@ -178,15 +97,12 @@ export const listFeaturesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-
     const { read } = await checkAccess({ name, scopedClusterClient });
-
     if (!read) {
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
 
-    const { hits: features } = await featureClient.getFeatures(name);
-
+    const { hits: features } = await featureClient.getFeatures(name, params.query?.status);
     return {
       features,
     };
@@ -444,8 +360,6 @@ export const describeStreamRoute = createServerRoute({
 });
 
 export const featureRoutes = {
-  ...getFeatureRoute,
-  ...deleteFeatureRoute,
   ...upsertFeatureRoute,
   ...listFeaturesRoute,
   ...bulkFeaturesRoute,
