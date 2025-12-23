@@ -11,14 +11,12 @@ type AddRuleFlyoutStep = 'definition' | 'actions' | 'details';
 
 export class AddRuleFlyout {
   public readonly flyout: Locator;
-  public readonly steps: Locator;
   public readonly saveButton: Locator;
 
   public readonly isAboveExpression: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = this.page.getByRole('dialog');
-    this.steps = this.flyout.getByTestId('addRuleFlyoutSteps');
     this.saveButton = this.flyout.getByTestId('ruleFlyoutFooterSaveButton');
 
     this.isAboveExpression = this.flyout.getByTestId('apmIsAboveExpression');
@@ -34,7 +32,7 @@ export class AddRuleFlyout {
   }
 
   public async jumpToStep(step: AddRuleFlyoutStep) {
-    await this.steps.getByTestId(`ruleFormStep-${step}`).click();
+    await this.page.getByTestId(`ruleFormStep-${step}`).click();
   }
 
   public async saveRule(opts: { saveEmptyActions?: boolean } = {}) {
