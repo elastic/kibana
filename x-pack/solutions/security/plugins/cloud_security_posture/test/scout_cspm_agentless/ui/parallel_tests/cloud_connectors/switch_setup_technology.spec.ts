@@ -6,52 +6,23 @@
  */
 
 import {
-  AWS_INPUT_TEST_SUBJECTS,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_INPUT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
 
-import { expect, spaceTest } from '@kbn/scout-security';
 import type { CreateAgentlessPolicyRequest } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
+import { expect, spaceTest } from '@kbn/scout-security';
+import {
+  mockAgentPoliciesCreate,
+  mockAgentlessPoliciesWithCapture,
+  mockPackagePoliciesEmpty,
+  mockPackagePoliciesEmptyWithCapture,
+} from '../../fixtures/mocks';
 
 // Use the Fleet plugin's typed request body
 type AgentlessPolicyRequestBody = CreateAgentlessPolicyRequest['body'];
-
-/**
- * Creates a mock agentless policy response for testing.
- */
-function createMockAgentlessPolicyResponse(requestBody: AgentlessPolicyRequestBody) {
-  const mockPolicyId = `mock-policy-${Date.now()}`;
-  const mockAgentPolicyId = `mock-agent-policy-${Date.now()}`;
-  const mockConnectorId = `mock-connector-${Date.now()}`;
-
-  // Convert legacy inputs format to array format for the response
-  const inputsArray = Object.entries(requestBody.inputs ?? {}).map(([type, input]) => ({
-    type,
-    enabled: input.enabled,
-    streams: Object.entries(input.streams ?? {}).map(([streamKey, stream]) => ({
-      enabled: stream.enabled,
-      data_stream: { type: 'logs', dataset: streamKey },
-      vars: stream.vars,
-    })),
-  }));
-
-  return {
-    item: {
-      id: mockPolicyId,
-      name: requestBody.name,
-      namespace: requestBody.namespace || 'default',
-      package: requestBody.package,
-      inputs: inputsArray,
-      policy_id: mockAgentPolicyId,
-      policy_ids: [mockAgentPolicyId],
-      supports_agentless: true,
-      supports_cloud_connector: !!requestBody.cloud_connector?.enabled,
-      cloud_connector_id: requestBody.cloud_connector?.enabled ? mockConnectorId : undefined,
-    },
-  };
-}
 
 spaceTest.describe(
   'Cloud Connectors - Switch Setup Technology',
@@ -73,38 +44,12 @@ spaceTest.describe(
         let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
         // Mock the package policy list API (GET request needed for form initialization)
-        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-          if (request.method() === 'GET') {
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                items: [],
-                total: 0,
-                page: 1,
-                perPage: 1000,
-              }),
-            });
-          } else {
-            await route.continue();
-          }
-        });
+        await mockPackagePoliciesEmpty(page);
 
         // Set up route interception for agentless policies API
         // Use regex to match URL with query parameters and space prefixes
-        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
-            capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
-
-            // Return mock response
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody)),
-            });
-          } else {
-            await route.continue();
-          }
+        await mockAgentlessPoliciesWithCapture(page, (body) => {
+          capturedRequestBody = body;
         });
 
         await pageObjects.cspmIntegrationPage.navigate();
@@ -174,36 +119,11 @@ spaceTest.describe(
         let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
         // Mock the package policy list API (GET request needed for form initialization)
-        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-          if (request.method() === 'GET') {
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                items: [],
-                total: 0,
-                page: 1,
-                perPage: 1000,
-              }),
-            });
-          } else {
-            await route.continue();
-          }
-        });
+        await mockPackagePoliciesEmpty(page);
 
         // Set up route interception for agentless policies API
-        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
-            capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
-
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody)),
-            });
-          } else {
-            await route.continue();
-          }
+        await mockAgentlessPoliciesWithCapture(page, (body) => {
+          capturedRequestBody = body;
         });
 
         await pageObjects.cspmIntegrationPage.navigate();
@@ -267,65 +187,23 @@ spaceTest.describe(
         let agentlessPolicyRequestCaptured = false;
         let packagePolicyRequestBody: Record<string, unknown> | null = null;
 
-        // Intercept agentless policy API - should NOT be called
-        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
-            agentlessPolicyRequestCaptured = true;
-          }
-          await route.continue();
-        });
-
-        // Mock agent policy creation (required for agent-based flow)
-        await page.route(/\/api\/fleet\/agent_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
-            const requestBody = request.postDataJSON() as Record<string, unknown>;
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                item: {
-                  id: `mock-agent-policy-${Date.now()}`,
-                  name: requestBody.name || 'Agent policy',
-                  namespace: requestBody.namespace || 'default',
-                  monitoring_enabled: [],
-                },
-              }),
-            });
-          } else {
+        // Set up ALL mocks BEFORE navigation (order preserved)
+        await Promise.all([
+          // 1. Intercept agentless (should NOT be called)
+          page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+            if (request.method() === 'POST') agentlessPolicyRequestCaptured = true;
             await route.continue();
-          }
-        });
+          }),
 
-        // Intercept package policy API - handle GET for form init and POST for save
-        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-          if (request.method() === 'GET') {
-            // Mock empty list for form initialization
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                items: [],
-                total: 0,
-                page: 1,
-                perPage: 1000,
-              }),
-            });
-          } else if (request.method() === 'POST') {
-            packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                item: {
-                  id: `mock-package-policy-${Date.now()}`,
-                  ...packagePolicyRequestBody,
-                },
-              }),
-            });
-          } else {
-            await route.continue();
-          }
-        });
+          // 2. Mock agent policies (agent-based flow)
+          mockAgentPoliciesCreate(page),
+
+          // 3. Mock package policies (GET empty + capture POST)
+          mockPackagePoliciesEmptyWithCapture(page, (body) => {
+            packagePolicyRequestBody = body;
+            return { item: { id: `mock-${Date.now()}`, ...body } };
+          }),
+        ]);
 
         await pageObjects.cspmIntegrationPage.navigate();
         await pageObjects.cspmIntegrationPage.selectProvider('aws');
@@ -387,65 +265,23 @@ spaceTest.describe(
         let agentlessPolicyRequestCaptured = false;
         let packagePolicyRequestBody: Record<string, unknown> | null = null;
 
-        // Intercept agentless policy API - should NOT be called
-        await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
-            agentlessPolicyRequestCaptured = true;
-          }
-          await route.continue();
-        });
-
-        // Mock agent policy creation (required for agent-based flow)
-        await page.route(/\/api\/fleet\/agent_policies/, async (route, request) => {
-          if (request.method() === 'POST') {
-            const requestBody = request.postDataJSON() as Record<string, unknown>;
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                item: {
-                  id: `mock-agent-policy-${Date.now()}`,
-                  name: requestBody.name || 'Agent policy',
-                  namespace: requestBody.namespace || 'default',
-                  monitoring_enabled: [],
-                },
-              }),
-            });
-          } else {
+        // Set up ALL mocks BEFORE navigation (order preserved)
+        await Promise.all([
+          // 1. Intercept agentless (should NOT be called)
+          page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+            if (request.method() === 'POST') agentlessPolicyRequestCaptured = true;
             await route.continue();
-          }
-        });
+          }),
 
-        // Intercept package policy API - handle GET for form init and POST for save
-        await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-          if (request.method() === 'GET') {
-            // Mock empty list for form initialization
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                items: [],
-                total: 0,
-                page: 1,
-                perPage: 1000,
-              }),
-            });
-          } else if (request.method() === 'POST') {
-            packagePolicyRequestBody = request.postDataJSON() as Record<string, unknown>;
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                item: {
-                  id: `mock-package-policy-${Date.now()}`,
-                  ...packagePolicyRequestBody,
-                },
-              }),
-            });
-          } else {
-            await route.continue();
-          }
-        });
+          // 2. Mock agent policies (agent-based flow)
+          mockAgentPoliciesCreate(page),
+
+          // 3. Mock package policies (GET empty + capture POST)
+          mockPackagePoliciesEmptyWithCapture(page, (body) => {
+            packagePolicyRequestBody = body;
+            return { item: { id: `mock-${Date.now()}`, ...body } };
+          }),
+        ]);
 
         await pageObjects.cspmIntegrationPage.navigate();
         await pageObjects.cspmIntegrationPage.selectProvider('azure');

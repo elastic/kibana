@@ -7,45 +7,10 @@
 
 import { expect, spaceTest } from '@kbn/scout-security';
 import type { CreateAgentlessPolicyRequest } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
+import { mockAgentlessPoliciesWithCapture, mockPackagePoliciesEmpty } from '../../fixtures/mocks';
 
 // Use the Fleet plugin's typed request body
 type AgentlessPolicyRequestBody = CreateAgentlessPolicyRequest['body'];
-
-/**
- * Creates a mock agentless policy response for testing.
- * The response format should match what the UI expects after successful creation.
- */
-function createMockAgentlessPolicyResponse(requestBody: AgentlessPolicyRequestBody) {
-  const mockPolicyId = `mock-policy-${Date.now()}`;
-  const mockAgentPolicyId = `mock-agent-policy-${Date.now()}`;
-  const mockConnectorId = `mock-connector-${Date.now()}`;
-
-  // Convert legacy inputs format to array format for the response
-  const inputsArray = Object.entries(requestBody.inputs ?? {}).map(([type, input]) => ({
-    type,
-    enabled: input.enabled,
-    streams: Object.entries(input.streams ?? {}).map(([streamKey, stream]) => ({
-      enabled: stream.enabled,
-      data_stream: { type: 'logs', dataset: streamKey },
-      vars: stream.vars,
-    })),
-  }));
-
-  return {
-    item: {
-      id: mockPolicyId,
-      name: requestBody.name,
-      namespace: requestBody.namespace || 'default',
-      package: requestBody.package,
-      inputs: inputsArray,
-      policy_id: mockAgentPolicyId,
-      policy_ids: [mockAgentPolicyId],
-      supports_agentless: true,
-      supports_cloud_connector: !!requestBody.cloud_connector?.enabled,
-      cloud_connector_id: requestBody.cloud_connector?.enabled ? mockConnectorId : undefined,
-    },
-  };
-}
 
 // Stream and input key constants
 const FINDINGS_STREAM_KEY = 'cloud_security_posture.findings';
@@ -86,36 +51,12 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
       let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
       // Mock the package policy list API (GET request needed for form initialization)
-      await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-        if (request.method() === 'GET') {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              items: [],
-              total: 0,
-              page: 1,
-              perPage: 1000,
-            }),
-          });
-        } else {
-          await route.continue();
-        }
-      });
+      await mockPackagePoliciesEmpty(page);
 
       // Set up route interception for agentless policies API
       // Only capture data in handler - assertions moved to main test body
-      await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
-        if (request.method() === 'POST') {
-          capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody)),
-          });
-        } else {
-          await route.continue();
-        }
+      await mockAgentlessPoliciesWithCapture(page, (body) => {
+        capturedRequestBody = body;
       });
 
       // Navigate and configure integration
@@ -190,36 +131,12 @@ spaceTest.describe('Cloud Connectors - Create New', { tag: ['@ess', '@svlSecurit
       let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
       // Mock the package policy list API (GET request needed for form initialization)
-      await page.route(/\/api\/fleet\/package_policies/, async (route, request) => {
-        if (request.method() === 'GET') {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              items: [],
-              total: 0,
-              page: 1,
-              perPage: 1000,
-            }),
-          });
-        } else {
-          await route.continue();
-        }
-      });
+      await mockPackagePoliciesEmpty(page);
 
       // Set up route interception for agentless policies API
       // Only capture data in handler - assertions moved to main test body
-      await page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
-        if (request.method() === 'POST') {
-          capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody)),
-          });
-        } else {
-          await route.continue();
-        }
+      await mockAgentlessPoliciesWithCapture(page, (body) => {
+        capturedRequestBody = body;
       });
 
       await pageObjects.cspmIntegrationPage.navigate();
