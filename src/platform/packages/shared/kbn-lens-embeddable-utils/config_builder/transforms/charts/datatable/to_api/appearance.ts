@@ -31,35 +31,38 @@ function parseDensityToAPI(
 
   const height: Record<string, unknown> = {};
   const isLegacySingleMode = (heightMode: string) => heightMode === LEGACY_SINGLE_ROW_HEIGHT_MODE;
-  const getHeightMode = (heightMode?: string) =>
-    heightMode
-      ? isLegacySingleMode(heightMode)
-        ? LENS_ROW_HEIGHT_MODE.custom
-        : heightMode
-      : LENS_ROW_HEIGHT_MODE.custom;
+  const getHeightMode = (heightMode: string) =>
+    isLegacySingleMode(heightMode) ? LENS_ROW_HEIGHT_MODE.custom : heightMode;
+  const shouldIncludeLines = (isLegacy: boolean, heightMode: string, heightLines?: number) =>
+    (heightMode === LENS_ROW_HEIGHT_MODE.custom && heightLines) || isLegacy;
 
   if (rowHeight || rowHeightLines) {
     // Handle legacy 'single' row height mode by mapping it to 'custom'
     const isLegacyRowHeight = rowHeight ? isLegacySingleMode(rowHeight) : false;
-    const heightMode = getHeightMode(rowHeight);
-    const shouldIncludeLines =
-      (heightMode === LENS_ROW_HEIGHT_MODE.custom && rowHeightLines) || isLegacyRowHeight;
+    const heightMode = rowHeight ? getHeightMode(rowHeight) : LENS_ROW_HEIGHT_MODE.custom;
+    const shouldIncludeRowLines = shouldIncludeLines(isLegacyRowHeight, heightMode, rowHeightLines);
+
     height.value = {
       type: heightMode,
-      ...(shouldIncludeLines ? { lines: rowHeightLines ?? 1 } : {}),
+      ...(shouldIncludeRowLines ? { lines: rowHeightLines ?? 1 } : {}),
     };
   }
 
   if (headerRowHeight || headerRowHeightLines) {
     // Handle legacy 'single' header row height mode by mapping it to 'custom'
     const isLegacyHeaderRowHeight = headerRowHeight ? isLegacySingleMode(headerRowHeight) : false;
-    const heightMode = getHeightMode(headerRowHeight);
-    const shouldIncludeMaxLines =
-      (heightMode === LENS_ROW_HEIGHT_MODE.custom && headerRowHeightLines) ||
-      isLegacyHeaderRowHeight;
+    const heightMode = headerRowHeight
+      ? getHeightMode(headerRowHeight)
+      : LENS_ROW_HEIGHT_MODE.custom;
+    const shouldIncludeHeaderMaxLines = shouldIncludeLines(
+      isLegacyHeaderRowHeight,
+      heightMode,
+      headerRowHeightLines
+    );
+
     height.header = {
       type: heightMode,
-      ...(shouldIncludeMaxLines ? { max_lines: headerRowHeightLines ?? 1 } : {}),
+      ...(shouldIncludeHeaderMaxLines ? { max_lines: headerRowHeightLines ?? 1 } : {}),
     };
   }
 
