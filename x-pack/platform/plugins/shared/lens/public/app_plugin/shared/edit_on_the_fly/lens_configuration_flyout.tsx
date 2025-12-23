@@ -445,6 +445,12 @@ export function LensEditConfigurationFlyout({
       return { isConvertToEsqlButtonDisabled: true };
     }
 
+    // Check if index pattern exists
+    const indexPattern = framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId];
+    if (!indexPattern) {
+      return { isConvertToEsqlButtonDisabled: true };
+    }
+
     // Get the esAggEntries
     const { columnOrder } = singleLayer;
     const columns = { ...singleLayer.columns };
@@ -459,7 +465,7 @@ export function LensEditConfigurationFlyout({
     const esqlLayer = getESQLForLayer(
       esAggEntries,
       singleLayer,
-      framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
+      indexPattern,
       coreStart.uiSettings,
       framePublicAPI.dateRange,
       startDependencies.data.nowProvider.get()
