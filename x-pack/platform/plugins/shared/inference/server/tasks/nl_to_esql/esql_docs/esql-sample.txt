@@ -1,0 +1,26 @@
+# SAMPLE
+
+The SAMPLE command selects a random fraction of rows from the table, based on the specified probability.
+
+## Syntax
+
+`SAMPLE probability`
+
+### Parameters
+
+#### probability
+
+The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
+
+## Examples
+
+```esql
+FROM employees
+| KEEP emp_no
+| SAMPLE 0.05
+```
+Randomly select approximately 5% of the employee numbers from the employees table.
+
+## Limitations
+
+This functionality is in technical preview and may be changed or removed in a future release. Features in technical preview are not subject to the support SLA of official GA features.

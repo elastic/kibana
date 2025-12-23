@@ -6957,10 +6957,6 @@
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/valid_slack_api_channels.ts"
-              },
-              {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
@@ -15783,7 +15779,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_latest_readiness_tasks.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_readiness_categories.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17590,10 +17586,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/install_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/post_readiness_task.ts"
               },
               {
                 "plugin": "securitySolution",
