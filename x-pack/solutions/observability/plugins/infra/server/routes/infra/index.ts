@@ -43,11 +43,22 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     async (context, request, response) => {
       const { from, to, metrics, limit, query, schema } = request.body;
 
-      // Filter out unsupported metrics for semconv schema
-      const filteredMetrics =
-        schema === 'semconv'
-          ? metrics.filter((metric) => !UNSUPPORTED_SEMCONV_METRICS.includes(metric))
-          : metrics;
+      // Validate that unsupported metrics are not requested for semconv schema
+      if (schema === 'semconv') {
+        const unsupportedMetrics = metrics.filter((metric) =>
+          UNSUPPORTED_SEMCONV_METRICS.includes(metric)
+        );
+
+        if (unsupportedMetrics.length > 0) {
+          return response.badRequest({
+            body: {
+              message: `The following metrics are not supported for semconv schema: ${unsupportedMetrics.join(
+                ', '
+              )}`,
+            },
+          });
+        }
+      }
 
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
@@ -61,7 +72,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         const hosts = await getHosts({
           from,
           to,
-          metrics: filteredMetrics,
+          metrics,
           limit,
           query,
           alertsClient,
