@@ -233,7 +233,7 @@ export function getBracketsToClose(text: string) {
 
       if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
-        i += substr.length - 1; // We advance the cursor to consume the full lenght of the bracket
+        i += substr.length - 1; // We advance the cursor to consume the full length of the bracket
         break;
       } else if (substr === openBracket) {
         stack.push(substr);
