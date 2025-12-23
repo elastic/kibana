@@ -108,6 +108,7 @@ export function convertDatatableColumnsToAPI(
     throw new Error('Datatable must have at least one metric column');
   }
 
+  // Used for the sorting columnId mapping during transformation to API format
   const columnIdMapping: ColumnIdMapping = {};
 
   if (isFormBasedLayer(layer)) {
