@@ -41,8 +41,11 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
     // Fix the introduced error
     await page.testSubj.click('customEquation');
     await customEquationField.click();
+    const responsePromise = page.waitForResponse('**/internal/search/ese');
     await customEquationField.fill('A');
     await page.testSubj.click('o11yClosablePopoverTitleButton');
+    const response = await responsePromise;
+    expect(response.status()).toBe(200);
 
     await expect(lensFailure).toHaveCount(0);
   });
