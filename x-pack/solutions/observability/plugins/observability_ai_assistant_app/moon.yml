@@ -93,6 +93,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/connector-schemas'
   - '@kbn/onechat-plugin'
+  - '@kbn/object-utils'
 tags:
   - plugin
   - prod
