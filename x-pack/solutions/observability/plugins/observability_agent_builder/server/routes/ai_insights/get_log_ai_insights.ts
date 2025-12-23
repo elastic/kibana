@@ -34,7 +34,8 @@ export async function getLogAiInsights({
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.
-    If it's an issue, provide remediation steps suitable for an on-call SRE.`);
+    If it is an issue, provide remediation steps for further investigation.
+    Check whether it is a problem with downstream services. Include when the issue started to appear.`);
 
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
