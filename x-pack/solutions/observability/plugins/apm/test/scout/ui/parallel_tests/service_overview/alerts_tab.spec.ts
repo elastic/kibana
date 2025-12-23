@@ -19,7 +19,7 @@ test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () =
     pageObjects: { alertsTab },
   }) => {
     await alertsTab.gotoServiceAlertsPage(
-      'opbeans-java',
+      testData.SERVICE_OPBEANS_JAVA,
       testData.OPBEANS_START_DATE,
       testData.OPBEANS_END_DATE
     );
@@ -29,7 +29,9 @@ test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () =
     await test.step('core alerts UI is visible', async () => {
       await expect(alertsTab.globalQueryBar).toBeVisible();
       await expect(alertsTab.alertsTableEmptyState).toBeVisible();
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-java');
+      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
+        testData.SERVICE_OPBEANS_JAVA
+      );
     });
 
     await test.step('renders the expected filter controls', async () => {

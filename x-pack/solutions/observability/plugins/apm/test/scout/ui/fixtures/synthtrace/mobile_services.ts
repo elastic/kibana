@@ -6,10 +6,7 @@
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-
-export const MOBILE_ANDROID_SERVICE_NAME = 'synth-android';
-export const MOBILE_IOS_SERVICE_NAME = 'synth-ios';
-export const SYNTH_GO_SERVICE_NAME = 'synth-go-1';
+import { SERVICE_MOBILE_ANDROID, SERVICE_MOBILE_IOS, SERVICE_SYNTH_GO } from '../constants';
 
 export function mobileServices({
   from,
@@ -22,7 +19,7 @@ export function mobileServices({
 
   const synthGo = apm
     .service({
-      name: SYNTH_GO_SERVICE_NAME,
+      name: SERVICE_SYNTH_GO,
       environment: 'production',
       agentName: 'go',
     })
@@ -30,7 +27,7 @@ export function mobileServices({
 
   const synthIOS = apm
     .service({
-      name: MOBILE_IOS_SERVICE_NAME,
+      name: SERVICE_MOBILE_IOS,
       environment: 'production',
       agentName: 'iOS/swift',
     })
@@ -38,7 +35,7 @@ export function mobileServices({
 
   const synthAndroid = apm
     .service({
-      name: MOBILE_ANDROID_SERVICE_NAME,
+      name: SERVICE_MOBILE_ANDROID,
       environment: 'production',
       agentName: 'android/java',
     })

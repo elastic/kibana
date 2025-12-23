@@ -6,10 +6,7 @@
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-
-export const OTEL_SERVICE_NAME = 'sendotlp-otel-native-synth';
-export const OTEL_INSTANCE_ID = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
-export const OTEL_TRANSACTION_NAME = 'parent-synth';
+import { SERVICE_OTEL_SENDOTLP, OTEL_INSTANCE_ID, OTEL_TRANSACTION_NAME } from '../constants';
 
 export function otelSendotlp({
   from,
@@ -24,7 +21,7 @@ export function otelSendotlp({
   // the OTEL pipeline. The service will appear as a Go service.
   const otelService = apm
     .service({
-      name: OTEL_SERVICE_NAME,
+      name: SERVICE_OTEL_SENDOTLP,
       environment: 'production',
       agentName: 'go',
     })

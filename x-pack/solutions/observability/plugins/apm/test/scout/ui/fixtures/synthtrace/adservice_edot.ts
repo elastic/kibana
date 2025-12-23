@@ -6,11 +6,12 @@
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-
-export const EDOT_SERVICE_NAME = 'adservice-edot-synth';
-export const EDOT_INSTANCE_ID = 'da7a8507-53be-421c-8d77-984f12397213';
-export const EDOT_TRANSACTION_NAME = 'oteldemo.AdServiceEdotSynth/GetAds';
-export const EDOT_ERROR_MESSAGE = '[ResponseError] index_not_found_exception';
+import {
+  SERVICE_EDOT_ADSERVICE,
+  EDOT_INSTANCE_ID,
+  EDOT_TRANSACTION_NAME,
+  EDOT_ERROR_MESSAGE,
+} from '../constants';
 
 export function adserviceEdot({
   from,
@@ -25,7 +26,7 @@ export function adserviceEdot({
   // the OTEL pipeline. The service will appear as a Java service.
   const edotService = apm
     .service({
-      name: EDOT_SERVICE_NAME,
+      name: SERVICE_EDOT_ADSERVICE,
       environment: 'production',
       agentName: 'java',
     })

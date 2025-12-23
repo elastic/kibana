@@ -31,6 +31,8 @@ export const EDOT_ERROR_MESSAGE = '[ResponseError] index_not_found_exception';
 export const SERVICE_MOBILE_ANDROID = 'synth-android';
 export const SERVICE_MOBILE_IOS = 'synth-ios';
 export const SERVICE_SYNTH_GO = 'synth-go-1';
+export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
+export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 // Error constants - based on opbeans synthtrace data

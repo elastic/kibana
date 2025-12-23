@@ -10,7 +10,7 @@ import { testData, BIGGER_TIMEOUT } from '../..';
 import { DependenciesTab } from './dependencies_tab';
 
 export class ServiceDetailsPage {
-  public readonly SERVICE_NAME = 'opbeans-java';
+  public readonly SERVICE_NAME = testData.SERVICE_OPBEANS_JAVA;
 
   public readonly dependenciesTab: DependenciesTab;
 
