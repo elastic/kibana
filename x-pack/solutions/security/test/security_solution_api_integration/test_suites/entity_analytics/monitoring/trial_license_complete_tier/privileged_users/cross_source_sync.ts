@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   // FLAKY: https://github.com/elastic/kibana/issues/237416
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const kibanaServer = getService('kibanaServer');
     const index1 = 'privmon_index1';
     const indexSyncUtils = PlainIndexSyncUtils(getService, index1);
@@ -82,8 +82,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       expect(createEntitySourceResponse.status).toBe(200);
-      // Use scheduleEngineAndWaitForUserCount to ensure sync completes before checking
-      users = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+      // Schedule the sync manually instead of using scheduleEngineAndWaitForUserCount
+      // because the user count is already 1 (from API/CSV sources), so waiting for count=1
+      // would return immediately before the index sync completes
+      await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
 
       // Additional wait to ensure the 'index' source has been merged
       await waitFor(
