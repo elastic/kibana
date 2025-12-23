@@ -100,17 +100,9 @@ export const streamEnrichmentMachine = setup({
 
       const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
 
-      // Only run full validation for wired streams
-      if (!isWiredStream) {
-        return {
-          schemaErrors: [],
-          validationErrors: new Map(),
-          fieldTypesByProcessor: new Map(),
-        };
-      }
-
       const validationResult = validateStreamlang(context.nextStreamlangDSL, {
         reservedFields: [],
+        isWiredStream,
       });
 
       const errorsByStep = new Map<string, typeof validationResult.errors>();

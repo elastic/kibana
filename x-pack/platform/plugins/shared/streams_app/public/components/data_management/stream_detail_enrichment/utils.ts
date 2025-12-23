@@ -23,7 +23,6 @@ import {
   ALWAYS_CONDITION,
   conditionSchema,
   convertStepToUIDefinition,
-  isConditionComplete,
   streamlangProcessorSchema,
   stripCustomIdentifiers,
 } from '@kbn/streamlang';
@@ -605,12 +604,6 @@ export const getValidSteps = (
     } else {
       // Action step: check schema validity
       if (!isSchema(streamlangProcessorSchema, step)) {
-        return false;
-      }
-
-      // Also check if the processor's where condition is complete
-      // (handles range conditions with empty values that pass schema but are incomplete)
-      if ('where' in step && !isConditionComplete(step.where)) {
         return false;
       }
 

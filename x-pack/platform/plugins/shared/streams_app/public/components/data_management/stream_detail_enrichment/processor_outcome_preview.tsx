@@ -39,7 +39,6 @@ import {
 } from './empty_prompts';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
 import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
-import { hasEditingStepIncompleteCondition } from './state_management/interactive_mode_machine/utils';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
@@ -252,15 +251,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  // Check if the editing step has an incomplete condition
-  const hasIncompleteCondition = useStreamEnrichmentSelector((state) => {
-    const isInteractiveMode = selectIsInteractiveMode(state);
-    if (!isInteractiveMode || !state.context.interactiveModeRef) return false;
-
-    const { stepRefs } = state.context.interactiveModeRef.getSnapshot().context;
-    return hasEditingStepIncompleteCondition(stepRefs);
-  });
-
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
     const isInteractiveMode = selectIsInteractiveMode(state);
     if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
@@ -403,18 +393,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   ]);
 
   // Use appropriate columns based on view mode
-  const displayColumnsForTable = useMemo(() => {
-    if (hasIncompleteCondition) {
-      return allColumns;
-    }
-    return effectiveViewMode === 'summary' ? displayColumnsForSummaryMode : previewColumns;
-  }, [
-    hasIncompleteCondition,
-    effectiveViewMode,
-    displayColumnsForSummaryMode,
-    previewColumns,
-    allColumns,
-  ]);
+  const displayColumnsForTable =
+    effectiveViewMode === 'summary' ? displayColumnsForSummaryMode : previewColumns;
 
   const setVisibleColumns = useCallback(
     (visibleColumns: string[]) => {
