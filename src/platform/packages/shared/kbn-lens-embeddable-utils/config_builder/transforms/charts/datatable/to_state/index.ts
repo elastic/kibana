@@ -49,7 +49,7 @@ export function buildFormBasedLayer(
   if (config.rows) {
     config.rows.forEach((row, index) => {
       const bucketColumn = fromBucketLensApiToLensState(row, allMetricColumnsWithIds);
-      addLayerColumn(defaultLayer, getAccessorName(ROW_ACCESSOR_PREFIX, index), bucketColumn, true);
+      addLayerColumn(defaultLayer, getAccessorName(ROW_ACCESSOR_PREFIX, index), bucketColumn);
     });
   }
 
@@ -60,8 +60,7 @@ export function buildFormBasedLayer(
       addLayerColumn(
         defaultLayer,
         getAccessorName(SPLIT_METRIC_BY_ACCESSOR_PREFIX, index),
-        bucketColumn,
-        true
+        bucketColumn
       );
     });
   }
