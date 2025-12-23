@@ -59,7 +59,8 @@
     "@kbn/core-security-server",
     "@kbn/charts-theme",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/kql"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

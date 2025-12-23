@@ -53,6 +53,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/licensing-types",
     "@kbn/kql",
+    "@kbn/unified-search-plugin",
   ],
   "exclude": [
     "target/**/*",
