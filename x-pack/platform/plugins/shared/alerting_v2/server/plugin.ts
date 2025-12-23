@@ -29,11 +29,11 @@ export class AlertingPlugin
       AlertingServerStartDependencies
     >
 {
-  // @ts-expect-error: logger is not used for now
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    void this.logger;
   }
 
   public setup(core: CoreSetup, plugins: AlertingServerSetupDependencies) {
