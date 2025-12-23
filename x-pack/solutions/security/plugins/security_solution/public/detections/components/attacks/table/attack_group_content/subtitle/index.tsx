@@ -16,10 +16,22 @@ import { useDateFormat } from '../../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import * as i18n from './translations';
 
-export const Subtitle = React.memo<{
+export interface SubtitleProps {
+  /**
+   * The attack discovery alert object containing details about the attack.
+   */
   attack: AttackDiscoveryAlert;
+  /**
+   * Whether to show anonymized values in the summary.
+   * @default false
+   */
   showAnonymized?: boolean;
-}>(({ attack, showAnonymized = false }) => {
+}
+
+/**
+ * A component that displays the subtitle for an attack group, including the detection timestamp and a summary.
+ */
+export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = false }) => {
   const summary = useMemo(() => {
     if (!attack.entitySummaryMarkdown) {
       return null;
