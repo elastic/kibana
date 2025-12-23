@@ -16,6 +16,7 @@ import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
+import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
@@ -24,6 +25,7 @@ import { groupingOptions, groupingSettings } from './grouping_configs';
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
+jest.mock('../../../hooks/attacks/use_attack_group_handler');
 jest.mock('../../alerts_table/alerts_grouping', () => ({
   ...jest.requireActual('../../alerts_table/alerts_grouping'),
   GroupedAlertsTable: jest.fn(),
@@ -33,12 +35,17 @@ const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 const dataView: DataView = createStubDataView({ spec: dataViewSpec });
 
 const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as jest.Mock;
+const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 
 describe('<TableSection />', () => {
   beforeEach(() => {
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
+    });
+    mockUseAttackGroupHandler.mockReturnValue({
+      getAttack: jest.fn(),
+      isLoading: false,
     });
     mockGroupedAlertsTable.mockImplementation((props) => (
       <div data-test-subj="mock-grouped-alerts-table">
@@ -71,6 +78,27 @@ describe('<TableSection />', () => {
     await waitFor(() => {
       expect(getByTestId(TABLE_SECTION_TEST_ID)).toBeInTheDocument();
       expect(getByTestId('mock-grouped-alerts-table')).toBeInTheDocument();
+    });
+  });
+
+  it('should pass isLoading from useAttackGroupHandler to useGetDefaultGroupTitleRenderers', async () => {
+    mockUseAttackGroupHandler.mockReturnValue({
+      getAttack: jest.fn(),
+      isLoading: true,
+    });
+
+    render(
+      <TestProviders>
+        <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isLoading: true,
+        })
+      );
     });
   });
 
@@ -124,14 +152,13 @@ describe('<TableSection />', () => {
     });
 
     await waitFor(() => {
-      expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
+      expect(mockUseAttackGroupHandler).toHaveBeenCalledWith({
         attackIds: ['attack-id-1'],
-        showAnonymized: false,
       });
     });
   });
 
-  it('should not call useGetDefaultGroupTitleRenderers when groupingLevel is not 0', async () => {
+  it('should not call useAttackGroupHandler with new IDs when groupingLevel is not 0', async () => {
     let onAggregationsChange: (
       aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
       groupingLevel?: number
@@ -166,7 +193,7 @@ describe('<TableSection />', () => {
     });
 
     await waitFor(() => {
-      expect(mockUseGetDefaultGroupTitleRenderers).not.toHaveBeenCalledWith({
+      expect(mockUseAttackGroupHandler).not.toHaveBeenCalledWith({
         attackIds: ['attack-id-1'],
       });
     });
@@ -309,8 +336,9 @@ describe('<TableSection />', () => {
 
       await waitFor(() => {
         expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          attackIds: undefined,
+          getAttack: expect.any(Function),
           showAnonymized: false,
+          isLoading: false,
         });
       });
     });
@@ -324,8 +352,9 @@ describe('<TableSection />', () => {
 
       await waitFor(() => {
         expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          attackIds: undefined,
+          getAttack: expect.any(Function),
           showAnonymized: false,
+          isLoading: false,
         });
       });
 
@@ -339,8 +368,9 @@ describe('<TableSection />', () => {
 
       await waitFor(() => {
         expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          attackIds: undefined,
+          getAttack: expect.any(Function),
           showAnonymized: true,
+          isLoading: false,
         });
       });
     });
@@ -363,8 +393,9 @@ describe('<TableSection />', () => {
 
       await waitFor(() => {
         expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          attackIds: undefined,
+          getAttack: expect.any(Function),
           showAnonymized: true,
+          isLoading: false,
         });
       });
 
@@ -375,8 +406,9 @@ describe('<TableSection />', () => {
 
       await waitFor(() => {
         expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          attackIds: undefined,
+          getAttack: expect.any(Function),
           showAnonymized: false,
+          isLoading: false,
         });
       });
     });
