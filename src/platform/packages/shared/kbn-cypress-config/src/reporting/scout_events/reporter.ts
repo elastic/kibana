@@ -51,21 +51,28 @@ export class ScoutCypressReporter {
   private report: ScoutEventsReport;
   private readonly baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
+  private readonly reporterOptions: ScoutCypressReporterOptions;
 
-  constructor(private runner: Mocha.Runner, private reporterOptions: ScoutCypressReporterOptions) {
+  constructor(
+    private runner: Mocha.Runner,
+    options: {
+      reporterOptions?: ScoutCypressReporterOptions;
+    }
+  ) {
     this.log = new ToolingLog({
       level: 'info',
       writeTo: process.stdout,
     });
 
+    this.reporterOptions = options.reporterOptions || {};
     this.name = this.reporterOptions.name || 'cypress';
     this.runId = generateTestRunId();
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
-    const configPath = reporterOptions.config?.path || undefined;
-    const category = reporterOptions.config?.category || undefined;
+    const configPath = this.reporterOptions.config?.path || undefined;
+    const category = this.reporterOptions.config?.category || undefined;
 
     this.baseTestRunInfo = {
       id: this.runId,

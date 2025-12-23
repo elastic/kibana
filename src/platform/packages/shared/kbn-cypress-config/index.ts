@@ -28,7 +28,7 @@ export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
 );
 
 function getConfigFile(): string {
-  const fileArgIndex = process.argv.findIndex((arg) => arg === '--file');
+  const fileArgIndex = process.argv.findIndex((arg) => arg === '--config-file');
   if (fileArgIndex !== -1) {
     return process.argv[fileArgIndex + 1];
   }
@@ -124,6 +124,21 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
     e2e: {
       ...options?.e2e,
       setupNodeEvents(on, config) {
+        // Update Scout reporter options with actual config file path
+        // This runs once per config file, so each config gets its own correct path
+        if (SCOUT_REPORTER_ENABLED && config.configFile) {
+          const reporterOptionsKey = `${camelCase(SCOUT_CYPRESS_REPORTER_PATH)}ReporterOptions`;
+
+          // Update the reporter options in the config object
+          // This ensures each config file gets the correct path
+          if (config.reporterOptions && config.reporterOptions[reporterOptionsKey]) {
+            config.reporterOptions[reporterOptionsKey].config.path = config.configFile;
+            config.reporterOptions[reporterOptionsKey].config.category = getCategoryFromPath(
+              config.configFile
+            );
+          }
+        }
+
         on('file:preprocessor', (file) => {
           const id = uuid();
           // Fix an issue with running Cypress parallel
@@ -167,6 +182,9 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
 
           return config;
         }
+
+        // Return the modified config so Cypress uses the updated reporter options
+        return config;
       },
     },
   });
