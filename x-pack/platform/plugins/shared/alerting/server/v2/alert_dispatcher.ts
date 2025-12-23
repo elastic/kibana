@@ -12,7 +12,7 @@ export interface AlertDispatcherOpts {
   esClient: ElasticsearchClient;
 }
 
-export const DISPATCHER_QUERY = `FROM .kibana_alert_events
+export const DISPATCHER_EVENTS_QUERY = `FROM .kibana_alert_events
   | RENAME alert_series_id AS event_alert_series_id
   | RENAME @timestamp AS event_timestamp
   | LOOKUP JOIN .kibana_alert_actions
@@ -21,8 +21,10 @@ export const DISPATCHER_QUERY = `FROM .kibana_alert_events
             alert_series_id == event_alert_series_id AND
             action_type == "fire"
   | STATS last_fire = MAX(@timestamp)
-        BY rule_id, event_alert_series_id
-  | LOOKUP JOIN .kibana_alert_events ON rule.id == rule_id AND alert_series_id == event_alert_series_id
+        BY rule.id, event_alert_series_id
+  | RENAME rule.id AS event_rule_id
+  | LOOKUP JOIN .kibana_alert_events
+        ON rule.id == event_rule_id AND alert_series_id == event_alert_series_id
   | WHERE @timestamp > last_fire OR last_fire IS NULL`;
 export const INTERVAL = 1000;
 
@@ -30,7 +32,7 @@ export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
   setInterval(async () => {
     try {
       const result = await esClient.esql.query({
-        query: DISPATCHER_QUERY,
+        query: DISPATCHER_EVENTS_QUERY,
       });
       const columns = result.columns.map((col) => col.name);
       const results = result.values.map((val) => {
@@ -60,7 +62,8 @@ async function dispatchEvents(rows: Record<string, unknown>[], esClient: Elastic
       }
       if (
         fireActions[ruleId][row.alert_series_id] === undefined ||
-        fireActions[ruleId][row.alert_series_id] < new Date(timestamp)) {
+        fireActions[ruleId][row.alert_series_id] < new Date(timestamp)
+      ) {
         fireActions[ruleId][row.alert_series_id] = new Date(timestamp);
       }
     }
