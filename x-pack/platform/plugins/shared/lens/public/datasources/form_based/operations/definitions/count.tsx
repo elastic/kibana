@@ -180,7 +180,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     const field = indexPattern?.getFieldByName(column.sourceField);
     return field?.format ?? { id: 'number' };
   },
-  toESQL: (column, columnId, indexPattern, layer) => {
+  toESQL: (column, columnId, indexPattern) => {
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);

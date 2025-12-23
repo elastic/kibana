@@ -42,6 +42,7 @@ import {
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
+import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
@@ -97,6 +98,8 @@ export function LayerPanel(props: LayerPanelProps) {
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
+
+  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
