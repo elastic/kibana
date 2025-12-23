@@ -58,5 +58,6 @@
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/core-elasticsearch-server-utils",
   ]
 }

@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/features-plugin'
   - '@kbn/zod-helpers'
+  - '@kbn/core-elasticsearch-server-utils'
 tags:
   - plugin
   - prod
