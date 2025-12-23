@@ -7,7 +7,7 @@
 
 import {
   ATTACK_DISCOVERY_FEATURE_ID,
-  SECURITY_FEATURE_ID,
+  RULES_FEATURE_ID,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { Role } from './types';
 
@@ -28,8 +28,8 @@ export const noKibanaPrivileges: Role = {
   },
 };
 
-export const securitySolutionOnlyAll: Role = {
-  name: 'sec_only_all_spaces',
+export const rulesRead: Role = {
+  name: 'rules_read_all_spaces',
   privileges: {
     elasticsearch: {
       indices: [
@@ -45,7 +45,7 @@ export const securitySolutionOnlyAll: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
+          [RULES_FEATURE_ID]: ['read'],
         },
         spaces: ['*'],
       },
@@ -53,8 +53,8 @@ export const securitySolutionOnlyAll: Role = {
   },
 };
 
-export const securitySolutionAllNoIndices: Role = {
-  name: 'sec_only_all_spaces_no_indices',
+export const rulesReadNoIndices: Role = {
+  name: 'rules_read_all_spaces_no_indices',
   privileges: {
     elasticsearch: {
       indices: [],
@@ -62,7 +62,7 @@ export const securitySolutionAllNoIndices: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
+          [RULES_FEATURE_ID]: ['read'],
         },
         spaces: ['*'],
       },
@@ -70,8 +70,8 @@ export const securitySolutionAllNoIndices: Role = {
   },
 };
 
-export const securitySolutionAllNoDetectionIndices: Role = {
-  name: 'sec_only_all_spaces_no_detection_indices',
+export const rulesReadNoDetectionIndices: Role = {
+  name: 'rules_read_all_spaces_no_detection_indices',
   privileges: {
     elasticsearch: {
       indices: [
@@ -84,7 +84,7 @@ export const securitySolutionAllNoDetectionIndices: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
+          [RULES_FEATURE_ID]: ['read'],
         },
         spaces: ['*'],
       },
@@ -92,8 +92,8 @@ export const securitySolutionAllNoDetectionIndices: Role = {
   },
 };
 
-export const securitySolutionAllNoAttackIndices: Role = {
-  name: 'sec_only_all_spaces_no_attack_indices',
+export const rulesReadNoAttackIndices: Role = {
+  name: 'rules_read_all_spaces_no_attack_indices',
   privileges: {
     elasticsearch: {
       indices: [
@@ -106,7 +106,7 @@ export const securitySolutionAllNoAttackIndices: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
+          [RULES_FEATURE_ID]: ['read'],
         },
         spaces: ['*'],
       },
@@ -139,8 +139,8 @@ export const attackDiscoveryOnlyAll: Role = {
   },
 };
 
-export const securitySolutionAndAttackDiscoveryAll: Role = {
-  name: 'sec_and_attack_discovery_all_spaces',
+export const rulesReadAndAttackDiscoveryAll: Role = {
+  name: 'rules_read_and_attack_discovery_all_spaces',
   privileges: {
     elasticsearch: {
       indices: [
@@ -156,8 +156,8 @@ export const securitySolutionAndAttackDiscoveryAll: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
           [ATTACK_DISCOVERY_FEATURE_ID]: ['all'],
+          [RULES_FEATURE_ID]: ['read'],
         },
         spaces: ['*'],
       },
@@ -167,10 +167,10 @@ export const securitySolutionAndAttackDiscoveryAll: Role = {
 
 export const allRoles = [
   noKibanaPrivileges,
-  securitySolutionOnlyAll,
-  securitySolutionAllNoIndices,
-  securitySolutionAllNoDetectionIndices,
-  securitySolutionAllNoAttackIndices,
+  rulesRead,
+  rulesReadNoIndices,
+  rulesReadNoDetectionIndices,
+  rulesReadNoAttackIndices,
   attackDiscoveryOnlyAll,
-  securitySolutionAndAttackDiscoveryAll,
+  rulesReadAndAttackDiscoveryAll,
 ];
