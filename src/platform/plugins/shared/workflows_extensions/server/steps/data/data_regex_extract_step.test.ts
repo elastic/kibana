@@ -38,6 +38,9 @@ describe('dataRegexExtractStepDefinition', () => {
       warn: jest.fn(),
       error: jest.fn(),
     },
+    abortSignal: new AbortController().signal,
+    stepId: 'test-step',
+    stepType: 'data.regex_extract',
   });
 
   describe('named capture groups', () => {
