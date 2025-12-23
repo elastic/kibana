@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+
+import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
+
 export type AlertingServerSetup = void;
 export type AlertingServerStart = void;
 
@@ -15,4 +22,5 @@ export interface AlertingServerSetupDependencies {
 
 export interface AlertingServerStartDependencies {
   taskManager: TaskManagerStartContract;
+  features: FeaturesPluginStart;
 }

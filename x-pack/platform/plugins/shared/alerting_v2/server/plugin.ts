@@ -29,6 +29,7 @@ export class AlertingPlugin
       AlertingServerStartDependencies
     >
 {
+  // @ts-expect-error: logger is not used for now
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -36,14 +37,14 @@ export class AlertingPlugin
   }
 
   public setup(core: CoreSetup, plugins: AlertingServerSetupDependencies) {
-    return {};
+    return;
   }
 
   public start(core: CoreStart, plugins: AlertingServerStartDependencies) {
-    return {};
+    return;
   }
 
   public stop() {
-    return {};
+    return;
   }
 }

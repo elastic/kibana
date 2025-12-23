@@ -10,5 +10,12 @@
     "public/**/*",
     "common/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/task-manager-plugin",
+    "@kbn/features-plugin",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
 }
