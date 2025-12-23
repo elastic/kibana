@@ -8,11 +8,14 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { CategoriesResponse } from './types';
+import type { CategoriesResponse, FleetPackage } from './types';
 import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
 
-const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'];
-const GET_INSTALLED_INTEGRATIONS_QUERY_KEY = ['installed-integrations'];
+// Fix: Use 'as const' to make these readonly tuples for proper React Query typing
+const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'] as const;
+const GET_INSTALLED_INTEGRATIONS_QUERY_KEY = ['installed-integrations'] as const;
+const GET_NOT_INSTALLED_INTEGRATIONS_QUERY_KEY = ['not-installed-integrations'] as const;
+const GET_DETECTION_RULES_QUERY_KEY = ['detection-rules'] as const;
 
 export const useSiemReadinessApi = () => {
   const { http } = useKibana<CoreStart>().services;
@@ -27,12 +30,39 @@ export const useSiemReadinessApi = () => {
   const getInstalledIntegrations = useQuery({
     queryKey: GET_INSTALLED_INTEGRATIONS_QUERY_KEY,
     queryFn: () => {
-      return http.get<unknown>('/api/fleet/epm/packages');
+      return http.get<{ items: FleetPackage[] }>('/api/fleet/epm/packages');
+    },
+    select: (data: { items: FleetPackage[] }) => {
+      return data.items?.filter((pkg: FleetPackage) => pkg.status === 'installed');
+    },
+  });
+
+  const getNotInstalledIntegrations = useQuery({
+    queryKey: GET_NOT_INSTALLED_INTEGRATIONS_QUERY_KEY,
+    queryFn: () => {
+      return http.get<{ items: FleetPackage[] }>('/api/fleet/epm/packages');
+    },
+    select: (data: { items: FleetPackage[] }) => {
+      return data.items?.filter((pkg: FleetPackage) => pkg.status === 'not_installed');
+    },
+  });
+
+  const getDetectionRules = useQuery({
+    queryKey: GET_DETECTION_RULES_QUERY_KEY,
+    queryFn: () => {
+      return http.get<{ data: FleetPackage[] }>('/api/detection_engine/rules/_find', {
+        query: {
+          filter: 'alert.attributes.enabled:true',
+          per_page: 10000,
+        },
+      });
     },
   });
 
   return {
     getReadinessCategories,
     getInstalledIntegrations,
+    getNotInstalledIntegrations,
+    getDetectionRules,
   };
 };
