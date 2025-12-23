@@ -22,7 +22,7 @@ import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
 import { EmptyState } from './empty_state';
-import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
@@ -167,6 +167,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       features={features}
       onFeatureIdentificationClick={identifyFeaturesCallback}
       generateOnMount={generateOnMount}
+      aiFeatures={aiFeatures}
     />
   );
 
@@ -193,6 +194,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
             setInitialFlow('ai');
             setIsEditFlyoutOpen(true);
           }}
+          aiFeatures={aiFeatures}
         />
         {featureDetectionFlyout}
         {editFlyout(true)}
