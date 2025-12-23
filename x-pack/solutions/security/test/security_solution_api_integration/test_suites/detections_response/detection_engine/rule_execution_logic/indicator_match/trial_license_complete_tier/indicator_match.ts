@@ -42,6 +42,7 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { deleteAllAlerts, deleteAllRules, createRule } from '@kbn/detections-response-ftr-services';
 import {
   previewRule,
   getAlerts,
@@ -52,11 +53,6 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
 } from '../../../../utils';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -64,15 +60,10 @@ const createThreatMatchRule = ({
   name = 'Query with a rule id',
   index = ['auditbeat-*'],
   query = '*:*',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   rule_id = 'rule-1',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_indicator_path = 'threat.indicator',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_query = 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_index = ['auditbeat-*'],
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_mapping = [
     // We match host.name against host.name
     {

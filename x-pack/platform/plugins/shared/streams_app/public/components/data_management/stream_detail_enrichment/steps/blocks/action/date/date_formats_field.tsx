@@ -78,6 +78,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
         {...inputProps}
         data-test-subj="input"
         fullWidth
+        compressed={true}
         inputRef={ref}
         isInvalid={invalid}
         noSuggestions

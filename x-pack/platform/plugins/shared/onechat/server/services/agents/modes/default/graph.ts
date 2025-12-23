@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StateGraph, START as _START_, END as _END_ } from '@langchain/langgraph';
+import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { BaseMessage } from '@langchain/core/messages';
@@ -18,24 +18,28 @@ import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, createToolCallMessage } from '@kbn/onechat-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
-import { getActPrompt, getAnswerPrompt } from './prompts';
+import { getAnswerAgentPrompt, getResearchAgentPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
 import {
+  processAnswerResponse,
   processResearchResponse,
   processToolNodeResponse,
-  processAnswerResponse,
 } from './action_utils';
+import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
-  isToolCallAction,
-  isHandoverAction,
-  isAgentErrorAction,
-  isAnswerAction,
   errorAction,
   handoverAction,
+  isAgentErrorAction,
+  isAnswerAction,
+  isHandoverAction,
+  isStructuredAnswerAction,
+  isToolCallAction,
+  isToolPromptAction,
 } from './actions';
+import type { ProcessedConversation } from '../utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -47,6 +51,9 @@ export const createAgentGraph = ({
   capabilities,
   logger,
   events,
+  structuredOutput = false,
+  outputSchema,
+  processedConversation,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -54,8 +61,13 @@ export const createAgentGraph = ({
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
+  structuredOutput?: boolean;
+  outputSchema?: Record<string, unknown>;
+  processedConversation: ProcessedConversation;
 }) => {
-  const toolNode = new ToolNode<BaseMessage[]>(tools);
+  const init = async () => {
+    return {};
+  };
 
   const researcherModel = chatModel.bindTools(tools).withConfig({
     tags: [tags.agent, tags.researchAgent],
@@ -67,11 +79,13 @@ export const createAgentGraph = ({
     }
     try {
       const response = await researcherModel.invoke(
-        getActPrompt({
+        getResearchAgentPrompt({
           customInstructions: configuration.research.instructions,
+          clearSystemMessage: configuration.research.replace_default_instructions,
           capabilities,
           initialMessages: state.initialMessages,
           actions: state.mainActions,
+          attachmentTypes: processedConversation.attachmentTypes,
         })
       );
 
@@ -119,6 +133,8 @@ export const createAgentGraph = ({
     throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
   };
 
+  const toolNode = new ToolNode<BaseMessage[]>(tools);
+
   const executeTool = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
     if (!isToolCallAction(lastAction)) {
@@ -135,15 +151,32 @@ export const createAgentGraph = ({
     };
   };
 
-  const prepareToAnswer = async (state: StateType) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  const executeToolEdge = async (state: StateType) => {
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+    if (isToolPromptAction(lastAction)) {
+      return steps.handleToolInterrupt;
+    }
+    return steps.researchAgent;
+  };
 
+  const handleToolInterrupt = async (state: StateType) => {
+    const lastAction = state.mainActions[state.mainActions.length - 1];
+    if (!isToolPromptAction(lastAction)) {
+      throw invalidState(`[handleToolInterrupt] last action type was ${lastAction.type}}`);
+    }
+    return {
+      interrupted: true,
+      prompt: lastAction.prompt,
+    };
+  };
+
+  const prepareToAnswer = async (state: StateType) => {
     const lastAction = state.mainActions[state.mainActions.length - 1];
     const maxCycleReached = state.currentCycle > state.cycleLimit;
 
     if (maxCycleReached && !isHandoverAction(lastAction)) {
       return {
-        actions: [handoverAction('', true)],
+        mainActions: [handoverAction('', true)],
       };
     } else {
       return {};
@@ -160,12 +193,14 @@ export const createAgentGraph = ({
     }
     try {
       const response = await answeringModel.invoke(
-        getAnswerPrompt({
+        getAnswerAgentPrompt({
           customInstructions: configuration.answer.instructions,
+          clearSystemMessage: configuration.answer.replace_default_instructions,
           capabilities,
           initialMessages: state.initialMessages,
           actions: state.mainActions,
           answerActions: state.answerActions,
+          attachmentTypes: processedConversation.attachmentTypes,
         })
       );
 
@@ -188,6 +223,16 @@ export const createAgentGraph = ({
     }
   };
 
+  const answerAgentStructured = createAnswerAgentStructured({
+    chatModel,
+    configuration,
+    capabilities,
+    events,
+    outputSchema,
+    attachmentTypes: processedConversation.attachmentTypes,
+    logger,
+  });
+
   const answerAgentEdge = async (state: StateType) => {
     const lastAction = state.answerActions[state.answerActions.length - 1];
 
@@ -198,7 +243,7 @@ export const createAgentGraph = ({
         // max error count reached, stop execution by throwing
         throw lastAction.error;
       }
-    } else if (isAnswerAction(lastAction)) {
+    } else if (isAnswerAction(lastAction) || isStructuredAnswerAction(lastAction)) {
       return steps.finalize;
     }
 
@@ -208,7 +253,11 @@ export const createAgentGraph = ({
 
   const finalize = async (state: StateType) => {
     const answerAction = state.answerActions[state.answerActions.length - 1];
-    if (isAnswerAction(answerAction)) {
+    if (isStructuredAnswerAction(answerAction)) {
+      return {
+        finalAnswer: answerAction.data,
+      };
+    } else if (isAnswerAction(answerAction)) {
       return {
         finalAnswer: answerAction.message,
       };
@@ -217,22 +266,31 @@ export const createAgentGraph = ({
     }
   };
 
+  const selectedAnswerAgent = structuredOutput ? answerAgentStructured : answerAgent;
+
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     // nodes
+    .addNode(steps.init, init)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
+    .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.prepareToAnswer, prepareToAnswer)
-    .addNode(steps.answerAgent, answerAgent)
+    .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
     // edges
-    .addEdge(_START_, steps.researchAgent)
-    .addEdge(steps.executeTool, steps.researchAgent)
+    .addEdge(_START_, steps.init)
+    .addEdge(steps.init, steps.researchAgent)
     .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,
       [steps.prepareToAnswer]: steps.prepareToAnswer,
     })
+    .addConditionalEdges(steps.executeTool, executeToolEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.handleToolInterrupt]: steps.handleToolInterrupt,
+    })
+    .addEdge(steps.handleToolInterrupt, _END_)
     .addEdge(steps.prepareToAnswer, steps.answerAgent)
     .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
       [steps.answerAgent]: steps.answerAgent,

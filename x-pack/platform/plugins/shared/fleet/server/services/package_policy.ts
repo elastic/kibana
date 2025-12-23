@@ -35,7 +35,7 @@ import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { catchAndSetErrorStackTrace } from '../errors/utils';
+import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
 import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -86,6 +86,10 @@ import type {
   PackagePolicyConfigRecord,
   ArchiveEntry,
 } from '../../common/types';
+import type {
+  AzureCloudConnectorVars,
+  CloudConnectorVar,
+} from '../../common/types/models/cloud_connector';
 import {
   FleetError,
   fleetErrorToResponseOptions,
@@ -133,6 +137,12 @@ import {
 import {
   AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
   AWS_ROLE_ARN_VAR_NAME,
+  AZURE_TENANT_ID_VAR_NAME,
+  AZURE_CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  TENANT_ID_VAR_NAME,
+  CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -179,6 +189,7 @@ import {
   deleteSecretsIfNotReferenced as deleteSecrets,
   isSecretStorageEnabled,
 } from './secrets';
+import { extractAccountType } from './cloud_connectors/integration_helpers';
 import { getAgentTemplateAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
@@ -186,7 +197,12 @@ import {
   validateAdditionalDatastreamsPermissionsForSpace,
   validatePolicyNamespaceForSpace,
 } from './spaces/policy_namespaces';
-import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
+import {
+  getSpaceForPackagePolicy,
+  getSpaceForPackagePolicySO,
+  isSpaceAwarenessEnabled,
+  isSpaceAwarenessMigrationPending,
+} from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
 import {
   _packagePoliciesGetUpgradeDryRunDiff,
@@ -304,6 +320,42 @@ const extractPackagePolicyVars = (
       };
 
       return awsCloudConnectorVars;
+    }
+  }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const tenantId = vars[TENANT_ID_VAR_NAME] || vars[AZURE_TENANT_ID_VAR_NAME];
+    const clientId = vars[CLIENT_ID_VAR_NAME] || vars[AZURE_CLIENT_ID_VAR_NAME];
+    const azureCredentials =
+      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] ||
+      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
+
+    if (tenantId && clientId && azureCredentials) {
+      // Type assertions are needed because PackagePolicyConfigRecordEntry in packagePolicy.inputs.streams[0].vars has loose types (type?: string, value?: any)
+      // while CloudConnectorSecretVar/CloudConnectorVar in CloudConnectorVars expect specific literal types (type?: 'password' | 'text').
+      // Runtime validation occurs in cloudConnectorService.validateCloudConnectorDetails()
+      const azureCloudConnectorVars: AzureCloudConnectorVars = {
+        tenant_id: tenantId as CloudConnectorSecretVar,
+        client_id: clientId as CloudConnectorSecretVar,
+        azure_credentials_cloud_connector_id: azureCredentials as CloudConnectorVar,
+      };
+
+      logger.debug(
+        `Extracted Azure cloud connector vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+      );
+
+      return azureCloudConnectorVars;
+    } else {
+      logger.error(
+        `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+      );
     }
   }
 };
@@ -553,7 +605,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .create<PackagePolicySOAttributes>(
         savedObjectType,
         {
-          ...enrichedPackagePolicy,
+          ...omit(enrichedPackagePolicy, 'cloud_connector_name'),
           ...(enrichedPackagePolicy.package
             ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
@@ -2287,6 +2339,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           supports_agentless: newPolicy.supports_agentless,
           supports_cloud_connector: newPolicy.supports_cloud_connector,
           cloud_connector_id: newPolicy.cloud_connector_id,
+          cloud_connector_name: newPolicy.cloud_connector_name,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
         };
       }
@@ -2596,7 +2649,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         async (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           const existingPackagePolicy = await this.get(soClient, packagePolicy.id);
 
@@ -2627,7 +2680,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicies,
         (packagePolicy) => {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
-            packagePolicy.spaceIds?.[0]
+            getSpaceForPackagePolicy(packagePolicy)
           );
           return this.update(
             soClient,
@@ -2782,7 +2835,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Create temporary SOs with id `id:copy` to allow cancellation in case rollback fails.
     const policiesToCreate: Record<
       string,
-      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes> & { initialNamespaces?: string[] }>
     > = {};
     const policiesToUpdate: Record<
       string,
@@ -2794,36 +2847,36 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     > = {};
 
     packagePolicies.forEach((policy) => {
-      const namespace = policy.namespaces?.[0] || policy.attributes.namespace;
-      if (namespace) {
-        if (!policy.id.endsWith(':prev')) {
-          const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
-          if (previousRevision?.attributes) {
-            if (!policiesToCreate[namespace]) {
-              policiesToCreate[namespace] = [];
-            }
-            policiesToCreate[namespace].push({
-              ...policy,
-              id: `${policy.id}:copy`,
-            });
-            if (!policiesToUpdate[namespace]) {
-              policiesToUpdate[namespace] = [];
-            }
-            policiesToUpdate[namespace].push({
-              ...policy,
-              attributes: {
-                ...previousRevision?.attributes,
-                revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
-                latest_revision: true,
-              },
-            });
+      const namespace = getSpaceForPackagePolicySO(policy);
+
+      if (!policy.id.endsWith(':prev')) {
+        const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
+        if (previousRevision?.attributes) {
+          if (!policiesToCreate[namespace]) {
+            policiesToCreate[namespace] = [];
           }
-        } else {
-          if (!previousVersionPolicies[namespace]) {
-            previousVersionPolicies[namespace] = [];
+          policiesToCreate[namespace].push({
+            ...policy,
+            id: `${policy.id}:copy`,
+            initialNamespaces: policy.namespaces,
+          });
+          if (!policiesToUpdate[namespace]) {
+            policiesToUpdate[namespace] = [];
           }
-          previousVersionPolicies[namespace].push(policy);
+          policiesToUpdate[namespace].push({
+            ...policy,
+            attributes: {
+              ...previousRevision?.attributes,
+              revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
+              latest_revision: true,
+            },
+          });
         }
+      } else {
+        if (!previousVersionPolicies[namespace]) {
+          previousVersionPolicies[namespace] = [];
+        }
+        previousVersionPolicies[namespace].push(policy);
       }
     });
 
@@ -2832,6 +2885,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await soClient
         .bulkCreate<PackagePolicySOAttributes>(policies, { namespace })
         .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
+
       for (const policy of policies) {
         auditLoggingService.writeCustomSoAuditLog({
           action: 'create',
@@ -2872,7 +2926,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const [namespace, policies] of Object.entries(copiedPolicies)) {
       // Update policies with copied data.
       const policiesToUpdate = policies.map((policy) => ({
-        ...policy,
+        ...omit(policy, 'initialNamespaces'),
         id: policy.id.replace(':copy', ''),
       }));
       await soClient
@@ -2969,6 +3023,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       enrichedPackagePolicy,
       logger
     );
+
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
         const existingCloudConnector = await soClient.get<CloudConnector>(
@@ -2993,17 +3048,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
+        // Extract account type from package policy vars
+        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy);
         try {
+          // Extract cloud connector name from package policy
+          const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
+
           const cloudConnector = await cloudConnectorService.create(soClient, {
-            name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
+            name:
+              cloudConnectorName ||
+              `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
             vars: cloudConnectorVars,
             cloudProvider,
+            accountType,
           });
           logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
           return cloudConnector;
         } catch (error) {
           logger.error(`Error creating cloud connector: ${error}`);
-          throw new CloudConnectorCreateError(`${error}`);
+          rethrowIfInstanceOrWrap(error, CloudConnectorCreateError);
         }
       }
     }

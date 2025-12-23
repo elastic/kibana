@@ -2897,6 +2897,14 @@ paths:
           required: false
           schema:
             type: string
+        - description: Gap fill statuses
+          in: query
+          name: gap_fill_statuses
+          required: false
+          schema:
+            items:
+              $ref: '#/components/schemas/GapFillStatus'
+            type: array
       responses:
         '200':
           content:
@@ -2992,6 +3000,10 @@ paths:
                     type: integer
                   total:
                     type: integer
+                  warnings:
+                    items:
+                      $ref: '#/components/schemas/WarningSchema'
+                    type: array
                 required:
                   - page
                   - perPage
@@ -3390,36 +3402,8 @@ paths:
                   runtime_mappings: {}
                   size: 0
             schema:
+              $ref: '#/components/schemas/QueryAlertsBodyParams'
               description: Elasticsearch query and aggregation request
-              type: object
-              properties:
-                _source:
-                  oneOf:
-                    - type: boolean
-                    - type: string
-                    - items:
-                        type: string
-                      type: array
-                aggs:
-                  additionalProperties: true
-                  type: object
-                fields:
-                  items:
-                    type: string
-                  type: array
-                query:
-                  additionalProperties: true
-                  type: object
-                runtime_mappings:
-                  additionalProperties: true
-                  type: object
-                size:
-                  minimum: 0
-                  type: integer
-                sort:
-                  $ref: '#/components/schemas/AlertsSort'
-                track_total_hits:
-                  type: boolean
         description: Search and/or aggregation query
         required: true
       responses:
@@ -4133,6 +4117,13 @@ components:
           enum:
             - delete
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4161,6 +4152,13 @@ components:
           enum:
             - disable
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4202,6 +4200,13 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4310,6 +4315,13 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4343,6 +4355,13 @@ components:
           enum:
             - enable
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4373,6 +4392,13 @@ components:
           enum:
             - export
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4420,6 +4446,13 @@ components:
           required:
             - start_date
             - end_date
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4449,6 +4482,13 @@ components:
           enum:
             - run
           type: string
+        gap_fill_statuses:
+          description: >-
+            Gap fill statuses to filter rules with gaps by status (used together
+            with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5702,6 +5742,12 @@ components:
         - severity
         - updated_at
         - updatedAt
+      type: string
+    GapFillStatus:
+      enum:
+        - unfilled
+        - in_progress
+        - filled
       type: string
     HistoryWindowStart:
       description: >-
@@ -7002,6 +7048,36 @@ components:
       required:
         - command
         - config
+    QueryAlertsBodyParams:
+      type: object
+      properties:
+        _source:
+          oneOf:
+            - type: boolean
+            - type: string
+            - items:
+                type: string
+              type: array
+        aggs:
+          additionalProperties: true
+          type: object
+        fields:
+          items:
+            type: string
+          type: array
+        query:
+          additionalProperties: true
+          type: object
+        runtime_mappings:
+          additionalProperties: true
+          type: object
+        size:
+          minimum: 0
+          type: integer
+        sort:
+          $ref: '#/components/schemas/AlertsSort'
+        track_total_hits:
+          type: boolean
     QueryRule:
       allOf:
         - type: object

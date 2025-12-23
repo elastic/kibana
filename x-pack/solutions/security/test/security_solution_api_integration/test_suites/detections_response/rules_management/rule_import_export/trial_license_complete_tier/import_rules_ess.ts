@@ -9,6 +9,7 @@ import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteAllRules, createRule } from '@kbn/detections-response-ftr-services';
 import {
   createLegacyRuleAction,
   getLegacyActionSO,
@@ -17,7 +18,6 @@ import {
   combineToNdJson,
   getCustomQueryRuleParams,
 } from '../../../utils';
-import { deleteAllRules, createRule } from '../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createConnector } from '../../../utils/connectors';

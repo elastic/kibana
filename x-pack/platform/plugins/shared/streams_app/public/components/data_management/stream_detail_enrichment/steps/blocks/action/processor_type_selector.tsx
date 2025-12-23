@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiLink, EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiComboBox, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
@@ -18,7 +18,10 @@ import { useKibana } from '../../../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../../../utils';
 import type { ProcessorFormState } from '../../../types';
 import { configDrivenProcessors } from './config_driven';
-import { useGetStreamEnrichmentState } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useGetStreamEnrichmentState,
+  useInteractiveModeSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { isStepUnderEdit } from '../../../state_management/steps_state_machine';
@@ -46,7 +49,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
     Streams.WiredStream.GetResponse.is(snapshot.context.definition)
   );
 
-  const isWithinWhereBlock = useStreamEnrichmentSelector((state) => {
+  const isWithinWhereBlock = useInteractiveModeSelector((state) => {
     const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
       isStepUnderEdit(stepRef.getSnapshot())
     );
@@ -113,6 +116,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
         onChange={handleChange}
         fullWidth
         singleSelection={{ asPlainText: true }}
+        compressed={true}
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorPlaceholder',
           { defaultMessage: 'Grok, Dissect ...' }
@@ -246,6 +250,92 @@ const getAvailableProcessors: (
       );
     },
   },
+  replace: {
+    type: 'replace' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceInputDisplay',
+      {
+        defaultMessage: 'Replace',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceHelpText"
+          defaultMessage="{replaceLink} that match a regular expression pattern with a replacement string."
+          values={{
+            replaceLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsReplaceLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.gsub}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.replaceLinkLabel', {
+                  defaultMessage: 'Replaces parts of a string field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  drop_document: {
+    type: 'drop_document' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.dropInputDisplay',
+      {
+        defaultMessage: 'Drop document',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dropHelpText"
+          defaultMessage="{dropLink} This is useful to prevent the document from getting indexed based on some condition."
+          values={{
+            dropLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsDropLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.drop}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.dropLinkLabel', {
+                  defaultMessage: 'Drops the document without raising any errors.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
+  math: {
+    type: 'math' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.mathInputDisplay',
+      {
+        defaultMessage: 'Math',
+      }
+    ),
+    getDocUrl: () => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.mathHelpText"
+          defaultMessage="Evaluates arithmetic or logical expressions. Reference fields directly (for example, {example}). The result is written to the target field."
+          values={{
+            example: (
+              <>
+                <EuiCode>bytes / duration </EuiCode>
+              </>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -271,17 +361,20 @@ const getAvailableProcessors: (
 
 const PROCESSOR_GROUP_MAP: Record<
   ProcessorType,
-  'removeField' | 'extract' | 'convert' | 'set' | 'other'
+  'remove' | 'extract' | 'convert' | 'set' | 'other'
 > = {
-  remove: 'removeField',
-  remove_by_prefix: 'removeField',
+  remove: 'remove',
+  remove_by_prefix: 'remove',
+  drop_document: 'remove',
   grok: 'extract',
   dissect: 'extract',
   convert: 'convert',
   date: 'convert',
+  replace: 'convert',
   append: 'set',
   set: 'set',
   rename: 'set',
+  math: 'set',
   manual_ingest_pipeline: 'other',
 };
 
@@ -302,7 +395,7 @@ const getProcessorTypeSelectorOptions = (
 
   // Define processor groups
   const groups = {
-    removeField: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    remove: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
     extract: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
     convert: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
     set: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
@@ -323,13 +416,13 @@ const getProcessorTypeSelectorOptions = (
     options: Array<EuiComboBoxOptionOption<ProcessorType>>;
   }> = [];
 
-  if (groups.removeField.length > 0) {
+  if (groups.remove.length > 0) {
     result.push({
       label: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeFieldGroup',
-        { defaultMessage: 'Remove field' }
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeGroup',
+        { defaultMessage: 'Remove' }
       ),
-      options: groups.removeField,
+      options: groups.remove,
     });
   }
 

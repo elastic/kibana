@@ -55,46 +55,11 @@ export const i18nMessages = {
   systemReferences: {
     documentation: {
       title: i18n.translate('xpack.onechat.tools.newTool.systemReferences.title', {
-        defaultMessage: 'System references',
+        defaultMessage: 'Details',
       }),
       description: i18n.translate('xpack.onechat.tools.newTool.systemReferences.description', {
-        defaultMessage:
-          'These values are used by agents and configurations, not shown to end users.',
+        defaultMessage: "Define the tool's ID and describe how it behaves.",
       }),
-      fieldsHelp: {
-        title: i18n.translate('xpack.onechat.tools.newTool.systemReferences.fieldsHelp.title', {
-          defaultMessage: 'What are these fields?',
-        }),
-        toolId: {
-          label: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.toolId.label',
-            {
-              defaultMessage: 'Tool ID',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.toolId.description',
-            {
-              defaultMessage: 'Unique ID for referencing the tool in code or configurations.',
-            }
-          ),
-        },
-        description: {
-          label: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.label',
-            {
-              defaultMessage: 'Description',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.onechat.tools.newTool.systemReferences.fieldsHelp.description.description',
-            {
-              defaultMessage:
-                'Help humans and agents understand how the tool works. Start with a short human-friendly summary, because the first ~50 characters appear in the tool list.',
-            }
-          ),
-        },
-      },
       toolBasicsDocumentationLink: i18n.translate(
         'xpack.onechat.tools.newTool.toolBasics.documentationLink',
         {
@@ -125,8 +90,7 @@ export const i18nMessages = {
         defaultMessage: 'Labels',
       }),
       description: i18n.translate('xpack.onechat.tools.newTool.labels.description', {
-        defaultMessage:
-          "Labels help with filtering, search, and bulk selection — they don't affect how tools behave.",
+        defaultMessage: 'Add labels for filtering and organizing tools.',
       }),
       documentationLink: i18n.translate(
         'xpack.onechat.tools.newTool.labels.toolLabelsDocumentationLink',
@@ -147,11 +111,10 @@ export const i18nMessages = {
   configuration: {
     documentation: {
       title: i18n.translate('xpack.onechat.tools.newTool.configuration.title', {
-        defaultMessage: 'Configuration',
+        defaultMessage: 'Type',
       }),
       description: i18n.translate('xpack.onechat.tools.newTool.configuration.description', {
-        defaultMessage:
-          'Set up how the tool works, by defining the index pattern or ES|QL query syntax and any required parameters.',
+        defaultMessage: "Set the tool's type and the parameters that control how it operates.",
       }),
       documentationLink: i18n.translate(
         'xpack.onechat.tools.newTool.configuration.documentationLink',
@@ -183,12 +146,46 @@ export const i18nMessages = {
             defaultMessage: 'Workflow',
           }
         ),
+        mcpOption: i18n.translate('xpack.onechat.tools.newTool.configuration.form.type.mcpOption', {
+          defaultMessage: 'MCP',
+        }),
       },
       indexSearch: {
         patternLabel: i18n.translate(
           'xpack.onechat.tools.newTool.configuration.form.indexSearch.patternLabel',
           {
             defaultMessage: 'Target pattern',
+          }
+        ),
+        defaultRowLimitLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitLabel',
+          {
+            defaultMessage: 'Row limit',
+          }
+        ),
+        defaultRowLimitHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.defaultRowLimitHelpText',
+          {
+            defaultMessage: 'Maximum number of rows to return from ES|QL queries.',
+          }
+        ),
+        customInstructionsLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsLabel',
+          {
+            defaultMessage: 'Custom instructions',
+          }
+        ),
+        customInstructionsHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsHelpText',
+          {
+            defaultMessage:
+              'Additional guidance for ES|QL query generation, such as field selection or limit logic.',
+          }
+        ),
+        customInstructionsPlaceholder: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.indexSearch.customInstructionsPlaceholder',
+          {
+            defaultMessage: 'e.g., "Always include timestamp field" ',
           }
         ),
       },
@@ -211,6 +208,82 @@ export const i18nMessages = {
           'xpack.onechat.tools.newTool.configuration.form.workflow.workflowLabel',
           {
             defaultMessage: 'Workflow',
+          }
+        ),
+        waitForCompletionLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionLabel',
+          {
+            defaultMessage: 'Workflow execution',
+          }
+        ),
+        waitForCompletionHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionHelpText',
+          {
+            defaultMessage:
+              'If checked, the tool waits until the workflow completes (up to 120s) and returns the results. If unchecked, the workflow runs in the background and you can ask the agent to check the execution status.',
+          }
+        ),
+        waitForCompletionCheckboxLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionCheckboxLabel',
+          {
+            defaultMessage: 'Wait until the workflow completes',
+          }
+        ),
+      },
+      mcp: {
+        connectorLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.connectorLabel',
+          {
+            defaultMessage: 'MCP Server',
+          }
+        ),
+        mcpToolLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.mcpToolLabel',
+          {
+            defaultMessage: 'Tool',
+          }
+        ),
+        mcpToolFetchError: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.mcpToolFetchError',
+          {
+            defaultMessage:
+              "We're unable to fetch tools from this MCP server. This is usually caused by a connection or configuration issue with the MCP connector.",
+          }
+        ),
+        mcpToolDetailsTitle: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.mcpToolDetailsTitle',
+          {
+            defaultMessage: 'MCP Tool Details',
+          }
+        ),
+        addMcpServerButtonLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.addMcpServerButtonLabel',
+          {
+            defaultMessage: 'Add a new MCP Server',
+          }
+        ),
+        bulkImportMcpToolsButtonLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.bulkImportMcpToolsButtonLabel',
+          {
+            defaultMessage: 'Bulk import MCP Tools',
+          }
+        ),
+        mcpHealthStatusHealthy: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.mcpHealthStatusHealthy',
+          {
+            defaultMessage: 'Healthy',
+          }
+        ),
+        mcpHealthStatusError: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.mcpHealthStatusError',
+          {
+            defaultMessage: 'Error',
+          }
+        ),
+        mcpHealthStatusLoading: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.mcp.mcpHealthStatusLoading',
+          {
+            defaultMessage: 'Loading',
           }
         ),
       },

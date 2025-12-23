@@ -15,7 +15,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { WaterfallFlyout } from '..';
 import LogsOverview from '../../../../../../doc_viewer_logs_overview';
-import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
+import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
 import { useAdhocDataView } from '../../hooks/use_adhoc_data_view';
 import { useFetchLog } from '../../hooks/use_fetch_log';
 
@@ -28,23 +28,27 @@ export interface SpanFlyoutProps {
 }
 
 export function LogsFlyout({ onCloseFlyout, id, dataView }: SpanFlyoutProps) {
-  const { loading, logDoc, index } = useFetchLog({ id });
+  const { loading, log, index } = useFetchLog({ id });
   const { indexes } = useDataSourcesContext();
-  const { dataView: logDataView, error, loading: loadingDataView } = useAdhocDataView({ index });
+  const {
+    dataView: logDataView,
+    error,
+    loading: loadingDataView,
+  } = useAdhocDataView({ index: index ?? null });
 
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
-    if (!logDoc || !id || !index) return null;
+    if (!log || !id || !index) return null;
 
     return {
       id,
       raw: {
         _index: index,
         _id: id,
-        _source: logDoc,
+        _source: log,
       },
-      flattened: flattenObject(logDoc),
+      flattened: flattenObject(log),
     };
-  }, [id, logDoc, index]);
+  }, [id, log, index]);
 
   return (
     <WaterfallFlyout

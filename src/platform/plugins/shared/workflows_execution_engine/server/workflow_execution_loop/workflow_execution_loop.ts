@@ -8,7 +8,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { runNode } from './run_node';
+import { executionFlowLoop } from './execution_flow_loop';
+import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 
 /**
@@ -41,8 +42,15 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
   });
 
-  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
-    await runNode(params);
-    await params.workflowLogger.flushEvents();
+  try {
+    await Promise.all([executionFlowLoop(params), persistenceLoop(params)]);
+  } catch (error) {
+    params.workflowRuntime.setWorkflowError(error as Error);
+  } finally {
+    await flushState(params);
   }
+
+  // Final save to ensure workflow state is persisted after execution loop
+  await params.workflowRuntime.saveState();
+  await params.workflowLogger.flushEvents();
 }

@@ -12,6 +12,7 @@ import type {
   GaugeVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
@@ -31,6 +32,8 @@ import {
   operationFromColumn,
 } from '../utils';
 import {
+  getDatasourceLayers,
+  getLensStateLayer,
   getMetricAccessor,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
@@ -42,7 +45,6 @@ import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { isEsqlTableTypeDataset } from '../../utils';
 
 const ACCESSOR = 'gauge_accessor';
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
 function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
   return `${ACCESSOR}_${type}`;
@@ -80,7 +82,7 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
 
 function reverseBuildVisualizationState(
   visualization: GaugeVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -91,7 +93,7 @@ function reverseBuildVisualizationState(
     throw new Error('Metric accessor is missing in the visualization state');
   }
 
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = buildDatasetState(layer, layerId, adHocDataViews, references, adhocReferences);
 
   if (!dataset || dataset.type == null) {
     throw new Error('Unsupported dataset type');
@@ -119,10 +121,7 @@ function reverseBuildVisualizationState(
             : {}),
         }
       : {
-          ...(operationFromColumn(
-            metricAccessor,
-            layer as FormBasedLayer
-          ) as LensApiAllMetricOperations),
+          ...operationFromColumn(metricAccessor, layer as FormBasedLayer),
           ...(visualization.minAccessor
             ? {
                 min: operationFromColumn(
@@ -178,7 +177,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
+  const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
 
@@ -221,7 +220,16 @@ function getValueColumns(layer: GaugeStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: GaugeState): LensAttributes {
+type GaugeAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsGauge' }
+>;
+
+type GaugeAttributesWithoutFiltersAndQuery = Omit<GaugeAttributes, 'state'> & {
+  state: Omit<GaugeAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) => buildFormBasedLayer(cfg as GaugeStateNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
@@ -233,7 +241,7 @@ export function fromAPItoLensState(config: GaugeState): LensAttributes {
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -243,8 +251,6 @@ export function fromAPItoLensState(config: GaugeState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
@@ -256,24 +262,15 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'gauge' }> {
   const { state } = config;
   const visualization = state.visualization as GaugeVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  // Layers can be in any order, so make sure to get the main one
-  const [layerId, layer] = Object.entries(layers).find(
-    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
-  )!;
+  const layers = getDatasourceLayers(state);
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

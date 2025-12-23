@@ -58,6 +58,7 @@ jest.mock('../../../kibana_services', () => {
         },
       };
     },
+    getHttp: jest.fn(),
   };
 });
 

@@ -17,12 +17,12 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store';
@@ -75,9 +75,9 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       services: { data },
     } = useKibana();
 
-    const { sourcererDataView: dataViewSpec } = useSourcererDataView(SourcererScopeName.timeline);
+    const { sourcererDataView: dataViewSpec } = useSourcererDataView(PageScope.timeline);
 
-    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+    const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
     const getIsDataProviderVisible = useMemo(

@@ -13,6 +13,11 @@ export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
   'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/'
 );
 
+export const STREAMS_SNAPSHOT_REPO_PATH = path.resolve(
+  REPO_ROOT,
+  'x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/snapshots/'
+);
+
 export const LOCAL_PRODUCT_DOC_PATH = path.resolve(
   REPO_ROOT,
   'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/complete/product_docs'

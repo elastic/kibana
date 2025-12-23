@@ -8,19 +8,22 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject, first, from, skipWhile, startWith, switchMap } from 'rxjs';
 
 export const CONTROL_GROUP_EMBEDDABLE_ID = 'CONTROL_GROUP_EMBEDDABLE_ID';
 
 export function initializeControlGroupManager(
   initialState: ControlsGroupState | undefined,
-  getReferences: (id: string) => Reference[]
+  getReferences: (id: string) => Reference[],
+  initialViewMode: ViewMode
 ) {
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
 
   async function untilControlsInitialized(): Promise<void> {
+    if (initialViewMode === 'print') return; // Controls are never initialized in print mode.
     return new Promise((resolve) => {
       controlGroupApi$
         .pipe(

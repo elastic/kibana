@@ -32,6 +32,7 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   ruleDetailsRoute as commonRuleDetailsRoute,
   getCreateRuleRoute,
+  getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import type {
@@ -774,7 +775,7 @@ export const RulesList = ({
         showSpinner={showSpinner}
         onCreateRulesClick={openRuleTypeModal}
       />
-      <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
+      <EuiPageTemplate.Section data-test-subj="rulesListSection" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation
             onConfirm={onDeleteConfirm}
@@ -1020,6 +1021,13 @@ export const RulesList = ({
             onSelectRuleType={(ruleTypeId) => {
               navigateToApp('management', {
                 path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              });
+            }}
+            onSelectTemplate={(templateId) => {
+              navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
               });
             }}
             http={http}

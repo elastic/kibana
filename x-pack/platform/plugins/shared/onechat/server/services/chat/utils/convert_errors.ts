@@ -9,13 +9,45 @@ import type { OperatorFunction } from 'rxjs';
 import { catchError, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { createInternalError, isOnechatError } from '@kbn/onechat-common';
+import type { ModelProvider } from '@kbn/inference-common';
 import { getCurrentTraceId } from '../../../tracing';
+import type { AnalyticsService, TrackingService } from '../../../telemetry';
 
-export function convertErrors<T>({ logger }: { logger: Logger }): OperatorFunction<T, T> {
+export function convertErrors<T>({
+  agentId,
+  analyticsService,
+  conversationId,
+  logger,
+  modelProvider,
+  trackingService,
+}: {
+  agentId: string;
+  analyticsService?: AnalyticsService;
+  conversationId?: string;
+  logger: Logger;
+  modelProvider: ModelProvider;
+  trackingService?: TrackingService;
+}): OperatorFunction<T, T> {
   return ($source) => {
     return $source.pipe(
       catchError((err) => {
         logger.error(`Error executing agent: ${err.stack}`);
+
+        if (trackingService) {
+          try {
+            trackingService.trackError(err, conversationId);
+          } catch (e) {
+            // continue
+          }
+        }
+
+        analyticsService?.reportRoundError({
+          agentId,
+          conversationId,
+          error: err,
+          modelProvider,
+        });
+
         return throwError(() => {
           const traceId = getCurrentTraceId();
           if (isOnechatError(err)) {

@@ -1,0 +1,31 @@
+{
+  "lastModified": "2025-12-11T10:19:36.976Z",
+  "sha1": "050fbd89767a4b4212b0fdb34e7f27beb9bc57a5",
+  "tests": [
+    {
+      "id": "4402bb6f4421c38-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "fe3e133d0c0af03-3916e4686fbd655",
+      "title": "Expandable flyout state sync should test flyout url sync",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/flyout/alert_details_url_sync.spec.ts",
+        "line": 25,
+        "column": 12
+      }
+    }
+  ]
+}

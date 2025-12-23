@@ -10,7 +10,7 @@ import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { EventOutcome, StatusCode } from '@kbn/apm-types/src/es_schemas/raw/fields';
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 
 const {
   CLOUD,
@@ -37,6 +37,8 @@ export const KNOWN_MULTI_VALUED_FIELDS = [
   APM_EVENT_FIELDS_MAP.PROCESS_ARGS,
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_TRACE_ID,
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_SPAN_ID,
+  APM_EVENT_FIELDS_MAP.SPAN_LINKS_TRACE_ID,
+  APM_EVENT_FIELDS_MAP.SPAN_LINKS_SPAN_ID,
 ] as const;
 
 export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;
@@ -44,11 +46,9 @@ export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;
 type KnownSingleValuedField = Exclude<KnownField, KnownMultiValuedField>;
 type KnownMultiValuedField = ValuesType<typeof KNOWN_MULTI_VALUED_FIELDS>;
 
-export const KNOWN_SINGLE_VALUED_FIELDS = [...ALL_FIELDS].filter(
-  (field): field is KnownSingleValuedField => !KNOWN_MULTI_VALUED_FIELDS.includes(field as any)
+export const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<KnownField>(
+  [...ALL_FIELDS].filter((field) => !KNOWN_MULTI_VALUED_FIELDS.includes(field as any))
 );
-
-export const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<string>(KNOWN_SINGLE_VALUED_FIELDS);
 
 interface TypeOverrideMap {
   [APM_EVENT_FIELDS_MAP.SPAN_DURATION]: number;
@@ -92,3 +92,19 @@ export type UnflattenedKnownFields<T extends Record<string, any>> = DedotObject<
 export type FlattenedApmEvent = Record<KnownSingleValuedField | KnownMultiValuedField, unknown[]>;
 
 export type UnflattenedApmEvent = UnflattenedKnownFields<FlattenedApmEvent>;
+
+/**
+ * Validates whether the field record object contains all required fields. Throws an error
+ * if it does not.
+ */
+export function ensureRequiredApmFields(fields: Record<string, any>, required: string[]) {
+  const missingRequiredFields = required.filter((key) => {
+    const value = fields[key];
+
+    return value == null || (Array.isArray(value) && value.length === 0);
+  });
+
+  if (missingRequiredFields.length) {
+    throw new Error(`Missing required fields (${missingRequiredFields.join(', ')}) in event`);
+  }
+}

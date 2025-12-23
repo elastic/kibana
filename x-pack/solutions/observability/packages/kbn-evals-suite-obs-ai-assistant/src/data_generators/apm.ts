@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { apm, timerange, log, serviceMap } from '@kbn/apm-synthtrace-client';
+import { apm, timerange, log, serviceMap } from '@kbn/synthtrace-client';
 import type { SynthtraceFixture } from '@kbn/scout-oblt';
 import { faker } from '@faker-js/faker';
 

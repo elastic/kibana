@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type * from './v1';
+export type * from './v2';

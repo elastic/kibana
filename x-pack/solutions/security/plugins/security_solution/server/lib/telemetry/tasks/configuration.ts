@@ -13,7 +13,7 @@ import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { artifactService } from '../artifact';
 import { telemetryConfiguration } from '../configuration';
-import { newTelemetryLogger } from '../helpers';
+import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
 export function createTelemetryConfigurationTaskConfig() {
   const taskName = 'Security Solution Telemetry Configuration Task';
@@ -143,7 +143,7 @@ export function createTelemetryConfigurationTaskConfig() {
         log.debug('Updated TelemetryConfiguration');
         return 0;
       } catch (error) {
-        log.warn('Failed to set telemetry configuration', { error });
+        log.warn('Failed to set telemetry configuration', withErrorMessage(error));
         telemetryConfiguration.resetAllToDefault();
         await taskMetricsService.end(trace, error);
         return 0;

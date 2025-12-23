@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Subject, debounceTime, filter, tap, defer, merge } from 'rxjs';
+import { debounceTime, filter, tap, defer, merge } from 'rxjs';
 
-import type {
-  AutoRefreshDoneFn,
-  DataPublicPluginStart,
-  ISearchSource,
-} from '@kbn/data-plugin/public';
+import type { AutoRefreshDoneFn, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FetchStatus } from '../../types';
 import type { DataMain$, DataRefetch$ } from '../state_management/discover_data_state_container';
 import type { DiscoverSearchSessionManager } from '../state_management/discover_search_session';
@@ -27,15 +23,12 @@ export function getFetch$({
   main$,
   refetch$,
   searchSessionManager,
-  lastReloadRequestTime$,
 }: {
   setAutoRefreshDone: (val: AutoRefreshDoneFn | undefined) => void;
   data: DataPublicPluginStart;
   main$: DataMain$;
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: ISearchSource;
-  lastReloadRequestTime$: Subject<number | undefined>;
 }) {
   const { timefilter } = data.query.timefilter;
   return merge(
@@ -65,10 +58,5 @@ export function getFetch$({
         .getNewSearchSessionIdFromURL$()
         .pipe(filter((sessionId) => !!sessionId));
     })
-  ).pipe(
-    debounceTime(100),
-    tap(() => {
-      lastReloadRequestTime$.next(Date.now());
-    })
-  );
+  ).pipe(debounceTime(100));
 }

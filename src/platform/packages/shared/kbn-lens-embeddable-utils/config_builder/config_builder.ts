@@ -26,9 +26,25 @@ import {
   fromLensStateToAPI as fromLegacyMetricLensStateToAPI,
 } from './transforms/charts/legacy_metric';
 import {
+  fromAPItoLensState as fromXYAPIToLensState,
+  fromLensStateToAPI as fromXYLensStateToAPI,
+} from './transforms/charts/xy';
+import {
   fromAPItoLensState as fromGaugeAPItoLensState,
   fromLensStateToAPI as fromGaugeLensStateToAPI,
 } from './transforms/charts/gauge';
+import {
+  fromAPItoLensState as fromHeatmapAPItoLensState,
+  fromLensStateToAPI as fromHeatmapLensStateToAPI,
+} from './transforms/charts/heatmap';
+import {
+  fromAPItoLensState as fromTagcloudAPItoLensState,
+  fromLensStateToAPI as fromTagcloudLensStateToAPI,
+} from './transforms/charts/tagcloud';
+import {
+  fromAPItoLensState as fromRegionMapAPItoLensState,
+  fromLensStateToAPI as fromRegionMapLensStateToAPI,
+} from './transforms/charts/region_map';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -36,7 +52,11 @@ import { isLensLegacyFormat } from './utils';
 const compatibilityMap: Record<string, string> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
+  lnsXY: 'xy',
   lnsGauge: 'gauge',
+  lnsHeatmap: 'heatmap',
+  lnsTagcloud: 'tagcloud',
+  lnsChoropleth: 'region_map',
 };
 
 /**
@@ -48,6 +68,34 @@ type ChartTypeLike =
   | Pick<LensApiState, 'type'>
   | { visualizationType: null | undefined }
   | undefined;
+
+const apiConvertersByChart = {
+  metric: { fromAPItoLensState, fromLensStateToAPI },
+  legacy_metric: {
+    fromAPItoLensState: fromLegacyMetricAPItoLensState,
+    fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
+  },
+  xy: {
+    fromAPItoLensState: fromXYAPIToLensState,
+    fromLensStateToAPI: fromXYLensStateToAPI,
+  },
+  gauge: {
+    fromAPItoLensState: fromGaugeAPItoLensState,
+    fromLensStateToAPI: fromGaugeLensStateToAPI,
+  },
+  heatmap: {
+    fromAPItoLensState: fromHeatmapAPItoLensState,
+    fromLensStateToAPI: fromHeatmapLensStateToAPI,
+  },
+  tagcloud: {
+    fromAPItoLensState: fromTagcloudAPItoLensState,
+    fromLensStateToAPI: fromTagcloudLensStateToAPI,
+  },
+  region_map: {
+    fromAPItoLensState: fromRegionMapAPItoLensState,
+    fromLensStateToAPI: fromRegionMapLensStateToAPI,
+  },
+} as const;
 
 export class LensConfigBuilder {
   private charts = {
@@ -64,23 +112,17 @@ export class LensConfigBuilder {
     table: buildTable,
   };
 
-  private apiConvertersByChart = {
-    metric: { fromAPItoLensState, fromLensStateToAPI },
-    legacy_metric: {
-      fromAPItoLensState: fromLegacyMetricAPItoLensState,
-      fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
-    },
-    gauge: {
-      fromAPItoLensState: fromGaugeAPItoLensState,
-      fromLensStateToAPI: fromGaugeLensStateToAPI,
-    },
-  } as const;
+  private apiConvertersByChart = apiConvertersByChart;
   private dataViewsAPI: DataViewsCommon | undefined;
   private enableAPITransforms: boolean;
 
   constructor(dataViewsAPI?: DataViewsCommon, enableAPITransforms = false) {
     this.dataViewsAPI = dataViewsAPI;
     this.enableAPITransforms = enableAPITransforms;
+  }
+
+  public get isEnabled() {
+    return this.enableAPITransforms;
   }
 
   public setEnabled(enabled: boolean) {
@@ -158,9 +200,12 @@ export class LensConfigBuilder {
     const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
 
     return {
+      // @TODO investigate why it complains about missing type
+      // type: 'lens',
       ...attributes,
       state: {
         ...attributes.state,
+        query: { language: 'kuery', query: '' },
         ...filtersAndQueryToLensState(config),
       },
     };
@@ -168,10 +213,10 @@ export class LensConfigBuilder {
 
   toAPIFormat(config: LensAttributes): LensApiState {
     const visType = config.visualizationType;
-    const type = compatibilityMap[visType];
+    const type = compatibilityMap[visType] ?? visType;
 
     if (!type || !(type in this.apiConvertersByChart)) {
-      throw new Error(`No API converter found for chart type: ${visType}`);
+      throw new Error(`No API converter found for chart type: ${visType} as ${type}`);
     }
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
     return {

@@ -14,7 +14,7 @@ import {
   type ElasticsearchClient,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -230,8 +230,17 @@ export class ManifestManager {
         ? exception.tags.includes('policy:all') || exception.tags.includes(`policy:${policyId}`)
         : exception.tags.includes('policy:all');
 
-    const exceptions: ExceptionListItemSchema[] =
-      listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
+    let exceptions: ExceptionListItemSchema[];
+
+    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      // with the feature enabled, we do not make an 'exception' with endpoint exceptions - it's filtered per-policy
+      exceptions = allExceptionsByListId.filter(filter);
+    } else {
+      exceptions =
+        listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          ? allExceptionsByListId
+          : allExceptionsByListId.filter(filter);
+    }
 
     return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
@@ -299,7 +308,6 @@ export class ManifestManager {
     allPolicyIds: string[]
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
     const decorateWildcardOnlyExceptionItem = (item: ExceptionListItemSchema) => {
       const isWildcardOnly = item.entries.every(({ type }) => type === 'wildcard');
@@ -318,18 +326,28 @@ export class ManifestManager {
     };
 
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_LIST_ID,
-      name: ArtifactConstants.GLOBAL_ALLOWLIST_NAME,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      name: ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME,
       exceptionItemDecorator: decorateWildcardOnlyExceptionItem,
     };
 
-    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
+    for (const os of ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS) {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
-    allPolicyIds.forEach((policyId) => {
-      policySpecificArtifacts[policyId] = defaultArtifacts;
-    });
+    let policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      policySpecificArtifacts = await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
+    } else {
+      allPolicyIds.forEach((policyId) => {
+        policySpecificArtifacts[policyId] = defaultArtifacts;
+      });
+    }
 
     return { defaultArtifacts, policySpecificArtifacts };
   }

@@ -19,9 +19,7 @@ import { getStatusLabel } from '../../../shared/translations';
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
   status?: ExecutionStatus;
-  executionIndex: number;
   executionTimeMs: number | null;
-  stepType: string;
   selected: boolean;
   onClick?: React.MouseEventHandler;
 }
@@ -29,13 +27,13 @@ export interface StepExecutionTreeItemLabelProps {
 export function StepExecutionTreeItemLabel({
   stepId,
   status,
-  executionIndex,
   executionTimeMs,
-  stepType,
   selected,
   onClick,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
+  // Trigger pseudo-steps are not real steps, they are used to display the trigger context
+  const isTriggerPseudoStep = stepId === 'trigger';
   const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
 
@@ -64,7 +62,7 @@ export function StepExecutionTreeItemLabel({
           </>
         )}
       </EuiFlexItem>
-      {executionTimeMs && (
+      {executionTimeMs && !isTriggerPseudoStep && (
         <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>
           <EuiText size="xs" color="subdued">
             {formatDuration(executionTimeMs)}

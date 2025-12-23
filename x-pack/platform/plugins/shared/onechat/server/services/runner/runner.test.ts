@@ -16,14 +16,15 @@ import type {
 import type {
   CreateScopedRunnerDepsMock,
   MockedTool,
-  MockedAgent,
+  MockedInternalAgent,
   AgentRegistryMock,
   ToolRegistryMock,
 } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
+  createRunnerDepsMock,
   createMockedTool,
-  createMockedAgent,
+  createMockedInternalAgent,
   createMockedAgentRegistry,
   createToolRegistryMock,
 } from '../../test_utils';
@@ -39,11 +40,11 @@ const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResul
 const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
 
 describe('Onechat runner', () => {
-  let runnerDeps: CreateScopedRunnerDepsMock;
+  let scopedRunnerDeps: CreateScopedRunnerDepsMock;
   let toolHandler: jest.MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
-    runnerDeps = createScopedRunnerDepsMock();
+    scopedRunnerDeps = createScopedRunnerDepsMock();
     getToolResultIdMock.mockReturnValue('some-result-id');
   });
 
@@ -55,7 +56,7 @@ describe('Onechat runner', () => {
       registry = createToolRegistryMock();
       const {
         toolsService: { getRegistry },
-      } = runnerDeps;
+      } = scopedRunnerDeps;
       getRegistry.mockResolvedValue(registry);
 
       toolHandler = jest.fn().mockReturnValue({ results: [] });
@@ -80,7 +81,7 @@ describe('Onechat runner', () => {
         toolParams: { foo: 'bar' },
       };
 
-      const runner = createScopedRunner(runnerDeps);
+      const runner = createScopedRunner(scopedRunnerDeps);
       const response = await runner.runTool(params);
 
       expect(toolHandler).toHaveBeenCalledTimes(1);
@@ -102,15 +103,16 @@ describe('Onechat runner', () => {
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
 
-      const { request, ...otherRunnerDeps } = runnerDeps;
+      const runnerDeps = createRunnerDepsMock();
+      runnerDeps.toolsService.getRegistry.mockResolvedValue(registry);
 
       const params: RunToolParams = {
         toolId: 'test-tool',
         toolParams: { foo: 'bar' },
-        request,
+        request: scopedRunnerDeps.request,
       };
 
-      const runner = createRunner(otherRunnerDeps);
+      const runner = createRunner(runnerDeps);
       const response = await runner.runTool(params);
 
       expect(toolHandler).toHaveBeenCalledTimes(1);
@@ -129,19 +131,19 @@ describe('Onechat runner', () => {
   });
 
   describe('runAgent', () => {
-    let agent: MockedAgent;
+    let agent: MockedInternalAgent;
     let agentClient: AgentRegistryMock;
     let agentHandler: jest.MockedFn<any>;
 
     beforeEach(() => {
-      agent = createMockedAgent();
+      agent = createMockedInternalAgent();
 
       agentClient = createMockedAgentRegistry();
       agentClient.get.mockResolvedValue(agent);
 
       const {
         agentsService: { getRegistry },
-      } = runnerDeps;
+      } = scopedRunnerDeps;
       getRegistry.mockResolvedValue(agentClient);
 
       agentHandler = jest.fn();
@@ -163,7 +165,7 @@ describe('Onechat runner', () => {
         agentParams: { nextInput: { message: 'dolly' } },
       };
 
-      const runner = createScopedRunner(runnerDeps);
+      const runner = createScopedRunner(scopedRunnerDeps);
       const response = await runner.runAgent(params);
 
       expect(agentHandler).toHaveBeenCalledTimes(1);
@@ -183,15 +185,16 @@ describe('Onechat runner', () => {
     it('can be invoked through a runner', async () => {
       agentHandler.mockResolvedValue({ result: 'someResult' as any });
 
-      const { request, ...otherRunnerDeps } = runnerDeps;
+      const runnerDeps = createRunnerDepsMock();
+      runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
 
       const params: RunAgentParams = {
         agentId: 'test-tool',
         agentParams: { nextInput: { message: 'dolly' } },
-        request,
+        request: scopedRunnerDeps.request,
       };
 
-      const runner = createRunner(otherRunnerDeps);
+      const runner = createRunner(runnerDeps);
       const response = await runner.runAgent(params);
 
       expect(agentHandler).toHaveBeenCalledTimes(1);

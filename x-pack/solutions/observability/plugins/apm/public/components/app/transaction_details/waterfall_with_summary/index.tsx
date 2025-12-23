@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -40,6 +41,8 @@ interface Props<TSample extends {}> {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   selectedSample?: TSample | null;
+  logsTableConfig?: SavedSearchTableConfig;
+  onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
 }
 
 export function WaterfallWithSummary<TSample extends {}>({
@@ -56,6 +59,8 @@ export function WaterfallWithSummary<TSample extends {}>({
   showCriticalPath,
   onShowCriticalPathChange,
   selectedSample,
+  logsTableConfig,
+  onLogsTableConfigChange,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -184,6 +189,8 @@ export function WaterfallWithSummary<TSample extends {}>({
           isLoading={isLoading}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
+          logsTableConfig={logsTableConfig}
+          onLogsTableConfigChange={onLogsTableConfigChange}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

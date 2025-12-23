@@ -7,32 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UNPINNED = (isAlert: boolean) =>
-  i18n.translate('xpack.securitySolution.timeline.body.pinning.pinTooltip', {
-    values: { isAlert },
-    defaultMessage: 'Pin {isAlert, select, true{alert} other{event}}',
-  });
-
-export const PINNED = (isAlert: boolean) =>
-  i18n.translate('xpack.securitySolution.timeline.body.pinning.unpinTooltip', {
-    values: { isAlert },
-    defaultMessage: 'Unpin {isAlert, select, true{alert} other{event}}',
-  });
-
-export const PINNED_WITH_NOTES = (isAlert: boolean) =>
-  i18n.translate('xpack.securitySolution.timeline.body.pinning.pinnnedWithNotesTooltip', {
-    values: { isAlert },
-    defaultMessage:
-      'This {isAlert, select, true{alert} other{event}} cannot be unpinned because it has notes in Timeline',
-  });
-
-export const DISABLE_PIN = (isAlert: boolean) =>
-  i18n.translate('xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip', {
-    values: { isAlert },
-    defaultMessage:
-      'This {isAlert, select, true{alert} other{event}} may not be pinned while editing a template timeline',
-  });
-
 export const ATTACH_ALERT_TO_CASE_FOR_ROW = ({
   ariaRowindex,
   columnValues,

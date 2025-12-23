@@ -13,7 +13,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
-import { ORGANIZATION_ACCOUNT } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/fleet-plugin/common';
 import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,
@@ -73,8 +73,8 @@ export const GcpCredentialsFormAgentless = ({
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
   const commandText = `gcloud config set project ${
-    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE>` : `<PROJECT_ID>`
-  } ./deploy_service_account.sh`;
+    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> && ` : `<PROJECT_ID> && `
+  }./deploy_service_account.sh`;
 
   return (
     <>

@@ -53,7 +53,6 @@ import { UninstallCommandFlyout } from '../../../../../../components';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { useAgentPolicyFormContext } from '../agent_policy_form';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
@@ -71,6 +70,7 @@ interface Props {
   allowedNamespacePrefixes?: string[];
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
+  setInvalidSpaceError?: (hasErrors: boolean) => void;
   disabled?: boolean;
 }
 
@@ -78,6 +78,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   agentPolicy,
   updateAgentPolicy,
   validation,
+  setInvalidSpaceError,
   disabled = false,
 }) => {
   const { docLinks } = useStartServices();
@@ -131,8 +132,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     () => ('space_ids' in agentPolicy ? !agentPolicy.space_ids?.includes(UNKNOWN_SPACE) : true),
     [agentPolicy]
   );
-
-  const agentPolicyFormContext = useAgentPolicyFormContext();
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -346,7 +345,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 ? agentPolicy.space_ids.filter((id) => id !== UNKNOWN_SPACE)
                 : [spaceId || 'default']
             }
-            setInvalidSpaceError={agentPolicyFormContext?.setInvalidSpaceError}
+            setInvalidSpaceError={setInvalidSpaceError}
             onChange={(newValue) => {
               if (newValue.length === 0) {
                 return;
@@ -390,12 +389,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           error={validation.namespace ? validation.namespace : null}
           isInvalid={Boolean(validation.namespace)}
           isDisabled={disabled}
+          aria-label="defaultNamespaceRow"
         >
           <EuiComboBox
+            data-test-subj="defaultNamespaceInput"
             fullWidth
             singleSelection
             noSuggestions
-            isDisabled={disabled}
+            isDisabled={disabled || agentPolicy.is_managed === true}
             selectedOptions={agentPolicy.namespace ? [{ label: agentPolicy.namespace }] : []}
             onCreateOption={(value: string) => {
               updateAgentPolicy({ namespace: value });
@@ -614,6 +615,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isDisabled={disabled}
           isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
+          aria-label="fleet server hosts options"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}
@@ -655,6 +657,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
           isDisabled={disabled}
+          aria-label="outputs options for agent integrations"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}
@@ -696,6 +699,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
           isDisabled={disabled}
+          aria-label="outputs options for agent monitoring"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}
@@ -738,6 +742,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
           isDisabled={disabled || isManagedOrAgentlessPolicy}
+          aria-label="download source options for agent binaries"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}

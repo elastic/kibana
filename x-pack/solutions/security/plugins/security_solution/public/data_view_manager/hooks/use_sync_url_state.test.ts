@@ -7,13 +7,14 @@
 
 import { renderHook } from '@testing-library/react';
 import {
-  useSyncSourcererUrlState,
   useRestoreDataViewManagerStateFromURL,
+  useSyncSourcererUrlState,
 } from './use_sync_url_state';
 import * as reactRedux from 'react-redux';
 import * as experimentalFeatures from '../../common/hooks/use_experimental_features';
 import * as globalQueryString from '../../common/utils/global_query_string';
-import { SourcererScopeName } from '../../sourcerer/store/model';
+
+import { PageScope } from '../constants';
 
 jest.mock('react-redux');
 jest.mock('../../common/hooks/use_experimental_features');
@@ -41,7 +42,7 @@ describe('useSyncSourcererUrlState', () => {
 
   it('should not dispatch or update url param if newDataViewPickerEnabled is true', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    renderHook(() => useSyncSourcererUrlState(SourcererScopeName.default));
+    renderHook(() => useSyncSourcererUrlState(PageScope.default));
     // Simulate onInitializeUrlParam call
     const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
     onInitializeUrlParam({ default: { id: 'test-id', selectedPatterns: ['a'] } });
@@ -51,7 +52,7 @@ describe('useSyncSourcererUrlState', () => {
 
   it('should dispatch setSelectedDataView if newDataViewPickerEnabled is false and initialState is provided', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    renderHook(() => useSyncSourcererUrlState(SourcererScopeName.default));
+    renderHook(() => useSyncSourcererUrlState(PageScope.default));
     const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
     onInitializeUrlParam({ default: { id: 'test-id', selectedPatterns: ['a'] } });
     expect(mockDispatch).toHaveBeenCalledWith({
@@ -69,7 +70,7 @@ describe('useSyncSourcererUrlState', () => {
     mockUseSelector
       .mockReturnValueOnce('test-id') // scopeDataViewId
       .mockReturnValueOnce(['a']); // selectedPatterns
-    renderHook(() => useSyncSourcererUrlState(SourcererScopeName.default));
+    renderHook(() => useSyncSourcererUrlState(PageScope.default));
     const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
     onInitializeUrlParam(null);
     expect(mockUpdateUrlParam).toHaveBeenCalledWith({
@@ -92,7 +93,7 @@ describe('useRestoreDataViewManagerStateFromURL', () => {
     const initDataViewSelection = jest.fn();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     renderHook(() =>
-      useRestoreDataViewManagerStateFromURL(initDataViewSelection, SourcererScopeName.default)
+      useRestoreDataViewManagerStateFromURL(initDataViewSelection, PageScope.default)
     );
     const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
     onInitializeUrlParam({ default: { id: 'test-id', selectedPatterns: ['a'] } });
@@ -103,7 +104,7 @@ describe('useRestoreDataViewManagerStateFromURL', () => {
     const initDataViewSelection = jest.fn();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     renderHook(() =>
-      useRestoreDataViewManagerStateFromURL(initDataViewSelection, SourcererScopeName.default)
+      useRestoreDataViewManagerStateFromURL(initDataViewSelection, PageScope.default)
     );
     const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
     onInitializeUrlParam({

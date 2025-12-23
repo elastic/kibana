@@ -6,8 +6,8 @@
  */
 
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
-import type { BedrockMessage, BedrockToolChoice } from '../../../common/bedrock/types';
+import { DEFAULT_TOKEN_LIMIT } from '@kbn/connector-schemas/bedrock';
+import type { BedrockMessage, BedrockToolChoice } from '@kbn/connector-schemas/bedrock';
 
 export const formatBedrockBody = ({
   messages,

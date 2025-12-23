@@ -7,13 +7,12 @@
 
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleForm } from '@kbn/response-ops-rule-form';
+import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
 import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
-import { useRuleTemplate } from '../../hooks/use_rule_template';
 import { RuleTemplateError } from './components/rule_template_error';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
@@ -31,6 +30,7 @@ export const RuleFormRoute = () => {
     ruleTypeRegistry,
     actionTypeRegistry,
     contentManagement,
+    uiActions,
     chrome,
     setBreadcrumbs,
     ...startServices
@@ -56,6 +56,7 @@ export const RuleFormRoute = () => {
     isLoading: isLoadingRuleTemplate,
     isError: isErrorRuleTemplate,
   } = useRuleTemplate({
+    http,
     templateId,
   });
 
@@ -104,6 +105,7 @@ export const RuleFormRoute = () => {
           ruleTypeRegistry,
           actionTypeRegistry,
           contentManagement,
+          uiActions,
           ...startServices,
         }}
         initialValues={ruleTemplate}

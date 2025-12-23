@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
-import { ZodError } from '@kbn/zod';
-import { isDynamicValue } from './get_node_value';
+import type { ZodSafeParseResult, ZodTypeAny } from '@kbn/zod/v4';
+import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
+import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
 import { formatZodError } from '../zod/format_zod_error';
 
-export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
+export function parseWorkflowYamlToJSON<T extends ZodTypeAny>(
   yamlString: string,
   schema: T
-): z.SafeParseReturnType<z.input<T>, z.output<T>> | { success: false; error: Error } {
+): ZodSafeParseResult<T> | { success: false; error: Error } {
   const parseResult = parseYamlToJSONWithoutValidation(yamlString);
   if (!parseResult.success) {
     return {
@@ -35,7 +35,7 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   }
   const result = schema.safeParse(parseResult.json);
   if (!result.success) {
-    // Filter out validation errors for dynamic values (${{ }})
+    // Filter out validation errors for dynamic values (${{ }}), variable values ({{ }}), and Liquid tags ({% ... %})
     const filteredIssues = result.error.issues.filter((issue) => {
       if (!issue.path || issue.path.length === 0) {
         return true;
@@ -50,15 +50,18 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
         value = (value as Record<string, unknown>)[segment as string];
       }
 
-      // Suppress error if value is a dynamic template
-      return !isDynamicValue(value);
+      const shouldSuppressError =
+        isDynamicValue(value) || isVariableValue(value) || isLiquidTagValue(value);
+
+      // Suppress error if value is a dynamic template, variable value, or Liquid tag
+      return !shouldSuppressError;
     });
 
     if (filteredIssues.length === 0) {
       return {
         success: true,
-        data: parseResult.json as z.output<T>,
-      } as z.SafeParseReturnType<z.input<T>, z.output<T>>;
+        data: parseResult.json as T['_output'],
+      } as ZodSafeParseResult<T>;
     }
 
     // Use custom error formatter for better user experience
@@ -69,5 +72,5 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
       error: new InvalidYamlSchemaError(message, formattedError),
     };
   }
-  return result;
+  return result as ZodSafeParseResult<T>;
 }

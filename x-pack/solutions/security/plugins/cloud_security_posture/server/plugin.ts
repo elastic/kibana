@@ -268,6 +268,13 @@ export class CspPlugin
   // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
   // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
   initializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    const isIndexExists = await esClient.indices.exists({
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+    });
+    if (isIndexExists) {
+      return;
+    }
+
     const isAliasExists = await esClient.indices.existsAlias({
       name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });

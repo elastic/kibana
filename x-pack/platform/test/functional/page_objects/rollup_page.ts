@@ -16,6 +16,76 @@ export class RollupPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly retry = this.ctx.getService('retry');
 
+  private readonly es = this.ctx.getService('es');
+  private readonly esArchiver = this.ctx.getService('esArchiver');
+
+  // This feature is deprecated and disabled by default. To enable it, follow the steps in:
+  // https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/rollup/README.md
+  async activateFeature() {
+    const postfix = Date.now();
+
+    await this.esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+    );
+
+    await this.es.transport.request({
+      path: `/rollup_index_${postfix}`,
+      method: 'PUT',
+      body: {
+        mappings: {
+          _meta: {
+            _rollup: {
+              id: `logs_job_${postfix}`,
+            },
+          },
+        },
+      },
+    });
+
+    await this.es.transport.request({
+      path: `/_rollup/job/logs_job_${postfix}`,
+      method: 'PUT',
+      body: {
+        id: `logs_job_${postfix}`,
+        index_pattern: 'logstash-*',
+        rollup_index: `rollup_logstash_${postfix}`,
+        cron: '* * * * * ?',
+        page_size: 1000,
+        groups: {
+          date_histogram: {
+            interval: '60m',
+            delay: '7d',
+            time_zone: 'UTC',
+            field: '@timestamp',
+          },
+          terms: {
+            fields: ['bytes'],
+          },
+          histogram: {
+            interval: '1003',
+            fields: ['bytes', 'memory'],
+          },
+        },
+      },
+    });
+
+    return async () => {
+      await this.es.transport.request({
+        path: `/rollup_index_${postfix}`,
+        method: 'DELETE',
+      });
+
+      await this.es.transport.request({
+        path: `/_rollup/job/logs_job_${postfix}`,
+        method: 'DELETE',
+      });
+
+      await this.esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+    };
+  }
+
   async createNewRollUpJob(
     jobName: string,
     indexPattern: string,

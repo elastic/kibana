@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type { ExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { RefObject } from 'react';
 import { createContext } from 'react';
 import type { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 
 export interface DiscoverInTimelineContextType
   extends ReturnType<typeof useDiscoverInTimelineActions> {
-  discoverStateContainer: RefObject<DiscoverStateContainer | undefined>;
-  setDiscoverStateContainer: (stateContainer: DiscoverStateContainer) => void;
+  discoverStateContainer: RefObject<ExtendedDiscoverStateContainer | undefined>;
+  setDiscoverStateContainer: (stateContainer: ExtendedDiscoverStateContainer) => void;
 }
 
 export const DiscoverInTimelineContext = createContext<DiscoverInTimelineContextType | null>(null);

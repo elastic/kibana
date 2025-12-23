@@ -30,7 +30,6 @@ export interface GetMonitorAvailabilityResult {
 }
 
 export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> =>
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   buckets.map(({ key, fields, up_sum, down_sum, ratio }: any) => ({
     ...key,
     location: key.location === null ? UNNAMED_LOCATION : (key.location as string),

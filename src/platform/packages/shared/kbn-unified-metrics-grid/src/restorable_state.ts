@@ -8,6 +8,7 @@
  */
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
+import type { Dimension } from './types';
 
 export interface MetricsExperienceRestorableState {
   // Pagination page index
@@ -19,11 +20,8 @@ export interface MetricsExperienceRestorableState {
   // Fullscreen mode state
   isFullscreen: boolean;
 
-  // Metric grouping dimensions
-  dimensions: string[];
-
-  // Metric value filters
-  valueFilters: string[];
+  // Selected dimensions
+  selectedDimensions: Dimension[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

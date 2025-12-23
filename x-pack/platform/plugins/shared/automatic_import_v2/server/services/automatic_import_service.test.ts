@@ -6,16 +6,15 @@
  */
 
 import expect from 'expect';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AutomaticImportService } from './automatic_import_service';
+import type { SavedObjectsServiceSetup, SavedObjectsClient } from '@kbn/core/server';
 import type {
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-  SecurityServiceStart,
-} from '@kbn/core/server';
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 // Mock the AutomaticImportSamplesIndexService
 jest.mock('./samples_index/index_service', () => {
@@ -29,23 +28,33 @@ jest.mock('./samples_index/index_service', () => {
 describe('AutomaticImportSetupService', () => {
   let service: AutomaticImportService;
   let mockLoggerFactory: ReturnType<typeof loggerMock.create>;
-  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockSavedObjectsSetup: jest.Mocked<SavedObjectsServiceSetup>;
-  let mockSavedObjectsStart: jest.Mocked<SavedObjectsServiceStart>;
-  let mockSecurity: SecurityServiceStart;
+  let mockSavedObjectsClient: SavedObjectsClient;
+  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerStart: jest.Mocked<TaskManagerStartContract>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockLoggerFactory = loggerMock.create();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockSavedObjectsSetup = savedObjectsServiceMock.createSetupContract();
-    mockSavedObjectsStart = savedObjectsServiceMock.createStartContract();
-    mockSecurity = securityMock.createStart() as unknown as SecurityServiceStart;
+    mockSavedObjectsClient = savedObjectsClientMock.create() as unknown as SavedObjectsClient;
+
+    // Mock TaskManager contracts
+    mockTaskManagerSetup = {
+      registerTaskDefinitions: jest.fn(),
+    } as unknown as jest.Mocked<TaskManagerSetupContract>;
+
+    mockTaskManagerStart = {
+      schedule: jest.fn(),
+      runSoon: jest.fn(),
+      get: jest.fn(),
+      ensureScheduled: jest.fn(),
+    } as unknown as jest.Mocked<TaskManagerStartContract>;
 
     service = new AutomaticImportService(
       mockLoggerFactory,
-      Promise.resolve(mockEsClient),
-      mockSavedObjectsSetup
+      mockSavedObjectsSetup,
+      mockTaskManagerSetup
     );
   });
 
@@ -55,7 +64,7 @@ describe('AutomaticImportSetupService', () => {
         './samples_index/index_service'
       );
 
-      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
+      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
     });
 
     it('should initialize the pluginStop$ subject', () => {
@@ -79,52 +88,30 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('initialize', () => {
-    it('should create internal repository and initialize saved object service', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+    it('should initialize saved object service', async () => {
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
 
-      expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalledTimes(1);
-      expect((service as any).security).toBe(mockSecurity);
       expect((service as any).savedObjectService).toBeDefined();
     });
 
-    it('should set security reference', async () => {
-      expect((service as any).security).toBeNull();
-
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
-
-      expect((service as any).security).toBe(mockSecurity);
-    });
-
     it('should create savedObjectService with correct parameters', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
 
       const savedObjectService = (service as any).savedObjectService;
       expect(savedObjectService).toBeDefined();
     });
-
-    it('should use internal repository from createInternalRepository', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
-
-      expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalled();
-    });
   });
 
   describe('methods before initialization', () => {
-    it('should throw error when calling insertIntegration before initialize', async () => {
-      await expect(service.insertIntegration({} as any, {} as any)).rejects.toThrow(
+    it('should throw error when calling createIntegration before initialize', async () => {
+      await expect(service.createIntegration({} as any)).rejects.toThrow(
         'Saved Objects service not initialized.'
       );
     });
 
-    it('should throw error when calling getIntegration before initialize', async () => {
-      await expect(service.getIntegration('test-id')).rejects.toThrow(
+    it('should throw error when calling getIntegrationById before initialize', async () => {
+      await expect(service.getIntegrationById('test-id')).rejects.toThrow(
         'Saved Objects service not initialized.'
-      );
-    });
-
-    it('should throw error when calling addSamplesToDataStream before initialize', async () => {
-      await expect(service.addSamplesToDataStream({} as any, {} as any)).rejects.toThrow(
-        'Security service not initialized.'
       );
     });
   });
@@ -176,6 +163,280 @@ describe('AutomaticImportSetupService', () => {
     });
   });
 
+  describe('addSamplesToDataStream', () => {
+    it('should delegate to samplesIndexService.addSamplesToDataStream', async () => {
+      const mockParams = {
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+        rawSamples: ['sample1', 'sample2'],
+        originalSource: { sourceType: 'file' as const, sourceValue: 'test.log' },
+        authenticatedUser: { username: 'test-user' } as any,
+        esClient: {} as any,
+      };
+
+      const mockResult = { items: [], errors: false };
+      const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      const result = await service.addSamplesToDataStream(mockParams);
+
+      expect(mockAddSamples).toHaveBeenCalledWith(mockParams);
+      expect(result).toBe(mockResult);
+    });
+
+    it('should work without initializing savedObjectService', async () => {
+      const mockParams = {
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+        rawSamples: ['sample1'],
+        originalSource: { sourceType: 'index' as const, sourceValue: 'logs-*' },
+        authenticatedUser: { username: 'test-user' } as any,
+        esClient: {} as any,
+      };
+
+      const mockResult = { items: [], errors: false };
+      const mockAddSamples = jest.fn().mockResolvedValue(mockResult);
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      // Service is not initialized, but this should still work
+      expect((service as any).savedObjectService).toBeNull();
+
+      const result = await service.addSamplesToDataStream(mockParams);
+
+      expect(mockAddSamples).toHaveBeenCalledWith(mockParams);
+      expect(result).toBe(mockResult);
+    });
+
+    it('should pass through all parameters correctly', async () => {
+      const mockParams = {
+        integrationId: 'test-integration',
+        dataStreamId: 'test-datastream',
+        rawSamples: ['log line 1', 'log line 2', 'log line 3'],
+        originalSource: { sourceType: 'file' as const, sourceValue: 'application.log' },
+        authenticatedUser: { username: 'admin', roles: ['admin'] } as any,
+        esClient: { bulk: jest.fn() } as any,
+      };
+
+      const mockAddSamples = jest.fn().mockResolvedValue({});
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      await service.addSamplesToDataStream(mockParams);
+
+      expect(mockAddSamples).toHaveBeenCalledTimes(1);
+      const callArgs = mockAddSamples.mock.calls[0][0];
+      expect(callArgs.integrationId).toBe('test-integration');
+      expect(callArgs.dataStreamId).toBe('test-datastream');
+      expect(callArgs.rawSamples).toEqual(['log line 1', 'log line 2', 'log line 3']);
+      expect(callArgs.originalSource).toEqual({
+        sourceType: 'file',
+        sourceValue: 'application.log',
+      });
+      expect(callArgs.authenticatedUser.username).toBe('admin');
+      expect(callArgs.esClient).toBe(mockParams.esClient);
+    });
+
+    it('should propagate errors from samplesIndexService', async () => {
+      const mockParams = {
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+        rawSamples: ['sample1'],
+        originalSource: { sourceType: 'file' as const, sourceValue: 'test.log' },
+        authenticatedUser: { username: 'test-user' } as any,
+        esClient: {} as any,
+      };
+
+      const mockError = new Error('Failed to add samples');
+      const mockAddSamples = jest.fn().mockRejectedValue(mockError);
+
+      (service as any).samplesIndexService = {
+        addSamplesToDataStream: mockAddSamples,
+      };
+
+      await expect(service.addSamplesToDataStream(mockParams)).rejects.toThrow(
+        'Failed to add samples'
+      );
+    });
+  });
+
+  describe('deleteDataStream', () => {
+    let mockEsClient: any;
+
+    beforeEach(async () => {
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
+      mockEsClient = {} as any;
+    });
+
+    it('should delete data stream and call all required services', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 5 });
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
+
+      expect(mockRemoveTask).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'data-stream-456',
+      });
+      expect(mockDeleteSamples).toHaveBeenCalledWith(
+        'integration-123',
+        'data-stream-456',
+        mockEsClient
+      );
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'integration-123',
+        'data-stream-456',
+        undefined
+      );
+    });
+
+    it('should pass options to saved object service delete', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const options = { force: true };
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith(
+        'integration-123',
+        'data-stream-456',
+        options
+      );
+    });
+
+    it('should throw error if saved object service is not initialized', async () => {
+      (service as any).savedObjectService = null;
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Saved Objects service not initialized.');
+    });
+
+    it('should handle errors from task manager service', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
+      const mockDeleteSavedObject = jest.fn();
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Task removal failed');
+
+      expect(mockDeleteSamples).not.toHaveBeenCalled();
+      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from samples index service', async () => {
+      const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest.fn();
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Sample deletion failed');
+
+      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from saved object service', async () => {
+      const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
+      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
+      const mockDeleteSavedObject = jest
+        .fn()
+        .mockRejectedValue(new Error('Saved object deletion failed'));
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await expect(
+        service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Saved object deletion failed');
+    });
+
+    it('should execute operations in correct order', async () => {
+      const executionOrder: string[] = [];
+      const mockDeleteSamples = jest.fn().mockImplementation(async () => {
+        executionOrder.push('deleteSamples');
+        return { deleted: 0 };
+      });
+      const mockRemoveTask = jest.fn().mockImplementation(async () => {
+        executionOrder.push('removeTask');
+      });
+      const mockDeleteSavedObject = jest.fn().mockImplementation(async () => {
+        executionOrder.push('deleteSavedObject');
+      });
+
+      (service as any).samplesIndexService = {
+        deleteSamplesForDataStream: mockDeleteSamples,
+      };
+      (service as any).taskManagerService = {
+        removeDataStreamCreationTask: mockRemoveTask,
+      };
+      (service as any).savedObjectService = {
+        deleteDataStream: mockDeleteSavedObject,
+      };
+
+      await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
+
+      expect(executionOrder).toEqual(['removeTask', 'deleteSamples', 'deleteSavedObject']);
+    });
+  });
+
   describe('integration', () => {
     it('should properly initialize and setup the service', async () => {
       const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(
@@ -183,11 +444,10 @@ describe('AutomaticImportSetupService', () => {
       );
 
       // Verify constructor was called
-      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
+      expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
 
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledTimes(2);
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
-      expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalled();
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
 
       // Stop the service
       service.stop();
@@ -203,20 +463,20 @@ describe('AutomaticImportSetupService', () => {
       expect(pluginStop$Before).toBe(pluginStop$After);
     });
 
-    it('should pass ES client promises to samples index service', () => {
+    it('should initialize samples index service with logger factory only', () => {
       const { AutomaticImportSamplesIndexService: MockedService } = jest.requireMock(
         './samples_index/index_service'
       );
 
       const constructorCall = MockedService.mock.calls[0];
       expect(constructorCall[0]).toBe(mockLoggerFactory);
-      expect(constructorCall[1]).toBeInstanceOf(Promise);
+      expect(constructorCall).toHaveLength(1); // Only one parameter now
     });
 
     it('should complete full lifecycle: construct -> initialize -> stop', async () => {
       expect((service as any).savedObjectService).toBeNull();
 
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
       expect((service as any).savedObjectService).toBeDefined();
 
       // Stop

@@ -352,4 +352,90 @@ describe('useExecutionInput', () => {
       );
     });
   });
+
+  describe('workflow ID cache isolation', () => {
+    it('should prevent cache collision for workflows with same name but different IDs', () => {
+      const sharedName = 'shared-workflow-name';
+      const workflowId1 = 'id-1';
+      const workflowId2 = 'id-2';
+
+      // First workflow with ID
+      const { result: result1 } = renderHook(() =>
+        useExecutionInput({
+          workflowName: sharedName,
+          workflowId: workflowId1,
+          selectedTrigger: manualTrigger,
+        })
+      );
+
+      const input1 = { workflow: 'first' };
+      act(() => {
+        result1.current.setExecutionInput(JSON.stringify(input1, null, 2));
+      });
+
+      // Second workflow with same name but different ID
+      const { result: result2 } = renderHook(() =>
+        useExecutionInput({
+          workflowName: sharedName,
+          workflowId: workflowId2,
+          selectedTrigger: manualTrigger,
+        })
+      );
+
+      // Second workflow should NOT load first workflow's input
+      expect(result2.current.executionInput).toBe('');
+
+      const input2 = { workflow: 'second' };
+      act(() => {
+        result2.current.setExecutionInput(JSON.stringify(input2, null, 2));
+      });
+
+      // Both should have separate cache entries
+      const key1 = `workflow-${manualTrigger}-input-${workflowId1}`;
+      const key2 = `workflow-${manualTrigger}-input-${workflowId2}`;
+
+      expect(localStorage.getItem(key1)).toBe(JSON.stringify(input1));
+      expect(localStorage.getItem(key2)).toBe(JSON.stringify(input2));
+    });
+
+    it('should use workflowId when provided, fallback to workflowName when not', async () => {
+      const testWorkflowName = 'test-workflow';
+      const workflowId = 'unique-id';
+
+      // Test with ID
+      const savedInputWithId = { test: 'with-id' };
+      const idKey = `workflow-${manualTrigger}-input-${workflowId}`;
+      localStorage.setItem(idKey, JSON.stringify(savedInputWithId));
+
+      const { result: resultWithId } = renderHook(() =>
+        useExecutionInput({
+          workflowName: testWorkflowName,
+          workflowId,
+          selectedTrigger: manualTrigger,
+        })
+      );
+
+      await waitFor(() => {
+        expect(resultWithId.current.executionInput).toBe(JSON.stringify(savedInputWithId, null, 2));
+      });
+
+      // Test without ID (fallback to name)
+      const savedInputWithoutId = { test: 'without-id' };
+      const nameKey = `workflow-${manualTrigger}-input-${testWorkflowName}`;
+      localStorage.setItem(nameKey, JSON.stringify(savedInputWithoutId));
+
+      const { result: resultWithoutId } = renderHook(() =>
+        useExecutionInput({
+          workflowName: testWorkflowName,
+          selectedTrigger: manualTrigger,
+        })
+      );
+
+      await waitFor(() => {
+        expect(resultWithoutId.current.executionInput).toBe(
+          JSON.stringify(savedInputWithoutId, null, 2)
+        );
+      });
+    });
+  });
 });

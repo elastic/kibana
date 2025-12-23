@@ -22,7 +22,8 @@
       "data",
       "uiActions",
       "screenshotMode",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "cps"
     ],
     "optionalPlugins": [
       "usageCollection"

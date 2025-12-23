@@ -339,8 +339,9 @@ export class HeadlessChromiumDriverFactory {
 
     const uncaughtExceptionPageError$ = this.getPageEventAsObservable(page, 'pageerror').pipe(
       map((err) => {
+        const errorMessage = err instanceof Error ? err.message : String(err);
         logger.warn(
-          `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`
+          `Reporting encountered an uncaught error on the page that will be ignored: ${errorMessage}`
         );
       })
     );

@@ -33,6 +33,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
@@ -97,6 +98,13 @@ function validateConfig(
   });
   if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
+  }
+
+  const { oauthTokenUrl } = config;
+  if (oauthTokenUrl && !configurationUtilities.isUriAllowed(oauthTokenUrl)) {
+    throw new Error(
+      `[oauthTokenUrl]: host name value for '${oauthTokenUrl}' is not in the allowedHosts configuration`
+    );
   }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
@@ -219,6 +227,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

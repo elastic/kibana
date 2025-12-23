@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+import { RULES_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { IconRules } from '../../../../../common/icons/rules';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { RULES_CARD_TITLE } from './translations';
 import { checkRulesComplete } from './rules_check_complete';
-import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 
 export const rulesCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.rules,
@@ -25,5 +25,5 @@ export const rulesCardConfig: OnboardingCardConfig = {
       )
   ),
   checkComplete: checkRulesComplete,
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.detections`],
+  capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE],
 };

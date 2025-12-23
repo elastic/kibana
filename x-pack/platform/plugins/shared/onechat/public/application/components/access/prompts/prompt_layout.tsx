@@ -5,18 +5,52 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
-export const PromptLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { euiTheme } = useEuiTheme();
-  const promptLayoutStyles = css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  `;
-  return <div css={promptLayoutStyles}>{children}</div>;
+const defaultPromptStyles = css`
+  .euiEmptyPrompt__main {
+    width: 740px;
+  }
+`;
+
+export type PromptLayoutVariant = 'default' | 'embeddable';
+
+export interface PromptLayoutProps {
+  imageSrc: string;
+  title: React.ReactNode;
+  subtitle: React.ReactNode;
+  primaryButton: React.ReactNode;
+  secondaryButton?: React.ReactNode;
+  variant?: PromptLayoutVariant;
+}
+
+export const PromptLayout: React.FC<PromptLayoutProps> = ({
+  imageSrc,
+  title,
+  subtitle,
+  primaryButton,
+  secondaryButton,
+  variant = 'default',
+}) => {
+  const actions = [primaryButton, ...(secondaryButton ? [secondaryButton] : [])];
+
+  const isEmbeddable = variant === 'embeddable';
+
+  return (
+    <EuiEmptyPrompt
+      css={isEmbeddable ? undefined : defaultPromptStyles}
+      hasShadow={!isEmbeddable}
+      color={isEmbeddable ? 'transparent' : 'plain'}
+      icon={<EuiImage src={imageSrc} alt="" size="s" />}
+      title={<h2>{title}</h2>}
+      body={
+        <EuiText color="subdued" textAlign="center">
+          {subtitle}
+        </EuiText>
+      }
+      actions={actions}
+    />
+  );
 };

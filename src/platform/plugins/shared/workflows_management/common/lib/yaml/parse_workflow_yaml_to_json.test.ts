@@ -9,13 +9,15 @@
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-import type { SafeParseReturnType } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import type { ZodSafeParseResult } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
 
 describe('parseWorkflowYamlToJSON', () => {
   const mockConnectors: ConnectorContractUnion[] = [
     {
+      summary: 'Noop',
+      description: 'Noop',
       type: 'noop',
       paramsSchema: z.object({
         message: z.string(),
@@ -36,14 +38,9 @@ describe('parseWorkflowYamlToJSON', () => {
     `;
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(
-      (
-        result as SafeParseReturnType<
-          z.input<typeof yamlSchemaLoose>,
-          z.output<typeof yamlSchemaLoose>
-        >
-      ).data
-    ).toEqual({
+    expect((result as ZodSafeParseResult<typeof yamlSchemaLoose>).data).toEqual({
+      version: '1',
+      enabled: true,
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, world!' } }],
     });
   });
@@ -76,14 +73,9 @@ describe('parseWorkflowYamlToJSON', () => {
     `;
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(
-      (
-        result as SafeParseReturnType<
-          z.input<typeof yamlSchemaLoose>,
-          z.output<typeof yamlSchemaLoose>
-        >
-      ).data
-    ).toEqual({
+    expect((result as any).data).toEqual({
+      version: '1',
+      enabled: true,
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, {{event.message}}' } }],
     });
   });
@@ -125,6 +117,11 @@ describe('parseWorkflowYamlToJSON', () => {
             type: z.string(),
             with: z.object({
               count: z.number(),
+              cases: z.array(
+                z.object({
+                  severity: z.enum(['low', 'medium', 'high', 'critical']),
+                })
+              ),
             }),
           })
         ),
@@ -135,6 +132,8 @@ describe('parseWorkflowYamlToJSON', () => {
           type: noop
           with:
             count: $\{\{ inputs.count \}\}
+            cases:
+              - severity: $\{\{ inputs.severity \}\}
       `;
       const result = parseWorkflowYamlToJSON(yaml, schema);
       expect(result.success).toBe(true);
@@ -190,7 +189,67 @@ describe('parseWorkflowYamlToJSON', () => {
       expect(result.error?.message).toContain('number');
     });
 
-    it('should not suppress errors for regular {{ }} template syntax', () => {
+    it('should also suppress errors for regular {{ }} template syntax', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              count: z.number(),
+              cases: z.array(
+                z.object({
+                  severity: z.enum(['low', 'medium', 'high', 'critical']),
+                })
+              ),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            count: "{{ inputs.count }}"
+            cases:
+              - severity: "{{ inputs.severity }}"
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(true);
+    });
+
+    it('should also suppress errors for Liquid tag syntax {% ... %}', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              severity: z.enum(['low', 'medium', 'high', 'critical']),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            severity: |
+              {%- if steps.get_source_version.output.severity == "critical" -%}
+              critical
+              {%- elsif steps.get_source_version.output.severity == "high" -%}
+              high
+              {%- else -%}
+              low
+              {%- endif -%}
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(true);
+    });
+
+    it('should not suppress errors if the variable is inside a string and field should be a number', () => {
       const schema = z.object({
         steps: z.array(
           z.object({
@@ -202,12 +261,11 @@ describe('parseWorkflowYamlToJSON', () => {
           })
         ),
       });
-
       const yaml = `steps:
         - name: step1
           type: noop
           with:
-            count: {{ inputs.count }}
+            count: "some string with a variable {{ inputs.count }}"
       `;
       const result = parseWorkflowYamlToJSON(yaml, schema);
       expect(result.success).toBe(false);

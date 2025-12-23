@@ -27,6 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'automaticDashboardsMigration',
+          'qradarRulesMigration',
         ])}`,
       ],
     },

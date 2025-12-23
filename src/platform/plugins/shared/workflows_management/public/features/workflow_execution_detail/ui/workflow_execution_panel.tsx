@@ -19,14 +19,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isCancelableStatus } from '@kbn/workflows';
+import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
-import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
 
 const i18nTexts = {
   backToExecutions: i18n.translate('workflows.workflowStepExecutionList.backToExecution', {
@@ -40,7 +39,6 @@ const i18nTexts = {
 export interface WorkflowExecutionPanelProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
-  isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
@@ -52,13 +50,21 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     execution,
     definition,
     showBackButton = true,
-    isLoading,
     error,
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
   }) => {
     const styles = useMemoCss(componentStyles);
+    const showCancelButton = useMemo<boolean>(
+      () => Boolean(execution && isCancelableStatus(execution.status)),
+      [execution]
+    );
+    const showDoneButton = useMemo<boolean>(
+      () => Boolean(!showBackButton && execution && isTerminalStatus(execution.status)),
+      [showBackButton, execution]
+    );
+
     return (
       <EuiFlexGroup
         direction="column"
@@ -88,44 +94,36 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
           <EuiPanel paddingSize="m" hasShadow={false} css={{ overflow: 'hidden' }}>
-            <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
-              <EuiFlexItem grow={false}>
-                <WorkflowExecutionListItem
-                  status={execution?.status ?? ExecutionStatus.PENDING}
-                  startedAt={execution?.startedAt ? new Date(execution.startedAt) : null}
-                  duration={execution?.duration ?? null}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem css={{ overflowY: 'auto' }}>
-                <WorkflowStepExecutionTree
-                  definition={definition}
-                  execution={execution ?? null}
-                  isLoading={isLoading}
-                  error={error}
-                  onStepExecutionClick={onStepExecutionClick}
-                  selectedId={selectedStepExecutionId ?? null}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <WorkflowStepExecutionTree
+              definition={definition}
+              execution={execution ?? null}
+              error={error}
+              onStepExecutionClick={onStepExecutionClick}
+              selectedId={selectedStepExecutionId ?? null}
+            />
           </EuiPanel>
         </EuiFlexItem>
 
-        {!showBackButton && (
+        {(showDoneButton || showCancelButton) && (
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="none" />
             <EuiPanel paddingSize="m" hasShadow={false}>
-              {execution && isCancelableStatus(execution.status) ? (
+              {showCancelButton && execution ? (
                 <CancelExecutionButton executionId={execution.id} />
               ) : (
-                <EuiButton
-                  onClick={onClose}
-                  iconType="check"
-                  size="s"
-                  fullWidth
-                  aria-label={i18nTexts.done}
-                >
-                  {i18nTexts.done}
-                </EuiButton>
+                <>
+                  {showDoneButton && (
+                    <EuiButton
+                      onClick={onClose}
+                      iconType="check"
+                      size="s"
+                      fullWidth
+                      aria-label={i18nTexts.done}
+                    >
+                      {i18nTexts.done}
+                    </EuiButton>
+                  )}
+                </>
               )}
             </EuiPanel>
           </EuiFlexItem>

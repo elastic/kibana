@@ -17,7 +17,6 @@ import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
-  withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
@@ -155,7 +154,7 @@ export function getState({
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
-    ...(toasts && withNotifyOnErrors(toasts)),
+    ...toasts,
   });
 
   const globalStateFromUrl = stateStorage.get<GlobalState>(GLOBAL_STATE_URL_KEY) as GlobalState;

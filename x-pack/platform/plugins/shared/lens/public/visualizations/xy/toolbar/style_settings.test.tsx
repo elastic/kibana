@@ -12,7 +12,7 @@ import type {
   DatasourcePublicAPI,
   VisualizationToolbarProps,
 } from '@kbn/lens-common';
-import type { State, XYState, XYDataLayerConfig } from '../types';
+import type { XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -25,7 +25,7 @@ import { XyAxisSettings } from './axis_settings';
 describe('xy style settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): State {
+  function testState(): XYState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',

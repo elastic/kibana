@@ -7,9 +7,11 @@
 
 import { z } from '@kbn/zod';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType, platformCoreTools } from '@kbn/onechat-common';
 import type { WorkflowToolConfig } from '@kbn/onechat-common/tools';
 import { createErrorResult } from '@kbn/onechat-server';
+import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/onechat-common/tools/types/workflow';
+import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
 import type { AnyToolTypeDefinition } from '../definitions';
 import { executeWorkflow } from './execute_workflow';
 import { generateSchema } from './generate_schema';
@@ -45,6 +47,7 @@ export const getWorkflowToolType = ({
                 workflowApi,
                 workflowId,
                 workflowParams: params,
+                waitForCompletion: config.wait_for_completion,
               });
 
               return {
@@ -75,9 +78,25 @@ export const getWorkflowToolType = ({
           }
           return generateSchema({ workflow });
         },
+        getLlmDescription: ({ description }) => {
+          const wait = config.wait_for_completion ?? true;
+
+          const waitInstruction = wait
+            ? `The tool will execute the workflow and then wait for it to complete up to ${WAIT_FOR_COMPLETION_TIMEOUT_SEC}s`
+            : 'The tool will execute the workflow and return immediately without waiting for its completion';
+
+          return cleanPrompt(`${description}
+
+          ## Additional information
+          - This tool executes the workflow with the ID '${config.workflow_id}'
+          - ${waitInstruction}
+          - If the workflow wasn't completed, a workflow execution ID will be returned.
+          - The ${platformCoreTools.getWorkflowExecutionStatus} tool can be used later to check the status of the workflow execution
+
+          `);
+        },
       };
     },
-
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
     validateForCreate: async ({ config, context: { spaceId } }) => {

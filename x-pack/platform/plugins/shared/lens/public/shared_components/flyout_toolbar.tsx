@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo } from 'react';
 
-import { EuiButtonGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps, UseEuiTheme, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -76,7 +76,7 @@ export function FlyoutToolbar<S>({
     [contentMap]
   );
 
-  const flyoutContentStyles = useMemoCss(styles).flyoutContent;
+  const flyoutToolbarStyles = useMemoCss(styles);
 
   const flyoutTitle = idSelected
     ? toolbarOptions.find((toolbarOption) => toolbarOption.id === idSelected)?.label || ''
@@ -90,8 +90,7 @@ export function FlyoutToolbar<S>({
   const FlyoutContent = idSelected ? contentMap[idSelected] : null;
 
   return (
-    <EuiFlexItem
-      grow={false}
+    <div
       css={css`
         // NOTE: Override euiAccordion styles added in LensConfigurationFlyout
         .euiAccordion {
@@ -117,18 +116,23 @@ export function FlyoutToolbar<S>({
           setIdSelected('');
           setFlyoutVisible(false);
         }}
+        overrideContainerCss={flyoutToolbarStyles.dialog}
       >
         {FlyoutContent ? (
-          <div id={idSelected} css={flyoutContentStyles}>
+          <div id={idSelected} css={flyoutToolbarStyles.flyoutContent}>
             <FlyoutContent {...flyoutContentProps} />
           </div>
         ) : null}
       </FlyoutContainer>
-    </EuiFlexItem>
+    </div>
   );
 }
 
 const styles = {
+  dialog: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      z-index: ${euiTheme.levels.menu};
+    `,
   flyoutContent: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.base,

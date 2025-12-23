@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from '@kbn/expect';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';

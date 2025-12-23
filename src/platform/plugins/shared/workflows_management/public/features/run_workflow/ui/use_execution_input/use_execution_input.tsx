@@ -11,9 +11,11 @@ import { useEffect, useMemo, useState } from 'react';
 
 export const useExecutionInput = ({
   workflowName,
+  workflowId,
   selectedTrigger,
 }: {
   workflowName: string;
+  workflowId?: string;
   selectedTrigger: string;
 }) => {
   const [executionInput, setExecutionInput] = useState<string>('');
@@ -22,8 +24,9 @@ export const useExecutionInput = ({
     if (!workflowName || selectedTrigger !== 'manual') {
       return null;
     }
-    return `workflow-${selectedTrigger}-input-${workflowName}`;
-  }, [workflowName, selectedTrigger]);
+    const storageIdentifier = workflowId || workflowName;
+    return `workflow-${selectedTrigger}-input-${storageIdentifier}`;
+  }, [workflowName, workflowId, selectedTrigger]);
 
   useEffect(() => {
     if (localStorageKey) {

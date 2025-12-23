@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { filterSchema } from './filter';
 import { formatSchema } from './format';
@@ -66,6 +67,15 @@ export const formulaOperationDefinitionSchema = schema.object({
    * Reduced time range
    */
   reduced_time_range: schema.maybe(schema.string({ meta: { description: 'Reduced time range' } })),
+  /**
+   * Custom scaling for the entire formula
+   */
+  time_scale: schema.maybe(
+    schema.oneOf(
+      [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
+      { meta: { description: 'Time scale' } }
+    )
+  ),
 });
 
 export const esqlColumnSchema = schema.object({
@@ -240,7 +250,12 @@ export const metricOperationDefinitionSchema = schema.oneOf([
   percentileRanksOperationSchema,
 ]);
 
-export type LensApiAllMetricOperations = typeof metricOperationDefinitionSchema.type;
+export type LensApiAllMetricOperations = TypeOf<typeof metricOperationDefinitionSchema>;
+export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf([
+  fieldMetricOperationsSchema,
+  formulaOperationDefinitionSchema,
+]);
+
 export type LensApiReferableMetricOperations =
   | LensApiCountMetricOperation
   | LensApiUniqueCountMetricOperation
@@ -249,18 +264,30 @@ export type LensApiReferableMetricOperations =
   | LensApiLastValueOperation
   | LensApiPercentileOperation
   | LensApiPercentileRanksOperation;
-export type LensApiFieldMetricOperations = typeof fieldMetricOperationsSchema.type;
+export type LensApiFieldMetricOperations = TypeOf<typeof fieldMetricOperationsSchema>;
 
-export type LensApiCountMetricOperation = typeof countMetricOperationSchema.type;
-export type LensApiUniqueCountMetricOperation = typeof uniqueCountMetricOperationSchema.type;
-export type LensApiMetricOperation = typeof metricOperationSchema.type;
-export type LensApiSumMetricOperation = typeof sumMetricOperationSchema.type;
-export type LensApiLastValueOperation = typeof lastValueOperationSchema.type;
-export type LensApiPercentileOperation = typeof percentileOperationSchema.type;
-export type LensApiPercentileRanksOperation = typeof percentileRanksOperationSchema.type;
-export type LensApiDifferencesOperation = typeof differencesOperationSchema.type;
-export type LensApiMovingAverageOperation = typeof movingAverageOperationSchema.type;
-export type LensApiCumulativeSumOperation = typeof cumulativeSumOperationSchema.type;
-export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type;
-export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
-export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;
+export type LensApiCountMetricOperation = TypeOf<typeof countMetricOperationSchema>;
+export type LensApiUniqueCountMetricOperation = TypeOf<typeof uniqueCountMetricOperationSchema>;
+export type LensApiMetricOperation = TypeOf<typeof metricOperationSchema>;
+export type LensApiSumMetricOperation = TypeOf<typeof sumMetricOperationSchema>;
+export type LensApiLastValueOperation = TypeOf<typeof lastValueOperationSchema>;
+export type LensApiPercentileOperation = TypeOf<typeof percentileOperationSchema>;
+export type LensApiPercentileRanksOperation = TypeOf<typeof percentileRanksOperationSchema>;
+export type LensApiDifferencesOperation = TypeOf<typeof differencesOperationSchema>;
+export type LensApiMovingAverageOperation = TypeOf<typeof movingAverageOperationSchema>;
+export type LensApiCumulativeSumOperation = TypeOf<typeof cumulativeSumOperationSchema>;
+export type LensApiCounterRateOperation = TypeOf<typeof counterRateOperationSchema>;
+export type LensApiFormulaOperation = TypeOf<typeof formulaOperationDefinitionSchema>;
+export type LensApiStaticValueOperation = TypeOf<typeof staticOperationDefinitionSchema>;
+
+export type LensApiFieldMetricOrFormulaOperation =
+  | LensApiFieldMetricOperations
+  | LensApiFormulaOperation;
+
+export type LensApiAllMetricOrFormulaOperations =
+  | LensApiFieldMetricOperations
+  | LensApiFormulaOperation
+  | LensApiDifferencesOperation
+  | LensApiMovingAverageOperation
+  | LensApiCumulativeSumOperation
+  | LensApiCounterRateOperation;

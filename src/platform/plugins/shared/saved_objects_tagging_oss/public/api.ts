@@ -161,6 +161,11 @@ export interface SavedObjectsTaggingApiUi {
   ): string[];
 
   /**
+   * Returns tag reference for given tag id
+   */
+  tagIdToReference(tagId: string): SavedObjectReference;
+
+  /**
    * Returns the id for given tag name. Will return `undefined`
    * if the given name does not match any existing tag.
    */

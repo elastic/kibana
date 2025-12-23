@@ -1218,6 +1218,36 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.EXPORT_TYPE_SCHEDULED",
+        "type": "string",
+        "tags": [],
+        "label": "EXPORT_TYPE_SCHEDULED",
+        "description": [],
+        "signature": [
+          "\"scheduled\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.EXPORT_TYPE_SINGLE",
+        "type": "string",
+        "tags": [],
+        "label": "EXPORT_TYPE_SINGLE",
+        "description": [],
+        "signature": [
+          "\"single\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.ILM_POLICY_NAME",
         "type": "string",
         "tags": [],
@@ -1360,6 +1390,36 @@
         "description": [],
         "signature": [
           "\"reportJobRow\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_EXPORT_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "REPORTING_EXPORT_TYPES",
+        "description": [],
+        "signature": [
+          "(\"scheduled\" | \"single\")[]"
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"Reporting\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
         "deprecated": false,
@@ -1691,6 +1751,17 @@
                 "type": "string",
                 "tags": [],
                 "label": "BULK_DELETE",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.SCHEDULED.BULK_ENABLE",
+                "type": "string",
+                "tags": [],
+                "label": "BULK_ENABLE",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
                 "deprecated": false,

@@ -40,7 +40,6 @@ test.describe('Anomaly Detection', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('Admin should be able to modify settings', async ({
-    page,
     pageObjects: { anomalyDetectionPage },
     browserAuth,
   }) => {
@@ -48,7 +47,14 @@ test.describe('Anomaly Detection', { tag: ['@ess', '@svlOblt'] }, () => {
     await anomalyDetectionPage.goto();
     const createButton = anomalyDetectionPage.getCreateJobButtonLocator();
     await expect(createButton).toBeEnabled();
-    await anomalyDetectionPage.createMlJobs('production');
+
+    await test.step('verify create button functionality', async () => {
+      await anomalyDetectionPage.createMlJobs('production');
+    });
+
+    await test.step('verify delete button functionality', async () => {
+      await anomalyDetectionPage.deleteMlJob();
+    });
   });
 
   test('APM Read Privileges With Write Settings should be able to modify settings', async ({

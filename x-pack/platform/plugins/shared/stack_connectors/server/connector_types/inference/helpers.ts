@@ -8,7 +8,7 @@
 import { last, lastValueFrom, map, merge, Observable, scan, share } from 'rxjs';
 import type { Readable } from 'node:stream';
 import { createParser } from 'eventsource-parser';
-import type { UnifiedChatCompleteResponse } from '../../../common/inference/types';
+import type { UnifiedChatCompleteResponse } from '@kbn/connector-schemas/inference';
 
 // TODO: Extract to the common package with appex-ai
 export function eventSourceStreamIntoObservable(readable: Readable) {
@@ -47,6 +47,9 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
           (prev, chunk) => {
             if (chunk.choices.length > 0 && !chunk.usage) {
               prev.choices[0].message.content += chunk.choices[0].message.content ?? '';
+              if (chunk.choices[0].message.refusal) {
+                prev.choices[0].message.refusal = chunk.choices[0].message.refusal;
+              }
 
               chunk.choices[0].message.tool_calls?.forEach((toolCall) => {
                 if (toolCall.index !== undefined) {
@@ -89,6 +92,7 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
               {
                 message: {
                   content: '',
+                  refusal: null,
                   role: 'assistant',
                 },
               },

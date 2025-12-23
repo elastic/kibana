@@ -17,7 +17,7 @@ export class ExitNormalPathNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.wfExecutionRuntimeManager.navigateToNode(this.node.exitOnFailureZoneNodeId);
   }
 }

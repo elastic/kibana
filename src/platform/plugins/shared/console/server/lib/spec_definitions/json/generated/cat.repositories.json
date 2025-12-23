@@ -6,6 +6,23 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",

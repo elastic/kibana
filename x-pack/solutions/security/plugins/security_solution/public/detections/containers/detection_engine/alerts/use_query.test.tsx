@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { waitFor, act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReturnQueryAlerts } from './use_query';
 import { useQueryAlerts } from './use_query';
 import { ALERTS_QUERY_NAMES } from './constants';
 import * as api from './api';
-import { mockAlertsQuery, alertsMock } from './mock';
+import { alertsMock, mockAlertsQuery } from './mock';
 
 jest.mock('./api');
 jest.mock('../../../../common/lib/apm/use_track_http_request');
@@ -46,7 +46,11 @@ describe('useQueryAlerts', () => {
         loading: false,
         data: alertsMock,
         response: JSON.stringify(alertsMock, null, 2),
-        request: JSON.stringify({ index: [indexName] ?? [''], body: mockAlertsQuery }, null, 2),
+        request: JSON.stringify(
+          { index: indexName ? [indexName] : [''], body: mockAlertsQuery },
+          null,
+          2
+        ),
         setQuery: result.current.setQuery,
         refetch: result.current.refetch,
       })

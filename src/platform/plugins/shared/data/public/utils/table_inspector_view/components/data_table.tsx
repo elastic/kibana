@@ -59,7 +59,7 @@ class DataTableFormatClass extends Component<
   DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
-  static propTypes = {
+  static propTypes: Record<string, PropTypes.Validator<unknown>> = {
     data: PropTypes.object.isRequired,
     uiSettings: PropTypes.object.isRequired,
     fieldFormats: PropTypes.object.isRequired,

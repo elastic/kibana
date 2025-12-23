@@ -17,6 +17,14 @@ export interface TestFilesValidationResult {
   configPath: string;
 }
 
+/**
+ * Regex pattern to match scout test directory paths
+ * Pattern: {scout,scout_*}/{ui,api}/{tests,parallel_tests}
+ * Capturing groups: [1] scout directory name, [2] type (ui|api), [3] test type (tests|parallel_tests)
+ */
+const SCOUT_TEST_DIR_PATTERN = /\/(scout(?:_[^/]+)?)\/(ui|api)\/(tests|parallel_tests)/;
+const SCOUT_TEST_DIR = '{scout,scout_*}/{ui,api}/{tests,parallel_tests}';
+
 function isTestFile(fileName: string): boolean {
   return fileName.endsWith('.spec.ts');
 }
@@ -49,20 +57,12 @@ function hasTestFilesInDirectory(dirPath: string): boolean {
  * @param isFile Whether the path is a file (affects validation specificity)
  */
 function validateScoutPath(normalizedPath: string, originalPath: string, isFile: boolean): void {
-  const allowedTestPaths = ['/scout/ui/tests', '/scout/ui/parallel_tests', '/scout/api/tests'];
-
-  const validationPatterns = isFile
-    ? allowedTestPaths.map((pattern) => `${pattern}/`)
-    : allowedTestPaths;
-
-  const isValidScoutPath = validationPatterns.some((pattern) => normalizedPath.includes(pattern));
+  const isValidScoutPath = SCOUT_TEST_DIR_PATTERN.test(normalizedPath);
 
   if (!isValidScoutPath) {
     const pathType = isFile ? 'Test file' : 'Directory';
     throw createFlagError(
-      `${pathType} must be within one of ${allowedTestPaths.join(
-        ', '
-      )} directories: ${originalPath}`
+      `${pathType} must be within a scout directory matching pattern '${SCOUT_TEST_DIR}': ${originalPath}`
     );
   }
 }
@@ -143,7 +143,7 @@ export function validateAndProcessTestFiles(testFilesList: string): TestFilesVal
       derivedConfigPath = derivedConfigForPath;
     } else if (derivedConfigPath !== derivedConfigForPath) {
       throw createFlagError(
-        `All paths must be from the same scout test directory (either 'scout/ui/tests', 'scout/ui/parallel_tests', or 'scout/api/tests')`
+        `All paths must be from the same scout test directory (matching pattern '${SCOUT_TEST_DIR}')`
       );
     }
   }
@@ -161,27 +161,21 @@ export function validateAndProcessTestFiles(testFilesList: string): TestFilesVal
  * @returns Derived config path
  */
 function deriveConfigPath(normalizedPath: string, originalPath: string): string {
-  if (normalizedPath.includes('/scout/ui/parallel_tests')) {
-    const scoutBasePath = extractScoutBasePath(normalizedPath, '/scout/ui/');
-    return `${scoutBasePath}/parallel.playwright.config.ts`;
-  } else if (normalizedPath.includes('/scout/ui/tests')) {
-    const scoutBasePath = extractScoutBasePath(normalizedPath, '/scout/ui/');
-    return `${scoutBasePath}/playwright.config.ts`;
-  } else if (normalizedPath.includes('/scout/api/tests')) {
-    const scoutBasePath = extractScoutBasePath(normalizedPath, '/scout/api/');
-    return `${scoutBasePath}/playwright.config.ts`;
-  } else {
+  const match = normalizedPath.match(SCOUT_TEST_DIR_PATTERN);
+
+  if (!match) {
     throw createFlagError(`Unable to derive config path for path: ${originalPath}`);
   }
-}
 
-/**
- * Extracts the base scout directory path from a normalized test file path
- * @param normalizedPath Normalized test file path
- * @param scoutPattern The scout pattern to search for (e.g., '/scout/ui/', '/scout/api/')
- * @returns Base scout directory path
- */
-function extractScoutBasePath(normalizedPath: string, scoutPattern: string): string {
-  const scoutIndex = normalizedPath.indexOf(scoutPattern);
-  return normalizedPath.substring(0, scoutIndex + scoutPattern.length - 1);
+  const [, scoutDir, type, testType] = match;
+  // Find the index of the scout directory pattern to preserve the full path prefix
+  const scoutIndex = normalizedPath.indexOf(`/${scoutDir}/${type}/`);
+  const pathPrefix = normalizedPath.substring(0, scoutIndex);
+  const scoutBasePath = `${pathPrefix}/${scoutDir}/${type}`;
+
+  if (testType === 'parallel_tests') {
+    return `${scoutBasePath}/parallel.playwright.config.ts`;
+  } else {
+    return `${scoutBasePath}/playwright.config.ts`;
+  }
 }
