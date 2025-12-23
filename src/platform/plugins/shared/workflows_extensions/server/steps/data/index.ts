@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './data_aggregate_step';
 export * from './data_dedupe_step';
 export * from './data_map_step';

@@ -9,7 +9,11 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { aiPromptStepDefinition } from './ai/ai_prompt_step';
-import { dataDedupeStepDefinition, dataMapStepDefinition } from './data';
+import {
+  dataAggregateStepDefinition,
+  dataDedupeStepDefinition,
+  dataMapStepDefinition,
+} from './data';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
@@ -17,6 +21,7 @@ export const registerInternalStepDefinitions = (
   core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
   serverStepRegistry: ServerStepRegistry
 ) => {
+  serverStepRegistry.register(dataAggregateStepDefinition);
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
   serverStepRegistry.register(aiPromptStepDefinition(core));

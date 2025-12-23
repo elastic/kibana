@@ -8,6 +8,12 @@
  */
 
 export {
+  dataAggregateStepCommonDefinition,
+  DataAggregateStepTypeId,
+  type DataAggregateStepInputSchema,
+  type DataAggregateStepOutputSchema,
+} from './data_aggregate_step';
+export {
   dataDedupeStepCommonDefinition,
   DataDedupeStepTypeId,
   type DataDedupeStepInputSchema,
