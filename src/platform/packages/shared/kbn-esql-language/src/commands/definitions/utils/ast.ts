@@ -237,7 +237,7 @@ export function getBracketsToClose(text: string) {
         break;
       } else if (substr === openBracket) {
         stack.push(substr);
-        i += substr.length - 1; // We advance the cursor to consume the full lenght of the bracket
+        i += substr.length - 1; // We advance the cursor to consume the full length of the bracket
         break;
       }
     }
