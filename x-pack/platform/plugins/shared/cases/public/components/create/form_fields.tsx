@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
   EuiLoadingSpinner,
   EuiSteps,
@@ -15,9 +15,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import type { Template } from '../../../common/templates';
 import type { CasePostRequest, CaseUI } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
 import { Connector } from '../case_form_fields/connector';
@@ -77,8 +76,6 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
     const configurationOwner = configuration.owner;
 
-    const [caseTemplate, setCaseTemplate] = useState<undefined | Template>();
-
     /**
      * Changes the selected connector
      * when the user selects a solution.
@@ -106,18 +103,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         title: i18n.STEP_ONE_TITLE,
         children: (
           <>
-            <TemplateSelectorV2
-              onSelectTemplate={(t) => {
-                setCaseTemplate(t);
-                setFieldValue('template', { id: t?.templateId, version: t?.templateVersion });
-                setFieldValue('templateFields', {});
-              }}
-              selectedTemplateId={caseTemplate?.templateId}
-            />
+            <TemplateSelectorV2 />
           </>
         ),
       }),
-      [caseTemplate?.templateId, setFieldValue]
+      []
     );
 
     const secondStep = useMemo(
@@ -125,7 +115,6 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         title: i18n.STEP_TWO_TITLE,
         children: (
           <CaseFormFields
-            template={caseTemplate}
             configurationCustomFields={configuration.customFields}
             isLoading={isSubmitting}
             setCustomFieldsOptional={false}
@@ -134,7 +123,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           />
         ),
       }),
-      [caseTemplate, configuration.customFields, draftStorageKey, isSubmitting]
+      [configuration.customFields, draftStorageKey, isSubmitting]
     );
     const showThirdStep = isSyncAlertsEnabled || canExtractObservables;
     const thirdStep = useMemo(

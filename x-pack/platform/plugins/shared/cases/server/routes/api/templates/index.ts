@@ -255,7 +255,7 @@ export const getTemplateRoute = createCasesRoute({
 
       console.log('templateVersion: ', (request.query as any).templateVersion);
 
-      const template = casesClient.templates.getTemplate(request.params.template_id);
+      const template = await casesClient.templates.getTemplate(request.params.template_id);
 
       return response.ok({
         body: template,

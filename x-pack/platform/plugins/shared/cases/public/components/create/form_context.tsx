@@ -61,8 +61,6 @@ export const FormContext: React.FC<FormContextProps> = ({
     deserializer: createFormDeserializer,
   });
 
-  console.log('form', form);
-
   return (
     <Form
       onKeyDown={(e: KeyboardEvent) => {

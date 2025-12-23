@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { EuiSelectOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiText,
   EuiButtonIcon,
-  EuiSelect,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
@@ -27,6 +26,12 @@ import { css } from '@emotion/react';
 import { load as parseYaml } from 'js-yaml';
 import { Controller, FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { noop } from 'lodash';
+import {
+  UseField,
+  useFormData as useKibanaFormData,
+  useFormContext as useKibanaFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { HiddenField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASES_INTERNAL_URL } from '../../../common/constants';
 import type { CreateTemplateInput, Template } from '../../../common/templates';
 import { CommonFlyout, CommonFlyoutFooter } from '../configure_cases/flyout';
@@ -413,39 +418,18 @@ const TemplateUpdateView = ({
 };
 TemplateUpdateView.displayName = 'TemplateUpdateView';
 
-export const TemplateSelectorV2 = ({
-  onSelectTemplate,
-  selectedTemplateId,
-}: {
-  onSelectTemplate: (template?: Template) => void;
-  selectedTemplateId?: string;
-}) => {
+export const TemplateSelectorV2 = () => {
   const templates = useTemplates();
-
-  const templatesAsMap = useMemo(() => {
-    if (!templates.data) {
-      return {};
-    }
-
-    return Object.fromEntries(templates.data.map((t) => [t.templateId, t]));
-  }, [templates?.data]);
+  const form = useKibanaFormContext();
 
   const options: EuiSelectOption[] = useMemo(() => {
     return [
-      { text: 'Please select', value: undefined },
       ...(templates.data?.map((t) => ({
         text: t.name,
         value: t.templateId,
       })) ?? []),
     ];
   }, [templates.data]);
-
-  const onChange: React.ChangeEventHandler<HTMLSelectElement> = useCallback(
-    (e) => {
-      onSelectTemplate(templatesAsMap[e.target.value]);
-    },
-    [onSelectTemplate, templatesAsMap]
-  );
 
   return (
     <EuiFormRow
@@ -454,19 +438,41 @@ export const TemplateSelectorV2 = ({
       label={'Template'}
       helpText={'Template governs case fields and layout'}
     >
-      <EuiSelect
-        onChange={onChange}
-        options={options}
-        disabled={templates.isLoading}
-        isLoading={templates.isLoading}
-        data-test-subj="create-case-template-select"
-        fullWidth
-        value={selectedTemplateId}
-      />
+      <>
+        <UseField path="template.version" component={HiddenField} />
+        <UseField
+          path="template.id"
+          component={SelectField}
+          onChange={(value) => {
+            form.setFieldValue(
+              'template.version',
+              templates.data?.find((t) => t.templateId === value)?.templateVersion
+            );
+          }}
+          componentProps={{
+            euiFieldProps: {
+              options,
+            },
+          }}
+        />
+      </>
     </EuiFormRow>
   );
 };
 TemplateSelectorV2.displayName = 'TemplateSelectorV2';
+
+export const TemplateFields = () => {
+  const [fields] = useKibanaFormData();
+  const template = useTemplate(fields?.template?.id);
+
+  // TODO when rendering values, get the case-specific template version from the server
+  console.log('template definition', template.data?.definition);
+
+  return (
+    <>{`TODO: Template Fields (Dynamic) for template ${fields?.template?.id} (${fields?.template?.version})`}</>
+  );
+};
+TemplateFields.displayName = 'TemplateFields';
 
 export const TemplateFlyout = ({
   onClose,
