@@ -66,6 +66,7 @@ export const ENHANCEMENTS_INSTRUCTIONS = i18n.translate(
 export const ENHANCEMENTS_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.enhancements.helperText',
   {
-    defaultMessage: 'You cannot add enhancements once the current migration is uploaded.',
+    defaultMessage:
+      'You will not be able to add enhancements if you close this flyout. Please add enhancement now for better translation results.',
   }
 );
