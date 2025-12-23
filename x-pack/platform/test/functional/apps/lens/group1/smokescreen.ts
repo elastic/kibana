@@ -67,8 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      // 4th item is the other bucket
-      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
+      // 10th item is the other bucket (9 top values + Other)
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(10);
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
