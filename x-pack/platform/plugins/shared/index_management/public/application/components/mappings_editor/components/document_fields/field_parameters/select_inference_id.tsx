@@ -227,6 +227,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                     iconSide="right"
                     color="text"
                     fullWidth
+                    contentProps={{ style: { justifyContent: 'space-between' } }}
                     data-test-subj="inferenceIdButton"
                     onClick={() => {
                       setIsInferencePopoverVisible((prev) => !prev);
