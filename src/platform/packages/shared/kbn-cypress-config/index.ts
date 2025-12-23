@@ -27,14 +27,6 @@ export const SCOUT_CYPRESS_REPORTER_PATH = path.join(
   'src/platform/packages/shared/kbn-cypress-config/src/reporting/scout_events'
 );
 
-function getConfigFile(): string {
-  const fileArgIndex = process.argv.findIndex((arg) => arg === '--config-file');
-  if (fileArgIndex !== -1) {
-    return process.argv[fileArgIndex + 1];
-  }
-  return '';
-}
-
 function getProjectRoot(): string {
   const projectRootIndex = process.argv.findIndex((arg) => arg === '--projectRoot');
   if (projectRootIndex !== -1) {
@@ -98,15 +90,12 @@ function getReportingOptionOverrides(options?: Cypress.ConfigOptions): Record<st
 
   if (SCOUT_REPORTER_ENABLED) {
     enabledReporters.push(SCOUT_CYPRESS_REPORTER_PATH);
-    const configFile = getConfigFile();
-    const category = getCategoryFromPath(configFile);
 
     reporterOptions[`${camelCase(SCOUT_CYPRESS_REPORTER_PATH)}ReporterOptions`] = {
       name: 'cypress',
       outputPath: SCOUT_REPORT_OUTPUT_ROOT,
       config: {
-        path: configFile,
-        category,
+        // The config properties will be set later in setupNodeEvents where config.configFile is available.
       },
     };
   }
