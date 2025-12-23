@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { EuiPanel, EuiIcon, EuiText } from '@elastic/eui';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import type { Connector } from '../../types/connector';
 
 interface ConnectorCardProps {
@@ -15,6 +16,24 @@ interface ConnectorCardProps {
 }
 
 export const ConnectorCard: React.FC<ConnectorCardProps> = ({ connector, onClick }) => {
+  // Resolve icon at render time to properly handle lazy components, require clean up later
+  const iconComponent = useMemo(() => {
+    if (connector.connectorSpecId) {
+      const LazyIcon = ConnectorIconsMap.get(connector.connectorSpecId);
+      if (LazyIcon) {
+        return (
+          <Suspense fallback={<EuiIcon type="application" size="l" />}>
+            <LazyIcon size="l" />
+          </Suspense>
+        );
+      }
+    }
+
+    if (connector.icon) {
+      return <EuiIcon type={connector.icon} size="l" />;
+    }
+  }, [connector.connectorSpecId, connector.icon]);
+
   return (
     <EuiPanel
       css={({ euiTheme }) => ({
@@ -44,7 +63,7 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({ connector, onClick
           gap: '16px',
         }}
       >
-        <EuiIcon type={connector.icon} size="l" />
+        {iconComponent}
         <EuiText
           css={({ euiTheme }) => ({
             fontWeight: euiTheme.font.weight.semiBold,

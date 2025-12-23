@@ -12,7 +12,7 @@
     "configPath": ["xpack", "dataConnectors"],
     "requiredPlugins": ["actions", "dataSourcesRegistry"],
     "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact", "dataSourcesRegistry"],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": [
       "common"
     ]

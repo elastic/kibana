@@ -9,7 +9,6 @@ import { useState, useEffect, useMemo } from 'react';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
 import { DUMMY_CONNECTORS } from '../../data/dummy_connectors';
 import type { Connector } from '../../types/connector';
-import { getConnectorIcon } from '../../utils';
 import { DataConnectorTypesService } from '../../services';
 import { useKibana } from './use_kibana';
 
@@ -21,8 +20,8 @@ const transformDataSourceType = (dataTypeDefinition: DataTypeDefinition): Connec
     id: dataTypeDefinition.id,
     name: dataTypeDefinition.name,
     type: dataTypeDefinition.stackConnector?.type,
-    icon: getConnectorIcon(dataTypeDefinition.name, dataTypeDefinition.id),
     category: 'popular',
+    connectorSpecId: dataTypeDefinition.connectorSpecId,
   };
 };
 

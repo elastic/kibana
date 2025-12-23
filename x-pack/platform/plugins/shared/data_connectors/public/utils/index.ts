@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorIcon } from './get_connector_icon';
+// Utilities will be exported here as needed

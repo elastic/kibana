@@ -23,7 +23,6 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActiveSource } from '../../types/connector';
-import { getConnectorIcon } from '../../utils/get_connector_icon';
 import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
 import { AgentAvatarGroup } from './agent_avatar_group';
 
@@ -154,7 +153,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       render: (name: string, source: ActiveSource) => (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={getConnectorIcon(name, source.type)} size="m" />
+            <EuiIcon type="integration" size="m" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">{name}</EuiText>

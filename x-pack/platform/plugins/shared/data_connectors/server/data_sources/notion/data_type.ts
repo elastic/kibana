@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
-import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/server/data_catalog/data_type';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
+import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/common';
 import {
   generateGetDataSourceWorkflow,
   generateGetPageWorkflow,
@@ -33,6 +33,8 @@ export const notionDataSource: DataTypeDefinition = {
     type: '.notion',
     config: {},
   },
+
+  connectorSpecId: '.notion', // Links to @kbn/connector-specs icon
 
   generateWorkflows(stackConnectorId: string) {
     return [
