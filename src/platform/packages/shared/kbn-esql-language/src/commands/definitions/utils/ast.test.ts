@@ -24,7 +24,7 @@ describe('getBracketsToClose', () => {
     expect(getBracketsToClose('FROM a | WHERE ("""field: *')).toEqual(['"""', ')']);
   });
 
-  it('igonres any bracket found within string or tripple quotes', () => {
+  it('ignores any bracket found within string or triple quotes', () => {
     expect(getBracketsToClose('FROM a | WHERE KQL("""field: "something"""")')).toEqual([]);
     expect(getBracketsToClose('FROM a | WHERE FUNCTION("field: (something)")')).toEqual([]);
     expect(getBracketsToClose('FROM a | WHERE FUNCTION("field: (som")')).toEqual([]);
