@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const isRetryableEsClientErrorMock = jest.fn();
-
-jest.doMock('./retryable_es_client_errors', () => {
-  return {
-    isRetryableEsClientError: isRetryableEsClientErrorMock,
-  };
-});
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/elasticsearch/server-utils'],
+};
