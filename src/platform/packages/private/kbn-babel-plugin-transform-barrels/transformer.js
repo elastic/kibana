@@ -8,6 +8,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 const { createImportDeclaration } = require('./ast_utils');
 
 /**
@@ -127,6 +128,27 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
 }
 
 /**
+ * Try to find a barrel entry by checking multiple extensions.
+ *
+ * @param {string} basePath - Base path to try
+ * @param {import('./types').BarrelIndex} barrelIndex
+ * @returns {import('./types').BarrelFileEntry | null}
+ */
+function tryResolveBarrel(basePath, barrelIndex) {
+  const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
+  for (const ext of extensions) {
+    if (barrelIndex[basePath + ext]) {
+      return barrelIndex[basePath + ext];
+    }
+    const indexPath = path.join(basePath, 'index' + ext);
+    if (barrelIndex[indexPath]) {
+      return barrelIndex[indexPath];
+    }
+  }
+  return null;
+}
+
+/**
  * Resolve an import source to its barrel entry.
  *
  * @param {string} importSource - The import path
@@ -135,24 +157,24 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
  * @returns {import('./types').BarrelFileEntry | null}
  */
 function resolveToBarrelEntry(importSource, fromDir, barrelIndex) {
-  // For relative imports, resolve manually
+  // For relative imports
   if (importSource.startsWith('.') || importSource.startsWith('/')) {
-    const extensions = ['.ts', '.tsx', '.js', '.jsx', ''];
-    const basePath = path.resolve(fromDir, importSource);
-
-    for (const ext of extensions) {
-      if (barrelIndex[basePath + ext]) {
-        return barrelIndex[basePath + ext];
-      }
-      const indexPath = path.join(basePath, 'index' + ext);
-      if (barrelIndex[indexPath]) {
-        return barrelIndex[indexPath];
-      }
-    }
-    return null;
+    return tryResolveBarrel(path.resolve(fromDir, importSource), barrelIndex);
   }
 
-  // For package imports, use require.resolve
+  // For @kbn/* packages, resolve symlinks manually (they only have .ts files)
+  if (importSource.startsWith('@kbn/')) {
+    const pkgDir = path.resolve(fromDir, 'node_modules', importSource);
+    try {
+      if (fs.existsSync(pkgDir)) {
+        return tryResolveBarrel(fs.realpathSync(pkgDir), barrelIndex);
+      }
+    } catch {
+      // Package not found
+    }
+  }
+
+  // For other package imports, use require.resolve
   try {
     const resolved = require.resolve(importSource, { paths: [fromDir] });
     if (barrelIndex[resolved]) {

@@ -68,9 +68,16 @@ function resolvePackageBarrel(packageRoot, pkgJson) {
     barrelRelPath = pkgJson.main;
   }
 
-  // Default to index.js if nothing specified
+  // Default to index if nothing specified - try multiple extensions
   if (!barrelRelPath) {
-    barrelRelPath = './index.js';
+    const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
+    for (const ext of extensions) {
+      const candidate = path.resolve(packageRoot, 'index' + ext);
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        return fs.realpathSync(candidate);
+      }
+    }
+    return null;
   }
 
   // Some entry points are JSON, .d.ts or binary files, so we need to skip them
