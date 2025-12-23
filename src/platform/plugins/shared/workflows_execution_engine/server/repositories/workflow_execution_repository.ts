@@ -170,13 +170,7 @@ export class WorkflowExecutionRepository {
     const mustNotClauses: Array<Record<string, unknown>> = [
       {
         terms: {
-          status: [
-            ExecutionStatus.COMPLETED,
-            ExecutionStatus.FAILED,
-            ExecutionStatus.CANCELLED,
-            ExecutionStatus.SKIPPED,
-            ExecutionStatus.TIMED_OUT,
-          ],
+          status: TerminalExecutionStatuses,
         },
       },
     ];
