@@ -14,69 +14,16 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getLogsIndices } from '../../utils/get_logs_indices';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import { parseDatemath } from '../../utils/time';
 import {
   DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
   DEFAULT_TIME_RANGE,
   DEFAULT_LOG_SOURCE_FIELDS,
 } from './constants';
-import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
-import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
-import type { LogSequence } from './types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_correlated_logs';
-
-function getNoResultsMessage({
-  sequences,
-  logId,
-  logsFilter,
-  interestingEventFilter,
-  correlationFields,
-  start,
-  end,
-}: {
-  sequences: LogSequence[];
-  logId: string | undefined;
-  logsFilter: string | undefined;
-  interestingEventFilter: string | undefined;
-  correlationFields: string[];
-  start: string;
-  end: string;
-}): string | undefined {
-  if (sequences.length > 0) {
-    return undefined;
-  }
-
-  const isUsingDefaultCorrelationFields =
-    correlationFields === DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
-
-  const correlationFieldsDescription = isUsingDefaultCorrelationFields
-    ? 'Matching logs exist but lack the default correlation fields (trace.id, request.id, transaction.id, etc.). Try using `correlationFields` for specifying custom correlation fields.'
-    : `Matching logs exist but lack the custom correlation fields: ${correlationFields.join(', ')}`;
-
-  const isUsingDefaultEventFilter = !interestingEventFilter;
-  const eventFilterDescription = isUsingDefaultEventFilter
-    ? 'The default `interestingEventFilter` (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.) did not match any documents.'
-    : `The \`interestingEventFilter\` option "${interestingEventFilter}" did not match any documents.`;
-
-  if (logId) {
-    return `The log ID "${logId}" was not found, or the log does not have any of the ${correlationFieldsDescription}.`;
-  }
-
-  const suggestions = [
-    `No matching logs exist in this time range (${start} to ${end})`,
-    ...(logsFilter ? ['`logsFilter` is too restrictive'] : []),
-    eventFilterDescription,
-    correlationFieldsDescription,
-  ];
-
-  return `No log sequences found. Possible reasons: ${suggestions
-    .map((s, i) => `(${i + 1}) ${s}`)
-    .join(', ')}.`;
-}
 
 const getCorrelatedLogsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
@@ -178,52 +125,22 @@ Do NOT use for:
       { esClient }
     ) => {
       try {
-        const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
-        const startTime = parseDatemath(start);
-        const endTime = parseDatemath(end, { roundUp: true });
-
-        const anchorLogs = await getAnchorLogs({
-          esClient,
-          logsIndices,
-          startTime,
-          endTime,
-          logsFilter,
-          interestingEventFilter,
-          correlationFields,
+        const { sequences, message } = await getToolHandler({
+          core,
           logger,
-          logId,
-          maxSequences,
-        });
-
-        // For each anchor log, find the correlated logs
-        const sequences = await Promise.all(
-          anchorLogs.map(async (anchorLog) => {
-            const { logs, isTruncated } = await getCorrelatedLogsForAnchor({
-              esClient,
-              anchorLog,
-              logsIndices,
-              logger,
-              logSourceFields,
-              maxLogsPerSequence,
-            });
-
-            return {
-              correlation: anchorLog.correlation,
-              logs,
-              isTruncated,
-            };
-          })
-        );
-
-        const message = getNoResultsMessage({
-          sequences,
-          logId,
-          logsFilter,
-          interestingEventFilter,
-          correlationFields,
+          esClient,
           start,
           end,
+          logsFilter,
+          interestingEventFilter,
+          index,
+          correlationFields,
+          logId,
+          logSourceFields,
+          maxSequences,
+          maxLogsPerSequence,
         });
+
         return {
           results: [{ type: ToolResultType.other, data: { sequences, message } }],
         };
