@@ -43,7 +43,6 @@ import type {
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
-import { ONECHAT_APP_ID } from '../common/features';
 
 export class OnechatPlugin
   implements
@@ -90,22 +89,7 @@ export class OnechatPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    const getInternalService = () => {
-      if (!this.internalServices) {
-        throw new Error('getInternalService called before plugin start');
-      }
-      return this.internalServices;
-    };
-    registerWorkflowSteps(deps.workflowsExtensions, {
-      getInternalService,
-      getAgentsManagementUrl: () =>
-        core.getStartServices().then(([start]) =>
-          start.application.getUrlForApp(ONECHAT_APP_ID, {
-            deepLinkId: 'agents',
-            absolute: true,
-          })
-        ),
-    });
+    registerWorkflowSteps(deps.workflowsExtensions);
 
     return {};
   }
