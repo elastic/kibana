@@ -32,7 +32,7 @@ jest.mock('./bar_details', () => ({
   ),
 }));
 jest.mock('./toggle_accordion_button', () => ({
-  TOGGLE_BUTTON_WIDTH: 20,
+  TOGGLE_BUTTON_WIDTH: 10,
   ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
     <div
       data-test-subj="toggle-btn"
