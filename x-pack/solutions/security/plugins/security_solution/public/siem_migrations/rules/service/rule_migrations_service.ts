@@ -206,7 +206,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     retry?: SiemMigrationRetryFilter,
     settings?: RuleMigrationSettings
   ): Promise<StartRuleMigrationResponse> {
-    const missingCapabilities = this.getMissingCapabilities('minimum');
+    const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
       this.core.notifications.toasts.add(
         getMissingCapabilitiesToast(missingCapabilities, this.core)

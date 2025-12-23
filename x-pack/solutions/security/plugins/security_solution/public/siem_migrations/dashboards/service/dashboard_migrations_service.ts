@@ -164,7 +164,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     retry?: api.StartDashboardsMigrationParams['retry'],
     settings?: api.StartDashboardsMigrationParams['settings']
   ): Promise<StartDashboardsMigrationResponse> {
-    const missingCapabilities = this.getMissingCapabilities('minimum');
+    const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
       this.core.notifications.toasts.add(
         getMissingCapabilitiesToast(missingCapabilities, this.core)
