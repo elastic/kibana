@@ -51,7 +51,9 @@ echo "--- Setting up Docker-in-Docker for Elasticsearch"
 docker rm -f dind || true # If there's an old daemon running that somehow didn't get cleaned up, lets remove it first
 CERTS_DIR="$HOME/dind-certs"
 rm -rf "$CERTS_DIR"
-docker run -d --rm --privileged --name dind --userns host -p 2377:2376 -e DOCKER_TLS_CERTDIR=/certs -v "$CERTS_DIR":/certs docker:dind
+
+export DIND_IMAGE=docker:28.5-dind
+docker run -d --rm --privileged --name dind --userns host -p 2377:2376 -e DOCKER_TLS_CERTDIR=/certs -v "$CERTS_DIR":/certs "$DIND_IMAGE"
 
 trap "docker rm -f dind" EXIT
 
