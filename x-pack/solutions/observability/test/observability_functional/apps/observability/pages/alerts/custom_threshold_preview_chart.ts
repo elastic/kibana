@@ -19,7 +19,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'header']);
 
-  describe('Custom threshold preview chart', () => {
+  describe.only('Custom threshold preview chart', () => {
     const observability = getService('observability');
     const DATA_VIEW_1 = 'metricbeat-*';
     const DATA_VIEW_1_ID = 'data-view-id_1';
