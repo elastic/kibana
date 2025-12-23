@@ -24,11 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type {
-  LayerAction,
-  LensDatasourceId,
-  VisualizationDimensionGroupConfig,
-} from '@kbn/lens-common';
+import type { LensDatasourceId, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
@@ -50,7 +46,6 @@ import {
   selectDatasourceStates,
 } from '../../../state_management';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { getLongMessage } from '../../../user_messages_utils';

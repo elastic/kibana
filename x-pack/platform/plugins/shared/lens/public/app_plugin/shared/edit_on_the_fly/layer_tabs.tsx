@@ -6,18 +6,21 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { partition } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { LayerAction, Visualization } from '@kbn/lens-common';
+import type { FormBasedLayer, LayerAction, Visualization } from '@kbn/lens-common';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import { UnifiedTabs } from '@kbn/unified-tabs';
-
 import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
+import { operationDefinitionMap } from '../../../datasources/form_based/operations';
+import { generateEsqlQuery } from '../../../datasources/form_based/generate_esql_query';
 import {
   cloneLayer,
   registerLibraryAnnotationGroup,
@@ -182,25 +185,39 @@ export function LayerTabs({
                   // Check if layer is already ES|QL
                   if (layerDatasourceState.layers[layerConfig.layerId]?.query) return;
 
-                  const adHocDataViews = Object.values(
-                    framePublicAPI.dataViews.indexPatterns ?? {}
-                  );
-                  const indexPatternsMap = adHocDataViews.reduce((acc, obj) => {
-                    acc[obj.id] = obj;
-                    return acc;
-                  }, {} as Record<string, any>);
+                  const layer = layerDatasourceState.layers[layerConfig.layerId] as FormBasedLayer;
+                  if (!layer || !layer.columnOrder || !layer.columns) return;
 
-                  const esqlResult = datasourceMap[datasourceId].toESQL(
-                    layerDatasourceState,
-                    layerConfig.layerId,
-                    indexPatternsMap,
+                  // Get the index pattern
+                  const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
+                  if (!indexPattern) return;
+
+                  // Partition columns to get esAggEntries (exclude fullReference and managedReference)
+                  const { columnOrder } = layer;
+                  const columns = { ...layer.columns };
+                  const columnEntries = columnOrder.map(
+                    (colId) => [colId, columns[colId]] as const
+                  );
+                  const [, esAggEntries] = partition(
+                    columnEntries,
+                    ([, col]) =>
+                      operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+                      operationDefinitionMap[col.operationType]?.input === 'managedReference'
+                  );
+
+                  // Call generateEsqlQuery to get the conversion result
+                  const esqlResult = generateEsqlQuery(
+                    esAggEntries,
+                    layer,
+                    indexPattern,
+                    coreStart.uiSettings,
                     dateRange,
                     new Date()
                   );
 
-                  if (!esqlResult) return;
+                  if (!esqlResult.success) return;
 
-                  const columns = Object.keys(esqlResult.esAggsIdMap).map((key) => {
+                  const newColumns = Object.keys(esqlResult.esAggsIdMap).map((key) => {
                     return {
                       ...esqlResult.esAggsIdMap[key][0],
                       columnId: esqlResult.esAggsIdMap[key][0].id,
@@ -217,10 +234,9 @@ export function LayerTabs({
                     layers: {
                       ...layerDatasourceState.layers,
                       [layerConfig.layerId]: {
-                        indexPatternId:
-                          layerDatasourceState.layers[layerConfig.layerId].indexPatternId,
+                        indexPatternId: layer.indexPatternId,
                         linkToLayers: [],
-                        columns,
+                        columns: newColumns,
                         columnOrder: [],
                         sampling: 1,
                         ignoreGlobalFilters: false,
@@ -305,7 +321,6 @@ export function LayerTabs({
     activeVisualization,
     coreStart,
     dateRange,
-    datasourceMap,
     datasourceStates,
     dispatchLens,
     framePublicAPI,
