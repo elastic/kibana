@@ -16,10 +16,15 @@ export type {
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
 } from './builtin';
-export type {
-  ToolHandlerFn,
-  ToolHandlerReturn,
-  ToolHandlerContext,
-  ToolHandlerResult,
+export {
+  type ToolHandlerFn,
+  type ToolHandlerReturn,
+  type ToolHandlerContext,
+  type ToolHandlerResult,
+  type ToolHandlerPromptReturn,
+  type ToolHandlerStandardReturn,
+  isToolHandlerInterruptReturn,
+  isToolHandlerStandardReturn,
 } from './handler';
 export { getToolResultId, createErrorResult, isToolResultId } from './utils';
+export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';

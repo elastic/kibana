@@ -26,7 +26,9 @@ const renderModal = (
     canShowInherit: boolean;
     isWired: boolean;
     isCurrentlyInherited: boolean;
-  }
+  },
+  canShowDisableLifecycle?: boolean,
+  disableButtonLabel?: string
 ) => {
   return render(
     <IntlProvider>
@@ -34,6 +36,8 @@ const renderModal = (
         {...defaultProps}
         failureStoreProps={failureStoreProps}
         inheritOptions={inheritOptions}
+        canShowDisableLifecycle={canShowDisableLifecycle}
+        disableButtonLabel={disableButtonLabel}
       />
     </IntlProvider>
   );
@@ -439,6 +443,194 @@ describe('FailureStoreModal', () => {
       expect(
         getByText("Use failure retention configuration from this stream's index template")
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('disabled lifecycle functionality', () => {
+    it('shows disabled option when canShowDisableLifecycle is true', () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        undefined,
+        true
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).queryByRole('button', {
+        name: /disabled/i,
+      });
+
+      expect(disabledButton).toBeInTheDocument();
+    });
+
+    it('shows default disabled label when disableButtonLabel is not provided', () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        undefined,
+        true
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).getByRole('button', {
+        name: /disabled/i,
+      });
+
+      expect(disabledButton).toHaveTextContent('Disabled');
+    });
+
+    it('shows custom disabled label when disableButtonLabel is provided', () => {
+      const customLabel = 'Forever';
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        undefined,
+        true,
+        customLabel
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).getByRole('button', {
+        name: customLabel,
+      });
+
+      expect(disabledButton).toBeInTheDocument();
+      expect(disabledButton).toHaveTextContent(customLabel);
+    });
+
+    it('saves retentionDisabled when custom disabled button is selected', async () => {
+      const customLabel = 'Infinite retention';
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        undefined,
+        true,
+        customLabel
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).getByRole('button', {
+        name: customLabel,
+      });
+
+      fireEvent.click(disabledButton);
+
+      await waitFor(() => {
+        expect(disabledButton).toHaveAttribute('aria-pressed', 'true');
+      });
+
+      fireEvent.click(getByTestId('failureStoreModalSaveButton'));
+
+      await waitFor(() => {
+        expect(defaultProps.onSaveModal).toHaveBeenCalledWith({
+          failureStoreEnabled: true,
+          retentionDisabled: true,
+        });
+      });
+    });
+
+    it('does not show disabled option when canShowDisableLifecycle is false', () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        undefined,
+        false
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).queryByRole('button', {
+        name: /disabled/i,
+      });
+
+      expect(disabledButton).not.toBeInTheDocument();
+    });
+
+    it('initializes to disabled period type when retentionDisabled is true and canShowDisableLifecycle is true', () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+          retentionDisabled: true,
+        },
+        undefined,
+        true
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).getByRole('button', {
+        name: /disabled/i,
+      });
+
+      expect(disabledButton).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('saves retentionDisabled when disabled option is selected', async () => {
+      const { getByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        undefined,
+        true
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).getByRole('button', {
+        name: /disabled/i,
+      });
+
+      fireEvent.click(disabledButton);
+
+      await waitFor(() => {
+        expect(disabledButton).toHaveAttribute('aria-pressed', 'true');
+      });
+
+      fireEvent.click(getByTestId('failureStoreModalSaveButton'));
+
+      await waitFor(() => {
+        expect(defaultProps.onSaveModal).toHaveBeenCalledWith({
+          failureStoreEnabled: true,
+          retentionDisabled: true,
+        });
+      });
+    });
+
+    it('hides retention period fields when disabled option is selected', async () => {
+      const { getByTestId, queryByTestId } = renderModal(
+        {
+          failureStoreEnabled: true,
+          defaultRetentionPeriod: '30d',
+        },
+        undefined,
+        true
+      );
+
+      const periodTypeButtons = getByTestId('selectFailureStorePeriodType');
+      const disabledButton = within(periodTypeButtons).getByRole('button', {
+        name: /disabled/i,
+      });
+
+      // Initially, retention fields should be visible (default period is selected)
+      expect(getByTestId('selectFailureStorePeriodValue')).toBeInTheDocument();
+      expect(getByTestId('selectFailureStoreRetentionPeriodUnit')).toBeInTheDocument();
+
+      fireEvent.click(disabledButton);
+
+      await waitFor(() => {
+        // Retention period fields should be hidden
+        expect(queryByTestId('selectFailureStorePeriodValue')).not.toBeInTheDocument();
+        expect(queryByTestId('selectFailureStoreRetentionPeriodUnit')).not.toBeInTheDocument();
+      });
     });
   });
 });

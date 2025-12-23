@@ -57,12 +57,13 @@
     "@kbn/core-saved-objects-server",
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
-    "@kbn/es-archiver",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
     "@kbn/connector-schemas",
     "@kbn/cloud-security-posture-graph",
+    "@kbn/kubernetes-security-plugin",
+    "@kbn/securitysolution-list-constants",
   ]
 }

@@ -6,40 +6,46 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RawRoundInput, ToolSelection } from '@kbn/onechat-common';
+import type { ToolSelection } from '@kbn/onechat-common';
 import { filterToolsBySelection } from '@kbn/onechat-common';
 import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
-import type { AgentConfiguration, Conversation } from '@kbn/onechat-common';
+import type { AgentConfiguration } from '@kbn/onechat-common';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
+import type { ProcessedConversation } from './prepare_conversation';
 
 export const selectTools = async ({
-  input,
   conversation,
   request,
   toolProvider,
   agentConfiguration,
   attachmentsService,
 }: {
-  input: RawRoundInput;
-  conversation?: Conversation;
+  conversation: ProcessedConversation;
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
 }) => {
-  // create tool selection for attachments
-  const attachmentTypes = getActiveAttachmentTypes(input, conversation);
+  // create tool selection for attachments types
+  const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);
   const attachmentToolIds = getToolsForAttachmentTypes(attachmentTypes, attachmentsService);
   const attachmentToolSelection: ToolSelection = {
     tool_ids: attachmentToolIds,
   };
 
-  // pick tools from provider
-  return await pickTools({
+  // convert attachment-bound tools
+  const attachmentBoundTools = conversation.attachments
+    .flatMap((attachment) => attachment.tools)
+    .map((tool) => attachmentsService.convertAttachmentTool(tool));
+
+  // pick tools from provider (from agent config and attachment-type tools)
+  const registryTools = await pickTools({
     selection: [attachmentToolSelection, ...agentConfiguration.tools],
     toolProvider,
     request,
   });
+
+  return [...attachmentBoundTools, ...registryTools];
 };
 
 const getToolsForAttachmentTypes = (
@@ -57,17 +63,6 @@ const getToolsForAttachmentTypes = (
   }
 
   return [...tools];
-};
-
-/**
- * Returns the list of attachment types that are currently used in the conversation.
- */
-const getActiveAttachmentTypes = (input: RawRoundInput, conversation?: Conversation): string[] => {
-  const attachments = [
-    ...(input.attachments ?? []),
-    ...(conversation?.rounds.flatMap((round) => round.input.attachments ?? []) ?? []),
-  ];
-  return [...new Set(attachments.map((att) => att.type))];
 };
 
 const pickTools = async ({

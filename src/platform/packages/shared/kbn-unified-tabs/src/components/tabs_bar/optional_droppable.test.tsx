@@ -19,11 +19,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { OptionalDroppable } from './optional_droppable';
 
-const mockOnDragEnd = jest.fn();
+const mockOnDrag = jest.fn();
 
 const renderOptionalDroppable = (disableDragAndDrop: boolean) => {
   render(
-    <OptionalDroppable disableDragAndDrop={disableDragAndDrop} onDragEnd={mockOnDragEnd}>
+    <OptionalDroppable
+      disableDragAndDrop={disableDragAndDrop}
+      onDragEnd={mockOnDrag}
+      onDragStart={mockOnDrag}
+    >
       <div data-test-subj="test-content">Test Content</div>
     </OptionalDroppable>
   );

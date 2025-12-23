@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Pie - Agg with params');
       await lens.waitForVisualization('partitionVisChart');
 
-      expect(await lens.getLayerCount()).to.be(1);
+      await lens.assertLayerCount(1);
 
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);

@@ -9,8 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
-import { PanelPlacementStrategy } from '../plugin_constants';
 import type { PanelPlacementProps, PanelPlacementReturn } from './types';
 
 export const runPanelPlacementStrategy = (

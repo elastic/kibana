@@ -65,7 +65,7 @@ export class EuiDataGridWrapper {
     );
   }
 
-  private getCellLocator(rowIndex: number, columnIndex: number): Locator {
+  private getCellLocatorByColIndex(rowIndex: number, columnIndex: number): Locator {
     if (rowIndex <= 0 || columnIndex <= 0) {
       throw new Error('Invalid row or column index: must be greater than 0');
     }
@@ -106,10 +106,16 @@ export class EuiDataGridWrapper {
     await contextMenu.waitFor({ state: 'hidden' });
   }
 
+  getCellLocatorByColId(rowIndex: number, colId: string): Locator {
+    return this.rows.locator(
+      `[data-gridcell-column-id="${colId}"][data-gridcell-row-index="${rowIndex}"]`
+    );
+  }
+
   async expandCell(rowIndex: number, columnIndex: number) {
     await this.ensureGridVisible();
 
-    const cell = this.getCellLocator(rowIndex, columnIndex);
+    const cell = this.getCellLocatorByColIndex(rowIndex, columnIndex);
     await expect(cell, `Cell at [${rowIndex}, ${columnIndex}] is not visible`).toBeVisible({
       timeout: 2500,
     });

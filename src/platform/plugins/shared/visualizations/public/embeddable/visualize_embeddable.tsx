@@ -23,6 +23,7 @@ import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
   apiIsOfType,
+  apiPublishesProjectRouting,
   apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
@@ -325,6 +326,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 filters: data.filters,
               }
             : {};
+          const projectRouting = apiPublishesProjectRouting(parentApi)
+            ? data.projectRouting
+            : undefined;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -360,6 +364,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           getExpressionParams = async () => {
             return await getExpressionRendererProps({
               unifiedSearch,
+              projectRouting,
               vis: vis$.getValue(),
               settings,
               disableTriggers,

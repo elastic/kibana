@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Basic _shards info, appears in many responses
@@ -22,7 +22,7 @@ export const EsShardsInfoSchema = z.object({
 /**
  * A generic document source – override with your own schema
  */
-export const EsHitSourceSchema = z.record(z.unknown());
+export const EsHitSourceSchema = z.record(z.string(), z.unknown());
 
 /**
  * Generic hit (for search, msearch, etc.)
@@ -33,10 +33,10 @@ export const EsHitSchema = z
     _id: z.string(),
     _score: z.number().nullable().optional(),
     _source: EsHitSourceSchema.optional(),
-    fields: z.record(z.array(z.unknown())).optional(),
-    highlight: z.record(z.array(z.string())).optional(),
+    fields: z.record(z.string(), z.array(z.unknown())).optional(),
+    highlight: z.record(z.string(), z.array(z.string())).optional(),
     sort: z.array(z.union([z.string(), z.number(), z.null()])).optional(),
-    inner_hits: z.record(z.unknown()).optional(),
+    inner_hits: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
 
@@ -78,6 +78,7 @@ export const EsAggregationBucketSchema = z
  */
 export const EsAggregationsSchema = z
   .record(
+    z.string(),
     z.union([
       EsAggregationBucketSchema,
       z
@@ -86,7 +87,7 @@ export const EsAggregationsSchema = z
             .array(
               z.union([
                 EsAggregationBucketSchema,
-                z.record(z.unknown()), // filters, range, etc. with extra fields
+                z.record(z.string(), z.unknown()), // filters, range, etc. with extra fields
               ])
             )
             .optional(),
@@ -124,6 +125,6 @@ export const EsGenericResponseSchema = z
     status: z.number().optional(),
 
     // Bulk, reindex, etc. often return “items”
-    items: z.array(z.record(z.unknown())).optional(),
+    items: z.array(z.record(z.string(), z.unknown())).optional(),
   })
   .passthrough();

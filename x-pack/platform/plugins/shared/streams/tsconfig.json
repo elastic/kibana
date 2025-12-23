@@ -9,7 +9,7 @@
     "scripts/**/*",
     "server/**/*",
     "public/**/*",
-    "types/**/*"
+    "types/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -72,5 +72,7 @@
     "@kbn/utility-types",
     "@kbn/console-plugin",
     "@kbn/actions-plugin",
+    "@kbn/apm-utils",
+    "@kbn/alerting-types",
   ]
 }

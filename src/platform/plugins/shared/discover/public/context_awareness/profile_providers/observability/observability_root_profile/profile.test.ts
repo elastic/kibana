@@ -109,6 +109,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           foo: 'bar',
         }),
@@ -138,6 +139,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           'attributes.foo': 'bar',
         }),
@@ -175,6 +177,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           'scope.attributes.foo': 'bar',
         }),
@@ -212,6 +215,7 @@ describe('observabilityRootProfileProvider', () => {
       );
 
       const docViewer = getDocViewer({
+        actions: {},
         record: buildMockRecord('test-index', {
           'resource.attributes.foo': 'bar',
         }),

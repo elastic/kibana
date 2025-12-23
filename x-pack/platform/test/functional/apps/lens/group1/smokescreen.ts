@@ -125,9 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.switchToVisualization('line');
 
-      expect(await lens.getLayerType(0)).to.eql('Line');
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql('Line');
       // expect first layer to be line, second layer to be bar chart
-      expect(await lens.getLayerType(1)).to.eql('Bar');
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql('Bar');
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -140,9 +142,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'machine.ram',
       });
 
-      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.assertLayerCount(2);
       await lens.removeLayer();
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
@@ -163,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.createLayer('data', undefined, 'bar');
-      expect(await lens.getLayerType(1)).to.eql('Bar');
+      expect(await lens.getLayerType()).to.eql('Bar');
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -179,12 +182,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // only changes one layer for compatible chart
       await lens.switchToVisualization('line', undefined, 1);
-      expect(await lens.getLayerType(0)).to.eql('Bar');
-      expect(await lens.getLayerType(1)).to.eql('Line');
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql('Bar');
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql('Line');
 
       // generates new one layer chart based on selected layer
       await lens.switchToVisualization('pie', undefined, 1);
-      expect(await lens.getLayerType(0)).to.eql('Pie');
+      expect(await lens.getLayerType()).to.eql('Pie');
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
       expect(sliceByText).to.be('Top 5 values of geo.src');
@@ -357,7 +362,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
-      expect(await lens.getLayerCount()).to.eql(1);
+      await lens.assertLayerCount(1);
       expect(await lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );
@@ -841,6 +846,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.duplicateLayer();
 
       // now make the first layer bar percentage to lead it in an broken rendering state
+      await lens.ensureLayerTabIsActive(0);
       await lens.switchToVisualizationSubtype('Percentage');
 
       // now check that both the main visualization and the current visualization suggestion are in error state

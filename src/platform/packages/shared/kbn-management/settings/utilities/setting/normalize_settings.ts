@@ -85,7 +85,7 @@ const deriveValue = (type: SettingType, value: unknown): Value => {
     case 'boolean':
       return Boolean(value);
     case 'array':
-      return Array.isArray(value) ? value : [value];
+      return (Array.isArray(value) ? value : [value]) as Value;
     default:
       return value as string;
   }

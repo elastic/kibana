@@ -30,16 +30,14 @@ export const journey = new Journey({
       parentLocator: subj('aiopsDocumentCountChart'),
       count: 1,
     });
-    await page.waitForSelector(subj('aiopsNoWindowParametersEmptyPrompt'));
+    // Wait for the change point detection to complete and show the spike detected prompt.
+    // The test data has all documents at a single timestamp, creating a clear spike pattern.
+    await page.waitForSelector(subj('aiopsChangePointDetectedPrompt'));
   })
   .step('Run AIOps Log Rate Analysis', async ({ page }) => {
-    // Select the chart and click in the area where the spike is located.
-    const chart = await page.locator(subj('aiopsDocumentCountChart'));
-    await chart.click({ position: { x: 710, y: 50 } });
-
-    // Click the "Run analysis" button.
-    await page.waitForSelector(subj('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton'));
-    await page.click(subj('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton'));
+    // Click the "Run analysis" button to analyze the detected spike.
+    await page.waitForSelector(subj('aiopsLogRateAnalysisContentRunAnalysisButton'));
+    await page.click(subj('aiopsLogRateAnalysisContentRunAnalysisButton'));
 
     // Wait for the analysis to complete.
     await page.waitForSelector(subj('aiopsAnalysisComplete'), { timeout: 120000 });

@@ -30,6 +30,11 @@ import {
   getSecurityV4BaseKibanaSubFeatureIds,
   getSecurityV4SubFeaturesMap,
 } from './v4_features/kibana_sub_features';
+import { getSecurityV5BaseKibanaFeature } from './v5_features/kibana_features';
+import {
+  getSecurityV5BaseKibanaSubFeatureIds,
+  getSecurityV5SubFeaturesMap,
+} from './v5_features/kibana_sub_features';
 
 export const getSecurityFeature = (
   params: SecurityFeatureParams
@@ -64,5 +69,14 @@ export const getSecurityV4Feature = (
   baseKibanaFeature: getSecurityV4BaseKibanaFeature(params),
   baseKibanaSubFeatureIds: getSecurityV4BaseKibanaSubFeatureIds(params),
   subFeaturesMap: getSecurityV4SubFeaturesMap(params),
+  productFeatureConfig: securityDefaultProductFeaturesConfig,
+});
+
+export const getSecurityV5Feature = (
+  params: SecurityFeatureParams
+): ProductFeatureParams<ProductFeatureSecurityKey, SecuritySubFeatureId> => ({
+  baseKibanaFeature: getSecurityV5BaseKibanaFeature(params),
+  baseKibanaSubFeatureIds: getSecurityV5BaseKibanaSubFeatureIds(params),
+  subFeaturesMap: getSecurityV5SubFeaturesMap(params),
   productFeatureConfig: securityDefaultProductFeaturesConfig,
 });

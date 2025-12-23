@@ -13,7 +13,11 @@ import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentCreateFleetUnreachableError } from '../../../common/errors';
-import { AgentlessAgentConfigError, AgentlessAgentCreateOverProvisionnedError } from '../../errors';
+import {
+  AgentlessAgentConfigError,
+  AgentlessAgentCreateOverProvisionnedError,
+  AgentlessAgentListNotFoundError,
+} from '../../errors';
 import type { AgentPolicy, NewAgentPolicy } from '../../types';
 import {
   type AgentlessApiDeploymentResponse,
@@ -1969,6 +1973,59 @@ describe('Agentless Agent service', () => {
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError(AgentlessAgentCreateOverProvisionnedError);
+
+      // Assert that the error is logged
+      expect(mockedLogger.error).toBeCalledTimes(1);
+    });
+
+    it('Agentless list API should handle 404', async () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: {
+            url: 'http://api.agentless.com',
+            tls: {
+              certificate: '/path/to/cert',
+              key: '/path/to/key',
+              ca: '/path/to/ca',
+            },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
+        },
+      } as any);
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+      } as any);
+      mockedListEnrollmentApiKeys.mockResolvedValue({
+        items: [
+          {
+            id: 'mocked-fleet-enrollment-token-id',
+            policy_id: 'mocked-policy-id',
+            api_key: 'mocked-api-key',
+          },
+        ],
+      } as any);
+
+      const mockedError = new AxiosError('reached limit: 5');
+
+      mockedError.response = {
+        status: 404,
+        data: {},
+      } as AxiosResponse;
+      // Force axios to throw an AxiosError to simulate an error response
+      jest.mocked(axios).mockRejectedValueOnce(mockedError);
+
+      await expect(agentlessAgentService.listAgentlessDeployments()).rejects.toThrowError(
+        AgentlessAgentListNotFoundError
+      );
 
       // Assert that the error is logged
       expect(mockedLogger.error).toBeCalledTimes(1);

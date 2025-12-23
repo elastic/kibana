@@ -17,6 +17,7 @@ import { VisualizationContextMenuActions } from '../../../common/components/visu
 import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   attackAlertIds: string[];
@@ -34,6 +35,8 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
   const {
     euiTheme: { colors },
   } = useEuiTheme();
+  const aiValueExportContext = useAIValueExportContext();
+  const isExportMode = aiValueExportContext?.isExportMode === true;
   const extraVisualizationOptions = useMemo(
     () => ({
       filters: getExcludeAlertsFilters(attackAlertIds),
@@ -53,7 +56,10 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${colors.vis.euiColorVis4};
+          ${isExportMode ? 'display: none;' : `fill: ${colors.vis.euiColorVis4};`}
+        }
+        .echMetricText__valueBlock {
+          grid-row-start: 3 !important;
         }
         .echMetricText {
           padding: 8px 16px 60px;

@@ -28,7 +28,6 @@ const getMockEndpoint = ({
   endpointName,
   methods,
   patterns,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   data_autocomplete_rules,
   availability,
 }: {

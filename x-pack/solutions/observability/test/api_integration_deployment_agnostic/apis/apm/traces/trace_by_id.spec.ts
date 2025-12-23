@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { Readable } from 'stream';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -118,7 +118,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('returns some errors', () => {
           expect(traces.traceItems.errorDocs.length).to.be.greaterThan(0);
-          expect(traces.traceItems.errorDocs[0].error.exception?.[0].message).to.eql(
+          expect(traces.traceItems.errorDocs[0].error.exception?.message).to.eql(
             '[ResponseError] index_not_found_exception'
           );
         });

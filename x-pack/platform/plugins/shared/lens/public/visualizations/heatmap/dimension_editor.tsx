@@ -36,7 +36,7 @@ export function HeatmapDimensionEditor(
   );
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -72,6 +72,6 @@ export function HeatmapDimensionEditor(
           )}
         </PalettePanelContainer>
       </EuiFormRow>
-    </>
+    </div>
   );
 }

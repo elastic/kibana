@@ -949,7 +949,7 @@
       "label": "FileUploadPluginStart",
       "description": [],
       "signature": [
-        "FileUploadStartApi"
+        "FileUploadPluginStartApi"
       ],
       "path": "x-pack/platform/plugins/private/file_upload/public/plugin.ts",
       "deprecated": false,

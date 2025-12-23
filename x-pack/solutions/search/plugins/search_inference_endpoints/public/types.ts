@@ -12,6 +12,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 export * from '../common/types';
 
@@ -28,6 +29,7 @@ export interface AppPluginStartDependencies {
   ml: MlPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
   serverless?: ServerlessPluginStart;
+  cloud?: CloudStart;
 }
 
 export interface AppPluginSetupDependencies {

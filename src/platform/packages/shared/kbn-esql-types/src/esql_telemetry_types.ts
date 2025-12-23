@@ -18,6 +18,7 @@ export enum QuerySource {
   MANUAL = 'manual',
   HELP = 'help',
   AUTOCOMPLETE = 'autocomplete',
+  QUICK_SEARCH = 'quick_search',
 }
 
 export interface TelemetryQuerySubmittedProps {

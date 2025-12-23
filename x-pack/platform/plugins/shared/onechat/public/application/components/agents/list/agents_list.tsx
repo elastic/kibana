@@ -32,7 +32,7 @@ import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
-import { AgentAvatar } from '../agent_avatar';
+import { AgentAvatar } from '../../common/agent_avatar';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const columnNames = {
@@ -71,12 +71,7 @@ export const AgentsList: React.FC = () => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
       width: '48px',
       align: 'center',
-      render: (agent) =>
-        agent.readonly && !agent.avatar_symbol ? (
-          <EuiIcon type={agent.avatar_icon ?? 'logoElastic'} size="xl" />
-        ) : (
-          <AgentAvatar agent={agent} size="m" />
-        ),
+      render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
 

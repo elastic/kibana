@@ -93,11 +93,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Wait for the expanded thinking details to appear
       await retry.try(async () => {
-        const responseElement = await testSubjects.find('agentBuilderRoundResponse');
-        const responseText = await responseElement.getVisibleText();
+        const thinkingPanelElement = await testSubjects.find('agentBuilderThinkingPanel');
+        const thinkingPanelText = await thinkingPanelElement.getVisibleText();
 
         // Check that the tool call details are visible
-        expect(responseText).to.contain('Calling tool platform.core.search');
+        expect(thinkingPanelText).to.contain('Calling tool platform.core.search');
       });
 
       // Click the "new" button

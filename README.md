@@ -1,6 +1,6 @@
 # Kibana
 
-Kibana is the window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
+Kibana is the open source interface to query, analyze, visualize, and manage your data stored in Elasticsearch.
 
 - [Getting Started](#getting-started)
   - [Using a Kibana Release](#using-a-kibana-release)
@@ -21,7 +21,7 @@ If you want to use a Kibana release in production, give it a test run, or just p
 
 - Download the latest version on the [Kibana Download Page](https://www.elastic.co/downloads/kibana).
 - Learn more about Kibana's features and capabilities on the
-[Kibana Product Page](https://www.elastic.co/products/kibana).
+[Kibana Product Page](https://www.elastic.co/kibana).
 - We also offer a hosted version of Kibana on our
 [Cloud Service](https://www.elastic.co/cloud/as-a-service).
 
@@ -32,8 +32,7 @@ out an open PR:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) will help you get Kibana up and running.
 - If you would like to contribute code, please follow our [STYLEGUIDE.mdx](STYLEGUIDE.mdx).
-- For all other questions, check out the [FAQ.md](FAQ.md) and
-[wiki](https://github.com/elastic/kibana/wiki).
+- For all other questions, check out the [FAQ.md](FAQ.md).
 
 ## Documentation
 

@@ -14,7 +14,7 @@ import type {
   ToolResult,
   UserIdAndName,
 } from '@kbn/onechat-common';
-import { ConversationRoundStepType } from '@kbn/onechat-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/onechat-common';
 import { getToolResultId } from '@kbn/onechat-server';
 import type {
   ConversationCreateRequest,
@@ -66,6 +66,7 @@ function serializeStepResults(rounds: ConversationRound[]): PersistentConversati
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => ({
     ...round,
+    status: round.status ?? ConversationRoundStatus.completed,
     started_at: round.started_at ?? new Date(0).toISOString(),
     time_to_first_token: round.time_to_first_token ?? 0,
     time_to_last_token: round.time_to_last_token ?? 0,
@@ -102,6 +103,7 @@ export const fromEs = (document: Document): Conversation => {
   return {
     ...base,
     rounds: deserializeStepResults(rounds),
+    ...(document._source!.attachments && { attachments: document._source!.attachments }),
   };
 };
 
@@ -121,6 +123,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     // Explicitly omit rounds to ensure migration
     rounds: undefined,
     conversation_rounds: serializeStepResults(conversation.rounds),
+    attachments: conversation.attachments ?? [],
   };
 };
 
@@ -139,7 +142,7 @@ export const updateConversation = ({
     ...conversation,
     ...update,
     space,
-    updatedAt: updateDate.toISOString(),
+    updated_at: updateDate.toISOString(),
   };
 
   return updated;
@@ -165,5 +168,6 @@ export const createRequestToEs = ({
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
     conversation_rounds: serializeStepResults(conversation.rounds),
+    attachments: conversation.attachments ?? [],
   };
 };

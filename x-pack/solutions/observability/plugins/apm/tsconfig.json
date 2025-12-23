@@ -42,7 +42,7 @@
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/ui-theme",
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/lens-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/share-plugin",
@@ -149,9 +149,8 @@
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/zod",
-    "@kbn/onechat-server",
-    "@kbn/onechat-common",
-    "@kbn/onechat-plugin"
+    "@kbn/onechat-plugin",
+    "@kbn/observability-agent-builder-plugin",
   ],
   "exclude": ["target/**/*"]
 }

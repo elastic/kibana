@@ -62,6 +62,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload(
         'x-pack/platform/test/fixtures/es_archives/ml/module_security_cloudtrail'
       );
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs'
+      );
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_gcp_audit'
+      );
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/module_metrics_ui');
       await esArchiver.unload(
         'x-pack/platform/test/fixtures/es_archives/ml/module_apache_data_stream'

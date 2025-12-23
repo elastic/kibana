@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -32,7 +32,9 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import { filterFromRange, processScores } from './calculate_risk_scores';
+import { filterFromRange } from './helpers';
+import { applyScoreModifiers } from './apply_score_modifiers';
+import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
@@ -41,6 +43,7 @@ type ESQLResults = Array<
 export const calculateScoresWithESQL = async (
   params: {
     assetCriticalityService: AssetCriticalityService;
+    privmonUserCrudService: PrivmonUserCrudService;
     esClient: ElasticsearchClient;
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
@@ -189,16 +192,27 @@ export const calculateScoresWithESQL = async (
           })
           .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
 
-          .then((riskScoreBuckets) => {
-            return processScores({
-              assetCriticalityService: params.assetCriticalityService,
-              buckets: riskScoreBuckets,
-              identifierField: (EntityTypeToIdentifierField as Record<string, string>)[entityType],
-              logger,
+          .then(async (riskScoreBuckets) => {
+            const results = await applyScoreModifiers({
               now,
+              experimentalFeatures: params.experimentalFeatures,
               identifierType: entityType as EntityType,
+              deps: {
+                assetCriticalityService: params.assetCriticalityService,
+                privmonUserCrudService: params.privmonUserCrudService,
+                logger,
+              },
               weights: params.weights,
+              page: {
+                buckets: riskScoreBuckets,
+                bounds,
+                identifierField: (EntityTypeToIdentifierField as Record<string, string>)[
+                  entityType
+                ],
+              },
             });
+
+            return results;
           })
           .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
             return [
@@ -352,7 +366,9 @@ export const getESQL = (
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
@@ -376,12 +392,43 @@ export const buildRiskScoreBucket =
     ];
 
     const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
-      const parsedRiskInputData = JSON.parse(input);
+      let parsedRiskInputData = JSON.parse('{}');
+      let ruleName: string | undefined;
+      let category: string | undefined;
+
+      try {
+        // Parse JSON and decode Base64 encoded fields to handle special characters (quotes, backslashes, newlines, etc.)
+        parsedRiskInputData = JSON.parse(input);
+
+        ruleName = parsedRiskInputData.rule_name_b64
+          ? Buffer.from(parsedRiskInputData.rule_name_b64, 'base64').toString('utf-8')
+          : parsedRiskInputData.rule_name; // Fallback for backward compatibility
+        category = parsedRiskInputData.category_b64
+          ? Buffer.from(parsedRiskInputData.category_b64, 'base64').toString('utf-8')
+          : parsedRiskInputData.category; // Fallback for backward compatibility
+      } catch {
+        // Attempt to use fallback values if parsedRiskInputData was parsed but decoding failed
+        if (parsedRiskInputData && Object.keys(parsedRiskInputData).length > 0) {
+          ruleName = parsedRiskInputData.rule_name;
+          category = parsedRiskInputData.category;
+        }
+      }
+
       const value = parseFloat(parsedRiskInputData.risk_score);
       const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
-      const { risk_score: _, ...otherFields } = parsedRiskInputData;
+      const otherFields = omit(parsedRiskInputData, [
+        'risk_score',
+        'rule_name',
+        'rule_name_b64',
+        'category',
+        'category_b64',
+      ]);
+
       return {
+        id: parsedRiskInputData.id,
         ...otherFields,
+        rule_name: ruleName,
+        category,
         score: value,
         contribution: currentScore / RIEMANN_ZETA_VALUE,
         index,

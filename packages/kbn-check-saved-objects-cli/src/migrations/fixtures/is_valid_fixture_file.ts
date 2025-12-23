@@ -16,6 +16,7 @@ export function isValidFixtureFile(
 ): boolean {
   return (
     typeof fixtures === 'object' &&
+    Object.keys(fixtures).length === 2 &&
     Boolean(fixtures[previous]?.length) &&
     Boolean(fixtures[current]?.length) &&
     fixtures[previous]?.length === fixtures[current]?.length &&

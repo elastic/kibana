@@ -224,6 +224,8 @@
                     "text": "ToolResultEvent"
                   },
                   " | ",
+                  "PromptRequestEvent",
+                  " | ",
                   {
                     "pluginId": "@kbn/onechat-common",
                     "scope": "common",
@@ -296,6 +298,19 @@
             "signature": [
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "\nId of the space associated with the request"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
             "deprecated": false,
@@ -416,6 +431,38 @@
                 "section": "def-common.WritableToolResultStore",
                 "text": "WritableToolResultStore"
               }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.promptManager",
+            "type": "Object",
+            "tags": [],
+            "label": "promptManager",
+            "description": [
+              "\nUsed to manage interruptions."
+            ],
+            "signature": [
+              "PromptManager"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.stateManager",
+            "type": "Object",
+            "tags": [],
+            "label": "stateManager",
+            "description": [
+              "\nUsed to access and store state during interrupted executions."
+            ],
+            "signature": [
+              "ConversationStateManager"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
             "deprecated": false,
@@ -671,7 +718,15 @@
                 "section": "def-common.ToolHandlerReturn",
                 "text": "ToolHandlerReturn"
               },
-              ">"
+              "<",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ToolResult",
+                "text": "ToolResult"
+              },
+              "<Record<string, unknown>>>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/builtin.ts",
             "deprecated": false,
@@ -856,7 +911,7 @@
                     "section": "def-common.ToolEventHandlerFn",
                     "text": "ToolEventHandlerFn"
                   },
-                  " | undefined; defaultConnectorId?: string | undefined; toolParams: TParams; }"
+                  " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
                 "deprecated": false,
@@ -884,6 +939,188 @@
               "<TConfig> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.InternalToolDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalToolDefinition",
+        "description": [
+          "\nInternal generic representation for a tool definition"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-server",
+            "scope": "common",
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.InternalToolDefinition",
+            "text": "InternalToolDefinition"
+          },
+          "<TType, TConfig, TSchema> extends ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinition",
+            "text": "ToolDefinition"
+          },
+          "<TType, TConfig>"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.InternalToolDefinition.isAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isAvailable",
+            "description": [
+              "\nCheck if the tool is available for the current context."
+            ],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.ToolAvailabilityContext",
+                "text": "ToolAvailabilityContext"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.ToolAvailabilityResult",
+                "text": "ToolAvailabilityResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-server",
+                "id": "def-common.InternalToolDefinition.isAvailable.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.ToolAvailabilityContext",
+                    "text": "ToolAvailabilityContext"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.InternalToolDefinition.getSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "getSchema",
+            "description": [
+              "\nGenerates the schema attached to this tool."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<TSchema>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.InternalToolDefinition.getHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "getHandler",
+            "description": [
+              "\nGet the handler which can be used to execute the tool."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.ToolHandlerFn",
+                "text": "ToolHandlerFn"
+              },
+              "<",
+              "TypeOf",
+              "<TSchema>>>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.InternalToolDefinition.getLlmDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "getLlmDescription",
+            "description": [
+              "\nOptional handled to add additional instructions to the LLM\nwhen specified, this will fully replace the description when converting to LLM tools."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.LlmDescriptionHandler",
+                "text": "LlmDescriptionHandler"
+              },
+              "<TConfig> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1257,7 +1494,7 @@
         "tags": [],
         "label": "Runner",
         "description": [
-          "\nPublic onechat runner."
+          "\nRepresents a runner, which is the entry point to execute all onechat primitives,\nsuch as tools or agents.\n\nThis version is not scoped to a given request, and is the version exposed from the plugin's contract."
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
         "deprecated": false,
@@ -1270,7 +1507,7 @@
             "tags": [],
             "label": "runTool",
             "description": [
-              "\nExecute a tool."
+              "\nExecute a tool (based on its ID)."
             ],
             "signature": [
               "<TParams = Record<string, unknown>>(params: ",
@@ -1312,6 +1549,73 @@
                     "text": "RunToolParams"
                   },
                   "<TParams>"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.Runner.runInternalTool",
+            "type": "Function",
+            "tags": [],
+            "label": "runInternalTool",
+            "description": [
+              "\nExecute an internal tool definition."
+            ],
+            "signature": [
+              "<TParams = Record<string, unknown>>(params: ",
+              "RunInternalToolParams",
+              "<TParams>) => Promise<",
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.RunToolReturn",
+                "text": "RunToolReturn"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-server",
+                "id": "def-common.Runner.runInternalTool.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.RunToolParams",
+                    "text": "RunToolParams"
+                  },
+                  "<TParams>, \"toolId\"> & { tool: ",
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.InternalToolDefinition",
+                    "text": "InternalToolDefinition"
+                  },
+                  "<",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.ToolType",
+                    "text": "ToolType"
+                  },
+                  ", any, any>; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
                 "deprecated": false,
@@ -1431,6 +1735,22 @@
           },
           {
             "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.RunToolParams.toolCallId",
+            "type": "string",
+            "tags": [],
+            "label": "toolCallId",
+            "description": [
+              "\nOptional toolCall id associated with the tool invocation."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.RunToolParams.onEvent",
             "type": "Function",
             "tags": [],
@@ -1518,7 +1838,24 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              "[]"
+              "<Record<string, unknown>>[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.RunToolReturn.prompt",
+            "type": "Object",
+            "tags": [],
+            "label": "prompt",
+            "description": [
+              "\nInterruption returned by the tool"
+            ],
+            "signature": [
+              "ConfirmationPrompt",
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
             "deprecated": false,
@@ -1629,7 +1966,7 @@
             "tags": [],
             "label": "runTool",
             "description": [
-              "\nExecute a tool."
+              "\nExecute a tool (based on its ID)."
             ],
             "signature": [
               "<TParams = Record<string, unknown>>(params: ",
@@ -1671,7 +2008,74 @@
                     "section": "def-common.ToolEventHandlerFn",
                     "text": "ToolEventHandlerFn"
                   },
-                  " | undefined; defaultConnectorId?: string | undefined; toolId: string; toolParams: TParams; }"
+                  " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolId: string; toolParams: TParams; }"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ScopedRunner.runInternalTool",
+            "type": "Function",
+            "tags": [],
+            "label": "runInternalTool",
+            "description": [
+              "\nExecute an internal tool definition."
+            ],
+            "signature": [
+              "<TParams = Record<string, unknown>>(params: ",
+              "ScopedRunnerRunInternalToolParams",
+              "<TParams>) => Promise<",
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.RunToolReturn",
+                "text": "RunToolReturn"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-server",
+                "id": "def-common.ScopedRunner.runInternalTool.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ onEvent?: ",
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.ToolEventHandlerFn",
+                    "text": "ToolEventHandlerFn"
+                  },
+                  " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; tool: ",
+                  {
+                    "pluginId": "@kbn/onechat-server",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatServerPluginApi",
+                    "section": "def-common.InternalToolDefinition",
+                    "text": "InternalToolDefinition"
+                  },
+                  "<",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.ToolType",
+                    "text": "ToolType"
+                  },
+                  ", any, any>; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
                 "deprecated": false,
@@ -2032,6 +2436,19 @@
           },
           {
             "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ToolHandlerContext.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "\nId of the space associated with the request"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.ToolHandlerContext.esClient",
             "type": "Object",
             "tags": [],
@@ -2177,43 +2594,135 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ToolHandlerContext.prompts",
+            "type": "Object",
+            "tags": [],
+            "label": "prompts",
+            "description": [
+              "\nService used to send and read interruptions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.ToolPromptManager",
+                "text": "ToolPromptManager"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ToolHandlerContext.stateManager",
+            "type": "Object",
+            "tags": [],
+            "label": "stateManager",
+            "description": [
+              "\nManager to store/load tool state during interrupted executions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.ToolStateManager",
+                "text": "ToolStateManager"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/onechat-server",
-        "id": "def-common.ToolHandlerReturn",
+        "id": "def-common.ToolPromptManager",
         "type": "Interface",
         "tags": [],
-        "label": "ToolHandlerReturn",
-        "description": [
-          "\nReturn value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
+        "label": "ToolPromptManager",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/prompt_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/onechat-server",
-            "id": "def-common.ToolHandlerReturn.results",
-            "type": "Array",
+            "id": "def-common.ToolPromptManager.checkConfirmationStatus",
+            "type": "Function",
             "tags": [],
-            "label": "results",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-server",
-                "scope": "common",
-                "docId": "kibKbnOnechatServerPluginApi",
-                "section": "def-common.ToolHandlerResult",
-                "text": "ToolHandlerResult"
-              },
-              "[]"
+            "label": "checkConfirmationStatus",
+            "description": [
+              "\nGet the status for the given confirmation prompt"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
+            "signature": [
+              "(promptId: string) => ConfirmationInfo"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/prompt_manager.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-server",
+                "id": "def-common.ToolPromptManager.checkConfirmationStatus.$1",
+                "type": "string",
+                "tags": [],
+                "label": "promptId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/prompt_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ToolPromptManager.askForConfirmation",
+            "type": "Function",
+            "tags": [],
+            "label": "askForConfirmation",
+            "description": [
+              "\nCreates a confirmation prompt which can be returned by the tool handler"
+            ],
+            "signature": [
+              "(opts: ",
+              "ConfirmPromptDefinition",
+              ") => ",
+              "ToolHandlerPromptReturn"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/prompt_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-server",
+                "id": "def-common.ToolPromptManager.askForConfirmation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "ConfirmPromptDefinition"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/prompt_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2581,7 +3090,8 @@
                 "docId": "kibKbnOnechatCommonPluginApi",
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
-              }
+              },
+              "<Record<string, unknown>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/result_store.ts",
             "deprecated": false,
@@ -2598,6 +3108,74 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/result_store.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.ToolStateManager",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolStateManager",
+        "description": [
+          "\nTool state manager - Which can be used to persist state between executions of the tool.\n\nNote: state is bound to a tool call, and not shared between multiple calls to the same tool."
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/state_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ToolStateManager.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "\nRetrieve the state which was stored during the previous execution of the tool.\nThis is only useful when interrupting the tool to prompt the user,\nto retrieve the state when the execution is resumed."
+            ],
+            "signature": [
+              "<T = unknown>() => T | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/state_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ToolStateManager.setState",
+            "type": "Function",
+            "tags": [],
+            "label": "setState",
+            "description": [
+              "\nPersist the internal state of the tool execution, to be retrieved when execution is resumed.\nThis is only useful when interrupting the tool to prompt the user."
+            ],
+            "signature": [
+              "<T = unknown>(state: T) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/state_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-server",
+                "id": "def-common.ToolStateManager.setState.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/state_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2654,7 +3232,7 @@
                 "section": "def-common.ToolResult",
                 "text": "ToolResult"
               },
-              ") => void"
+              "<Record<string, unknown>>) => void"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/result_store.ts",
             "deprecated": false,
@@ -2674,7 +3252,8 @@
                     "docId": "kibKbnOnechatCommonPluginApi",
                     "section": "def-common.ToolResult",
                     "text": "ToolResult"
-                  }
+                  },
+                  "<Record<string, unknown>>"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/result_store.ts",
                 "deprecated": false,
@@ -2809,6 +3388,8 @@
                 "section": "def-common.ToolResultEvent",
                 "text": "ToolResultEvent"
               },
+              " | ",
+              "PromptRequestEvent",
               " | ",
               {
                 "pluginId": "@kbn/onechat-common",
@@ -3005,7 +3586,7 @@
                 "section": "def-common.ToolEventHandlerFn",
                 "text": "ToolEventHandlerFn"
               },
-              " | undefined; defaultConnectorId?: string | undefined; toolParams: TParams; }"
+              " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; }"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
             "deprecated": false,
@@ -3032,11 +3613,73 @@
             "section": "def-common.ToolEventHandlerFn",
             "text": "ToolEventHandlerFn"
           },
-          " | undefined; defaultConnectorId?: string | undefined; toolParams: TParams; }"
+          " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.InternalToolAvailabilityHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalToolAvailabilityHandler",
+        "description": [],
+        "signature": [
+          "(context: ",
+          {
+            "pluginId": "@kbn/onechat-server",
+            "scope": "common",
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.ToolAvailabilityContext",
+            "text": "ToolAvailabilityContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-server",
+            "scope": "common",
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.ToolAvailabilityResult",
+            "text": "ToolAvailabilityResult"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.InternalToolAvailabilityHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-server",
+                "scope": "common",
+                "docId": "kibKbnOnechatServerPluginApi",
+                "section": "def-common.ToolAvailabilityContext",
+                "text": "ToolAvailabilityContext"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/internal.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3244,6 +3887,8 @@
                 "section": "def-common.ToolResultEvent",
                 "text": "ToolResultEvent"
               },
+              " | ",
+              "PromptRequestEvent",
               " | ",
               {
                 "pluginId": "@kbn/onechat-common",
@@ -3471,7 +4116,7 @@
             "section": "def-common.ToolEventHandlerFn",
             "text": "ToolEventHandlerFn"
           },
-          " | undefined; defaultConnectorId?: string | undefined; toolId: string; toolParams: TParams; }"
+          " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolId: string; toolParams: TParams; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
         "deprecated": false,
@@ -3527,7 +4172,7 @@
                 "section": "def-common.ToolEventHandlerFn",
                 "text": "ToolEventHandlerFn"
               },
-              " | undefined; defaultConnectorId?: string | undefined; toolId: string; toolParams: TParams; }"
+              " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolId: string; toolParams: TParams; }"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/runner.ts",
             "deprecated": false,
@@ -3813,7 +4458,15 @@
             "section": "def-common.ToolHandlerReturn",
             "text": "ToolHandlerReturn"
           },
-          ">"
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolResult",
+            "text": "ToolResult"
+          },
+          "<Record<string, unknown>>>>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
         "deprecated": false,
@@ -3867,15 +4520,27 @@
           "\nTool result as returned by the tool handler."
         ],
         "signature": [
-          "Omit<",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolResult",
-            "text": "ToolResult"
-          },
-          ", \"tool_result_id\"> & { tool_result_id?: string | undefined; }"
+          "Omit<TResult, \"tool_result_id\"> & { tool_result_id?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.ToolHandlerReturn",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolHandlerReturn",
+        "description": [
+          "\nReturn value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}"
+        ],
+        "signature": [
+          "ToolHandlerPromptReturn",
+          " | ",
+          "ToolHandlerStandardReturn",
+          "<TResult>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-server/tools/handler.ts",
         "deprecated": false,

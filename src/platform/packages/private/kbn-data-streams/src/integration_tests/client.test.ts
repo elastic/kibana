@@ -14,25 +14,24 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import type { DataStreamDefinition } from '../types';
-import * as mappings from '../mappings';
+import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 
 describe('DataStreamClient', () => {
   let esServer: EsTestCluster;
   let logger: Logger;
-  interface MyTestDoc {
-    '@timestamp': string;
-    mappedField: string;
-  }
-  const testDataStream: DataStreamDefinition<MyTestDoc> = {
+
+  const myTestDocMappings = {
+    properties: {
+      '@timestamp': mappings.date(),
+      mappedField: mappings.keyword(),
+    },
+  } satisfies MappingsDefinition;
+
+  const testDataStream: DataStreamDefinition<typeof myTestDocMappings> = {
     name: 'test-data-stream',
     version: 1,
     template: {
-      mappings: {
-        properties: {
-          '@timestamp': mappings.date(),
-          mappedField: mappings.keyword(),
-        },
-      },
+      mappings: myTestDocMappings,
     },
   };
 
@@ -63,14 +62,18 @@ describe('DataStreamClient', () => {
   });
 
   describe('operations', () => {
-    let client: DataStreamClient<MyTestDoc, {}>;
+    let client: DataStreamClient<typeof myTestDocMappings, {}>;
     beforeEach(async () => {
       const elasticsearchClient = esServer.getClient();
-      client = await DataStreamClient.initialize({
+      const initializedClient = await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: testDataStream,
+        dataStream: testDataStream,
       });
+      if (!initializedClient) {
+        throw new Error('Failed to initialize DataStreamClient');
+      }
+      client = initializedClient;
     });
 
     test('basic index and search', async () => {
@@ -92,8 +95,6 @@ describe('DataStreamClient', () => {
         mappedField: 'test-value',
       });
     });
-
-    // it('searches (basic)', async () => {});
 
     // TODO: Add more thorough tests, for ex. for search runtime mappings
   });
@@ -144,7 +145,7 @@ describe('DataStreamClient', () => {
         DataStreamClient.initialize({
           logger,
           elasticsearchClient: esServer.getClient(),
-          dataStreams: { ...testDataStream, version: 0 },
+          dataStream: { ...testDataStream, version: 0 },
         })
       ).rejects.toThrow('Template version must be greater than 0');
     });
@@ -159,7 +160,7 @@ describe('DataStreamClient', () => {
       const client = await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: testDataStream,
+        dataStream: testDataStream,
       });
 
       expect(client).toBeInstanceOf(DataStreamClient);
@@ -172,17 +173,19 @@ describe('DataStreamClient', () => {
 
     it('is idempotent', async () => {
       const elasticsearchClient = esServer.getClient();
-      const ps: Promise<DataStreamClient<any, any>>[] = [];
+      const ps: Promise<DataStreamClient<any, any> | undefined>[] = [];
       for (const _ of [1, 2, 3])
         ps.push(
           DataStreamClient.initialize({
             logger,
             elasticsearchClient,
-            dataStreams: testDataStream,
+            dataStream: testDataStream,
           })
         );
 
-      const clients = await Promise.all(ps);
+      const clients = (await Promise.all(ps)).filter(
+        (c): c is DataStreamClient<any, any> => c !== undefined
+      );
 
       expect(clients).toEqual([
         expect.any(DataStreamClient),
@@ -197,7 +200,7 @@ describe('DataStreamClient', () => {
       await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: testDataStream,
+        dataStream: testDataStream,
       });
 
       await assertStateOfIndexTemplate();
@@ -219,24 +222,26 @@ describe('DataStreamClient', () => {
         dynamic: 'false',
       });
 
-      const nextDefinition: DataStreamDefinition<MyTestDoc & { newField: string }> = {
+      const nextMappings = {
+        ...myTestDocMappings,
+        properties: {
+          ...myTestDocMappings.properties,
+          newField: mappings.text(),
+        },
+      } satisfies MappingsDefinition;
+
+      const nextDefinition: DataStreamDefinition<typeof nextMappings> = {
         ...testDataStream,
         version: 2,
         template: {
-          mappings: {
-            ...testDataStream.template.mappings,
-            properties: {
-              ...testDataStream.template.mappings!.properties,
-              newField: mappings.text(),
-            },
-          },
+          mappings: nextMappings,
         },
       };
 
       await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: nextDefinition,
+        dataStream: nextDefinition,
       });
 
       const {
@@ -293,26 +298,30 @@ describe('DataStreamClient', () => {
       await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: testDataStream,
+        dataStream: testDataStream,
       });
+
+      const sameVersionMappings = {
+        properties: { somethingElse: mappings.text() },
+      } satisfies MappingsDefinition;
 
       await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
-        dataStreams: {
+        dataStream: {
           ...testDataStream,
           version: 1, // same version as initial deployment
           template: {
             ...testDataStream.template,
-            mappings: { properties: { somethingElse: mappings.text() } as any }, // some new mappings
+            mappings: sameVersionMappings, // some new mappings
           },
         },
       });
 
       expect(getIndexTemplateSpy).toHaveBeenCalledTimes(2);
-      expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1);
+      expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1); // Index template not updated when version is same
       expect(createDataStreamSpy).toHaveBeenCalledTimes(1);
-      expect(putMappingSpy).toHaveBeenCalledTimes(0); // No mapping updates were made
+      expect(putMappingSpy).toHaveBeenCalledTimes(0); // Mappings are not applied to write index when version is not incremented
     });
   });
 });

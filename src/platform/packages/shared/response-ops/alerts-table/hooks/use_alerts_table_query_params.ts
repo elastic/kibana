@@ -94,7 +94,7 @@ export const useAlertsTableQueryParams = ({
           pageSize,
         }
       );
-      if (resetPageIndex) {
+      if (resetPageIndex || pageIndex !== prevQueryParams.pageIndex) {
         // Clear any bulk actions selections when the query changes
         dispatchBulkAction({ action: BulkActionsVerbs.clear });
       }

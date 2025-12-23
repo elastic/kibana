@@ -6,16 +6,17 @@
  */
 
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
-import { isHumanMessage, isAIMessage } from '@langchain/core/messages';
-import type { ToolCallWithResult, ToolCallStep } from '@kbn/onechat-common';
-import { ConversationRoundStepType } from '@kbn/onechat-common';
+import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
+import type { ToolCallStep, ToolCallWithResult } from '@kbn/onechat-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type {
-  ProcessedConversationRound,
   ProcessedAttachment,
+  ProcessedConversation,
+  ProcessedConversationRound,
   ProcessedRoundInput,
 } from './prepare_conversation';
 
@@ -60,13 +61,27 @@ describe('conversationLangchainMessages', () => {
       type: 'text',
       value: representationValue,
     },
+    tools: [],
   });
+
+  const createConversation = (
+    parts: Partial<ProcessedConversation> = {}
+  ): ProcessedConversation => {
+    return {
+      nextInput: { message: '', attachments: [] },
+      previousRounds: [],
+      attachments: [],
+      attachmentTypes: [],
+      ...parts,
+    };
+  };
 
   const createRound = (
     parts: Partial<ProcessedConversationRound> = {}
   ): ProcessedConversationRound => {
     return {
       id: 'round-1',
+      status: ConversationRoundStatus.completed,
       input: {
         message: '',
         attachments: [],
@@ -91,7 +106,7 @@ describe('conversationLangchainMessages', () => {
   it('returns only the user message if no previous rounds', () => {
     const nextInput = makeRoundInput('hello');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds: [], nextInput, attachmentTypes: [] },
+      conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
     expect(isHumanMessage(result[0])).toBe(true);
@@ -112,7 +127,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('how are you?');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput, attachmentTypes: [] },
+      conversation: createConversation({ previousRounds, nextInput }),
     });
 
     expect(result).toHaveLength(3);
@@ -149,7 +164,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('next');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput, attachmentTypes: [] },
+      conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
@@ -215,7 +230,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('bye');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput, attachmentTypes: [] },
+      conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(7);
@@ -274,7 +289,7 @@ describe('conversationLangchainMessages', () => {
     ];
     const nextInput = makeRoundInput('next');
     const result = conversationToLangchainMessages({
-      conversation: { previousRounds, nextInput, attachmentTypes: [] },
+      conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
@@ -295,7 +310,7 @@ describe('conversationLangchainMessages', () => {
       );
       const nextInput = makeRoundInput('hello with attachment', [attachment]);
       const result = conversationToLangchainMessages({
-        conversation: { previousRounds: [], nextInput, attachmentTypes: [] },
+        conversation: createConversation({ previousRounds: [], nextInput }),
       });
 
       expect(result).toHaveLength(1);
@@ -326,7 +341,7 @@ describe('conversationLangchainMessages', () => {
         attachment2,
       ]);
       const result = conversationToLangchainMessages({
-        conversation: { previousRounds: [], nextInput, attachmentTypes: [] },
+        conversation: createConversation({ nextInput }),
       });
 
       expect(result).toHaveLength(1);
@@ -361,7 +376,7 @@ describe('conversationLangchainMessages', () => {
       ];
       const nextInput = makeRoundInput('next message');
       const result = conversationToLangchainMessages({
-        conversation: { previousRounds, nextInput, attachmentTypes: [] },
+        conversation: createConversation({ previousRounds, nextInput }),
       });
 
       expect(result).toHaveLength(3);

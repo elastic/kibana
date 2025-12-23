@@ -1,0 +1,544 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "40980216-cf98-4447-af57-894c0e7c39b4",
+    "index": ".alerts-security.attack.discovery.alerts-default",
+    "source": {
+      "ecs.version": "9.0.0",
+      "kibana.alert.risk_score": 1089,
+      "kibana.alert.attack_discovery.alert_ids": [
+        "9f06064a82fbc78e6d42c75209127d8e1e1e50ec9170d677b79acbcf262293ff",
+        "a73ba41a9f8d3894ea1524db55142ef2aadbd16081406bcec9c08610f222856a",
+        "2f0e0faf927eb4a44449fa5de128d38b39f06bf633763125b598cbf96c50e6b7",
+        "d36a5657696d2bcfe1b724021948b92cb1e772dd3cee455ccee91f86d6cd64e4",
+        "6dea6f6d0a25cbf08d90915870850761927fad5ee0db469091606326290ca596",
+        "f9a0c1682eb2af895843fef929e7fb48d5a7d2a616ea30611314a5a5f756657c",
+        "08a053a34e83a4b98068b1f2bfb6df7cd64e087a11a52de47348aec8a94abd44",
+        "3543dd8f7dd49d965891b2d2cb0c219aaf60febd840261f5544dc4d624ab5242",
+        "6380b05ad71e6447cda70c0fd30c47760ca8cf6049e473413f119f7ff3237a03",
+        "00df2d9ce235aa81ba3df21a5745b0c025e4d67622a596b4a98a31db11bc1d2d",
+        "0cb19f38648bd1e6fbefd30c089b49944885b32a4ffa6becacc74ac98b5084b0"
+      ],
+      "kibana.alert.attack_discovery.alerts_context_count": 100,
+      "kibana.alert.attack_discovery.api_config": {
+        "action_type_id": ".gen-ai",
+        "connector_id": "gpt-4-1",
+        "name": "GPT-4.1 (Azure OpenAI)"
+      },
+      "kibana.alert.attack_discovery.details_markdown": "- The attack on {{ host.name b1beeeb3-f61d-4cc4-bcf5-20b2b15d8da8 }} starts with {{ process.name explorer.exe }} writing a suspicious file {{ file.name bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36 }} to {{ file.path C:\\Users\\Administrator\\Desktop\\8934878593\\bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36 }}.\n- {{ process.name regsvr32.exe }} loads {{ file.name bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36.dll }} ({{ file.path C:\\Users\\Administrator\\Desktop\\8934878593\\bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36.dll }}), a known code execution vector (MITRE: Execution).\n- The DLL is copied to {{ file.path C:\\Windows\\system32\\TRENpvQLoAQYWTPK\\OzwVOlaOnbXRjzj.dll }} and loaded again by {{ process.name regsvr32.exe }}, suggesting privilege escalation or lateral movement.\n- Memory threat detection flags {{ process.name regsvr32.exe }} as running {{ rule.name Windows.Trojan.Emotet }}, and later loading another DLL at {{ file.path C:\\Windows\\system32\\RwUHliEElU\\WsmpRExIFs.dll }}.\n- Registry run keys are modified by {{ process.name regsvr32.exe }} ({{ rule.name Registry Run Key Modified by Unusual Process }}, {{ rule.name Suspicious String Value Written to Registry Run Key }}), establishing persistence (MITRE: Persistence).\n- The attack culminates with {{ process.name MsMpEng.exe }} (Windows Defender) being injected with {{ rule.name Windows.Ransomware.Sodinokibi }}, and canary ransomware files are created ({{ Ransomware.files.path c:\\hd3vuk19y-readme.txt }}), confirming impact (MITRE: Impact).\n- All actions are performed by {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}. The chain is validated by process ancestry, file paths, and rule transitions.",
+      "kibana.alert.attack_discovery.details_markdown_with_replacements": "- The attack on {{ host.name SRVWIN03 }} starts with {{ process.name explorer.exe }} writing a suspicious file {{ file.name bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36 }} to {{ file.path C:\\Users\\Administrator\\Desktop\\8934878593\\bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36 }}.\n- {{ process.name regsvr32.exe }} loads {{ file.name bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36.dll }} ({{ file.path C:\\Users\\Administrator\\Desktop\\8934878593\\bb444759e8d9a1a91a3b94e55da2aa489bb181348805185f9b26f4287a55df36.dll }}), a known code execution vector (MITRE: Execution).\n- The DLL is copied to {{ file.path C:\\Windows\\system32\\TRENpvQLoAQYWTPK\\OzwVOlaOnbXRjzj.dll }} and loaded again by {{ process.name regsvr32.exe }}, suggesting privilege escalation or lateral movement.\n- Memory threat detection flags {{ process.name regsvr32.exe }} as running {{ rule.name Windows.Trojan.Emotet }}, and later loading another DLL at {{ file.path C:\\Windows\\system32\\RwUHliEElU\\WsmpRExIFs.dll }}.\n- Registry run keys are modified by {{ process.name regsvr32.exe }} ({{ rule.name Registry Run Key Modified by Unusual Process }}, {{ rule.name Suspicious String Value Written to Registry Run Key }}), establishing persistence (MITRE: Persistence).\n- The attack culminates with {{ process.name MsMpEng.exe }} (Windows Defender) being injected with {{ rule.name Windows.Ransomware.Sodinokibi }}, and canary ransomware files are created ({{ Ransomware.files.path c:\\hd3vuk19y-readme.txt }}), confirming impact (MITRE: Impact).\n- All actions are performed by {{ user.name Administrator }}. The chain is validated by process ancestry, file paths, and rule transitions.",
+      "kibana.alert.attack_discovery.entity_summary_markdown": "Ransomware on {{ host.name b1beeeb3-f61d-4cc4-bcf5-20b2b15d8da8 }} for {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}.",
+      "kibana.alert.attack_discovery.entity_summary_markdown_with_replacements": "Ransomware on {{ host.name SRVWIN03 }} for {{ user.name Administrator }}.",
+      "kibana.alert.attack_discovery.mitre_attack_tactics": [
+        "Initial Access",
+        "Execution",
+        "Persistence",
+        "Defense Evasion",
+        "Impact"
+      ],
+      "kibana.alert.attack_discovery.replacements": [
+        {
+          "uuid": "98d3202b-f09a-4a2e-9280-30375bc79a3b",
+          "value": "root"
+        },
+        {
+          "uuid": "0993974e-3b42-42ff-aaad-c3dc7278ec38",
+          "value": "SRVMAC08"
+        },
+        {
+          "uuid": "fbba0efc-0350-4477-9a1b-10be2a7e0000",
+          "value": "james"
+        },
+        {
+          "uuid": "e7136b97-e77c-486b-93ee-d887819fddf9",
+          "value": "Administrator"
+        },
+        {
+          "uuid": "43b280a5-db40-4e4c-aa69-b239c557b893",
+          "value": "SRVWIN07"
+        },
+        {
+          "uuid": "0bc4b603-3e00-459f-8fe3-4793719a043f",
+          "value": "SRVWIN07-PRIV"
+        },
+        {
+          "uuid": "13f182a8-d62e-41dd-8ece-0160698ede59",
+          "value": "SRVWIN06"
+        },
+        {
+          "uuid": "eb154e4b-81ab-4aa9-88e1-f0773a2c06f0",
+          "value": "SRVNIX05"
+        },
+        {
+          "uuid": "b2dd70c5-4641-4223-adfb-45ba5ed26fe7",
+          "value": "SRVWIN04"
+        },
+        {
+          "uuid": "b1beeeb3-f61d-4cc4-bcf5-20b2b15d8da8",
+          "value": "SRVWIN03"
+        },
+        {
+          "uuid": "f8bfeae0-60fa-4dd7-a061-13b8c3485b45",
+          "value": "SRVWIN03-PRIV"
+        },
+        {
+          "uuid": "3fc3d861-3ef0-4f1f-89b0-c33e98eb03d4",
+          "value": "SRVWIN02"
+        },
+        {
+          "uuid": "e2f60ed2-93dd-4eec-8d0e-d15833c64374",
+          "value": "SRVWIN01"
+        },
+        {
+          "uuid": "0f06135f-12ab-45e1-893d-a31d648cd8f6",
+          "value": "SRVWIN01-PRIV"
+        },
+        {
+          "uuid": "4ecb7737-2d03-4a1d-a1a4-096e158e4fdf",
+          "value": "SRVMAC08-PRIV"
+        },
+        {
+          "uuid": "36227c87-c591-4257-be7b-5130d8075c10",
+          "value": "SRVWIN06-PRIV"
+        },
+        {
+          "uuid": "f6c0d3c8-e002-4557-9c38-10f9fc86ca2a",
+          "value": "SRVNIX05-PRIV"
+        },
+        {
+          "uuid": "b212a084-34b3-4336-b45a-23f896e30999",
+          "value": "SRVWIN04-PRIV"
+        },
+        {
+          "uuid": "ad704de7-217b-4601-826f-c7bfdc792fb5",
+          "value": "SRVWIN02-PRIV"
+        },
+        {
+          "uuid": "4b20146a-e91f-4c97-bc34-3a2ea5243c3d",
+          "value": "SYSTEM"
+        }
+      ],
+      "kibana.alert.attack_discovery.summary_markdown": "Emotet infection on {{ host.name b1beeeb3-f61d-4cc4-bcf5-20b2b15d8da8 }} leads to Sodinokibi ransomware via regsvr32 and registry persistence for {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}.",
+      "kibana.alert.attack_discovery.summary_markdown_with_replacements": "Emotet infection on {{ host.name SRVWIN03 }} leads to Sodinokibi ransomware via regsvr32 and registry persistence for {{ user.name Administrator }}.",
+      "kibana.alert.attack_discovery.title": "Emotet to Sodinokibi ransomware chain",
+      "kibana.alert.attack_discovery.title_with_replacements": "Emotet to Sodinokibi ransomware chain",
+      "kibana.alert.attack_ids": [
+        "40980216-cf98-4447-af57-894c0e7c39b4"
+      ],
+      "kibana.alert.rule.category": "Attack Discovery Schedule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.execution.uuid": "da824c16-dae1-4afa-bfc0-dd2a901c4488",
+      "kibana.alert.rule.name": "Insights_Testing",
+      "kibana.alert.rule.parameters": {
+        "alertsIndexPattern": ".alerts-security.alerts-default",
+        "apiConfig": {
+          "connectorId": "gpt-4-1",
+          "actionTypeId": ".gen-ai",
+          "name": "GPT-4.1 (Azure OpenAI)"
+        },
+        "end": "now",
+        "query": {
+          "query": "",
+          "language": "kuery"
+        },
+        "filters": [],
+        "size": 100,
+        "start": "now-24h"
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.rule_type_id": "attack-discovery",
+      "kibana.alert.rule.tags": [],
+      "kibana.alert.rule.uuid": "c20fc355-a80b-4934-95dc-d955252525cd",
+      "kibana.space_ids": [
+        "default"
+      ],
+      "@timestamp": "2025-11-20T13:15:01.149Z",
+      "event.action": "open",
+      "event.kind": "signal",
+      "kibana.alert.rule.execution.timestamp": "2025-11-20T13:15:01.149Z",
+      "kibana.alert.action_group": "default",
+      "kibana.alert.flapping": false,
+      "kibana.alert.flapping_history": [
+        true
+      ],
+      "kibana.alert.instance.id": "efcc8608cd8d7d09a3bc962169004cedf05214fbb8383e581fe68c84ee398476",
+      "kibana.alert.maintenance_window_ids": [],
+      "kibana.alert.consecutive_matches": 1,
+      "kibana.alert.pending_recovered_count": 0,
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "40980216-cf98-4447-af57-894c0e7c39b4",
+      "kibana.alert.severity_improving": false,
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.duration.us": 0,
+      "kibana.alert.start": "2025-11-20T13:15:01.149Z",
+      "kibana.alert.time_range": {
+        "gte": "2025-11-20T13:15:01.149Z"
+      },
+      "kibana.version": "9.3.0",
+      "tags": []
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "8ff09eb6-aa01-41dc-882e-d7115c3016e3",
+    "index": ".alerts-security.attack.discovery.alerts-default",
+    "source": {
+      "ecs.version": "9.0.0",
+      "kibana.alert.risk_score": 792,
+      "kibana.alert.attack_discovery.alert_ids": [
+        "52c9fd2b6b08551aca345ed1557ce494f6675e52040bdde06de50f19ab91bc6a",
+        "c967e12f71970f1a2f964806e5bd39e7b3f05bf4e2e0ab662eb3cac38be5e3ff",
+        "99e1c80570b4e7434f28e2efc035816534aff82684438832fac0507185292904",
+        "9efb7a8635db02ba09fc5c23612feb3dd1a4438d10e67cb75fdc234e6ca59661",
+        "e42accf4b21b885fcf12f60ae397c5d40892d3d9d62b9b265970612f8c33ef3e",
+        "15fa4018cb57676760735d525753dd10bebf3169159829a20842d7360251affa",
+        "b7c25071902114304b3de5b918f837ba45f69b514fe16d524fb1745b396a2fd9",
+        "8a72baf70ece1a6c02abcc58623b00b7ffc7bbdfbf9095b826d9a5accaa60a2c"
+      ],
+      "kibana.alert.attack_discovery.alerts_context_count": 100,
+      "kibana.alert.attack_discovery.api_config": {
+        "action_type_id": ".gen-ai",
+        "connector_id": "gpt-4-1",
+        "name": "GPT-4.1 (Azure OpenAI)"
+      },
+      "kibana.alert.attack_discovery.details_markdown": "- On {{ host.name e2f60ed2-93dd-4eec-8d0e-d15833c64374 }}, {{ process.name EXCEL.EXE }} spawns {{ process.name certutil.exe }} to decode a file ({{ process.command_line certutil -decode C:\\Programdata\\B1Z8U2N9.txt C:\\Programdata\\Q3C7N1V8.exe }}), a known LOLBAS technique (MITRE: Execution).\n- The decoded file {{ file.name Q3C7N1V8.exe }} is executed as a suspicious process, which is unsigned and modifies registry keys for persistence ({{ rule.name Uncommon Persistence via Registry Modification }}, {{ rule.name Registry Persistence via Microsoft Office Descendant Process }}).\n- {{ process.name Q3C7N1V8.exe }} writes {{ file.name cdnver.dll }} to {{ file.path C:\\Users\\Administrator\\AppData\\Local\\cdnver.dll }}.\n- {{ process.name rundll32.exe }} loads {{ file.name cdnver.dll }}, furthering code execution and defense evasion (MITRE: Defense Evasion).\n- All activity is under {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}. The chain is validated by process ancestry, file paths, and registry modifications.",
+      "kibana.alert.attack_discovery.details_markdown_with_replacements": "- On {{ host.name SRVWIN01 }}, {{ process.name EXCEL.EXE }} spawns {{ process.name certutil.exe }} to decode a file ({{ process.command_line certutil -decode C:\\Programdata\\B1Z8U2N9.txt C:\\Programdata\\Q3C7N1V8.exe }}), a known LOLBAS technique (MITRE: Execution).\n- The decoded file {{ file.name Q3C7N1V8.exe }} is executed as a suspicious process, which is unsigned and modifies registry keys for persistence ({{ rule.name Uncommon Persistence via Registry Modification }}, {{ rule.name Registry Persistence via Microsoft Office Descendant Process }}).\n- {{ process.name Q3C7N1V8.exe }} writes {{ file.name cdnver.dll }} to {{ file.path C:\\Users\\Administrator\\AppData\\Local\\cdnver.dll }}.\n- {{ process.name rundll32.exe }} loads {{ file.name cdnver.dll }}, furthering code execution and defense evasion (MITRE: Defense Evasion).\n- All activity is under {{ user.name Administrator }}. The chain is validated by process ancestry, file paths, and registry modifications.",
+      "kibana.alert.attack_discovery.entity_summary_markdown": "Loader persistence on {{ host.name e2f60ed2-93dd-4eec-8d0e-d15833c64374 }} for {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}.",
+      "kibana.alert.attack_discovery.entity_summary_markdown_with_replacements": "Loader persistence on {{ host.name SRVWIN01 }} for {{ user.name Administrator }}.",
+      "kibana.alert.attack_discovery.mitre_attack_tactics": [
+        "Initial Access",
+        "Execution",
+        "Persistence",
+        "Defense Evasion"
+      ],
+      "kibana.alert.attack_discovery.replacements": [
+        {
+          "uuid": "98d3202b-f09a-4a2e-9280-30375bc79a3b",
+          "value": "root"
+        },
+        {
+          "uuid": "0993974e-3b42-42ff-aaad-c3dc7278ec38",
+          "value": "SRVMAC08"
+        },
+        {
+          "uuid": "fbba0efc-0350-4477-9a1b-10be2a7e0000",
+          "value": "james"
+        },
+        {
+          "uuid": "e7136b97-e77c-486b-93ee-d887819fddf9",
+          "value": "Administrator"
+        },
+        {
+          "uuid": "43b280a5-db40-4e4c-aa69-b239c557b893",
+          "value": "SRVWIN07"
+        },
+        {
+          "uuid": "0bc4b603-3e00-459f-8fe3-4793719a043f",
+          "value": "SRVWIN07-PRIV"
+        },
+        {
+          "uuid": "13f182a8-d62e-41dd-8ece-0160698ede59",
+          "value": "SRVWIN06"
+        },
+        {
+          "uuid": "eb154e4b-81ab-4aa9-88e1-f0773a2c06f0",
+          "value": "SRVNIX05"
+        },
+        {
+          "uuid": "b2dd70c5-4641-4223-adfb-45ba5ed26fe7",
+          "value": "SRVWIN04"
+        },
+        {
+          "uuid": "b1beeeb3-f61d-4cc4-bcf5-20b2b15d8da8",
+          "value": "SRVWIN03"
+        },
+        {
+          "uuid": "f8bfeae0-60fa-4dd7-a061-13b8c3485b45",
+          "value": "SRVWIN03-PRIV"
+        },
+        {
+          "uuid": "3fc3d861-3ef0-4f1f-89b0-c33e98eb03d4",
+          "value": "SRVWIN02"
+        },
+        {
+          "uuid": "e2f60ed2-93dd-4eec-8d0e-d15833c64374",
+          "value": "SRVWIN01"
+        },
+        {
+          "uuid": "0f06135f-12ab-45e1-893d-a31d648cd8f6",
+          "value": "SRVWIN01-PRIV"
+        },
+        {
+          "uuid": "4ecb7737-2d03-4a1d-a1a4-096e158e4fdf",
+          "value": "SRVMAC08-PRIV"
+        },
+        {
+          "uuid": "36227c87-c591-4257-be7b-5130d8075c10",
+          "value": "SRVWIN06-PRIV"
+        },
+        {
+          "uuid": "f6c0d3c8-e002-4557-9c38-10f9fc86ca2a",
+          "value": "SRVNIX05-PRIV"
+        },
+        {
+          "uuid": "b212a084-34b3-4336-b45a-23f896e30999",
+          "value": "SRVWIN04-PRIV"
+        },
+        {
+          "uuid": "ad704de7-217b-4601-826f-c7bfdc792fb5",
+          "value": "SRVWIN02-PRIV"
+        },
+        {
+          "uuid": "4b20146a-e91f-4c97-bc34-3a2ea5243c3d",
+          "value": "SYSTEM"
+        }
+      ],
+      "kibana.alert.attack_discovery.summary_markdown": "Excel spawns certutil to decode and run loader {{ file.name Q3C7N1V8.exe }} with registry persistence on {{ host.name e2f60ed2-93dd-4eec-8d0e-d15833c64374 }}.",
+      "kibana.alert.attack_discovery.summary_markdown_with_replacements": "Excel spawns certutil to decode and run loader {{ file.name Q3C7N1V8.exe }} with registry persistence on {{ host.name SRVWIN01 }}.",
+      "kibana.alert.attack_discovery.title": "Office to certutil to custom loader",
+      "kibana.alert.attack_discovery.title_with_replacements": "Office to certutil to custom loader",
+      "kibana.alert.attack_ids": [
+        "8ff09eb6-aa01-41dc-882e-d7115c3016e3"
+      ],
+      "kibana.alert.rule.category": "Attack Discovery Schedule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.execution.uuid": "da824c16-dae1-4afa-bfc0-dd2a901c4488",
+      "kibana.alert.rule.name": "Insights_Testing",
+      "kibana.alert.rule.parameters": {
+        "alertsIndexPattern": ".alerts-security.alerts-default",
+        "apiConfig": {
+          "connectorId": "gpt-4-1",
+          "actionTypeId": ".gen-ai",
+          "name": "GPT-4.1 (Azure OpenAI)"
+        },
+        "end": "now",
+        "query": {
+          "query": "",
+          "language": "kuery"
+        },
+        "filters": [],
+        "size": 100,
+        "start": "now-24h"
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.rule_type_id": "attack-discovery",
+      "kibana.alert.rule.tags": [],
+      "kibana.alert.rule.uuid": "c20fc355-a80b-4934-95dc-d955252525cd",
+      "kibana.space_ids": [
+        "default"
+      ],
+      "@timestamp": "2025-11-20T13:15:01.149Z",
+      "event.action": "open",
+      "event.kind": "signal",
+      "kibana.alert.rule.execution.timestamp": "2025-11-20T13:15:01.149Z",
+      "kibana.alert.action_group": "default",
+      "kibana.alert.flapping": false,
+      "kibana.alert.flapping_history": [
+        true
+      ],
+      "kibana.alert.instance.id": "4f3e344c4abf33f272622be532647996c3a205b2dd7502004f3ce561a55e7a98",
+      "kibana.alert.maintenance_window_ids": [],
+      "kibana.alert.consecutive_matches": 1,
+      "kibana.alert.pending_recovered_count": 0,
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "8ff09eb6-aa01-41dc-882e-d7115c3016e3",
+      "kibana.alert.severity_improving": false,
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.duration.us": 0,
+      "kibana.alert.start": "2025-11-20T13:15:01.149Z",
+      "kibana.alert.time_range": {
+        "gte": "2025-11-20T13:15:01.149Z"
+      },
+      "kibana.version": "9.3.0",
+      "tags": []
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "c50c57de-8d20-465d-a5d6-9fc269d33e37",
+    "index": ".alerts-security.attack.discovery.alerts-default",
+    "source": {
+      "ecs.version": "9.0.0",
+      "kibana.alert.risk_score": 1089,
+      "kibana.alert.attack_discovery.alert_ids": [
+        "92c7d8f221ea2e08410193f959c6456397cff2d82aeed107e2fbda8a088841f3",
+        "35e108863dbf56c1c940c5e4607d33b7f65eeaef5e4e322eb7bc0bb71b3fa6b5",
+        "5a91fc9bb9065968d18a476e9384bd04345aad2a6f20431171a3064f86903875",
+        "f35e81cb8a052d85fc2a421618c1e78df169ffd71ef518f5faca577fbf31184f",
+        "3bb707dafbb06dcacc47f71f97fedd5f9593442948da7b9aed58623a4424cf52",
+        "704a95345fc144fcd522f4adf52637097cf6d063ab8a4264d371db23c56bb0be",
+        "a6f36ff135098cb805803b04c09b5b507643c5531ecd120a86586b69db0c31ae",
+        "2bf9eb58bf53869a0eed1e0251ad521474d112907f19ec3cac1e671fc5989d43",
+        "f18661a94000bc9c8e5a5e3b9616b7ed355259f7ab662376d4bff04b29353e08",
+        "ce2e025a69d082409d8d2c1134a33bea6127d74e9f9001ee8892825ebb22b892",
+        "d06cb36b483a41e503f3938b14bb079a2de6dcbf3ee1e401010ed7a87b81565b"
+      ],
+      "kibana.alert.attack_discovery.alerts_context_count": 100,
+      "kibana.alert.attack_discovery.api_config": {
+        "action_type_id": ".gen-ai",
+        "connector_id": "gpt-4-1",
+        "name": "GPT-4.1 (Azure OpenAI)"
+      },
+      "kibana.alert.attack_discovery.details_markdown": "- On {{ host.name b2dd70c5-4641-4223-adfb-45ba5ed26fe7 }}, {{ process.name ONENOTE.EXE }} spawns {{ process.name mshta.exe }} to execute an embedded HTA file ({{ process.command_line \"C:\\Windows\\SysWOW64\\mshta.exe\" ... }}), a phishing technique (MITRE: Initial Access).\n- {{ process.name mshta.exe }} downloads a payload via {{ process.name curl.exe }} ({{ process.command_line \"C:\\Windows\\System32\\curl.exe\" --output C:\\ProgramData\\121.png ... }}).\n- The payload is executed via {{ process.name rundll32.exe }} ({{ process.command_line \"C:\\Windows\\System32\\rundll32.exe\" C:\\ProgramData\\121.png,Wind }}), detected as process injection and defense evasion.\n- Memory threat detections (shellcode injection, Qbot) and registry run key modifications confirm persistence and C2 activity (MITRE: Command and Control).\n- All actions are under {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}. The chain is validated by process ancestry, file paths, and registry modifications.",
+      "kibana.alert.attack_discovery.details_markdown_with_replacements": "- On {{ host.name SRVWIN04 }}, {{ process.name ONENOTE.EXE }} spawns {{ process.name mshta.exe }} to execute an embedded HTA file ({{ process.command_line \"C:\\Windows\\SysWOW64\\mshta.exe\" ... }}), a phishing technique (MITRE: Initial Access).\n- {{ process.name mshta.exe }} downloads a payload via {{ process.name curl.exe }} ({{ process.command_line \"C:\\Windows\\System32\\curl.exe\" --output C:\\ProgramData\\121.png ... }}).\n- The payload is executed via {{ process.name rundll32.exe }} ({{ process.command_line \"C:\\Windows\\System32\\rundll32.exe\" C:\\ProgramData\\121.png,Wind }}), detected as process injection and defense evasion.\n- Memory threat detections (shellcode injection, Qbot) and registry run key modifications confirm persistence and C2 activity (MITRE: Command and Control).\n- All actions are under {{ user.name Administrator }}. The chain is validated by process ancestry, file paths, and registry modifications.",
+      "kibana.alert.attack_discovery.entity_summary_markdown": "C2 loader on {{ host.name b2dd70c5-4641-4223-adfb-45ba5ed26fe7 }} for {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}.",
+      "kibana.alert.attack_discovery.entity_summary_markdown_with_replacements": "C2 loader on {{ host.name SRVWIN04 }} for {{ user.name Administrator }}.",
+      "kibana.alert.attack_discovery.mitre_attack_tactics": [
+        "Initial Access",
+        "Execution",
+        "Persistence",
+        "Defense Evasion",
+        "Command and Control"
+      ],
+      "kibana.alert.attack_discovery.replacements": [
+        {
+          "uuid": "98d3202b-f09a-4a2e-9280-30375bc79a3b",
+          "value": "root"
+        },
+        {
+          "uuid": "0993974e-3b42-42ff-aaad-c3dc7278ec38",
+          "value": "SRVMAC08"
+        },
+        {
+          "uuid": "fbba0efc-0350-4477-9a1b-10be2a7e0000",
+          "value": "james"
+        },
+        {
+          "uuid": "e7136b97-e77c-486b-93ee-d887819fddf9",
+          "value": "Administrator"
+        },
+        {
+          "uuid": "43b280a5-db40-4e4c-aa69-b239c557b893",
+          "value": "SRVWIN07"
+        },
+        {
+          "uuid": "0bc4b603-3e00-459f-8fe3-4793719a043f",
+          "value": "SRVWIN07-PRIV"
+        },
+        {
+          "uuid": "13f182a8-d62e-41dd-8ece-0160698ede59",
+          "value": "SRVWIN06"
+        },
+        {
+          "uuid": "eb154e4b-81ab-4aa9-88e1-f0773a2c06f0",
+          "value": "SRVNIX05"
+        },
+        {
+          "uuid": "b2dd70c5-4641-4223-adfb-45ba5ed26fe7",
+          "value": "SRVWIN04"
+        },
+        {
+          "uuid": "b1beeeb3-f61d-4cc4-bcf5-20b2b15d8da8",
+          "value": "SRVWIN03"
+        },
+        {
+          "uuid": "f8bfeae0-60fa-4dd7-a061-13b8c3485b45",
+          "value": "SRVWIN03-PRIV"
+        },
+        {
+          "uuid": "3fc3d861-3ef0-4f1f-89b0-c33e98eb03d4",
+          "value": "SRVWIN02"
+        },
+        {
+          "uuid": "e2f60ed2-93dd-4eec-8d0e-d15833c64374",
+          "value": "SRVWIN01"
+        },
+        {
+          "uuid": "0f06135f-12ab-45e1-893d-a31d648cd8f6",
+          "value": "SRVWIN01-PRIV"
+        },
+        {
+          "uuid": "4ecb7737-2d03-4a1d-a1a4-096e158e4fdf",
+          "value": "SRVMAC08-PRIV"
+        },
+        {
+          "uuid": "36227c87-c591-4257-be7b-5130d8075c10",
+          "value": "SRVWIN06-PRIV"
+        },
+        {
+          "uuid": "f6c0d3c8-e002-4557-9c38-10f9fc86ca2a",
+          "value": "SRVNIX05-PRIV"
+        },
+        {
+          "uuid": "b212a084-34b3-4336-b45a-23f896e30999",
+          "value": "SRVWIN04-PRIV"
+        },
+        {
+          "uuid": "ad704de7-217b-4601-826f-c7bfdc792fb5",
+          "value": "SRVWIN02-PRIV"
+        },
+        {
+          "uuid": "4b20146a-e91f-4c97-bc34-3a2ea5243c3d",
+          "value": "SYSTEM"
+        }
+      ],
+      "kibana.alert.attack_discovery.summary_markdown": "OneNote phishing on {{ host.name b2dd70c5-4641-4223-adfb-45ba5ed26fe7 }} leads to C2 loader and persistence for {{ user.name e7136b97-e77c-486b-93ee-d887819fddf9 }}.",
+      "kibana.alert.attack_discovery.summary_markdown_with_replacements": "OneNote phishing on {{ host.name SRVWIN04 }} leads to C2 loader and persistence for {{ user.name Administrator }}.",
+      "kibana.alert.attack_discovery.title": "OneNote phishing to C2 loader",
+      "kibana.alert.attack_discovery.title_with_replacements": "OneNote phishing to C2 loader",
+      "kibana.alert.attack_ids": [
+        "c50c57de-8d20-465d-a5d6-9fc269d33e37"
+      ],
+      "kibana.alert.rule.category": "Attack Discovery Schedule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.execution.uuid": "da824c16-dae1-4afa-bfc0-dd2a901c4488",
+      "kibana.alert.rule.name": "Insights_Testing",
+      "kibana.alert.rule.parameters": {
+        "alertsIndexPattern": ".alerts-security.alerts-default",
+        "apiConfig": {
+          "connectorId": "gpt-4-1",
+          "actionTypeId": ".gen-ai",
+          "name": "GPT-4.1 (Azure OpenAI)"
+        },
+        "end": "now",
+        "query": {
+          "query": "",
+          "language": "kuery"
+        },
+        "filters": [],
+        "size": 100,
+        "start": "now-24h"
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.rule_type_id": "attack-discovery",
+      "kibana.alert.rule.tags": [],
+      "kibana.alert.rule.uuid": "c20fc355-a80b-4934-95dc-d955252525cd",
+      "kibana.space_ids": [
+        "default"
+      ],
+      "@timestamp": "2025-11-20T13:15:01.149Z",
+      "event.action": "open",
+      "event.kind": "signal",
+      "kibana.alert.rule.execution.timestamp": "2025-11-20T13:15:01.149Z",
+      "kibana.alert.action_group": "default",
+      "kibana.alert.flapping": false,
+      "kibana.alert.flapping_history": [
+        true
+      ],
+      "kibana.alert.instance.id": "233e01e19671a02e6ba422ec4bfa5bb9bb2ecc434d58e53d4a8faa6b2c93ea21",
+      "kibana.alert.maintenance_window_ids": [],
+      "kibana.alert.consecutive_matches": 1,
+      "kibana.alert.pending_recovered_count": 0,
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "c50c57de-8d20-465d-a5d6-9fc269d33e37",
+      "kibana.alert.severity_improving": false,
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.duration.us": 0,
+      "kibana.alert.start": "2025-11-20T13:15:01.149Z",
+      "kibana.alert.time_range": {
+        "gte": "2025-11-20T13:15:01.149Z"
+      },
+      "kibana.version": "9.3.0",
+      "tags": []
+    }
+  }
+}

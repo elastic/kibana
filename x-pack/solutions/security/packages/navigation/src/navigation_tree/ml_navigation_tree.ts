@@ -10,16 +10,11 @@ import { SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { i18nStrings } from '../i18n_strings';
 
-export const createMachineLearningNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createMachineLearningNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.machineLearning,
-  iconV2: 'machineLearningApp',
+  icon: 'machineLearningApp',
   title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       breadcrumbStatus: 'hidden',

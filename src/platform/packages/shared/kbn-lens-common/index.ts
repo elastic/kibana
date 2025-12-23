@@ -258,7 +258,6 @@ export type {
   IntegrationCallbacks,
   LensPublicCallbacks,
   LensApiCallbacks,
-  LensRequestHandlersProps,
   LensUnifiedSearchContext,
   LensPanelProps,
   LensSharedProps,
@@ -276,6 +275,7 @@ export type {
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
   LensByValueBase,
+  LensRequestHandlersProps,
 } from './embeddable/types';
 export type {
   LensAppLocatorParams,
@@ -374,6 +374,11 @@ export {
   SeriesTypes,
   visualizationSubtypes,
   visualizationTypes,
+  AvailableReferenceLineIcons,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
+export {
+  getLensLayerTypeTabDisplayName,
+  lensLayerTypeTabDisplayNames,
+} from './visualizations/layer_type_tab_display_name';

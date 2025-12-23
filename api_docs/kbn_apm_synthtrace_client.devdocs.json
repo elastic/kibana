@@ -913,7 +913,7 @@
             "label": "error",
             "description": [],
             "signature": [
-              "({ message, type, culprit, groupingKey, }: { message: string; type?: string | undefined; culprit?: string | undefined; groupingKey?: string | undefined; }) => ",
+              "({ message, type, culprit, groupingKey, withoutErrorId, }: { message: string; type?: string | undefined; culprit?: string | undefined; groupingKey?: string | undefined; withoutErrorId?: boolean | undefined; }) => ",
               "ApmError"
             ],
             "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
@@ -925,7 +925,7 @@
                 "id": "def-common.Instance.error.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    message,\n    type,\n    culprit,\n    groupingKey,\n  }",
+                "label": "{\n    message,\n    type,\n    culprit,\n    groupingKey,\n    withoutErrorId = false,\n  }",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
@@ -979,6 +979,20 @@
                     "description": [],
                     "signature": [
                       "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.Instance.error.$1.withoutErrorId",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "withoutErrorId",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                     "deprecated": false,

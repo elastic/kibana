@@ -17,6 +17,7 @@ import {
   getESQLQueryColumnsRaw,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
   getStartEndParams,
   hasStartEndParams,
 } from '@kbn/esql-utils';
@@ -73,7 +74,10 @@ export class ESQLSource
   extends AbstractVectorSource
   implements
     IVectorSource,
-    Pick<IESSource, 'getIndexPattern' | 'getIndexPatternId' | 'getGeoFieldName'>
+    Pick<
+      IESSource,
+      'getIndexPattern' | 'getIndexPatternId' | 'getGeoFieldName' | 'getProjectRouting'
+    >
 {
   readonly _descriptor: NormalizedESQLSourceDescriptor;
   private _dataViewId: string | undefined;
@@ -274,6 +278,7 @@ export class ESQLSource
           { params },
           {
             strategy: 'esql',
+            projectRouting: requestMeta.projectRouting,
           }
         )
         .pipe(
@@ -392,6 +397,10 @@ export class ESQLSource
 
   getESQL() {
     return this._descriptor.esql;
+  }
+
+  getProjectRouting() {
+    return getProjectRoutingFromEsqlQuery(this.getESQL());
   }
 
   private _getDataViewFields = async () => {

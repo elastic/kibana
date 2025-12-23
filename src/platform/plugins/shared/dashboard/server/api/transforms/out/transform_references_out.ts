@@ -8,10 +8,15 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardState, DashboardPanel } from '../../types';
 import { isDashboardSection } from '../../../../common';
 import { embeddableService } from '../../../kibana_services';
 import { getPanelIdFromReference } from '../../../../common/reference_utils';
+
+export function isSearchSourceReference(reference: SavedObjectReference) {
+  return reference.name.startsWith('kibanaSavedObjectMeta');
+}
 
 export function transformReferencesOut(
   references: SavedObjectReference[],
@@ -40,6 +45,13 @@ export function transformReferencesOut(
       return isLegacySavedObjectRef(ref) ? transformLegacySavedObjectRef(ref) : ref;
     })
     .filter((ref) => {
+      // drop tag references
+      // tags are returned in "data.tags"
+      if (ref.type === tagSavedObjectTypeName) return false;
+
+      // drop search source references because they are injected on server
+      if (isSearchSourceReference(ref)) return false;
+
       const panelId = getPanelIdFromReference(ref);
       return panelId && dropRefsForPanel[panelId]
         ? // drop references for panels that inject references on server

@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
 import { SETUP_HEALTH_URL } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { SetupHealthResponse } from '../../../../../../../common/api/detection_engine';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -24,7 +25,7 @@ export const setupHealthRoute = (router: SecuritySolutionPluginRouter) => {
       path: SETUP_HEALTH_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [INITIALIZE_SECURITY_SOLUTION],
         },
       },
     })

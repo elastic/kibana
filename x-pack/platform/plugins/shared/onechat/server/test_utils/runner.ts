@@ -12,8 +12,17 @@ import {
   httpServerMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { WritableToolResultStore } from '@kbn/onechat-server';
+import type {
+  WritableToolResultStore,
+  AgentHandlerContext,
+  ScopedRunner,
+  ToolProvider,
+} from '@kbn/onechat-server';
+import type { AttachmentsService } from '@kbn/onechat-server/runner/attachments_service';
+import type { ConversationStateManager, PromptManager } from '@kbn/onechat-server/runner';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';
@@ -24,7 +33,19 @@ import type { AgentsServiceStartMock } from './agents';
 import { createAgentsServiceStartMock } from './agents';
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
-export type AttachmentsServiceMock = jest.Mocked<AttachmentServiceStart>;
+export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
+export type ToolProviderMock = jest.Mocked<ToolProvider>;
+export type AttachmentsServiceMock = jest.Mocked<AttachmentsService>;
+export type PromptManagerMock = jest.Mocked<PromptManager>;
+export type StateManagerMock = jest.Mocked<ConversationStateManager>;
+
+export const createToolProviderMock = (): ToolProviderMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    list: jest.fn(),
+  };
+};
 
 export const createToolResultStoreMock = (): ToolResultStoreMock => {
   return {
@@ -36,10 +57,31 @@ export const createToolResultStoreMock = (): ToolResultStoreMock => {
   };
 };
 
-export const createAttachmentsServiceMock = (): AttachmentsServiceMock => {
+export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
   return {
     validate: jest.fn(),
     getTypeDefinition: jest.fn(),
+  };
+};
+
+export const createAttachmentsService = (): AttachmentsServiceMock => {
+  return {
+    getTypeDefinition: jest.fn(),
+    convertAttachmentTool: jest.fn(),
+  };
+};
+
+export const createPromptManagerMock = (): PromptManagerMock => {
+  return {
+    set: jest.fn(),
+    clear: jest.fn(),
+    forTool: jest.fn(),
+  };
+};
+
+export const createStateManagerMock = (): StateManagerMock => {
+  return {
+    getToolStateManager: jest.fn(),
   };
 };
 
@@ -62,17 +104,54 @@ export interface CreateRunnerDepsMock extends CreateRunnerDeps {
   logger: MockedLogger;
 }
 
+export interface AgentHandlerContextMock extends AgentHandlerContext {
+  toolProvider: ToolProviderMock;
+  resultStore: ToolResultStoreMock;
+  attachments: AttachmentsServiceMock;
+}
+
+export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
+  return {
+    request: httpServerMock.createKibanaRequest(),
+    spaceId: 'default',
+    esClient: elasticsearchServiceMock.createScopedClusterClient(),
+    modelProvider: createModelProviderMock(),
+    toolProvider: createToolProviderMock(),
+    runner: createScopedRunnerMock(),
+    attachments: createAttachmentsService(),
+    resultStore: createToolResultStoreMock(),
+    events: {
+      emit: jest.fn(),
+    },
+    logger: loggerMock.create(),
+    promptManager: createPromptManagerMock(),
+    stateManager: createStateManagerMock(),
+  };
+};
+
+export const createScopedRunnerMock = (): jest.Mocked<ScopedRunner> => {
+  return {
+    runTool: jest.fn(),
+    runInternalTool: jest.fn(),
+    runAgent: jest.fn(),
+  };
+};
+
 export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    spaces: spacesMock.createStart(),
+    actions: actionsMock.createStart(),
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
-    attachmentsService: createAttachmentsServiceMock(),
+    attachmentsService: createAttachmentsServiceStartMock(),
+    promptManager: createPromptManagerMock(),
+    stateManager: createStateManagerMock(),
   };
 };
 
@@ -80,10 +159,12 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     security: securityServiceMock.createStart(),
+    spaces: spacesMock.createStart(),
+    actions: actionsMock.createStart(),
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
     logger: loggerMock.create(),
-    attachmentsService: createAttachmentsServiceMock(),
+    attachmentsService: createAttachmentsServiceStartMock(),
   };
 };

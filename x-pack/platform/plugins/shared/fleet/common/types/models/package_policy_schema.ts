@@ -147,6 +147,17 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  cloud_connector_name: schema.maybe(
+    schema.nullable(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: {
+          description: 'Transient field for cloud connector name during creation.',
+        },
+      })
+    )
+  ),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
@@ -250,6 +261,19 @@ export const CreatePackagePolicyRequestBodySchema = schema.object({
           'Force package policy creation even if the package is not verified, or if the agent policy is managed.',
       },
     })
+  ),
+  // supports_agentless is deprecated for package policy creation in favor of agentless policies API
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
+          deprecated: true,
+        },
+      })
+    )
   ),
 });
 
@@ -420,6 +444,19 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
       })
     ),
     package: PackagePolicyPackageSchema,
+    // supports_agentless is deprecated for package policy creation in favor of agentless policies API
+    supports_agentless: schema.maybe(
+      schema.nullable(
+        schema.boolean({
+          defaultValue: false,
+          meta: {
+            description:
+              'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
+            deprecated: true,
+          },
+        })
+      )
+    ),
   });
 
 export const UpdatePackagePolicyRequestBodySchema = schema.object({

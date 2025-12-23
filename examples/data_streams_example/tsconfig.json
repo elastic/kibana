@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core-data-streams-server",
+    "@kbn/es-mappings",
     "@kbn/core",
   ]
 }

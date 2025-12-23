@@ -35,4 +35,30 @@ export const strings = {
     i18n.translate('cpsUtils.projectPicker.thisProjectLabel', {
       defaultMessage: 'This project',
     }),
+  getProjectPickerTourTitle: () =>
+    i18n.translate('cpsUtils.projectPicker.tour.title', {
+      defaultMessage: 'Cross-project search now enabled',
+    }),
+  getProjectPickerTourContent: () =>
+    i18n.translate('cpsUtils.projectPicker.tour.content', {
+      defaultMessage:
+        'By default, you will now be searching across this project’s data and all linked project data as configured for this space. You may further adjust the scope of your own cross-project search here.',
+    }),
+  getProjectPickerTourCloseButton: () =>
+    i18n.translate('cpsUtils.projectPicker.tour.closeButton', {
+      defaultMessage: 'Got it',
+    }),
+  getProjectPickerDisabledTooltip: () =>
+    i18n.translate('cpsUtils.projectPicker.disabledTooltip', {
+      defaultMessage:
+        'Cross-project search is not available here. Unless otherwise informed, your project scope will be limited to this project alone.',
+    }),
+  getProjectPickerReadonlyCallout: () =>
+    i18n.translate('cpsUtils.projectPicker.readonlyCallout', {
+      defaultMessage: 'This page automatically inherits project scope from space defaults.',
+    }),
+  getProjectPickerReadonlyLensCallout: () =>
+    i18n.translate('cpsUtils.projectPicker.readonlyLensCallout', {
+      defaultMessage: 'Please adjust project scope for each layer in the Lens editor.',
+    }),
 };

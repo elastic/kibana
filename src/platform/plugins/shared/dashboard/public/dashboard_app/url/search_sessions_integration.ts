@@ -101,10 +101,10 @@ function getLocatorParams({
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()
       : undefined,
-    timeRange: shouldRestoreSearchSession
+    time_range: shouldRestoreSearchSession
       ? dataService.query.timefilter.timefilter.getAbsoluteTime()
       : dataService.query.timefilter.timefilter.getTime(),
-    refreshInterval: shouldRestoreSearchSession
+    refresh_interval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session
           value: 0,

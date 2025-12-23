@@ -39,6 +39,9 @@ export { measurePerformance, measurePerformanceAsync } from './src/common';
 // EUI components
 export * from './src/playwright/eui_components';
 
+// Kibana-wide components
+export * from './src/playwright/ui_components';
+
 // Scout core types
 export type {
   ScoutPlaywrightOptions,
@@ -55,6 +58,7 @@ export type {
 export type {
   ApiServicesFixture,
   BrowserAuthFixture,
+  RequestAuthFixture,
   SamlAuth,
   SynthtraceFixture,
 } from './src/playwright';

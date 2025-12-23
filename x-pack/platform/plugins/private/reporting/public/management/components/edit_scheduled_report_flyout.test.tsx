@@ -25,6 +25,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import { updateScheduleReport } from '../apis/update_schedule_report';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { transformScheduledReport } from '../utils';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/reporting-public', () => ({
@@ -36,7 +37,7 @@ jest.mock('../hooks/use_get_user_profile_query');
 jest.mock('../apis/get_reporting_health');
 jest.mock('../apis/update_schedule_report');
 
-const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
+const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
 const mockReportingHealth = jest.mocked(getReportingHealth);
 const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
@@ -51,7 +52,11 @@ describe('EditScheduledReportFlyout', () => {
   const today = new Date('2025-11-10T12:00:00.000Z');
 
   const defaultProps = {
-    scheduledReport: mockScheduledReports[1],
+    scheduledReport: {
+      ...transformScheduledReport(mockScheduledReports[1]),
+      sendByEmail: true,
+      emailRecipients: ['test@email.com'],
+    },
     availableReportTypes: [],
     onClose,
   };
@@ -154,7 +159,6 @@ describe('EditScheduledReportFlyout', () => {
               rrule: {
                 byhour: [12],
                 byminute: [0],
-                byweekday: ['MO'],
                 freq: 3,
                 interval: 1,
                 dtstart: '2025-11-10T12:00:00.000Z',
@@ -162,6 +166,56 @@ describe('EditScheduledReportFlyout', () => {
               },
             },
             title: 'Updated scheduled report title',
+            notification: {
+              email: {
+                to: ['test@email.com'],
+              },
+            },
+          },
+        })
+      );
+    });
+  });
+
+  it('nullifies the email notification when toggling it off', async () => {
+    user = userEvent.setup({ delay: null });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <EditScheduledReportFlyout
+            {...defaultProps}
+            availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+          />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    const emailToggle = await screen.findByTestId('sendByEmailToggle');
+    await user.click(emailToggle);
+
+    const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockUpdateScheduleReport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          http,
+          params: {
+            reportId: mockScheduledReports[1].id,
+            schedule: {
+              rrule: {
+                byhour: [12],
+                byminute: [0],
+                freq: 3,
+                interval: 1,
+                dtstart: '2025-11-10T12:00:00.000Z',
+                tzid: 'UTC',
+              },
+            },
+            title: mockScheduledReports[1].title,
+            notification: {
+              email: null,
+            },
           },
         })
       );

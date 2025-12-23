@@ -230,8 +230,8 @@ describe('usage-counters#search', () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 });
 
