@@ -220,15 +220,28 @@ export function convertFormBasedToTextBasedLayer({
     return undefined;
   }
 
-  const newDatasourceState = buildTextBasedState(
+  const convertedTextBasedState = buildTextBasedState(
     validLayersToConvert,
     formBasedState.layers,
     framePublicAPI
   );
 
-  if (!newDatasourceState) {
+  if (!convertedTextBasedState) {
     return undefined;
   }
+
+  const existingTextBasedState = datasourceStates.textBased?.state as
+    | TextBasedPrivateState
+    | undefined;
+  const newDatasourceState: TextBasedPrivateState = {
+    ...existingTextBasedState,
+    ...convertedTextBasedState,
+    layers: {
+      ...existingTextBasedState?.layers,
+      ...convertedTextBasedState.layers,
+    },
+    indexPatternRefs: convertedTextBasedState.indexPatternRefs,
+  };
 
   // Ensure the converted layer carries an ES|QL query
   const firstLayerId = validLayersToConvert[0].id;
@@ -244,10 +257,8 @@ export function convertFormBasedToTextBasedLayer({
   );
   const hasRemainingFormBasedLayers = Object.keys(remainingFormBasedLayers).length > 0;
 
-  // Build new attributes with converted layers in the text-based datasource and preserve
-  // non-data helper layers (reference lines/annotations) in the form-based datasource.
-  // Callers must not pass a subset of data layers: leaving a form-based data layer
-  // alongside text-based ones creates an invalid mixed state (see useEsqlConversionCheck guard).
+  // Move only the requested layers to the text-based datasource. Existing text-based layers and
+  // unconverted form-based layers remain owned by their original datasources.
   const newAttributes: TypedLensSerializedState['attributes'] = {
     ...attributes,
     state: {

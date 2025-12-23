@@ -135,4 +135,6 @@ export interface LayerTabsProps {
   coreStart: CoreStart;
   framePublicAPI: FramePublicAPI;
   uiActions: LensPluginStartDependencies['uiActions'];
+  /** Converts the selected form-based data layer to ES|QL. */
+  onConvertToEsql?: (layerId: string) => void;
 }
