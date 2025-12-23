@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -20,13 +20,16 @@ import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import { UnifiedTabs } from '@kbn/unified-tabs';
 
+import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import {
   cloneLayer,
   registerLibraryAnnotationGroup,
   removeOrClearLayer,
   selectSelectedLayerId,
+  selectResolvedDateRange,
   selectVisualization,
   setSelectedLayerId,
+  updateDatasourceState,
   updateVisualizationState,
   useLensDispatch,
   useLensSelector,
@@ -68,6 +71,7 @@ export function LayerTabs({
   const { datasourceMap } = useEditorFrameService();
   const { isSaveable, visualization, datasourceStates } = useLensSelector((state) => state.lens);
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
+  const dateRange = useLensSelector(selectResolvedDateRange);
 
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
@@ -164,6 +168,89 @@ export function LayerTabs({
 
     return visibleLayerConfigs.map((layerConfig, layerIndex) => {
       const compatibleActions: LayerAction[] = [
+        // Convert to ES|QL action - only for data layers that aren't already ES|QL
+        ...(layerConfig.layerType === 'data'
+          ? [
+              {
+                execute: () => {
+                  const datasourcePublicAPI =
+                    framePublicAPI.datasourceLayers?.[layerConfig.layerId];
+                  const datasourceId = datasourcePublicAPI?.datasourceId;
+
+                  if (!datasourceId) return;
+
+                  const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+                  if (!layerDatasourceState) return;
+
+                  // Check if layer is already ES|QL
+                  if (layerDatasourceState.layers[layerConfig.layerId]?.query) return;
+
+                  const adHocDataViews = Object.values(
+                    framePublicAPI.dataViews.indexPatterns ?? {}
+                  );
+                  const indexPatternsMap = adHocDataViews.reduce(
+                    (acc, obj) => {
+                      acc[obj.id] = obj;
+                      return acc;
+                    },
+                    {} as Record<string, any>
+                  );
+
+                  const esqlResult = datasourceMap[datasourceId].toESQL(
+                    layerDatasourceState,
+                    layerConfig.layerId,
+                    indexPatternsMap,
+                    dateRange,
+                    new Date()
+                  );
+
+                  if (!esqlResult) return;
+
+                  const columns = Object.keys(esqlResult.esAggsIdMap).map((key) => {
+                    return {
+                      ...esqlResult.esAggsIdMap[key][0],
+                      columnId: esqlResult.esAggsIdMap[key][0].id,
+                      fieldName: key,
+                      meta: {
+                        type: esqlResult.esAggsIdMap[key][0].dataType,
+                        label: esqlResult.esAggsIdMap[key][0].label,
+                      },
+                    };
+                  });
+
+                  const newState = {
+                    ...layerDatasourceState,
+                    layers: {
+                      ...layerDatasourceState.layers,
+                      [layerConfig.layerId]: {
+                        indexPatternId:
+                          layerDatasourceState.layers[layerConfig.layerId].indexPatternId,
+                        linkToLayers: [],
+                        columns,
+                        columnOrder: [],
+                        sampling: 1,
+                        ignoreGlobalFilters: false,
+                        query: {
+                          esql: esqlResult.esql,
+                        },
+                      },
+                    },
+                  };
+
+                  dispatchLens(
+                    updateDatasourceState({ newDatasourceState: newState, datasourceId })
+                  );
+                },
+                displayName: i18n.translate('xpack.lens.convert', {
+                  defaultMessage: 'Convert to ES|QL',
+                }),
+                icon: 'sortUp',
+                'data-test-subj': 'lnsConvertLayer',
+                order: -1, // Show before other actions
+                isCompatible: true,
+              },
+            ]
+          : []),
         ...(activeVisualization
           .getSupportedActionsForLayer?.(
             layerConfig.layerId,
@@ -223,7 +310,11 @@ export function LayerTabs({
   }, [
     activeVisualization,
     coreStart,
+    dateRange,
+    datasourceMap,
+    datasourceStates,
     dispatchLens,
+    framePublicAPI,
     isSaveable,
     isTextBasedLanguage,
     layerIds.length,
