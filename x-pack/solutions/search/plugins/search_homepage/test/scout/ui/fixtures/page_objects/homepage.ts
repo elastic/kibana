@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout-search';
 
 export class Homepage {
   constructor(private readonly page: ScoutPage) {}

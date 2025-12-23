@@ -11,8 +11,8 @@ import type {
   PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
-} from '@kbn/scout';
-import { test as base, createLazyPageObject } from '@kbn/scout';
+} from '@kbn/scout-search';
+import { test as base, createLazyPageObject } from '@kbn/scout-search';
 import { Homepage } from './page_objects/homepage';
 
 export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
