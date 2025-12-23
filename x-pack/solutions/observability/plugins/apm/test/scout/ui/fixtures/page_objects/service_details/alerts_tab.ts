@@ -30,7 +30,7 @@ export class AlertsTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad() {
-    // Wait for control filter titles to appear
-    await this.page.testSubj.waitForSelector('control-frame-title', { timeout: 30000 });
+    // Wait for alerts table to load (either empty state or with data)
+    await Promise.any([this.alertsTableEmptyState.waitFor(), this.alertsTable.ensureGridVisible()]);
   }
 }

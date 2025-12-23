@@ -55,7 +55,7 @@ export class EuiDataGridWrapper {
     this.popoverPanel = this.page.locator('div[data-popover-panel="true"]');
   }
 
-  private async ensureGridVisible(): Promise<void> {
+  public async ensureGridVisible(): Promise<void> {
     await this.dataGridWrapper.waitFor({ state: 'visible' });
   }
 
