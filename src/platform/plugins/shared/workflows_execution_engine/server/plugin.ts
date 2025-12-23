@@ -62,14 +62,13 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private readonly concurrencyManager: ConcurrencyManager;
+  private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private initializePromise?: Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.concurrencyManager = new ConcurrencyManager();
   }
 
   public setup(
@@ -284,22 +283,7 @@ export class WorkflowsExecutionEnginePlugin
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
               // Check concurrency limits and apply collision strategy if needed
-              if (
-                workflow.definition?.settings?.concurrency &&
-                workflowExecution.concurrencyGroupKey &&
-                workflowExecution.id &&
-                workflowExecution.spaceId
-              ) {
-                const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
-                await this.concurrencyManager.checkConcurrency(
-                  workflow.definition.settings.concurrency,
-                  workflowExecution.concurrencyGroupKey,
-                  workflowExecution.id,
-                  workflowExecution.spaceId,
-                  workflowExecutionRepository,
-                  workflowTaskManager
-                );
-              }
+              await this.checkConcurrencyIfNeeded(workflowExecution);
 
               if (!workflowExecution.id || !workflowExecution.spaceId) {
                 throw new Error('Workflow execution must have id and spaceId');
@@ -338,6 +322,16 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    // Initialize ConcurrencyManager with dependencies
+    const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
+    const workflowExecutionRepository = new WorkflowExecutionRepository(
+      coreStart.elasticsearch.client.asInternalUser
+    );
+    this.concurrencyManager = new ConcurrencyManager(
+      workflowTaskManager,
+      workflowExecutionRepository
+    );
+
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
       coreStart,
@@ -357,8 +351,6 @@ export class WorkflowsExecutionEnginePlugin
     }> => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const createdBy = (context.createdBy as string | undefined) || 'system';
       const spaceId = (context.spaceId as string | undefined) || 'default';
@@ -430,24 +422,14 @@ export class WorkflowsExecutionEnginePlugin
         throw new Error('Workflows cannot be executed without the user context');
       }
 
-      const { workflowExecution, repository } = await createAndPersistWorkflowExecution(
+      const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'manual'
       );
 
       // Check concurrency limits and apply collision strategy if needed
-      if (workflow.definition?.settings?.concurrency && workflowExecution.concurrencyGroupKey) {
-        const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-        await this.concurrencyManager.checkConcurrency(
-          workflow.definition.settings.concurrency,
-          workflowExecution.concurrencyGroupKey,
-          workflowExecution.id as string,
-          workflowExecution.spaceId || 'default',
-          repository,
-          workflowTaskManager
-        );
-      }
+      await this.checkConcurrencyIfNeeded(workflowExecution);
 
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
@@ -478,24 +460,14 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
-      const { workflowExecution, repository } = await createAndPersistWorkflowExecution(
+      const { workflowExecution } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'alert'
       );
 
       // Check concurrency limits and apply collision strategy if needed
-      if (workflow.definition?.settings?.concurrency && workflowExecution.concurrencyGroupKey) {
-        const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-        await this.concurrencyManager.checkConcurrency(
-          workflow.definition.settings.concurrency,
-          workflowExecution.concurrencyGroupKey,
-          workflowExecution.id as string,
-          workflowExecution.spaceId || 'default',
-          repository,
-          workflowTaskManager
-        );
-      }
+      await this.checkConcurrencyIfNeeded(workflowExecution);
 
       // Always schedule a task (never execute directly)
       const taskInstance = createTaskInstance(
@@ -526,10 +498,6 @@ export class WorkflowsExecutionEnginePlugin
       }
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-
-      // Get ES client and create repository for this execution
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const context: Record<string, unknown> = {
         contextOverride,
       };
@@ -586,13 +554,10 @@ export class WorkflowsExecutionEnginePlugin
       spaceId
     ) => {
       await this.initialize(coreStart);
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionId,
         spaceId
       );
-      const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -642,5 +607,31 @@ export class WorkflowsExecutionEnginePlugin
       });
     }
     await this.initializePromise;
+  }
+
+  /**
+   * Checks concurrency limits and applies collision strategy if needed.
+   * This helper method consolidates the duplicated concurrency check logic.
+   *
+   * @param workflowExecution - The workflow execution (might be partial)
+   */
+  private async checkConcurrencyIfNeeded(
+    workflowExecution: Partial<EsWorkflowExecution>
+  ): Promise<void> {
+    if (
+      !workflowExecution.workflowDefinition?.settings?.concurrency ||
+      !workflowExecution.concurrencyGroupKey ||
+      !workflowExecution.id ||
+      !workflowExecution.spaceId
+    ) {
+      return;
+    }
+
+    await this.concurrencyManager.checkConcurrency(
+      workflowExecution.workflowDefinition.settings.concurrency,
+      workflowExecution.concurrencyGroupKey,
+      workflowExecution.id,
+      workflowExecution.spaceId
+    );
   }
 }

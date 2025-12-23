@@ -23,9 +23,16 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  */
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
+  private readonly workflowTaskManager: WorkflowTaskManager;
+  private readonly workflowExecutionRepository: WorkflowExecutionRepository;
 
-  constructor() {
+  constructor(
+    workflowTaskManager: WorkflowTaskManager,
+    workflowExecutionRepository: WorkflowExecutionRepository
+  ) {
     this.templatingEngine = new WorkflowTemplatingEngine();
+    this.workflowTaskManager = workflowTaskManager;
+    this.workflowExecutionRepository = workflowExecutionRepository;
   }
 
   /**
@@ -87,17 +94,13 @@ export class ConcurrencyManager {
    * @param concurrencyGroupKey - The evaluated concurrency group key
    * @param currentExecutionId - The ID of the current execution to check
    * @param spaceId - The space ID of the execution
-   * @param workflowExecutionRepository - Repository for querying/updating executions
-   * @param workflowTaskManager - Task manager for propagating cancellations
    * @returns Promise<boolean> - true if execution can proceed, false otherwise
    */
   public async checkConcurrency(
     concurrencySettings: ConcurrencySettings | undefined,
     concurrencyGroupKey: string | null,
     currentExecutionId: string,
-    spaceId: string,
-    workflowExecutionRepository: WorkflowExecutionRepository,
-    workflowTaskManager: WorkflowTaskManager
+    spaceId: string
   ): Promise<boolean> {
     // If no concurrency settings or key, allow execution to proceed
     if (!concurrencySettings || !concurrencyGroupKey) {
@@ -115,7 +118,7 @@ export class ConcurrencyManager {
     // Query for non-terminal executions in the same concurrency group
     // For cancel-in-progress, we cancel any non-terminal executions (PENDING, RUNNING, etc.)
     const runningExecutions =
-      await workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
+      await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
         concurrencyGroupKey,
         spaceId,
         currentExecutionId
@@ -136,7 +139,7 @@ export class ConcurrencyManager {
 
     await Promise.all(
       executionsToCancelList.map(async (execution) => {
-        await workflowExecutionRepository.updateWorkflowExecution({
+        await this.workflowExecutionRepository.updateWorkflowExecution({
           id: execution.id,
           status: ExecutionStatus.CANCELLED,
           cancelRequested: true,
@@ -146,7 +149,7 @@ export class ConcurrencyManager {
         });
 
         // Propagate cancellation to the running task
-        await workflowTaskManager.forceRunIdleTasks(execution.id);
+        await this.workflowTaskManager.forceRunIdleTasks(execution.id);
       })
     );
 
