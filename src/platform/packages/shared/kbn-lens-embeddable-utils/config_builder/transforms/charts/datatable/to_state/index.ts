@@ -15,7 +15,6 @@ import type {
 import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
 import { DEFAULT_LAYER_ID } from '../../../../types';
 import { fromMetricAPItoLensState } from '../../../columns/metric';
-import type { AnyMetricLensStateColumn } from '../../../columns/types';
 import { getValueColumn } from '../../../columns/esql_column';
 import { addLayerColumn, generateLayer } from '../../../utils';
 import { fromBucketLensApiToLensState } from '../../../columns/buckets';
@@ -27,6 +26,7 @@ import {
 } from '../constants';
 import { buildMetricsState, buildRowsState, buildSplitMetricsByState } from './columns';
 import { buildAppearanceState } from './appearance';
+import { processMetricColumnsWithReferences } from '../../utils';
 
 export function buildFormBasedLayer(
   config: DatatableStateNoESQL
@@ -39,23 +39,11 @@ export function buildFormBasedLayer(
 
   // First, convert ALL metrics and collect them with their IDs
   const metricsConverted = config.metrics.map(fromMetricAPItoLensState);
-  const allMetricColumnsWithIds: Array<{ column: AnyMetricLensStateColumn; id: string }> = [];
-
-  for (const [index, convertedColumns] of metricsConverted.entries()) {
-    const [mainMetric, refMetric] = convertedColumns;
-    const id = getAccessorName(METRIC_ACCESSOR_PREFIX, index);
-    allMetricColumnsWithIds.push({ column: mainMetric, id });
-
-    if (refMetric) {
-      // Reference columns need a different ID format
-      const refId = getAccessorName(`${METRIC_ACCESSOR_PREFIX}_ref`, index);
-      // Rewrite the main metric's reference to match the new ID
-      if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
-        mainMetric.references = [refId];
-      }
-      allMetricColumnsWithIds.push({ column: refMetric, id: refId });
-    }
-  }
+  const allMetricColumnsWithIds = processMetricColumnsWithReferences(
+    metricsConverted,
+    (index) => getAccessorName(METRIC_ACCESSOR_PREFIX, index),
+    (index) => getAccessorName(`${METRIC_ACCESSOR_PREFIX}_ref`, index)
+  );
 
   // Add row columns
   if (config.rows) {
