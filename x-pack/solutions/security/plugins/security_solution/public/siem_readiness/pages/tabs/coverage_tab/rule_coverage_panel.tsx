@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -22,6 +22,11 @@ import {
   EuiBasicTable,
   EuiHealth,
   EuiLoadingSpinner,
+  EuiButton,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSelectable,
 } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, Partition, Settings, PartitionLayout, LIGHT_THEME } from '@elastic/charts';
@@ -34,11 +39,53 @@ import { useBasePath } from '../../../../common/lib/kibana';
 const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
 
-// interface CategoryCoverageData {
-//   category: string;
-//   hasCoverage: boolean;
-//   totalDocs: number;
-// }
+const SelectablePopover = (props: Pick<EuiSelectableProps, 'options' | 'onChange'>) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { options, onChange } = props;
+
+  return (
+    <EuiPopover
+      panelPaddingSize="none"
+      button={
+        <EuiButton
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        >
+          {'Show Integrations'}
+        </EuiButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+    >
+      <EuiSelectable
+        aria-label="Selectable + popover example"
+        searchable
+        singleSelection="always"
+        searchProps={{
+          placeholder: 'Filter list',
+          compressed: true,
+        }}
+        options={options}
+        onChange={(newOptions, event, changedOption) => {
+          onChange?.(newOptions, event, changedOption);
+        }}
+      >
+        {(list, search) => (
+          <div style={{ width: 240 }}>
+            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            {list}
+            <EuiPopoverFooter paddingSize="s">
+              <EuiButton size="s" fullWidth>
+                {'Integration list'}
+              </EuiButton>
+            </EuiPopoverFooter>
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+};
 
 const buildMissingCategoriesDescription = (
   missingCategories: string[],
@@ -61,11 +108,9 @@ const buildMissingCategoriesDescription = (
   );
 };
 
-// const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
-
 export const RuleCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
-  const getCategoryIntegrationUrl = useCallback(
+  const getIntegrationUrl = useCallback(
     (integration: string): string => {
       const baseUrl = `${basePath}/app/integrations/detail`;
       return integration ? `${baseUrl}/${integration}` : baseUrl;
@@ -74,49 +119,48 @@ export const RuleCoveragePanel: React.FC = () => {
   );
 
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const {
-    // getReadinessCategories,
-    getInstalledIntegrations,
-    // getNotInstalledIntegrations,
-    getDetectionRules,
-  } = useSiemReadinessApi();
+  const { getInstalledIntegrations, getDetectionRules } = useSiemReadinessApi();
 
   const integrationNames = getInstalledIntegrations.data?.map((item) => item.name) || [];
   const installedIntegrationRules = useDetectionRulesByIntegration(integrationNames);
 
-  // const coverageData = useMemo<CategoryCoverageData[]>(() => {
-  //   if (!getReadinessCategories.data?.mainCategoriesMap) {
-  //     return [];
-  //   }
+  const installedIntegrationsOptions = useMemo(() => {
+    return (installedIntegrationRules.data?.analytics?.installedIntegrations || []).map(
+      (integration) => ({
+        label: integration,
+      })
+    );
+  }, [installedIntegrationRules.data?.analytics?.installedIntegrations]);
 
-  //   const mainCategoriesMap = getReadinessCategories.data.mainCategoriesMap;
+  const missingIntegrationsOptions = useMemo(() => {
+    return (installedIntegrationRules.data?.analytics?.missingIntegrations || []).map(
+      (integration) => ({
+        label: integration,
+      })
+    );
+  }, [installedIntegrationRules.data?.analytics?.missingIntegrations]);
 
-  //   return CATEGORY_ORDER.map((category) => {
-  //     const categoryData = mainCategoriesMap.find((item) => item.category === category);
-  //     const totalDocs = categoryData?.indices.reduce((sum, index) => sum + index.docs, 0) || 0;
+  const onChangePopOver = (
+    popoverOptions: EuiSelectableOption[],
+    event?: React.MouseEvent | React.KeyboardEvent,
+    changedOption?: EuiSelectableOption
+  ) => {
+    // Find the selected option
+    const selectedOption = popoverOptions.find((option) => option.checked === 'on');
 
-  //     return {
-  //       category,
-  //       hasCoverage: totalDocs > 0,
-  //       totalDocs,
-  //     };
-  //   });
-  // }, [getReadinessCategories.data?.mainCategoriesMap]);
-
-  // const missingCategories = useMemo(
-  //   () => coverageData.filter((row) => !row.hasCoverage),
-  //   [coverageData]
-  // );
-
-  // const hasMissingData = missingCategories.length > 0;
+    if (selectedOption) {
+      const integrationUrl = getIntegrationUrl(selectedOption.label);
+      window.open(integrationUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   const caseDescription = useMemo(
     () =>
       buildMissingCategoriesDescription(
         installedIntegrationRules.data?.analytics.missingIntegrations || [],
-        getCategoryIntegrationUrl
+        getIntegrationUrl
       ),
-    [installedIntegrationRules.data?.analytics.missingIntegrations, getCategoryIntegrationUrl]
+    [installedIntegrationRules.data?.analytics.missingIntegrations, getIntegrationUrl]
   );
 
   const handleCreateCase = useCallback(() => {
@@ -214,6 +258,18 @@ export const RuleCoveragePanel: React.FC = () => {
       field: 'actions',
       name: 'Actions',
       truncateText: true,
+      render: (actions: string, item) => {
+        if (item.status === 'Installed integrations') {
+          return (
+            <SelectablePopover options={installedIntegrationsOptions} onChange={onChangePopOver} />
+          );
+        } else {
+          // For "Missing Integrations" row
+          return (
+            <SelectablePopover options={missingIntegrationsOptions} onChange={onChangePopOver} />
+          );
+        }
+      },
       mobileOptions: {
         show: false,
       },
@@ -235,14 +291,12 @@ export const RuleCoveragePanel: React.FC = () => {
       {
         status: 'Installed integrations',
         numberOfRulesAssociated: installedIntegrationAssociatedRulesCount || 0,
-        // actions: getInstalledIntegrations.data?.length || 0,
-        actions: 'PLACEHOLDER',
+        actions: '',
       },
       {
         status: 'Missing Integrations',
         numberOfRulesAssociated: missingIntegrationAssociatedRulesCount || 0,
-        // actions: getNotInstalledIntegrations.data?.length || 0,
-        actions: 'PLACEHOLDER',
+        actions: '',
       },
     ],
     [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
