@@ -295,7 +295,7 @@ export function insertTriggerSnippet(
     // Check if triggers is a flow-style empty array (triggers: [])
     if (triggersPair.value && isSeq(triggersPair.value)) {
       const sequence = triggersPair.value;
-      if ((sequence as any).flow === true && (!sequence.items || sequence.items.length === 0)) {
+      if (sequence.flow === true && (!sequence.items || sequence.items.length === 0)) {
         const sequenceRange = getMonacoRangeFromYamlNode(model, sequence);
         if (sequenceRange) {
           replaceRange = sequenceRange;
