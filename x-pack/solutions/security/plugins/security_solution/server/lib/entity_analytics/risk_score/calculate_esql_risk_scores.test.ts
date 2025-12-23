@@ -29,11 +29,11 @@ describe('Calculate risk scores with ESQL', () => {
   describe('buildRiskScoreBucket', () => {
     it('parses esql results into RiskScoreBucket', () => {
       const inputs = [
-        '{ "score": "50", "time": "2021-08-23T18:00:05.000Z", "rule_name": "Test rule 5", "id": "test_id_5" }',
-        '{ "score": "40", "time": "2021-08-22T18:00:04.000Z", "rule_name": "Test rule 4", "id": "test_id_4" }',
-        '{ "score": "30", "time": "2021-08-21T18:00:03.000Z", "rule_name": "Test rule 3", "id": "test_id_3" }',
-        '{ "score": "20", "time": "2021-08-20T18:00:02.000Z", "rule_name": "Test rule 2", "id": "test_id_2" }',
-        '{ "score": "10", "time": "2021-08-19T18:00:01.000Z", "rule_name": "Test rule 1", "id": "test_id_1" }',
+        '{ "risk_score": "50", "time": "2021-08-23T18:00:05.000Z", "index": ".alerts-security.alerts-default", "rule_name_b64": "VGVzdCBydWxlIDU=", "category_b64": "c2lnbmFs", "id": "test_id_5" }',
+        '{ "risk_score": "40", "time": "2021-08-22T18:00:04.000Z", "index": ".alerts-security.alerts-default", "rule_name_b64": "VGVzdCBydWxlIDQ=", "category_b64": "c2lnbmFs", "id": "test_id_4" }',
+        '{ "risk_score": "30", "time": "2021-08-21T18:00:03.000Z", "index": ".alerts-security.alerts-default", "rule_name_b64": "VGVzdCBydWxlIDM=", "category_b64": "c2lnbmFs", "id": "test_id_3" }',
+        '{ "risk_score": "20", "time": "2021-08-20T18:00:02.000Z", "index": ".alerts-security.alerts-default", "rule_name_b64": "VGVzdCBydWxlIDI=", "category_b64": "c2lnbmFs", "id": "test_id_2" }',
+        '{ "risk_score": "10", "time": "2021-08-19T18:00:01.000Z", "index": ".alerts-security.alerts-default", "rule_name_b64": "VGVzdCBydWxlIDE=", "category_b64": "c2lnbmFs", "id": "test_id_1" }',
       ];
       const alertCount = 10;
       const riskScore = 100;
@@ -64,6 +64,7 @@ describe('Calculate risk scores with ESQL', () => {
                   score: 50,
                   time: '2021-08-23T18:00:05.000Z',
                   rule_name: 'Test rule 5',
+                  category: 'signal',
                   id: 'test_id_5',
                   contribution: 50 / 1 ** RIEMANN_ZETA_S_VALUE / RIEMANN_ZETA_VALUE,
                 },
@@ -72,6 +73,7 @@ describe('Calculate risk scores with ESQL', () => {
                   score: 40,
                   time: '2021-08-22T18:00:04.000Z',
                   rule_name: 'Test rule 4',
+                  category: 'signal',
                   id: 'test_id_4',
                   contribution: 40 / 2 ** RIEMANN_ZETA_S_VALUE / RIEMANN_ZETA_VALUE,
                 },
@@ -80,6 +82,7 @@ describe('Calculate risk scores with ESQL', () => {
                   score: 30,
                   time: '2021-08-21T18:00:03.000Z',
                   rule_name: 'Test rule 3',
+                  category: 'signal',
                   id: 'test_id_3',
                   contribution: 30 / 3 ** RIEMANN_ZETA_S_VALUE / RIEMANN_ZETA_VALUE,
                 },
@@ -88,6 +91,7 @@ describe('Calculate risk scores with ESQL', () => {
                   score: 20,
                   time: '2021-08-20T18:00:02.000Z',
                   rule_name: 'Test rule 2',
+                  category: 'signal',
                   id: 'test_id_2',
                   contribution: 20 / 4 ** RIEMANN_ZETA_S_VALUE / RIEMANN_ZETA_VALUE,
                 },
@@ -96,6 +100,7 @@ describe('Calculate risk scores with ESQL', () => {
                   score: 10,
                   time: '2021-08-19T18:00:01.000Z',
                   rule_name: 'Test rule 1',
+                  category: 'signal',
                   id: 'test_id_1',
                   contribution: 10 / 5 ** RIEMANN_ZETA_S_VALUE / RIEMANN_ZETA_VALUE,
                 },
