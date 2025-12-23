@@ -79,7 +79,7 @@ export class ConcurrencyManager {
    * Checks concurrency limits and applies the collision strategy if needed.
    *
    * For 'cancel-in-progress' strategy:
-   * - Queries for RUNNING executions with the same concurrency group key
+   * - Queries for non-terminal executions with the same concurrency group key
    * - If limit is exceeded, cancels the oldest execution(s) to make room
    * - Returns true if the new execution can proceed, false otherwise
    *
