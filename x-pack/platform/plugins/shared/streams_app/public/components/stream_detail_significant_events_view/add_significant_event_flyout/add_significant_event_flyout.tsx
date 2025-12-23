@@ -36,7 +36,7 @@ import { from, concatMap } from 'rxjs';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
-import { useAIFeatures } from '../../../hooks/use_ai_features';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
@@ -60,6 +60,7 @@ interface Props {
   initialSelectedFeatures: Feature[];
   onFeatureIdentificationClick: () => void;
   generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }
 
 export function AddSignificantEventFlyout({
@@ -73,6 +74,7 @@ export function AddSignificantEventFlyout({
   initialSelectedFeatures,
   features,
   onFeatureIdentificationClick,
+  aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -85,7 +87,6 @@ export function AddSignificantEventFlyout({
   const {
     timeState: { start, end },
   } = useTimefilter();
-  const aiFeatures = useAIFeatures();
 
   const dataViewsFetch = useStreamsAppFetch(() => {
     return data.dataViews.create({ title: definition.stream.name }).then((value) => {
@@ -93,8 +94,11 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const { onGenerateDescription: generateDescription, onSaveDescription: saveDescription } =
-    useStreamDescriptionApi({ definition, refreshDefinition });
+  const {
+    onGenerateDescription: generateDescription,
+    onSaveDescription: saveDescription,
+    abort: abortDescription,
+  } = useStreamDescriptionApi({ definition, refreshDefinition, aiFeatures, silent: true });
 
   const { generate, abort } = useSignificantEventsApi({ name: definition.stream.name, start, end });
 
@@ -115,7 +119,8 @@ export function AddSignificantEventFlyout({
   const stopGeneration = useCallback(() => {
     setIsGenerating(false);
     abort();
-  }, [abort]);
+    abortDescription();
+  }, [abort, abortDescription]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -309,6 +314,7 @@ export function AddSignificantEventFlyout({
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
+                  aiFeatures={aiFeatures}
                 />
               </EuiPanel>
             </EuiFlexItem>
