@@ -5,31 +5,22 @@
  * 2.0.
  */
 
-import type {
-  IWaterfall,
-  IWaterfallSpanOrTransaction,
-} from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import type { CriticalPath, CriticalPathSegment } from './types';
+import type { CriticalPath, CriticalPathBase, CriticalPathSegment } from './types';
 
-export function getCriticalPath(waterfall: IWaterfall): CriticalPath {
-  const segments: CriticalPathSegment[] = [];
+export function getCriticalPath<T extends CriticalPathBase>(
+  root: T | undefined,
+  childrenByParentId: Record<string, T[]>
+): CriticalPath<T> {
+  const segments: CriticalPathSegment<T>[] = [];
 
-  function scan({
-    item,
-    start,
-    end,
-  }: {
-    item: IWaterfallSpanOrTransaction;
-    start: number;
-    end: number;
-  }): void {
+  function scan({ item, start, end }: { item: T; start: number; end: number }): void {
     segments.push({
       self: false,
       duration: end - start,
       item,
       offset: start,
     });
-    const directChildren = waterfall.childrenByParentId[item.id];
+    const directChildren = childrenByParentId[item.id];
 
     if (directChildren && directChildren.length > 0) {
       // We iterate over all the item's direct children. The one that
@@ -118,13 +109,12 @@ export function getCriticalPath(waterfall: IWaterfall): CriticalPath {
     }
   }
 
-  if (waterfall.entryWaterfallTransaction) {
-    const start =
-      waterfall.entryWaterfallTransaction.skew + waterfall.entryWaterfallTransaction.offset;
+  if (root) {
+    const start = root.skew + root.offset;
     scan({
-      item: waterfall.entryWaterfallTransaction,
+      item: root,
       start,
-      end: start + waterfall.entryWaterfallTransaction.duration,
+      end: start + root.duration,
     });
   }
 
