@@ -204,9 +204,15 @@ describe('ConnectionDetailsService', () => {
 
   describe('setTab', () => {
     it('should block switching to apiKeys without permission', async () => {
-      const service = new ConnectionDetailsService(createMockOpts());
+      const hasPermission = jest.fn().mockResolvedValue(false);
+      const service = new ConnectionDetailsService(
+        createMockOpts({
+          apiKeys: { createKey: jest.fn(), hasPermission },
+        })
+      );
 
       await service.setTab('apiKeys');
+      await waitForPermissionCheck(service);
 
       expect(service.tabId$.getValue()).toBe('endpoints');
     });
