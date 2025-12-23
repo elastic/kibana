@@ -48,7 +48,7 @@
     "@kbn/data-views-plugin",
     "@kbn/cloud",
     "@kbn/onechat-plugin",
-    "@kbn/scout",
+    "@kbn/scout-search",
   ],
   "exclude": [
     "target/**/*",
