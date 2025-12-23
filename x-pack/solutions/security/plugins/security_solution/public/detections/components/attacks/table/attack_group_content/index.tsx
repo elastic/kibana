@@ -14,7 +14,6 @@ import {
 
 import { IconSparkles } from '../../../../../common/icons/sparkles';
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
-import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { Subtitle } from './subtitle';
 
 export const ATTACK_GROUP_TEST_ID_SUFFIX = '-group-renderer' as const;
