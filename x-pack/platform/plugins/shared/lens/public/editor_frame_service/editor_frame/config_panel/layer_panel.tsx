@@ -300,11 +300,25 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage =
-    layerDatasourceState !== undefined &&
-    layerDatasourceState?.layers &&
-    layerDatasourceState.layers[layerId] &&
-    layerDatasourceState?.layers[layerId].query !== undefined;
+  const isTextBasedLanguage = useMemo(() => {
+    const result =
+      layerDatasourceState !== undefined &&
+      layerDatasourceState?.layers &&
+      layerDatasourceState.layers[layerId] &&
+      layerDatasourceState?.layers[layerId].query !== undefined;
+    
+    // eslint-disable-next-line no-console
+    console.log('[LayerPanel] isTextBasedLanguage check:', {
+      layerId,
+      result,
+      hasLayerState: !!layerDatasourceState,
+      hasLayer: !!(layerDatasourceState?.layers?.[layerId]),
+      hasQuery: !!(layerDatasourceState?.layers?.[layerId]?.query),
+      query: layerDatasourceState?.layers?.[layerId]?.query,
+    });
+    
+    return result;
+  }, [layerDatasourceState, layerId]);
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -388,6 +402,20 @@ export function LayerPanel(props: LayerPanelProps) {
   const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
 
   const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
+
+  // Sync query state when layer is converted to ES|QL
+  useEffect(() => {
+    if (hasQuery(layerDatasourceState)) {
+      const newQuery = layerDatasourceState.layers[layerId].query;
+      // eslint-disable-next-line no-console
+      console.log('[LayerPanel] Layer has ES|QL query, syncing:', {
+        layerId,
+        newQuery,
+        currentQuery: query,
+      });
+      setQuery(newQuery);
+    }
+  }, [layerDatasourceState, layerId, query]);
 
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
