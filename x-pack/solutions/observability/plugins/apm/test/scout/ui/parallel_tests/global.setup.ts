@@ -11,6 +11,9 @@ import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
 import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_links_data';
 import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
+import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
+import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
+import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { testData } from '../fixtures';
 
 globalSetupHook(
@@ -38,6 +41,30 @@ globalSetupHook(
     // Generate span stacktrace data for stacktrace tests
     const spanStacktraceData = generateSpanStacktraceData();
     await apmSynthtraceEsClient.index(spanStacktraceData);
+
+    // Generate OTEL service data for OTEL service overview tests
+    const otelData = otelSendotlp({
+      from: new Date(testData.OPBEANS_START_DATE).getTime(),
+      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(otelData);
+    log.info('OTEL service data indexed');
+
+    // Generate eDot service data for eDot service overview tests
+    const edotData = adserviceEdot({
+      from: new Date(testData.OPBEANS_START_DATE).getTime(),
+      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(edotData);
+    log.info('eDot service data indexed');
+
+    // Generate mobile services data for mobile service overview tests
+    const mobileData = mobileServices({
+      from: new Date(testData.OPBEANS_START_DATE).getTime(),
+      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(mobileData);
+    log.info('Mobile services data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

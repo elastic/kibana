@@ -7,12 +7,45 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { BIGGER_TIMEOUT } from '../constants';
+import { testData } from '..';
 
 export class ServiceInventoryPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  readonly servicesTable;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.servicesTable = this.page.locator('.euiBasicTable');
+  }
 
   async gotoDetailedServiceInventoryWithDateSelected(start: string, end: string) {
     await this.page.goto(`${this.kbnUrl.app('apm')}/services?&rangeFrom=${start}&rangeTo=${end}`);
     await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: BIGGER_TIMEOUT });
+  }
+
+  async gotoServiceInventory(overrides: { rangeFrom?: string; rangeTo?: string } = {}) {
+    await this.page.goto(
+      `${this.kbnUrl.app('apm')}/services?${new URLSearchParams({
+        rangeFrom: overrides.rangeFrom ?? testData.OPBEANS_START_DATE,
+        rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
+      })}`
+    );
+    await this.waitForServicesTableToLoad();
+  }
+
+  async waitForServicesTableToLoad() {
+    await this.page
+      .getByTestId('allServices')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+  }
+
+  getServiceLink(serviceName: string) {
+    return this.servicesTable.getByRole('link', { name: serviceName });
+  }
+
+  async clickServiceLink(serviceName: string) {
+    await this.getServiceLink(serviceName).click();
+  }
+
+  async waitForServiceOverviewToLoad() {
+    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 }

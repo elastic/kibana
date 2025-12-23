@@ -1,0 +1,167 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout-oblt';
+import { test, testData, BIGGER_TIMEOUT } from '../../fixtures';
+
+test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlOblt'] }, () => {
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsViewer();
+  });
+
+  test('OTEL service navigates to transaction detail page from overview', async ({
+    page,
+    pageObjects: { serviceDetailsPage },
+  }) => {
+    await serviceDetailsPage.goToOverviewTab({
+      serviceName: testData.SERVICE_OTEL_SENDOTLP,
+      rangeFrom: testData.OPBEANS_START_DATE,
+      rangeTo: testData.OPBEANS_END_DATE,
+    });
+
+    await test.step('Click Transactions tab', async () => {
+      await serviceDetailsPage.clickTransactionsTab();
+    });
+
+    await test.step('Click on transaction link and wait for page to load', async () => {
+      await page.getByRole('link', { name: testData.OTEL_TRANSACTION_NAME }).click();
+      await page
+        .getByTestId('apmSettingsHeaderLink')
+        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    });
+
+    await test.step('Verify transaction detail page shows transaction name', async () => {
+      await expect(
+        page.getByRole('heading', { name: testData.OTEL_TRANSACTION_NAME, level: 2 })
+      ).toBeVisible();
+    });
+  });
+
+  test('OTEL service transaction detail page shows waterfall', async ({
+    page,
+    pageObjects: { transactionDetailsPage },
+  }) => {
+    await transactionDetailsPage.goto(
+      testData.SERVICE_OTEL_SENDOTLP,
+      testData.OTEL_TRANSACTION_NAME,
+      {
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+      }
+    );
+
+    await test.step('Verify waterfall button is visible', async () => {
+      await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
+        timeout: BIGGER_TIMEOUT,
+      });
+    });
+  });
+
+  test('OTEL service clicking waterfall accordion shows transaction details flyout', async ({
+    page,
+    pageObjects: { transactionDetailsPage },
+  }) => {
+    await transactionDetailsPage.goto(
+      testData.SERVICE_OTEL_SENDOTLP,
+      testData.OTEL_TRANSACTION_NAME,
+      {
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+      }
+    );
+
+    await test.step('Click on waterfall accordion', async () => {
+      await page.getByTestId('apmWaterfallButton').click();
+    });
+
+    await test.step('Verify transaction details flyout is hidden', async () => {
+      await expect(page.getByLabel('View details for child1')).toBeHidden();
+    });
+
+    await test.step('Click on the same waterfall accordion', async () => {
+      await page.getByTestId('apmWaterfallButton').click();
+    });
+
+    await test.step('Verify transaction details flyout is visible', async () => {
+      await expect(page.getByLabel('View details for child1')).toBeVisible();
+    });
+  });
+
+  test('EDOT service navigates to transaction detail page from overview', async ({
+    page,
+    pageObjects: { serviceDetailsPage },
+  }) => {
+    await serviceDetailsPage.goToOverviewTab({
+      serviceName: testData.SERVICE_EDOT_ADSERVICE,
+      rangeFrom: testData.OPBEANS_START_DATE,
+      rangeTo: testData.OPBEANS_END_DATE,
+    });
+
+    await test.step('Click Transactions tab', async () => {
+      await serviceDetailsPage.clickTransactionsTab();
+    });
+
+    await test.step('Click on transaction link and wait for page to load', async () => {
+      await page.getByRole('link', { name: testData.EDOT_TRANSACTION_NAME }).click();
+      await page
+        .getByTestId('apmSettingsHeaderLink')
+        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    });
+
+    await test.step('Verify transaction detail page shows transaction name', async () => {
+      await expect(
+        page.getByRole('heading', { name: testData.EDOT_TRANSACTION_NAME, level: 2 })
+      ).toBeVisible();
+    });
+  });
+
+  test('EDOT service transaction detail page shows waterfall', async ({
+    page,
+    pageObjects: { transactionDetailsPage },
+  }) => {
+    await transactionDetailsPage.goto(
+      testData.SERVICE_EDOT_ADSERVICE,
+      testData.EDOT_TRANSACTION_NAME,
+      {
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+      }
+    );
+
+    await test.step('Verify waterfall button is visible', async () => {
+      await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
+        timeout: BIGGER_TIMEOUT,
+      });
+    });
+
+    await test.step('Verify waterfall is rendered', async () => {
+      await expect(page.getByTestId('waterfallItem')).toBeVisible();
+    });
+  });
+
+  test('EDOT service clicking waterfall accordion shows transaction details flyout', async ({
+    page,
+    pageObjects: { transactionDetailsPage },
+  }) => {
+    await transactionDetailsPage.goto(
+      testData.SERVICE_EDOT_ADSERVICE,
+      testData.EDOT_TRANSACTION_NAME,
+      {
+        rangeFrom: testData.OPBEANS_START_DATE,
+        rangeTo: testData.OPBEANS_END_DATE,
+      }
+    );
+
+    await test.step('Click on waterfall accordion', async () => {
+      await page.getByTestId('apmWaterfallButton').click();
+    });
+
+    await test.step('Verify service name in flyout', async () => {
+      await expect(page.getByTestId('waterfallItem')).toContainText(testData.EDOT_TRANSACTION_NAME);
+    });
+  });
+});
