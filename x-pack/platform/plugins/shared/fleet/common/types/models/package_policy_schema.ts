@@ -437,10 +437,8 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
         meta: {
           description: 'IDs of the agent policies which that package policy will be added to.',
         },
-      }),
-      {
         maxSize: MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
-      }
+      })
     ),
     force: schema.maybe(
       schema.boolean({
