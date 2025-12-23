@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { firstValueFrom, filter } from 'rxjs';
 import { ConnectionDetailsService } from './service';
 import type { ConnectionDetailsOpts } from './types';
+
+// Helper to wait for permission check to complete
+const waitForPermissionCheck = (service: ConnectionDetailsService) =>
+  firstValueFrom(service.apiKeyHasAccess$.pipe(filter((v) => v !== null)));
 
 const createMockOpts = (overrides: Partial<ConnectionDetailsOpts> = {}): ConnectionDetailsOpts => ({
   apiKeys: {
@@ -31,8 +36,16 @@ describe('ConnectionDetailsService', () => {
       expect(service.tabId$.getValue()).toBe('endpoints');
     });
 
-    it('should initialize apiKeyHasAccess$ as null', () => {
-      const service = new ConnectionDetailsService(createMockOpts());
+    it('should initialize apiKeyHasAccess$ as null before permission resolves', () => {
+      const hasPermission = jest.fn(
+        () => new Promise<boolean>(() => {}) // never resolves
+      );
+
+      const service = new ConnectionDetailsService(
+        createMockOpts({
+          apiKeys: { createKey: jest.fn(), hasPermission },
+        })
+      );
 
       expect(service.apiKeyHasAccess$.getValue()).toBe(null);
     });
@@ -50,8 +63,7 @@ describe('ConnectionDetailsService', () => {
         })
       );
 
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitForPermissionCheck(service);
 
       expect(hasPermission).toHaveBeenCalled();
       expect(service.apiKeyHasAccess$.getValue()).toBe(true);
@@ -68,8 +80,7 @@ describe('ConnectionDetailsService', () => {
         })
       );
 
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitForPermissionCheck(service);
 
       expect(hasPermission).toHaveBeenCalled();
       expect(service.apiKeyHasAccess$.getValue()).toBe(false);
@@ -88,8 +99,7 @@ describe('ConnectionDetailsService', () => {
         })
       );
 
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitForPermissionCheck(service);
 
       expect(hasPermission).toHaveBeenCalled();
       expect(service.apiKeyHasAccess$.getValue()).toBe(false);
@@ -128,8 +138,7 @@ describe('ConnectionDetailsService', () => {
       // Initially should be endpoints (deferred)
       expect(service.tabId$.getValue()).toBe('endpoints');
 
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitForPermissionCheck(service);
 
       // Now should be apiKeys since user has permission
       expect(service.tabId$.getValue()).toBe('apiKeys');
@@ -147,8 +156,7 @@ describe('ConnectionDetailsService', () => {
         })
       );
 
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitForPermissionCheck(service);
 
       // Should stay on endpoints since user lacks permission
       expect(service.tabId$.getValue()).toBe('endpoints');
@@ -171,8 +179,7 @@ describe('ConnectionDetailsService', () => {
       service.setTab('apiKeys');
       expect(service.tabId$.getValue()).toBe('apiKeys');
 
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitForPermissionCheck(service);
 
       // Should switch back to endpoints
       expect(service.tabId$.getValue()).toBe('endpoints');
@@ -191,8 +198,7 @@ describe('ConnectionDetailsService', () => {
 
       service.setTab('apiKeys');
 
-      // Wait for the permission check to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitForPermissionCheck(service);
 
       // Should stay on apiKeys
       expect(service.tabId$.getValue()).toBe('apiKeys');
