@@ -44,6 +44,7 @@ export interface SearchHitRiskInput {
   id: string;
   index: string;
   rule_name?: string;
+  category?: string;
   time?: string;
   score?: number;
   contribution?: number;
