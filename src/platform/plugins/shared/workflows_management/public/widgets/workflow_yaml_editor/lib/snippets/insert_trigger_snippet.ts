@@ -108,15 +108,13 @@ function findLastCommentLine(
       break;
     }
 
-    if (!trimmed) {
-      continue;
-    }
-
-    if (trimmed.charAt(0) === '#') {
-      lastCommentLine = lineNum;
-      commentCount++;
-    } else {
-      return null;
+    if (trimmed) {
+      if (trimmed.charAt(0) === '#') {
+        lastCommentLine = lineNum;
+        commentCount++;
+      } else {
+        return null;
+      }
     }
   }
 
