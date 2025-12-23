@@ -38,11 +38,11 @@ export const getNavCategories = (
     },
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.siemReadiness],
-    },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.aiValue, SecurityPageName.siemMigrationsLanding],
+      linkIds: [
+        SecurityPageName.siemReadiness,
+        SecurityPageName.aiValue,
+        SecurityPageName.siemMigrationsLanding,
+      ],
     },
   ];
 };
