@@ -12481,12 +12481,10 @@
     "@storybook/global" "^5.0.0"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-styling-webpack@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-styling-webpack/-/addon-styling-webpack-1.0.1.tgz#660ee002ec249f6e32dd2784abfa50f59ef97951"
-  integrity sha512-5n+SXPfMTc4m7sWaJWPWjoHYWc6/B111M2Ia55toQ3GV4ON4vVlTgH9FX+EgCkDticElj99HLTMDJkHRj2yvkg==
-  dependencies:
-    "@storybook/node-logger" "^8.0.0-alpha.10"
+"@storybook/addon-styling-webpack@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-styling-webpack/-/addon-styling-webpack-2.0.0.tgz#3e854c82a835a6df439a69e307f337b39b4a4cab"
+  integrity sha512-N8jWhWnk3/nbL4P9zl0OEV/47P0Cxn/kPzSHjdAClyDYnqj9jI6upeLsraZgIV9Ro3QSeqeIloeXb1zMasWpOw==
 
 "@storybook/addon-toolbars@8.6.15":
   version "8.6.15"
@@ -12500,10 +12498,10 @@
   dependencies:
     memoizerific "^1.11.3"
 
-"@storybook/addon-webpack5-compiler-babel@^3.0.5":
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-webpack5-compiler-babel/-/addon-webpack5-compiler-babel-3.0.5.tgz#730378d44dcc6756005ac59d1e864238852f525e"
-  integrity sha512-9dlc5PrehEFUHqkgj8x+aKtOY9XH9Zk6WBbtpgY/JCQ7waJ2VvhyDnrgJeXfek+WYlSkJElnta6SlqP+XRG0PQ==
+"@storybook/addon-webpack5-compiler-babel@^3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-webpack5-compiler-babel/-/addon-webpack5-compiler-babel-3.0.6.tgz#8fe3a3dac8ec33e532a7e9af207b99676fbb132e"
+  integrity sha512-J4uVxEfkd2iAxPxcT90iebt5wuLSd0EYuMJa94t1jVUGlvZZAvnmqXAqscRITNU37nOr0c9yZ2YVS/sFOZyOVw==
   dependencies:
     "@babel/core" "^7.26.0"
     babel-loader "^9.2.1"
