@@ -128,4 +128,34 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       _index: 'workflows-executions',
     }));
   }
+
+  public async getRunningExecutionsByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    excludeExecutionId?: string
+  ): Promise<EsWorkflowExecution[]> {
+    const terminalStatuses = [
+      ExecutionStatus.COMPLETED,
+      ExecutionStatus.FAILED,
+      ExecutionStatus.CANCELLED,
+      ExecutionStatus.SKIPPED,
+      ExecutionStatus.TIMED_OUT,
+    ];
+
+    const results = Array.from(this.workflowExecutions.values())
+      .filter(
+        (exec) =>
+          exec.concurrencyGroupKey === concurrencyGroupKey &&
+          exec.spaceId === spaceId &&
+          !terminalStatuses.includes(exec.status) &&
+          (!excludeExecutionId || exec.id !== excludeExecutionId)
+      )
+      .sort((a, b) => {
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        return aTime - bTime; // Oldest first
+      });
+
+    return results;
+  }
 }

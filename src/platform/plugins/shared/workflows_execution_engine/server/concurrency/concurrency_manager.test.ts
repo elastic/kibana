@@ -25,7 +25,7 @@ describe('ConcurrencyManager', () => {
       error: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
 
-    concurrencyManager = new ConcurrencyManager(logger);
+    concurrencyManager = new ConcurrencyManager();
 
     mockContext = {
       execution: {

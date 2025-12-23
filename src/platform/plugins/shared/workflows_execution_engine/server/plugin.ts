@@ -69,7 +69,7 @@ export class WorkflowsExecutionEnginePlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.concurrencyManager = new ConcurrencyManager(this.logger);
+    this.concurrencyManager = new ConcurrencyManager();
   }
 
   public setup(

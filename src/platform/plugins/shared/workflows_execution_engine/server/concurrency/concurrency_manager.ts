@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -24,11 +23,9 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  */
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
-  private readonly logger: Logger;
 
-  constructor(logger: Logger) {
+  constructor() {
     this.templatingEngine = new WorkflowTemplatingEngine();
-    this.logger = logger;
   }
 
   /**

@@ -56,8 +56,13 @@ export const useWorkflowJsonSchema = ({
         : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getWorkflowJsonSchema(zodSchema);
 
-      // Hide concurrency settings from autocomplete (still parsed from YAML)
-      if (jsonSchema?.properties?.settings?.properties) {
+      // Temp hide concurrency settings from autocomplete (still parsed from YAML)
+      if (
+        jsonSchema?.properties?.settings &&
+        typeof jsonSchema.properties.settings === 'object' &&
+        'properties' in jsonSchema.properties.settings &&
+        typeof jsonSchema.properties.settings.properties === 'object'
+      ) {
         delete jsonSchema.properties.settings.properties.concurrency;
       }
 
