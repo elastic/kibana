@@ -1,7 +1,12 @@
 get:
   summary: Search for saved objects 
   operationId: findSavedObjects
-  description: Retrieve a paginated set of Kibana saved objects.
+  description: >
+    Retrieve a paginated set of Kibana saved objects.
+
+
+    WARNING: This API is intended to be removed in a future Elastic stack version.
+    Consider using the export API for your use case.
   deprecated: true
   tags:
     - saved objects
