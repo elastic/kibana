@@ -16,6 +16,7 @@ import { getAlertProcessingDonutAttributes } from '../../../common/components/vi
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
 const ChartSize = 250;
+const visualizationId = 'aiValueAlertProcessingDonut';
 interface Props {
   attackAlertIds: string[];
   from: string;
@@ -69,7 +70,7 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         }
         height={ChartSize}
         width={'100%'}
-        id={`open`}
+        id={visualizationId}
         isDonut={true}
         donutTitleLabel={'Total alerts processed'}
         donutTextWrapperClassName={'donutText'}

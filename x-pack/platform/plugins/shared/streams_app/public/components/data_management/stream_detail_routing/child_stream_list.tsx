@@ -105,7 +105,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 
   const renderCreateButton = () => {
     return (
-      <EuiFlexItem grow={false} alignItems="flex-start">
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup
           justifyContent="center"
           alignItems="center"
