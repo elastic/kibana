@@ -372,7 +372,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                   'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
                   {
                     defaultMessage:
-                      'The referenced model for this inference endpoint will be started when adding this field.',
+                      'For models that use ML nodes, the referenced model will be started when adding this field.',
                   }
                 )}
               </p>
