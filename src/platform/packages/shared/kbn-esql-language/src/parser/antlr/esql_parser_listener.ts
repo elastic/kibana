@@ -1,4 +1,4 @@
-// Generated from src/antlr/esql_parser.g4 by ANTLR 4.13.2
+// Generated from src/parser/antlr/esql_parser.g4 by ANTLR 4.13.2
 
 import {ParseTreeListener} from "antlr4";
 
@@ -84,6 +84,7 @@ import { CompletionCommandContext } from "./esql_parser.js";
 import { InlineStatsCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
 import { FuseConfigurationContext } from "./esql_parser.js";
+import { FuseKeyByFieldsContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
 import { InsistCommandContext } from "./esql_parser.js";
 import { SetCommandContext } from "./esql_parser.js";
@@ -903,6 +904,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFuseConfiguration?: (ctx: FuseConfigurationContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.fuseKeyByFields`.
+	 * @param ctx the parse tree
+	 */
+	enterFuseKeyByFields?: (ctx: FuseKeyByFieldsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fuseKeyByFields`.
+	 * @param ctx the parse tree
+	 */
+	exitFuseKeyByFields?: (ctx: FuseKeyByFieldsContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
 	 * @param ctx the parse tree

@@ -35,8 +35,8 @@ describe('elasticsearch clients', () => {
   });
 
   afterAll(async () => {
-    await kibanaServer.stop();
-    await esServer.stop();
+    await kibanaServer?.stop();
+    await esServer?.stop();
   });
 
   it('does not return deprecation warning when x-elastic-product-origin header is set', async () => {
