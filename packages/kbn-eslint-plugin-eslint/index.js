@@ -21,6 +21,7 @@ module.exports = {
     no_unsafe_console: require('./rules/no_unsafe_console'),
     scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
     scout_require_api_client_in_api_test: require('./rules/scout_require_api_client_in_api_test'),
+    scout_require_global_setup_hook_in_parallel_tests: require('./rules/scout_require_global_setup_hook_in_parallel_tests'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
   },
