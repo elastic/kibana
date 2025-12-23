@@ -45,10 +45,12 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
     // Filter to only show templates that:
     // 1. Have data_stream enabled
     // 2. Have at least one index pattern containing a wildcard
+    // 3. Are not hidden
     return response.templates.filter((template) => {
+      const isHidden = template.dataStream?.hidden === true;
       const hasDataStream = template.dataStream !== undefined;
       const hasWildcardPattern = template.indexPatterns?.some((pattern) => pattern.includes('*'));
-      return hasDataStream && hasWildcardPattern;
+      return hasDataStream && hasWildcardPattern && !isHidden;
     });
   }, [indexManagement.apiService, signal]);
 
