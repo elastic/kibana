@@ -173,13 +173,19 @@ async function buildBarrelIndex(repoRoot) {
         const barrelPath = resolvePackageBarrel(packageRoot, pkgJson);
         if (!barrelPath) return;
 
+        // Normalize packageRoot to real path to match the resolved barrelPath.
+        // This is necessary because barrelPath uses realpathSync (for symlinks like @kbn/*)
+        // and exports are resolved relative to it, so packageRoot must also be real path
+        // for path.relative() to work correctly in the transformer.
+        const normalizedPackageRoot = fs.realpathSync(packageRoot);
+
         // Parse barrel with context available
         const content = await readFile(barrelPath, 'utf-8');
         const exports = parseBarrelExports(content, barrelPath);
 
         if (Object.keys(exports).length > 0) {
           /** @type {import('./types').BarrelFileEntry} */
-          const entry = { exports, packageName, packageRoot };
+          const entry = { exports, packageName, packageRoot: normalizedPackageRoot };
 
           // Build reverse map and compute publicSubpath for each export
           if (pkgExports) {
@@ -191,7 +197,7 @@ async function buildBarrelIndex(repoRoot) {
             const validExports = {};
 
             for (const [exportName, exportInfo] of Object.entries(exports)) {
-              const relativePath = path.relative(packageRoot, exportInfo.path);
+              const relativePath = path.relative(normalizedPackageRoot, exportInfo.path);
               const publicSubpath = resolvePublicSubpath(relativePath, reverseMap);
               if (publicSubpath !== null) {
                 exportInfo.publicSubpath = publicSubpath;
