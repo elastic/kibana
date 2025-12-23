@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApiServicesFixture } from '@kbn/scout-oblt';
+import type { ApiServicesFixture, KbnClient, ScoutLogger } from '@kbn/scout-oblt';
 import type { ApmFields, LogDocument } from '@kbn/synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
 import { apm, log, timerange } from '@kbn/synthtrace-client';
@@ -16,6 +16,88 @@ export const TEST_END_DATE = '2024-01-01T01:00:00.000Z';
 export const RULE_NAMES = {
   FIRST_RULE_TEST: '!!! - Scout - First Rule Test',
 } as const;
+
+// Data view constants for custom threshold tests
+export const DATA_VIEWS = {
+  FILEBEAT: {
+    ID: 'data-view-id_1',
+    NAME: 'test-data-view-name_1',
+    TITLE: 'filebeat-*',
+  },
+  METRICBEAT: {
+    ID: 'data-view-id_2',
+    NAME: 'test-data-view-name_2',
+    TITLE: 'metricbeat-*',
+  },
+} as const;
+
+/**
+ * Create a data view via API
+ */
+export async function createDataView({
+  kbnClient,
+  log: logger,
+  id,
+  name,
+  title,
+}: {
+  kbnClient: KbnClient;
+  log: ScoutLogger;
+  id: string;
+  name: string;
+  title: string;
+}): Promise<void> {
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: '/api/content_management/rpc/create',
+      body: {
+        contentTypeId: 'index-pattern',
+        data: {
+          fieldAttrs: '{}',
+          title,
+          timeFieldName: '@timestamp',
+          sourceFilters: '[]',
+          fields: '[]',
+          fieldFormatMap: '{}',
+          typeMeta: '{}',
+          runtimeFieldMap: '{}',
+          name,
+        },
+        options: { id },
+        version: 1,
+      },
+    });
+    logger.info(`Created data view: ${name} (${id})`);
+  } catch (error) {
+    // Data view might already exist, which is fine
+    logger.debug(`Data view creation result for ${name}: ${error}`);
+  }
+}
+
+/**
+ * Delete a data view via API
+ */
+export async function deleteDataView({
+  kbnClient,
+  log: logger,
+  id,
+}: {
+  kbnClient: KbnClient;
+  log: ScoutLogger;
+  id: string;
+}): Promise<void> {
+  try {
+    await kbnClient.request({
+      method: 'DELETE',
+      path: `/api/data_views/data_view/${id}`,
+    });
+    logger.info(`Deleted data view: ${id}`);
+  } catch (error) {
+    // Data view might not exist, which is fine
+    logger.debug(`Data view deletion result for ${id}: ${error}`);
+  }
+}
 
 /**
  * Generate synthetic logs data for testing
