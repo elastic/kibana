@@ -16,6 +16,7 @@ import { PackageGrid } from './components/package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
+import { NoDataPrompt } from './components/no_data_prompt';
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
@@ -89,12 +90,16 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
               backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
             }}
           >
-            <PackageGrid
-              items={filteredCards}
-              isLoading={
-                isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
-              }
-            />
+            {filteredCards.length === 0 && !isLoading ? (
+              <NoDataPrompt />
+            ) : (
+              <PackageGrid
+                items={filteredCards}
+                isLoading={
+                  isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
+                }
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

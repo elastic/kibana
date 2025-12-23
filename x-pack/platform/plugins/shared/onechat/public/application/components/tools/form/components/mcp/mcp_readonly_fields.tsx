@@ -9,6 +9,7 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { ToolType } from '@kbn/onechat-common';
 import React, { useEffect } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { appPaths } from '../../../../../utils/app_paths';
 import { labels } from '../../../../../utils/i18n';
 import { McpToolHealthStatus } from '../../types/mcp';
 import { useToolHealth } from '../../../../../hooks/tools/use_tools_health';
@@ -26,7 +27,7 @@ export const McpReadOnlyFields = ({
   setMcpHealthStatus,
 }: McpConfigurationFieldsProps) => {
   const { createTool, deleteTool } = useToolsActions();
-  const { navigateToManageConnectors } = useNavigation();
+  const { navigateToManageConnectors, navigateToOnechatUrl } = useNavigation();
 
   const { control, setError, clearErrors } = useFormContext<McpToolFormData>();
   const [connectorId, mcpToolName, toolId] = useWatch({
@@ -118,7 +119,9 @@ export const McpReadOnlyFields = ({
       {mcpHealthStatus && (
         <McpHealthBanner
           status={mcpHealthStatus}
-          onDeleteTool={() => deleteTool(toolId)}
+          onDeleteTool={() =>
+            deleteTool(toolId, { onConfirm: () => navigateToOnechatUrl(appPaths.tools.list) })
+          }
           onCreateNewTool={() => createTool(ToolType.mcp)}
           onViewConnectors={navigateToManageConnectors}
           onViewMcpServer={openEditMcpServerFlyout}
