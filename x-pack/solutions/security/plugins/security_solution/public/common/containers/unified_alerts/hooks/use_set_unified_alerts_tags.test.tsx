@@ -47,8 +47,8 @@ describe('useSetUnifiedAlertsTags', () => {
   it('should call setUnifiedAlertsTags and show success toast', async () => {
     const body = {
       tags: {
-        add: ['tag-1'],
-        remove: [],
+        tags_to_add: ['tag-1'],
+        tags_to_remove: [],
       },
       ids: ['alert-1', 'alert-2'],
     };
@@ -74,8 +74,8 @@ describe('useSetUnifiedAlertsTags', () => {
   it('should handle errors', async () => {
     const body = {
       tags: {
-        add: ['tag-1'],
-        remove: [],
+        tags_to_add: ['tag-1'],
+        tags_to_remove: [],
       },
       ids: ['alert-1'],
     };
