@@ -73,5 +73,12 @@ describe('barrel transform build integration', () => {
     // With package exports field, the import is transformed to use the public subpath
     expect(testFileContent).not.toMatch(/require\(['"]rxjs['"]\)/);
     expect(testFileContent).toMatch(/require\(['"]rxjs\/internal\/firstValueFrom['"]\)/);
+
+    // Original: import { modifyUrl } from '@kbn/std';
+    // @kbn/std has no exports field - tests symlinked package barrel transform
+    const basePathTestFilePath = Path.join(outputSrcDir, 'base_path_service.js');
+    const basePathTestFileContent = await Fsp.readFile(basePathTestFilePath, 'utf-8');
+    expect(basePathTestFileContent).not.toMatch(/require\(['"]@kbn\/std['"]\)/);
+    expect(basePathTestFileContent).toMatch(/require\(['"]@kbn\/std\/src\/url['"]\)/);
   });
 });
