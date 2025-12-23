@@ -54,7 +54,7 @@ describe('Datatable', () => {
       validateConverter(multiMetricRowSplitDatatableAttributes, datatableStateSchema);
     });
 
-    it('should convert a datatable chart with multiple metrics, rows, split by with full config', () => {
+    it('should convert a datatable chart with full config', () => {
       validateConverter(fullConfigDatatableAttributes, datatableStateSchema);
     });
 
@@ -78,7 +78,7 @@ describe('Datatable', () => {
       validateConverter(multipleMetricRowSplitESQLDatatableAttributes, datatableStateSchema);
     });
 
-    it('should convert an ESQL datatable chart with multiple metrics, rows, split by with full config', () => {
+    it('should convert an ESQL datatable chart with full config', () => {
       validateConverter(fullConfigESQLDatatableAttributes, datatableStateSchema);
     });
 
