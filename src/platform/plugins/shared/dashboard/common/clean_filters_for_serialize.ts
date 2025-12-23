@@ -8,13 +8,14 @@
  */
 
 import { isCombinedFilter, type Filter } from '@kbn/es-query';
+import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
 import type { DashboardFilter } from '../server';
 
 export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] | undefined {
   if (!filters) return;
   return filters.map((filter) => {
     const cleanedFilter = { ...filter };
-    if (cleanedFilter.meta?.value) {
+    if (cleanedFilter.meta?.value === undefined) {
       // Create a new filter object with meta excluding 'value'
       const { value, ...metaWithoutValue } = cleanedFilter.meta;
       cleanedFilter.meta = metaWithoutValue;
@@ -34,7 +35,9 @@ export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] 
 
     if (isCombinedFilter(filter) && filter.meta?.params) {
       // Recursively clean filters in combined filters
-      cleanedFilter.meta.params = cleanFiltersForSerialize(cleanedFilter.meta.params as Filter[]);
+      cleanedFilter.meta.params = cleanFiltersForSerialize(
+        cleanedFilter.meta.params as Filter[]
+      ) as FilterMetaParams;
     }
 
     return cleanedFilter;
