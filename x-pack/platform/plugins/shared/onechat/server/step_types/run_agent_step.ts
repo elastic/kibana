@@ -19,7 +19,8 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { agent_id: agentId, message, schema } = context.input;
+        const { message, schema } = context.input;
+        const { agent_id: agentId } = context.config;
 
         context.logger.debug('onechat.runAgent step started');
         const request = context.contextManager.getFakeRequest();
