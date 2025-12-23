@@ -21,6 +21,9 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
 
   await esClient.indices.create({
     index: ALERT_EVENTS_INDEX,
+    settings: {
+      mode: 'lookup',
+    },
     mappings: {
       dynamic: false,
       properties: {
