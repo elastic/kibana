@@ -186,7 +186,7 @@ export function getBracketsToClose(text: string) {
 
   // Order is important here, do not change it lightly,
   // we want to consume first `"""` before `"` , as `"`'s can be found inside `"""` strings,
-  // and not the other wy around.
+  // and not the other way around.
   const pairs: Record<string, string> = { '"""': '"""', '/*': '*/', '(': ')', '[': ']', '"': '"' };
   const pairsReversed: Record<string, string> = {
     '"""': '"""',
