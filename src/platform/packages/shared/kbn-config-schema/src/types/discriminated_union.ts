@@ -19,7 +19,7 @@ export type DiscriminatedUnionTypeOptions<T> = TypeOptions<T> & {
 };
 
 export class DiscriminatedUnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
-  private readonly discriminator?: string;
+  private readonly discriminator: string;
 
   constructor(discriminator: string, types: RTS, options?: DiscriminatedUnionTypeOptions<T>) {
     let schema = internals.alternatives(types.map((type) => type.getSchema())).match('one');
@@ -65,6 +65,13 @@ export class DiscriminatedUnionType<RTS extends Array<Type<any>>, T> extends Typ
         return errorDetailToSchemaTypeError(
           'types that failed validation:',
           nonDiscriminatorDetails.flatMap((detail) => detail.details),
+          path
+        );
+      case 'alternatives.one':
+        return new SchemaTypeError(
+          `value [${value?.[this.discriminator]}] matched more than one allowed type of [${
+            this.discriminator
+          }]`,
           path
         );
       case 'alternatives.match':

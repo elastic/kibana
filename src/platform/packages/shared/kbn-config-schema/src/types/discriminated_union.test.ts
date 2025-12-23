@@ -49,6 +49,34 @@ test('handles catch-all pattern', () => {
   });
 });
 
+test('fails with less helpful error message when multiple catch-all patterns are provided', () => {
+  // Schema authors should avoid this antipattern
+  const type = schema.discriminatedOneOf('type', [
+    schema.object({ type: schema.literal('foo'), foo: schema.string() }),
+    schema.object({ type: schema.literal('bar'), bar: schema.number() }),
+    schema.object({ type: schema.string(), bar: schema.literal('catch all!') }),
+    schema.object({ type: schema.string(), bar: schema.literal('catch all again!') }),
+  ]);
+
+  expect(() => type.validate({ type: 123, bar: 'catch all!' })).toThrowErrorMatchingInlineSnapshot(
+    `"value [123] did not match any of the allowed values for [type]: [Error: expected value to equal [foo], Error: expected value to equal [bar], Error: expected value of type [string] but got [number], Error: expected value of type [string] but got [number]]"`
+  );
+});
+
+test('fails with less helpful error message when multiple discriminators are matched', () => {
+  // Schema authors should avoid this antipattern
+  const type = schema.discriminatedOneOf('type', [
+    schema.object({ type: schema.literal('foo'), foo: schema.string() }),
+    schema.object({ type: schema.literal('bar'), bar: schema.number() }),
+    schema.object({ type: schema.string(), bar: schema.number() }),
+    schema.object({ type: schema.string(), bar: schema.number() }),
+  ]);
+
+  expect(() => type.validate({ type: 'catchall', bar: 123 })).toThrowErrorMatchingInlineSnapshot(
+    `"value [catchall] matched more than one allowed type of [type]"`
+  );
+});
+
 test('handles multiple objects with the same type', () => {
   // This defeats the purpose of the discriminator, but it will work
   const type = schema.discriminatedOneOf('type', [
@@ -105,10 +133,24 @@ test('fails when discriminator matches but the rest of the type fails', () => {
   );
 });
 
+test('fails when discriminator matches but the rest of the type fails (nested object)', () => {
+  const type = schema.discriminatedOneOf('type', [
+    schema.object({ type: schema.literal('foo'), object: schema.object({ foo: schema.string() }) }),
+    schema.object({ type: schema.literal('bar'), bar: schema.number() }),
+  ]);
+
+  expect(() =>
+    type.validate({ type: 'foo', object: { foo: 12 } })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[object.foo]: Error: expected value of type [string] but got [number]"`
+  );
+});
+
 test('fails weirdly if discriminator keys are not ordered consistently', () => {
   // Unfortunately I can't see a good way of handling this case gracefully,
   // so hopefully developers will specify their discriminator key first in the schema.
-  // Alternatively, we can try to find a way to not abort validation early for this type.
+  // Alternatively, we can try to find a way to not abort validation early for discriminatedOneOf
+  // types to introspect the error details better (likely a performance hit).
   const type = schema.discriminatedOneOf('type', [
     schema.object({ foo: schema.string(), type: schema.literal('foo') }),
     schema.object({ type: schema.literal('bar'), bar: schema.number() }),
