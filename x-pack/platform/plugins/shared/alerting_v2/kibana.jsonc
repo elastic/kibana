@@ -5,7 +5,7 @@
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "alerting_esql",
+    "id": "alertingVTwo",
     "browser": false,
     "server": true,
     "configPath": ["xpack", "alerting_v2"],
