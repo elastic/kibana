@@ -20,12 +20,10 @@ function buildCommonMetricRowState(
   config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
 ): Pick<ColumnState, 'hidden' | 'alignment' | 'colorMode' | 'isTransposed'> {
   return {
-    ...(config.visible !== undefined ? { hidden: !config.visible } : {}),
+    ...(config.visible != null ? { hidden: !config.visible } : {}),
     ...(config.alignment ? { alignment: config.alignment } : {}),
     ...(config.apply_color_to
-      ? config.apply_color_to === 'value'
-        ? { colorMode: 'text' }
-        : { colorMode: 'cell' }
+      ? { colorMode: config.apply_color_to === 'value' ? 'text' : 'cell' }
       : {}),
     isTransposed: false,
   };
@@ -44,7 +42,7 @@ export function buildMetricsState(metrics: DatatableState['metrics']): ColumnSta
       ...(metric.summary
         ? {
             summaryRow: metric.summary.type,
-            ...(metric.summary.label ? { summaryLabel: metric.summary.label } : {}),
+            ...(metric.summary.label != null ? { summaryLabel: metric.summary.label } : {}),
           }
         : {}),
       isMetric: true,
@@ -63,7 +61,7 @@ export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
       ...(row.color && row.apply_color_to
         ? { colorMapping: fromColorMappingAPIToLensState(row.color) }
         : {}),
-      ...(row.click_filter !== undefined ? { oneClickFilter: row.click_filter } : {}),
+      ...(row.click_filter != null ? { oneClickFilter: row.click_filter } : {}),
       ...(row.collapse_by ? { collapseFn: row.collapse_by } : {}),
       isMetric: false,
     };
