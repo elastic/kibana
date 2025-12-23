@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, KibanaRequest, CoreRequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, Logger, KibanaRequest } from '@kbn/core/server';
 import type {
   InfraServerPluginSetupDeps,
   InfraServerPluginStartDeps,
@@ -91,16 +91,7 @@ async function buildInfraToolResources({
   libs: InfraBackendLibs;
   request: KibanaRequest;
 }) {
-  const [coreStart] = await core.getStartServices();
-  const soClient = coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: [] });
-  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-  const esClient = coreStart.elasticsearch.client.asScoped(request);
-
-  const coreContext = {
-    savedObjects: { client: soClient },
-    uiSettings: { client: uiSettingsClient },
-    elasticsearch: { client: esClient },
-  } as unknown as CoreRequestHandlerContext;
+  const coreContext = await core.createRequestHandlerContext(request);
 
   const infraContext = await getInfraRequestHandlerContext({ coreContext, request, plugins });
   const context = {
