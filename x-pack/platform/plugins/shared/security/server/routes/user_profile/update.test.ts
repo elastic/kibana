@@ -332,5 +332,38 @@ describe('Update profile routes', () => {
       expect(userProfileService.update).toBeCalledTimes(1);
       expect(userProfileService.update).toBeCalledWith('u_some_id', { some: 'property' });
     });
+
+    it('rejects invalid avatar color.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar: { color: 'invalid' } } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 400 }));
+
+      expect(userProfileService.update).not.toHaveBeenCalled();
+    });
+    it('accepts valid avatar color.', async () => {
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ userProfileId: 'u_some_id' }),
+      });
+      authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      await expect(
+        routeHandler(
+          getMockContext(),
+          httpServerMock.createKibanaRequest({ body: { avatar: { color: '#000000' } } }),
+          kibanaResponseFactory
+        )
+      ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
+
+      expect(userProfileService.update).toBeCalledTimes(1);
+    });
   });
 });

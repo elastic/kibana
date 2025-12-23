@@ -68,7 +68,16 @@ export const PipelinePanel: React.FC<PipelinePanelProps> = ({ pipeline }) => {
         defaultMessage: 'Pipeline',
       })}
     >
-      <EuiBasicTable columns={columns} items={items} />
+      <EuiBasicTable
+        columns={columns}
+        items={items}
+        tableCaption={i18n.translate(
+          'searchConnectors.index.syncJobs.pipeline.settingsTableCaption',
+          {
+            defaultMessage: 'Pipeline settings and values',
+          }
+        )}
+      />
     </FlyoutPanel>
   );
 };
