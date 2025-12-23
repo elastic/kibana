@@ -35,7 +35,6 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -51,6 +50,7 @@ import {
   selectDatasourceStates,
 } from '../../../state_management';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { getLongMessage } from '../../../user_messages_utils';
@@ -113,6 +113,8 @@ export function LayerPanel(props: LayerPanelProps) {
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
+
+  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);

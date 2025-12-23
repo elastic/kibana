@@ -29,9 +29,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { TextBasedDimensionTrigger } from '../text_based/components/dimension_trigger';
-import { TextBasedDimensionEditor } from '../text_based/components/dimension_editor';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -59,6 +57,8 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import { TextBasedDimensionTrigger } from '../text_based/components/dimension_trigger';
+import { TextBasedDimensionEditor } from '../text_based/components/dimension_editor';
 import {
   changeIndexPattern,
   changeLayerIndexPattern,
@@ -489,7 +489,15 @@ export function getFormBasedDatasource({
       );
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId, forceDSL) => {
+    toExpression: (
+      state,
+      layerId,
+      indexPatterns,
+      dateRange,
+      nowInstant,
+      searchSessionId,
+      forceDSL
+    ) => {
       if (state.layers[layerId].query) {
         return toExpressionESQL(state, layerId);
       }
@@ -502,6 +510,20 @@ export function getFormBasedDatasource({
         nowInstant,
         searchSessionId,
         forceDSL
+      );
+    },
+
+    toESQL: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) => {
+      return toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        uiSettings,
+        featureFlags,
+        dateRange,
+        nowInstant,
+        searchSessionId,
+        true
       );
     },
 
@@ -1005,13 +1027,13 @@ export function getFormBasedDatasource({
 function blankLayer(
   indexPatternId: string,
   linkToLayers?: string[],
-  visLayerType: string
+  visLayerType?: string
 ): FormBasedLayer {
   if (visLayerType === 'esql') {
     return {
       indexPatternId,
       linkToLayers,
-      columns: [],
+      columns: {},
       columnOrder: [],
       sampling: 1,
       ignoreGlobalFilters: false,
