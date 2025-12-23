@@ -842,6 +842,7 @@
     "@kbn/profiling-utils": "link:src/platform/packages/shared/kbn-profiling-utils",
     "@kbn/projects-solutions-groups": "link:src/platform/packages/private/kbn-projects-solutions-groups",
     "@kbn/random-sampling": "link:x-pack/platform/packages/private/kbn-random-sampling",
+    "@kbn/react-context-registry": "link:src/platform/packages/shared/react/context_registry",
     "@kbn/react-env": "link:src/platform/packages/shared/react/env",
     "@kbn/react-field": "link:src/platform/packages/shared/kbn-react-field",
     "@kbn/react-hooks": "link:src/platform/packages/shared/kbn-react-hooks",

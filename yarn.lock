@@ -7883,6 +7883,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-context-registry@link:src/platform/packages/shared/react/context_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-env@link:src/platform/packages/shared/react/env":
   version "0.0.0"
   uid ""
