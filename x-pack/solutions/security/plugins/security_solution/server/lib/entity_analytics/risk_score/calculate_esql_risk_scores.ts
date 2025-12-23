@@ -8,7 +8,6 @@
 import { isEmpty, omit } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
@@ -30,9 +29,9 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
-import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
+import type { CalculateScoresParams, RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import { filterFromRange } from './helpers';
+import { filterFromRange } from './calculate_risk_scores';
 // applyScoreModifiers and PrivmonUserCrudService are not available in 9.1; keep logic inline here
 
 type ESQLResults = Array<
@@ -51,7 +50,6 @@ export const calculateScoresWithESQL = async (
 ): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const { identifierType, logger, esClient } = params;
-    const now = new Date().toISOString();
 
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
@@ -78,13 +76,11 @@ export const calculateScoresWithESQL = async (
         );
 
         let error: unknown = null;
-        const response = await esClient
-          .search<never, RiskScoreCompositeBuckets>(query)
-          .catch((e) => {
-            logger.error(`Error executing composite query for ${entityType}: ${e.message}`);
-            error = e;
-            return null;
-          });
+        const response = await esClient.search(query).catch((e) => {
+          logger.error(`Error executing composite query for ${entityType}: ${e.message}`);
+          error = e;
+          return null;
+        });
 
         return {
           entityType,
@@ -96,15 +92,15 @@ export const calculateScoresWithESQL = async (
     );
 
     // Combine results from all entity queries
-    const combinedAggregations: Partial<RiskScoreCompositeBuckets> = {};
+    const combinedAggregations: Record<string, unknown> = {};
     responses.forEach(({ entityType, response }) => {
       if (
         response?.aggregations &&
         (response.aggregations as unknown as Record<string, unknown>)[entityType]
       ) {
-        (combinedAggregations as Record<string, unknown>)[entityType] = (
-          response.aggregations as unknown as Record<string, unknown>
-        )[entityType];
+        combinedAggregations[entityType] = (response.aggregations as Record<string, unknown>)[
+          entityType
+        ];
       }
     });
 
@@ -182,18 +178,18 @@ export const calculateScoresWithESQL = async (
           params.index
         );
 
-        const entityFilter = getFilters(params, entityType as EntityType);
+        const entityFilter = getFilters(params);
         return esClient.esql
           .query({
             query,
             filter: { bool: { filter: entityFilter } },
           })
           .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
-          .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
+          .then((riskScoreBuckets: RiskScoreBucket[]): ESQLResults[number] => {
             return [
               entityType as EntityType,
               {
-                scores,
+                scores: riskScoreBuckets as unknown as EntityRiskScoreRecord[],
                 afterKey: afterKey as EntityAfterKey,
               },
             ];
@@ -226,13 +222,7 @@ export const calculateScoresWithESQL = async (
   });
 
 const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => {
-  const {
-    excludeAlertStatuses = [],
-    excludeAlertTags = [],
-    range,
-    filter: userFilter,
-    filters: customFilters,
-  } = options;
+  const { excludeAlertStatuses = [], excludeAlertTags = [], range, filter: userFilter } = options;
   const filters = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
   if (excludeAlertStatuses.length > 0) {
     filters.push({
@@ -246,25 +236,6 @@ const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => 
     filters.push({
       bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
     });
-  }
-
-  // Apply entity-specific custom filters (EXCLUSIVE - exclude matching alerts)
-  if (customFilters && customFilters.length > 0 && entityType) {
-    customFilters
-      .filter((customFilter) => customFilter.entity_types.includes(entityType))
-      .forEach((customFilter) => {
-        try {
-          const kqlQuery = fromKueryExpression(customFilter.filter);
-          const esQuery = toElasticsearchQuery(kqlQuery);
-          if (esQuery) {
-            filters.push({
-              bool: { must: esQuery },
-            });
-          }
-        } catch (error) {
-          // Silently ignore invalid KQL filters to prevent query failures
-        }
-      });
   }
 
   return filters;
