@@ -22,10 +22,6 @@ test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
     await apiServices.alerting.cleanup.deleteAllRules();
   });
 
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.alerting.cleanup.deleteAllRules();
-  });
-
   test("Can create, trigger and view an 'Error count' alert from service inventory", async ({
     page,
     pageObjects: { serviceInventoryPage, alertsControls, serviceDetailsPage },
