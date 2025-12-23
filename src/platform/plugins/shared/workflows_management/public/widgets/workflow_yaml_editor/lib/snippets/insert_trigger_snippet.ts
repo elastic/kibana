@@ -137,10 +137,13 @@ function getInsertRangeAndText(
   insertAfterComment: boolean,
   insertAtLineNumber: number,
   insertText: string,
-  commentCount?: number
+  commentCount?: number,
+  isReplacingFlowArray?: boolean
 ): { range: monaco.Range; text: string } {
   if (replaceRange) {
-    return { range: replaceRange, text: insertText };
+    // When replacing a flow-style empty array ([]), prepend newline to start on a new line
+    const text = isReplacingFlowArray ? '\n' + insertText : insertText;
+    return { range: replaceRange, text };
   }
 
   if (insertAfterComment) {
@@ -276,6 +279,7 @@ export function insertTriggerSnippet(
   let insertAfterComment = false;
   let replaceRange: monaco.Range | null = null;
   let commentCount: number | undefined = undefined;
+  let isReplacingFlowArray = false;
 
   if (triggersPair) {
     insertTriggersSection = false;
@@ -285,30 +289,45 @@ export function insertTriggerSnippet(
     );
     triggersKeyRange = keyRange;
 
-    const firstEmptyItem = findFirstEmptyItem(model, triggersPair);
-    if (firstEmptyItem) {
-      replaceRange = createReplacementRange(model, firstEmptyItem.lineNumber);
-      indentLevel = firstEmptyItem.indentLevel;
-    } else if (triggerNodes.length > 0) {
-      const lastTriggerRange = getMonacoRangeFromYamlNode(
-        model,
-        triggerNodes[triggerNodes.length - 1].node
-      );
-      if (lastTriggerRange) {
-        insertAtLineNumber = lastTriggerRange.endLineNumber;
-        indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
-        insertAfterComment = true;
+    // Check if triggers is a flow-style empty array (triggers: [])
+    if (triggersPair.value && isSeq(triggersPair.value)) {
+      const sequence = triggersPair.value;
+      if ((sequence as any).flow === true && (!sequence.items || sequence.items.length === 0)) {
+        const sequenceRange = getMonacoRangeFromYamlNode(model, sequence);
+        if (sequenceRange) {
+          replaceRange = sequenceRange;
+          indentLevel = expectedIndent;
+          isReplacingFlowArray = true;
+        }
       }
-    } else if (triggersKeyRange) {
-      const lastCommentLine = findLastCommentLine(model, triggersPair, triggersKeyRange);
-      if (lastCommentLine) {
-        insertAtLineNumber = lastCommentLine.lineNumber;
-        indentLevel = lastCommentLine.indentLevel;
-        commentCount = lastCommentLine.commentCount;
-        insertAfterComment = true;
-      } else {
-        insertAtLineNumber = triggersKeyRange.endLineNumber + 1;
-        indentLevel = expectedIndent;
+    }
+
+    if (!replaceRange) {
+      const firstEmptyItem = findFirstEmptyItem(model, triggersPair);
+      if (firstEmptyItem) {
+        replaceRange = createReplacementRange(model, firstEmptyItem.lineNumber);
+        indentLevel = firstEmptyItem.indentLevel;
+      } else if (triggerNodes.length > 0) {
+        const lastTriggerRange = getMonacoRangeFromYamlNode(
+          model,
+          triggerNodes[triggerNodes.length - 1].node
+        );
+        if (lastTriggerRange) {
+          insertAtLineNumber = lastTriggerRange.endLineNumber;
+          indentLevel = getIndentLevelFromLineNumber(model, lastTriggerRange.startLineNumber);
+          insertAfterComment = true;
+        }
+      } else if (triggersKeyRange) {
+        const lastCommentLine = findLastCommentLine(model, triggersPair, triggersKeyRange);
+        if (lastCommentLine) {
+          insertAtLineNumber = lastCommentLine.lineNumber;
+          indentLevel = lastCommentLine.indentLevel;
+          commentCount = lastCommentLine.commentCount;
+          insertAfterComment = true;
+        } else {
+          insertAtLineNumber = triggersKeyRange.endLineNumber + 1;
+          indentLevel = expectedIndent;
+        }
       }
     }
   }
@@ -334,7 +353,8 @@ export function insertTriggerSnippet(
     insertAfterComment,
     insertAtLineNumber,
     insertText,
-    commentCount
+    commentCount,
+    isReplacingFlowArray
   );
 
   model.pushEditOperations(

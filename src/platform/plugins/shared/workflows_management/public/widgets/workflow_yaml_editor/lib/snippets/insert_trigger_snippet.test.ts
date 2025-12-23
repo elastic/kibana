@@ -348,7 +348,7 @@ describe('insertTriggerSnippet', () => {
   });
 
   describe('when triggers section exists but is empty', () => {
-    it('should insert trigger when triggers: [] (empty array)', () => {
+    it('should insert trigger when triggers: (empty children)', () => {
       const inputYaml = `triggers:`;
       const model = createFakeMonacoModel(inputYaml);
       const yamlDocument = parseDocument(inputYaml);
@@ -371,6 +371,36 @@ describe('insertTriggerSnippet', () => {
         [
           {
             range: new monaco.Range(1, 10, 1, 10),
+            text: `\n  ${expectedSnippet}`,
+          },
+        ],
+        expect.any(Function)
+      );
+    });
+
+    it('should insert trigger when triggers: [] (empty array)', () => {
+      const inputYaml = `triggers: []`;
+      const model = createFakeMonacoModel(inputYaml);
+      const yamlDocument = parseDocument(inputYaml);
+
+      insertTriggerSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'manual');
+
+      expect(generateTriggerSnippetSpy).toHaveBeenCalledWith('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+        withTriggersSection: false,
+      });
+
+      const expectedSnippet = generateTriggerSnippetModule.generateTriggerSnippet('manual', {
+        full: true,
+        monacoSuggestionFormat: false,
+      });
+
+      expect(model.pushEditOperations).toHaveBeenCalledWith(
+        null,
+        [
+          {
+            range: new monaco.Range(1, 11, 1, 13), 
             text: `\n  ${expectedSnippet}`,
           },
         ],
