@@ -17,7 +17,7 @@ import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -498,13 +498,19 @@ export function getTextBasedDatasource({
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
-      const context = state?.initialContext;
-      if (context && 'query' in context && context.query && isOfAggregateQueryType(context.query)) {
-        const language = getAggregateQueryMode(context.query);
-        // it will eventually log render_lens_esql_chart
-        return [`${language}_chart`];
-      }
-      return [];
+      const counters = flatten(
+        Object.values(state?.layers ?? {}).map((layer) => {
+          if (isOfAggregateQueryType(layer.query)) {
+            const language = getAggregateQueryMode(layer.query);
+
+            // it will eventually log render_lens_esql_chart
+            return [`${language}_chart`];
+          }
+          return [];
+        })
+      );
+      console.log(counters);
+      return counters;
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
