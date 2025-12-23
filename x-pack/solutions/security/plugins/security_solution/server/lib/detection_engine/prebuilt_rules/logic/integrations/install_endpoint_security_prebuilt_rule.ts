@@ -71,9 +71,10 @@ export const installEndpointSecurityPrebuiltRule = async ({
     // Solution first)
     await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
-    const latestRuleVersion = await ruleAssetsClient.fetchLatestVersions([
-      ELASTIC_SECURITY_RULE_ID,
-    ]);
+    const latestRuleVersion = await ruleAssetsClient.fetchLatestVersions({
+      ruleIds: [ELASTIC_SECURITY_RULE_ID],
+    });
+
     if (latestRuleVersion.length === 0) {
       logger.error(
         `Unable to find Elastic Defend rule in the prebuilt rule assets (rule_id: ${ELASTIC_SECURITY_RULE_ID})`
