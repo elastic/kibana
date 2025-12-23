@@ -14,55 +14,46 @@ import { getTypedSearch } from '../../utils/get_typed_search';
 
 type MetricType = 'min' | 'max' | 'sum' | 'count' | 'avg' | 'p95' | 'p99';
 
-function getMetricAggregation({
-  field,
-  aggregationType,
-}: {
-  field?: string;
-  aggregationType: MetricType;
-}): {
+interface AggregationConfig {
+  field: string;
+  type: MetricType;
+}
+
+function getMetricAggregation(aggregation: AggregationConfig | undefined): {
   agg: AggregationsAggregationContainer;
   buckets_path?: string;
 } {
-  if (aggregationType === 'count') {
-    return field
-      ? {
-          agg: {
-            value_count: {
-              field,
-            },
-          },
-        }
-      : {
-          agg: {
-            filter: {
-              match_all: {},
-            },
-          },
-          buckets_path: '_count',
-        };
-  }
-
-  if (!field) {
-    throw new Error(`Metric type ${aggregationType} needs a field to aggregate over`);
-  }
-
-  if (['min', 'max', 'sum', 'avg'].includes(aggregationType)) {
+  if (!aggregation?.type && !aggregation?.field) {
     return {
       agg: {
-        [aggregationType]: {
-          field,
+        filter: {
+          match_all: {},
+        },
+      },
+      buckets_path: '_count',
+    };
+  }
+
+  if (!aggregation?.type || !aggregation?.field) {
+    throw new Error(`Metric type ${aggregation?.type} needs a field to aggregate over`);
+  }
+
+  if (['min', 'max', 'sum', 'avg'].includes(aggregation.type)) {
+    return {
+      agg: {
+        [aggregation.type]: {
+          field: aggregation.field,
         },
       } as Record<Exclude<MetricType, 'count' | 'p95' | 'p99'>, { field: string }>,
     };
   }
 
-  const percentile = `${aggregationType.split('p')[1]}.0`;
+  const percentile = `${aggregation.type.split('p')[1]}.0`;
 
   return {
     agg: {
       percentiles: {
-        field,
+        field: aggregation.field,
         percents: [Number(percentile)],
         keyed: true,
       },
@@ -97,30 +88,23 @@ function getGroupingAggregation(groupingFields: string[]) {
 }
 
 async function getMetricChangePoints({
-  name,
   index,
   start,
   end,
   kqlFilter: kuery,
   groupBy,
-  field,
-  aggregationType,
+  aggregation,
   esClient,
 }: {
-  name: string;
-  index: string;
+  esClient: IScopedClusterClient;
   start: string;
   end: string;
+  index: string;
+  aggregation: AggregationConfig | undefined;
   kqlFilter?: string;
   groupBy: string[];
-  field?: string;
-  aggregationType: MetricType;
-  esClient: IScopedClusterClient;
 }) {
-  const { agg: metricAgg, buckets_path: bucketsPathMetric } = getMetricAggregation({
-    aggregationType,
-    field,
-  });
+  const { agg: metricAgg, buckets_path: bucketsPathMetric } = getMetricAggregation(aggregation);
 
   const groupAgg = getGroupingAggregation(groupBy);
 
@@ -128,7 +112,7 @@ async function getMetricChangePoints({
     groups: {
       ...groupAgg,
       aggs: {
-        over_time: {
+        time_series: {
           auto_date_histogram: {
             field: '@timestamp',
             buckets: 100,
@@ -147,7 +131,7 @@ async function getMetricChangePoints({
         },
         changes: {
           change_point: {
-            buckets_path: 'over_time>value',
+            buckets_path: 'time_series>value',
           },
           // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
         } as AggregationsAggregationContainer,
@@ -181,7 +165,6 @@ async function getMetricChangePoints({
   }
 
   return await getChangePoints({
-    name,
     buckets,
   });
 }
@@ -190,34 +173,27 @@ export async function getToolHandler({
   esClient,
   start,
   end,
-  name,
   index,
+  aggregation,
   kqlFilter: kqlFilterValue,
-  field,
-  aggregationType,
-  groupBy = [],
+  groupBy,
 }: {
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  name: string;
   index: string;
-  aggregationType: MetricType;
-  field?: string;
+  aggregation: AggregationConfig | undefined;
   kqlFilter?: string;
-  groupBy?: string[];
+  groupBy: string[];
 }) {
   const metricChangePoints = await getMetricChangePoints({
-    name,
-    index,
     esClient,
+    index,
     start,
     end,
+    aggregation,
     kqlFilter: kqlFilterValue,
     groupBy,
-    aggregationType,
-    field,
   });
-
   return orderBy(metricChangePoints.flat(), [(item) => item.changes.p_value]).slice(0, 25);
 }

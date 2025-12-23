@@ -13,12 +13,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-1h",
     "end": "now",
-    "metrics": [
-      {
-        "name": "API Latency",
-        "index": "metrics-*"
-      }
-    ]
+    "index": "metrics-*"
   }
 }
 ```

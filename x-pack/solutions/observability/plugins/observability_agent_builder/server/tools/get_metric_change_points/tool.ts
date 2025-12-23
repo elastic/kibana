@@ -23,25 +23,22 @@ export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
 
 const getMetricChangePointsSchema = z.object({
   ...timeRangeSchemaRequired,
-  name: z
-    .string()
-    .describe(
-      'A descriptive label for the metric change point analysis, e.g. "Error Rate" or "Latency P95". Used to identify results in the output.'
-    ),
   index: z.string().describe('The index or index pattern to find the metrics').optional(),
   kqlFilter: z
     .string()
     .describe('A KQL filter to filter the metric documents, e.g.: my_field:foo')
     .optional(),
-  field: z
-    .string()
-    .describe(
-      `Optional numeric field to aggregate and observe for changes (e.g., 'transaction.duration.us'). REQUIRED when 'aggregationType' is 'avg', 'sum', 'min', 'max', 'p95', or 'p99'.`
-    )
-    .optional(),
-  aggregationType: z
-    .enum(['count', 'avg', 'sum', 'min', 'max', 'p95', 'p99'])
-    .describe('The aggregation to apply to the specified field. Required when a field is provided.')
+  aggregation: z
+    .object({
+      field: z
+        .string()
+        .describe(
+          `Numeric field to aggregate and observe for changes (e.g., 'transaction.duration.us').`
+        ),
+      type: z
+        .enum(['avg', 'sum', 'min', 'max', 'p95', 'p99'])
+        .describe('Aggregation to apply to the specified field.'),
+    })
     .optional(),
   groupBy: z
     .array(z.string())
@@ -75,10 +72,7 @@ How it works:
 It uses the "auto_date_histogram" aggregation to group metrics by time and then detects change points (spikes/dips) within each time bucket.`,
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
-    handler: async (
-      { start, end, name, index, kqlFilter, field, aggregationType = 'count', groupBy },
-      { esClient }
-    ) => {
+    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
       try {
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
 
@@ -86,11 +80,9 @@ It uses the "auto_date_histogram" aggregation to group metrics by time and then 
           esClient,
           start,
           end,
-          name,
           index: index || metricIndexPatterns.join(','),
           kqlFilter,
-          field,
-          aggregationType,
+          aggregation,
           groupBy,
         });
 

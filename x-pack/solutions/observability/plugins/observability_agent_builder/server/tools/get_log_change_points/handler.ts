@@ -8,11 +8,6 @@
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { orderBy } from 'lodash';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { type Bucket, getChangePoints } from '../../utils/get_change_points';
 import { parseDatemath } from '../../utils/time';
@@ -25,7 +20,6 @@ function getProbability(totalHits: number): number {
 }
 
 async function getLogChangePoint({
-  name,
   index,
   start,
   end,
@@ -33,7 +27,6 @@ async function getLogChangePoint({
   messageField,
   esClient,
 }: {
-  name: string;
   index: string;
   start: string;
   end: string;
@@ -76,7 +69,7 @@ async function getLogChangePoint({
             size: 1000,
           },
           aggs: {
-            over_time: {
+            time_series: {
               auto_date_histogram: {
                 field: '@timestamp',
                 buckets: 100,
@@ -84,7 +77,7 @@ async function getLogChangePoint({
             },
             changes: {
               change_point: {
-                buckets_path: 'over_time>_count',
+                buckets_path: 'time_series>_count',
               },
               // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
             } as AggregationsAggregationContainer,
@@ -121,37 +114,26 @@ async function getLogChangePoint({
   }
 
   return await getChangePoints({
-    name,
     buckets: buckets as Bucket[],
   });
 }
 
 export async function getToolHandler({
-  core,
-  logger,
   esClient,
   start,
   end,
-  name,
   index,
   kqlFilter: kqlFilterValue,
   messageField,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
-  logger: Logger;
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  name: string;
   index: string;
   kqlFilter?: string;
   messageField: string;
 }) {
   const logChangePoints = await getLogChangePoint({
-    name,
     index,
     esClient,
     start,

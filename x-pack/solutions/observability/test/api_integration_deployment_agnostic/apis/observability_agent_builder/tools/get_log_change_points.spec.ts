@@ -54,25 +54,84 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             start: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start,
             end: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end,
             index: LOG_CHANGE_POINTS_DATA_STREAM,
-            name: 'test-logs',
           },
         });
         logChangePoints = toolResults[0]?.data?.changePoints ?? [];
+      });
+
+      it('should return change points', () => {
+        expect(logChangePoints).to.be.an('array');
+        expect(logChangePoints.length).to.be.greaterThan(0);
       });
 
       it('should detect spike in error logs', () => {
         expect(logChangePoints.length).to.be.greaterThan(0);
         const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
         expect(spike).to.be.ok();
+        expect(spike).to.have.property('timeSeries');
+        expect(spike?.timeSeries?.length).to.be.greaterThan(0);
+        expect(spike?.timeSeries?.[0]).to.have.property('x');
+        expect(spike?.timeSeries?.[0]).to.have.property('y');
       });
 
-      it('should include time series data for visualization', () => {
-        logChangePoints.forEach((cp: ChangePoint) => {
-          expect(cp).to.have.property('over_time');
-          expect(cp.over_time.length).to.be.greaterThan(0);
-          expect(cp.over_time[0]).to.have.property('x');
-          expect(cp.over_time[0]).to.have.property('y');
+      it('should detect stationary patterns in logs', () => {
+        const stationary = logChangePoints.find(
+          (cp: ChangePoint) => cp.changes?.type === 'stationary'
+        );
+        expect(stationary).to.be.ok();
+        expect(stationary).not.to.have.property('timeSeries');
+      });
+    });
+
+    describe('when resolving the logs index automatically', () => {
+      let logChangePoints: ChangePoint[];
+
+      before(async () => {
+        const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+          params: {
+            start: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start,
+            end: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end,
+          },
         });
+
+        logChangePoints = toolResults[0]?.data?.changePoints ?? [];
+      });
+
+      it('should still detect spikes without an explicit index', () => {
+        expect(logChangePoints.length).to.be.greaterThan(0);
+        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
+        expect(spike).to.be.ok();
+      });
+    });
+
+    describe('when filtering logs with kql', () => {
+      let logChangePoints: ChangePoint[];
+
+      before(async () => {
+        const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+          params: {
+            start: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start,
+            end: LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end,
+            index: LOG_CHANGE_POINTS_DATA_STREAM,
+            kqlFilter: 'log.level: info',
+          },
+        });
+
+        logChangePoints = toolResults[0]?.data?.changePoints ?? [];
+      });
+
+      it('should not report spikes when only stable info logs are included', () => {
+        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
+        expect(spike).to.be(undefined);
+      });
+
+      it('should still report stationary patterns in info logs', () => {
+        const stationary = logChangePoints.find(
+          (cp: ChangePoint) => cp.changes?.type === 'stationary'
+        );
+        expect(stationary).to.be.ok();
       });
     });
   });

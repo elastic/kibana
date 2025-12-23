@@ -53,7 +53,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start,
             end: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end,
-            name: 'test-metrics',
             index: METRIC_CHANGE_POINTS_INDEX,
           },
         });
@@ -68,10 +67,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should include time series data for visualization', () => {
         metricChangePoints.forEach((cp: ChangePoint) => {
-          expect(cp).to.have.property('over_time');
-          expect(cp.over_time.length).to.be.greaterThan(0);
-          expect(cp.over_time[0]).to.have.property('x');
-          expect(cp.over_time[0]).to.have.property('y');
+          expect(cp).to.have.property('timeSeries');
+          expect(cp?.timeSeries?.length).to.be.greaterThan(0);
+          expect(cp?.timeSeries?.[0]).to.have.property('x');
+          expect(cp?.timeSeries?.[0]).to.have.property('y');
         });
       });
     });

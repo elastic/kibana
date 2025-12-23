@@ -11,12 +11,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-1h",
     "end": "now",
-    "logs": [
-      {
-        "name": "Error Logs",
-        "index": "logs-*"
-      }
-    ]
+    "index": "logs-*"
   }
 }
 ```

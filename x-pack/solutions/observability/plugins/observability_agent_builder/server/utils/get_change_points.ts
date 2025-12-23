@@ -19,6 +19,7 @@ interface ChangePointResult {
   bucket?: {
     key: string | number;
     key_as_string?: string;
+    doc_count: number;
   };
 }
 
@@ -26,7 +27,7 @@ export interface Bucket {
   key: string | number | Array<string | number>;
   regex?: string;
   changes?: ChangePointResult;
-  over_time: {
+  time_series: {
     buckets: Array<{
       key: string | number;
       key_as_string?: string;
@@ -36,45 +37,84 @@ export interface Bucket {
 }
 
 export interface ChangePoint {
-  name: string;
   key: string | number | Array<string | number>;
   pattern?: string;
-  over_time: Array<{ x: number; y: number }>;
+  timeSeries?: Array<{ x: number; y: number }>;
   changes: ChangePointDetails & {
-    time: string;
+    time?: string;
     type: ChangePointType;
   };
 }
 
-export async function getChangePoints({
-  name,
-  buckets,
+function getMessage({
+  changes,
+  startTime,
+  endTime,
 }: {
-  name: string;
-  buckets: Bucket[];
-}): Promise<ChangePoint[]> {
+  changes: ChangePoint['changes'];
+  startTime: string;
+  endTime: string;
+}): string {
+  switch (changes.type) {
+    case 'spike':
+      return `A significant spike (transient increase) was detected for the time range ${startTime} to ${endTime} at ${changes.time} (p_value: ${changes.p_value}).`;
+
+    case 'dip':
+      return `A significant dip (transient decrease) was detected for the time range ${startTime} to ${endTime} at ${changes.time} (p_value: ${changes.p_value}).`;
+
+    case 'step_change':
+      return `A step change (baseline shift) was detected for the time range ${startTime} to ${endTime} starting at ${changes.time} (p_value: ${changes.p_value}).`;
+
+    case 'trend_change':
+      return `A trend change (slope shift) was detected for the time range ${startTime} to ${endTime} starting at ${changes.time} (p_value: ${changes.p_value}).`;
+
+    case 'stationary':
+      return `No change points were found for the time range ${startTime} to ${endTime}. The data is stationary (stable).`;
+
+    case 'non_stationary':
+      return `No specific change point was found for the time range ${startTime} to ${endTime}, but the data is non-stationary (unstable). The values are drifting or volatile without a clear single trigger event.`;
+
+    case 'indeterminable':
+      return `No specific change point was found for the time range ${startTime} to ${endTime}, and the data is indeterminable. There is insufficient evidence to classify the data as stationary or non-stationary.`;
+
+    default:
+      return `An anomaly of type '${changes.type}' was detected for the time range ${startTime} to ${endTime} at ${changes.time}.`;
+  }
+}
+
+function isChangePoint(changes: ChangePointResult): boolean {
+  return !changes.type.stationary && !changes.type.indeterminable && !changes.type.non_stationary;
+}
+
+export async function getChangePoints({ buckets }: { buckets: Bucket[] }): Promise<ChangePoint[]> {
   const series = buckets
-    .filter(
-      // filter out non-change points (stationary = no change, indeterminable = can't determine)
-      (bucket) =>
-        bucket.changes && !bucket.changes.type?.stationary && !bucket.changes.type?.indeterminable
-    )
+    .filter((bucket) => bucket.changes)
     .map((bucket) => {
-      const changes = bucket.changes!;
-      const [changeType, value] = Object.entries(changes.type)[0];
+      const changesResult = bucket.changes!;
+      const [changeType, value] = Object.entries(changesResult.type)[0];
+      const changes = {
+        time: changesResult.bucket?.key
+          ? new Date(changesResult.bucket.key).toISOString()
+          : undefined,
+        type: changeType as ChangePointType,
+        ...value,
+      };
       return {
-        name,
         key: bucket.key,
         pattern: bucket.regex,
-        over_time: bucket.over_time.buckets.map((group) => ({
-          x: new Date(group.key).getTime(),
-          y: group.doc_count,
-        })),
-        changes: {
-          time: changes.bucket?.key ? new Date(changes.bucket.key).toISOString() : '',
-          type: changeType as ChangePointType,
-          ...value,
-        },
+        message: getMessage({
+          changes,
+          startTime: bucket.time_series.buckets[0]?.key_as_string ?? '',
+          endTime:
+            bucket.time_series.buckets[bucket.time_series.buckets.length - 1]?.key_as_string ?? '',
+        }),
+        timeSeries: isChangePoint(bucket.changes!)
+          ? bucket.time_series.buckets.map((group) => ({
+              x: new Date(group.key).getTime(),
+              y: group.doc_count,
+            }))
+          : undefined,
+        changes,
       };
     });
 

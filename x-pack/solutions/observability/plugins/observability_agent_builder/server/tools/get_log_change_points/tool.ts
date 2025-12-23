@@ -23,11 +23,6 @@ export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_lo
 
 const getLogChangePointsSchema = z.object({
   ...timeRangeSchemaRequired,
-  name: z
-    .string()
-    .describe(
-      'A descriptive label for the log change point analysis, e.g. "Error Logs" or "API Requests". Used to identify results in the output.'
-    ),
   index: z.string().describe('The index or index pattern to find the logs').optional(),
   kqlFilter: z
     .string()
@@ -62,20 +57,14 @@ How it works:
 It uses the "categorize_text" aggregation to group similar unstructured messages into categories and then detects change points (spikes/dips) within each cateogory.`,
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
-    handler: async (
-      { start, end, name, index, kqlFilter, messageField = 'message' },
-      { esClient }
-    ) => {
+    handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {
       try {
         const logIndexPatterns = await getLogsIndices({ core, logger });
 
         const topLogChangePoints = await getToolHandler({
-          core,
-          logger,
           esClient,
           start,
           end,
-          name,
           index: index || logIndexPatterns.join(','),
           kqlFilter,
           messageField,
