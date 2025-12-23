@@ -2765,7 +2765,7 @@ describe('terms', () => {
                       <strong>
                         notExisting
                       </strong>
-
+                      
                     </React.Fragment>
                   </React.Fragment>,
                 }
