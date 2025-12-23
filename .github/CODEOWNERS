@@ -413,6 +413,7 @@ src/platform/packages/shared/content-management/favorites/favorites_common @elas
 src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
 src/platform/packages/shared/content-management/kbn-content-management-storybook @elastic/appex-sharedux
+src/platform/packages/shared/content-management/kbn-content-management-tags @elastic/appex-sharedux
 src/platform/packages/shared/content-management/tabbed_table_list_view @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
@@ -789,7 +790,6 @@ src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/kql @elastic/kibana-presentation
 src/platform/plugins/shared/management @elastic/kibana-management
-src/platform/plugins/shared/metrics_experience @elastic/obs-presentation-team
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/platform/plugins/shared/no_data_page @elastic/appex-sharedux
@@ -1175,6 +1175,7 @@ x-pack/solutions/observability/plugins/uptime @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/ux @elastic/actionable-obs-team
 x-pack/solutions/observability/test
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
+x-pack/solutions/search/packages/kbn-scout-search @elastic/appex-qa @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-code-examples @elastic/search-kibana
@@ -1258,11 +1259,6 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 /src/platform/test/functional/apps/management @elastic/kibana-management
-
-# Metrics Experience
-/src/platform/plugins/shared/metrics_experience @elastic/obs-exploration-team
-/src/platform/test/api_integration/apis/metrics_experience @elastic/obs-exploration-team
-/src/platform/test/api_integration/fixtures/es_archiver/metrics_experience @elastic/obs-exploration-team
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
