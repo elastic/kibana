@@ -22,9 +22,7 @@ import {
   EuiBasicTable,
   EuiHealth,
   EuiLoadingSpinner,
-  EuiButton,
   EuiPopover,
-  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
@@ -42,18 +40,35 @@ const ELASTIC_INTEGRATIONS_DOCS_URL =
 const SelectablePopover = (props: Pick<EuiSelectableProps, 'options' | 'onChange'>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { options, onChange } = props;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPopover
       panelPaddingSize="none"
       button={
-        <EuiButton
-          iconType="arrowDown"
-          iconSide="right"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        >
-          {'Show Integrations'}
-        </EuiButton>
+        <>
+          <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
+            <EuiFlexItem grow={false}>
+              <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+                {'View Integrations'}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                color="text"
+                size="xs"
+                style={{
+                  backgroundColor: euiTheme.colors.backgroundLightText,
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                }}
+              >
+                {options.length}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
@@ -75,11 +90,6 @@ const SelectablePopover = (props: Pick<EuiSelectableProps, 'options' | 'onChange
           <div style={{ width: 240 }}>
             <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
             {list}
-            <EuiPopoverFooter paddingSize="s">
-              <EuiButton size="s" fullWidth>
-                {'Integration list'}
-              </EuiButton>
-            </EuiPopoverFooter>
           </div>
         )}
       </EuiSelectable>
@@ -87,11 +97,11 @@ const SelectablePopover = (props: Pick<EuiSelectableProps, 'options' | 'onChange
   );
 };
 
-const buildMissingCategoriesDescription = (
-  missingCategories: string[],
+const buildMissingIntegrationDescription = (
+  missingIntegration: string[],
   getCategoryUrl: (category: string) => string
 ): string => {
-  const integrationLinks = missingCategories
+  const integrationLinks = missingIntegration
     .map((row) => {
       const url = getCategoryUrl(row);
       return `- [${row}](${window.location.origin}${url})`;
@@ -110,6 +120,7 @@ const buildMissingCategoriesDescription = (
 
 export const RuleCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
+  const { euiTheme } = useEuiTheme();
   const getIntegrationUrl = useCallback(
     (integration: string): string => {
       const baseUrl = `${basePath}/app/integrations/detail`;
@@ -156,7 +167,7 @@ export const RuleCoveragePanel: React.FC = () => {
 
   const caseDescription = useMemo(
     () =>
-      buildMissingCategoriesDescription(
+      buildMissingIntegrationDescription(
         installedIntegrationRules.data?.analytics.missingIntegrations || [],
         getIntegrationUrl
       ),
@@ -194,8 +205,6 @@ export const RuleCoveragePanel: React.FC = () => {
     setToggleIdSelected(optionId);
   };
 
-  const { euiTheme } = useEuiTheme();
-
   const chartBaseTheme = useMemo(
     () => ({
       ...LIGHT_THEME,
@@ -232,12 +241,18 @@ export const RuleCoveragePanel: React.FC = () => {
       name: 'Data Source status',
       'data-test-subj': 'firstNameCell',
       render: (status: string) => {
-        const color = status === 'Installed integrations' ? '#16C5C0' : '#F6726A';
+        const color =
+          status === 'Installed integrations'
+            ? euiTheme.colors.vis.euiColorVis0
+            : euiTheme.colors.vis.euiColorVis6;
         return <EuiHealth color={color}>{status}</EuiHealth>;
       },
       mobileOptions: {
         render: (item: { status: string; numberOfRulesAssociated: number; actions: string }) => {
-          const color = item.status === 'Installed integrations' ? '#16C5C0' : '#F6726A';
+          const color =
+            item.status === 'Installed integrations'
+              ? euiTheme.colors.vis.euiColorVis0
+              : euiTheme.colors.vis.euiColorVis6;
           return <EuiHealth color={color}>{item.status}</EuiHealth>;
         },
         header: false,
