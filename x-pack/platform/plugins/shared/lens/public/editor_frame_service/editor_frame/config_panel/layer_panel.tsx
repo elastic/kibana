@@ -306,17 +306,17 @@ export function LayerPanel(props: LayerPanelProps) {
       layerDatasourceState?.layers &&
       layerDatasourceState.layers[layerId] &&
       layerDatasourceState?.layers[layerId].query !== undefined;
-    
+
     // eslint-disable-next-line no-console
     console.log('[LayerPanel] isTextBasedLanguage check:', {
       layerId,
       result,
       hasLayerState: !!layerDatasourceState,
-      hasLayer: !!(layerDatasourceState?.layers?.[layerId]),
-      hasQuery: !!(layerDatasourceState?.layers?.[layerId]?.query),
+      hasLayer: !!layerDatasourceState?.layers?.[layerId],
+      hasQuery: !!layerDatasourceState?.layers?.[layerId]?.query,
       query: layerDatasourceState?.layers?.[layerId]?.query,
     });
-    
+
     return result;
   }, [layerDatasourceState, layerId]);
 

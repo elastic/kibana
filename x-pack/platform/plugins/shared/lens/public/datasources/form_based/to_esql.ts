@@ -6,6 +6,7 @@
  */
 
 import { from, where, sort, SortOrder, stats } from '@kbn/esql-composer';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
@@ -134,9 +135,19 @@ export function getESQLForLayer(
       return undefined;
     }
 
-    const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-      ? `bucket_${index + 1}_${aggId}`
-      : `bucket_${index}_${aggId}`;
+    // Calculate the label first so we can use it as the column name
+    const label = col.customLabel
+      ? col.label
+      : operationDefinitionMap[col.operationType].getDefaultLabel(
+          col,
+          layer.columns,
+          indexPattern,
+          uiSettings,
+          dateRange
+        );
+
+    // Use the raw label as the column ID (backticks are only for query syntax)
+    const esAggsId = label;
 
     const format =
       operationDefinitionMap[col.operationType].getSerializedFormat?.(
@@ -158,15 +169,8 @@ export function getESQLForLayer(
         id: colId,
         format: format as unknown as ValueFormatConfig,
         interval: undefined as never,
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
-              col,
-              layer.columns,
-              indexPattern,
-              uiSettings,
-              dateRange
-            ),
+        ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
+        label,
       },
     ];
 
@@ -189,7 +193,8 @@ export function getESQLForLayer(
 
     if (!metricESQL) return undefined;
 
-    metricESQL = `${esAggsId} = ` + metricESQL;
+    // Wrap column name in backticks for ES|QL syntax (if needed)
+    metricESQL = `${sanitazeESQLInput(esAggsId)} = ` + metricESQL;
 
     if (wrapInFilter) {
       if (col.filter?.language === 'kuery') {
@@ -232,11 +237,20 @@ export function getESQLForLayer(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
-    let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-      ? `col_${index}-${aggId}`
-      : `col_${index}_${aggId}`;
+    // Calculate the label first
+    const label = col.customLabel
+      ? col.label
+      : operationDefinitionMap[col.operationType].getDefaultLabel(
+          col,
+          layer.columns,
+          indexPattern,
+          uiSettings,
+          dateRange
+        );
 
+    let esAggsId: string;
     let interval: number | undefined;
+    
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
       const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
@@ -257,13 +271,17 @@ export function getESQLForLayer(
             return i;
         }
       };
+      // For date histogram, use the source field name for better compatibility
       esAggsId = dateHistogramColumn.sourceField;
       const kibanaInterval =
         dateHistogramColumn.params?.interval === 'auto'
-          ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+          ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate}) || '1h'
           : dateHistogramColumn.params?.interval || '1h';
       const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
       interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
+    } else {
+      // For other bucket types, use the raw label (backticks only for query syntax)
+      esAggsId = label;
     }
 
     const format =
@@ -282,15 +300,7 @@ export function getESQLForLayer(
         format: format as unknown as ValueFormatConfig,
         interval: interval as never,
         ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
-              col,
-              layer.columns,
-              indexPattern,
-              uiSettings,
-              dateRange
-            ),
+        label,
       },
     ];
 
@@ -332,8 +342,9 @@ export function getESQLForLayer(
       }
     }
 
+    // Wrap column name in backticks for ES|QL syntax (if needed)
     return (
-      `${esAggsId} = ` +
+      `${sanitazeESQLInput(esAggsId)} = ` +
       def.toESQL(
         {
           ...col,
