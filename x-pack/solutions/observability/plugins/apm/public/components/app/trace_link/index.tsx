@@ -25,11 +25,10 @@ const CentralizedContainer = styled.div`
 
 export function TraceLink() {
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { data: dataService } = services;
-  const timeRange = dataService.query.timefilter.timefilter.getTime();
+
   const {
     path: { traceId },
-    query: { rangeFrom = timeRange.from, rangeTo = timeRange.to, waterfallItemId },
+    query: { rangeFrom, rangeTo, waterfallItemId },
   } = useApmParams('/link-to/trace/{traceId}');
 
   const { start, end } = useTimeRange({
