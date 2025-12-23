@@ -38,12 +38,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
@@ -97,7 +93,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "core-usage-stats": "0e76782718b2eef6104d2ddec46ed356339220997ad8da8d4f86433c3b46f77a",
         "csp-rule-template": "6fec028650a7aa0ef5a07d3d2906c32c2505da013adb2e51fa0e66bbf0ff70c5",
         "dashboard": "f57c3b6ba05cb4d2f06fbc5421bb160fa7c95cd0519ed1c516b2cad45f03c820",
-        "data_connector": "e247c802cdd52a9c33d7845b0dd35e27f1c59b880b6986defd5f54fb4706ee1b",
+        "data_connector": "0a781d30dd08b12719543a6de805d2b7646088ace57bc534cd5128ac779cecf4",
         "dynamic-config-overrides": "6e190eb599a0e1297f743ae85a9c8b8398a83d8ba07a2060d4c6e8629f0a6b36",
         "endpoint:unified-user-artifact-manifest": "43de99c3d008e0b84173f63ee09936ba398c93ed3e18eabbd5792073a26b69b8",
         "endpoint:user-artifact-manifest": "eb81c7e7f4a32496d259521a9b5754a202fec4b139ef64c90ae3d777a3f217ee",
@@ -166,7 +162,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "9d54f733fb2bd08978c7059d71e77741574dc2616823745501742d34816a408c",
         "rules-settings": "436a36535b5d57ea1f7cbaaa37887ed5ddac8c3dea30c9fd98b3931ae87dfe1a",
         "sample-data-telemetry": "4c102e89bdcaee1ccc887d1709c7e176c05f25b4c5ac14c3d013b58fbfd806ac",
-        "search": "431e34cbf3aadc050c4f5e23e2e13da977d1d37468f3651499d722c207723c4c",
+        "search": "c85e16bcb3b1973b0592cade64b1440333fc9fc8802fe9d2c4c120cc6f153b81",
         "search-session": "95e62da1c06afde503c7d12efebc7df2102b9cb8bead1f50ca5c6ab8f4b67c26",
         "search-telemetry": "c152fc7e66d5ac7907e81c0926be9c219a15181e10b418b2fbb86bab2760627c",
         "search_playground": "97895cb5356dd7dad771b6d72b5c236c7c229c012545d56bf6e849984512c9b1",
@@ -576,7 +572,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "dashboard|warning: The SO type owner should ensure these transform functions DO NOT mutate after they are defined.",
         "==================================================================================================================",
         "data_connector|global: cd0025f57609f97d28e905c34c7d74608494d14d",
-        "data_connector|mappings: 20ac4cca81fb9e525cc9f4d601dc230d8ccaf8d3",
+        "data_connector|mappings: 8348a54d026b60ec0efccf703b79238ff42c7caa",
         "data_connector|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "data_connector|10.1.0: e0fe478ddea140633901e7d92978f956751245d5b8ce5b1f254968c54a7f2616",
         "=======================================================================================",
@@ -1051,6 +1047,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "search|global: ce649a79d99c5ff5eb68d544635428ef87946d84",
         "search|mappings: 432d4dfdb5a33ce29d00ccdcfcda70d7c5f94b52",
         "search|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
+        "search|10.10.0: 2267369c36edf6d7a2ebafe7028171610687672921e7d79b796acb287199897f",
         "search|10.9.0: 557d8a40f3cd758fb4da9afba44e827a8c18b63ba140af871cf4a815f8e5e869",
         "search|10.8.0: 76274f35cc139d5e208236bb92c859dd29e27ade181950a9f0bc3e95220c86dc",
         "search|10.7.0: 03bcc899ac7be8e0a88520ae8fc091fc6ea37b231848dcbc0119b7425f36dd0e",
@@ -1399,7 +1396,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "10.4.0",
         "rules-settings": "10.1.0",
         "sample-data-telemetry": "10.0.0",
-        "search": "10.9.0",
+        "search": "10.10.0",
         "search-session": "10.0.0",
         "search-telemetry": "10.0.0",
         "search_playground": "10.1.0",
@@ -1552,7 +1549,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "10.4.0",
         "rules-settings": "10.1.0",
         "sample-data-telemetry": "0.0.0",
-        "search": "10.9.0",
+        "search": "10.10.0",
         "search-session": "8.6.0",
         "search-telemetry": "7.12.0",
         "search_playground": "10.1.0",

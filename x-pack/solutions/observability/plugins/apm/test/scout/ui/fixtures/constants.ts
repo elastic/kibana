@@ -10,12 +10,17 @@ import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/gen
 
 export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
 export const OPBEANS_END_DATE = '2021-10-10T00:15:00.000Z';
+export const BIGGER_TIMEOUT = 45000;
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 // Error constants - based on opbeans synthtrace data
 export const ERROR_MESSAGE = '[MockError] Foo';
 export const ERROR_GROUPING_KEY = generateLongIdWithSeed(ERROR_MESSAGE);
 export const ERROR_GROUPING_KEY_SHORT = ERROR_GROUPING_KEY.slice(0, 5);
+
+// Span links test data dates
+export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
+export const SPAN_LINKS_END_DATE = '2022-01-01T00:15:00.000Z';
 
 // APM-specific role definitions matching authentication.ts
 export const APM_ROLES = {
