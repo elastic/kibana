@@ -139,9 +139,9 @@ async function setCcmApiKey(
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const auth = Buffer.from(
-        `${es.credentials.username}:${es.credentials.password}`
-      ).toString('base64');
+      const auth = Buffer.from(`${es.credentials.username}:${es.credentials.password}`).toString(
+        'base64'
+      );
       const body = JSON.stringify({ api_key: apiKey });
 
       const { statusCode } = await httpRequest(
