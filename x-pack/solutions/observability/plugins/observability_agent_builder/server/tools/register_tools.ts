@@ -41,6 +41,10 @@ import {
   createDownstreamDependenciesTool,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 } from './get_downstream_dependencies/tool';
+import {
+  createGetRedMetricsTool,
+  OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+} from './get_red_metrics/tool';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -60,6 +64,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -88,6 +93,7 @@ export async function registerTools({
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
+    createGetRedMetricsTool({ core, dataRegistry, logger }),
   ];
 
   for (const tool of observabilityTools) {

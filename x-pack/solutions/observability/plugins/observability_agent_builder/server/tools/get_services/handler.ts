@@ -35,13 +35,18 @@ export async function getToolHandler({
     end,
   });
 
-  const services = (response?.items ?? []).filter((item) => {
+  const filteredServices = (response?.items ?? []).filter((item) => {
     if (!healthStatus) {
       return true;
     }
 
     return healthStatus.includes(item.healthStatus ?? 'unknown');
   });
+
+  const services = filteredServices.map((service) => ({
+    ...service,
+    latency: service.latency != null ? service.latency / 1000 : null,
+  }));
 
   return {
     services,

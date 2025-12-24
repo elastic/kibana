@@ -141,6 +141,18 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
+// RED metrics types
+export interface RedMetricsItem {
+  group: string;
+  latency: number | null;
+  throughput: number;
+  failureRate: number;
+}
+
+interface RedMetricsResponse {
+  items: RedMetricsItem[];
+}
+
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -212,4 +224,12 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  redMetrics: (params: {
+    request: KibanaRequest;
+    start: string;
+    end: string;
+    filter?: string;
+    groupBy?: string;
+  }) => Promise<RedMetricsResponse>;
 }

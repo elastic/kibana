@@ -26,6 +26,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.observability}.get_downstream_dependencies`,
   `${internalNamespaces.observability}.get_correlated_logs`,
   `${internalNamespaces.observability}.get_hosts`,
+  `${internalNamespaces.observability}.get_red_metrics`,
 
   // Dashboards
   'platform.dashboard.create_dashboard',
@@ -42,7 +43,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
-  'observability.agent',
+  `${internalNamespaces.observability}.agent`,
   'platform.dashboard.dashboard_agent',
   `${internalNamespaces.security}.agent`,
 ];

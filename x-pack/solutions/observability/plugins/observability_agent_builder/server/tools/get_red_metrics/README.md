@@ -1,0 +1,121 @@
+# get_red_metrics
+
+Retrieves RED metrics (Rate, Errors, Duration) for APM data with flexible filtering and grouping. This tool is designed for drilling down into performance issues after identifying an unhealthy service.
+
+## RED Metrics
+
+- **Rate (throughput)**: requests per minute
+- **Errors (failure rate)**: percentage of failed transactions (0-1)
+- **Duration (latency)**: average response time in milliseconds
+
+## When to use
+
+- After identifying an unhealthy service with `get_services`, use this tool to drill down and find the root cause
+- Analyze which specific transactions, hosts, or containers are causing performance issues
+- Compare RED metrics across different dimensions (e.g.: by transaction name, host, region)
+- Investigate performance by service version during deployments
+
+## Examples
+
+### Get RED metrics grouped by service (default)
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_red_metrics",
+  "tool_params": {
+    "start": "now-1h",
+    "end": "now"
+  }
+}
+```
+
+### Drill down by transaction name for a specific service
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_red_metrics",
+  "tool_params": {
+    "start": "now-1h",
+    "end": "now",
+    "filter": "service.name: \"frontend\"",
+    "groupBy": "transaction.name"
+  }
+}
+```
+
+### Analyze performance by host
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_red_metrics",
+  "tool_params": {
+    "start": "now-30m",
+    "end": "now",
+    "filter": "service.name: \"checkout-service\"",
+    "groupBy": "host.name"
+  }
+}
+```
+
+### Compare performance across service versions
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_red_metrics",
+  "tool_params": {
+    "start": "now-2h",
+    "end": "now",
+    "filter": "service.name: \"payment-api\"",
+    "groupBy": "service.version"
+  }
+}
+```
+
+### Filter by transaction type
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_red_metrics",
+  "tool_params": {
+    "start": "now-1h",
+    "end": "now",
+    "filter": "transaction.type: \"request\"",
+    "groupBy": "service.name"
+  }
+}
+```
+
+### Analyze specific transaction across containers
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_red_metrics",
+  "tool_params": {
+    "start": "now-15m",
+    "end": "now",
+    "filter": "service.name: \"frontend\" AND transaction.name: \"POST /api/cart\"",
+    "groupBy": "container.id"
+  }
+}
+```
+
+### Analyze by cloud region
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_red_metrics",
+  "tool_params": {
+    "start": "now-1h",
+    "end": "now",
+    "filter": "service.name: \"api-gateway\"",
+    "groupBy": "cloud.region"
+  }
+}
+```
