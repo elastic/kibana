@@ -97,14 +97,10 @@ export function createEsqlRulesTaskRunner({
         await ensureAlertsResources({
           logger,
           esClient,
-          dataStreamPrefix: config.esqlRules.alertsDataStreamPrefix,
         });
         const targetDataStream = await ensureAlertsDataStream({
           logger,
           esClient,
-          dataStreamPrefix: config.esqlRules.alertsDataStreamPrefix,
-          spaceId: params.spaceId,
-          spaces: pluginsStart.spaces,
         });
 
         const scheduledAt = taskInstance.scheduledAt;
@@ -119,6 +115,7 @@ export function createEsqlRulesTaskRunner({
           services: { logger, esClient, dataStreamName: targetDataStream },
           input: {
             ruleId: params.ruleId,
+            spaceId: params.spaceId,
             rawRule,
             esqlResponse,
             taskRunKey,

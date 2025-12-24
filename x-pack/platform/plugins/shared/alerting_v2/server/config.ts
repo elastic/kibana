@@ -11,11 +11,6 @@ import type { TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   esqlRules: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    /**
-     * Prefix for alerts data streams. Per-space streams are created as:
-     * `<alertsDataStreamPrefix>-<space_namespace>`
-     */
-    alertsDataStreamPrefix: schema.string({ defaultValue: 'alerts' }),
   }),
 });
 

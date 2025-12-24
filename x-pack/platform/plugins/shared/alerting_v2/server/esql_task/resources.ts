@@ -7,14 +7,13 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   ClusterPutComponentTemplateRequest,
   IndicesPutIndexTemplateRequest,
   IlmPolicy,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
+import { ALERT_EVENTS_INDEX } from './constants';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -33,10 +32,6 @@ export const DEFAULT_ALERTS_ILM_POLICY: IlmPolicy = {
     },
   },
 };
-
-function getIndexPattern(prefix: string) {
-  return `${prefix}-*`;
-}
 
 async function retryTransientEsErrors<T>(
   fn: () => Promise<T>,
@@ -100,14 +95,13 @@ const ALERTS_WRITTEN_FIELDS_MAPPINGS: estypes.MappingTypeMapping = {
 export async function ensureAlertsResources({
   logger,
   esClient,
-  dataStreamPrefix,
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
-  dataStreamPrefix: string;
 }) {
-  const componentTemplateName = `${dataStreamPrefix}-schema@component`;
-  const indexTemplateName = `${dataStreamPrefix}-schema@index-template`;
+  const dataStreamName = ALERT_EVENTS_INDEX;
+  const componentTemplateName = `${dataStreamName}-schema@component`;
+  const indexTemplateName = `${dataStreamName}-schema@index-template`;
 
   const componentTemplate: ClusterPutComponentTemplateRequest = {
     name: componentTemplateName,
@@ -116,15 +110,13 @@ export async function ensureAlertsResources({
     },
     _meta: {
       managed: true,
-      description: `${getIndexPattern(
-        dataStreamPrefix
-      )} written-fields schema (alerting_v2 / ES|QL)`,
+      description: `${dataStreamName} written-fields schema (alerting_v2 / ES|QL)`,
     },
   };
 
   const indexTemplate: IndicesPutIndexTemplateRequest = {
     name: indexTemplateName,
-    index_patterns: [getIndexPattern(dataStreamPrefix)],
+    index_patterns: [dataStreamName],
     data_stream: {},
     composed_of: [componentTemplateName],
     priority: 500,
@@ -137,7 +129,7 @@ export async function ensureAlertsResources({
     },
     _meta: {
       managed: true,
-      description: `${getIndexPattern(dataStreamPrefix)} index template (alerting_v2 / ES|QL)`,
+      description: `${dataStreamName} index template (alerting_v2 / ES|QL)`,
     },
   };
 
@@ -169,18 +161,11 @@ export async function ensureAlertsResources({
 export async function ensureAlertsDataStream({
   logger,
   esClient,
-  dataStreamPrefix,
-  spaceId,
-  spaces,
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
-  dataStreamPrefix: string;
-  spaceId: string;
-  spaces?: SpacesPluginStart;
 }) {
-  const namespace = spaceIdToNamespace(spaces, spaceId) ?? 'default';
-  const dataStreamName = `${dataStreamPrefix}-${namespace}`;
+  const dataStreamName = ALERT_EVENTS_INDEX;
 
   try {
     await esClient.indices.createDataStream({ name: dataStreamName });

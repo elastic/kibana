@@ -49,13 +49,11 @@ export interface WriteEsqlAlertsOpts {
   services: {
     logger: Logger;
     esClient: ElasticsearchClient;
-    /**
-     * Per-space data stream name, e.g. `alerts-default` or `alerts-<space_namespace>`
-     */
     dataStreamName: string;
   };
   input: {
     ruleId: string;
+    spaceId: string;
     rawRule: RawEsqlRule;
     esqlResponse: ESQLSearchResponse;
     /**
@@ -67,7 +65,7 @@ export interface WriteEsqlAlertsOpts {
 
 export async function writeEsqlAlerts({
   services: { logger, esClient, dataStreamName },
-  input: { ruleId, rawRule, esqlResponse, taskRunKey },
+  input: { ruleId, spaceId, rawRule, esqlResponse, taskRunKey },
 }: WriteEsqlAlertsOpts) {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
@@ -77,8 +75,8 @@ export async function writeEsqlAlerts({
   }
 
   // Stable per run to support retries without duplicating documents.
-  // Include dataStreamName so execution uuids are unique per space.
-  const executionUuid = sha256(`${ruleId}|${dataStreamName}|${taskRunKey}`);
+  // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
+  const executionUuid = sha256(`${ruleId}|${spaceId}|${taskRunKey}`);
 
   const now = new Date().toISOString();
   const operations: Array<Record<string, unknown>> = values.flatMap((valueRow, i) => {
@@ -103,6 +101,9 @@ export async function writeEsqlAlerts({
           execution: { uuid: executionUuid },
         },
         attributes: rowDoc,
+      },
+      labels: {
+        kibana_space_id: spaceId,
       },
       ...(rawRule.tags?.length ? { tags: rawRule.tags } : {}),
     };

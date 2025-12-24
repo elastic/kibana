@@ -25,10 +25,11 @@ describe('writeEsqlAlerts', () => {
       services: {
         logger: { debug: jest.fn() } as any,
         esClient,
-        dataStreamName: 'alerts-default',
+        dataStreamName: '.alerts-events',
       },
       input: {
         ruleId: 'rule-123',
+        spaceId: 'default',
         rawRule: {
           name: 'My ES|QL Rule',
           tags: ['esql', 'test'],
@@ -62,16 +63,17 @@ describe('writeEsqlAlerts', () => {
     expect(bulk).toHaveBeenCalledTimes(1);
 
     const bulkArgs = bulk.mock.calls[0][0];
-    expect(bulkArgs.index).toBe('alerts-default');
+    expect(bulkArgs.index).toBe('.alerts-events');
     expect(bulkArgs.refresh).toBe(false);
     expect(bulkArgs.operations).toHaveLength(4);
 
     const [op1, doc1, op2, doc2] = bulkArgs.operations;
-    expect(op1.create._index).toBe('alerts-default');
-    expect(op2.create._index).toBe('alerts-default');
+    expect(op1.create._index).toBe('.alerts-events');
+    expect(op2.create._index).toBe('.alerts-events');
 
     expect(doc1['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
     expect(doc1.tags).toEqual(['esql', 'test']);
+    expect(doc1.labels).toEqual({ kibana_space_id: 'default' });
     expect(doc1.alert.grouping.key).toBe('host.name=host-a');
     expect(doc1.alert.attributes).toEqual({ 'host.name': 'host-a', count: 10 });
 
