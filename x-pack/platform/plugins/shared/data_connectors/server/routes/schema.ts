@@ -14,6 +14,8 @@ export interface DataConnectorAPIResponse {
   name: string;
   type: string;
   stackConnectors: string[];
+  workflowIds: string[];
+  toolIds: string[];
 }
 
 export function convertSOtoAPIResponse(
@@ -24,6 +26,8 @@ export function convertSOtoAPIResponse(
     name: savedObject.attributes.name,
     type: savedObject.attributes.type,
     stackConnectors: savedObject.attributes.kscIds,
+    workflowIds: savedObject.attributes.workflowIds,
+    toolIds: savedObject.attributes.toolIds,
   };
 }
 

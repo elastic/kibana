@@ -169,28 +169,18 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       render: (type: string) => <EuiText size="s">{type}</EuiText>,
     },
     {
-      field: 'connectedAs',
-      name: i18n.translate('xpack.dataConnectors.activeSources.connectedAsColumn', {
-        defaultMessage: 'Connected as',
+      field: 'workflowIds',
+      name: i18n.translate('xpack.dataConnectors.activeSources.workflowsColumn', {
+        defaultMessage: 'Workflows',
       }),
-      render: (connectedAs?: string) => <EuiText size="s">{connectedAs || '-'}</EuiText>,
+      render: (workflowIds: string[]) => <EuiText size="s">{workflowIds.length}</EuiText>,
     },
     {
-      field: 'createdAt',
-      name: i18n.translate('xpack.dataConnectors.activeSources.createdAtColumn', {
-        defaultMessage: 'Created at',
+      field: 'toolIds',
+      name: i18n.translate('xpack.dataConnectors.activeSources.toolsColumn', {
+        defaultMessage: 'Tools',
       }),
-      render: (createdAt?: string) => {
-        if (!createdAt) {
-          return <EuiText size="s">-</EuiText>;
-        }
-        const date = new Date(createdAt);
-        return (
-          <EuiText size="s">
-            {date.toLocaleDateString()} {date.toLocaleTimeString()}
-          </EuiText>
-        );
-      },
+      render: (toolIds: string[]) => <EuiText size="s">{toolIds.length}</EuiText>,
     },
     {
       field: 'usedBy',

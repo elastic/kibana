@@ -27,8 +27,8 @@ export interface ActiveSource {
   id: string;
   name: string;
   type: string;
-  stackConnectors: string[]; // Stack connector IDs
-  connectedAs?: string; // Account/user the connector is connected as
-  createdAt?: string; // ISO date string
-  usedBy?: Agent[]; // Agents using this source
+  stackConnectors: string[];
+  workflowIds: string[];
+  toolIds: string[];
+  usedBy?: Agent[]; // Agents using this source (future)
 }
