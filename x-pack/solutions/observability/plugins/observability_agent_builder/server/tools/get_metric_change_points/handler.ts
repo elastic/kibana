@@ -23,7 +23,7 @@ function getMetricAggregation(aggregation: AggregationConfig | undefined): {
   agg: AggregationsAggregationContainer;
   buckets_path?: string;
 } {
-  if (!aggregation?.type && !aggregation?.field) {
+  if (!aggregation) {
     return {
       agg: {
         filter: {
@@ -32,10 +32,6 @@ function getMetricAggregation(aggregation: AggregationConfig | undefined): {
       },
       buckets_path: '_count',
     };
-  }
-
-  if (!aggregation?.type || !aggregation?.field) {
-    throw new Error(`Metric type ${aggregation?.type} needs a field to aggregate over`);
   }
 
   if (['min', 'max', 'sum', 'avg'].includes(aggregation.type)) {
