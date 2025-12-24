@@ -167,7 +167,8 @@ export default function (providerContext: FtrProviderContext) {
     },
   };
 
-  describe('POST /internal/cloud_security_posture/graph', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/246732
+  describe.skip('POST /internal/cloud_security_posture/graph', () => {
     describe('Authorization', () => {
       it('should return 403 for user without read access', async () => {
         await postGraph(
