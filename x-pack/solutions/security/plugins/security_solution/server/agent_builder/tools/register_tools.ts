@@ -23,6 +23,6 @@ export const registerTools = async (
 ) => {
   onechat.tools.register(entityRiskScoreTool(core, logger));
   onechat.tools.register(attackDiscoverySearchTool(core, logger));
-  onechat.tools.register(securityLabsSearchTool(core, logger));
+  onechat.tools.register(securityLabsSearchTool(core));
   onechat.tools.register(alertsTool(core, logger));
 };

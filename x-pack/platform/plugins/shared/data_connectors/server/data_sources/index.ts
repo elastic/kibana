@@ -6,7 +6,9 @@
  */
 import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
 import { notionDataSource } from './notion';
+import { githubDataSource } from './github';
 
 export function registerDataSources(dataSourcesRegistry: DataSourcesRegistryPluginSetup) {
   dataSourcesRegistry.register(notionDataSource);
+  dataSourcesRegistry.register(githubDataSource);
 }

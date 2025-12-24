@@ -24,6 +24,7 @@ import type {
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
+  isDataSet,
   isEnterStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitStepTimeoutZone,
@@ -31,6 +32,7 @@ import {
 } from '@kbn/workflows/graph';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
+import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
@@ -42,7 +44,6 @@ import {
 } from './if_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { NodeImplementation } from './node_implementation';
-// Import schema and inferred types
 import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
 import {
   EnterFallbackPathNodeImpl,
@@ -82,6 +83,12 @@ export class NodesFactory {
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const { node } = stepExecutionRuntime;
 
+    // Built-in steps - checked first before workflows_extensions
+    // Note: Some built-in steps (like data.set) are also registered in workflows_extensions
+    // for YAML schema validation, but execution always uses the built-in implementation.
+    // This dual-registration is intentional: workflows_extensions provides the schema,
+    // while the execution engine provides the implementation with access to internal APIs.
+
     // Handle elasticsearch.* and kibana.* actions
     if (node.stepType && node.stepType.startsWith('elasticsearch.')) {
       this.workflowLogger.logDebug(`Creating Elasticsearch action step: ${node.stepType}`, {
@@ -105,6 +112,20 @@ export class NodesFactory {
       return new KibanaActionStepImpl(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         node as any,
+        stepExecutionRuntime,
+        this.workflowRuntime,
+        this.workflowLogger
+      );
+    }
+
+    // Handle data.set internal step
+    if (isDataSet(node)) {
+      this.workflowLogger.logDebug('Creating data.set step', {
+        event: { action: 'internal-step-creation', outcome: 'success' },
+        tags: ['step-factory', 'data-set', 'internal-step'],
+      });
+      return new DataSetStepImpl(
+        node,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
@@ -243,6 +264,11 @@ export class NodesFactory {
         );
       case 'atomic':
         // Default atomic step (connector-based)
+        // eslint-disable-next-line no-console
+        console.log(
+          '[NodesFactory] Creating AtomicStepImpl for node.type=atomic, stepType:',
+          node.stepType
+        );
         return new AtomicStepImpl(
           node as AtomicGraphNode,
           stepExecutionRuntime,

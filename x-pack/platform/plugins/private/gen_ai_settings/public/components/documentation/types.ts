@@ -14,6 +14,7 @@ export interface DocumentationItem {
   name: string;
   description?: string;
   status: DocumentationStatus;
+  updateAvailable?: boolean;
   isTechPreview?: boolean;
   isStubbed?: boolean;
   icon?: string;

@@ -20,6 +20,7 @@ import { ArrayFromString } from '@kbn/zod-helpers';
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import { WarningSchema } from '../../model/warning_schema.gen';
 
 export type FindRulesSortField = z.infer<typeof FindRulesSortField>;
 export const FindRulesSortField = z.enum([
@@ -96,4 +97,5 @@ export const FindRulesResponse = z.object({
   perPage: z.number().int(),
   total: z.number().int(),
   data: z.array(RuleResponse),
+  warnings: z.array(WarningSchema).optional(),
 });

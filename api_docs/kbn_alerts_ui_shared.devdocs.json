@@ -6206,6 +6206,53 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.RuleTemplate",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTemplate",
+        "description": [],
+        "signature": [
+          "{ params: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          "; id: string; name: string; tags: string[]; schedule: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          "; alertDelay?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDelay",
+            "text": "AlertDelay"
+          },
+          " | null | undefined; flapping?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Flapping",
+            "text": "Flapping"
+          },
+          " | null | undefined; ruleTypeId: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.RuleTypeIndexWithDescriptions",
         "type": "Type",
         "tags": [],

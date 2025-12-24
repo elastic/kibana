@@ -7,9 +7,11 @@
 
 import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import { onechatIconType } from '@kbn/onechat-plugin/public';
+import type { AgentBuilderAddToChatTelemetry } from '../hooks/use_report_add_to_chat';
+import { useReportAddToChat } from '../hooks/use_report_add_to_chat';
 import * as i18n from './translations';
 import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
 
@@ -27,6 +29,14 @@ export interface NewAgentBuilderAttachmentProps {
    * Size of the button
    */
   size?: EuiButtonEmptySizes;
+  /**
+   * Whether the button is disabled
+   */
+  disabled?: boolean;
+  /**
+   * Telemetry data for tracking "Add to Chat" clicks
+   */
+  telemetry?: AgentBuilderAddToChatTelemetry;
 }
 
 /**
@@ -37,8 +47,22 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   color = 'primary',
   onClick,
   size = 'm',
+  disabled = false,
+  telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const reportAddToChatClick = useReportAddToChat();
+
+  const handleClick = useCallback(() => {
+    if (telemetryData) {
+      reportAddToChatClick({
+        pathway: telemetryData.pathway,
+        attachments: telemetryData.attachments,
+      });
+    }
+    onClick();
+  }, [onClick, reportAddToChatClick, telemetryData]);
+
   if (!isAgentBuilderEnabled) {
     return null;
   }
@@ -47,8 +71,9 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
       aria-label={i18n.ADD_TO_CHAT}
       color={color}
       data-test-subj={'newAgentBuilderAttachment'}
-      onClick={onClick}
+      onClick={handleClick}
       size={size}
+      disabled={disabled}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>

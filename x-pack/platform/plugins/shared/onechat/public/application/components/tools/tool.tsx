@@ -212,6 +212,12 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     reset(mergedValues);
   }, [toolType, mode, getValues, reset]);
 
+  useEffect(() => {
+    if (urlToolType && urlToolType !== toolType) {
+      setUrlToolType(toolType);
+    }
+  }, [urlToolType, toolType, setUrlToolType]);
+
   const toolFormId = useGeneratedHtmlId({
     prefix: 'toolForm',
   });
@@ -371,13 +377,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                 {isViewMode ? (
                   <ToolForm mode={ToolFormMode.View} formId={toolFormId} />
                 ) : (
-                  <ToolForm
-                    mode={mode}
-                    formId={toolFormId}
-                    saveTool={handleSave}
-                    toolType={urlToolType!}
-                    setToolType={setUrlToolType}
-                  />
+                  <ToolForm mode={mode} formId={toolFormId} saveTool={handleSave} />
                 )}
                 <EuiSpacer
                   css={css`

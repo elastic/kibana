@@ -28,6 +28,11 @@ export interface ToolTypeDefinition<
   updateSchema: ObjectType;
   validateForCreate: ToolTypeCreateValidator<TConfig>;
   validateForUpdate: ToolTypeUpdateValidator<TConfig>;
+
+  /**
+   * Whether to track execution health for tools of this type.
+   */
+  trackHealth?: boolean;
 }
 
 /**
