@@ -42,13 +42,7 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
       [missingResourcesIndexed]
     );
     const onAllReferenceSetCreated = useCallback(() => {
-      setDataInputStep((currentStep: number) => {
-        // If we are not on the Reference Set step, move to the End step
-        if (currentStep !== QradarDataInputStep.ReferenceSet) {
-          return QradarDataInputStep.End;
-        }
-        return QradarDataInputStep.Enhancements;
-      });
+      setDataInputStep(QradarDataInputStep.Enhancements);
     }, [setDataInputStep]);
 
     const dataInputStatus = useMemo(
