@@ -14,7 +14,7 @@ import type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,
 } from '@kbn/unified-search-plugin/public';
-import type { KqlPluginSetup } from '@kbn/kql/public';
+import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -54,6 +54,7 @@ export interface InputControlVisPluginStartDependencies {
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   uiActions: UiActionsStart;
 }
 
