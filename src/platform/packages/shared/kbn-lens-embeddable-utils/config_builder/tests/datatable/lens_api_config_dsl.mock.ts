@@ -600,7 +600,7 @@ export const sortedByTransposedMetricColumnDatatable: DatatableState = {
     },
   },
   paging: 10,
-  sorting: {
+  sort_by: {
     by: 'split_metrics_by',
     metric_index: 0,
     values: ['US', 'CH'],
@@ -771,7 +771,7 @@ export const sortedByRowDatatable: DatatableState = {
     },
   },
   paging: 30,
-  sorting: {
+  sort_by: {
     by: 'row',
     index: 1,
     direction: 'asc',

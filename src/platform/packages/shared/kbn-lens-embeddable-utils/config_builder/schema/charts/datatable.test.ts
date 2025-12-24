@@ -117,7 +117,7 @@ describe('Datatable Schema', () => {
             size: 5,
           },
         ],
-        sorting: {
+        sort_by: {
           by: 'metric',
           index: 1,
           direction: 'desc',
@@ -162,7 +162,7 @@ describe('Datatable Schema', () => {
             size: 5,
           },
         ],
-        sorting: {
+        sort_by: {
           by: 'row',
           index: 1,
           direction: 'desc',
@@ -207,7 +207,7 @@ describe('Datatable Schema', () => {
             size: 5,
           },
         ],
-        sorting: {
+        sort_by: {
           by: 'split_metrics_by',
           metric_index: 1,
           values: ['success'],
@@ -435,7 +435,7 @@ describe('Datatable Schema', () => {
             size: 5,
           },
         ],
-        sorting: {
+        sort_by: {
           by: 'metric',
           index: 2,
           direction: 'desc',
@@ -479,7 +479,7 @@ describe('Datatable Schema', () => {
             size: 5,
           },
         ],
-        sorting: {
+        sort_by: {
           by: 'split_metrics_by',
           metric_index: 2,
           values: ['success'],
@@ -529,7 +529,7 @@ describe('Datatable Schema', () => {
             size: 5,
           },
         ],
-        sorting: {
+        sort_by: {
           by: 'split_metrics_by',
           metric_index: 2,
           values: ['success'],
@@ -616,7 +616,7 @@ describe('Datatable Schema', () => {
             size: 5,
           },
         ],
-        sorting: {
+        sort_by: {
           by: 'metric',
           index: 0,
           direction: 'asc',

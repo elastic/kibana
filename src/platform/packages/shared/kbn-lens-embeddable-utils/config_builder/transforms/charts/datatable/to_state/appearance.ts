@@ -12,15 +12,15 @@ import type { DatatableState } from '../../../../schema';
 import { getAccessorName } from '../helpers';
 import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
 
-function getSortingColumnId(sorting: NonNullable<DatatableState['sorting']>): string | undefined {
-  switch (sorting.by) {
+function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): string | undefined {
+  switch (sortBy.by) {
     case 'metric':
-      return getAccessorName(METRIC_ACCESSOR_PREFIX, sorting.index);
+      return getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
     case 'row':
-      return getAccessorName(ROW_ACCESSOR_PREFIX, sorting.index);
+      return getAccessorName(ROW_ACCESSOR_PREFIX, sortBy.index);
     case 'split_metrics_by': {
-      const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sorting.metric_index);
-      return `${sorting.values.join('---')}---${metricColumnId}`;
+      const metricColumnId = getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.metric_index);
+      return `${sortBy.values.join('---')}---${metricColumnId}`;
     }
     default:
       return undefined;
@@ -28,11 +28,11 @@ function getSortingColumnId(sorting: NonNullable<DatatableState['sorting']>): st
 }
 
 function buildSortingState(config: DatatableState): Pick<DatatableVisualizationState, 'sorting'> {
-  if (!config.sorting) {
+  if (!config.sort_by) {
     return {};
   }
 
-  const columnId = getSortingColumnId(config.sorting);
+  const columnId = getSortingColumnId(config.sort_by);
   if (!columnId) {
     return {};
   }
@@ -40,7 +40,7 @@ function buildSortingState(config: DatatableState): Pick<DatatableVisualizationS
   return {
     sorting: {
       columnId,
-      direction: config.sorting.direction,
+      direction: config.sort_by.direction,
     },
   };
 }

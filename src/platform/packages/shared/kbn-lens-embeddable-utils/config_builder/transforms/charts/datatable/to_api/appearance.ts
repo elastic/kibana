@@ -105,7 +105,7 @@ function parseSplitMetricsBySorting(
 function parseSortingToAPI(
   sorting: DatatableVisualizationState['sorting'],
   columnIdMapping: ColumnIdMapping
-): DatatableState['sorting'] | undefined {
+): DatatableState['sort_by'] | undefined {
   if (!sorting?.columnId || sorting.direction === 'none') {
     return;
   }
@@ -139,11 +139,11 @@ function parseSortingToAPI(
 export function convertAppearanceToAPIFormat(
   visualization: DatatableVisualizationState,
   columnIdMapping: ColumnIdMapping
-): Pick<DatatableState, 'density' | 'paging' | 'sorting'> {
+): Pick<DatatableState, 'density' | 'paging' | 'sort_by'> {
   const { paging, sorting } = visualization;
 
   const densityAPI = parseDensityToAPI(visualization);
-  const sortingAPI = parseSortingToAPI(sorting, columnIdMapping);
+  const sortByAPI = parseSortingToAPI(sorting, columnIdMapping);
 
   const isValidPagingSize = (size: number): size is 10 | 20 | 30 | 50 | 100 => {
     return [10, 20, 30, 50, 100].includes(size);
@@ -154,6 +154,6 @@ export function convertAppearanceToAPIFormat(
     ...(paging && paging.enabled
       ? { paging: isValidPagingSize(paging.size) ? paging.size : 10 }
       : {}),
-    ...(sortingAPI ? { sorting: sortingAPI } : {}),
+    ...(sortByAPI ? { sort_by: sortByAPI } : {}),
   };
 }

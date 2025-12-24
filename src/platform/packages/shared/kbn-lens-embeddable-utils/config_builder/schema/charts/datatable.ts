@@ -188,7 +188,7 @@ const datatableStateSharedOptionsSchema = {
   /**
    * Sorting configuration
    */
-  sorting: schema.maybe(sortingSchema),
+  sort_by: schema.maybe(sortingSchema),
 };
 
 const datatableStateCommonOptionsSchema = {
@@ -272,11 +272,11 @@ const datatableStateMetricsOptionsSchema = schema.object({
   ),
 });
 
-interface SortingValidationInput {
+interface SortByValidationInput {
   metrics: Array<{}>;
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
-  sorting?: {
+  sort_by?: {
     by: 'metric' | 'row' | 'split_metrics_by';
     index?: number;
     metric_index?: number;
@@ -284,22 +284,22 @@ interface SortingValidationInput {
   };
 }
 
-function validateSorting({
+function validateSortBy({
   metrics,
   rows,
   split_metrics_by,
-  sorting,
-}: SortingValidationInput): string | undefined {
-  if (!sorting) {
+  sort_by,
+}: SortByValidationInput): string | undefined {
+  if (!sort_by) {
     return;
   }
 
-  const { by } = sorting;
+  const { by } = sort_by;
 
   if (by === 'metric') {
-    const index = sorting.index;
+    const index = sort_by.index;
     if (index == null || index >= metrics.length) {
-      return `The 'sorting.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
     }
   }
 
@@ -307,9 +307,9 @@ function validateSorting({
     if (!rows || rows.length === 0) {
       return `Cannot sort by 'row' when no rows are defined.`;
     }
-    const index = sorting.index;
+    const index = sort_by.index;
     if (index == null || index >= rows.length) {
-      return `The 'sorting.index' (${index}) is out of bounds. The 'rows' array has ${rows.length} item(s).`;
+      return `The 'sort_by.index' (${index}) is out of bounds. The 'rows' array has ${rows.length} item(s).`;
     }
   }
 
@@ -318,14 +318,14 @@ function validateSorting({
       return `Cannot sort by 'split_metrics_by' when no split_metrics_by columns are defined.`;
     }
 
-    const metricIndex = sorting.metric_index;
+    const metricIndex = sort_by.metric_index;
     if (metricIndex == null || metricIndex >= metrics.length) {
-      return `The 'sorting.metric_index' (${metricIndex}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
+      return `The 'sort_by.metric_index' (${metricIndex}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
     }
 
-    const values = sorting.values;
+    const values = sort_by.values;
     if (values == null || values.length !== split_metrics_by.length) {
-      return `The 'sorting.values' length (${values?.length}) must match the 'split_metrics_by' length (${split_metrics_by.length}).`;
+      return `The 'sort_by.values' length (${values?.length}) must match the 'split_metrics_by' length (${split_metrics_by.length}).`;
     }
   }
 }
@@ -371,7 +371,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     ),
   },
   {
-    validate: validateSorting,
+    validate: validateSortBy,
     meta: {
       description: 'Datatable state configuration for standard queries',
     },
@@ -424,7 +424,7 @@ export const datatableStateSchemaESQL = schema.object(
     ),
   },
   {
-    validate: validateSorting,
+    validate: validateSortBy,
     meta: {
       description: 'Datatable state configuration for ES|QL queries',
     },
