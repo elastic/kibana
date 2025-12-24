@@ -352,6 +352,7 @@ describe('dataRegexReplaceStepDefinition', () => {
     it('should log replacement statistics', async () => {
       const config = {
         source: ['foo bar', 'foo baz', 'foo qux'],
+        detailed: true,
       };
       const input = {
         pattern: 'foo',

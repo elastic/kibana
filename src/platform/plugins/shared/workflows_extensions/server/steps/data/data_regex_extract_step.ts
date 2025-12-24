@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createRegex, validateInputLength, validateSourceInput } from './regex_utils';
 import { dataRegexExtractStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
 function extractFieldsFromMatch(
-  match: RegExpExecArray,
+  match: RegExpMatchArray,
   fields: Record<string, string>
 ): Record<string, unknown> {
   const extractedFields: Record<string, unknown> = {};
@@ -36,26 +37,15 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
       const errorIfNoMatch = context.config.errorIfNoMatch || false;
       const { pattern, fields, flags = '' } = context.input;
 
-      if (source == null) {
-        context.logger.error('Input source is null or undefined');
-        return {
-          error: new Error(
-            'Source cannot be null or undefined. Please provide a string or array of strings to extract from.'
-          ),
-        };
+      const sourceValidation = validateSourceInput(source, context.logger);
+      if (!sourceValidation.valid) {
+        return { error: sourceValidation.error };
       }
+      const { isArray } = sourceValidation;
 
-      const isArray = Array.isArray(source);
-      if (!isArray && typeof source !== 'string') {
-        context.logger.error(`Input source has invalid type: ${typeof source}`);
-        return {
-          error: new Error(
-            `Expected source to be a string or array, but received ${typeof source}. Please provide a string or array of strings to extract from.`
-          ),
-        };
-      }
-
-      const sourceArray = isArray ? source : [source];
+      const sourceArray = isArray
+        ? (source as unknown[])
+        : [source as string | Record<string, unknown>];
       const shouldReturnObject = !isArray;
 
       if (sourceArray.length === 0) {
@@ -67,18 +57,12 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
         `Extracting from ${sourceArray.length} item(s) using pattern: ${pattern} with flags: ${flags}`
       );
 
-      let regex: RegExp;
-      try {
-        regex = new RegExp(pattern, flags);
-      } catch (err) {
-        context.logger.error('Invalid regex pattern', err);
-        return {
-          error: new Error(
-            `Invalid regex pattern: ${pattern}. ${
-              err instanceof Error ? err.message : 'Unknown error'
-            }`
-          ),
-        };
+      const regexResult = createRegex(pattern, flags, {
+        error: (message: string, error?: unknown) =>
+          context.logger.error(message, error as Error | undefined),
+      });
+      if ('error' in regexResult) {
+        return { error: regexResult.error };
       }
 
       const extractedItems: Array<Record<string, unknown> | null> = [];
@@ -89,7 +73,14 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
           context.logger.warn(`Skipping non-string item in array: ${typeof item}`);
           extractedItems.push(null);
         } else {
-          const match = regex.exec(item);
+          const lengthValidation = validateInputLength(item, context.logger);
+          if (!lengthValidation.valid) {
+            return { error: lengthValidation.error };
+          }
+          // Remove global flag to ensure match() returns capture groups instead of all matches
+          // When 'g' flag is present, match() returns array of all matches without groups
+          const itemRegex = new RegExp(pattern, flags?.replace(/g/g, ''));
+          const match = item.match(itemRegex);
 
           if (!match) {
             if (errorIfNoMatch) {

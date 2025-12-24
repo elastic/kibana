@@ -388,4 +388,116 @@ describe('dataRegexExtractStepDefinition', () => {
       expect(context.logger.debug).toHaveBeenCalledWith(expect.stringContaining('3 matches found'));
     });
   });
+
+  describe('global flag behavior', () => {
+    it('should correctly process multiple array items with global flag', async () => {
+      const config = {
+        source: ['test1', 'test2', 'test3'],
+      };
+      const input = {
+        pattern: '(\\w+)(\\d+)',
+        fields: {
+          word: '$1',
+          number: '$2',
+        },
+        flags: 'g',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.output).toEqual([
+        { word: 'test', number: '1' },
+        { word: 'test', number: '2' },
+        { word: 'test', number: '3' },
+      ]);
+    });
+
+    it('should not skip array items when using global flag', async () => {
+      const config = {
+        source: ['ID: 100', 'ID: 200', 'ID: 300', 'ID: 400'],
+      };
+      const input = {
+        pattern: 'ID: (\\d+)',
+        fields: {
+          id: '$1',
+        },
+        flags: 'g',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.output).toHaveLength(4);
+      expect(result.output).toEqual([{ id: '100' }, { id: '200' }, { id: '300' }, { id: '400' }]);
+    });
+
+    it('should extract from each array item independently with global flag', async () => {
+      const config = {
+        source: [
+          '2024-01-15 ERROR First error',
+          '2024-01-16 INFO Some info',
+          '2024-01-17 ERROR Second error',
+        ],
+      };
+      const input = {
+        pattern: '^(?<date>\\d{4}-\\d{2}-\\d{2}) (?<level>\\w+)',
+        fields: {
+          date: 'date',
+          level: 'level',
+        },
+        flags: 'g',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.output).toEqual([
+        { date: '2024-01-15', level: 'ERROR' },
+        { date: '2024-01-16', level: 'INFO' },
+        { date: '2024-01-17', level: 'ERROR' },
+      ]);
+    });
+
+    it('should handle multiline flag correctly across array items', async () => {
+      const config = {
+        source: ['line1\nline2', 'start\nmiddle\nend', 'single'],
+      };
+      const input = {
+        pattern: '^(\\w+)',
+        fields: {
+          first: '$1',
+        },
+        flags: 'm',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.output).toEqual([{ first: 'line1' }, { first: 'start' }, { first: 'single' }]);
+    });
+
+    it('should not be affected by regex state across iterations', async () => {
+      const config = {
+        source: ['abc123', 'def456', 'ghi789', 'jkl012'],
+      };
+      const input = {
+        pattern: '([a-z]+)(\\d+)',
+        fields: {
+          letters: '$1',
+          digits: '$2',
+        },
+        flags: 'g',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.output).toHaveLength(4);
+      expect(result.output[0]).toEqual({ letters: 'abc', digits: '123' });
+      expect(result.output[1]).toEqual({ letters: 'def', digits: '456' });
+      expect(result.output[2]).toEqual({ letters: 'ghi', digits: '789' });
+      expect(result.output[3]).toEqual({ letters: 'jkl', digits: '012' });
+    });
+  });
 });

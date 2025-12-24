@@ -31,7 +31,9 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.details', {
-      defaultMessage: `The ${DataRegexReplaceStepTypeId} step performs pattern-based text replacements using regular expressions. It supports backreferences, named groups, and can process single strings or arrays.`,
+      defaultMessage: `The ${DataRegexReplaceStepTypeId} step performs pattern-based text replacements using regular expressions. It supports backreferences, named groups, and can process single strings or arrays.
+
+**Security Note**: Complex regex patterns can cause performance issues (ReDoS - Regular Expression Denial of Service). The step enforces a maximum input length of 100KB per string. Avoid patterns with nested quantifiers like (a+)+, (a*)+, or (a|a)* which can cause catastrophic backtracking and hang the server.`,
     }),
     examples: [
       i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example1', {
@@ -45,8 +47,8 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
     replacement: "***"
     flags: "gi"
 
-# Input: "My password is secret123"
-# Output: "My *** is ***123"
+# Input: "My password is secret"
+# Output: "My *** is ***"
 \`\`\``,
       }),
       i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example2', {

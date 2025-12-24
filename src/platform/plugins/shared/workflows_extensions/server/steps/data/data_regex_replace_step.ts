@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createRegex, validateInputLength, validateSourceInput } from './regex_utils';
 import { dataRegexReplaceStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -18,26 +19,15 @@ export const dataRegexReplaceStepDefinition = createServerStepDefinition({
       const detailed = context.config.detailed || false;
       const { pattern, replacement, flags = '' } = context.input;
 
-      if (source == null) {
-        context.logger.error('Input source is null or undefined');
-        return {
-          error: new Error(
-            'Source cannot be null or undefined. Please provide a string or array of strings to replace in.'
-          ),
-        };
+      const sourceValidation = validateSourceInput(source, context.logger);
+      if (!sourceValidation.valid) {
+        return { error: sourceValidation.error };
       }
+      const { isArray } = sourceValidation;
 
-      const isArray = Array.isArray(source);
-      if (!isArray && typeof source !== 'string') {
-        context.logger.error(`Input source has invalid type: ${typeof source}`);
-        return {
-          error: new Error(
-            `Expected source to be a string or array, but received ${typeof source}. Please provide a string or array of strings.`
-          ),
-        };
-      }
-
-      const sourceArray = isArray ? source : [source];
+      const sourceArray = isArray
+        ? (source as unknown[])
+        : [source as string | Record<string, unknown>];
       const shouldReturnString = !isArray;
 
       if (sourceArray.length === 0) {
@@ -49,19 +39,14 @@ export const dataRegexReplaceStepDefinition = createServerStepDefinition({
         `Replacing in ${sourceArray.length} item(s) using pattern: ${pattern} with flags: ${flags}`
       );
 
-      let regex: RegExp;
-      try {
-        regex = new RegExp(pattern, flags);
-      } catch (err) {
-        context.logger.error('Invalid regex pattern', err);
-        return {
-          error: new Error(
-            `Invalid regex pattern: ${pattern}. ${
-              err instanceof Error ? err.message : 'Unknown error'
-            }`
-          ),
-        };
+      const regexResult = createRegex(pattern, flags, {
+        error: (message: string, error?: unknown) =>
+          context.logger.error(message, error as Error | undefined),
+      });
+      if ('error' in regexResult) {
+        return { error: regexResult.error };
       }
+      const { regex } = regexResult;
 
       const replacedItems: string[] = [];
       let totalMatchCount = 0;
@@ -71,9 +56,16 @@ export const dataRegexReplaceStepDefinition = createServerStepDefinition({
           context.logger.warn(`Skipping non-string item in array: ${typeof item}`);
           replacedItems.push(String(item));
         } else {
-          const matches = item.match(regex);
-          const matchCount = matches ? matches.length : 0;
-          totalMatchCount += matchCount;
+          const lengthValidation = validateInputLength(item, context.logger);
+          if (!lengthValidation.valid) {
+            return { error: lengthValidation.error };
+          }
+
+          if (detailed) {
+            const matches = item.match(regex);
+            const matchCount = matches ? matches.length : 0;
+            totalMatchCount += matchCount;
+          }
 
           const replaced = item.replace(regex, replacement);
           replacedItems.push(replaced);

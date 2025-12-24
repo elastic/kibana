@@ -31,7 +31,9 @@ export const dataRegexExtractStepDefinition: PublicStepDefinition = {
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.details', {
-      defaultMessage: `The ${DataRegexExtractStepTypeId} step extracts structured data from text using regular expression capture groups. It supports both named groups and numbered groups, and can process single strings or arrays.`,
+      defaultMessage: `The ${DataRegexExtractStepTypeId} step extracts structured data from text using regular expression capture groups. It supports both named groups and numbered groups, and can process single strings or arrays.
+
+**Security Note**: Complex regex patterns can cause performance issues (ReDoS - Regular Expression Denial of Service). The step enforces a maximum input length of 100KB per string. Avoid patterns with nested quantifiers like (a+)+, (a*)+, or (a|a)* which can cause catastrophic backtracking and hang the server.`,
     }),
     examples: [
       i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.example1', {
