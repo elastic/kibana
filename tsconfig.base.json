@@ -1854,6 +1854,8 @@
       "@kbn/scout-release-testing/*": ["x-pack/platform/packages/private/kbn-scout-release-testing/*"],
       "@kbn/scout-reporting": ["src/platform/packages/private/kbn-scout-reporting"],
       "@kbn/scout-reporting/*": ["src/platform/packages/private/kbn-scout-reporting/*"],
+      "@kbn/scout-search": ["x-pack/solutions/search/packages/kbn-scout-search"],
+      "@kbn/scout-search/*": ["x-pack/solutions/search/packages/kbn-scout-search/*"],
       "@kbn/scout-security": ["x-pack/solutions/security/packages/kbn-scout-security"],
       "@kbn/scout-security/*": ["x-pack/solutions/security/packages/kbn-scout-security/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
