@@ -402,6 +402,16 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
     '.euiTableRow > .euiTableRowCell': {
       borderTop: 0,
     },
+    '& .dvMap__wrapper': {
+      minWidth: 0,
+      height: '240px',
+      [useEuiMinBreakpoint('s')]: {
+        minWidth: $panelWidthM,
+      },
+      [useEuiMinBreakpoint('m')]: {
+        minWidth: $panelWidthL,
+      },
+    },
     [useEuiMinBreakpoint('s')]: {
       '& .columnHeader__title': {
         display: 'flex',
@@ -458,11 +468,6 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       '& .dvPanel__wrapper:last-child': {
         margin: `${euiTheme.size.xs} 0 ${euiTheme.size.m} 0`,
-      },
-
-      '& .dvMap__wrapper': {
-        minWidth: $panelWidthL,
-        height: '240px',
       },
       '& .dvText__wrapper': {
         minWidth: $panelWidthS,
