@@ -6,9 +6,9 @@
  */
 import type { ApmFields } from '@kbn/synthtrace-client';
 import { apm, dedot } from '@kbn/synthtrace-client';
-import { getWaterfall } from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import type { Span } from '../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { getWaterfall } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import type { Span } from '../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getCriticalPath } from './get_critical_path';
 
 describe('getCriticalPath', () => {
@@ -30,7 +30,10 @@ describe('getCriticalPath', () => {
 
     return {
       waterfall,
-      criticalPath: getCriticalPath(waterfall),
+      criticalPath: getCriticalPath(
+        waterfall.entryWaterfallTransaction,
+        waterfall.childrenByParentId
+      ),
     };
   }
   it('adds the only active span to the critical path', () => {
