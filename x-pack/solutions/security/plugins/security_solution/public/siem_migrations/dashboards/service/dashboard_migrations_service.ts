@@ -26,10 +26,15 @@ import type { CapabilitiesLevel, MissingCapability } from '../../common/service/
 import { getMissingCapabilitiesChecker } from '../../common/service/capabilities';
 import { requiredDashboardMigrationCapabilities } from './capabilities';
 import { SiemMigrationsServiceBase } from '../../common/service';
-import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
+import type {
+  MigrationSource,
+  GetMigrationsStatsAllParams,
+  GetMigrationStatsParams,
+} from '../../common/types';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import type { DashboardMigrationStats } from '../types';
 import { SiemDashboardMigrationsTelemetry } from './telemetry';
+import type { SiemMigrationVendor } from '../../../../common/siem_migrations/types';
 
 export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
@@ -92,7 +97,8 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   /** Creates a dashboard migration with a name and adds the dashboards to it, returning the migration ID */
   public async createDashboardMigration(
     data: CreateDashboardMigrationDashboardsRequestBody,
-    migrationName: string
+    migrationName: string,
+    vendor: MigrationSource
   ): Promise<string> {
     const dashboardsCount = data.length;
     if (dashboardsCount === 0) {
@@ -112,19 +118,33 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
       await this.addDashboardsToMigration(migrationId, data);
 
-      this.telemetry.reportSetupMigrationCreated({ migrationId, count: dashboardsCount });
+      this.telemetry.reportSetupMigrationCreated({
+        migrationId,
+        count: dashboardsCount,
+        vendor,
+      });
       return migrationId;
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ count: dashboardsCount, error });
+      this.telemetry.reportSetupMigrationCreated({
+        migrationId: undefined,
+        count: dashboardsCount,
+        error,
+        vendor,
+      });
       throw error;
     }
   }
 
   /** Upserts resources for a dashboard migration, batching the requests to avoid hitting the max payload size limit of the API */
-  public async upsertMigrationResources(
-    migrationId: string,
-    body: UpsertDashboardMigrationResourcesRequestBody
-  ): Promise<void> {
+  public async upsertMigrationResources({
+    migrationId,
+    vendor,
+    body,
+  }: {
+    migrationId: string;
+    vendor?: SiemMigrationVendor;
+    body: UpsertDashboardMigrationResourcesRequestBody;
+  }): Promise<void> {
     const count = body.length;
     if (count === 0) {
       throw new Error(i18n.EMPTY_DASHBOARDS_ERROR);
@@ -145,6 +165,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
           migrationId,
           type,
           count,
+          vendor,
         });
       })
       .catch((error) => {
@@ -153,17 +174,24 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
           type,
           count,
           error,
+          vendor,
         });
         throw error;
       });
   }
 
   /** Starts a dashbaord migration task and waits for the task to start running */
-  public async startDashboardMigration(
-    migrationId: string,
-    retry?: api.StartDashboardsMigrationParams['retry'],
-    settings?: api.StartDashboardsMigrationParams['settings']
-  ): Promise<StartDashboardsMigrationResponse> {
+  public async startDashboardMigration({
+    migrationId,
+    retry,
+    settings,
+    vendor,
+  }: {
+    migrationId: string;
+    retry?: api.StartDashboardsMigrationParams['retry'];
+    settings?: api.StartDashboardsMigrationParams['settings'];
+    vendor: MigrationSource;
+  }): Promise<StartDashboardsMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
       this.core.notifications.toasts.add(
@@ -178,6 +206,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     }
     const params: api.StartDashboardsMigrationParams = {
       migrationId,
+      vendor,
       settings: { connectorId },
       retry,
     };
@@ -211,9 +240,13 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   }
 
   /** Stops a running dashboard migration task and waits for the task to completely stop */
-  public async stopDashboardMigration(
-    migrationId: string
-  ): Promise<StopDashboardsMigrationResponse> {
+  public async stopDashboardMigration({
+    migrationId,
+    vendor,
+  }: {
+    migrationId: string;
+    vendor: MigrationSource;
+  }): Promise<StopDashboardsMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
       this.core.notifications.toasts.add(
@@ -222,9 +255,8 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
       return { stopped: false };
     }
 
-    const params: api.StopDashboardMigrationParams = { migrationId };
     try {
-      const result = await api.stopDashboardMigration(params);
+      const result = await api.stopDashboardMigration({ migrationId });
 
       // Should take a few seconds to stop the task, so we poll until it is not running anymore
       await this.migrationTaskPollingUntil(
@@ -233,20 +265,24 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
         { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 } // wait up to 90 seconds for the task to stop
       );
 
-      this.telemetry.reportStopTranslation(params);
+      this.telemetry.reportStopTranslation({ migrationId, vendor });
       return result;
     } catch (error) {
-      this.telemetry.reportStopTranslation({ ...params, error });
+      this.telemetry.reportStopTranslation({ migrationId, vendor, error });
       throw error;
     }
   }
 
-  protected async startMigrationFromStats(
-    connectorId: string,
-    taskStats: DashboardMigrationStats
-  ): Promise<void> {
+  protected async startMigrationFromStats({
+    connectorId,
+    taskStats,
+  }: {
+    connectorId: string;
+    taskStats: DashboardMigrationStats;
+  }): Promise<void> {
     const params: api.StartDashboardsMigrationParams = {
       migrationId: taskStats.id,
+      vendor: taskStats.vendor,
       settings: { connectorId },
     };
     await api
@@ -278,17 +314,23 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   }
 
   /** Deletes a dashboard migration by its ID, refreshing the stats to remove it from the list */
-  public async deleteMigration(migrationId: string): Promise<string> {
+  public async deleteMigration({
+    migrationId,
+    vendor,
+  }: {
+    migrationId: string;
+    vendor: MigrationSource;
+  }): Promise<string> {
     try {
       await api.deleteDashboardMigration({ migrationId });
 
       // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
       await this.getMigrationsStats();
 
-      this.telemetry.reportSetupMigrationDeleted({ migrationId });
+      this.telemetry.reportSetupMigrationDeleted({ migrationId, vendor });
       return migrationId;
     } catch (error) {
-      this.telemetry.reportSetupMigrationDeleted({ migrationId, error });
+      this.telemetry.reportSetupMigrationDeleted({ migrationId, error, vendor });
       throw error;
     }
   }

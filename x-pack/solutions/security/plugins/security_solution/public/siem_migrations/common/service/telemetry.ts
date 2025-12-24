@@ -19,6 +19,7 @@ import type {
 } from '../../../common/lib/telemetry/events/siem_migrations/types';
 import type { StartRuleMigrationParams } from '../../rules/api';
 import type { StartDashboardsMigrationParams } from '../../dashboards/api';
+import type { SiemMigrationVendor } from '../../../../common/siem_migrations/types';
 
 export class SiemBaseMigrationsTelemetry {
   constructor(
@@ -53,6 +54,7 @@ export class SiemBaseMigrationsTelemetry {
   reportSetupMigrationOpenResources = (params: {
     migrationId: string;
     missingResourcesCount: number;
+    vendor: SiemMigrationVendor;
   }) => {
     this.telemetryService.reportEvent(this.eventTypes.SetupMigrationOpenResources, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupMigrationOpenResources],
@@ -62,69 +64,84 @@ export class SiemBaseMigrationsTelemetry {
 
   reportSetupMigrationCreated = (params: {
     migrationId?: string;
+    vendor?: SiemMigrationVendor;
     count: number;
     error?: Error;
   }) => {
-    const { migrationId, count, error } = params;
+    const { migrationId, vendor, count, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.SetupMigrationCreated, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupMigrationCreated],
       migrationId,
       count,
+      vendor,
       ...this.getBaseResultParams(error),
     });
   };
 
-  reportSetupMigrationDeleted = (params: { migrationId: string; error?: Error }) => {
-    const { migrationId, error } = params;
+  reportSetupMigrationDeleted = (params: {
+    migrationId: string;
+    vendor: SiemMigrationVendor;
+    error?: Error;
+  }) => {
+    const { migrationId, vendor, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.SetupMigrationDeleted, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupMigrationDeleted],
       migrationId,
+      vendor,
       ...this.getBaseResultParams(error),
     });
   };
 
   reportSetupResourceUploaded = (params: {
     migrationId: string;
+    vendor?: SiemMigrationVendor;
     type: SiemMigrationResourceType;
     count: number;
     error?: Error;
   }) => {
-    const { migrationId, type, count, error } = params;
+    const { migrationId, vendor, type, count, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.SetupResourcesUploaded, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupResourcesUploaded],
       migrationId,
+      vendor,
       count,
       type,
       ...this.getBaseResultParams(error),
     });
   };
 
-  reportSetupQueryCopied = (params: { migrationId?: string }) => {
-    const { migrationId } = params;
+  reportSetupQueryCopied = (params: { migrationId?: string; vendor: SiemMigrationVendor }) => {
+    const { migrationId, vendor } = params;
     this.telemetryService.reportEvent(this.eventTypes.SetupQueryCopied, {
       migrationId,
+      vendor,
       eventName: siemMigrationEventNames[this.eventTypes.SetupQueryCopied],
     });
   };
 
-  reportSetupMacrosQueryCopied = (params: { migrationId: string }) => {
+  reportSetupMacrosQueryCopied = (params: { migrationId: string; vendor: SiemMigrationVendor }) => {
     this.telemetryService.reportEvent(this.eventTypes.SetupMacrosQueryCopied, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupMacrosQueryCopied],
       ...params,
     });
   };
 
-  reportSetupLookupNameCopied = (params: { migrationId: string }) => {
+  reportSetupLookupNameCopied = (params: { migrationId: string; vendor: SiemMigrationVendor }) => {
     this.telemetryService.reportEvent(this.eventTypes.SetupLookupNameCopied, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupLookupNameCopied],
       ...params,
     });
   };
 
-  reportStopTranslation = (params: { migrationId: string; error?: Error }) => {
-    const { migrationId, error } = params;
+  reportStopTranslation = (params: {
+    migrationId: string;
+    vendor: SiemMigrationVendor;
+    error?: Error;
+  }) => {
+    const { migrationId, vendor, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.StopMigration, {
       migrationId,
+      vendor,
       eventName: siemMigrationEventNames[this.eventTypes.StopMigration],
       ...this.getBaseResultParams(error),
     });
@@ -134,27 +151,31 @@ export class SiemBaseMigrationsTelemetry {
 
   reportTranslatedItemUpdate = (params: {
     migrationItem: RuleMigrationRule | DashboardMigrationDashboard;
+    vendor: SiemMigrationVendor;
     error?: Error;
   }) => {
-    const { migrationItem, error } = params;
+    const { migrationItem, vendor, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.TranslatedItemUpdate, {
       eventName: siemMigrationEventNames[this.eventTypes.TranslatedItemUpdate],
       migrationId: migrationItem.migration_id,
       ruleMigrationId: migrationItem.id,
+      vendor,
       ...this.getBaseResultParams(error),
     });
   };
 
   reportTranslatedItemInstall = (params: {
     migrationItem: RuleMigrationRule | DashboardMigrationDashboard;
+    vendor: SiemMigrationVendor;
     enabled: boolean;
     error?: Error;
   }) => {
-    const { migrationItem, enabled, error } = params;
+    const { migrationItem, vendor, enabled, error } = params;
     const eventParams: ReportTranslatedItemInstallActionParams = {
       eventName: siemMigrationEventNames[this.eventTypes.TranslatedItemInstall],
       migrationId: migrationItem.migration_id,
       ruleMigrationId: migrationItem.id,
+      vendor,
       author: 'custom',
       enabled,
       ...this.getBaseResultParams(error),
@@ -176,12 +197,14 @@ export class SiemBaseMigrationsTelemetry {
     count: number;
     enabled: boolean;
     error?: Error;
+    vendor?: SiemMigrationVendor;
   }) => {
-    const { migrationId, count, enabled, error } = params;
+    const { migrationId, count, enabled, error, vendor } = params;
 
     this.telemetryService.reportEvent(this.eventTypes.TranslatedBulkInstall, {
       eventName: siemMigrationEventNames[this.eventTypes.TranslatedBulkInstall],
       migrationId,
+      vendor,
       count,
       enabled,
       ...this.getBaseResultParams(error),
@@ -195,10 +218,11 @@ export class SiemBaseMigrationsTelemetry {
           error?: Error;
         })
   ) => {
-    const { migrationId, settings, retry } = params;
+    const { migrationId, vendor, settings, retry } = params;
     const error = 'error' in params ? params.error : undefined;
     this.telemetryService.reportEvent(this.eventTypes.StartMigration, {
       migrationId,
+      vendor,
       connectorId: settings?.connectorId,
       isRetry: !!retry,
       skipPrebuiltRulesMatching:

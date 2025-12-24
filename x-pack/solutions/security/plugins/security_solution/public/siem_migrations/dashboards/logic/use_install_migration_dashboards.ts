@@ -15,6 +15,7 @@ import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { installMigrationDashboards } from '../api';
 import { useInvalidateGetMigrationDashboards } from './use_get_migration_dashboards';
+import type { DashboardMigrationStats } from '../types';
 
 export const INSTALL_MIGRATION_DASHBOARDS_MUTATION_KEY = [
   'POST',
@@ -25,20 +26,22 @@ interface InstallMigrationDashboardsParams {
   ids?: string[];
 }
 
-export const useInstallMigrationDashboards = (migrationId: string) => {
+export const useInstallMigrationDashboards = (migrationStats: DashboardMigrationStats) => {
   const { addError, addSuccess } = useAppToasts();
   const { telemetry } = useKibana().services.siemMigrations.dashboards;
+  const { id: migrationId, vendor } = migrationStats;
 
   const reportTelemetry = useCallback(
     ({ ids }: InstallMigrationDashboardsParams, error?: Error) => {
       telemetry.reportTranslatedItemBulkInstall({
         migrationId,
+        vendor,
         enabled: true,
         count: ids?.length ?? 0,
         error,
       });
     },
-    [telemetry, migrationId]
+    [telemetry, migrationId, vendor]
   );
 
   const invalidateGetMigrationDashboards = useInvalidateGetMigrationDashboards();

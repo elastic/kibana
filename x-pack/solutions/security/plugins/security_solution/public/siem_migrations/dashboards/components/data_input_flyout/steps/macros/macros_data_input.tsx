@@ -11,23 +11,34 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { SubSteps } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
-import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from '../common/check_resources';
-import type { MigrationStepProps, OnMissingResourcesFetched } from '../../../../../common/types';
+import type {
+  MigrationSource,
+  MigrationStepProps,
+  OnMissingResourcesFetched,
+} from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
+import type { DashboardMigrationStats } from '../../../../types';
 
 interface MacrosDataInputSubStepsProps {
-  migrationStats: DashboardMigrationTaskStats;
+  migrationStats: DashboardMigrationStats;
   missingMacros: string[];
+  migrationSource: MigrationSource;
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
 
 export const MacrosDataInput = React.memo<MigrationStepProps>(
-  ({ dataInputStep, migrationStats, missingResourcesIndexed, onMissingResourcesFetched }) => {
+  ({
+    dataInputStep,
+    migrationStats,
+    migrationSource,
+    missingResourcesIndexed,
+    onMissingResourcesFetched,
+  }) => {
     const missingMacros = useMemo(() => missingResourcesIndexed?.macros, [missingResourcesIndexed]);
 
     const dataInputStatus = useMemo(
@@ -61,6 +72,7 @@ export const MacrosDataInput = React.memo<MigrationStepProps>(
                 migrationStats={migrationStats}
                 missingMacros={missingMacros}
                 onMissingResourcesFetched={onMissingResourcesFetched}
+                migrationSource={migrationSource}
               />
             </EuiFlexItem>
           )}
@@ -74,15 +86,18 @@ MacrosDataInput.displayName = 'MacrosDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | 3 | typeof END;
 export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
-  ({ migrationStats, missingMacros, onMissingResourcesFetched }) => {
+  ({ migrationStats, missingMacros, migrationSource, onMissingResourcesFetched }) => {
     const [subStep, setSubStep] = useState<SubStep>(missingMacros.length ? 1 : 3);
     const { telemetry } = useKibana().services.siemMigrations.dashboards;
 
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-      telemetry.reportSetupMacrosQueryCopied({ migrationId: migrationStats.id });
-    }, [telemetry, migrationStats.id]);
+      telemetry.reportSetupMacrosQueryCopied({
+        migrationId: migrationStats.id,
+        vendor: migrationSource,
+      });
+    }, [telemetry, migrationStats.id, migrationSource]);
     const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(1, subStep), onCopied });
 
     // Upload macros step
