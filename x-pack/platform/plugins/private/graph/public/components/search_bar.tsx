@@ -21,10 +21,7 @@ import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
-  IUnifiedSearchPluginServices,
-  UnifiedSearchPublicPluginStart,
-} from '@kbn/unified-search-plugin/public/types';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { css } from '@emotion/react';
@@ -111,7 +108,6 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
   const { services, overlays } = useKibana<
     IUnifiedSearchPluginServices & {
       contentManagement: ContentManagementPublicStart;
-      unifiedSearch: UnifiedSearchPublicPluginStart;
       kql: KqlPluginStart;
     }
   >();

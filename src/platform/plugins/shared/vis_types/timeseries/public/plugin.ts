@@ -15,7 +15,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -38,7 +37,6 @@ import {
   setDataViewsStart,
   setCharts,
   setUsageCollectionStart,
-  setUnifiedSearchStart,
   setKqlStart,
 } from './services';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
@@ -57,7 +55,6 @@ export interface MetricsPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   usageCollection: UsageCollectionStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   kql: KqlPluginStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
@@ -69,7 +66,6 @@ export interface TimeseriesVisDependencies extends Partial<CoreStart> {
   http: HttpSetup;
   timefilter: TimefilterContract;
   appName: string;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   kql: KqlPluginStart;
   core: CoreStart;
   notifications: CoreStart['notifications'];
@@ -114,7 +110,6 @@ export class MetricsPlugin implements Plugin<void, void> {
       dataViews,
       usageCollection,
       fieldFormats,
-      unifiedSearch,
       kql,
       uiActions,
       embeddable,
@@ -124,7 +119,6 @@ export class MetricsPlugin implements Plugin<void, void> {
     setI18n(core.i18n);
     setFieldFormats(fieldFormats);
     setDataStart(data);
-    setUnifiedSearchStart(unifiedSearch);
     setKqlStart(kql);
     setDataViewsStart(dataViews);
     setCoreStart(core);

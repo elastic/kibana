@@ -20,6 +20,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -109,6 +110,7 @@ function wrapQueryBarTopRowInContext(
   const services = {
     ...startMock,
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     appName: 'discover',
     storage: createMockStorage(),

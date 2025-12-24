@@ -10,8 +10,8 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { KqlPlugin } from './plugin';
 
 export type { KqlPluginStart, KqlPluginSetup } from './plugin';
-export type { QueryStringInputProps } from './components/query_string_input/query_string_input';
-export { QueryStringInput } from './components/query_string_input/query_string_input';
+export type { QueryStringInputProps } from './components/query_string_input';
+export { QueryStringInput } from './components/query_string_input';
 export { QueryLanguageSwitcher } from './components/query_string_input/language_switcher';
 export { FilterButtonGroup } from './components/query_string_input/filter_button_group';
 export { fromUser } from './components/query_string_input/from_user';

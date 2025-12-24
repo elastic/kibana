@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { parseDatemath } from '../../utils/time';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { InfraEntityMetricsItem } from '../../data_registry/data_registry_types';
+import { kqlFilter } from '../../utils/dsl_filters';
 
 export async function getToolHandler({
   request,
@@ -16,7 +17,7 @@ export async function getToolHandler({
   start,
   end,
   limit,
-  kqlFilter,
+  kqlFilter: kqlFilterValue,
 }: {
   request: KibanaRequest;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -32,18 +33,18 @@ export async function getToolHandler({
     throw new Error('Invalid date range provided.');
   }
 
+  const query = kqlFilterValue ? { bool: { filter: kqlFilter(kqlFilterValue) } } : undefined;
+
   const result = await dataRegistry.getData('infraHosts', {
     request,
     from: new Date(startMs).toISOString(),
     to: new Date(endMs).toISOString(),
     limit,
-    kqlFilter,
+    query,
   });
 
   if (!result) {
-    throw new Error(
-      'Host data is not available. The infra plugin may not be installed or configured.'
-    );
+    throw new Error('Host data is not available.');
   }
 
   return {

@@ -16,7 +16,7 @@ import React, { Fragment, useCallback, useMemo } from 'react';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
@@ -32,7 +32,7 @@ type KibanaDeps = {
   dataViews: DataViewsPublicPluginStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
 } & CoreStart;
 
