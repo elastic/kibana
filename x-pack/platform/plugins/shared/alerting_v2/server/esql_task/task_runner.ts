@@ -14,7 +14,6 @@ import type { AlertingServerStartDependencies } from '../types';
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { RawEsqlRule } from '../saved_objects';
 import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
-import { getFakeKibanaRequest } from '../lib/get_fake_kibana_request';
 import type { EsqlRulesTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
 import { ensureAlertsDataStream, ensureAlertsResources } from './resources';
@@ -69,18 +68,15 @@ export function createEsqlRulesTaskRunner({
           return { state: taskInstance.state };
         }
 
-        const runAsRequest =
-          fakeRequest ??
-          getFakeKibanaRequest({
-            basePathService: coreStart.http.basePath,
-            spaceId: params.spaceId,
-            apiKey: rawRule.apiKey,
-          });
-        if (!runAsRequest) {
-          throw new Error('Cannot execute a task without Kibana Request');
+        // Task Manager will provide `fakeRequest` if the task has an apiKey + userScope.
+        // We intentionally do not construct fake requests here; scheduling must pass a real request.
+        if (!fakeRequest) {
+          throw new Error(
+            `Cannot execute ES|QL task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
+          );
         }
 
-        const searchClient = pluginsStart.data.search.asScoped(runAsRequest);
+        const searchClient = pluginsStart.data.search.asScoped(fakeRequest);
         const esqlResponse = await executeEsqlRule({
           logger,
           searchClient,

@@ -18,6 +18,7 @@ import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
+// TODO ILM for new rules should be managed by the user
 export const DEFAULT_ALERTS_ILM_POLICY_NAME = '.alerts-ilm-policy';
 export const DEFAULT_ALERTS_ILM_POLICY: IlmPolicy = {
   _meta: { managed: true },

@@ -27,13 +27,19 @@ export async function ensureEsqlRuleTaskScheduled({
     spaceId: string;
     schedule: IntervalSchedule;
     /**
-     * When provided, Task Manager will persist an apiKey + userScope on the task so the runner
-     * can receive a `fakeRequest`.
+     * Must be provided so Task Manager can persist an apiKey + userScope on the task and
+     * provide a `fakeRequest` to the task runner.
      */
-    request?: KibanaRequest;
+    request: KibanaRequest;
   };
 }) {
   const id = getEsqlRuleTaskId({ ruleId, spaceId });
+
+  if (!request) {
+    throw new Error(
+      `Cannot schedule ES|QL task [${id}] without a KibanaRequest. A request is required so Task Manager can associate an API key and provide fakeRequest to the runner.`
+    );
+  }
 
   await taskManager.ensureScheduled(
     {
@@ -48,7 +54,7 @@ export async function ensureEsqlRuleTaskScheduled({
       scope: ['alerting'],
       enabled: true,
     },
-    request ? { request } : undefined
+    { request }
   );
 
   return { id };
