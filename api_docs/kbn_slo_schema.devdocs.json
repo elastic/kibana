@@ -946,6 +946,156 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.RepairAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "RepairAction",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.RepairAction.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"noop\" | \"recreate-transform\" | \"start-transform\" | \"stop-transform\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.RepairAction.transformType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "transformType",
+            "description": [],
+            "signature": [
+              "\"rollup\" | \"summary\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.RepairActionResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "RepairActionResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.RepairActionResult.action",
+            "type": "Object",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.RepairAction",
+                "text": "RepairAction"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.RepairActionResult.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"success\" | \"failure\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.RepairActionResult.error",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.RepairActionsGroupResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "RepairActionsGroupResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.RepairActionsGroupResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.RepairActionsGroupResult.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.RepairActionResult",
+                "text": "RepairActionResult"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -1857,6 +2007,21 @@
           "string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/indicators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.RepairParams",
+        "type": "Type",
+        "tags": [],
+        "label": "RepairParams",
+        "description": [],
+        "signature": [
+          "{ list: string[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -15138,6 +15303,28 @@
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.repairParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "repairParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<string, string, unknown>>; }>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/repair.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
