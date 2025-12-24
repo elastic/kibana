@@ -638,7 +638,7 @@ export class WorkflowsExecutionEnginePlugin
       // Best-effort concurrency enforcement: log error but allow execution to proceed
       // This prevents a single cancellation failure from blocking new executions
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
+      this.logger.debug(
         `Failed to enforce concurrency limits for workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}): ${errorMessage}. Execution will proceed without concurrency enforcement.`
       );
       if (error instanceof Error) {
