@@ -21,8 +21,8 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
 import type { BasicRuleInfo } from '../../logic/basic_rule_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import type { ReviewPrebuiltRuleInstallationFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_filter';
-import type { ReviewPrebuiltRuleInstallationSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_sort';
+import type { PrebuiltRuleAssetsFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
+import type { PrebuiltRuleAssetsSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
 
 /*
   To ensure a smooth transition from a non-paginated API to a paginated API, we will release the changes in two stages:
@@ -111,8 +111,8 @@ async function getInstallableRuleVersions(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
   mlAuthz: MlAuthz,
   currentRuleVersionsMap: Map<string, RuleSummary>,
-  sort?: ReviewPrebuiltRuleInstallationSort,
-  filter?: ReviewPrebuiltRuleInstallationFilter
+  sort?: PrebuiltRuleAssetsSort,
+  filter?: PrebuiltRuleAssetsFilter
 ): Promise<BasicRuleInfo[]> {
   const allLatestVersions = await ruleAssetsClient.fetchLatestVersions({
     sort,

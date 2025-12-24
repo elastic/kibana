@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod';
 import type { RuleTagArray } from '../../model';
 import type { RuleResponse } from '../../model/rule_schema';
-import { ReviewPrebuiltRuleInstallationFilter } from '../common/review_prebuilt_rules_installation_filter';
-import { ReviewPrebuiltRuleInstallationSort } from '../common/review_prebuilt_rules_installation_sort';
+import { PrebuiltRuleAssetsFilter } from '../common/prebuilt_rule_assets_filter';
+import { PrebuiltRuleAssetsSort } from '../common/prebuilt_rule_assets_sort';
 
 export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
 export const ReviewRuleInstallationRequestBody = z
@@ -26,12 +26,12 @@ export const ReviewRuleInstallationRequestBody = z
     /**
      * Filtering criteria
      */
-    filter: ReviewPrebuiltRuleInstallationFilter.optional(),
+    filter: PrebuiltRuleAssetsFilter.optional(),
 
     /**
      * Sorting criteria
      */
-    sort: ReviewPrebuiltRuleInstallationSort.optional(),
+    sort: PrebuiltRuleAssetsSort.optional(),
   })
   .partial();
 

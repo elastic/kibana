@@ -7,10 +7,8 @@
 
 import { z } from '@kbn/zod';
 
-export type ReviewPrebuiltRuleInstallationFilter = z.infer<
-  typeof ReviewPrebuiltRuleInstallationFilter
->;
-export const ReviewPrebuiltRuleInstallationFilter = z.object({
+export type PrebuiltRuleAssetsFilter = z.infer<typeof PrebuiltRuleAssetsFilter>;
+export const PrebuiltRuleAssetsFilter = z.object({
   fields: z.object({
     name: z
       .object({
