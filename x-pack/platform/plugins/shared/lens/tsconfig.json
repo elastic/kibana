@@ -135,6 +135,9 @@
     "@kbn/unified-tabs",
     "@kbn/esql-composer",
     "@kbn/cps",
+    "@kbn/react-env",
+    "@kbn/core-base-browser-mocks",
+    "@kbn/react-kibana-context-env",
   ],
   "exclude": ["target/**/*"]
 }
