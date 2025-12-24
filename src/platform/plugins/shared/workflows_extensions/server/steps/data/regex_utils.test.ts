@@ -44,10 +44,12 @@ describe('regex_utils', () => {
       const result = validateInputLength(tooLong, mockLogger);
 
       expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toContain('exceeds maximum allowed length');
-      expect(result.error?.message).toContain('100000');
-      expect(result.error?.message).toContain('ReDoS');
+      if (!result.valid) {
+        expect(result.error).toBeDefined();
+        expect(result.error.message).toContain('exceeds maximum allowed length');
+        expect(result.error.message).toContain('100000');
+        expect(result.error.message).toContain('ReDoS');
+      }
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('exceeds max length'));
     });
 
@@ -56,7 +58,9 @@ describe('regex_utils', () => {
       const result = validateInputLength(tooLong, mockLogger);
 
       expect(result.valid).toBe(false);
-      expect(result.error?.message).toContain('150000');
+      if (!result.valid) {
+        expect(result.error.message).toContain('150000');
+      }
     });
 
     it('should accept empty strings', () => {

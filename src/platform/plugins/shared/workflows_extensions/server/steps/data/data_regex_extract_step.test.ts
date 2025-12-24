@@ -493,11 +493,13 @@ describe('dataRegexExtractStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataRegexExtractStepDefinition.handler(context);
 
-      expect(result.output).toHaveLength(4);
-      expect(result.output[0]).toEqual({ letters: 'abc', digits: '123' });
-      expect(result.output[1]).toEqual({ letters: 'def', digits: '456' });
-      expect(result.output[2]).toEqual({ letters: 'ghi', digits: '789' });
-      expect(result.output[3]).toEqual({ letters: 'jkl', digits: '012' });
+      expect(Array.isArray(result.output)).toBe(true);
+      const output = result.output as Array<Record<string, unknown> | null>;
+      expect(output).toHaveLength(4);
+      expect(output[0]).toEqual({ letters: 'abc', digits: '123' });
+      expect(output[1]).toEqual({ letters: 'def', digits: '456' });
+      expect(output[2]).toEqual({ letters: 'ghi', digits: '789' });
+      expect(output[3]).toEqual({ letters: 'jkl', digits: '012' });
     });
   });
 });
