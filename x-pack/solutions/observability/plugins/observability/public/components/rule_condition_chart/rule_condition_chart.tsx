@@ -136,31 +136,31 @@ export function RuleConditionChart({
   }, [searchConfiguration.filter, additionalFilters]);
 
   // Handle Lens error
-  useEffect(() => {
-    // Lens does not expose or provide a way to check if there is an error in the chart, yet.
-    // To work around this, we check if the element with class 'lnsEmbeddedError' is found in the DOM.
-    setTimeout(function () {
-      const errorDiv = document.querySelector('.lnsEmbeddedError');
-      if (errorDiv) {
-        const paragraphElements = errorDiv.querySelectorAll('p');
-        if (!paragraphElements) return;
-        paragraphElements[0].innerText = i18n.translate(
-          'xpack.observability.ruleCondition.chart.error_equation.title',
-          {
-            defaultMessage: 'An error occurred while rendering the chart',
-          }
-        );
-        if (paragraphElements.length > 1) {
-          paragraphElements[1].innerText = i18n.translate(
-            'xpack.observability.ruleCondition.chart.error_equation.description',
-            {
-              defaultMessage: 'Check the rule equation.',
-            }
-          );
-        }
-      }
-    }, 10);
-  }, [chartLoading, attributes]);
+  // useEffect(() => {
+  //   // Lens does not expose or provide a way to check if there is an error in the chart, yet.
+  //   // To work around this, we check if the element with class 'lnsEmbeddedError' is found in the DOM.
+  //   setTimeout(function () {
+  //     const errorDiv = document.querySelector('.lnsEmbeddedError');
+  //     if (errorDiv) {
+  //       const paragraphElements = errorDiv.querySelectorAll('p');
+  //       if (!paragraphElements) return;
+  //       paragraphElements[0].innerText = i18n.translate(
+  //         'xpack.observability.ruleCondition.chart.error_equation.title',
+  //         {
+  //           defaultMessage: 'An error occurred while rendering the chart',
+  //         }
+  //       );
+  //       if (paragraphElements.length > 1) {
+  //         paragraphElements[1].innerText = i18n.translate(
+  //           'xpack.observability.ruleCondition.chart.error_equation.description',
+  //           {
+  //             defaultMessage: 'Check the rule equation.',
+  //           }
+  //         );
+  //       }
+  //     }
+  //   }, 10);
+  // }, [chartLoading, attributes]);
 
   // Build the warning threshold reference line
   useEffect(() => {
