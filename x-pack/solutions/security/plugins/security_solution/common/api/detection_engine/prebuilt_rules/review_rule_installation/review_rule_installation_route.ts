@@ -17,11 +17,11 @@ export const ReviewRuleInstallationRequestBody = z
     /**
      * Page number starting from 1
      */
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce.number().int().min(1).optional(),
     /**
      * Rules per page
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce.number().int().min(0).optional(),
 
     /**
      * Filtering criteria
@@ -33,7 +33,7 @@ export const ReviewRuleInstallationRequestBody = z
      */
     sort: ReviewPrebuiltRuleInstallationSort.optional(),
   })
-  .nullable();
+  .partial();
 
 export interface ReviewRuleInstallationResponseBody {
   /** Current page number */

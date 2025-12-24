@@ -27,7 +27,7 @@ export const reviewPrebuiltRulesToInstall = async (
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'securitySolution')
-    .send(body ?? {})
+    .send(body)
     .expect(200);
 
   return response.body;

@@ -26,6 +26,67 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
+    describe('Using endpoint without providing all parameters', () => {
+      it('called without parameters - returns all rules', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest);
+
+        expect(response).toMatchObject({
+          rules: [
+            expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+          ],
+          page: 1,
+          per_page: 10_000,
+        });
+      });
+
+      it('called with an empty object - returns all rules', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {});
+
+        expect(response).toMatchObject({
+          rules: [
+            expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+          ],
+          page: 1,
+          per_page: 10_000,
+        });
+      });
+
+      it('called with `per_page` only - respects `per_page` parameter', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest, {
+          per_page: 1,
+        });
+
+        expect(response).toMatchObject({
+          rules: [expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' })],
+          page: 1,
+          per_page: 1,
+        });
+      });
+    });
+
     describe('Pagination', () => {
       it('returns page and per_page passed in the request', async () => {
         const response = await reviewPrebuiltRulesToInstall(supertest, {
