@@ -251,6 +251,7 @@ dependsOn:
   - '@kbn/spaces-utils'
   - '@kbn/core-metrics-server'
   - '@kbn/ai-assistant-default-llm-setting'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-ui-settings-common'
   - '@kbn/react-query'
 tags:
