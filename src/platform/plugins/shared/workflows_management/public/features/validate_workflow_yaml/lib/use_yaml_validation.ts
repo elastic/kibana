@@ -125,9 +125,7 @@ export function useYamlValidation(
         validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
         validateLiquidTemplate(model.getValue()),
         validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-        ...(customPropertyItems.length > 0
-          ? await validateCustomProperties(customPropertyItems)
-          : []),
+        await validateCustomProperties(customPropertyItems),
       ].flat();
 
       for (const validationResult of validationResults) {

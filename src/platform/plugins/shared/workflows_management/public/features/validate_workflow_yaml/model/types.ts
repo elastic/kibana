@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepPropertyHandler } from '@kbn/workflows';
+import type { PropertyValidationFn } from '@kbn/workflows';
 
 interface BaseItem {
   id: string;
@@ -34,7 +34,7 @@ export interface CustomPropertyItem extends BaseItem {
   stepType: string;
   propertyKey: string;
   propertyValue: unknown;
-  validator: StepPropertyHandler['validate'];
+  validator: PropertyValidationFn;
 }
 
 export interface StepNameInfo {

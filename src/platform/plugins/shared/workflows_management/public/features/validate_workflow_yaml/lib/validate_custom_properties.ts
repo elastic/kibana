@@ -20,26 +20,25 @@ export async function validateCustomProperties(
           stepType: customPropertyItem.stepType,
           scope: customPropertyItem.scope,
           propertyKey: customPropertyItem.propertyKey,
-          rawValue: customPropertyItem.propertyValue,
         })
         .then((result) => {
-          if (result !== null) {
-            return {
-              id: customPropertyItem.id,
-              severity: result.severity,
-              message: result.message,
-              afterMessage: result.afterMessage ?? undefined,
-              hoverMessage: result.hoverMessage ?? undefined,
-              startLineNumber: customPropertyItem.startLineNumber,
-              startColumn: customPropertyItem.startColumn,
-              endLineNumber: customPropertyItem.endLineNumber,
-              endColumn: customPropertyItem.endColumn,
-              yamlPath: customPropertyItem.yamlPath,
-              key: customPropertyItem.key,
-              owner: 'custom-property-validation',
-            } as YamlValidationResult;
+          if (!result) {
+            return null;
           }
-          return null;
+          return {
+            id: customPropertyItem.id,
+            severity: result.severity,
+            message: result.message,
+            afterMessage: result.afterMessage ?? undefined,
+            hoverMessage: result.hoverMessage ?? undefined,
+            startLineNumber: customPropertyItem.startLineNumber,
+            startColumn: customPropertyItem.startColumn,
+            endLineNumber: customPropertyItem.endLineNumber,
+            endColumn: customPropertyItem.endColumn,
+            yamlPath: customPropertyItem.yamlPath,
+            key: customPropertyItem.key,
+            owner: 'custom-property-validation',
+          } as YamlValidationResult;
         })
     );
   }

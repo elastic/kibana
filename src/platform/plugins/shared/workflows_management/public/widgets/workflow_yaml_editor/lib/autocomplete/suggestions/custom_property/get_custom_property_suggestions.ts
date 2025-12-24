@@ -40,10 +40,11 @@ export async function getCustomPropertySuggestions(
     isInConfig ? 'config' : 'input',
     key
   );
-  if (!propertyHandler) {
+  if (!propertyHandler || !propertyHandler.getCompletions) {
     return [];
   }
   const [startOffset, endOffset] = focusedYamlPair.valueNode.range;
+  const currentValue = focusedYamlPair.valueNode.value;
   const startPos = yamlLineCounter?.linePos(startOffset);
   const endPos = yamlLineCounter?.linePos(endOffset);
   // replace the whole value with the suggestion
@@ -53,14 +54,15 @@ export async function getCustomPropertySuggestions(
     endLineNumber: endPos.line,
     endColumn: endPos.col,
   };
-  const completions = await propertyHandler.getCompletions();
-  return completions.map((completion) => ({
-    label: completion.label,
-    value: completion.value,
-    kind: monaco.languages.CompletionItemKind.Value,
-    insertText: completion.value,
-    range: replaceRange,
-    detail: completion.detail,
-    documentation: completion.documentation,
-  }));
+  const completions = await propertyHandler.getCompletions(currentValue);
+  return completions.map(
+    (completion): monaco.languages.CompletionItem => ({
+      label: completion.label,
+      kind: monaco.languages.CompletionItemKind.Value,
+      insertText: completion.value,
+      range: replaceRange,
+      detail: completion.detail,
+      documentation: completion.documentation,
+    })
+  );
 }

@@ -62,6 +62,7 @@ export const getExternalStepDefinition: (deps: {
           return proxies.map((proxy) => ({
             label: proxy.id,
             value: proxy.id,
+            detail: 'Proxy details',
           }));
         },
         validate: async (value: unknown, _context: PropertyValidationContext) => {

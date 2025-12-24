@@ -105,4 +105,56 @@ steps:
       key: 'debug',
     });
   });
+  it('should collect nested custom property items at both config and input level', () => {
+    const yaml = `
+name: test-workflow
+steps:
+  - name: run-agent
+    type: run-agent
+    agent-config:
+      agent:
+        id: great-agent
+    with:
+      obj:
+        message: "Hello, world!"
+`;
+    const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
+    const validator = jest.fn();
+    const getPropertyHandler = jest.fn();
+    getPropertyHandler.mockImplementation(
+      (stepType: string, scope: 'config' | 'input', key: string) => {
+        if (stepType === 'run-agent' && scope === 'input' && key === 'obj.message') {
+          return { validate: validator };
+        }
+        if (stepType === 'run-agent' && scope === 'config' && key === 'agent-config.agent.id') {
+          return { validate: validator };
+        }
+        return null;
+      }
+    );
+    const customPropertyItems = collectAllCustomPropertyItems(
+      workflowLookup!,
+      yamlLineCounter!,
+      getPropertyHandler
+    );
+    expect(customPropertyItems).toHaveLength(2);
+    expect(customPropertyItems[0]).toMatchObject({
+      propertyKey: 'agent-config.agent.id',
+      propertyValue: 'great-agent',
+      stepType: 'run-agent',
+      scope: 'config',
+      validator,
+      yamlPath: ['agent-config', 'agent', 'id'],
+      key: 'id',
+    });
+    expect(customPropertyItems[1]).toMatchObject({
+      propertyKey: 'obj.message',
+      propertyValue: 'Hello, world!',
+      stepType: 'run-agent',
+      scope: 'input',
+      validator,
+      yamlPath: ['with', 'obj', 'message'],
+      key: 'message',
+    });
+  });
 });

@@ -10,7 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
-import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions.ts';
+import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
@@ -23,7 +23,6 @@ import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getPropertyHandler } from '../../../../../../common/schema';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
-// eslint-disable-next-line complexity
 export async function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
 ): Promise<monaco.languages.CompletionItem[]> {
@@ -150,14 +149,12 @@ export async function getSuggestions(
     return getTimezoneSuggestions(adjustedRange, lineParseResult.fullKey);
   }
 
-  // Dynamic completions
-  if (autocompleteContext.dynamicConnectorTypes) {
-    return getCustomPropertySuggestions(
-      autocompleteContext,
-      (stepType: string, scope: 'config' | 'input', key: string) =>
-        getPropertyHandler(stepType, scope, key)
-    );
-  }
+  // Custom property completion for steps registered via workflows_extensions
+  return getCustomPropertySuggestions(
+    autocompleteContext,
+    (stepType: string, scope: 'config' | 'input', key: string) =>
+      getPropertyHandler(stepType, scope, key)
+  );
 
   // TODO: Implement connector with block completion
   // Connector with block completion
@@ -172,5 +169,5 @@ export async function getSuggestions(
   //         "@timestamp":
   //           gte: "now-1h"
   //     |<-
-  return [];
+  // return [];
 }

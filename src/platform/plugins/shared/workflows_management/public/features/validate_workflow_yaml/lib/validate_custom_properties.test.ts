@@ -59,13 +59,11 @@ describe('validateCustomProperties', () => {
       stepType: '1',
       scope: 'config',
       propertyKey: '1',
-      rawValue: '1',
     });
     expect(validator2).toHaveBeenCalledWith('2', {
       stepType: '2',
       scope: 'input',
       propertyKey: '2',
-      rawValue: '2',
     });
     expect(validationResults).toHaveLength(2);
     expect(validationResults[0]).toMatchObject({

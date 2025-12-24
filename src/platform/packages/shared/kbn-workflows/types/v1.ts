@@ -437,18 +437,22 @@ export interface StepPropertyHandler<T = unknown> {
    * Fetch available options for autocompletion.
    * Called lazily when the user triggers completion.
    */
-  getCompletions?: () => Promise<PropertyCompletionOption[]>;
+  getCompletions?: PropertyCompletionFn<T>;
 
   /**
    * Validate a value and return decoration/error info.
    * Called when the YAML document changes.
    * Returns null if no validation is needed (static Zod validation is sufficient).
    */
-  validate?: (
-    value: T,
-    context: PropertyValidationContext
-  ) => Promise<PropertyValidationResult | null>;
+  validate?: PropertyValidationFn<T>;
 }
+
+export type PropertyCompletionFn<T = unknown> = (value: T) => Promise<PropertyCompletionOption[]>;
+
+export type PropertyValidationFn<T = unknown> = (
+  value: T,
+  context: PropertyValidationContext
+) => Promise<PropertyValidationResult | null>;
 
 export interface PropertyCompletionOption {
   /** The value that will be stored in the yaml */

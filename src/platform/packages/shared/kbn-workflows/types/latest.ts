@@ -54,6 +54,8 @@ export type {
   BaseConnectorContract,
   HttpMethod,
   StepPropertyHandler,
+  PropertyCompletionFn,
+  PropertyValidationFn,
   PropertyValidationResult,
   PropertyCompletionOption,
   PropertyValidationContext,

@@ -11,21 +11,20 @@ import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
- * Step type ID for the setvar step.
+ * Step type ID for the external step.
  */
 export const ExternalStepTypeId = 'example.externalStep';
 
 /**
- * Input schema for the setvar step.
- * Uses variables structure with key->value pairs.
+ * Input schema for the external step.
  */
 export const InputSchema = z.object({
   input: z.string(),
 });
 
 /**
- * Output schema for the setvar step.
- * Uses variables structure with key->value pairs.
+ * Output schema for the external step.
+ * Returns simple string response.
  */
 export const OutputSchema = z.object({
   response: z.string(),
@@ -44,7 +43,7 @@ export type ExternalStepInputSchema = typeof InputSchema;
 export type ExternalStepOutputSchema = typeof OutputSchema;
 
 /**
- * Common step definition for SetVar step.
+ * Common step definition for External step.
  * This is shared between server and public implementations.
  * Input and output types are automatically inferred from the schemas.
  */

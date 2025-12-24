@@ -25,7 +25,7 @@ export function collectAllCustomPropertyItems(
 
   const steps = Object.values(workflowLookup.steps);
   for (const step of steps) {
-    for (const [_, prop] of Object.entries(step.propInfos)) {
+    for (const [propKey, prop] of Object.entries(step.propInfos)) {
       if (
         prop.keyNode.range &&
         typeof prop.keyNode.value === 'string' &&
@@ -35,9 +35,9 @@ export function collectAllCustomPropertyItems(
         prop.valueNode.range
       ) {
         const scope = prop.path.length > 0 && prop.path[0] === 'with' ? 'input' : 'config';
-        const key = prop.keyNode.value as string;
+        const key = scope === 'config' ? propKey : propKey.split('.').slice(1).join('.');
         const propertyHandler = getPropertyHandler(step.stepType, scope, key);
-        if (propertyHandler) {
+        if (propertyHandler && propertyHandler.validate) {
           const [startOffset, endOffset] = prop.valueNode.range;
           const startPos = lineCounter.linePos(startOffset);
           const endPos = lineCounter.linePos(endOffset);
