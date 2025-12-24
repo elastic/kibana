@@ -21,5 +21,6 @@
   ],
   "kbn_references": [
     "@kbn/core-chrome-layout-constants",
+    "@kbn/react-context-registry",
   ]
 }
