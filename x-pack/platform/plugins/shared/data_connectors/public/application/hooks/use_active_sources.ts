@@ -5,17 +5,31 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { DUMMY_ACTIVE_SOURCES } from '../../data/dummy_active_sources';
+import { useQuery } from '@kbn/react-query';
+import { useKibana } from './use_kibana';
+import { API_BASE_PATH } from '../../../common/constants';
+import type { ActiveSource } from '../../types/connector';
 
-// TODO: Replace with API integration when backend is ready
-// This hook currently returns hardcoded dummy data
+interface ListDataConnectorsResponse {
+  connectors: ActiveSource[];
+  total: number;
+}
+
 export const useActiveSources = () => {
-  const activeSources = useMemo(() => DUMMY_ACTIVE_SOURCES, []);
+  const {
+    services: { http },
+  } = useKibana();
+
+  const { data, isLoading, error } = useQuery<ListDataConnectorsResponse>({
+    queryKey: ['dataConnectors', 'list'],
+    queryFn: async () => {
+      return await http.get<ListDataConnectorsResponse>(API_BASE_PATH);
+    },
+  });
 
   return {
-    activeSources,
-    isLoading: false,
-    error: null,
+    activeSources: data?.connectors ?? [],
+    isLoading,
+    error,
   };
 };

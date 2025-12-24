@@ -173,14 +173,17 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.connectedAsColumn', {
         defaultMessage: 'Connected as',
       }),
-      render: (connectedAs: string) => <EuiText size="s">{connectedAs}</EuiText>,
+      render: (connectedAs?: string) => <EuiText size="s">{connectedAs || '-'}</EuiText>,
     },
     {
       field: 'createdAt',
       name: i18n.translate('xpack.dataConnectors.activeSources.createdAtColumn', {
         defaultMessage: 'Created at',
       }),
-      render: (createdAt: string) => {
+      render: (createdAt?: string) => {
+        if (!createdAt) {
+          return <EuiText size="s">-</EuiText>;
+        }
         const date = new Date(createdAt);
         return (
           <EuiText size="s">
@@ -194,7 +197,12 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       name: i18n.translate('xpack.dataConnectors.activeSources.usedByColumn', {
         defaultMessage: 'Used by',
       }),
-      render: (agents: ActiveSource['usedBy']) => <AgentAvatarGroup agents={agents} />,
+      render: (agents?: ActiveSource['usedBy']) =>
+        agents && agents.length > 0 ? (
+          <AgentAvatarGroup agents={agents} />
+        ) : (
+          <EuiText size="s">-</EuiText>
+        ),
     },
     {
       name: i18n.translate('xpack.dataConnectors.activeSources.actionsColumn', {
