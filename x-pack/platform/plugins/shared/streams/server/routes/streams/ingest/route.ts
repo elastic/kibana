@@ -16,7 +16,7 @@ import type { AttachmentClient } from '../../../lib/streams/attachments/attachme
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import type { QueryAsset } from '../../../../common/assets';
+import type { Query } from '../../../../common/queries';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
 
@@ -39,7 +39,7 @@ async function getAssets({
     .map((attachment) => attachment.id);
 
   const queries = assets
-    .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
+    .filter((asset): asset is Query => asset[ASSET_TYPE] === 'query')
     .map((asset) => asset.query);
 
   const rules = attachments
