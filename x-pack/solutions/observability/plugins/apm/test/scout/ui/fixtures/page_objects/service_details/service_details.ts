@@ -52,7 +52,9 @@ export class ServiceDetailsPage {
         rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
       })}`
     );
-    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await this.page
+      .getByTestId('superDatePickerToggleQuickMenuButton')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   // #region Go to Tabs
@@ -83,26 +85,6 @@ export class ServiceDetailsPage {
 
   getInstancesTableContainer() {
     return this.page.getByTestId('serviceInstancesTableContainer');
-  }
-
-  getInstanceRow(instanceName: string) {
-    return this.serviceOverviewInstancesTable.getByRole('row', { name: new RegExp(instanceName) });
-  }
-
-  getInstanceDetailsButton(instanceName: string) {
-    return this.page.getByTestId(`instanceDetailsButton_${instanceName}`);
-  }
-
-  async clickInstanceDetailsButton(instanceName: string) {
-    await this.getInstanceDetailsButton(instanceName).click();
-  }
-
-  getInstanceActionsButton(instanceName: string) {
-    return this.page.getByTestId(`instanceActionsButton_${instanceName}`);
-  }
-
-  async clickInstanceActionsButton(instanceName: string) {
-    await this.getInstanceActionsButton(instanceName).click();
   }
 
   getViewTransactionsLink() {

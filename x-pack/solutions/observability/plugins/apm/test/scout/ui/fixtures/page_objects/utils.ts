@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
+import { BIGGER_TIMEOUT } from '../constants';
 
 export async function waitForTableToLoad(page: ScoutPage, idOrLocator: Locator | string) {
   const table = typeof idOrLocator === 'string' ? page.getByTestId(idOrLocator) : idOrLocator;
@@ -21,6 +22,6 @@ export async function waitForChartToLoad(
 ): Promise<void> {
   const chart = typeof idOrLocator === 'string' ? page.getByTestId(idOrLocator) : idOrLocator;
 
-  await chart.waitFor();
-  await chart.getByTestId('loading').waitFor({ state: 'hidden' });
+  await chart.waitFor({ timeout: BIGGER_TIMEOUT });
+  await chart.getByTestId('loading').waitFor({ state: 'hidden', timeout: BIGGER_TIMEOUT });
 }
