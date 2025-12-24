@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useCallback } from 'react';
+
+import { useSetUnifiedAlertsTags } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_tags';
+
+import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
+import type { BaseApplyAttackProps } from '../types';
+
+/**
+ * Props for the applyTags function
+ */
+interface ApplyAttackTagsProps extends BaseApplyAttackProps {
+  /** Tags to add or remove */
+  tags: { tags_to_add: string[]; tags_to_remove: string[] };
+}
+
+/**
+ * Hook that provides a function to apply tags to attack discoveries and optionally related detection alerts.
+ * Shows a confirmation modal to let users choose whether to update only attack discoveries or both attack discoveries and related detection alerts.
+ *
+ * @returns Object containing the applyTags function
+ *
+ * @example
+ * ```tsx
+ * const { applyTags } = useApplyAttackTags();
+ * await applyTags({
+ *   tags: { tags_to_add: ['tag1'], tags_to_remove: [] },
+ *   attackIds: ['attack-1', 'attack-2'],
+ *   relatedAlertIds: ['alert-1', 'alert-2'],
+ *   setIsLoading: (loading) => setLoading(loading),
+ *   onSuccess: () => console.log('Success'),
+ * });
+ * ```
+ */
+export const useApplyAttackTags = () => {
+  const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();
+  const showModalIfNeeded = useUpdateAttacksModal('tags');
+
+  const applyTags = useCallback(
+    async ({ tags, attackIds, relatedAlertIds, setIsLoading, onSuccess }: ApplyAttackTagsProps) => {
+      // Show modal (if needed) and wait for user decision
+      const result = await showModalIfNeeded({
+        alertsCount: relatedAlertIds.length,
+        attackDiscoveriesCount: attackIds.length,
+      });
+      if (result === null) {
+        // User cancelled, don't proceed with update
+        return;
+      }
+      setIsLoading?.(true);
+      try {
+        // Combine IDs based on user choice
+        const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
+
+        await setUnifiedAlertsTags({
+          tags,
+          ids: allIds,
+        });
+        onSuccess?.();
+      } finally {
+        setIsLoading?.(false);
+      }
+    },
+    [setUnifiedAlertsTags, showModalIfNeeded]
+  );
+
+  return { applyTags };
+};
