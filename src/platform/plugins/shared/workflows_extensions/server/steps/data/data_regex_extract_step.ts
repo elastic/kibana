@@ -57,6 +57,7 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
         `Extracting from ${sourceArray.length} item(s) using pattern: ${pattern} with flags: ${flags}`
       );
 
+      // Validate the regex pattern with the user-provided flags
       const regexResult = createRegex(pattern, flags, {
         error: (message: string, error?: unknown) =>
           context.logger.error(message, error as Error | undefined),
@@ -64,6 +65,11 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
       if ('error' in regexResult) {
         return { error: regexResult.error };
       }
+
+      // Remove global flag for matching to ensure match() returns capture groups instead of all matches
+      // When 'g' flag is present, match() returns array of all matches without groups
+      const normalizedFlags = flags?.replace(/g/g, '');
+      const matchRegex = new RegExp(pattern, normalizedFlags);
 
       const extractedItems: Array<Record<string, unknown> | null> = [];
       let matchCount = 0;
@@ -77,10 +83,7 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
           if (!lengthValidation.valid) {
             return { error: lengthValidation.error };
           }
-          // Remove global flag to ensure match() returns capture groups instead of all matches
-          // When 'g' flag is present, match() returns array of all matches without groups
-          const itemRegex = new RegExp(pattern, flags?.replace(/g/g, ''));
-          const match = item.match(itemRegex);
+          const match = item.match(matchRegex);
 
           if (!match) {
             if (errorIfNoMatch) {

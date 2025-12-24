@@ -62,6 +62,8 @@ export const dataRegexReplaceStepDefinition = createServerStepDefinition({
           }
 
           if (detailed) {
+            // Note: matchCount is only accurate when the global flag is set.
+            // Without the global flag, match() returns only the first match.
             const matches = item.match(regex);
             const matchCount = matches ? matches.length : 0;
             totalMatchCount += matchCount;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MAX_INPUT_LENGTH = 100000; // 100KB per string
+export const MAX_INPUT_LENGTH = 100000; // max 100,000 characters per string
 
 export function validateInputLength(
   item: string,

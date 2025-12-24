@@ -1,0 +1,279 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  createRegex,
+  MAX_INPUT_LENGTH,
+  validateInputLength,
+  validateSourceInput,
+} from './regex_utils';
+
+describe('regex_utils', () => {
+  describe('validateInputLength', () => {
+    const mockLogger = {
+      warn: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should accept strings below max length', () => {
+      const result = validateInputLength('short string', mockLogger);
+
+      expect(result.valid).toBe(true);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should accept strings at exactly max length', () => {
+      const exactLength = 'a'.repeat(MAX_INPUT_LENGTH);
+      const result = validateInputLength(exactLength, mockLogger);
+
+      expect(result.valid).toBe(true);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should reject strings exceeding max length', () => {
+      const tooLong = 'a'.repeat(MAX_INPUT_LENGTH + 1);
+      const result = validateInputLength(tooLong, mockLogger);
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('exceeds maximum allowed length');
+      expect(result.error?.message).toContain('100000');
+      expect(result.error?.message).toContain('ReDoS');
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('exceeds max length'));
+    });
+
+    it('should include actual length in error message', () => {
+      const tooLong = 'a'.repeat(150000);
+      const result = validateInputLength(tooLong, mockLogger);
+
+      expect(result.valid).toBe(false);
+      expect(result.error?.message).toContain('150000');
+    });
+
+    it('should accept empty strings', () => {
+      const result = validateInputLength('', mockLogger);
+
+      expect(result.valid).toBe(true);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createRegex', () => {
+    const mockLogger = {
+      error: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should create valid regex without flags', () => {
+      const result = createRegex('\\d+', undefined, mockLogger);
+
+      expect('regex' in result).toBe(true);
+      if ('regex' in result) {
+        expect(result.regex).toBeInstanceOf(RegExp);
+        expect(result.regex.source).toBe('\\d+');
+        expect(result.regex.flags).toBe('');
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should create valid regex with flags', () => {
+      const result = createRegex('test', 'gi', mockLogger);
+
+      expect('regex' in result).toBe(true);
+      if ('regex' in result) {
+        expect(result.regex).toBeInstanceOf(RegExp);
+        expect(result.regex.source).toBe('test');
+        expect(result.regex.flags).toBe('gi');
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should handle complex patterns', () => {
+      const result = createRegex(
+        '^(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})$',
+        'i',
+        mockLogger
+      );
+
+      expect('regex' in result).toBe(true);
+      if ('regex' in result) {
+        expect(result.regex).toBeInstanceOf(RegExp);
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should reject invalid regex patterns', () => {
+      const result = createRegex('[invalid(', undefined, mockLogger);
+
+      expect('error' in result).toBe(true);
+      if ('error' in result) {
+        expect(result.error).toBeInstanceOf(Error);
+        expect(result.error.message).toContain('Invalid regex pattern');
+        expect(result.error.message).toContain('[invalid(');
+      }
+      expect(mockLogger.error).toHaveBeenCalledWith('Invalid regex pattern', expect.any(Error));
+    });
+
+    it('should reject unclosed groups', () => {
+      const result = createRegex('(unclosed', undefined, mockLogger);
+
+      expect('error' in result).toBe(true);
+      if ('error' in result) {
+        expect(result.error.message).toContain('Invalid regex pattern');
+      }
+    });
+
+    it('should reject invalid flags', () => {
+      const result = createRegex('test', 'xyz', mockLogger);
+
+      expect('error' in result).toBe(true);
+      if ('error' in result) {
+        expect(result.error.message).toContain('Invalid regex pattern');
+      }
+    });
+
+    it('should handle empty pattern', () => {
+      const result = createRegex('', undefined, mockLogger);
+
+      expect('regex' in result).toBe(true);
+      if ('regex' in result) {
+        expect(result.regex.source).toBe('(?:)');
+      }
+    });
+
+    it('should handle all common flags', () => {
+      const result = createRegex('test', 'gimsuyd', mockLogger);
+
+      expect('regex' in result).toBe(true);
+      if ('regex' in result) {
+        expect(result.regex.flags).toBe('dgimsuy');
+      }
+    });
+  });
+
+  describe('validateSourceInput', () => {
+    const mockLogger = {
+      error: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should accept string input', () => {
+      const result = validateSourceInput('test string', mockLogger);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.isArray).toBe(false);
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should accept array input', () => {
+      const result = validateSourceInput(['item1', 'item2'], mockLogger);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.isArray).toBe(true);
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should accept empty string', () => {
+      const result = validateSourceInput('', mockLogger);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.isArray).toBe(false);
+      }
+    });
+
+    it('should accept empty array', () => {
+      const result = validateSourceInput([], mockLogger);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.isArray).toBe(true);
+      }
+    });
+
+    it('should reject null input', () => {
+      const result = validateSourceInput(null, mockLogger);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error).toBeInstanceOf(Error);
+        expect(result.error.message).toContain('cannot be null or undefined');
+      }
+      expect(mockLogger.error).toHaveBeenCalledWith('Input source is null or undefined');
+    });
+
+    it('should reject undefined input', () => {
+      const result = validateSourceInput(undefined, mockLogger);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.message).toContain('cannot be null or undefined');
+      }
+    });
+
+    it('should reject number input', () => {
+      const result = validateSourceInput(12345, mockLogger);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.message).toContain('Expected source to be a string or array');
+        expect(result.error.message).toContain('number');
+      }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('invalid type: number')
+      );
+    });
+
+    it('should reject boolean input', () => {
+      const result = validateSourceInput(true, mockLogger);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.message).toContain('boolean');
+      }
+    });
+
+    it('should reject object input', () => {
+      const result = validateSourceInput({ key: 'value' }, mockLogger);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error.message).toContain('object');
+      }
+    });
+
+    it('should accept array with mixed types', () => {
+      const result = validateSourceInput(['string', 123, null], mockLogger);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.isArray).toBe(true);
+      }
+    });
+  });
+
+  describe('MAX_INPUT_LENGTH constant', () => {
+    it('should be set to 100000', () => {
+      expect(MAX_INPUT_LENGTH).toBe(100000);
+    });
+  });
+});

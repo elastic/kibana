@@ -118,6 +118,9 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
 #   replaced: "warning occurred. Another warning found.",
 #   matchCount: 2
 # }
+
+# Note: matchCount is only accurate when the global flag (g) is set.
+# Without the global flag, matchCount will be 1 if there's a match, 0 otherwise.
 \`\`\``,
       }),
       i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.example6', {
