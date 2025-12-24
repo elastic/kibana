@@ -22,6 +22,7 @@ import {
   type FilterCondition,
   getFilterOperator,
   getFilterValue,
+  isArrayOperator,
   isCondition,
   type OperatorKeys,
 } from '@kbn/streamlang';
@@ -29,10 +30,12 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useKibana } from '../../../hooks/use_kibana';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   alwaysToEmptyEquals,
   conditionNeedsValueField,
   emptyEqualsToAlways,
+  getFilterConditionOperator,
   isConditionEditableInUi,
 } from '../../../util/condition';
 import type { Suggestion } from './autocomplete_selector';
@@ -116,6 +119,18 @@ export function ConditionEditor(props: ConditionEditorProps) {
                   })}
                 </EuiLink>
               ),
+            }}
+          />
+        ) : undefined
+      }
+      helpText={
+        isArrayOperator(getFilterConditionOperator(condition)) ? (
+          <FormattedMessage
+            id="xpack.streams.conditionEditor.arrayOperatorHelpText"
+            defaultMessage="Use {includes} for array/multivalue fields. For partial matches, use {contains}."
+            values={{
+              includes: <strong>includes</strong>,
+              contains: <strong>contains</strong>,
             }}
           />
         ) : undefined
