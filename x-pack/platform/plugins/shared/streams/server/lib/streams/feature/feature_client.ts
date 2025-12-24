@@ -6,14 +6,15 @@
  */
 
 import { termQuery } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IStorageClient,
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import type { Feature, FeatureStatus } from '@kbn/streams-schema';
+import type { Feature, FeatureStatus, FeatureType } from '@kbn/streams-schema';
 import { FeatureNotFoundError } from '../errors/feature_not_found_error';
-import { STREAM_NAME, FEATURE_UUID, FEATURE_STATUS } from './fields';
+import { STREAM_NAME, FEATURE_UUID, FEATURE_STATUS, FEATURE_TYPE } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import type { FeatureTypeRegistry } from './feature_type_registry';
@@ -147,19 +148,35 @@ export class FeatureClient {
 
   async getFeatures(
     name: string,
-    status?: FeatureStatus
+    filters?: {
+      type?: FeatureType[];
+      status?: FeatureStatus[];
+    }
   ): Promise<{ hits: Feature[]; total: number }> {
+    const filter: QueryDslQueryContainer[] = [...termQuery(STREAM_NAME, name)];
+
+    if (filters?.type?.length) {
+      filter.push({
+        bool: {
+          should: filters.type.flatMap((type) => termQuery(FEATURE_TYPE, type)),
+          minimum_should_match: 1,
+        },
+      });
+    }
+
+    if (filters?.status?.length) {
+      filter.push({
+        bool: {
+          should: filters.status.flatMap((status) => termQuery(FEATURE_STATUS, status)),
+          minimum_should_match: 1,
+        },
+      });
+    }
+
     const featuresResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: true,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(STREAM_NAME, name),
-            ...(status ? termQuery(FEATURE_STATUS, status) : []),
-          ],
-        },
-      },
+      query: { bool: { filter } },
     });
 
     return {

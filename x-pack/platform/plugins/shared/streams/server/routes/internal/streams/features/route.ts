@@ -6,7 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import { featureSchema, featureStatusSchema, type Feature } from '@kbn/streams-schema';
+import {
+  featureSchema,
+  featureTypeSchema,
+  featureStatusSchema,
+  type Feature,
+  type FeatureStatus,
+} from '@kbn/streams-schema';
 import type { StorageClientBulkResponse, StorageClientIndexResponse } from '@kbn/storage-adapter';
 import { generateStreamDescription, sumTokens } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
@@ -81,7 +87,12 @@ export const listFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.optional(z.object({ status: featureStatusSchema.optional() })),
+    query: z.optional(
+      z.object({
+        status: featureStatusSchema.optional(),
+        type: featureTypeSchema.optional(),
+      })
+    ),
   }),
   handler: async ({
     params,
@@ -102,7 +113,10 @@ export const listFeaturesRoute = createServerRoute({
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
 
-    const { hits: features } = await featureClient.getFeatures(name, params.query?.status);
+    const { hits: features } = await featureClient.getFeatures(name, {
+      type: params.query?.type ? [params.query.type] : [],
+      status: params.query?.status ? [params.query.status] : [],
+    });
     return {
       features,
     };
@@ -236,14 +250,40 @@ export const identifyFeaturesRoute = createServerRoute({
           stream,
           signal,
         })
-        .then(async ({ features, tokensUsed }) => {
-          await featureClient.bulk(
-            name,
-            features.map((feature) => ({
+        .then(async ({ features: newFeatures, tokensUsed }) => {
+          const { hits: existingFeatures } = await featureClient.getFeatures(name, {
+            status: ['active', 'stale'],
+          });
+
+          const existingFeaturesNotIdentified = existingFeatures.filter((existingFeature) => {
+            const handler = featureRegistry.getHandler(existingFeature.type);
+            return !newFeatures.some(
+              (newFeature) =>
+                newFeature.type === existingFeature.type &&
+                handler.getFeatureUuid(name, existingFeature) ===
+                  handler.getFeatureUuid(name, newFeature)
+            );
+          });
+
+          await featureClient.bulk(name, [
+            ...newFeatures.map((feature) => ({
               index: { feature },
-            }))
-          );
-          return { features, tokensUsed };
+            })),
+            ...existingFeaturesNotIdentified.map((feature) => {
+              const updatedStatus: FeatureStatus =
+                feature.status === 'active' ? 'stale' : 'expired';
+              return {
+                index: {
+                  feature: {
+                    ...feature,
+                    status: updatedStatus,
+                  },
+                },
+              };
+            }),
+          ]);
+
+          return { features: newFeatures, tokensUsed };
         })
     ).pipe(
       map(({ features, tokensUsed }) => {
