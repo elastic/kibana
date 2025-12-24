@@ -5,8 +5,9 @@
  * 2.0.
  */
 import type { EuiFlexGroupProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState, useCallback } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { chartHeight } from '..';
@@ -33,6 +34,7 @@ import { ServiceOverviewInstancesChartAndTable } from '../service_overview_insta
 import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
 import { SloCallout } from '../../../shared/slo_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 
 const latencyChartHeight = 200;
 
@@ -87,6 +89,31 @@ export function ApmOverview() {
     false
   );
 
+  const { slo } = useKibana<ApmPluginStartDeps>().services;
+  const [isSloDetailsFlyoutOpen, setIsSloDetailsFlyoutOpen] = useState(false);
+  const [isCreateSloFlyoutOpen, setIsCreateSloFlyoutOpen] = useState(false);
+  const SLO_ID = '33fc6d05-36d9-4c26-ad9a-dd1963379eac';
+
+  const SloDetailsFlyout = slo?.getSLODetailsFlyout({
+    sloId: SLO_ID,
+    onClose: () => setIsSloDetailsFlyoutOpen(false),
+  });
+
+  const CreateSloFlyout = slo?.getCreateSLOFormFlyout({
+    initialValues: {
+      name: `SLO for ${serviceName}`,
+      indicator: {
+        type: 'sli.apm.transactionErrorRate',
+        params: {
+          service: serviceName,
+          environment: environment === 'ENVIRONMENT_ALL' ? '*' : environment,
+          transactionType,
+        },
+      },
+    },
+    onClose: () => setIsCreateSloFlyoutOpen(false),
+  });
+
   const handleOnLoadTable = (key: keyof TablesLoadedState) =>
     setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
 
@@ -96,6 +123,39 @@ export function ApmOverview() {
 
   return (
     <>
+      {slo && (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="apmCreateSloButton"
+                iconType="plusInCircle"
+                onClick={() => setIsCreateSloFlyoutOpen(true)}
+              >
+                {i18n.translate('xpack.apm.serviceOverview.createSlo', {
+                  defaultMessage: 'Create SLO',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="apmViewSloDetailsButton"
+                iconType="visGauge"
+                onClick={() => setIsSloDetailsFlyoutOpen(true)}
+              >
+                {i18n.translate('xpack.apm.serviceOverview.viewSloDetails', {
+                  defaultMessage: 'View SLO Details',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </>
+      )}
+
+      {isSloDetailsFlyoutOpen && SloDetailsFlyout}
+      {isCreateSloFlyoutOpen && CreateSloFlyout}
+
       {!sloCalloutDismissed && (
         <>
           <SloCallout
