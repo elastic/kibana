@@ -13,7 +13,10 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawEsqlRule } from '../../../../saved_objects';
-import { ensureEsqlRuleTaskScheduled, getEsqlRuleTaskId } from '../../../../esql_task/schedule';
+import {
+  ensureRuleExecutorTaskScheduled,
+  getRuleExecutorTaskId,
+} from '../../../../rule_executor/schedule';
 import { updateEsqlRuleDataSchema } from './schemas';
 import type { UpdateEsqlRuleData } from './types';
 import type { EsqlRuleResponse } from '../create/types';
@@ -98,14 +101,15 @@ export async function updateEsqlRule(
   // Disable transition: remove task and clear task id.
   if (wasEnabled && !willBeEnabled) {
     const taskId =
-      existingAttrs.scheduledTaskId ?? getEsqlRuleTaskId({ ruleId: id, spaceId: context.spaceId });
+      existingAttrs.scheduledTaskId ??
+      getRuleExecutorTaskId({ ruleId: id, spaceId: context.spaceId });
     await context.taskManager.removeIfExists(taskId);
     nextAttrs = { ...nextAttrs, scheduledTaskId: null };
   }
 
   // If enabled, ensure task exists and schedule is up-to-date (also handles schedule changes).
   if (willBeEnabled) {
-    const { id: taskId } = await ensureEsqlRuleTaskScheduled({
+    const { id: taskId } = await ensureRuleExecutorTaskScheduled({
       services: { taskManager: context.taskManager },
       input: {
         ruleId: id,

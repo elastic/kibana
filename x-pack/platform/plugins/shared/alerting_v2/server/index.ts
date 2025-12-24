@@ -14,7 +14,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { AlertingV2Config } from './config';
 import { configSchema } from './config';
 import { setupSavedObjects } from './saved_objects';
-import { initializeEsqlRulesTaskDefinition } from './esql_task';
+import { initializeRuleExecutorTaskDefinition } from './rule_executor';
 import { CreateEsqlRuleRoute } from './routes/esql_rule/routes/create_esql_rule_route';
 import { UpdateEsqlRuleRoute } from './routes/esql_rule/routes/update_esql_rule_route';
 
@@ -32,7 +32,7 @@ export const module = new ContainerModule(({ bind }) => {
     const pluginConfig = container.get(
       PluginInitializer('config')
     ) as PluginInitializerContext['config'];
-    const cfg = pluginConfig.get<AlertingV2Config>();
+    const alertingConfig = pluginConfig.get<AlertingV2Config>();
 
     // Saved Objects + Encrypted Saved Objects registration
     setupSavedObjects({
@@ -46,7 +46,12 @@ export const module = new ContainerModule(({ bind }) => {
     const getStartServices = container.get(CoreSetup('getStartServices')) as () => Promise<
       [unknown, unknown, unknown]
     >;
-    initializeEsqlRulesTaskDefinition(logger, taskManagerSetup, getStartServices() as any, cfg);
+    initializeRuleExecutorTaskDefinition(
+      logger,
+      taskManagerSetup,
+      getStartServices() as any,
+      alertingConfig
+    );
   });
 });
 

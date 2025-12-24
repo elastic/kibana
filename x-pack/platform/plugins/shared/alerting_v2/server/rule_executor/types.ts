@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/**
- * Fixed data stream name for ES|QL alert documents written by `alerting_v2`.
- */
-export const ALERT_EVENTS_INDEX = '.alerts-events';
+export interface RuleExecutorTaskParams {
+  ruleId: string;
+  spaceId: string;
+}

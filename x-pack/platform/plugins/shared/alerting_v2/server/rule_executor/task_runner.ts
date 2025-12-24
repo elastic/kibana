@@ -14,12 +14,12 @@ import type { AlertingServerStartDependencies } from '../types';
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { RawEsqlRule } from '../saved_objects';
 import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
-import type { EsqlRulesTaskParams } from './types';
+import type { RuleExecutorTaskParams } from './types';
 import { executeEsqlRule } from './execute_esql';
 import { ensureAlertsDataStream, ensureAlertsResources } from './resources';
 import { writeEsqlAlerts } from './write_alerts';
 
-export function createEsqlRulesTaskRunner({
+export function createRuleExecutorTaskRunner({
   logger,
   coreStartServices,
   config,
@@ -35,7 +35,7 @@ export function createEsqlRulesTaskRunner({
           return { state: taskInstance.state };
         }
 
-        const params = taskInstance.params as EsqlRulesTaskParams;
+        const params = taskInstance.params as RuleExecutorTaskParams;
         const [coreStart, pluginsStart] = await coreStartServices;
 
         const namespace: string | undefined = spaceIdToNamespace(
@@ -72,7 +72,7 @@ export function createEsqlRulesTaskRunner({
         // We intentionally do not construct fake requests here; scheduling must pass a real request.
         if (!fakeRequest) {
           throw new Error(
-            `Cannot execute ES|QL task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
+            `Cannot execute rule executor task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
           );
         }
 

@@ -8,14 +8,14 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IntervalSchedule, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { ALERTING_ESQL_TASK_TYPE } from '.';
-import type { EsqlRulesTaskParams } from './types';
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '.';
+import type { RuleExecutorTaskParams } from './types';
 
-export function getEsqlRuleTaskId({ ruleId, spaceId }: { ruleId: string; spaceId: string }) {
-  return `${ALERTING_ESQL_TASK_TYPE}:${spaceId}:${ruleId}`;
+export function getRuleExecutorTaskId({ ruleId, spaceId }: { ruleId: string; spaceId: string }) {
+  return `${ALERTING_RULE_EXECUTOR_TASK_TYPE}:${spaceId}:${ruleId}`;
 }
 
-export async function ensureEsqlRuleTaskScheduled({
+export async function ensureRuleExecutorTaskScheduled({
   services: { taskManager },
   input: { ruleId, spaceId, schedule, request },
 }: {
@@ -33,7 +33,7 @@ export async function ensureEsqlRuleTaskScheduled({
     request: KibanaRequest;
   };
 }) {
-  const id = getEsqlRuleTaskId({ ruleId, spaceId });
+  const id = getRuleExecutorTaskId({ ruleId, spaceId });
 
   if (!request) {
     throw new Error(
@@ -44,12 +44,12 @@ export async function ensureEsqlRuleTaskScheduled({
   await taskManager.ensureScheduled(
     {
       id,
-      taskType: ALERTING_ESQL_TASK_TYPE,
+      taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
       schedule,
       params: {
         ruleId,
         spaceId,
-      } satisfies EsqlRulesTaskParams,
+      } satisfies RuleExecutorTaskParams,
       state: {},
       scope: ['alerting'],
       enabled: true,

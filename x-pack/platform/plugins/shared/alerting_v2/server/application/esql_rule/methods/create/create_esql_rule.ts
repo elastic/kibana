@@ -13,7 +13,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawEsqlRule } from '../../../../saved_objects';
-import { ensureEsqlRuleTaskScheduled } from '../../../../esql_task/schedule';
+import { ensureRuleExecutorTaskScheduled } from '../../../../rule_executor/schedule';
 import { createEsqlRuleDataSchema } from './schemas';
 import type { CreateEsqlRuleParams, EsqlRuleResponse } from './types';
 import type { CreateAPIKeyResult } from '../../lib/api_key';
@@ -90,7 +90,7 @@ export async function createEsqlRule(
   let scheduledTaskId: string | null = null;
   if (attributes.enabled) {
     try {
-      const { id: taskId } = await ensureEsqlRuleTaskScheduled({
+      const { id: taskId } = await ensureRuleExecutorTaskScheduled({
         services: { taskManager: context.taskManager },
         input: {
           ruleId: id,

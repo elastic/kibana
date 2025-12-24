@@ -11,25 +11,25 @@ import { schema } from '@kbn/config-schema';
 
 import type { AlertingV2Config } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
-import { createEsqlRulesTaskRunner } from './task_runner';
+import { createRuleExecutorTaskRunner } from './task_runner';
 
-export const ALERTING_ESQL_TASK_TYPE = 'alerting:esql' as const;
+export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting:esql' as const;
 
-export function initializeEsqlRulesTaskDefinition(
+export function initializeRuleExecutorTaskDefinition(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>,
   config: AlertingV2Config
 ) {
   taskManager.registerTaskDefinitions({
-    [ALERTING_ESQL_TASK_TYPE]: {
-      title: 'Alerting v2 ES|QL rules executor',
+    [ALERTING_RULE_EXECUTOR_TASK_TYPE]: {
+      title: 'Alerting v2 rule executor (ES|QL)',
       timeout: '5m',
       paramsSchema: schema.object({
         ruleId: schema.string(),
         spaceId: schema.string(),
       }),
-      createTaskRunner: createEsqlRulesTaskRunner({ logger, coreStartServices, config }),
+      createTaskRunner: createRuleExecutorTaskRunner({ logger, coreStartServices, config }),
     },
   });
 }
