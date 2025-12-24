@@ -33,8 +33,8 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
 }
 
 /**
- * Get access token for OAuth2 Authorization Code flow
- * Automatically refreshes expired tokens using refresh token
+ * Get an access token for OAuth2 Authorization Code flow
+ * Automatically refreshes expired tokens using the refresh token
  */
 export const getOAuthAuthorizationCodeAccessToken = async ({
   connectorId,

@@ -184,6 +184,7 @@ export class OAuthStateClient {
   /**
    * Clean up expired OAuth states (called periodically)
    */
+  // FIXME: call this via Taskmanager scheduled task
   public async cleanupExpiredStates(): Promise<number> {
     try {
       const result = await this.unsecuredSavedObjectsClient.find<OAuthState>({

@@ -16,7 +16,7 @@ import type { AsApiContract } from '../../common';
 export interface OAuthTokenResponse {
   tokenType: string;
   accessToken: string;
-  expiresIn: number;
+  expiresIn?: number;
   refreshToken?: string;
   refreshTokenExpiresIn?: number;
 }
