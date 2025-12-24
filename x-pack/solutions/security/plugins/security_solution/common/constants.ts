@@ -318,6 +318,12 @@ export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/unified_alerts` as const;
 export const DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/search` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/workflow_status` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/tags` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are

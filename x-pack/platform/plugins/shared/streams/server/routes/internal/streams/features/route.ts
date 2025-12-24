@@ -26,8 +26,8 @@ import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledgin
 import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
 import { isStale } from '../../../../lib/tasks/is_stale';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
-import type { IdentifyFeaturesResult } from '../../../../lib/streams/feature/feature_type_registry';
 import type { FeatureIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/feature_identification';
+import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
@@ -319,7 +319,12 @@ export const identifyFeaturesRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
       schedule: BooleanFromString.optional(),
@@ -343,7 +348,7 @@ export const identifyFeaturesRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { connectorId: connectorIdParam, from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -452,7 +457,12 @@ export const describeStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
     }),
@@ -479,7 +489,7 @@ export const describeStreamRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { connectorId: connectorIdParam, from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -489,6 +499,12 @@ export const describeStreamRoute = createServerRoute({
         `Cannot generate stream description for ${name}, insufficient privileges`
       );
     }
+
+    const connectorId = await resolveConnectorId({
+      connectorId: connectorIdParam,
+      uiSettingsClient,
+      logger,
+    });
 
     // Get connector info for error enrichment
     const connector = await inferenceClient.getConnectorById(connectorId);
