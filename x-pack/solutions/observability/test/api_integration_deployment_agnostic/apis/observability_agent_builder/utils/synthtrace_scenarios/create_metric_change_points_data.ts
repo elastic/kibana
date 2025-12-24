@@ -47,13 +47,14 @@ export async function createMetricChangePointsData({
     .generator((timestamp) => {
       const isSpike = timestamp >= spikeStart && timestamp < spikeEnd;
       const docCount = isSpike ? 500 : 5;
+      const memoryFree = isSpike ? 10000 : 1000;
 
       const metrics = [];
       for (let i = 0; i < docCount; i++) {
         metrics.push(
           instance
             .appMetrics({
-              'system.memory.actual.free': 1000,
+              'system.memory.actual.free': memoryFree,
               'system.memory.total': 10000,
             })
             .timestamp(timestamp)

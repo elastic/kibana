@@ -21,7 +21,7 @@ interface AggregationConfig {
 
 function getMetricAggregation(aggregation: AggregationConfig | undefined): {
   agg: AggregationsAggregationContainer;
-  buckets_path?: string;
+  buckets_path: string;
 } {
   if (!aggregation) {
     return {
@@ -41,6 +41,7 @@ function getMetricAggregation(aggregation: AggregationConfig | undefined): {
           field: aggregation.field,
         },
       } as Record<Exclude<MetricType, 'count' | 'p95' | 'p99'>, { field: string }>,
+      buckets_path: 'metric',
     };
   }
 
@@ -54,7 +55,7 @@ function getMetricAggregation(aggregation: AggregationConfig | undefined): {
         keyed: true,
       },
     },
-    buckets_path: percentile,
+    buckets_path: 'metric',
   };
 }
 

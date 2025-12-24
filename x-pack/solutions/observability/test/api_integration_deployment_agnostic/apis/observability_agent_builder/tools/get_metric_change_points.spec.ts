@@ -74,5 +74,107 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
     });
+
+    describe('when using avg aggregation on a numeric field', () => {
+      let metricChangePoints: ChangePoint[];
+
+      before(async () => {
+        const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+          params: {
+            start: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start,
+            end: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end,
+            index: METRIC_CHANGE_POINTS_INDEX,
+            aggregation: {
+              field: 'system.memory.actual.free',
+              type: 'avg',
+            },
+          },
+        });
+        metricChangePoints = toolResults[0]?.data?.changePoints ?? [];
+      });
+
+      it('should detect change in avg metric values', () => {
+        expect(metricChangePoints.length).to.be.greaterThan(0);
+        const changePoint = metricChangePoints.find(
+          (cp: ChangePoint) => cp.changes?.type === 'spike'
+        );
+        expect(changePoint).to.be.ok();
+      });
+    });
+
+    describe('when resolving the metrics index automatically', () => {
+      let metricChangePoints: ChangePoint[];
+
+      before(async () => {
+        const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+          params: {
+            start: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start,
+            end: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end,
+          },
+        });
+
+        metricChangePoints = toolResults[0]?.data?.changePoints ?? [];
+      });
+
+      it('should still detect spikes without an explicit index', () => {
+        expect(metricChangePoints.length).to.be.greaterThan(0);
+        const spike = metricChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
+        expect(spike).to.be.ok();
+      });
+    });
+
+    describe('when filtering metrics with kql', () => {
+      let metricChangePoints: ChangePoint[];
+
+      before(async () => {
+        const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+          params: {
+            start: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start,
+            end: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end,
+            index: METRIC_CHANGE_POINTS_INDEX,
+            aggregation: {
+              field: 'system.memory.actual.free',
+              type: 'avg',
+            },
+            kqlFilter: 'system.memory.actual.free:10000',
+          },
+        });
+
+        metricChangePoints = toolResults[0]?.data?.changePoints ?? [];
+      });
+
+      it('should not report spikes once the spike window is filtered out', () => {
+        const spike = metricChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
+        expect(spike).to.be(undefined);
+      });
+    });
+
+    describe('when grouping by multiple dimensions', () => {
+      let metricChangePoints: ChangePoint[];
+
+      before(async () => {
+        const toolResults: ToolResult[] = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+          params: {
+            start: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start,
+            end: METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end,
+            index: METRIC_CHANGE_POINTS_INDEX,
+            groupBy: ['service.name', 'service.environment'],
+          },
+        });
+
+        metricChangePoints = toolResults[0]?.data?.changePoints ?? [];
+      });
+
+      it('should keep the group key values on the change point', () => {
+        expect(metricChangePoints.length).to.be.greaterThan(0);
+        const spike = metricChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
+        expect(spike?.key).to.contain('test-service');
+        expect(spike?.key).to.contain('test');
+      });
+    });
   });
 }
