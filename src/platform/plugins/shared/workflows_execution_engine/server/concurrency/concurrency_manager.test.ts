@@ -442,7 +442,7 @@ describe('ConcurrencyManager', () => {
     it('should skip cancel-in-progress for other strategies', async () => {
       const settings: ConcurrencySettings = {
         key: 'server-1',
-        // strategy is undefined (other strategies not implemented yet)
+        // strategy is undefined (queue strategy not implemented yet)
         max: 1,
       };
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
@@ -457,6 +457,88 @@ describe('ConcurrencyManager', () => {
       );
 
       expect(result).toBe(true);
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
+    });
+
+    it('should drop new execution when limit is exceeded with drop strategy', async () => {
+      const settings: ConcurrencySettings = {
+        key: 'server-1',
+        strategy: 'drop',
+        max: 2,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+        'exec-2',
+      ]);
+
+      const result = await concurrencyManager.checkConcurrency(
+        settings,
+        'server-1',
+        'exec-3',
+        'default'
+      );
+
+      expect(result).toBe(false); // Execution should be dropped
+      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+        id: 'exec-3',
+        status: ExecutionStatus.SKIPPED,
+        cancelRequested: true,
+        cancellationReason: 'Dropped due to concurrency limit (max: 2)',
+        cancelledAt: expect.any(String),
+        cancelledBy: 'system',
+      });
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
+      expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+    });
+
+    it('should allow execution when within limit with drop strategy', async () => {
+      const settings: ConcurrencySettings = {
+        key: 'server-1',
+        strategy: 'drop',
+        max: 2,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+      ]);
+
+      const result = await concurrencyManager.checkConcurrency(
+        settings,
+        'server-1',
+        'exec-2',
+        'default'
+      );
+
+      expect(result).toBe(true); // Execution should proceed
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
+    });
+
+    it('should drop execution when exactly at limit with drop strategy', async () => {
+      const settings: ConcurrencySettings = {
+        key: 'server-1',
+        strategy: 'drop',
+        max: 2,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+        'exec-2',
+      ]);
+
+      const result = await concurrencyManager.checkConcurrency(
+        settings,
+        'server-1',
+        'exec-3',
+        'default'
+      );
+
+      expect(result).toBe(false); // Execution should be dropped (at limit, new one exceeds)
+      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+        id: 'exec-3',
+        status: ExecutionStatus.SKIPPED,
+        cancelRequested: true,
+        cancellationReason: 'Dropped due to concurrency limit (max: 2)',
+        cancelledAt: expect.any(String),
+        cancelledBy: 'system',
+      });
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
   });
