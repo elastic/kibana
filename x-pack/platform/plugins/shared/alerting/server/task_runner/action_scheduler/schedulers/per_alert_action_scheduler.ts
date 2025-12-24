@@ -42,6 +42,7 @@ enum Reasons {
   MUTED = 'muted',
   THROTTLED = 'throttled',
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
+  DELAYED = 'delayed',
 }
 
 export class PerAlertActionScheduler<
@@ -288,9 +289,9 @@ export class PerAlertActionScheduler<
     return (
       !this.hasActiveMaintenanceWindow({ alert, action }) &&
       !this.isAlertMuted(alert) &&
+      !this.isAlertDelayed(alert) &&
       !this.hasPendingCountButNotNotifyOnChange({ alert, action }) &&
-      !alert.isFilteredOut(summarizedAlerts) &&
-      !alert.isDelayed()
+      !alert.isFilteredOut(summarizedAlerts)
     );
   }
 
@@ -374,6 +375,25 @@ export class PerAlertActionScheduler<
         );
       }
       this.skippedAlerts[alertId] = { reason: Reasons.MUTED };
+      return true;
+    }
+    return false;
+  }
+
+  private isAlertDelayed(
+    alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
+  ) {
+    if (alert.isDelayed()) {
+      const alertId = alert.getId();
+      if (
+        !this.skippedAlerts[alertId] ||
+        (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.DELAYED)
+      ) {
+        this.context.logger.debug(
+          `skipping scheduling of actions for '${alertId}' in rule ${this.context.ruleLabel}: alert is delayed`
+        );
+      }
+      this.skippedAlerts[alertId] = { reason: Reasons.DELAYED };
       return true;
     }
     return false;

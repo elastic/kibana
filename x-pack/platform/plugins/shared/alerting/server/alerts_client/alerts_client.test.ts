@@ -234,6 +234,13 @@ const fetchedAlert3 = {
   [ALERT_UUID]: 'xyz',
 };
 
+const fetchedAlert4Delayed = {
+  ...fetchedAlert2,
+  [ALERT_INSTANCE_ID]: '4',
+  [ALERT_UUID]: '444',
+  [ALERT_STATUS]: 'delayed',
+};
+
 const getNewIndexedAlertDoc = (overrides = {}) => ({
   [TIMESTAMP]: date,
   [EVENT_ACTION]: 'open',
@@ -680,7 +687,7 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
+        test('should set alert status "delayed" if activeCount is less than the rule alertDelay', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
             rule: { ...alertsClientParams.rule, alertDelay: 3 },
@@ -690,22 +697,13 @@ describe('Alerts Client', () => {
 
           // Report 1 new alerts
           const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
+          const alert = alertExecutorService.create('1').scheduleActions('default');
 
           await alertsClient.processAlerts();
           alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
+          alertsClient.determineDelayedAlerts({ ...determineDelayedAlertsOpts, alertDelay: 3 });
 
-          await alertsClient.persistAlerts();
-
-          expect(clusterClient.bulk).not.toHaveBeenCalled();
-          expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
-            eventLogger: alertingEventLogger,
-            request: fakeRequest,
-            ruleTypeCategory: 'test',
-            spaceId: 'space1',
-          });
+          expect(alert.isDelayed()).toBe(true);
         });
 
         test('should update ongoing alerts in existing index', async () => {

@@ -371,14 +371,6 @@ export class AlertsClient<
     }
     return false;
   }
-  // public isDelayedAlert(id: string) {
-  //   const alert = this.trackedAlerts.getById(id);
-  //   const uuid = alert?.[ALERT_UUID];
-  //   if (uuid) {
-  //     return !!this.trackedAlerts.delayed[uuid];
-  //   }
-  //   return false;
-  // }
 
   public hasReachedAlertLimit(): boolean {
     return this.legacyAlertsClient.hasReachedAlertLimit();

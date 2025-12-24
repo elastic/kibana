@@ -136,7 +136,12 @@ export const getExpectedQueryByExecutionUuid = ({
         { term: { 'kibana.alert.rule.execution.uuid': uuid } },
         { term: { 'kibana.alert.rule.uuid': ruleId } },
         {
-          bool: { must_not: { exists: { field: 'kibana.alert.maintenance_window_ids' } } },
+          bool: {
+            must_not: {
+              exists: { field: 'kibana.alert.maintenance_window_ids' },
+              term: { 'kibana.alert.status': 'delayed' },
+            },
+          },
         },
         ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
         ...(!!excludedAlertInstanceIds?.length
@@ -254,7 +259,10 @@ export const getExpectedQueryByTimeRange = ({
         },
       },
     },
-    { term: { 'kibana.alert.rule.uuid': ruleId } }
+    { term: { 'kibana.alert.rule.uuid': ruleId } },
+    {
+      bool: { must_not: { term: { 'kibana.alert.status': 'delayed' } } },
+    }
   );
   if (excludedAlertInstanceIds?.length) {
     filter.push({
