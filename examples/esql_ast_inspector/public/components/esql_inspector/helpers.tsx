@@ -71,9 +71,12 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
       }
     },
 
-    visitLiteral: (node) => {
+    visitLiteral: (node, parent) => {
       const location = node.location;
       if (!location) return;
+      // sources pass also through here.
+      // wondering if we still need them here for a reason.
+      if (parent && parent.type === 'source') return;
       annotations.push([
         location.min,
         location.max + 1,
