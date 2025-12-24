@@ -9,7 +9,6 @@
 
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getChartHidden } from '@kbn/unified-histogram';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -20,40 +19,47 @@ import {
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
-import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
+import { createDataSource } from '../../../../../common/data_sources';
 
-function getDefaultColumns(savedSearch: SavedSearch | undefined, uiSettings: IUiSettingsClient) {
-  if (savedSearch?.columns && savedSearch.columns.length > 0) {
-    return [...savedSearch.columns];
+function getDefaultColumns(
+  persistedTab: DiscoverSessionTab | undefined,
+  uiSettings: IUiSettingsClient
+) {
+  if (persistedTab?.columns && persistedTab.columns.length > 0) {
+    return [...persistedTab.columns];
   }
   return [...uiSettings.get(DEFAULT_COLUMNS_SETTING)];
 }
 
 export function getStateDefaults({
-  savedSearch,
-  overrideDataView,
+  persistedTab,
+  dataView,
   services,
 }: {
-  savedSearch: SavedSearch | undefined;
-  overrideDataView?: DataView;
+  persistedTab: DiscoverSessionTab | undefined;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
 }) {
-  const searchSource = savedSearch?.searchSource;
   const { data, uiSettings, storage } = services;
-  const dataView = overrideDataView ?? searchSource?.getField('index');
-  const query = searchSource?.getField('query') || data.query.queryString.getDefaultQuery();
+  const query =
+    persistedTab?.serializedSearchSource.query || data.query.queryString.getDefaultQuery();
   const isEsqlQuery = isOfAggregateQueryType(query);
-  const sort = getSortArray(savedSearch?.sort ?? [], dataView!, isEsqlQuery);
-  const columns = getDefaultColumns(savedSearch, uiSettings);
+  // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
+  // we assume the sort array is valid since we can't know for sure
+  const sort =
+    dataView && 'getFieldByName' in dataView
+      ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery)
+      : persistedTab?.sort ?? [];
+  const columns = getDefaultColumns(persistedTab, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
-  const dataSource = isEsqlQuery
-    ? createEsqlDataSource()
-    : dataView?.id
-    ? createDataViewDataSource({ dataViewId: dataView.id })
-    : undefined;
+  const dataSource = createDataSource({
+    dataView: dataView ?? persistedTab?.serializedSearchSource.index,
+    query,
+  });
 
   const defaultState: DiscoverAppState = {
     query,
@@ -68,7 +74,7 @@ export function getStateDefaults({
     columns,
     dataSource,
     interval: 'auto',
-    filters: cloneDeep(searchSource?.getOwnField('filter')) as DiscoverAppState['filters'],
+    filters: cloneDeep(persistedTab?.serializedSearchSource.filter),
     hideChart: chartHidden,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
@@ -82,39 +88,38 @@ export function getStateDefaults({
     density: undefined,
   };
 
-  if (savedSearch?.grid) {
-    defaultState.grid = savedSearch.grid;
+  if (persistedTab?.grid) {
+    defaultState.grid = persistedTab.grid;
   }
-  if (savedSearch?.hideChart !== undefined) {
-    defaultState.hideChart = savedSearch.hideChart;
+  if (persistedTab?.hideChart !== undefined) {
+    defaultState.hideChart = persistedTab.hideChart;
   }
-
-  if (savedSearch?.rowHeight !== undefined) {
-    defaultState.rowHeight = savedSearch.rowHeight;
+  if (persistedTab?.rowHeight !== undefined) {
+    defaultState.rowHeight = persistedTab.rowHeight;
   }
-  if (savedSearch?.headerRowHeight !== undefined) {
-    defaultState.headerRowHeight = savedSearch.headerRowHeight;
+  if (persistedTab?.headerRowHeight !== undefined) {
+    defaultState.headerRowHeight = persistedTab.headerRowHeight;
   }
-  if (savedSearch?.viewMode) {
+  if (persistedTab?.viewMode) {
     defaultState.viewMode = getValidViewMode({
-      viewMode: savedSearch.viewMode,
+      viewMode: persistedTab.viewMode,
       isEsqlMode: isEsqlQuery,
     });
   }
-  if (savedSearch?.hideAggregatedPreview) {
-    defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
+  if (persistedTab?.hideAggregatedPreview) {
+    defaultState.hideAggregatedPreview = persistedTab.hideAggregatedPreview;
   }
-  if (savedSearch?.rowsPerPage) {
-    defaultState.rowsPerPage = savedSearch.rowsPerPage;
+  if (persistedTab?.rowsPerPage) {
+    defaultState.rowsPerPage = persistedTab.rowsPerPage;
   }
-  if (savedSearch?.sampleSize) {
-    defaultState.sampleSize = savedSearch.sampleSize;
+  if (persistedTab?.sampleSize) {
+    defaultState.sampleSize = persistedTab.sampleSize;
   }
-  if (savedSearch?.breakdownField) {
-    defaultState.breakdownField = savedSearch.breakdownField;
+  if (persistedTab?.breakdownField) {
+    defaultState.breakdownField = persistedTab.breakdownField;
   }
-  if (savedSearch?.density) {
-    defaultState.density = savedSearch.density;
+  if (persistedTab?.density) {
+    defaultState.density = persistedTab.density;
   }
 
   return defaultState;

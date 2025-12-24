@@ -27,7 +27,7 @@ import type {
 import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
 import { type GlobalQueryStateFromUrl, connectToQueryState } from '@kbn/data-plugin/public';
-import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DiscoverGridSettings, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { distinctUntilChanged, from, map } from 'rxjs';
@@ -46,7 +46,7 @@ import {
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import type { DiscoverInternalState, InternalStateStore, TabActionInjector } from './redux';
-import { internalStateActions, selectTab } from './redux';
+import { fromSavedSearchToSavedObjectTab, internalStateActions, selectTab } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
@@ -202,7 +202,8 @@ export const getDiscoverAppStateContainer = ({
 }): DiscoverAppStateContainer => {
   let initialState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
-    savedSearch: savedSearchContainer.getState(),
+    persistedTab: undefined,
+    dataView: savedSearchContainer.getState().searchSource.getField('index'),
     services,
   });
   let previousState = initialState;
@@ -233,7 +234,12 @@ export const getDiscoverAppStateContainer = ({
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
     return getInitialState({
       initialUrlState: undefined,
-      savedSearch: newSavedSearch,
+      persistedTab: fromSavedSearchToSavedObjectTab({
+        tab: selectTab(internalState.getState(), tabId),
+        savedSearch: newSavedSearch,
+        services,
+      }),
+      dataView: newSavedSearch.searchSource.getField('index'),
       services,
     });
   };
@@ -412,7 +418,7 @@ export const getDiscoverAppStateContainer = ({
   };
 };
 
-function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
+export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
   return (
     cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
     {}
@@ -421,18 +427,18 @@ function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: Discove
 
 export function getInitialState({
   initialUrlState,
-  savedSearch,
-  overrideDataView,
+  persistedTab,
+  dataView,
   services,
 }: {
   initialUrlState: DiscoverAppState | undefined;
-  savedSearch: SavedSearch | undefined;
-  overrideDataView?: DataView | undefined;
+  persistedTab: DiscoverSessionTab | undefined;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
 }) {
   const defaultAppState = getStateDefaults({
-    savedSearch,
-    overrideDataView,
+    persistedTab,
+    dataView,
     services,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
