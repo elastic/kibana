@@ -263,7 +263,6 @@
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/connector-schemas",
     "@kbn/deeplinks-analytics",
-    "@kbn/tour-queue",
     "@kbn/shared-ux-file-types",
     "@kbn/onechat-common",
     "@kbn/onechat-plugin",
