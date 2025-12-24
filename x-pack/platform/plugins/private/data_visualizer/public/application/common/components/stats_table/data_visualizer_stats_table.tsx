@@ -511,6 +511,11 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
             })}
+            tableCaption={i18n.translate('xpack.dataVisualizer.dataGrid.tableCaption', {
+              defaultMessage:
+                'Field statistics table showing {count, plural, one {# field} other {# fields}} with their types, document counts, distinct values, and value distributions.',
+              values: { count: items.length },
+            })}
           />
         </div>
       )}
