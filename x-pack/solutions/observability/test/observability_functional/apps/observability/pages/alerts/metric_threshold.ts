@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -37,6 +38,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('shows an expression row in the condition section', async () => {
       await testSubjects.existOrFail('metricThresholdExpressionRow');
+    });
+
+    it('shows noDataNotificationsEnabled checkbox', async () => {
+      await testSubjects.existOrFail('metricsAlertNoDataNotificationsToggle');
+    });
+
+    it('checks if noDataNotificationsEnabled checkbox is selected by default', async () => {
+      const isChecked = await testSubjects.isChecked('metricsAlertNoDataNotificationsToggle');
+      expect(isChecked).toBe(true);
     });
   });
 };

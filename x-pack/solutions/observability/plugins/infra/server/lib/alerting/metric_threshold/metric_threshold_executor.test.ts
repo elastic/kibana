@@ -2369,6 +2369,600 @@ describe('The metric threshold rule type', () => {
     });
   });
 
+  describe('handle noDataNotificationsEnabled', () => {
+    const alertIdA = 'a';
+
+    describe('when noDataNotificationsEnabled is true (default)', () => {
+      const execute = (state?: any) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.75],
+              },
+            ],
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+            noDataNotificationsEnabled: true,
+          },
+          state: state ?? mockOptions.state,
+        });
+
+      test('sends NO_DATA notification when alert transitions from ALERT to NO_DATA', async () => {
+        // First execution: alert fires
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: stateResult1 } = await execute();
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.75.',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+
+        // Second execution: alert goes to NO_DATA
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        await execute(stateResult1);
+        testNAlertsReported(2);
+        testAlertReported(2, {
+          id: alertIdA,
+          conditions: [
+            {
+              metric: 'test.metric.1',
+              threshold: [0.75],
+              value: '[NO DATA]',
+              evaluation_value: null,
+            },
+          ],
+          actionGroup: NO_DATA_ACTIONS.id,
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+      });
+    });
+
+    describe('when noDataNotificationsEnabled is false', () => {
+      const execute = (state?: any) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.75],
+              },
+            ],
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+            noDataNotificationsEnabled: false,
+          },
+          state: state ?? mockOptions.state,
+        });
+
+      test('skips initial NO_DATA alert when there is no previous ALERT/WARNING state', async () => {
+        // First execution: NO_DATA state without any previous alert
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: stateResult1 } = await execute();
+        // Should NOT report any alerts - initial NO_DATA is skipped
+        testNAlertsReported(0);
+        expect(stateResult1.previousActionGroups).toEqual({});
+      });
+
+      test('keeps FIRED action group when transitioning from ALERT to NO_DATA', async () => {
+        // First execution: alert fires
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: stateResult1 } = await execute();
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.75.',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        expect(stateResult1.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Second execution: alert goes to NO_DATA, but should keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: stateResult2 } = await execute(stateResult1);
+        testNAlertsReported(2);
+        // Should report with FIRED action group (not NO_DATA) to suppress notification
+        testAlertReported(2, {
+          id: alertIdA,
+          conditions: [
+            {
+              metric: 'test.metric.1',
+              threshold: [0.75],
+              value: '[NO DATA]',
+              evaluation_value: null,
+            },
+          ],
+          actionGroup: FIRED_ACTIONS.id, // Kept as FIRED, not NO_DATA
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        // Previous action group should still be FIRED
+        expect(stateResult2.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+      });
+
+      test('checks scenario: NO_DATA -> ALERT -> NO_DATA -> NO_DATA -> ALERT -> RECOVERED', async () => {
+        // Execution 1: Initial NO_DATA - should be skipped
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state1 } = await execute();
+        testNAlertsReported(0); // Skipped
+
+        // Execution 2: ALERT - should fire
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state2 } = await execute(state1);
+        testNAlertsReported(1);
+        expect(state2.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 3: NO_DATA - should keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state3 } = await execute(state2);
+        testNAlertsReported(2);
+        expect(state3.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 4: Still NO_DATA - should keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state4 } = await execute(state3);
+        testNAlertsReported(3);
+        expect(state4.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 5: Back to ALERT - should keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state5 } = await execute(state4);
+        testNAlertsReported(4);
+        expect(state5.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 6: Group disappears (RECOVERED) - should trigger recovery
+        setEvaluationResults([{}]); // Group 'a' no longer in results
+        const { state: state6 } = await execute(state5);
+        testNAlertsReported(5);
+        // The alert should now be recovered - previousActionGroups should be cleared
+        expect(state6.previousActionGroups).toEqual({});
+      });
+
+      test('checks scenario: ALERT -> NO_DATA -> ALERT -> NO_DATA -> NO_DATA -> RECOVERED', async () => {
+        // Execution 1: ALERT fires
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state1 } = await execute();
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.75.',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        expect(state1.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 2: First NO_DATA - should keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state2 } = await execute(state1);
+        testNAlertsReported(2);
+        testAlertReported(2, {
+          id: alertIdA,
+          conditions: [
+            {
+              metric: 'test.metric.1',
+              threshold: [0.75],
+              value: '[NO DATA]',
+              evaluation_value: null,
+            },
+          ],
+          actionGroup: FIRED_ACTIONS.id, // Kept as FIRED to suppress notification
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        expect(state2.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 3: Back to ALERT - should keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state3 } = await execute(state2);
+        testNAlertsReported(3);
+        testAlertReported(3, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
+          ],
+          actionGroup: FIRED_ACTIONS.id, // Still FIRED, no notification since action group hasn't changed
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 1 in the last 1 min for a. Alert when above 0.75.',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        expect(state3.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 4: Second NO_DATA - should still keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state4 } = await execute(state3);
+        testNAlertsReported(4);
+        testAlertReported(4, {
+          id: alertIdA,
+          conditions: [
+            {
+              metric: 'test.metric.1',
+              threshold: [0.75],
+              value: '[NO DATA]',
+              evaluation_value: null,
+            },
+          ],
+          actionGroup: FIRED_ACTIONS.id, // Kept as FIRED
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        expect(state4.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 5: Continuing NO_DATA - should still keep FIRED action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: state5 } = await execute(state4);
+        testNAlertsReported(5);
+        expect(state5.previousActionGroups).toEqual({ a: FIRED_ACTIONS.id });
+
+        // Execution 6: Group disappears (RECOVERED) - should trigger recovery
+        setEvaluationResults([{}]); // Group 'a' no longer in results
+        const { state: state6 } = await execute(state5);
+        testNAlertsReported(6);
+        // The alert should now be recovered - action group would be 'recovered'
+        expect(state6.previousActionGroups).toEqual({});
+      });
+
+      test('keeps WARNING action group when transitioning from WARNING to NO_DATA', async () => {
+        const executeWithWarning = (state?: any) =>
+          executor({
+            ...mockOptions,
+            services,
+            params: {
+              groupBy: 'something',
+              sourceId: 'default',
+              criteria: [
+                {
+                  ...baseNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1.5],
+                  warningComparator: COMPARATORS.GREATER_THAN,
+                  warningThreshold: [0.75],
+                },
+              ],
+              alertOnNoData: true,
+              alertOnGroupDisappear: true,
+              noDataNotificationsEnabled: false,
+            },
+            state: state ?? mockOptions.state,
+          });
+
+        // First execution: warning fires
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1.5],
+              warningComparator: COMPARATORS.GREATER_THAN,
+              warningThreshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: true,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: stateResult1 } = await executeWithWarning();
+        testNAlertsReported(1);
+        expect(stateResult1.previousActionGroups).toEqual({ a: WARNING_ACTIONS.id });
+
+        // Second execution: NO_DATA - should keep WARNING action group
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1.5],
+              warningComparator: COMPARATORS.GREATER_THAN,
+              warningThreshold: [0.75],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+          },
+        ]);
+        const { state: stateResult2 } = await executeWithWarning(stateResult1);
+        testNAlertsReported(2);
+        // Should report with WARNING action group (not NO_DATA) to suppress notification
+        testAlertReported(2, {
+          id: alertIdA,
+          conditions: [
+            {
+              metric: 'test.metric.1',
+              threshold: [1.5],
+              value: '[NO DATA]',
+              evaluation_value: null,
+            },
+          ],
+          actionGroup: WARNING_ACTIONS.id, // Kept as WARNING, not NO_DATA
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        expect(stateResult2.previousActionGroups).toEqual({ a: WARNING_ACTIONS.id });
+      });
+    });
+  });
+
   function testNAlertsReported(n: number) {
     expect(services.alertsClient.report).toHaveBeenCalledTimes(n);
     expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(n);

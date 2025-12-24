@@ -245,6 +245,9 @@ export const Expressions: React.FC<Props> = (props) => {
     if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
       setRuleParams('alertOnGroupDisappear', false);
     }
+    if (typeof ruleParams.noDataNotificationsEnabled === 'undefined') {
+      setRuleParams('noDataNotificationsEnabled', true);
+    }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
@@ -466,6 +469,31 @@ export const Expressions: React.FC<Props> = (props) => {
         disabled={!hasGroupBy}
         checked={Boolean(ruleParams.alertOnGroupDisappear)}
         onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
+      />
+      <EuiSpacer size="s" />
+      <EuiCheckbox
+        id="metrics-alert-nodata-notifications-toggle"
+        data-test-subj="metricsAlertNoDataNotificationsToggle"
+        label={
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.noDataNotifications', {
+              defaultMessage: 'Allow notifications when alert transitions to no data',
+            })}{' '}
+            <EuiIconTip
+              type="question"
+              color="subdued"
+              content={i18n.translate(
+                'xpack.infra.metrics.alertFlyout.noDataNotificationsHelpText',
+                {
+                  defaultMessage:
+                    'When disabled, the alert will remain active but no notification will be sent when data stops arriving. The alert will only notify on initial firing and recovery. This is useful to avoid notification noise while keeping the alert state.',
+                }
+              )}
+            />
+          </>
+        }
+        checked={ruleParams.noDataNotificationsEnabled !== false}
+        onChange={(e) => setRuleParams('noDataNotificationsEnabled', e.target.checked)}
       />
       <EuiSpacer size="m" />
     </>

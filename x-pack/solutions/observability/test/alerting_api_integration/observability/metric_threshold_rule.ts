@@ -226,5 +226,223 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
     });
+
+    describe('noDataNotificationsEnabled parameter', () => {
+      let noDataRuleId: string;
+
+      afterEach(async () => {
+        if (noDataRuleId) {
+          await supertest.delete(`/api/alerting/rule/${noDataRuleId}`).set('kbn-xsrf', 'foo');
+          await esClient.deleteByQuery({
+            index: METRICS_ALERTS_INDEX,
+            query: { term: { 'kibana.alert.rule.uuid': noDataRuleId } },
+            conflicts: 'proceed',
+          });
+        }
+      });
+
+      it('should accept noDataNotificationsEnabled: true and store it in rule parameters', async () => {
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule with noDataNotificationsEnabled true',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+            noDataNotificationsEnabled: true,
+          },
+          schedule: {
+            interval: '1m',
+          },
+        });
+        noDataRuleId = createdRule.id;
+
+        expect(createdRule.params.noDataNotificationsEnabled).to.be(true);
+
+        // Verify the rule was saved correctly by fetching it
+        const { body: fetchedRule } = await supertest
+          .get(`/api/alerting/rule/${noDataRuleId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        expect(fetchedRule.params.noDataNotificationsEnabled).to.be(true);
+      });
+
+      it('should accept noDataNotificationsEnabled: false and store it in rule parameters', async () => {
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule with noDataNotificationsEnabled false',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+            noDataNotificationsEnabled: false,
+          },
+          schedule: {
+            interval: '1m',
+          },
+        });
+        noDataRuleId = createdRule.id;
+
+        expect(createdRule.params.noDataNotificationsEnabled).to.be(false);
+
+        // Verify the rule was saved correctly by fetching it
+        const { body: fetchedRule } = await supertest
+          .get(`/api/alerting/rule/${noDataRuleId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        expect(fetchedRule.params.noDataNotificationsEnabled).to.be(false);
+      });
+
+      it('should allow creating a rule without noDataNotificationsEnabled (defaults to undefined, treated as true)', async () => {
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule without noDataNotificationsEnabled',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+            // noDataNotificationsEnabled not set - should default to undefined
+          },
+          schedule: {
+            interval: '1m',
+          },
+        });
+        noDataRuleId = createdRule.id;
+
+        // When not set, the parameter should be undefined in the saved rule
+        // The executor will treat undefined as true for backward compatibility
+        expect(createdRule.params.noDataNotificationsEnabled).to.be(undefined);
+
+        // Verify the rule was saved correctly by fetching it
+        const { body: fetchedRule } = await supertest
+          .get(`/api/alerting/rule/${noDataRuleId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        expect(fetchedRule.params.noDataNotificationsEnabled).to.be(undefined);
+      });
+
+      it('should update a rule to change noDataNotificationsEnabled from true to false', async () => {
+        // Create rule with noDataNotificationsEnabled: true
+        const createdRule = await createRule<MetricThresholdParams>({
+          supertest,
+          logger,
+          esClient,
+          ruleTypeId: InfraRuleType.MetricThreshold,
+          consumer: 'infrastructure',
+          tags: ['infrastructure'],
+          name: 'Metric threshold rule to update noDataNotificationsEnabled',
+          params: {
+            criteria: [
+              {
+                aggType: Aggregators.AVERAGE,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [0.5],
+                timeSize: 5,
+                timeUnit: 'm',
+                metric: 'system.cpu.user.pct',
+              },
+            ],
+            sourceId: 'default',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+            noDataNotificationsEnabled: true,
+          },
+          schedule: {
+            interval: '1m',
+          },
+        });
+        noDataRuleId = createdRule.id;
+
+        expect(createdRule.params.noDataNotificationsEnabled).to.be(true);
+
+        // Update the rule to set noDataNotificationsEnabled: false
+        const { body: updatedRule } = await supertest
+          .put(`/api/alerting/rule/${noDataRuleId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Metric threshold rule to update noDataNotificationsEnabled',
+            tags: ['infrastructure'],
+            schedule: {
+              interval: '1m',
+            },
+            params: {
+              criteria: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [0.5],
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  metric: 'system.cpu.user.pct',
+                },
+              ],
+              sourceId: 'default',
+              alertOnNoData: true,
+              alertOnGroupDisappear: true,
+              noDataNotificationsEnabled: false,
+            },
+            actions: [],
+          })
+          .expect(200);
+
+        expect(updatedRule.params.noDataNotificationsEnabled).to.be(false);
+
+        // Verify by fetching the rule
+        const { body: fetchedRule } = await supertest
+          .get(`/api/alerting/rule/${noDataRuleId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        expect(fetchedRule.params.noDataNotificationsEnabled).to.be(false);
+      });
+    });
   });
 }

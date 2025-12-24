@@ -79,6 +79,8 @@ export type MetricThresholdRuleTypeState = RuleTypeState & {
   missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
   filterQuery?: string;
+  // Track previous action groups per alert ID to support noDataNotificationsEnabled feature
+  previousActionGroups?: Record<string, string>;
 };
 export type MetricThresholdAlertState = AlertState; // no specific instance state used
 export type MetricThresholdAlertContext = AlertContext; // no specific instance state used
@@ -191,11 +193,16 @@ export const createMetricThresholdExecutor =
       sourceId,
       alertOnNoData,
       alertOnGroupDisappear: _alertOnGroupDisappear,
+      noDataNotificationsEnabled: _noDataNotificationsEnabled,
     } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
+      noDataNotificationsEnabled: boolean | undefined;
     };
+
+    // For backwards-compatibility, interpret undefined noDataNotificationsEnabled as true
+    const noDataNotificationsEnabled = _noDataNotificationsEnabled !== false;
 
     const source = await libs.sources.getSourceConfiguration(
       savedObjectsClient,
@@ -294,6 +301,11 @@ export const createMetricThresholdExecutor =
     const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
+    // Track action groups for the current execution to save to state
+    const currentActionGroups: Record<string, string> = {};
+    // Get previous action groups from state to support noDataNotificationsEnabled feature
+    const previousActionGroups = state.previousActionGroups ?? {};
+
     // The key of `groupArray` is the alert instance ID.
     for (const group of groupArray) {
       // AND logic; all criteria must be across the threshold
@@ -356,23 +368,58 @@ export const createMetricThresholdExecutor =
         // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
         // check to see if a No Data state has occurred
         if (nextState === AlertStates.NO_DATA) {
-          reason = alertResults
-            .filter((result) => result[group]?.isNoData)
-            .map((result) => buildNoDataAlertReason({ ...result[group], group }))
-            .join('\n');
+          const previousActionGroup = previousActionGroups[group];
+          const hasPreviousAlertOrWarningState =
+            previousActionGroup &&
+            previousActionGroup !== RecoveredActionGroup.id &&
+            previousActionGroup !== NO_DATA_ACTIONS_ID;
+
+          // When noDataNotificationsEnabled is false and the alert doesn't have a previous ALERT/WARNING state,
+          // skip reporting this NO_DATA alert entirely. This prevents the initial NO_DATA notification.
+          // The alert will be tracked when it transitions to ALERT state instead.
+          if (!noDataNotificationsEnabled && !hasPreviousAlertOrWarningState) {
+            // Skip - don't set reason, so alert won't be reported
+          } else {
+            reason = alertResults
+              .filter((result) => result[group]?.isNoData)
+              .map((result) => buildNoDataAlertReason({ ...result[group], group }))
+              .join('\n');
+          }
         }
       }
 
       if (reason) {
         const timestamp = startedAt.toISOString();
-        const actionGroupId: MetricThresholdActionGroup =
-          nextState === AlertStates.OK
-            ? RecoveredActionGroup.id
-            : nextState === AlertStates.NO_DATA
-            ? NO_DATA_ACTIONS_ID
-            : nextState === AlertStates.WARNING
-            ? WARNING_ACTIONS_ID
-            : FIRED_ACTIONS_ID;
+
+        // Determine the action group, considering noDataNotificationsEnabled setting
+        let actionGroupId: MetricThresholdActionGroup;
+        const previousActionGroup = previousActionGroups[group];
+
+        if (nextState === AlertStates.OK) {
+          actionGroupId = RecoveredActionGroup.id;
+        } else if (nextState === AlertStates.NO_DATA) {
+          // When noDataNotificationsEnabled is false and the alert was previously active,
+          // keep the previous action group to avoid triggering a notification
+          if (
+            !noDataNotificationsEnabled &&
+            previousActionGroup &&
+            previousActionGroup !== RecoveredActionGroup.id &&
+            previousActionGroup !== NO_DATA_ACTIONS_ID
+          ) {
+            // Keep the previous action group (FIRED or WARNING) to suppress NO_DATA notification
+            actionGroupId = previousActionGroup as MetricThresholdActionGroup;
+          } else {
+            actionGroupId = NO_DATA_ACTIONS_ID;
+          }
+        } else if (nextState === AlertStates.WARNING) {
+          actionGroupId = WARNING_ACTIONS_ID;
+        } else {
+          // nextState === AlertStates.ALERT
+          actionGroupId = FIRED_ACTIONS_ID;
+        }
+
+        // Track the action group for this alert to save to state
+        currentActionGroups[group] = actionGroupId;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0
@@ -508,6 +555,8 @@ export const createMetricThresholdExecutor =
         missingGroups: [...nextMissingGroups],
         groupBy,
         filterQuery: params.filterQuery,
+        // Save current action groups to state for noDataNotificationsEnabled feature
+        previousActionGroups: currentActionGroups,
       },
     };
   };

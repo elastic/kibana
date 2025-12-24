@@ -70,6 +70,12 @@ export interface MetricThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  /**
+   * When false, no notification will be sent when an active alert or warning transitions to NO_DATA state.
+   * The alert remains active but silently continues without triggering actions.
+   * Defaults to true for backward compatibility.
+   */
+  noDataNotificationsEnabled?: boolean;
 }
 
 interface BaseMetricExpressionParams {
