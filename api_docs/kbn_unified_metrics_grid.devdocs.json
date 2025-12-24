@@ -45,9 +45,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<Omit<Omit<",
           "UnifiedMetricsGridProps",
-          " & { client?: { getFields: (params: { index?: string | undefined; page?: number | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
-          "MetricField",
-          "[]; total: number; page: number; }>; } | undefined; } & Pick<",
+          " & Pick<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",
