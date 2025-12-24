@@ -75,7 +75,7 @@ export const createSyntheticRedMetricsData = async ({
                 instance
                   .transaction({ transactionName: txConfig.name, transactionType: txConfig.type })
                   .timestamp(timestamp)
-                  .duration(txConfig.duration * 1.5) // Failed transactions typically take longer
+                  .duration(txConfig.duration * 1.5)
                   .failure()
               );
             }
