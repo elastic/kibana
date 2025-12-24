@@ -15,6 +15,7 @@ import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
 export type OnFileSelectParameters = GeoFilePreview & {
   indexName: string;
   importer: GeoFileImporter;
+  file: File;
 };
 
 interface Props {
@@ -28,6 +29,7 @@ interface State {
   isLoadingPreview: boolean;
   importer: GeoFileImporter | null;
   previewSummary: string | null;
+  file: File | null;
 }
 
 export class GeoFilePicker extends Component<Props, State> {
@@ -39,6 +41,7 @@ export class GeoFilePicker extends Component<Props, State> {
     isLoadingPreview: false,
     importer: null,
     previewSummary: null,
+    file: null,
   };
 
   async componentDidMount() {
@@ -58,6 +61,7 @@ export class GeoFilePicker extends Component<Props, State> {
       isLoadingPreview: false,
       importer: null,
       previewSummary: null,
+      file: null,
     });
 
     if (files && files.length) {
@@ -68,6 +72,7 @@ export class GeoFilePicker extends Component<Props, State> {
           {
             defaultIndexName: file.name.split('.')[0].toLowerCase(),
             importer,
+            file,
           },
           this._loadFilePreview
         );
@@ -116,11 +121,12 @@ export class GeoFilePicker extends Component<Props, State> {
           : null,
     });
 
-    if (preview) {
+    if (preview && this.state.importer && this.state.file) {
       this.props.onSelect({
         ...preview,
         importer: this.state.importer,
         indexName: this.state.defaultIndexName ? this.state.defaultIndexName : 'features',
+        file: this.state.file,
       });
     }
   };

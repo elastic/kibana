@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import type { FeatureCollection } from 'geojson';
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart, AnalyticsServiceStart } from '@kbn/core/public';
 import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { ImportFactoryOptions } from '@kbn/file-upload-common';
 import type { IImporter } from '../importer';
@@ -29,6 +29,8 @@ export interface FileUploadComponentProps {
   disableImportBtn: () => void;
   onUploadComplete: (results: FileUploadGeoResults) => void;
   onUploadError: () => void;
+  analytics?: AnalyticsServiceStart;
+  location?: string;
 }
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;

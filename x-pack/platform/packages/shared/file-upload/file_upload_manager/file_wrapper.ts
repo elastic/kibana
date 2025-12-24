@@ -8,8 +8,8 @@
 import { BehaviorSubject } from 'rxjs';
 import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
 import {
+  FileUploadTelemetryService,
   isAbortError,
-  type FileUploadTelemetryService,
   type FindFileStructureResponse,
   type FormattedOverrides,
   type ImportFailure,
@@ -112,7 +112,7 @@ export class FileWrapper {
     private fileUploadTelemetryService: FileUploadTelemetryService,
     private uploadSessionId: string
   ) {
-    this.fileId = Math.random().toString(36).substring(2, 15);
+    this.fileId = FileUploadTelemetryService.generateId();
     this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
     this.analyzedFile$.next({
       ...this.analyzedFile$.getValue(),
