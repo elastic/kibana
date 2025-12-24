@@ -15,6 +15,7 @@ import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { testData } from '../fixtures';
+import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -41,6 +42,8 @@ globalSetupHook(
     // Generate span stacktrace data for stacktrace tests
     const spanStacktraceData = generateSpanStacktraceData();
     await apmSynthtraceEsClient.index(spanStacktraceData);
+
+    await apmSynthtraceEsClient.index(serviceDataWithRecentErrors());
 
     // Generate OTEL service data for OTEL service overview tests
     const otelData = otelSendotlp({

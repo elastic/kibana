@@ -8,11 +8,13 @@
 import { createLazyPageObject, type KibanaUrl, type ScoutPage } from '@kbn/scout-oblt';
 import { testData, BIGGER_TIMEOUT } from '../..';
 import { DependenciesTab } from './dependencies_tab';
+import { AlertsTab } from './alerts_tab';
 
 export class ServiceDetailsPage {
   public readonly SERVICE_NAME = testData.SERVICE_OPBEANS_JAVA;
 
   public readonly dependenciesTab: DependenciesTab;
+  public readonly alertsTab: AlertsTab;
 
   // Chart and table locators
   readonly latencyChart;
@@ -29,6 +31,7 @@ export class ServiceDetailsPage {
       this.kbnUrl,
       this.SERVICE_NAME
     );
+    this.alertsTab = createLazyPageObject(AlertsTab, this.page, this.kbnUrl, this.SERVICE_NAME);
 
     this.latencyChart = this.page.getByTestId('latencyChart');
     this.throughputChart = this.page.getByTestId('throughput');
