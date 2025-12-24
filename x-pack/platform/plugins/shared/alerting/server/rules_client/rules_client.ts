@@ -8,13 +8,6 @@
 import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import type { RuleTagsParams } from '../application/rule/methods/tags';
 import { getRuleTags } from '../application/rule/methods/tags';
-import type {
-  CreateEsqlRuleParams,
-  EsqlRuleResponse,
-} from '../application/esql_rule/methods/create';
-import { createEsqlRule } from '../application/esql_rule/methods/create';
-import type { UpdateEsqlRuleData } from '../application/esql_rule/methods/update';
-import { updateEsqlRule } from '../application/esql_rule/methods/update';
 import type { MuteAlertQuery, MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import type { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
@@ -308,13 +301,5 @@ export class RulesClient {
     return this.context;
   }
 
-  /**
-   * ES|QL rules (stored in a dedicated SO type).
-   */
-  public createEsqlRule = (params: CreateEsqlRuleParams): Promise<EsqlRuleResponse> =>
-    createEsqlRule(this.context, params);
-  public updateEsqlRule = (params: {
-    id: string;
-    data: UpdateEsqlRuleData;
-  }): Promise<EsqlRuleResponse> => updateEsqlRule(this.context, params);
+  // NOTE: ES|QL rule APIs have moved to `alerting_v2`.
 }

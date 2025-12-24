@@ -30,7 +30,6 @@ import type { BackfillClient } from './backfill_client/backfill_client';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
-  ESQL_RULE_SAVED_OBJECT_TYPE,
   GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -144,7 +143,6 @@ export class RulesClientFactory {
           API_KEY_PENDING_INVALIDATION_TYPE,
           AD_HOC_RUN_SAVED_OBJECT_TYPE,
           GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-          ESQL_RULE_SAVED_OBJECT_TYPE,
         ],
       }),
       authorization,

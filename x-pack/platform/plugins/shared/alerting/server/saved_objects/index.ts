@@ -18,7 +18,6 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { ruleTemplateMappings } from './rule_template_mappings';
-import { esqlRuleMappings } from './esql_rule_mappings';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import type { RawRule, RawRuleTemplate } from '../types';
@@ -30,20 +29,17 @@ import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import {
   adHocRunParamsModelVersions,
   apiKeyPendingInvalidationModelVersions,
-  esqlRuleModelVersions,
   ruleModelVersions,
   ruleTemplateModelVersions,
   rulesSettingsModelVersions,
   gapAutoFillSchedulerModelVersions,
 } from './model_versions';
-import type { RawEsqlRule } from './schemas/raw_esql_rule';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
 export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
-export const ESQL_RULE_SAVED_OBJECT_TYPE = 'alerting_esql_rule';
 
 export const RuleAttributesToEncrypt = ['apiKey'];
 
@@ -101,24 +97,7 @@ export const AdHocRunAttributesToEncrypt = ['apiKeyToUse'];
 export const AdHocRunAttributesIncludedInAAD = ['rule', 'spaceId'];
 export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
 
-export const EsqlRuleAttributesToEncrypt = ['apiKey'];
-export const EsqlRuleAttributesIncludedInAAD = [
-  'enabled',
-  'name',
-  'tags',
-  'schedule',
-  'esql',
-  'timeField',
-  'lookbackWindow',
-  'groupKey',
-  'apiKeyOwner',
-  'apiKeyCreatedByUser',
-  'scheduledTaskId',
-  'createdBy',
-  'createdAt',
-  'updatedBy',
-  'updatedAt',
-];
+// NOTE: ES|QL rule saved object type has moved to `alerting_v2`.
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -157,21 +136,6 @@ export function setupSavedObjects(
     modelVersions: ruleModelVersions,
   });
 
-  savedObjects.registerType({
-    name: ESQL_RULE_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
-    mappings: esqlRuleMappings,
-    management: {
-      importableAndExportable: false,
-      getTitle(esqlRuleSavedObject: SavedObject<RawEsqlRule>) {
-        return `ES|QL Rule: [${esqlRuleSavedObject.attributes.name}]`;
-      },
-    },
-    modelVersions: esqlRuleModelVersions,
-  });
 
   savedObjects.registerType({
     name: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -320,10 +284,4 @@ export function setupSavedObjects(
     attributesToIncludeInAAD: new Set(AdHocRunAttributesIncludedInAAD),
   });
 
-  encryptedSavedObjects.registerType({
-    type: ESQL_RULE_SAVED_OBJECT_TYPE,
-    enforceRandomId: false,
-    attributesToEncrypt: new Set(EsqlRuleAttributesToEncrypt),
-    attributesToIncludeInAAD: new Set(EsqlRuleAttributesIncludedInAAD),
-  });
 }

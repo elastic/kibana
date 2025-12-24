@@ -81,7 +81,6 @@ import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/
 import {
   setupSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
-  ESQL_RULE_SAVED_OBJECT_TYPE,
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
 } from './saved_objects';
@@ -114,7 +113,6 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
-import { initializeEsqlRulesTaskDefinition } from './rna_esql_task';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -415,15 +413,6 @@ export class AlertingPlugin {
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
-    // Dedicated Task Manager task type for ES|QL rules execution.
-    // Registered regardless of enabled flag so that scheduling can be toggled independently.
-    initializeEsqlRulesTaskDefinition(
-      this.logger,
-      plugins.taskManager,
-      core.getStartServices(),
-      this.config
-    );
-
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
       'alerting',
       this.createRouteHandlerContext(core)
@@ -608,7 +597,6 @@ export class AlertingPlugin {
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [
         RULE_SAVED_OBJECT_TYPE,
-        ESQL_RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ],
@@ -634,7 +622,6 @@ export class AlertingPlugin {
       securityPluginStart: plugins.security,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
-        ESQL_RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ]),

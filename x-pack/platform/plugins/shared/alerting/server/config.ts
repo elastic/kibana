@@ -96,18 +96,6 @@ export const configSchema = schema.object({
   enabledRuleTypes: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
   ),
-  /**
-   * ES|QL rules execution path that writes to a dedicated append-only alerts data stream.
-   *
-   * The configured value is treated as a **prefix/base name**. The actual data stream name is
-   * derived per Kibana space (e.g. `<prefix>-<space_namespace>`). For the default space we use
-   * `<prefix>-default`.
-   */
-  esqlRules: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    // `alerts-*` data streams, one per Kibana space (e.g. `alerts-default`, `alerts-<space_namespace>`)
-    alertsDataStreamPrefix: schema.string({ defaultValue: 'alerts' }),
-  }),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { writeEsqlAlerts } from './write_alerts';
+
+describe('writeEsqlAlerts', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('transforms ES|QL response rows into alert documents and bulk indexes them', async () => {
+    const bulk = jest.fn().mockResolvedValue({ errors: false });
+    const esClient = { bulk } as any;
+
+    const res = await writeEsqlAlerts({
+      services: {
+        logger: { debug: jest.fn() } as any,
+        esClient,
+        dataStreamName: 'alerts-default',
+      },
+      input: {
+        ruleId: 'rule-123',
+        rawRule: {
+          name: 'My ES|QL Rule',
+          tags: ['esql', 'test'],
+          schedule: '1m',
+          enabled: true,
+          esql: 'FROM idx | STATS count = COUNT(*) BY host.name',
+          timeField: '@timestamp',
+          lookbackWindow: '5m',
+          groupKey: ['host.name'],
+          apiKey: null,
+          apiKeyOwner: null,
+          apiKeyCreatedByUser: null,
+          scheduledTaskId: null,
+          createdBy: 'u',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'u',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        esqlResponse: {
+          columns: [{ name: 'host.name' }, { name: 'count' }],
+          values: [
+            ['host-a', 10],
+            ['host-b', 5],
+          ],
+        } as any,
+        taskRunKey: '2025-01-01T00:00:00.000Z',
+      },
+    });
+
+    expect(res).toEqual({ created: 2 });
+    expect(bulk).toHaveBeenCalledTimes(1);
+
+    const bulkArgs = bulk.mock.calls[0][0];
+    expect(bulkArgs.index).toBe('alerts-default');
+    expect(bulkArgs.refresh).toBe(false);
+    expect(bulkArgs.operations).toHaveLength(4);
+
+    const [op1, doc1, op2, doc2] = bulkArgs.operations;
+    expect(op1.create._index).toBe('alerts-default');
+    expect(op2.create._index).toBe('alerts-default');
+
+    expect(doc1['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
+    expect(doc1.tags).toEqual(['esql', 'test']);
+    expect(doc1.alert.grouping.key).toBe('host.name=host-a');
+    expect(doc1.alert.attributes).toEqual({ 'host.name': 'host-a', count: 10 });
+
+    expect(doc2.alert.grouping.key).toBe('host.name=host-b');
+    expect(doc2.alert.attributes).toEqual({ 'host.name': 'host-b', count: 5 });
+  });
+});
