@@ -77,12 +77,15 @@ export const operationFromColumn = (
   const column = typedLayer.columns[columnId];
   if (!column) return;
 
-  // map columns to array of { column, id }
-  const columnMap = Object.entries(layer.columns).map(([id, c]) => ({
-    // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
-    column: c as AnyLensStateColumn,
-    id,
-  }));
+  // map columns to array of { column, id } in columnOrder sequence (matches visualization.columns order)
+  const columnMap = layer.columnOrder
+    .filter((id) => layer.columns[id] != null)
+    .map((id) => ({
+      // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
+      column: layer.columns[id] as AnyLensStateColumn,
+      id,
+    }));
+
   if (isLensStateBucketColumnType(column)) {
     return fromBucketLensStateToAPI(column, columnMap);
   }
