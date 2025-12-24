@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
@@ -77,6 +78,27 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
           },
         },
       ],
+      schemas: {
+        forwardCompatibility: schema.object(
+          {
+            rule_id: schema.string(),
+            version: schema.number(),
+            name: schema.string(),
+            tags: schema.string(),
+            severity: schema.string(),
+            risk_score: schema.number(),
+          },
+          { unknowns: 'ignore' }
+        ),
+        create: schema.object({
+          rule_id: schema.string(),
+          version: schema.number(),
+          name: schema.string(),
+          tags: schema.string(),
+          severity: schema.string(),
+          risk_score: schema.number(),
+        }),
+      },
     },
   },
 };

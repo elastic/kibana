@@ -62,7 +62,7 @@ export const reviewRuleInstallationHandler = async (
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const hasFilter = Boolean(filter && Object.keys(filter).length);
+    const requestHasFilter = Boolean(filter && Object.keys(filter).length);
 
     const installableVersions = await getInstallableRuleVersions(
       ruleAssetsClient,
@@ -72,7 +72,7 @@ export const reviewRuleInstallationHandler = async (
       filter
     );
 
-    const installableVersionsWithoutFilter = hasFilter
+    const installableVersionsWithoutFilter = requestHasFilter
       ? await getInstallableRuleVersions(ruleAssetsClient, mlAuthz, currentRuleVersionsMap)
       : installableVersions;
 
