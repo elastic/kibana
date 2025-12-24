@@ -264,7 +264,7 @@ export class CoreSystem {
       const injection = this.injection.setup();
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
-      this.chrome.setup({ analytics });
+      const chrome = this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
@@ -276,6 +276,7 @@ export class CoreSystem {
       const core: InternalCoreSetup = {
         analytics,
         application,
+        chrome,
         fatalErrors: this.fatalErrorsSetup,
         featureFlags,
         http,
