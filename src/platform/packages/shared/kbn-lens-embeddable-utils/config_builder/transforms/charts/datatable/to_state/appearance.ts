@@ -13,7 +13,7 @@ import { getAccessorName } from '../helpers';
 import { METRIC_ACCESSOR_PREFIX, ROW_ACCESSOR_PREFIX } from '../constants';
 
 function getSortingColumnId(sortBy: NonNullable<DatatableState['sort_by']>): string | undefined {
-  switch (sortBy.by) {
+  switch (sortBy.column_type) {
     case 'metric':
       return getAccessorName(METRIC_ACCESSOR_PREFIX, sortBy.index);
     case 'row':

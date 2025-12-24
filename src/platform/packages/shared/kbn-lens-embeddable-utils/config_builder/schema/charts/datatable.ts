@@ -34,7 +34,7 @@ const sortingSchema = schema.oneOf(
     // Sorting for metric columns
     schema.object(
       {
-        by: schema.literal('metric'),
+        column_type: schema.literal('metric'),
         index: schema.number({
           min: 0,
           meta: { description: 'Index of the metric column to sort by (0-based)' },
@@ -48,7 +48,7 @@ const sortingSchema = schema.oneOf(
     // Sorting for row columns
     schema.object(
       {
-        by: schema.literal('row'),
+        column_type: schema.literal('row'),
         index: schema.number({
           min: 0,
           meta: { description: 'Index of the row column to sort by (0-based)' },
@@ -62,7 +62,7 @@ const sortingSchema = schema.oneOf(
     // Sorting for split_metrics_by (transposed) columns
     schema.object(
       {
-        by: schema.literal('split_metrics_by'),
+        column_type: schema.literal('split_metrics_by'),
         metric_index: schema.number({
           min: 0,
           meta: {
@@ -87,7 +87,7 @@ const sortingSchema = schema.oneOf(
   {
     meta: {
       description:
-        'Sorting configuration. Only one column can be sorted at a time. Use "by" to specify the column type.',
+        'Sorting configuration. Only one column can be sorted at a time. Use "column_type" to specify the column type.',
     },
   }
 );
@@ -277,7 +277,7 @@ interface SortByValidationInput {
   rows?: Array<{}>;
   split_metrics_by?: Array<{}>;
   sort_by?: {
-    by: 'metric' | 'row' | 'split_metrics_by';
+    column_type: 'metric' | 'row' | 'split_metrics_by';
     index?: number;
     metric_index?: number;
     values?: string[];
@@ -294,16 +294,16 @@ function validateSortBy({
     return;
   }
 
-  const { by } = sort_by;
+  const { column_type } = sort_by;
 
-  if (by === 'metric') {
+  if (column_type === 'metric') {
     const index = sort_by.index;
     if (index == null || index >= metrics.length) {
       return `The 'sort_by.index' (${index}) is out of bounds. The 'metrics' array has ${metrics.length} item(s).`;
     }
   }
 
-  if (by === 'row') {
+  if (column_type === 'row') {
     if (!rows || rows.length === 0) {
       return `Cannot sort by 'row' when no rows are defined.`;
     }
@@ -313,7 +313,7 @@ function validateSortBy({
     }
   }
 
-  if (by === 'split_metrics_by') {
+  if (column_type === 'split_metrics_by') {
     if (!split_metrics_by || split_metrics_by.length === 0) {
       return `Cannot sort by 'split_metrics_by' when no split_metrics_by columns are defined.`;
     }

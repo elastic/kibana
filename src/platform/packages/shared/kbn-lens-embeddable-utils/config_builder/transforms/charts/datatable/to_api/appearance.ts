@@ -119,7 +119,7 @@ function parseSortingToAPI(
     const parsed = parseSplitMetricsBySorting(columnId, columnIdMapping);
     return parsed
       ? {
-          by: 'split_metrics_by',
+          column_type: 'split_metrics_by',
           metric_index: parsed.metricIndex,
           values: parsed.values,
           direction: direction || DEFAULT_DIRECTION,
@@ -133,7 +133,11 @@ function parseSortingToAPI(
     return undefined;
   }
 
-  return { by: mapped.type, index: mapped.index, direction: direction || DEFAULT_DIRECTION };
+  return {
+    column_type: mapped.type,
+    index: mapped.index,
+    direction: direction || DEFAULT_DIRECTION,
+  };
 }
 
 export function convertAppearanceToAPIFormat(

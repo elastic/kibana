@@ -268,7 +268,7 @@ export const sortedByTransposedMetricColumnESQLDatatable: DatatableState = {
   },
   paging: 10,
   sort_by: {
-    by: 'split_metrics_by',
+    column_type: 'split_metrics_by',
     metric_index: 0,
     values: ['US', 'MM'],
     direction: 'desc',
@@ -372,7 +372,7 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
   },
   paging: 10,
   sort_by: {
-    by: 'row',
+    column_type: 'row',
     index: 1,
     direction: 'desc',
   },
