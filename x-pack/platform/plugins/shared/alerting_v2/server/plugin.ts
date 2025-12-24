@@ -19,6 +19,7 @@ import type {
   AlertingServerSetupDependencies,
   AlertingServerStartDependencies,
 } from './types';
+import { registerFeaturePrivileges } from './lib/security/privileges';
 
 export class AlertingPlugin
   implements
@@ -37,7 +38,7 @@ export class AlertingPlugin
   }
 
   public setup(core: CoreSetup, plugins: AlertingServerSetupDependencies) {
-    return;
+    registerFeaturePrivileges(plugins.features);
   }
 
   public start(core: CoreStart, plugins: AlertingServerStartDependencies) {
