@@ -6,16 +6,48 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { ContainerModule } from 'inversify';
+import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
+import { CoreSetup, PluginInitializer, Route } from '@kbn/core-di-server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+
 import type { AlertingV2Config } from './config';
 import { configSchema } from './config';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { AlertingPlugin } = await import('./plugin');
-  return new AlertingPlugin(initContext);
-};
+import { setupSavedObjects } from './saved_objects';
+import { initializeEsqlRulesTaskDefinition } from './esql_task';
+import { CreateEsqlRuleRoute } from './routes/esql_rule/routes/create_esql_rule_route';
+import { UpdateEsqlRuleRoute } from './routes/esql_rule/routes/update_esql_rule_route';
 
 export const config: PluginConfigDescriptor<AlertingV2Config> = {
   schema: configSchema,
 };
+
+export const module = new ContainerModule(({ bind }) => {
+  // Register HTTP routes via DI
+  bind(Route).toConstantValue(CreateEsqlRuleRoute);
+  bind(Route).toConstantValue(UpdateEsqlRuleRoute);
+
+  bind(OnSetup).toConstantValue((container) => {
+    const logger = container.get(Logger);
+    const pluginConfig = container.get(
+      PluginInitializer('config')
+    ) as PluginInitializerContext['config'];
+    const cfg = pluginConfig.get<AlertingV2Config>();
+
+    // Saved Objects + Encrypted Saved Objects registration
+    setupSavedObjects({
+      savedObjects: container.get(CoreSetup('savedObjects')),
+      encryptedSavedObjects: container.get(PluginSetup('encryptedSavedObjects')),
+      logger,
+    });
+
+    // Task type registration
+    const taskManagerSetup = container.get(PluginSetup<TaskManagerSetupContract>('taskManager'));
+    const getStartServices = container.get(CoreSetup('getStartServices')) as () => Promise<
+      [unknown, unknown, unknown]
+    >;
+    initializeEsqlRulesTaskDefinition(logger, taskManagerSetup, getStartServices() as any, cfg);
+  });
+});
 
 export type { AlertingV2Config } from './config';
