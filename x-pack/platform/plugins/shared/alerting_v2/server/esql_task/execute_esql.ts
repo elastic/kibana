@@ -11,8 +11,42 @@ import { ESQL_SEARCH_STRATEGY, isRunningResponse } from '@kbn/data-plugin/common
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { catchError, filter, lastValueFrom, map, throwError } from 'rxjs';
-
+import { hasStartEndParams } from '@kbn/esql-utils';
+import type { RawEsqlRule } from '../saved_objects/schemas/raw_esql_rule';
 import { parseDurationToMs } from '../lib/duration';
+
+export const getEsqlQuery = (
+  params: ExecuteEsqlRuleParams,
+  dateStart: string,
+  dateEnd: string
+): ESQLSearchParams => {
+  const rangeFilter: unknown[] = [
+    {
+      range: {
+        [params.timeField]: {
+          lte: dateEnd,
+          gt: dateStart,
+          format: 'strict_date_optional_time',
+        },
+      },
+    },
+  ];
+
+  const query = {
+    query: params.esql,
+    filter: {
+      bool: {
+        filter: rangeFilter,
+      },
+    },
+    ...(hasStartEndParams(params.esql)
+      ? { params: [{ _tstart: dateStart }, { _tend: dateEnd }] }
+      : {}),
+  };
+  return query;
+};
+
+export type ExecuteEsqlRuleParams = Pick<RawEsqlRule, 'esql' | 'timeField' | 'lookbackWindow'>;
 
 export async function executeEsqlRule({
   logger,
@@ -25,32 +59,12 @@ export async function executeEsqlRule({
   searchClient: IScopedSearchClient;
   abortController: AbortController;
   rule: { id: string; spaceId: string; name: string };
-  params: { esql: string; timeField: string; lookbackWindow: string };
+  params: ExecuteEsqlRuleParams;
 }): Promise<ESQLSearchResponse> {
-  const windowMs = parseDurationToMs(params.lookbackWindow);
   const dateEnd = new Date().toISOString();
-  const dateStart = new Date(Date.now() - windowMs).toISOString();
+  const dateStart = new Date(Date.now() - parseDurationToMs(params.lookbackWindow)).toISOString();
 
-  const request: IKibanaSearchRequest<ESQLSearchParams> = {
-    params: {
-      query: params.esql,
-      filter: {
-        bool: {
-          filter: [
-            {
-              range: {
-                [params.timeField]: {
-                  lte: dateEnd,
-                  gt: dateStart,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
-          ],
-        },
-      },
-    } as unknown as ESQLSearchParams,
-  };
+  const request = { params: getEsqlQuery(params, dateStart, dateEnd) };
 
   logger.debug(
     () =>
