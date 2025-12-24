@@ -24,7 +24,11 @@ import {
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, Partition, Settings, PartitionLayout, LIGHT_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useDetectionRulesByIntegration, useSiemReadinessApi } from '@kbn/siem-readiness';
+import {
+  useDetectionRulesByIntegration,
+  useIntegrationDisplayNames,
+  useSiemReadinessApi,
+} from '@kbn/siem-readiness';
 import { useBasePath } from '../../../../../common/lib/kibana';
 
 const SelectablePopover = (props: Pick<EuiSelectableProps, 'options' | 'onChange'>) => {
@@ -103,21 +107,32 @@ export const AllRuleCoveragePanel: React.FC = () => {
   const integrationNames = getInstalledIntegrations.data?.map((item) => item.name) || [];
   const installedIntegrationRules = useDetectionRulesByIntegration(integrationNames);
 
+  const integrationDisplayNames = useIntegrationDisplayNames();
+
+  const getIntegrationDisplayName = useCallback(
+    (packageName: string): string => {
+      return integrationDisplayNames.data?.get(packageName) || packageName;
+    },
+    [integrationDisplayNames.data]
+  );
+
   const installedIntegrationsOptions = useMemo(() => {
     return (installedIntegrationRules.data?.analytics?.installedIntegrations || []).map(
       (integration) => ({
-        label: integration,
+        label: getIntegrationDisplayName(integration),
+        key: integration,
       })
     );
-  }, [installedIntegrationRules.data?.analytics?.installedIntegrations]);
+  }, [getIntegrationDisplayName, installedIntegrationRules.data?.analytics?.installedIntegrations]);
 
   const missingIntegrationsOptions = useMemo(() => {
     return (installedIntegrationRules.data?.analytics?.missingIntegrations || []).map(
       (integration) => ({
-        label: integration,
+        label: getIntegrationDisplayName(integration),
+        key: integration,
       })
     );
-  }, [installedIntegrationRules.data?.analytics?.missingIntegrations]);
+  }, [getIntegrationDisplayName, installedIntegrationRules.data?.analytics?.missingIntegrations]);
 
   const onChangePopOver = (
     popoverOptions: EuiSelectableOption[],
@@ -128,7 +143,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     const selectedOption = popoverOptions.find((option) => option.checked === 'on');
 
     if (selectedOption) {
-      const integrationUrl = getIntegrationUrl(selectedOption.label);
+      const integrationUrl = getIntegrationUrl(selectedOption.key as string);
       window.open(integrationUrl, '_blank', 'noopener,noreferrer');
     }
   };

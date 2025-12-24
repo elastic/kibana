@@ -9,3 +9,4 @@ export type * from './src/types';
 export * from './src/constants';
 export * from './src/use_readiness_tasks';
 export * from './src/use_get_detection_rules_by_integration';
+export * from './src/use_integration_display_names';
