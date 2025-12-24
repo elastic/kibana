@@ -31,33 +31,21 @@ import { horizontalAlignmentSchema } from '../alignments';
  */
 const sortingSchema = schema.oneOf(
   [
-    // Sorting for metric columns
+    // Sorting for metric or row columns
     schema.object(
       {
-        column_type: schema.literal('metric'),
+        column_type: schema.oneOf([schema.literal('metric'), schema.literal('row')], {
+          meta: { description: 'Type of column to sort by' },
+        }),
         index: schema.number({
           min: 0,
-          meta: { description: 'Index of the metric column to sort by (0-based)' },
+          meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
         direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
           meta: { description: 'Sort direction' },
         }),
       },
-      { meta: { description: 'Sort by a metric column' } }
-    ),
-    // Sorting for row columns
-    schema.object(
-      {
-        column_type: schema.literal('row'),
-        index: schema.number({
-          min: 0,
-          meta: { description: 'Index of the row column to sort by (0-based)' },
-        }),
-        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-          meta: { description: 'Sort direction' },
-        }),
-      },
-      { meta: { description: 'Sort by a row column' } }
+      { meta: { description: 'Sort by a metric or row column' } }
     ),
     // Sorting for split_metrics_by (transposed) columns
     schema.object(
@@ -81,7 +69,12 @@ const sortingSchema = schema.oneOf(
           meta: { description: 'Sort direction' },
         }),
       },
-      { meta: { description: 'Sort by a transposed split_metrics_by column' } }
+      {
+        meta: {
+          description:
+            'Sort by a transposed metric column (created when metrics are pivoted by split_metrics_by)',
+        },
+      }
     ),
   ],
   {
