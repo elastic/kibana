@@ -40,7 +40,7 @@ export const EisCloudConnectPromoCallout = ({
   const {
     services: { application },
   } = useKibana();
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}CloudConnectCallout`,
   });
 
@@ -65,7 +65,7 @@ export const EisCloudConnectPromoCallout = ({
           border: `${euiTheme.border.thin}`,
           borderRadius: `${euiTheme.border.radius.medium}`,
         })}
-        onDismiss={onDismissTour}
+        onDismiss={onDismissPromo}
       >
         <EuiFlexGroup direction={direction} alignItems="flexStart">
           <EuiImage src={searchRocketIcon} alt="" size="original" />
@@ -83,7 +83,7 @@ export const EisCloudConnectPromoCallout = ({
               size="s"
               onClick={navigateToApp}
               data-test-subj="eisUpdateCalloutCtaBtn"
-              data-telemetry-id={`${dataId}-cta-btn`}
+              data-telemetry-id={`${dataId}-connectYourCluster-btn`}
               iconSide="right"
               iconType="popout"
             >
