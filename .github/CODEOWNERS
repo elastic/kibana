@@ -993,6 +993,7 @@ x-pack/platform/packages/shared/security/form_components @elastic/kibana-securit
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
+x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
