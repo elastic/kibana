@@ -21,7 +21,7 @@ import {
   CAI_INDEX_MODE,
   CAI_DEFAULT_TIMEOUT,
 } from './constants';
-import { fullJitterBackoffFactory } from '../common/retry_service/full_jitter_backoff';
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { scheduleCAIBackfillTask } from './tasks/backfill_task';
 import { CasesAnalyticsRetryService } from './retry_service';
 
