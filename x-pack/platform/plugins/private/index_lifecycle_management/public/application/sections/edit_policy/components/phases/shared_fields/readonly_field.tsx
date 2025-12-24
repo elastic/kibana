@@ -25,7 +25,7 @@ export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {
         <EuiTextColor color="subdued">
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.readonlyDescription"
-            defaultMessage="Enable to make the index read only, disable to allow writes changes."
+            defaultMessage="Enable to make the index read only. Disable to allow writing to the index."
           />{' '}
           <LearnMoreLink docPath={docLinks.links.elasticsearch.ilmReadOnly} />
         </EuiTextColor>
