@@ -64,7 +64,9 @@ export class ServiceDetailsPage {
         rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
       })}`
     );
-    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await this.page
+      .getByTestId('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
   // #endregion
 
@@ -222,7 +224,9 @@ export class ServiceDetailsPage {
 
   async clickErrorsTab() {
     await this.getErrorsTab().click();
-    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await this.page
+      .getByTestId('errorDistribution')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
   // #endregion
 
