@@ -6,6 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import http from 'http';
 import https from 'https';
 import execa from 'execa';
 import chalk from 'chalk';
@@ -15,13 +16,21 @@ interface ElasticsearchCredentials {
   password: string;
 }
 
-function httpsRequest(
+interface ElasticsearchConnection {
+  baseUrl: string;
+  credentials: ElasticsearchCredentials;
+  ssl: boolean;
+}
+
+function httpRequest(
   url: string,
-  options: https.RequestOptions,
-  body?: string
+  options: http.RequestOptions | https.RequestOptions,
+  body?: string,
+  ssl: boolean = true
 ): Promise<{ statusCode: number; data: string }> {
   return new Promise((resolve, reject) => {
-    const req = https.request(url, options, (res) => {
+    const requestFn = ssl ? https.request : http.request;
+    const req = requestFn(url, options, (res) => {
       let data = '';
 
       res.on('data', (chunk) => {
@@ -43,8 +52,11 @@ function httpsRequest(
   });
 }
 
-async function getElasticsearchCredentials(log: ToolingLog): Promise<ElasticsearchCredentials> {
-  log.debug('Determining Elasticsearch credentials');
+async function getES(log: ToolingLog, ssl: boolean = true): Promise<ElasticsearchConnection> {
+  log.debug('Determining Elasticsearch connection');
+
+  const protocol = ssl ? 'https' : 'http';
+  const baseUrl = `${protocol}://localhost:9200`;
 
   // Check environment variables first
   const envUsername = process.env.ES_USERNAME || process.env.ELASTICSEARCH_USERNAME;
@@ -52,7 +64,7 @@ async function getElasticsearchCredentials(log: ToolingLog): Promise<Elasticsear
 
   if (envUsername && envPassword) {
     log.debug('Using credentials from environment variables');
-    return { username: envUsername, password: envPassword };
+    return { baseUrl, credentials: { username: envUsername, password: envPassword }, ssl };
   }
 
   // Try default credentials
@@ -67,17 +79,22 @@ async function getElasticsearchCredentials(log: ToolingLog): Promise<Elasticsear
       const auth = Buffer.from(`${credentials.username}:${credentials.password}`).toString(
         'base64'
       );
-      const { statusCode } = await httpsRequest('https://localhost:9200', {
-        method: 'GET',
-        headers: {
-          Authorization: `Basic ${auth}`,
+      const { statusCode } = await httpRequest(
+        baseUrl,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Basic ${auth}`,
+          },
+          rejectUnauthorized: false,
         },
-        rejectUnauthorized: false,
-      });
+        undefined,
+        ssl
+      );
 
       if (statusCode === 200) {
         log.debug(`Credentials ${credentials.username} authorized`);
-        return credentials;
+        return { baseUrl, credentials, ssl };
       }
     } catch (error) {
       // Continue to next credentials
@@ -111,23 +128,24 @@ async function getEisApiKey(log: ToolingLog): Promise<string> {
 
 async function setCcmApiKey(
   apiKey: string,
-  credentials: ElasticsearchCredentials,
+  es: ElasticsearchConnection,
   log: ToolingLog
 ): Promise<void> {
   log.debug('Setting CCM API key in Elasticsearch');
 
   const maxRetries = 3;
   const retryDelayMs = 2000;
+  const esUrl = `${es.baseUrl}/_inference/_ccm`;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const auth = Buffer.from(`${credentials.username}:${credentials.password}`).toString(
+      const auth = Buffer.from(`${es.credentials.username}:${es.credentials.password}`).toString(
         'base64'
       );
       const body = JSON.stringify({ api_key: apiKey });
 
-      const { statusCode } = await httpsRequest(
-        'https://localhost:9200/_inference/_ccm',
+      const { statusCode } = await httpRequest(
+        esUrl,
         {
           method: 'PUT',
           headers: {
@@ -137,7 +155,8 @@ async function setCcmApiKey(
           },
           rejectUnauthorized: false,
         },
-        body
+        body,
+        es.ssl
       );
 
       if (statusCode >= 200 && statusCode < 300) {
@@ -157,17 +176,18 @@ async function setCcmApiKey(
   }
 }
 
-export async function ensureEis({ log }: { log: ToolingLog }) {
-  log.info('Setting up Cloud Connected Mode for EIS');
+export async function ensureEis({ log, ssl = true }: { log: ToolingLog; ssl?: boolean }) {
+  const protocol = ssl ? 'https' : 'http';
+  log.info(`Setting up Cloud Connected Mode for EIS (using ${protocol})`);
 
-  // Get Elasticsearch credentials
-  const credentials = await getElasticsearchCredentials(log);
+  // Get Elasticsearch connection info
+  const es = await getES(log, ssl);
 
   // Get EIS API key from vault
   const apiKey = await getEisApiKey(log);
 
   // Set CCM API key in Elasticsearch
-  await setCcmApiKey(apiKey, credentials, log);
+  await setCcmApiKey(apiKey, es, log);
 
   log.write('');
   log.write(`${chalk.green('✔')} EIS API key successfully set in Cloud Connected Mode`);
