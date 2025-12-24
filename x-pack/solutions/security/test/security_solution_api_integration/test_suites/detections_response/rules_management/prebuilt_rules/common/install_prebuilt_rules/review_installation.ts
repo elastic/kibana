@@ -149,8 +149,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { name: { include: ['Rule'] } } },
         });
 
@@ -170,10 +168,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
-        });
+        const response = await reviewPrebuiltRulesToInstall(supertest);
 
         expect(response).toMatchObject({
           stats: {
@@ -192,8 +187,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: ['tag-a'] } } },
         });
 
@@ -217,8 +210,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: ['tag-a'] } } },
         });
 
@@ -236,10 +227,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
-        });
+        const response = await reviewPrebuiltRulesToInstall(supertest);
 
         expect(response.stats.tags).toEqual(['tag-a', 'tag-b', 'tag-c']);
       });
@@ -255,9 +243,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          // TODO: Fix types here - page and per_page shouldn't be required
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'name', order: 'asc' }],
         });
 
@@ -268,8 +253,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'name', order: 'desc' }],
         });
 
@@ -292,8 +275,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'severity', order: 'asc' }],
         });
 
@@ -305,8 +286,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'severity', order: 'desc' }],
         });
 
@@ -328,8 +307,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'risk_score', order: 'asc' }],
         });
 
@@ -340,8 +317,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'risk_score', order: 'desc' }],
         });
 
@@ -362,10 +337,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
-        });
+        const response = await reviewPrebuiltRulesToInstall(supertest);
 
         expect(response.rules).toEqual([
           expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
@@ -382,8 +354,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { name: {} } },
         });
 
@@ -393,8 +363,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const emptyNameResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { name: { include: [] } } },
         });
 
@@ -404,8 +372,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const emptyNameResponse3 = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { name: { include: [''] } } },
         });
 
@@ -425,8 +391,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const wildcardResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { name: { include: ['My rule 1'] } } },
         });
 
@@ -435,8 +399,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const wildcardResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { name: { include: ['rule'] } } },
         });
 
@@ -456,8 +418,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const emptyTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: [] } } },
         });
 
@@ -476,8 +436,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: ['tag-a'] } } },
         });
 
@@ -486,8 +444,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const singleTagResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: ['tag-b'] } } },
         });
 
@@ -497,8 +453,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const singleTagResponse3 = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: ['tag-d'] } } },
         });
 
@@ -514,8 +468,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: ['tag-a', 'tag-b'] } } },
         });
 
@@ -524,8 +476,6 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
 
         const multipleTagsResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           filter: { fields: { tags: { include: ['tag-a', 'tag-c'] } } },
         });
 
@@ -559,8 +509,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          page: 1,
-          per_page: 20,
           sort: [{ field: 'name', order: 'desc' }],
           filter: { fields: { tags: { include: ['tag-b'] } } },
         });
