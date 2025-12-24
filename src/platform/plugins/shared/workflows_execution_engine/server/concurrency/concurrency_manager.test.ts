@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
+import type { ConcurrencySettings, EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -320,7 +320,7 @@ describe('ConcurrencyManager', () => {
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
           createdAt: '2024-01-01T00:00:00Z',
-        },
+        } as EsWorkflowExecution,
       ]);
 
       const result = await concurrencyManager.checkConcurrency(
@@ -343,19 +343,19 @@ describe('ConcurrencyManager', () => {
         strategy: 'cancel-in-progress',
         max: 2,
       };
-      const runningExecutions = [
+      const runningExecutions: EsWorkflowExecution[] = [
         {
           id: 'exec-1',
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
           createdAt: '2024-01-01T00:00:00Z',
-        },
+        } as EsWorkflowExecution,
         {
           id: 'exec-2',
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
           createdAt: '2024-01-01T01:00:00Z',
-        },
+        } as EsWorkflowExecution,
       ];
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(
         runningExecutions
@@ -387,25 +387,25 @@ describe('ConcurrencyManager', () => {
         strategy: 'cancel-in-progress',
         max: 2,
       };
-      const runningExecutions = [
+      const runningExecutions: EsWorkflowExecution[] = [
         {
           id: 'exec-1',
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
           createdAt: '2024-01-01T00:00:00Z',
-        },
+        } as EsWorkflowExecution,
         {
           id: 'exec-2',
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
           createdAt: '2024-01-01T01:00:00Z',
-        },
+        } as EsWorkflowExecution,
         {
           id: 'exec-3',
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
           createdAt: '2024-01-01T02:00:00Z',
-        },
+        } as EsWorkflowExecution,
       ];
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(
         runningExecutions
@@ -446,13 +446,13 @@ describe('ConcurrencyManager', () => {
         key: 'server-1',
         strategy: 'cancel-in-progress',
       };
-      const runningExecutions = [
+      const runningExecutions: EsWorkflowExecution[] = [
         {
           id: 'exec-1',
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
           createdAt: '2024-01-01T00:00:00Z',
-        },
+        } as EsWorkflowExecution,
       ];
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(
         runningExecutions
@@ -479,7 +479,7 @@ describe('ConcurrencyManager', () => {
     it('should skip cancel-in-progress for other strategies', async () => {
       const settings: ConcurrencySettings = {
         key: 'server-1',
-        strategy: 'queue',
+        // strategy is undefined (other strategies not implemented yet)
         max: 1,
       };
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
@@ -487,7 +487,8 @@ describe('ConcurrencyManager', () => {
           id: 'exec-1',
           concurrencyGroupKey: 'server-1',
           status: ExecutionStatus.RUNNING,
-        },
+          createdAt: '2024-01-01T00:00:00Z',
+        } as EsWorkflowExecution,
       ]);
 
       const result = await concurrencyManager.checkConcurrency(
