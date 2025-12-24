@@ -10,7 +10,11 @@
 import type { TermsIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
 import { fromFormatAPIToLensState } from './format';
-import { isColumnOfReferableType } from './utils';
+import {
+  isColumnOfReferableType,
+  isLensStateBucketColumnType,
+  isLensStateFormulaReferenceColumnType,
+} from './utils';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import type { AnyLensStateColumn } from './types';
 
@@ -128,11 +132,13 @@ function getRankByConfig(
     };
   }
   if (params.orderBy.type === 'column') {
+    // Filter out the bucketed columns (they're not metrics) and the formula reference columns (X0, X1, X2) (they are internal implementation, not in API metrics)
     const index = columns
-      .filter(({ column }) => !column.isBucketed)
-      .findIndex(
-        (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
-      );
+      .filter(
+        ({ id, column }) =>
+          !isLensStateBucketColumnType(column) && !isLensStateFormulaReferenceColumnType(id)
+      )
+      .findIndex(({ id }) => params.orderBy.type === 'column' && id === params.orderBy.columnId!);
     if (index > -1) {
       return {
         type: 'column',
