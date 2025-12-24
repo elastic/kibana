@@ -113,10 +113,12 @@ export class ConnectorTokenClient {
 
     try {
       const updateOperation = () => {
+        // Exclude id from attributes since it's saved object metadata, not document data
+        const { id: _id, ...attributesWithoutId } = attributes;
         return this.unsecuredSavedObjectsClient.create<ConnectorToken>(
           CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
           {
-            ...attributes,
+            ...attributesWithoutId,
             token,
             expiresAt: expiresAtMillis,
             tokenType: tokenType ?? 'access_token',
@@ -291,7 +293,7 @@ export class ConnectorTokenClient {
       });
     } else {
       await this.update({
-        id: token.id!.toString(),
+        id: token.id!,
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
         tokenType: 'access_token',
@@ -375,11 +377,13 @@ export class ConnectorTokenClient {
 
     try {
       const updateOperation = () => {
+        // Exclude id from attributes since it's saved object metadata, not document data
+        const { id: _id, ...attributesWithoutId } = attributes;
         return this.unsecuredSavedObjectsClient.create<ConnectorToken>(
           CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
           omitBy(
             {
-              ...attributes,
+              ...attributesWithoutId,
               token,
               refreshToken: refreshToken ?? attributes.refreshToken,
               expiresAt: expiresAtMillis,
@@ -389,7 +393,7 @@ export class ConnectorTokenClient {
               updatedAt: new Date(updateTime).toISOString(),
             },
             isUndefined
-          ),
+          ) as ConnectorToken,
           omitBy(
             {
               id,
