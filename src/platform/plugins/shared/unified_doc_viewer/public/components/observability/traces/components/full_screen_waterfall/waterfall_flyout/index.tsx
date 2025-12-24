@@ -11,13 +11,11 @@ import {
   EuiErrorBoundary,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiSkeletonText,
-  EuiSkeletonTitle,
   EuiTab,
   EuiTabs,
-  EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -94,19 +92,13 @@ export function WaterfallFlyout({
       // Temporarily opt out from the flyout system, until the waterfall is migrated to properly use it
       // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/kibana/pull/247451
       session="never"
+      size="s"
       includeFixedHeadersInFocusTrap={false}
       ownFocus={false}
       onClose={onCloseFlyout}
-      aria-labelledby={flyoutId}
+      aria-label={title}
       id={flyoutId}
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiSkeletonTitle isLoading={loading}>
-          <EuiTitle size="m">
-            <h2>{title}</h2>
-          </EuiTitle>
-        </EuiSkeletonTitle>
-      </EuiFlyoutHeader>
       <EuiFlyoutBody
         css={css`
           & .euiFlyoutBody__overflow {
