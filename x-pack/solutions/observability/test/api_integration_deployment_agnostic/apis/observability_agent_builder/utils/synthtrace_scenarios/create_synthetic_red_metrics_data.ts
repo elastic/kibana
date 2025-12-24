@@ -69,6 +69,7 @@ export const createSyntheticRedMetricsData = async ({
               );
             }
 
+            // Create failed transactions
             const failureCount = Math.round(10 * txConfig.failureRate);
             for (let i = 0; i < failureCount; i++) {
               transactions.push(
