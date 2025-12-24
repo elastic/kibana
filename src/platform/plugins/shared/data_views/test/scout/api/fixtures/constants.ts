@@ -12,7 +12,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  [ELASTIC_HTTP_VERSION_HEADER]: '1',
+  [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
 };
 
 export const ES_ARCHIVE_BASIC_INDEX =
@@ -24,8 +24,8 @@ export const KBN_ARCHIVE_SAVED_OBJECTS_BASIC =
 export const KBN_ARCHIVE_SAVED_OBJECTS_RELATIONSHIPS =
   'src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json';
 
-export const DATA_VIEW_PATH_LEGACY = '/api/index_patterns/index_pattern';
-export const DATA_VIEW_PATH = '/api/data_views/data_view';
+export const DATA_VIEW_PATH_LEGACY = 'api/index_patterns/index_pattern';
+export const DATA_VIEW_PATH = 'api/data_views/data_view';
 export const SERVICE_KEY_LEGACY = 'index_pattern';
 export const SERVICE_KEY = 'data_view';
 

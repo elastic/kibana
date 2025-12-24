@@ -13,42 +13,12 @@ import { COMMON_HEADERS, configArray } from '../../fixtures/constants';
 
 configArray.forEach((config) => {
   apiTest.describe(`POST ${config.path} - main (${config.name})`, { tag: ['@svlOblt'] }, () => {
-    let dataViewsApiCredentials: RoleApiCredentials;
+    let adminApiCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      // Use admin role which should have all privileges including indexPatterns
-      dataViewsApiCredentials = await requestAuth.getApiKey('admin');
-    });
-
-    apiTest('debug - test status endpoint', async ({ apiClient, log }) => {
-      log.info('Testing /api/status endpoint to verify auth works');
-      const statusResponse = await apiClient.get('/api/status', {
-        headers: {
-          ...COMMON_HEADERS,
-          ...dataViewsApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-      log.info(`Status endpoint response code: ${statusResponse.statusCode}`);
-
-      // Check if dataViews plugin is loaded
-      if (statusResponse.body && statusResponse.body.status && statusResponse.body.status.plugins) {
-        const dataViewsPlugin = statusResponse.body.status.plugins.dataViews;
-        log.info(`dataViews plugin status: ${JSON.stringify(dataViewsPlugin, null, 2)}`);
-      }
-    });
-
-    apiTest('debug - list data views', async ({ apiClient, log }) => {
-      log.info('Testing GET /api/data_views to list existing data views');
-      const listResponse = await apiClient.get('/api/data_views', {
-        headers: {
-          ...COMMON_HEADERS,
-          ...dataViewsApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-      log.info(`List data views response code: ${listResponse.statusCode}`);
-      log.info(`List data views response: ${JSON.stringify(listResponse.body, null, 2)}`);
+    apiTest.beforeAll(async ({ requestAuth, log }) => {
+      // Use admin role - API key auth for public endpoints
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+      log.info(`API Key created for admin role: ${adminApiCredentials.apiKey.name}`);
     });
 
     apiTest('can create an index_pattern with just a title', async ({ apiClient, log }) => {
@@ -61,7 +31,7 @@ configArray.forEach((config) => {
       const response = await apiClient.post(config.path, {
         headers: {
           ...COMMON_HEADERS,
-          ...dataViewsApiCredentials.apiKeyHeader,
+          ...adminApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
         body: {
@@ -82,7 +52,7 @@ configArray.forEach((config) => {
       const response = await apiClient.post(config.path, {
         headers: {
           ...COMMON_HEADERS,
-          ...dataViewsApiCredentials.apiKeyHeader,
+          ...adminApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
         body: {
@@ -106,7 +76,7 @@ configArray.forEach((config) => {
         const response = await apiClient.post(config.path, {
           headers: {
             ...COMMON_HEADERS,
-            ...dataViewsApiCredentials.apiKeyHeader,
+            ...adminApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
           body: {
@@ -134,7 +104,7 @@ configArray.forEach((config) => {
         const response = await apiClient.post(config.path, {
           headers: {
             ...COMMON_HEADERS,
-            ...dataViewsApiCredentials.apiKeyHeader,
+            ...adminApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
           body: {
@@ -162,7 +132,7 @@ configArray.forEach((config) => {
         const response = await apiClient.post(config.path, {
           headers: {
             ...COMMON_HEADERS,
-            ...dataViewsApiCredentials.apiKeyHeader,
+            ...adminApiCredentials.apiKeyHeader,
           },
           responseType: 'json',
           body: {
@@ -180,7 +150,7 @@ configArray.forEach((config) => {
 
         expect(response.statusCode).toBe(200);
         expect(response.body[config.serviceKey].fieldFormats.foo.id).toBe('test-id');
-        expect(response.body[config.serviceKey].fieldFormats.foo.params).toEqual({});
+        expect(response.body[config.serviceKey].fieldFormats.foo.params).toStrictEqual({});
       }
     );
 
@@ -188,7 +158,7 @@ configArray.forEach((config) => {
       const response = await apiClient.post(config.path, {
         headers: {
           ...COMMON_HEADERS,
-          ...dataViewsApiCredentials.apiKeyHeader,
+          ...adminApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
         body: {
