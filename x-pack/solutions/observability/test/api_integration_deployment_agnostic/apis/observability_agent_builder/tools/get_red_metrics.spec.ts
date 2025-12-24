@@ -197,7 +197,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(notificationService).to.be.ok();
         // Configured at 30% failure rate: 3 failures / 10 total = 0.3
-        expect(notificationService.failureRate).to.be(0.3);
+        expect(notificationService!.failureRate).to.be(0.3);
       });
     });
 
