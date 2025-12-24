@@ -165,9 +165,9 @@ const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProp
           <EuiText size="s">{i18n.ENHANCEMENTS_INSTRUCTIONS}</EuiText>
           <EuiSpacer size="s" />
           <EuiCallOut
-            iconType="warning"
+            iconType="info"
             size="s"
-            color="warning"
+            color="primary"
             title={i18n.ENHANCEMENTS_HELPER_TEXT}
           />
         </EuiFlexItem>
