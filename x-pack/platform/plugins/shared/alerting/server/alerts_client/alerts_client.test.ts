@@ -234,13 +234,6 @@ const fetchedAlert3 = {
   [ALERT_UUID]: 'xyz',
 };
 
-const fetchedAlert4Delayed = {
-  ...fetchedAlert2,
-  [ALERT_INSTANCE_ID]: '4',
-  [ALERT_UUID]: '444',
-  [ALERT_STATUS]: 'delayed',
-};
-
 const getNewIndexedAlertDoc = (overrides = {}) => ({
   [TIMESTAMP]: date,
   [EVENT_ACTION]: 'open',
