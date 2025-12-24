@@ -95,7 +95,6 @@ export function WaterfallFlyout({
       // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/kibana/pull/247451
       session="never"
       includeFixedHeadersInFocusTrap={false}
-      size="s"
       ownFocus={false}
       onClose={onCloseFlyout}
       aria-labelledby={flyoutId}
