@@ -25,9 +25,13 @@ import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
 
 export const ConnectorsView: React.FC = () => {
   const { popularConnectors, allConnectors, isLoading } = useConnectors();
-  const { openFlyout, flyout } = useAddConnectorFlyout();
+  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const { openFlyout, flyout } = useAddConnectorFlyout({
+    dataSourceType: selectedConnector?.id,
+  });
 
   const paginatedAllConnectors = useMemo(() => {
     const start = activePage * itemsPerPage;
@@ -43,6 +47,7 @@ export const ConnectorsView: React.FC = () => {
 
   const handleConnectorClick = useCallback(
     (connector: Connector) => {
+      setSelectedConnector(connector);
       // Open the flyout with the connector's action type ID
       // For popular connectors from registry, this will be the stackConnector.type (e.g., '.notion')
       openFlyout(connector.type);

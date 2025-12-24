@@ -12,10 +12,6 @@ export const DATA_CONNECTOR_SAVED_OBJECT_TYPE = 'data_connector';
 export interface DataConnectorAttributes {
   name: string;
   type: string;
-  config: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-  features?: string[];
   workflowIds: string[];
   toolIds: string[];
   kscIds: string[];
@@ -24,10 +20,6 @@ export interface DataConnectorAttributes {
 export const dataConnectorSchemaV1 = schema.object({
   name: schema.string(),
   type: schema.string(),
-  config: schema.object({}),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
-  features: schema.maybe(schema.arrayOf(schema.string())),
   workflowIds: schema.arrayOf(schema.string()),
   toolIds: schema.arrayOf(schema.string()),
   kscIds: schema.arrayOf(schema.string()),

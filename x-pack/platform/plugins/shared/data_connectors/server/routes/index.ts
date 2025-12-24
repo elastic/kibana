@@ -250,8 +250,17 @@ export function registerRoutes(
       const coreContext = await context.core;
 
       try {
-        const { name, type, token } = request.body;
+        const { name, type, token, stack_connector_id: stackConnectorId } = request.body;
         const [, { actions, dataSourcesRegistry }] = await getStartServices();
+
+        // Validate: either use existing connector OR create new one
+        if (!stackConnectorId && (!name || !token)) {
+          return response.badRequest({
+            body: {
+              message: 'Either stack_connector_id or both name and token are required',
+            },
+          });
+        }
 
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
@@ -259,33 +268,57 @@ export function registerRoutes(
           return response.customError({
             statusCode: 400,
             body: {
-              message: `Data connector type "${request.body.type}" not found`,
+              message: `Data connector type "${type}" not found`,
             },
           });
         }
 
-        const connectorType = dataConnectorTypeDef.stackConnector.type;
-        const secrets = buildSecretsFromConnectorSpec(connectorType, token);
-
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const stackConnector = await actionsClient.create({
-          action: {
-            name: `${type} stack connector for data connector '${name}'`,
-            actionTypeId: connectorType,
-            config: {},
-            secrets,
-          },
-        });
+        let stackConnector;
+        let dataConnectorName: string;
 
+        if (stackConnectorId) {
+          try {
+            stackConnector = await actionsClient.get({ id: stackConnectorId });
+            dataConnectorName = stackConnector.name;
+          } catch (error) {
+            logger.error(`Stack connector not found: ${stackConnectorId}`);
+            return response.notFound({
+              body: {
+                message: `Stack connector "${stackConnectorId}" not found`,
+              },
+            });
+          }
+
+          // Validate connector type matches
+          if (stackConnector.actionTypeId !== dataConnectorTypeDef.stackConnector.type) {
+            return response.badRequest({
+              body: {
+                message: `Stack connector type "${stackConnector.actionTypeId}" does not match expected type "${dataConnectorTypeDef.stackConnector.type}"`,
+              },
+            });
+          }
+        } else {
+          const connectorType = dataConnectorTypeDef.stackConnector.type;
+          const secrets = buildSecretsFromConnectorSpec(connectorType, token!);
+
+          stackConnector = await actionsClient.create({
+            action: {
+              name: `${type} stack connector for data connector '${name}'`,
+              actionTypeId: connectorType,
+              config: {},
+              secrets,
+            },
+          });
+          dataConnectorName = name!;
+          logger.info(`Created new stack connector: ${stackConnector.id}`);
+        }
+
+        // Create data connector saved object
         const savedObjectsClient = coreContext.savedObjects.client;
-        const now = new Date().toISOString();
         const savedObject = await savedObjectsClient.create(DATA_CONNECTOR_SAVED_OBJECT_TYPE, {
-          name,
+          name: dataConnectorName,
           type,
-          config: {},
-          features: [],
-          createdAt: now,
-          updatedAt: now,
           workflowIds: [],
           toolIds: [],
           kscIds: [stackConnector.id],

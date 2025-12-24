@@ -7,10 +7,13 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
+import { API_BASE_PATH } from '../../../common/constants';
 
 export interface UseAddConnectorFlyoutOptions {
   onConnectorCreated?: (connector: ActionConnector) => void;
+  dataSourceType?: string;
 }
 
 /**
@@ -18,15 +21,19 @@ export interface UseAddConnectorFlyoutOptions {
  */
 export const useAddConnectorFlyout = ({
   onConnectorCreated,
+  dataSourceType,
 }: UseAddConnectorFlyoutOptions = {}) => {
   const {
     services: {
       plugins: { triggersActionsUi },
+      http,
+      notifications: { toasts },
     },
   } = useKibana();
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedConnectorType, setSelectedConnectorType] = useState<string | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
 
   const openFlyout = useCallback((actionTypeId?: string) => {
     setSelectedConnectorType(actionTypeId);
@@ -36,14 +43,53 @@ export const useAddConnectorFlyout = ({
   const closeFlyout = useCallback(() => {
     setIsOpen(false);
     setSelectedConnectorType(undefined);
+    setIsSaving(false);
   }, []);
 
   const handleConnectorCreated = useCallback(
-    (connector: ActionConnector) => {
-      onConnectorCreated?.(connector);
-      closeFlyout();
+    async (connector: ActionConnector) => {
+      // If no dataSourceType, close immediately (no additional processing needed)
+      if (!dataSourceType) {
+        onConnectorCreated?.(connector);
+        closeFlyout();
+        return;
+      }
+
+      // Create data connector using the stack connector ID
+      setIsSaving(true);
+      try {
+        await http.post(`${API_BASE_PATH}`, {
+          body: JSON.stringify({
+            stack_connector_id: connector.id,
+            type: dataSourceType,
+          }),
+        });
+
+        toasts.addSuccess(
+          i18n.translate('xpack.dataConnectors.hooks.useAddConnectorFlyout.createSuccessText', {
+            defaultMessage: 'Data source {connectorName} connected successfully',
+            values: {
+              connectorName: connector.name,
+            },
+          })
+        );
+
+        // Success! Call callback and close flyout
+        onConnectorCreated?.(connector);
+        closeFlyout();
+      } catch (error) {
+        toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.dataConnectors.hooks.useAddConnectorFlyout.createErrorTitle',
+            {
+              defaultMessage: 'Failed to create data connector',
+            }
+          ),
+        });
+        setIsSaving(false);
+      }
     },
-    [onConnectorCreated, closeFlyout]
+    [dataSourceType, http, toasts, onConnectorCreated, closeFlyout]
   );
 
   const flyout = useMemo(() => {
@@ -66,6 +112,7 @@ export const useAddConnectorFlyout = ({
     openFlyout,
     closeFlyout,
     isOpen,
+    isSaving,
     flyout,
   };
 };
