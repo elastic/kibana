@@ -480,7 +480,7 @@ describe('#start()', () => {
       overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
       analytics: expect.any(Object),
-      rendering: expect.any(Object),
+      addRenderingContext: expect.any(Function),
     });
   });
 
