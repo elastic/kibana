@@ -215,7 +215,9 @@ export class ServiceDetailsPage {
 
   async clickTransactionsTab() {
     await this.getTransactionsTab().click();
-    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await this.page
+      .getByRole('heading', { name: 'Transactions', exact: true })
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async clickErrorsTab() {

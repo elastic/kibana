@@ -69,11 +69,16 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
 
   test('sendotlp service transaction type persistence', async ({
     pageObjects: { serviceDetailsPage },
+    page,
   }) => {
     await serviceDetailsPage.goToOverviewTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
+    });
+
+    await test.step('Wait for page to load', async () => {
+      await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
     });
 
     await test.step('Verify transaction type filter exists', async () => {
