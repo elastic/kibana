@@ -36,6 +36,8 @@ export const BINARY_OPERATORS: BinaryOperatorKeys[] = [
 
 export const UNARY_OPERATORS: UnaryOperatorKeys[] = ['exists'];
 
+export const ARRAY_OPERATORS: BinaryOperatorKeys[] = ['includes'];
+
 export interface RangeCondition {
   gt?: StringOrNumberOrBoolean;
   gte?: StringOrNumberOrBoolean;

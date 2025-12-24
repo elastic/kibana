@@ -13,10 +13,12 @@ import type {
   ShorthandUnaryFilterCondition,
   FilterCondition,
   Condition,
+  BinaryOperatorKeys,
 } from '../../types/conditions';
 import {
   BINARY_OPERATORS,
   UNARY_OPERATORS,
+  ARRAY_OPERATORS,
   isAndCondition,
   isFilterCondition,
   isOrCondition,
@@ -264,3 +266,7 @@ export function isConditionComplete(condition: Condition | undefined): boolean {
 
   return false;
 }
+
+export const isArrayOperator = (operator: OperatorKeys | undefined): boolean => {
+  return operator !== undefined && ARRAY_OPERATORS.includes(operator as BinaryOperatorKeys);
+};
