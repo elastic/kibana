@@ -297,6 +297,7 @@ export interface ResponseSettings {
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
+  id?: string;
   connectorId: string;
   tokenType: string;
   token: string;
