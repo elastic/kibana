@@ -8,7 +8,8 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { getOrCreateContext } from '@kbn/react-context-registry';
 import type { LayoutDimensions } from './layout.types';
 
 /**
@@ -35,33 +36,8 @@ interface LayoutConfigContextValue {
   updateLayout: (updates: Partial<LayoutConfig>) => void;
 }
 
-/**
- * Global registry for ensuring single context instance across bundles
- *
- * TODO: this pattern is used to share a single context provider across bundles loaded from different plugins to allow for smoother DX
- * https://github.com/elastic/kibana/issues/240770
- * @internal
- */
-const REGISTRY_KEY = '__KIBANA_LAYOUT_CONFIG_CTX__';
-
-interface LayoutConfigRegistry {
-  LayoutConfigContext?: React.Context<LayoutConfigContextValue | undefined>;
-}
-
-const getGlobalRegistry = (): LayoutConfigRegistry => {
-  if (typeof globalThis === 'undefined') {
-    // Fallback for environments without globalThis
-    return {};
-  }
-  return ((globalThis as any)[REGISTRY_KEY] ??= {} as LayoutConfigRegistry);
-};
-
-const registry = getGlobalRegistry();
-
 // Reuse if already created, otherwise create and store
-const LayoutConfigContext = (registry.LayoutConfigContext ??= createContext<
-  LayoutConfigContextValue | undefined
->(undefined));
+const LayoutConfigContext = getOrCreateContext<LayoutConfigContextValue>('LayoutConfigContext');
 
 /**
  * Props for the LayoutConfigProvider component.
