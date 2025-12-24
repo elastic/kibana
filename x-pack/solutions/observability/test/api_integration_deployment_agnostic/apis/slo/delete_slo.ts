@@ -13,10 +13,15 @@ import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getCustomSLOPipelineId,
+  getCustomSLOSummaryPipelineId,
+  getWildcardPipelineId,
 } from '@kbn/slo-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
+import type { PipelineHelper } from './helpers/pipeline';
+import { createPipelineHelper } from './helpers/pipeline';
 import type { TransformHelper } from './helpers/transform';
 import { createTransformHelper } from './helpers/transform';
 
@@ -33,11 +38,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let adminRoleAuthc: RoleCredentials;
   let transformHelper: TransformHelper;
+  let pipelineHelper: PipelineHelper;
 
   describe('Delete SLOs', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       transformHelper = createTransformHelper(getService);
+      pipelineHelper = createPipelineHelper(getService);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -71,6 +78,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await transformHelper.assertNotFound(getSLOTransformId(id, 1));
       await transformHelper.assertNotFound(getSLOSummaryTransformId(id, 1));
+
+      await pipelineHelper.assertNotFound(getWildcardPipelineId(id, 1));
+
       // expect summary and rollup documents to be deleted
       await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await esClient.search({
@@ -112,6 +122,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
         return true;
       });
+    });
+
+    it('deletes custom pipelines when deleting SLO', async () => {
+      const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      expect(response).property('id');
+      const id = response.id;
+
+      // Create custom pipelines for this SLO
+      const customSLOPipelineId = getCustomSLOPipelineId(id);
+      const customSLOSummaryPipelineId = getCustomSLOSummaryPipelineId(id);
+
+      await esClient.ingest.putPipeline({
+        id: customSLOPipelineId,
+        processors: [{ set: { field: 'custom.test', value: 'rollup custom works!' } }],
+      });
+
+      await esClient.ingest.putPipeline({
+        id: customSLOSummaryPipelineId,
+        processors: [{ set: { field: 'custom.summary_test', value: 'summary custom works!' } }],
+      });
+
+      // Verify pipelines exist
+      await pipelineHelper.assertExists(customSLOPipelineId);
+      await pipelineHelper.assertExists(customSLOSummaryPipelineId);
+
+      // Delete the SLO
+      await sloApi.delete(id, adminRoleAuthc);
+
+      await pipelineHelper.assertNotFound(customSLOPipelineId);
+      await pipelineHelper.assertNotFound(customSLOSummaryPipelineId);
     });
   });
 }

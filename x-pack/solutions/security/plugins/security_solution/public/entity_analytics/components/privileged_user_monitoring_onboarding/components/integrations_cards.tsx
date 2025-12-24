@@ -44,7 +44,7 @@ export const IntegrationCards = ({
         path: addPathParamToUrl(
           `/detail/${id}-${version}/overview`,
           ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-          { prerelease: 'true' } // entityanalytics_ad is a technical preview package, delete this line when it is GA
+          { prerelease: 'true' } // entityanalytics_ad is a technical preview package, delete this line when it is GA:  https://github.com/elastic/security-team/issues/15167
         ),
         state,
       });

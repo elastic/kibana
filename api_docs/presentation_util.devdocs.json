@@ -632,6 +632,76 @@
       },
       {
         "parentPluginId": "presentationUtil",
+        "id": "def-public.PanelResizeSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelResizeSettings",
+        "description": [],
+        "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PanelResizeSettings.minWidth",
+            "type": "number",
+            "tags": [],
+            "label": "minWidth",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PanelResizeSettings.maxWidth",
+            "type": "number",
+            "tags": [],
+            "label": "maxWidth",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PanelResizeSettings.minHeight",
+            "type": "number",
+            "tags": [],
+            "label": "minHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.PanelResizeSettings.maxHeight",
+            "type": "number",
+            "tags": [],
+            "label": "maxHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
         "id": "def-public.PresentationLabsService",
         "type": "Interface",
         "tags": [],
@@ -993,7 +1063,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PanelPlacementStrategy",
+        "type": "Enum",
+        "tags": [],
+        "label": "PanelPlacementStrategy",
+        "description": [],
+        "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "presentationUtil",
@@ -1062,6 +1145,31 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.PanelSettings",
+        "type": "Type",
+        "tags": [],
+        "label": "PanelSettings",
+        "description": [],
+        "signature": [
+          "{ placementSettings?: ",
+          "PanelPlacementSettings",
+          " | undefined; resizeSettings?: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.PanelResizeSettings",
+            "text": "PanelResizeSettings"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1209,6 +1317,167 @@
                 "[]"
               ],
               "path": "src/platform/plugins/shared/presentation_util/public/index.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings",
+          "type": "Function",
+          "tags": [],
+          "label": "registerPanelPlacementSettings",
+          "description": [],
+          "signature": [
+            "<SerializedState extends object = object>(embeddableType: string, getPanelSettings: ",
+            "PanelSettingsGetter",
+            "<SerializedState>) => void"
+          ],
+          "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings.$1",
+              "type": "string",
+              "tags": [],
+              "label": "embeddableType",
+              "description": [],
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "getPanelSettings",
+              "description": [],
+              "signature": [
+                "(serializedState?: ",
+                {
+                  "pluginId": "@kbn/presentation-publishing",
+                  "scope": "public",
+                  "docId": "kibKbnPresentationPublishingPluginApi",
+                  "section": "def-public.SerializedPanelState",
+                  "text": "SerializedPanelState"
+                },
+                "<SerializedState> | undefined) => ",
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.MaybePromise",
+                  "text": "MaybePromise"
+                },
+                "<Partial<{ placementSettings: ",
+                "PanelPlacementSettings",
+                "; resizeSettings: ",
+                {
+                  "pluginId": "presentationUtil",
+                  "scope": "public",
+                  "docId": "kibPresentationUtilPluginApi",
+                  "section": "def-public.PanelResizeSettings",
+                  "text": "PanelResizeSettings"
+                },
+                "; }>>"
+              ],
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": [
+                {
+                  "parentPluginId": "presentationUtil",
+                  "id": "def-public.PresentationUtilPluginStart.registerPanelPlacementSettings.$2.$1",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "serializedState",
+                  "description": [],
+                  "signature": [
+                    {
+                      "pluginId": "@kbn/presentation-publishing",
+                      "scope": "public",
+                      "docId": "kibKbnPresentationPublishingPluginApi",
+                      "section": "def-public.SerializedPanelState",
+                      "text": "SerializedPanelState"
+                    },
+                    "<SerializedState> | undefined"
+                  ],
+                  "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "parentPluginId": "presentationUtil",
+          "id": "def-public.PresentationUtilPluginStart.getPanelPlacementSettings",
+          "type": "Function",
+          "tags": [],
+          "label": "getPanelPlacementSettings",
+          "description": [],
+          "signature": [
+            "<SerializedState extends object = object>(embeddableType: string, serializedState?: ",
+            {
+              "pluginId": "@kbn/presentation-publishing",
+              "scope": "public",
+              "docId": "kibKbnPresentationPublishingPluginApi",
+              "section": "def-public.SerializedPanelState",
+              "text": "SerializedPanelState"
+            },
+            "<SerializedState> | undefined) => Promise<Partial<{ placementSettings: ",
+            "PanelPlacementSettings",
+            "; resizeSettings: ",
+            {
+              "pluginId": "presentationUtil",
+              "scope": "public",
+              "docId": "kibPresentationUtilPluginApi",
+              "section": "def-public.PanelResizeSettings",
+              "text": "PanelResizeSettings"
+            },
+            "; }> | undefined>"
+          ],
+          "path": "src/platform/plugins/shared/presentation_util/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.getPanelPlacementSettings.$1",
+              "type": "string",
+              "tags": [],
+              "label": "embeddableType",
+              "description": [],
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "presentationUtil",
+              "id": "def-public.PresentationUtilPluginStart.getPanelPlacementSettings.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "serializedState",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/presentation-publishing",
+                  "scope": "public",
+                  "docId": "kibKbnPresentationPublishingPluginApi",
+                  "section": "def-public.SerializedPanelState",
+                  "text": "SerializedPanelState"
+                },
+                "<SerializedState> | undefined"
+              ],
+              "path": "src/platform/plugins/shared/presentation_util/public/registries/panel_placement/panel_placement_registry.ts",
               "deprecated": false,
               "trackAdoption": false
             }
