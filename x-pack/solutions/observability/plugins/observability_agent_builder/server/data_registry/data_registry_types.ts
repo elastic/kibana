@@ -141,7 +141,6 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
-// RED metrics types
 export interface RedMetricsItem {
   group: string;
   latency: number | null;
