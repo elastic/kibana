@@ -437,7 +437,7 @@ export interface StepPropertyHandler<T = unknown> {
    * Fetch available options for autocompletion.
    * Called lazily when the user triggers completion.
    */
-  getCompletions?: PropertyCompletionFn<T>;
+  complete?: PropertyCompletionFn<T>;
 
   /**
    * Validate a value and return decoration/error info.

@@ -57,13 +57,23 @@ export const getExternalStepDefinition: (deps: {
   propertyHandlers: {
     config: {
       'proxy-id': {
-        getCompletions: async () => {
+        complete: async (currentValue: unknown) => {
           const proxies = await deps.externalService.getProxies();
-          return proxies.map((proxy) => ({
-            label: proxy.id,
-            value: proxy.id,
-            detail: 'Proxy details',
-          }));
+          const currentValueString = typeof currentValue === 'string' ? currentValue.trim() : '';
+          if (currentValueString.length > 1) {
+            return proxies.map((proxy) => ({
+              label: proxy.id,
+              value: proxy.id,
+              detail: 'Proxy details',
+            }));
+          }
+          return proxies
+            .filter((proxy) => proxy.id.includes(currentValueString))
+            .map((proxy) => ({
+              label: proxy.id,
+              value: proxy.id,
+              detail: 'Proxy details',
+            }));
         },
         validate: async (value: unknown, _context: PropertyValidationContext) => {
           if (value === null) {
