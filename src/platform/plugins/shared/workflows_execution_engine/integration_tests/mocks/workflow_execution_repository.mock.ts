@@ -125,7 +125,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     concurrencyGroupKey: string,
     spaceId: string,
     excludeExecutionId?: string
-  ): Promise<EsWorkflowExecution[]> {
+  ): Promise<string[]> {
     const results = Array.from(this.workflowExecutions.values())
       .filter(
         (exec) =>
@@ -138,8 +138,25 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         const aTime = new Date(a.createdAt).getTime();
         const bTime = new Date(b.createdAt).getTime();
         return aTime - bTime; // Oldest first
-      });
+      })
+      .map((exec) => exec.id);
 
     return results;
+  }
+
+  public async bulkUpdateWorkflowExecutions(
+    updates: Array<Partial<EsWorkflowExecution>>
+  ): Promise<void> {
+    for (const update of updates) {
+      if (!update.id) {
+        throw new Error('Workflow execution ID is required for bulk update');
+      }
+
+      const existing = this.workflowExecutions.get(update.id);
+      this.workflowExecutions.set(update.id, {
+        ...(existing || {}),
+        ...update,
+      } as EsWorkflowExecution);
+    }
   }
 }

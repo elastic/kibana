@@ -115,16 +115,16 @@ export class ConcurrencyManager {
       return true;
     }
 
-    // Query for non-terminal executions in the same concurrency group
+    // Query for non-terminal execution IDs in the same concurrency group
     // For cancel-in-progress, we cancel any non-terminal executions (PENDING, RUNNING, etc.)
-    const runningExecutions =
+    const runningExecutionIds =
       await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
         concurrencyGroupKey,
         spaceId,
         currentExecutionId
       );
 
-    const activeCount = runningExecutions.length;
+    const activeCount = runningExecutionIds.length;
 
     // If we're within the limit, allow execution to proceed
     if (activeCount < maxConcurrency) {
@@ -135,22 +135,24 @@ export class ConcurrencyManager {
     const executionsToCancel = activeCount - maxConcurrency + 1;
 
     // Cancel the oldest executions (they're already sorted by createdAt ascending)
-    const executionsToCancelList = runningExecutions.slice(0, executionsToCancel);
+    const executionIdsToCancel = runningExecutionIds.slice(0, executionsToCancel);
 
+    // Bulk update all executions to cancelled status in a single ES request
+    const cancellationTimestamp = new Date().toISOString();
+    await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
+      executionIdsToCancel.map((id) => ({
+        id,
+        status: ExecutionStatus.CANCELLED,
+        cancelRequested: true,
+        cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
+        cancelledAt: cancellationTimestamp,
+        cancelledBy: 'system',
+      }))
+    );
+
+    // Propagate cancellation to running tasks (can be done in parallel)
     await Promise.all(
-      executionsToCancelList.map(async (execution) => {
-        await this.workflowExecutionRepository.updateWorkflowExecution({
-          id: execution.id,
-          status: ExecutionStatus.CANCELLED,
-          cancelRequested: true,
-          cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
-          cancelledAt: new Date().toISOString(),
-          cancelledBy: 'system',
-        });
-
-        // Propagate cancellation to the running task
-        await this.workflowTaskManager.forceRunIdleTasks(execution.id);
-      })
+      executionIdsToCancel.map((id) => this.workflowTaskManager.forceRunIdleTasks(id))
     );
 
     return true; // Execution can proceed after cancelling old ones

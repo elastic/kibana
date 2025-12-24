@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcurrencySettings, EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
+import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -27,6 +27,7 @@ describe('ConcurrencyManager', () => {
 
     mockWorkflowExecutionRepository = {
       getRunningExecutionsByConcurrencyGroup: jest.fn(),
+      bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
       updateWorkflowExecution: jest.fn(),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
@@ -315,12 +316,7 @@ describe('ConcurrencyManager', () => {
         max: 2,
       };
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
-        {
-          id: 'exec-1',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T00:00:00Z',
-        } as EsWorkflowExecution,
+        'exec-1',
       ]);
 
       const result = await concurrencyManager.checkConcurrency(
@@ -334,7 +330,7 @@ describe('ConcurrencyManager', () => {
       expect(
         mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup
       ).toHaveBeenCalledWith('server-1', 'default', 'exec-2');
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
 
     it('should cancel oldest execution when limit is exceeded', async () => {
@@ -343,23 +339,10 @@ describe('ConcurrencyManager', () => {
         strategy: 'cancel-in-progress',
         max: 2,
       };
-      const runningExecutions: EsWorkflowExecution[] = [
-        {
-          id: 'exec-1',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T00:00:00Z',
-        } as EsWorkflowExecution,
-        {
-          id: 'exec-2',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T01:00:00Z',
-        } as EsWorkflowExecution,
-      ];
-      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(
-        runningExecutions
-      );
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+        'exec-2',
+      ]);
 
       const result = await concurrencyManager.checkConcurrency(
         settings,
@@ -369,15 +352,17 @@ describe('ConcurrencyManager', () => {
       );
 
       expect(result).toBe(true);
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-        id: 'exec-1',
-        status: ExecutionStatus.CANCELLED,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled due to concurrency limit (max: 2)',
-        cancelledAt: expect.any(String),
-        cancelledBy: 'system',
-      });
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
+        {
+          id: 'exec-1',
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled due to concurrency limit (max: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        },
+      ]);
       expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-1');
     });
 
@@ -387,29 +372,11 @@ describe('ConcurrencyManager', () => {
         strategy: 'cancel-in-progress',
         max: 2,
       };
-      const runningExecutions: EsWorkflowExecution[] = [
-        {
-          id: 'exec-1',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T00:00:00Z',
-        } as EsWorkflowExecution,
-        {
-          id: 'exec-2',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T01:00:00Z',
-        } as EsWorkflowExecution,
-        {
-          id: 'exec-3',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T02:00:00Z',
-        } as EsWorkflowExecution,
-      ];
-      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(
-        runningExecutions
-      );
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+        'exec-2',
+        'exec-3',
+      ]);
 
       const result = await concurrencyManager.checkConcurrency(
         settings,
@@ -420,23 +387,25 @@ describe('ConcurrencyManager', () => {
 
       expect(result).toBe(true);
       // Should cancel 2 executions (3 active - 2 max + 1 new = 2 to cancel)
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-        id: 'exec-1',
-        status: ExecutionStatus.CANCELLED,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled due to concurrency limit (max: 2)',
-        cancelledAt: expect.any(String),
-        cancelledBy: 'system',
-      });
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-        id: 'exec-2',
-        status: ExecutionStatus.CANCELLED,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled due to concurrency limit (max: 2)',
-        cancelledAt: expect.any(String),
-        cancelledBy: 'system',
-      });
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
+        {
+          id: 'exec-1',
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled due to concurrency limit (max: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        },
+        {
+          id: 'exec-2',
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled due to concurrency limit (max: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        },
+      ]);
       expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-1');
       expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-2');
     });
@@ -446,49 +415,8 @@ describe('ConcurrencyManager', () => {
         key: 'server-1',
         strategy: 'cancel-in-progress',
       };
-      const runningExecutions: EsWorkflowExecution[] = [
-        {
-          id: 'exec-1',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T00:00:00Z',
-        } as EsWorkflowExecution,
-      ];
-      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(
-        runningExecutions
-      );
-
-      const result = await concurrencyManager.checkConcurrency(
-        settings,
-        'server-1',
-        'exec-2',
-        'default'
-      );
-
-      expect(result).toBe(true);
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-        id: 'exec-1',
-        status: ExecutionStatus.CANCELLED,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled due to concurrency limit (max: 1)',
-        cancelledAt: expect.any(String),
-        cancelledBy: 'system',
-      });
-    });
-
-    it('should skip cancel-in-progress for other strategies', async () => {
-      const settings: ConcurrencySettings = {
-        key: 'server-1',
-        // strategy is undefined (other strategies not implemented yet)
-        max: 1,
-      };
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
-        {
-          id: 'exec-1',
-          concurrencyGroupKey: 'server-1',
-          status: ExecutionStatus.RUNNING,
-          createdAt: '2024-01-01T00:00:00Z',
-        } as EsWorkflowExecution,
+        'exec-1',
       ]);
 
       const result = await concurrencyManager.checkConcurrency(
@@ -499,7 +427,37 @@ describe('ConcurrencyManager', () => {
       );
 
       expect(result).toBe(true);
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
+        {
+          id: 'exec-1',
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled due to concurrency limit (max: 1)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        },
+      ]);
+    });
+
+    it('should skip cancel-in-progress for other strategies', async () => {
+      const settings: ConcurrencySettings = {
+        key: 'server-1',
+        // strategy is undefined (other strategies not implemented yet)
+        max: 1,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+      ]);
+
+      const result = await concurrencyManager.checkConcurrency(
+        settings,
+        'server-1',
+        'exec-2',
+        'default'
+      );
+
+      expect(result).toBe(true);
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
   });
 });
