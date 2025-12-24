@@ -276,6 +276,8 @@ export const oauthCallbackRoute = (
           }
 
           // Exchange authorization code for tokens
+          // TODO: couldn't this be either an Opaque token (as below) or a JWT token (requestOAuthJWTToken)?
+          // depending on the 3rd party's implementation of the token endpoint
           const tokenResult = await requestOAuthAuthorizationCodeToken(
             tokenUrl,
             logger,
@@ -301,7 +303,9 @@ export const oauthCallbackRoute = (
           });
 
           const now = Date.now();
-          const accessTokenExpiresAt = new Date(now + tokenResult.expiresIn * 1000).toISOString();
+          // TODO: if no expiresIn, can we set accessTokenExpiresAt to null and handle that?
+          const expiresIn = tokenResult.expiresIn ? tokenResult.expiresIn : 3600;
+          const accessTokenExpiresAt = new Date(now + expiresIn * 1000).toISOString();
 
           const refreshTokenExpiresAt = tokenResult.refreshTokenExpiresIn
             ? new Date(now + tokenResult.refreshTokenExpiresIn * 1000).toISOString()
@@ -318,7 +322,7 @@ export const oauthCallbackRoute = (
             `Successfully exchanged authorization code for access token for connectorId: ${oauthState.connectorId}`
           );
 
-          // Create new token record
+          // Create a new token record
           await connectorTokenClient.createWithRefreshToken({
             connectorId: oauthState.connectorId,
             accessToken: formattedToken,
@@ -333,6 +337,7 @@ export const oauthCallbackRoute = (
 
           // Return success page
           return res.ok({
+            // FIXME: redirect to a page instead! kibana url from state object
             headers: { 'content-type': 'text/html' },
             body: generateOAuthCallbackPage({
               title: 'OAuth Authorization Successful',
@@ -351,6 +356,7 @@ export const oauthCallbackRoute = (
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
           return res.ok({
+            // FIXME: redirect to a page instead?
             headers: { 'content-type': 'text/html' },
             body: generateOAuthCallbackPage({
               title: 'OAuth Authorization Failed',

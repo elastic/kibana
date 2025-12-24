@@ -86,6 +86,7 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
   ): Promise<AxiosInstance> => {
     // For authorization code flow, tokens are managed separately via callback routes
     // The getToken() method will retrieve already-stored tokens and auto-refresh if needed
+    // For this auth spec, getToken() calls getOAuthAuthorizationCodeAccessToken()
     let token;
     try {
       token = await ctx.getToken({
