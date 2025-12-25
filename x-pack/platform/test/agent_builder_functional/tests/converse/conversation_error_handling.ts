@@ -229,7 +229,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const ERROR_INPUT = 'error message';
 
       // Create a conversation with a successful first round
-      await agentBuilder.createConversationViaUI(FIRST_TITLE, FIRST_INPUT, FIRST_RESPONSE, llmProxy);
+      await agentBuilder.createConversationViaUI(
+        FIRST_TITLE,
+        FIRST_INPUT,
+        FIRST_RESPONSE,
+        llmProxy
+      );
 
       // Assert the first round is visible
       const firstResponseElement = await testSubjects.find('agentBuilderRoundResponse');

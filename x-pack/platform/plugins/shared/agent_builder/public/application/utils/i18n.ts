@@ -14,7 +14,9 @@ export const labels = {
     }),
   },
   conversations: {
-    title: i18n.translate('xpack.agentBuilder.conversations.title', { defaultMessage: 'Agent Chat' }),
+    title: i18n.translate('xpack.agentBuilder.conversations.title', {
+      defaultMessage: 'Agent Chat',
+    }),
   },
   tools: {
     // Landing page
@@ -69,9 +71,13 @@ export const labels = {
 
     // Tool types
     esqlLabel: i18n.translate('xpack.agentBuilder.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
-    builtinLabel: i18n.translate('xpack.agentBuilder.tools.builtinLabel', { defaultMessage: 'System' }),
+    builtinLabel: i18n.translate('xpack.agentBuilder.tools.builtinLabel', {
+      defaultMessage: 'System',
+    }),
     mcpLabel: i18n.translate('xpack.agentBuilder.tools.mcpLabel', { defaultMessage: 'MCP' }),
-    searchLabel: i18n.translate('xpack.agentBuilder.tools.searchLabel', { defaultMessage: 'Search' }),
+    searchLabel: i18n.translate('xpack.agentBuilder.tools.searchLabel', {
+      defaultMessage: 'Search',
+    }),
     indexTypeLabel: i18n.translate('xpack.agentBuilder.tools.indexTypeLabel', {
       defaultMessage: 'Index',
     }),
@@ -146,9 +152,12 @@ export const labels = {
     cloneToolButtonLabel: i18n.translate('xpack.agentBuilder.tools.cloneToolButtonLabel', {
       defaultMessage: 'Clone',
     }),
-    toolContextMenuButtonLabel: i18n.translate('xpack.agentBuilder.tools.toolContextMenuButtonLabel', {
-      defaultMessage: 'Tool context menu',
-    }),
+    toolContextMenuButtonLabel: i18n.translate(
+      'xpack.agentBuilder.tools.toolContextMenuButtonLabel',
+      {
+        defaultMessage: 'Tool context menu',
+      }
+    ),
 
     // Table header and bulk actions
     deleteSelectedToolsButtonLabel: (count: number) =>
@@ -156,12 +165,18 @@ export const labels = {
         defaultMessage: 'Delete {count, plural, one {# Tool} other {# Tools}}',
         values: { count },
       }),
-    selectAllToolsButtonLabel: i18n.translate('xpack.agentBuilder.tools.selectAllToolsButtonLabel', {
-      defaultMessage: 'Select all',
-    }),
-    clearSelectionButtonLabel: i18n.translate('xpack.agentBuilder.tools.clearSelectionButtonLabel', {
-      defaultMessage: 'Clear selection',
-    }),
+    selectAllToolsButtonLabel: i18n.translate(
+      'xpack.agentBuilder.tools.selectAllToolsButtonLabel',
+      {
+        defaultMessage: 'Select all',
+      }
+    ),
+    clearSelectionButtonLabel: i18n.translate(
+      'xpack.agentBuilder.tools.clearSelectionButtonLabel',
+      {
+        defaultMessage: 'Clear selection',
+      }
+    ),
     includeSystemToolsSwitchLabel: i18n.translate(
       'xpack.agentBuilder.tools.includeSystemToolsSwitchLabel',
       {
@@ -256,12 +271,18 @@ export const labels = {
         defaultMessage: 'Delete {toolId}?',
         values: { toolId },
       }),
-    deleteEsqlToolCancelButton: i18n.translate('xpack.agentBuilder.tools.deleteEsqlToolCancelButton', {
-      defaultMessage: 'Cancel',
-    }),
-    deleteEsqlToolConfirmButton: i18n.translate('xpack.agentBuilder.tools.deleteEsqlToolConfirmButton', {
-      defaultMessage: 'Delete tool',
-    }),
+    deleteEsqlToolCancelButton: i18n.translate(
+      'xpack.agentBuilder.tools.deleteEsqlToolCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    deleteEsqlToolConfirmButton: i18n.translate(
+      'xpack.agentBuilder.tools.deleteEsqlToolConfirmButton',
+      {
+        defaultMessage: 'Delete tool',
+      }
+    ),
     deleteEsqlToolConfirmationText: i18n.translate(
       'xpack.agentBuilder.tools.deleteEsqlToolConfirmationText',
       {
@@ -282,9 +303,12 @@ export const labels = {
       }
     ),
     testTool: {
-      backToEditToolButton: i18n.translate('xpack.agentBuilder.tools.testTool.backToEditToolButton', {
-        defaultMessage: 'Back to edit tool',
-      }),
+      backToEditToolButton: i18n.translate(
+        'xpack.agentBuilder.tools.testTool.backToEditToolButton',
+        {
+          defaultMessage: 'Back to edit tool',
+        }
+      ),
     },
 
     // Bulk import MCP tools
@@ -296,9 +320,12 @@ export const labels = {
         defaultMessage:
           'Select an MCP server and import multiple tools at once to make them available in Agent Builder.',
       }),
-      importToolsButton: i18n.translate('xpack.agentBuilder.tools.bulkImportMcp.importToolsButton', {
-        defaultMessage: 'Import tools',
-      }),
+      importToolsButton: i18n.translate(
+        'xpack.agentBuilder.tools.bulkImportMcp.importToolsButton',
+        {
+          defaultMessage: 'Import tools',
+        }
+      ),
       cancelButton: i18n.translate('xpack.agentBuilder.tools.bulkImportMcp.cancelButton', {
         defaultMessage: 'Cancel',
       }),
@@ -306,9 +333,12 @@ export const labels = {
         title: i18n.translate('xpack.agentBuilder.tools.bulkImportMcp.sourceSection.title', {
           defaultMessage: 'Source',
         }),
-        description: i18n.translate('xpack.agentBuilder.tools.bulkImportMcp.sourceSection.description', {
-          defaultMessage: 'Select the MCP server and preview the tools available for import.',
-        }),
+        description: i18n.translate(
+          'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.description',
+          {
+            defaultMessage: 'Select the MCP server and preview the tools available for import.',
+          }
+        ),
         mcpServerLabel: i18n.translate(
           'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.mcpServerLabel',
           {
@@ -327,9 +357,12 @@ export const labels = {
             defaultMessage: 'Tools to import',
           }
         ),
-        nameColumn: i18n.translate('xpack.agentBuilder.tools.bulkImportMcp.sourceSection.nameColumn', {
-          defaultMessage: 'Name',
-        }),
+        nameColumn: i18n.translate(
+          'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.nameColumn',
+          {
+            defaultMessage: 'Name',
+          }
+        ),
         searchPlaceholder: i18n.translate(
           'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.searchPlaceholder',
           {
@@ -431,15 +464,22 @@ export const labels = {
   },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),
-    newAgent: i18n.translate('xpack.agentBuilder.agents.new.title', { defaultMessage: 'New Agent' }),
-    editAgent: i18n.translate('xpack.agentBuilder.agents.edit.title', { defaultMessage: 'Edit Agent' }),
+    newAgent: i18n.translate('xpack.agentBuilder.agents.new.title', {
+      defaultMessage: 'New Agent',
+    }),
+    editAgent: i18n.translate('xpack.agentBuilder.agents.edit.title', {
+      defaultMessage: 'Edit Agent',
+    }),
     createAgent: i18n.translate('xpack.agentBuilder.agents.create.title', {
       defaultMessage: 'Create Agent',
     }),
     settings: {
-      cancelButtonLabel: i18n.translate('xpack.agentBuilder.agents.form.settings.cancelButtonLabel', {
-        defaultMessage: 'Cancel',
-      }),
+      cancelButtonLabel: i18n.translate(
+        'xpack.agentBuilder.agents.form.settings.cancelButtonLabel',
+        {
+          defaultMessage: 'Cancel',
+        }
+      ),
     },
   },
   navigationAbort: {

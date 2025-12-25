@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { isAgentBuilderError, AgentBuilderErrorCode, isAgentExecutionError } from '@kbn/agent-builder-common';
+import {
+  isAgentBuilderError,
+  AgentBuilderErrorCode,
+  isAgentExecutionError,
+} from '@kbn/agent-builder-common';
 
 /**
  * Normalize error type/code from error object

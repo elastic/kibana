@@ -7,7 +7,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import {
+  type AgentDefinition,
+  type ToolSelection,
+  defaultAgentToolIds,
+} from '@kbn/agent-builder-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';

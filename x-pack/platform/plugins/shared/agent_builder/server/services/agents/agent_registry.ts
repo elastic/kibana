@@ -10,7 +10,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
-import type { AgentAvailabilityContext, AgentAvailabilityResult } from '@kbn/agent-builder-server/agents';
+import type {
+  AgentAvailabilityContext,
+  AgentAvailabilityResult,
+} from '@kbn/agent-builder-server/agents';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {

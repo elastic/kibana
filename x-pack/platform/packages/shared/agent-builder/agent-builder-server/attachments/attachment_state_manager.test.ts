@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { VersionedAttachment, AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import { hashContent } from '@kbn/agent-builder-common/attachments';
 import {
   createAttachmentStateManager,

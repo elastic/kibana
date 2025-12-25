@@ -31,9 +31,13 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonly: false,
     },
     [AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID]: {
-      description: i18n.translate('xpack.agentBuilder.uiSettings.createVisualizations.description', {
-        defaultMessage: 'Enables the Dashboard Agent and related tools for Elastic Agent Builder.',
-      }),
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.createVisualizations.description',
+        {
+          defaultMessage:
+            'Enables the Dashboard Agent and related tools for Elastic Agent Builder.',
+        }
+      ),
       name: i18n.translate('xpack.agentBuilder.uiSettings.createVisualizations.name', {
         defaultMessage: 'Elastic Agent Builder: Dashboard Agent and tools',
       }),

@@ -13,7 +13,11 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { type ChatEvent, agentBuilderDefaultAgentId, isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import {
+  type ChatEvent,
+  agentBuilderDefaultAgentId,
+  isRoundCompleteEvent,
+} from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';

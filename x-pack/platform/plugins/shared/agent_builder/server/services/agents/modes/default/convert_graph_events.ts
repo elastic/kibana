@@ -11,7 +11,11 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { ChatAgentEvent, ConversationRound, ToolResultEvent } from '@kbn/agent-builder-common/chat';
+import type {
+  ChatAgentEvent,
+  ConversationRound,
+  ToolResultEvent,
+} from '@kbn/agent-builder-common/chat';
 import { isToolCallStep } from '@kbn/agent-builder-common/chat';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import {

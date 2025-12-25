@@ -537,7 +537,8 @@ describe('TrackingService', () => {
       trackingService.trackError(error, 'conv-1');
 
       const conversationsWithErrorsCalls = mockUsageCounter.incrementCounter.mock.calls.filter(
-        (call) => call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
+        (call) =>
+          call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
       );
 
       expect(conversationsWithErrorsCalls).toHaveLength(1);
@@ -551,7 +552,8 @@ describe('TrackingService', () => {
       trackingService.trackError(error, 'conv-3');
 
       const conversationsWithErrorsCalls = mockUsageCounter.incrementCounter.mock.calls.filter(
-        (call) => call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
+        (call) =>
+          call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
       );
 
       expect(conversationsWithErrorsCalls).toHaveLength(3);
@@ -563,7 +565,8 @@ describe('TrackingService', () => {
       trackingService.trackError(error);
 
       const conversationsWithErrorsCalls = mockUsageCounter.incrementCounter.mock.calls.filter(
-        (call) => call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
+        (call) =>
+          call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
       );
 
       expect(conversationsWithErrorsCalls).toHaveLength(0);

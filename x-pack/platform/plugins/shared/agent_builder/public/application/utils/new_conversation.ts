@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRound,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 

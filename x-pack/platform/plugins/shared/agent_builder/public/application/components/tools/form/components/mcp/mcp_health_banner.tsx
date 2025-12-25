@@ -20,10 +20,13 @@ const mcpHealthI18nMessages = {
     title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolNotFound.title', {
       defaultMessage: 'Tool not found on MCP server',
     }),
-    description: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolNotFound.description', {
-      defaultMessage:
-        'The tool below no longer exists on the selected MCP server. It may have been removed or renamed.',
-    }),
+    description: i18n.translate(
+      'xpack.agentBuilder.tools.mcpHealthBanner.toolNotFound.description',
+      {
+        defaultMessage:
+          'The tool below no longer exists on the selected MCP server. It may have been removed or renamed.',
+      }
+    ),
   },
   connectorNotFound: {
     title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.connectorNotFound.title', {
@@ -41,19 +44,25 @@ const mcpHealthI18nMessages = {
     title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.listToolsFailed.title', {
       defaultMessage: "Can't retrieve tools from MCP server",
     }),
-    description: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.listToolsFailed.description', {
-      defaultMessage:
-        "We're unable to fetch tools from this MCP server. This is usually caused by a connection or configuration issue with the MCP connector.",
-    }),
+    description: i18n.translate(
+      'xpack.agentBuilder.tools.mcpHealthBanner.listToolsFailed.description',
+      {
+        defaultMessage:
+          "We're unable to fetch tools from this MCP server. This is usually caused by a connection or configuration issue with the MCP connector.",
+      }
+    ),
   },
   toolUnhealthy: {
     title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolUnhealthy.title', {
       defaultMessage: 'Tool execution failed',
     }),
-    description: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolUnhealthy.description', {
-      defaultMessage:
-        'This tool encountered an error while running in Agent Builder. Please verify the MCP connector configuration and try again.',
-    }),
+    description: i18n.translate(
+      'xpack.agentBuilder.tools.mcpHealthBanner.toolUnhealthy.description',
+      {
+        defaultMessage:
+          'This tool encountered an error while running in Agent Builder. Please verify the MCP connector configuration and try again.',
+      }
+    ),
   },
   deleteToolButtonLabel: i18n.translate(
     'xpack.agentBuilder.tools.mcpHealthBanner.deleteToolButtonLabel',

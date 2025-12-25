@@ -14,9 +14,12 @@ import type {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-export const editButtonLabel = i18n.translate('xpack.agentBuilder.conversation.visualization.edit', {
-  defaultMessage: 'Edit visualization',
-});
+export const editButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversation.visualization.edit',
+  {
+    defaultMessage: 'Edit visualization',
+  }
+);
 
 export const saveButtonLabel = i18n.translate(
   'xpack.agentBuilder.conversation.visualization.saveToDashboard',

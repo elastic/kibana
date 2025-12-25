@@ -68,7 +68,9 @@ export const ToolEditContextMenu = () => {
             `}
             onClick={() => {
               setIsOpen(false);
-              deleteTool(toolId, { onConfirm: () => navigateToAgentBuilderUrl(appPaths.tools.list) });
+              deleteTool(toolId, {
+                onConfirm: () => navigateToAgentBuilderUrl(appPaths.tools.list),
+              });
             }}
           >
             {labels.tools.deleteToolButtonLabel}

@@ -6,7 +6,10 @@
  */
 
 import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
-import { dashboardElement, visualizationElement } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  dashboardElement,
+  visualizationElement,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { dashboardTools } from '../common';
 

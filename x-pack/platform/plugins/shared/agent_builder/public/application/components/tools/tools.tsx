@@ -45,9 +45,12 @@ export const AgentBuilderTools = () => {
                 <EuiLink
                   href={docLinks.tools}
                   target="_blank"
-                  aria-label={i18n.translate('xpack.agentBuilder.tools.toolsDocumentationAriaLabel', {
-                    defaultMessage: 'Learn more about tools in the documentation',
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.agentBuilder.tools.toolsDocumentationAriaLabel',
+                    {
+                      defaultMessage: 'Learn more about tools in the documentation',
+                    }
+                  )}
                 >
                   {i18n.translate('xpack.agentBuilder.tools.toolsDocumentation', {
                     defaultMessage: 'Learn more',

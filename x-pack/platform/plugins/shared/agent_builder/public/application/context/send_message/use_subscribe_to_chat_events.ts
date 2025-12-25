@@ -17,7 +17,10 @@ import {
   isToolResultEvent,
   isThinkingCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { createReasoningStep, createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  createReasoningStep,
+  createToolCallStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import { finalize, type Observable, type Subscription } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import { useRef } from 'react';

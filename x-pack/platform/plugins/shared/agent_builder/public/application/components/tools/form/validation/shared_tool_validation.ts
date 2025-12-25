@@ -7,17 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { toolIdRegexp, toolIdMaxLength, isReservedToolId } from '@kbn/agent-builder-common/tools';
-import { isInProtectedNamespace, hasNamespaceName } from '@kbn/agent-builder-common/base/namespaces';
+import {
+  isInProtectedNamespace,
+  hasNamespaceName,
+} from '@kbn/agent-builder-common/base/namespaces';
 import { z } from '@kbn/zod';
 
 export const sharedI18nMessages = {
   toolId: {
-    requiredError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.requiredError', {
-      defaultMessage: 'Tool ID is required.',
-    }),
-    tooLongError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.tooLongError', {
-      defaultMessage: 'Tool ID must be 63 characters or less.',
-    }),
+    requiredError: i18n.translate(
+      'xpack.agentBuilder.tools.newTool.validation.toolId.requiredError',
+      {
+        defaultMessage: 'Tool ID is required.',
+      }
+    ),
+    tooLongError: i18n.translate(
+      'xpack.agentBuilder.tools.newTool.validation.toolId.tooLongError',
+      {
+        defaultMessage: 'Tool ID must be 63 characters or less.',
+      }
+    ),
     formatError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.toolId.formatError', {
       defaultMessage:
         'Tool ID must start with a letter and contain only lowercase letters, numbers, and hyphens.',

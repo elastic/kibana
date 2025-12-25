@@ -21,9 +21,12 @@ import { UpgradeLicensePrompt } from '../application/components/access/prompts/u
 import { AddLlmConnectionPrompt } from '../application/components/access/prompts/add_llm_connection_prompt';
 import { NoPrivilegePrompt } from '../application/components/access/prompts/no_privilege_prompt';
 
-const closeButtonLabel = i18n.translate('xpack.agentBuilder.embeddable.accessBoundary.closeButton', {
-  defaultMessage: 'Close',
-});
+const closeButtonLabel = i18n.translate(
+  'xpack.agentBuilder.embeddable.accessBoundary.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 interface AccessDeniedWrapperProps {
   children: ReactNode;

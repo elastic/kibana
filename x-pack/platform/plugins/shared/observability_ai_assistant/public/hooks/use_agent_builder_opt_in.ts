@@ -75,7 +75,12 @@ export const useAgentBuilderOptIn = ({
       hasAdvancedSettingsEditPrivilege &&
       hasAgentBuilderAccess &&
       !isAgentChatExperienceEnabled,
-    [agentBuilder, hasAdvancedSettingsEditPrivilege, hasAgentBuilderAccess, isAgentChatExperienceEnabled]
+    [
+      agentBuilder,
+      hasAdvancedSettingsEditPrivilege,
+      hasAgentBuilderAccess,
+      isAgentChatExperienceEnabled,
+    ]
   );
 
   const [isAgentBuilderConfirmationModalOpen, setIsAgentBuilderConfirmationModalOpen] =
@@ -114,7 +119,13 @@ export const useAgentBuilderOptIn = ({
         toastMessage: error?.message,
       });
     }
-  }, [application, navigateFromConversationApp, notifications?.toasts, agentBuilder, settings.client]);
+  }, [
+    application,
+    navigateFromConversationApp,
+    notifications?.toasts,
+    agentBuilder,
+    settings.client,
+  ]);
 
   return {
     showAgentBuilderOptInCta,

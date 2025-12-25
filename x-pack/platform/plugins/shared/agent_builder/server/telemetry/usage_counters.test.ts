@@ -36,7 +36,9 @@ describe('usage_counters', () => {
 
       const result = createAgentBuilderUsageCounter(mockUsageCollection);
 
-      expect(mockUsageCollection.createUsageCounter).toHaveBeenCalledWith(AGENTBUILDER_USAGE_DOMAIN);
+      expect(mockUsageCollection.createUsageCounter).toHaveBeenCalledWith(
+        AGENTBUILDER_USAGE_DOMAIN
+      );
       expect(result).toBe(mockUsageCounter);
     });
   });

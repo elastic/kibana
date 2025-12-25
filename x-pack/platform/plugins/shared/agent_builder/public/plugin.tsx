@@ -94,7 +94,10 @@ export class AgentBuilderPlugin
     return {};
   }
 
-  start(core: CoreStart, startDependencies: AgentBuilderStartDependencies): AgentBuilderPluginStart {
+  start(
+    core: CoreStart,
+    startDependencies: AgentBuilderStartDependencies
+  ): AgentBuilderPluginStart {
     const { http } = core;
     const { licensing, inference } = startDependencies;
     docLinks.setDocLinks(core.docLinks.links);

@@ -22,7 +22,10 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
-import { visualizationElement, dashboardElement } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  visualizationElement,
+  dashboardElement,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import {
   Cursor,

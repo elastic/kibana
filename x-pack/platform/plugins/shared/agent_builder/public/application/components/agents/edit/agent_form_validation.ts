@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { agentIdRegexp, agentIdMaxLength } from '@kbn/agent-builder-common/agents';
-import { isInProtectedNamespace, hasNamespaceName } from '@kbn/agent-builder-common/base/namespaces';
+import {
+  isInProtectedNamespace,
+  hasNamespaceName,
+} from '@kbn/agent-builder-common/base/namespaces';
 import { z } from '@kbn/zod';
 import { isValidAgentAvatarColor } from '../../../utils/color';
 

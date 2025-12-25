@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ConversationRound, AgentCapabilities, AssistantResponse } from '@kbn/agent-builder-common';
+import type {
+  ConversationRound,
+  AgentCapabilities,
+  AssistantResponse,
+} from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';

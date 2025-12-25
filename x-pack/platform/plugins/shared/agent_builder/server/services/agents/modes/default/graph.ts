@@ -15,7 +15,10 @@ import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
-import { createReasoningEvent, createToolCallMessage } from '@kbn/agent-builder-genai-utils/langchain';
+import {
+  createReasoningEvent,
+  createToolCallMessage,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import { getAnswerAgentPrompt, getResearchAgentPrompt } from './prompts';

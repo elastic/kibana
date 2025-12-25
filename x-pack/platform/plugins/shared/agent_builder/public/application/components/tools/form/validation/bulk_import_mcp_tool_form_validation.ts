@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isInProtectedNamespace, hasNamespaceName } from '@kbn/agent-builder-common/base/namespaces';
+import {
+  isInProtectedNamespace,
+  hasNamespaceName,
+} from '@kbn/agent-builder-common/base/namespaces';
 import { toolIdRegexp, toolIdMaxLength } from '@kbn/agent-builder-common/tools';
 import { useQueryClient } from '@kbn/react-query';
 import { z } from '@kbn/zod';

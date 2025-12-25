@@ -16,7 +16,10 @@ export interface FinalStateEventData {
   state: StateType;
 }
 
-export type FinalStateEvent = AgentBuilderEvent<AgentExecutionEventType.finalState, FinalStateEventData>;
+export type FinalStateEvent = AgentBuilderEvent<
+  AgentExecutionEventType.finalState,
+  FinalStateEventData
+>;
 
 export const isFinalStateEvent = (event: AgentBuilderEvent<any, any>): event is FinalStateEvent => {
   return event.type === AgentExecutionEventType.finalState;

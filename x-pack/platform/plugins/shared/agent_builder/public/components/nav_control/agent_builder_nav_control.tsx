@@ -88,7 +88,10 @@ export function AgentBuilderNavControl() {
           minWidth={0}
         >
           <RobotIcon size="m" />
-          <FormattedMessage id="xpack.agentBuilder.navControl.linkLabel" defaultMessage="AI Agent" />
+          <FormattedMessage
+            id="xpack.agentBuilder.navControl.linkLabel"
+            defaultMessage="AI Agent"
+          />
         </EuiButton>
       </EuiToolTip>
     </>

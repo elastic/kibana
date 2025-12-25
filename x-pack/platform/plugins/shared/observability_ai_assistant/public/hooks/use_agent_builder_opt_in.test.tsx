@@ -192,7 +192,8 @@ describe('useAgentBuilderOptIn', () => {
       { path: '/' }
     );
     expect(
-      (servicesWithNavigation.plugins.start.agentBuilder as AgentBuilderStart).openConversationFlyout
+      (servicesWithNavigation.plugins.start.agentBuilder as AgentBuilderStart)
+        .openConversationFlyout
     ).toHaveBeenCalledWith({ newConversation: true });
   });
 

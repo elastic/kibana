@@ -621,7 +621,10 @@ export function registerTelemetryCollector(
           for (const [counterName, count] of Array.from(errorCounters.entries())) {
             if (count > 0) {
               if (counterName.startsWith(`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_`)) {
-                const errorType = counterName.replace(`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_`, '');
+                const errorType = counterName.replace(
+                  `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_`,
+                  ''
+                );
                 if (errorType) {
                   errorsByType.push({ type: errorType, count });
                 }

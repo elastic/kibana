@@ -24,9 +24,12 @@ const indexSearchI18nMessages = {
     }),
   },
   defaultRowLimit: {
-    invalidError: i18n.translate('xpack.agentBuilder.tools.indexPattern.defaultRowLimit.invalidError', {
-      defaultMessage: 'Default row limit must be bigger than 0.',
-    }),
+    invalidError: i18n.translate(
+      'xpack.agentBuilder.tools.indexPattern.defaultRowLimit.invalidError',
+      {
+        defaultMessage: 'Default row limit must be bigger than 0.',
+      }
+    ),
   },
 };
 

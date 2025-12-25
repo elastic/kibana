@@ -8,7 +8,10 @@
 import React from 'react';
 import type { Node, Parent } from 'unist';
 import { render, screen } from '@testing-library/react';
-import { ToolResultType, type TabularDataResult } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  type TabularDataResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
@@ -47,7 +50,9 @@ jest.mock('../../../../context/conversation/conversation_context', () => ({
 }));
 
 const mockVisualizeESQL = VisualizeESQL as jest.MockedFunction<any>;
-const useAgentBuilderServicesMock = useAgentBuilderServices as jest.MockedFunction<typeof useAgentBuilderServices>;
+const useAgentBuilderServicesMock = useAgentBuilderServices as jest.MockedFunction<
+  typeof useAgentBuilderServices
+>;
 const useStepsFromPrevRoundsMock = useStepsFromPrevRounds as jest.MockedFunction<
   typeof useStepsFromPrevRounds
 >;

@@ -18,10 +18,14 @@ const createMockAgentExecutionError = (
   errCode: AgentExecutionErrorCode,
   meta: Record<string, any> = {}
 ) => {
-  const error = createAgentBuilderError(AgentBuilderErrorCode.agentExecutionError, 'Execution error', {
-    errCode,
-    ...meta,
-  });
+  const error = createAgentBuilderError(
+    AgentBuilderErrorCode.agentExecutionError,
+    'Execution error',
+    {
+      errCode,
+      ...meta,
+    }
+  );
   return error;
 };
 

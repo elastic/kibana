@@ -79,9 +79,12 @@ const fullscreenLabels = {
   genAiSettings: i18n.translate('xpack.agentBuilder.conversationActions.genAiSettings', {
     defaultMessage: 'Gen AI Settings',
   }),
-  externalLinkAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.externalLinkAriaLabel', {
-    defaultMessage: 'Open in new tab',
-  }),
+  externalLinkAriaLabel: i18n.translate(
+    'xpack.agentBuilder.conversationActions.externalLinkAriaLabel',
+    {
+      defaultMessage: 'Open in new tab',
+    }
+  ),
 };
 
 const popoverMinWidthStyles = css`

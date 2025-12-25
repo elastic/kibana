@@ -35,9 +35,12 @@ const usePaddingStyles = () => {
   return paddingStyles;
 };
 
-const readonlyAgentTooltip = i18n.translate('xpack.agentBuilder.agentSelector.readonlyAgentTooltip', {
-  defaultMessage: 'This agent is read-only.',
-});
+const readonlyAgentTooltip = i18n.translate(
+  'xpack.agentBuilder.agentSelector.readonlyAgentTooltip',
+  {
+    defaultMessage: 'This agent is read-only.',
+  }
+);
 
 const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
   const prependStyles = usePaddingStyles();

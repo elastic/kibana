@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,

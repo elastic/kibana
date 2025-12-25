@@ -34,24 +34,33 @@ export const i18nMessages = {
   optionalParamLabel: i18n.translate('xpack.agentBuilder.tools.newTool.optionalParamLabel', {
     defaultMessage: 'Optional',
   }),
-  removeParamButtonLabel: i18n.translate('xpack.agentBuilder.tools.newTool.removeParamButtonLabel', {
-    defaultMessage: 'Remove parameter',
-  }),
+  removeParamButtonLabel: i18n.translate(
+    'xpack.agentBuilder.tools.newTool.removeParamButtonLabel',
+    {
+      defaultMessage: 'Remove parameter',
+    }
+  ),
   addParamButtonLabel: i18n.translate('xpack.agentBuilder.tools.newTool.addParamButtonLabel', {
     defaultMessage: 'Add a parameter',
   }),
-  inferParamsButtonLabel: i18n.translate('xpack.agentBuilder.tools.newTool.inferParamsButtonLabel', {
-    defaultMessage: 'Infer parameters',
-  }),
+  inferParamsButtonLabel: i18n.translate(
+    'xpack.agentBuilder.tools.newTool.inferParamsButtonLabel',
+    {
+      defaultMessage: 'Infer parameters',
+    }
+  ),
   noParamsMessage: i18n.translate('xpack.agentBuilder.tools.newTool.noParamsMessage', {
     defaultMessage: 'Add parameters or infer them from your ES|QL query.',
   }),
   optionalFieldLabel: i18n.translate('xpack.agentBuilder.tools.newTool.optionalFieldLabel', {
     defaultMessage: 'Optional',
   }),
-  documentationLinkLabel: i18n.translate('xpack.agentBuilder.tools.newTool.documentationLinkLabel', {
-    defaultMessage: 'Documentation',
-  }),
+  documentationLinkLabel: i18n.translate(
+    'xpack.agentBuilder.tools.newTool.documentationLinkLabel',
+    {
+      defaultMessage: 'Documentation',
+    }
+  ),
   systemReferences: {
     documentation: {
       title: i18n.translate('xpack.agentBuilder.tools.newTool.systemReferences.title', {
@@ -146,9 +155,12 @@ export const i18nMessages = {
             defaultMessage: 'Workflow',
           }
         ),
-        mcpOption: i18n.translate('xpack.agentBuilder.tools.newTool.configuration.form.type.mcpOption', {
-          defaultMessage: 'MCP',
-        }),
+        mcpOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.type.mcpOption',
+          {
+            defaultMessage: 'MCP',
+          }
+        ),
       },
       indexSearch: {
         patternLabel: i18n.translate(
