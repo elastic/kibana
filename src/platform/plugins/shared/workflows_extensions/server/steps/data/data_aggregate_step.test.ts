@@ -425,7 +425,7 @@ describe('dataAggregateStepDefinition', () => {
       const result = await dataAggregateStepDefinition.handler(context);
 
       expect(result.output).toHaveLength(1);
-      expect(result.output[0]).toHaveProperty('count', 3);
+      expect(result.output![0]).toHaveProperty('count', 3);
     });
   });
 

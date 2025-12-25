@@ -21,6 +21,28 @@ interface AggregationGroup {
   result: Record<string, unknown>;
 }
 
+/**
+ * Builds a unique string key from an item based on the specified group field names.
+ *
+ * This function creates a composite key by extracting values from the specified fields
+ * and joining them together. JSON.stringify is used to handle complex values (objects,
+ * arrays, null, undefined) consistently.
+ *
+ * @example Single key
+ * const item = { status: 'open', priority: 'high' };
+ * buildGroupKey(item, ['status']);
+ * // Returns: '"open"'
+ *
+ * @example Multiple keys
+ * const item = { region: 'North', product: 'Laptop' };
+ * buildGroupKey(item, ['region', 'product']);
+ * // Returns: '"North"::"Laptop"'
+ *
+ * @example Null values
+ * const item = { status: null };
+ * buildGroupKey(item, ['status']);
+ * // Returns: 'null'
+ */
 function buildGroupKey(item: unknown, groupByFields: string[]): string {
   if (typeof item !== 'object' || item === null) {
     return JSON.stringify(null);
@@ -34,6 +56,17 @@ function buildGroupKey(item: unknown, groupByFields: string[]): string {
   return keyParts.join('::');
 }
 
+/**
+ * Extracts the actual values for group key fields from an item.
+ *
+ * This function builds a record containing the group key field names and their
+ * corresponding values from the item. Null/undefined values are normalized to null.
+ *
+ * @example
+ * const item = { status: 'open', priority: 'high', age: 5 };
+ * extractGroupKeyValues(item, ['status', 'priority']);
+ * // Returns: { status: 'open', priority: 'high' }
+ */
 function extractGroupKeyValues(item: unknown, groupByFields: string[]): Record<string, unknown> {
   if (typeof item !== 'object' || item === null) {
     return groupByFields.reduce((acc, field) => {
@@ -48,6 +81,23 @@ function extractGroupKeyValues(item: unknown, groupByFields: string[]): Record<s
   }, {} as Record<string, unknown>);
 }
 
+/**
+ * Computes an aggregation metric over a collection of items.
+ *
+ * Supports count, sum, avg, min, and max operations. For numeric operations,
+ * only valid numeric values are included in the calculation. Non-numeric or
+ * NaN values are filtered out.
+ *
+ * @example Count metric
+ * computeMetric([{a: 1}, {a: 2}], { type: 'count', field: '' });
+ * // Returns: 2
+ *
+ * @example Average metric
+ * computeMetric([{age: 5}, {age: 10}, {age: 'invalid'}], { type: 'avg', field: 'age' });
+ * // Returns: 7.5 (invalid value is ignored)
+ *
+ * @returns The computed metric value, or null if no valid values exist for numeric operations
+ */
 function computeMetric(items: unknown[], metricDef: MetricDefinition): unknown {
   const { type, field } = metricDef;
 
@@ -76,20 +126,32 @@ function computeMetric(items: unknown[], metricDef: MetricDefinition): unknown {
     case 'avg':
       return values.reduce((acc, val) => acc + val, 0) / values.length;
     case 'min':
-      return Math.min(...values);
+      return values.reduce((min, val) => (val < min ? val : min), values[0]);
     case 'max':
-      return Math.max(...values);
+      return values.reduce((max, val) => (val > max ? val : max), values[0]);
     default:
       return null;
   }
 }
 
+/**
+ * Sorts aggregation results by a specified field.
+ *
+ * Creates a copy of the results array before sorting to avoid mutating the input.
+ * Handles null/undefined values by placing them at the end. Supports numeric,
+ * string, and mixed-type comparisons.
+ *
+ * @example
+ * const results = [{ status: 'open', count: 5 }, { status: 'closed', count: 10 }];
+ * sortResults(results, 'count', 'desc');
+ * // Returns: [{ status: 'closed', count: 10 }, { status: 'open', count: 5 }]
+ */
 function sortResults(
   results: Array<Record<string, unknown>>,
   sortBy: string,
   sortOrder: 'asc' | 'desc'
 ): Array<Record<string, unknown>> {
-  return results.sort((a, b) => {
+  return [...results].sort((a, b) => {
     const aVal = a[sortBy];
     const bVal = b[sortBy];
 
@@ -162,20 +224,19 @@ export const dataAggregateStepDefinition = createServerStepDefinition({
 
       for (const item of items) {
         const keyString = buildGroupKey(item, groupByFields);
+        let group = groups.get(keyString);
 
-        if (!groups.has(keyString)) {
+        if (!group) {
           const keyValues = extractGroupKeyValues(item, groupByFields);
-          groups.set(keyString, {
+          group = {
             key: keyString,
             items: [],
             result: keyValues,
-          });
+          };
+          groups.set(keyString, group);
         }
 
-        const group = groups.get(keyString);
-        if (group) {
-          group.items.push(item);
-        }
+        group.items.push(item);
       }
 
       context.logger.debug(`Created ${groups.size} unique groups`);
