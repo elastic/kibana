@@ -74,9 +74,13 @@ export const dataRegexReplaceStepDefinition = createServerStepDefinition({
         }
       }
 
-      context.logger.debug(
-        `Replacement complete: ${totalMatchCount} matches replaced in ${sourceArray.length} item(s)`
-      );
+      if (detailed) {
+        context.logger.debug(
+          `Replacement complete: ${totalMatchCount} matches replaced in ${sourceArray.length} item(s)`
+        );
+      } else {
+        context.logger.debug(`Replacement complete for ${sourceArray.length} item(s)`);
+      }
 
       if (detailed) {
         return {

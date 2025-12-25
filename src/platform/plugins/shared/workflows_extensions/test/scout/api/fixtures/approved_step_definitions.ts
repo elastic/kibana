@@ -42,7 +42,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.regex_replace',
-    handlerHash: '6de0e42bbcc9323990f67ba2797bd621ce3478835a46a619ecc3ab4faeff2de8',
+    handlerHash: '17821b34339152e19dfd47f5345e13da3754f905fc2b3bfd69ab887854e66eb1',
   },
   {
     id: 'onechat.runAgent',

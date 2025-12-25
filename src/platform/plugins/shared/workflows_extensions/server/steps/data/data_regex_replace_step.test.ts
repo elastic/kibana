@@ -281,6 +281,50 @@ describe('dataRegexReplaceStepDefinition', () => {
         matchCount: 0,
       });
     });
+
+    it('should show matchCount of 1 in detailed mode without global flag (limitation)', async () => {
+      const config = {
+        source: 'error error error',
+        detailed: true,
+      };
+      const input = {
+        pattern: 'error',
+        replacement: 'warning',
+        // No global flag - will only replace first occurrence
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataRegexReplaceStepDefinition.handler(context);
+
+      // Without global flag, only first occurrence is replaced
+      expect(result.output).toEqual({
+        original: 'error error error',
+        replaced: 'warning error error',
+        matchCount: 1, // matchCount is 1 because match() without 'g' returns only first match
+      });
+    });
+
+    it('should show accurate matchCount with global flag in detailed mode', async () => {
+      const config = {
+        source: 'error error error',
+        detailed: true,
+      };
+      const input = {
+        pattern: 'error',
+        replacement: 'warning',
+        flags: 'g',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataRegexReplaceStepDefinition.handler(context);
+
+      // With global flag, all occurrences are replaced and counted correctly
+      expect(result.output).toEqual({
+        original: 'error error error',
+        replaced: 'warning warning warning',
+        matchCount: 3, // matchCount is accurate with global flag
+      });
+    });
   });
 
   describe('error handling', () => {
@@ -349,7 +393,7 @@ describe('dataRegexReplaceStepDefinition', () => {
   });
 
   describe('logging', () => {
-    it('should log replacement statistics', async () => {
+    it('should log replacement statistics in detailed mode', async () => {
       const config = {
         source: ['foo bar', 'foo baz', 'foo qux'],
         detailed: true,
@@ -368,6 +412,32 @@ describe('dataRegexReplaceStepDefinition', () => {
       );
       expect(context.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('3 matches replaced')
+      );
+    });
+
+    it('should log completion without match count when detailed is false', async () => {
+      const config = {
+        source: ['foo bar', 'foo baz', 'foo qux'],
+        detailed: false,
+      };
+      const input = {
+        pattern: 'foo',
+        replacement: 'bar',
+        flags: 'g',
+      };
+
+      const context = createMockContext(config, input);
+      await dataRegexReplaceStepDefinition.handler(context);
+
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Replacing in 3 item(s)')
+      );
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Replacement complete for 3 item(s)')
+      );
+      // Should NOT log match count when detailed is false
+      expect(context.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringContaining('matches replaced')
       );
     });
   });
