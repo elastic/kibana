@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { RuleSummary } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type {
@@ -38,8 +38,9 @@ const DEFAULT_PAGE = 1;
 
 export const reviewRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest<undefined, undefined, ReviewRuleInstallationRequestBody>,
-  response: KibanaResponseFactory
+  request: KibanaRequest<unknown, unknown, ReviewRuleInstallationRequestBody | null>,
+  response: KibanaResponseFactory,
+  logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
   const {
@@ -48,6 +49,12 @@ export const reviewRuleInstallationHandler = async (
     sort,
     filter,
   } = request.body ?? {};
+
+  logger.debug(
+    `reviewRuleInstallationHandler: Executing handler with params: page=${page}, perPage=${perPage}, sort=${JSON.stringify(
+      sort
+    )}, filter=${JSON.stringify(filter)}`
+  );
 
   try {
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
@@ -58,6 +65,9 @@ export const reviewRuleInstallationHandler = async (
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+    logger.debug(
+      `reviewRuleInstallationHandler: Found ${currentRuleVersions.length} currently installed prebuilt rules`
+    );
     const currentRuleVersionsMap = new Map(
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
@@ -66,6 +76,7 @@ export const reviewRuleInstallationHandler = async (
 
     const installableVersions = await getInstallableRuleVersions(
       ruleAssetsClient,
+      logger,
       mlAuthz,
       currentRuleVersionsMap,
       sort,
@@ -73,7 +84,7 @@ export const reviewRuleInstallationHandler = async (
     );
 
     const installableVersionsWithoutFilter = requestHasFilter
-      ? await getInstallableRuleVersions(ruleAssetsClient, mlAuthz, currentRuleVersionsMap)
+      ? await getInstallableRuleVersions(ruleAssetsClient, logger, mlAuthz, currentRuleVersionsMap)
       : installableVersions;
 
     const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
@@ -97,8 +108,13 @@ export const reviewRuleInstallationHandler = async (
       ),
     };
 
+    logger.debug(
+      `reviewRuleInstallationHandler: Returning response with total=${body.total}, num_rules_to_install=${body.stats.num_rules_to_install}`
+    );
+
     return response.ok({ body });
   } catch (err) {
+    logger.error(`reviewRuleInstallationHandler: Caught error`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,
@@ -109,6 +125,7 @@ export const reviewRuleInstallationHandler = async (
 
 async function getInstallableRuleVersions(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
+  logger: Logger,
   mlAuthz: MlAuthz,
   currentRuleVersionsMap: Map<string, RuleSummary>,
   sort?: PrebuiltRuleAssetsSort,
@@ -119,13 +136,27 @@ async function getInstallableRuleVersions(
     filter,
   });
 
+  logger.debug(
+    `reviewRuleInstallationHandler: Fetched ${
+      allLatestVersions.length
+    } latest rule versions from assets ${filter ? 'WITH filter' : 'without filter'}`
+  );
+
   const nonInstalledLatestVersions = allLatestVersions.filter(
     (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+  );
+
+  logger.debug(
+    `reviewRuleInstallationHandler: ${nonInstalledLatestVersions.length} rules remaining after filtering installed rules`
   );
 
   const installableVersions = await excludeLicenseRestrictedRules(
     nonInstalledLatestVersions,
     mlAuthz
+  );
+
+  logger.debug(
+    `reviewRuleInstallationHandler: ${installableVersions.length} rules remaining after checking license restrictions`
   );
 
   return installableVersions;

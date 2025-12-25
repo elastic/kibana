@@ -7,6 +7,7 @@
 
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { Logger } from '@kbn/core/server';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -17,7 +18,10 @@ import {
 } from '../../constants';
 import { reviewRuleInstallationHandler } from './review_rule_installation_handler';
 
-export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
+export const reviewRuleInstallationRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -47,6 +51,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
           },
         },
       },
-      reviewRuleInstallationHandler
+      (context, request, response) =>
+        reviewRuleInstallationHandler(context, request, response, logger)
     );
 };
