@@ -5,140 +5,159 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 
-import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
-import type { HttpSetup } from '@kbn/core/public';
-import { TemplateList } from '../../../public/application/sections/home/template_list';
-import type { TemplateDeserialized } from '../../../common';
-import type { TestSubjects } from '../helpers';
-import { WithAppDependencies } from '../helpers';
+// Convert non breaking spaces (&nbsp;) to ordinary space
+export const removeWhiteSpaceOnArrayValues = (array: string[]) =>
+  array.map((value) => value.trim().replace(/\s/g, ' '));
 
-const testBedConfig: AsyncTestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`/templates`],
-    componentRoutePath: `/templates/:templateName?`,
-  },
-  doMountAsync: true,
+export const getTableCellsValues = (tableTestId: string): string[][] =>
+  new EuiTableTestHarness(tableTestId).normalizedCellValues;
+
+/**
+ * Helper to check if an element exists.
+ */
+export const exists = (testId: string): boolean => screen.queryByTestId(testId) !== null;
+
+const getActionLabel = (action: 'edit' | 'clone' | 'delete') => {
+  const labelMap: Record<typeof action, string> = {
+    edit: 'Edit',
+    clone: 'Clone',
+    delete: 'Delete',
+  };
+  return labelMap[action];
 };
 
-const createActions = (testBed: TestBed<TestSubjects>) => {
-  /**
-   * Additional helpers
-   */
-  const findAction = (action: 'edit' | 'clone' | 'delete') => {
-    const actions = ['edit', 'clone', 'delete'];
-    const { component } = testBed;
+const queryContextMenuItemButton = (label: string): HTMLButtonElement | null => {
+  // Avoid `findByText('Edit')` etc since EUI can render multiple "Edit" screen-reader-only spans.
+  const candidates = screen.queryAllByText(label);
+  const textEl = candidates.find((el) => el.classList.contains('euiContextMenuItem__text'));
+  return (textEl?.closest('button') as HTMLButtonElement | null) ?? null;
+};
 
-    return component.find('button.euiContextMenuItem').at(actions.indexOf(action));
-  };
-
-  /**
-   * User Actions
-   */
-  const selectDetailsTab = async (
-    tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
-  ) => {
-    const tabTestDataSubj = `${tab}TabBtn` as TestSubjects;
-
-    await act(async () => {
-      testBed.find(tabTestDataSubj).simulate('click');
-    });
-    testBed.component.update();
-  };
-
+/**
+ * Actions for interacting with the index templates tab.
+ */
+export const createIndexTemplatesTabActions = () => {
   const clickReloadButton = () => {
-    const { find } = testBed;
-    find('reloadButton').simulate('click');
+    fireEvent.click(screen.getByTestId('reloadButton'));
   };
 
-  const clickActionMenu = (templateName: TemplateDeserialized['name']) => {
-    const { component } = testBed;
-
-    // When a table has > 2 actions, EUI displays an overflow menu with an id "<template_name>-actions"
-    // The template name may contain a period (.) so we use bracket syntax for selector
-    act(() => {
-      component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+  const toggleViewFilter = async (filter: 'managed' | 'deprecated' | 'cloudManaged' | 'system') => {
+    const filterIndexMap: Record<string, number> = {
+      managed: 0,
+      deprecated: 1,
+      cloudManaged: 2,
+      system: 3,
+    };
+    // Click the view button to open the filter popover
+    fireEvent.click(screen.getByTestId('viewButton'));
+    await waitFor(() => {
+      expect(screen.getAllByTestId('filterItem').length).toBeGreaterThan(0);
     });
-    component.update();
-  };
-
-  const clickTemplateAction = async (
-    templateName: TemplateDeserialized['name'],
-    action: 'edit' | 'clone' | 'delete'
-  ) => {
-    const actions = ['edit', 'clone', 'delete'];
-    const { component } = testBed;
-
-    clickActionMenu(templateName);
-
-    await act(async () => {
-      component.find('button.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    // Click the appropriate filter item
+    const filterItems = screen.getAllByTestId('filterItem');
+    fireEvent.click(filterItems[filterIndexMap[filter]]);
+    await waitFor(() => {
+      expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
     });
-    component.update();
   };
 
   const clickTemplateAt = async (index: number, isLegacy = false) => {
-    const { component, table, router } = testBed;
-    const { rows } = table.getMetaData(isLegacy ? 'legacyTemplateTable' : 'templateTable');
-    const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
-
-    const { href } = templateLink.props();
-    await act(async () => {
-      router.navigateTo(href!);
+    const tableTestId = isLegacy ? 'legacyTemplateTable' : 'templateTable';
+    const dataRow = new EuiTableTestHarness(tableTestId).rows[index];
+    if (!dataRow) throw new Error(`Expected row ${index} to exist in table "${tableTestId}"`);
+    const templateLink = within(dataRow).getByTestId('templateDetailsLink');
+    fireEvent.click(templateLink);
+    await screen.findByTestId('templateDetails');
+    await waitFor(() => {
+      // Either summary tab or error section should be present
+      const hasSummaryTab = screen.queryByTestId('summaryTab') !== null;
+      const hasSectionError = screen.queryByTestId('sectionError') !== null;
+      expect(hasSummaryTab || hasSectionError).toBe(true);
     });
-    component.update();
   };
 
-  const clickCloseDetailsButton = () => {
-    const { find } = testBed;
-
-    find('closeDetailsButton').simulate('click');
+  const clickCloseDetailsButton = async () => {
+    fireEvent.click(screen.getByTestId('closeDetailsButton'));
+    await waitFor(() => {
+      expect(screen.queryByTestId('templateDetails')).not.toBeInTheDocument();
+    });
   };
 
-  const toggleViewItem = (view: 'managed' | 'deprecated' | 'cloudManaged' | 'system') => {
-    const { find, component } = testBed;
-    const views = ['managed', 'deprecated', 'cloudManaged', 'system'];
+  const clickActionMenu = async (templateName: string) => {
+    // EUI uses overflow menu with id "<template_name>-actions" when > 2 actions
+    const actionsContainer = document.getElementById(`${templateName}-actions`);
+    if (!actionsContainer) return;
 
-    // First open the pop over
-    act(() => {
-      find('viewButton').simulate('click');
-    });
-    component.update();
+    fireEvent.click(within(actionsContainer).getByRole('button'));
 
-    // Then click on a filter item
-    act(() => {
-      find('filterList.filterItem').at(views.indexOf(view)).simulate('click');
+    // Wait for context menu items to appear
+    await waitFor(() => {
+      expect(queryContextMenuItemButton('Edit')).toBeTruthy();
     });
-    component.update();
+  };
+
+  const findActionButton = (action: 'edit' | 'clone' | 'delete'): HTMLElement | null => {
+    return queryContextMenuItemButton(getActionLabel(action));
+  };
+
+  const clickTemplateAction = async (templateName: string, action: 'edit' | 'clone' | 'delete') => {
+    await clickActionMenu(templateName);
+    const label = getActionLabel(action);
+    const button = await waitFor(() => {
+      const el = queryContextMenuItemButton(label);
+      if (!el) throw new Error('Context menu item not ready');
+      return el;
+    });
+    fireEvent.click(button);
+    await waitFor(() => {
+      expect(queryContextMenuItemButton(label)).toBeNull();
+    });
+  };
+
+  const selectDetailsTab = async (
+    tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
+  ) => {
+    const tabTestIdMap: Record<string, string> = {
+      summary: 'summaryTabBtn',
+      settings: 'settingsTabBtn',
+      mappings: 'mappingsTabBtn',
+      aliases: 'aliasesTabBtn',
+      preview: 'previewTabBtn',
+    };
+    fireEvent.click(screen.getByTestId(tabTestIdMap[tab]));
+
+    const tabContentTestIds: Record<string, string[]> = {
+      summary: ['summaryTab'],
+      settings: ['settingsTabContent', 'noSettingsCallout'],
+      mappings: ['mappingsTabContent', 'noMappingsCallout'],
+      aliases: ['aliasesTabContent', 'noAliasesCallout'],
+      preview: ['previewTabContent'],
+    };
+    await waitFor(() => {
+      const testIds = tabContentTestIds[tab];
+      const found = testIds.some((testId) => screen.queryByTestId(testId) !== null);
+      expect(found).toBe(true);
+    });
   };
 
   return {
-    findAction,
-    actions: {
-      selectDetailsTab,
-      clickReloadButton,
-      clickTemplateAction,
-      clickTemplateAt,
-      clickCloseDetailsButton,
-      clickActionMenu,
-      toggleViewItem,
-    },
+    clickReloadButton,
+    toggleViewFilter,
+    clickTemplateAt,
+    clickCloseDetailsButton,
+    clickActionMenu,
+    findActionButton,
+    clickTemplateAction,
+    selectDetailsTab,
   };
 };
 
-export const setup = async (httpSetup: HttpSetup): Promise<IndexTemplatesTabTestBed> => {
-  const initTestBed = registerTestBed<TestSubjects>(
-    WithAppDependencies(TemplateList, httpSetup),
-    testBedConfig
-  );
-  const testBed = await initTestBed();
-
-  return {
-    ...testBed,
-    ...createActions(testBed),
-  };
+export const waitForTemplateListToLoad = async () => {
+  await screen.findByTestId('templateList');
+  await waitFor(() => {
+    expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
+  });
 };
-
-export type IndexTemplatesTabTestBed = TestBed<TestSubjects> & ReturnType<typeof createActions>;
