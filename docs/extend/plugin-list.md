@@ -111,6 +111,7 @@ mapped_pages:
 | Name | Description |
 | --- | --- |
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
+| [agentBuilder](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/README.md) | Home of the Agent Builder framework. |
 | [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
 | [aiops](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/aiops/README.md) | The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team. |
 | [alerting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md) | The Kibana Alerting plugin provides a common place to set up rules. You can: |
@@ -196,7 +197,6 @@ mapped_pages:
 | [observabilityLogsExplorer](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_logs_explorer/README.md) | This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances. |
 | [observabilityOnboarding](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_onboarding/README.md) | This plugin provides an onboarding framework for observability solutions: Logs and APM. |
 | [observabilityShared](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_shared/README.md) | A plugin that contains components and utilities shared by all Observability plugins. |
-| [agentBuilder](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/README.md) | Home of the Agent Builder framework. |
 | [osquery](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/osquery/README.md) | This plugin adds extended support to Security Solution Fleet Osquery integration |
 | [painlessLab](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/painless_lab/README.md) | This plugin helps users learn how to use the Painless scripting language. |
 | [productDocBase](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md) | This plugin provides APIs to install, update, and uninstall knowledge base artifacts for AI Assistants. It supports two resource types: |

@@ -4555,7 +4555,27 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-browser@link:x-pack/platform/packages/shared/agent-builder/agent-builder-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-common@link:x-pack/platform/packages/shared/agent-builder/agent-builder-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-platform-plugin@link:x-pack/platform/plugins/shared/agent_builder_platform":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-plugin@link:x-pack/platform/plugins/shared/agent_builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-server@link:x-pack/platform/packages/shared/agent-builder/agent-builder-server":
   version "0.0.0"
   uid ""
 
@@ -6615,11 +6635,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-obs-ai-assistant@link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant":
+"@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
+"@kbn/evals-suite-obs-ai-assistant@link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant":
   version "0.0.0"
   uid ""
 
@@ -7688,26 +7708,6 @@
   uid ""
 
 "@kbn/oidc-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/oidc_provider":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agent-builder-browser@link:x-pack/platform/packages/shared/agent-builder/agent-builder-browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agent-builder-common@link:x-pack/platform/packages/shared/agent-builder/agent-builder-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agent-builder-plugin@link:x-pack/platform/plugins/shared/agent_builder":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agent-builder-server@link:x-pack/platform/packages/shared/agent-builder/agent-builder-server":
   version "0.0.0"
   uid ""
 
