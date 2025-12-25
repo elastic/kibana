@@ -55,12 +55,23 @@ export class EuiSelectTestHarness {
    * Select option by value
    */
   public select(optionName: string | RegExp) {
-    const option = this.options.find((o) => o.value === optionName)?.value;
+    const matches = (re: RegExp, value: string) => {
+      // Avoid surprising behavior for global regexes (`/foo/g`) by resetting state.
+      re.lastIndex = 0;
+      return re.test(value);
+    };
+
+    const option = this.options.find((o) => {
+      if (typeof optionName === 'string') return o.value === optionName;
+
+      const text = o.textContent ?? '';
+      return matches(optionName, o.value) || matches(optionName, text);
+    });
 
     if (!option) {
       throw new Error(`Option [${optionName}] not found`);
     }
 
-    fireEvent.change(this.#selectEl, { target: { value: option } });
+    fireEvent.change(this.#selectEl, { target: { value: option.value } });
   }
 }
