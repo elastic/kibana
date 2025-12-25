@@ -36,14 +36,23 @@ export async function getCustomPropertySuggestions(
     return [];
   }
 
-  const key = focusedYamlPair.keyNode.value as string;
-  // if the key is in config, it's on a root level, so path will be equal to the key
-  const isInConfig = focusedYamlPair.path.length > 0 && focusedYamlPair.path[0] === key;
+  // if the key is in input, it's in the with block, so path will be ['with', 'key']
+  const isInInput = focusedYamlPair.path.length > 0 && focusedYamlPair.path[0] === 'with';
+  const composedKey = isInInput
+    ? focusedYamlPair.path.slice(1).join('.')
+    : focusedYamlPair.path.join('.');
+  // if the key is in config, it's on a root level, so path will be equal to the joined key path
+  const isInConfig =
+    focusedYamlPair.path.length > 0 && focusedYamlPair.path.join('.') === composedKey;
+
+  if (!isInConfig && !isInInput) {
+    return [];
+  }
 
   const propertyHandler = getPropertyHandler(
     focusedStepInfo.stepType,
     isInConfig ? 'config' : 'input',
-    key
+    composedKey
   );
   if (!propertyHandler || !propertyHandler.complete) {
     return [];

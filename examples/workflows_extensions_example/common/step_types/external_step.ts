@@ -33,10 +33,13 @@ export const OutputSchema = z.object({
 /**
  * Config schema for the external step.
  * Defines config properties that appear at the step level (outside the `with` block).
- * Example: `url`.
+ * Example: `proxy.id` or `proxy.url`.
  */
 export const ConfigSchema = z.object({
-  'proxy-id': z.string(),
+  proxy: z.object({
+    id: z.string(),
+    url: z.string().optional(),
+  }),
 });
 
 export type ExternalStepInputSchema = typeof InputSchema;

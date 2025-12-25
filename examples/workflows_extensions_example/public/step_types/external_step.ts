@@ -56,11 +56,11 @@ export const getExternalStepDefinition: (deps: {
   },
   propertyHandlers: {
     config: {
-      'proxy-id': {
+      'proxy.id': {
         complete: async (currentValue: unknown) => {
           const proxies = await deps.externalService.getProxies();
           const currentValueString = typeof currentValue === 'string' ? currentValue.trim() : '';
-          if (currentValueString.length > 1) {
+          if (currentValueString.length === 0) {
             return proxies.map((proxy) => ({
               label: proxy.id,
               value: proxy.id,
