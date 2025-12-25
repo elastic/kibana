@@ -602,7 +602,7 @@
           "signature": [
             "(request: ",
             "KibanaRequest",
-            "<unknown, unknown, unknown, any>, excludedExtension?: string[] | undefined) => ",
+            "<unknown, unknown, unknown, any>) => ",
             "MaintenanceWindowClientApi"
           ],
           "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
@@ -624,21 +624,6 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
-            },
-            {
-              "parentPluginId": "maintenanceWindows",
-              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientInternal.$2",
-              "type": "Array",
-              "tags": [],
-              "label": "excludedExtension",
-              "description": [],
-              "signature": [
-                "string[] | undefined"
-              ],
-              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": false
             }
           ],
           "returnComment": []
@@ -663,6 +648,42 @@
             {
               "parentPluginId": "maintenanceWindows",
               "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithAuth.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "maintenanceWindows",
+          "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithoutAuth",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaintenanceWindowClientWithoutAuth",
+          "description": [],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => ",
+            "MaintenanceWindowClientApi"
+          ],
+          "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "maintenanceWindows",
+              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithoutAuth.$1",
               "type": "Object",
               "tags": [],
               "label": "request",
