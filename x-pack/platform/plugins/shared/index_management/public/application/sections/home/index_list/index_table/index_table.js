@@ -49,6 +49,7 @@ import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
 import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
+import { DocCountCell } from './doc_count';
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -123,7 +124,7 @@ const getColumnConfigs = ({
         }),
         order: 60,
         render: (index) => {
-          return Number(index.documents ?? 0).toLocaleString();
+          return <DocCountCell indexName={index.name} httpSetup={http} />;
         },
       },
       {
