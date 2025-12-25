@@ -1,0 +1,139 @@
+{
+    "type": "index",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "mappings": {
+            "properties": {
+                "@timestamp": {
+                    "type": "date"
+                },
+                "event": {
+                    "properties": {
+                        "code": {
+                            "type": "keyword"
+                        },
+                        "category": {
+                            "type": "keyword"
+                        },
+                        "type": {
+                            "type": "keyword"
+                        },
+                        "action": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                "host": {
+                    "properties": {
+                        "name": {
+                            "type": "keyword"
+                        },
+                        "hostname": {
+                            "type": "keyword"
+                        },
+                        "os": {
+                            "properties": {
+                                "family": {
+                                    "type": "keyword"
+                                },
+                                "type": {
+                                    "type": "keyword"
+                                },
+                                "platform": {
+                                    "type": "keyword"
+                                },
+                                "name": {
+                                    "type": "keyword"
+                                },
+                                "version": {
+                                    "type": "keyword"
+                                }
+                            }
+                        }
+                    }
+                },
+                "process": {
+                    "properties": {
+                        "name": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
+                        "pid": {
+                            "type": "long"
+                        },
+                        "command_line": {
+                            "type": "wildcard",
+                            "fields": {
+                                "text": {
+                                    "type": "match_only_text"
+                                }
+                            }
+                        },
+                        "executable": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
+                        "args": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                "winlog": {
+                    "properties": {
+                        "channel": {
+                            "type": "keyword"
+                        },
+                        "event_id": {
+                            "type": "keyword"
+                        },
+                        "event_data": {
+                            "properties": {
+                                "ServiceName": {
+                                    "type": "keyword"
+                                },
+                                "ImagePath": {
+                                    "type": "keyword"
+                                },
+                                "ServiceType": {
+                                    "type": "keyword"
+                                },
+                                "StartType": {
+                                    "type": "keyword"
+                                },
+                                "AccountName": {
+                                    "type": "keyword"
+                                }
+                            }
+                        }
+                    }
+                },
+                "agent": {
+                    "properties": {
+                        "type": {
+                            "type": "keyword"
+                        },
+                        "version": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                "user": {
+                    "properties": {
+                        "name": {
+                            "type": "keyword"
+                        },
+                        "domain": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            }
+        },
+        "settings": {
+            "index": {
+                "number_of_replicas": "1",
+                "number_of_shards": "1"
+            }
+        }
+    }
+}

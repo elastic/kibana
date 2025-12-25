@@ -19,6 +19,10 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
+import {
+  NATURAL_LANGUAGE_THREAT_HUNTING_FEATURE_FLAG,
+  NATURAL_LANGUAGE_THREAT_HUNTING_FEATURE_FLAG_DEFAULT,
+} from '../common/entity_analytics/feature_flags';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAgents } from './agent_builder/agents';
@@ -152,6 +156,7 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { entityAnalyticsToolInternal } from './agent_builder/tools/entity_analytics/entity_analytics';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -233,10 +238,11 @@ export class Plugin implements ISecuritySolutionPlugin {
   }
 
   private registerOnechatAttachmentsAndTools(
-    onechat: SecuritySolutionPluginSetupDependencies['onechat'],
+    plugins: SecuritySolutionPluginSetupDependencies,
     core: SecuritySolutionPluginCoreSetupDependencies,
     logger: Logger
   ): void {
+    const onechat = plugins.onechat;
     if (!onechat) {
       return;
     }
@@ -264,6 +270,21 @@ export class Plugin implements ISecuritySolutionPlugin {
         registerAgents(onechat, core, logger).catch((error) => {
           this.logger.error(`Error registering security agent: ${error}`);
         });
+
+        const isNaturalLanguageThreatHuntingEnabled = await featureFlags.getBooleanValue(
+          NATURAL_LANGUAGE_THREAT_HUNTING_FEATURE_FLAG,
+          NATURAL_LANGUAGE_THREAT_HUNTING_FEATURE_FLAG_DEFAULT
+        );
+
+        if (isNaturalLanguageThreatHuntingEnabled) {
+          onechat.tools.register(
+            entityAnalyticsToolInternal(
+              core.getStartServices,
+              plugins.ml,
+              this.pluginContext.env.packageInfo.version
+            )
+          );
+        }
       })
       .catch((error) => {
         this.logger.error(`Error checking AI agents feature flag: ${error}`);
@@ -667,7 +688,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, core, this.logger);
+    this.registerOnechatAttachmentsAndTools(plugins, core, this.logger);
 
     return {
       setProductFeaturesConfigurator:

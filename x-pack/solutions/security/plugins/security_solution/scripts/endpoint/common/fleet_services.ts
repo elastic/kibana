@@ -2028,6 +2028,9 @@ export const installIntegration = async (
     .request<InstallPackageResponse>({
       method: 'POST',
       path: epmRouteService.getInstallPath(integrationName, version),
+      query: {
+        prerelease: 'true',
+      },
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);

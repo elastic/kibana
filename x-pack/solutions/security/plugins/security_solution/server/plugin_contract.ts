@@ -28,6 +28,8 @@ import type { FleetStartContract as FleetPluginStart } from '@kbn/fleet-plugin/s
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type {
   RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
@@ -45,8 +47,6 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/serve
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
-import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import type { ExperimentalFeatures } from '../common';
 
@@ -85,6 +85,7 @@ export interface SecuritySolutionPluginStartDependencies {
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
   licensing: LicensingPluginStart;
+  onechat: OnechatPluginStart;
   ruleRegistry: RuleRegistryPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;

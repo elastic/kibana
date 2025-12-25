@@ -63,6 +63,8 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "onechat",
+      "llmTasks",
       "share"
     ],
     "optionalPlugins": [

@@ -1,0 +1,699 @@
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T08:00:00.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-server-01",
+                "hostname": "windows-server-01",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows Server 2019",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 668
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "WindowsUpdateService",
+                    "ImagePath": "C:\\Windows\\System32\\wuauserv.dll",
+                    "ServiceType": "0x20",
+                    "StartType": "2",
+                    "AccountName": "LocalSystem"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "SYSTEM",
+                "domain": "NT AUTHORITY"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T09:15:30.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-server-02",
+                "hostname": "windows-server-02",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows Server 2016",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 720
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "RemoteRegistry",
+                    "ImagePath": "C:\\Windows\\System32\\regsvc.dll",
+                    "ServiceType": "0x20",
+                    "StartType": "3",
+                    "AccountName": "LocalService"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "Administrator",
+                "domain": "CONTOSO"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T10:22:45.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-workstation-01",
+                "hostname": "windows-workstation-01",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows 10 Pro",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 652
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "SuspiciousBackdoorService",
+                    "ImagePath": "C:\\Temp\\malicious.exe",
+                    "ServiceType": "0x10",
+                    "StartType": "2",
+                    "AccountName": "LocalSystem"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "jdoe",
+                "domain": "WORKGROUP"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T11:05:12.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-server-03",
+                "hostname": "windows-server-03",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows Server 2019",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 688
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "CustomMonitoringAgent",
+                    "ImagePath": "C:\\Program Files\\Monitoring\\agent.exe",
+                    "ServiceType": "0x10",
+                    "StartType": "2",
+                    "AccountName": "NetworkService"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "admin",
+                "domain": "CORP"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T12:30:00.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-server-01",
+                "hostname": "windows-server-01",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows Server 2019",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 668
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "PrintSpooler",
+                    "ImagePath": "C:\\Windows\\System32\\spoolsv.exe",
+                    "ServiceType": "0x110",
+                    "StartType": "2",
+                    "AccountName": "LocalSystem"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "SYSTEM",
+                "domain": "NT AUTHORITY"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T13:45:18.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-workstation-02",
+                "hostname": "windows-workstation-02",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows 11 Pro",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 700
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "RareCustomService",
+                    "ImagePath": "C:\\CustomApps\\service.exe",
+                    "ServiceType": "0x10",
+                    "StartType": "3",
+                    "AccountName": "LocalService"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "user1",
+                "domain": "WORKGROUP"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T14:20:33.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-server-04",
+                "hostname": "windows-server-04",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows Server 2022",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 712
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "WindowsDefender",
+                    "ImagePath": "C:\\Program Files\\Windows Defender\\MsMpEng.exe",
+                    "ServiceType": "0x10",
+                    "StartType": "2",
+                    "AccountName": "LocalSystem"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "SYSTEM",
+                "domain": "NT AUTHORITY"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T15:10:45.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-server-02",
+                "hostname": "windows-server-02",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows Server 2016",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 720
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "UnusualPersistenceService",
+                    "ImagePath": "C:\\Windows\\Temp\\hidden.exe",
+                    "ServiceType": "0x10",
+                    "StartType": "2",
+                    "AccountName": "LocalSystem"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "Administrator",
+                "domain": "CONTOSO"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T16:25:22.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-workstation-03",
+                "hostname": "windows-workstation-03",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows 10 Enterprise",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 680
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "BitLocker",
+                    "ImagePath": "C:\\Windows\\System32\\bdesvc.dll",
+                    "ServiceType": "0x20",
+                    "StartType": "3",
+                    "AccountName": "LocalSystem"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "user2",
+                "domain": "CORP"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T17:40:55.000Z",
+            "event": {
+                "code": "7045",
+                "category": "configuration",
+                "type": "creation",
+                "action": "service-installed"
+            },
+            "host": {
+                "name": "windows-server-05",
+                "hostname": "windows-server-05",
+                "os": {
+                    "family": "windows",
+                    "type": "windows",
+                    "platform": "windows",
+                    "name": "Windows Server 2019",
+                    "version": "10.0"
+                }
+            },
+            "process": {
+                "name": "services.exe",
+                "pid": 696
+            },
+            "winlog": {
+                "channel": "System",
+                "event_id": "7045",
+                "event_data": {
+                    "ServiceName": "DNSCache",
+                    "ImagePath": "C:\\Windows\\System32\\dnsrslvr.dll",
+                    "ServiceType": "0x20",
+                    "StartType": "2",
+                    "AccountName": "NetworkService"
+                }
+            },
+            "agent": {
+                "type": "winlogbeat",
+                "version": "8.0.0"
+            },
+            "user": {
+                "name": "SYSTEM",
+                "domain": "NT AUTHORITY"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T08:00:00.000Z",
+            "event": {
+                "category": "process",
+                "type": "start",
+                "action": "exec"
+            },
+            "host": {
+                "name": "linux-server-01",
+                "os": {
+                    "type": "linux",
+                    "family": "debian",
+                    "platform": "ubuntu"
+                }
+            },
+            "user": {
+                "name": "root"
+            },
+            "process": {
+                "name": "sudo",
+                "pid": 12345,
+                "command_line": "sudo apt-get update",
+                "executable": "/usr/bin/sudo",
+                "args": [
+                    "sudo",
+                    "apt-get",
+                    "update"
+                ]
+            },
+            "agent": {
+                "type": "auditbeat"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T08:15:00.000Z",
+            "event": {
+                "category": "process",
+                "type": "start",
+                "action": "executed"
+            },
+            "host": {
+                "name": "linux-server-01",
+                "os": {
+                    "type": "linux",
+                    "family": "debian",
+                    "platform": "ubuntu"
+                }
+            },
+            "user": {
+                "name": "root"
+            },
+            "process": {
+                "name": "usermod",
+                "pid": 12346,
+                "command_line": "usermod -aG sudo newuser",
+                "executable": "/usr/sbin/usermod",
+                "args": [
+                    "usermod",
+                    "-aG",
+                    "sudo",
+                    "newuser"
+                ]
+            },
+            "agent": {
+                "type": "auditbeat"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T08:30:00.000Z",
+            "event": {
+                "category": "process",
+                "type": "start",
+                "action": "fork"
+            },
+            "host": {
+                "name": "linux-server-02",
+                "os": {
+                    "type": "Linux",
+                    "family": "redhat",
+                    "platform": "centos"
+                }
+            },
+            "user": {
+                "name": "admin"
+            },
+            "process": {
+                "name": "passwd",
+                "pid": 23456,
+                "command_line": "passwd -l testuser",
+                "executable": "/usr/bin/passwd",
+                "args": [
+                    "passwd",
+                    "-l",
+                    "testuser"
+                ]
+            },
+            "agent": {
+                "type": "auditbeat"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T09:00:00.000Z",
+            "event": {
+                "category": "process",
+                "type": "start",
+                "action": "exec"
+            },
+            "host": {
+                "name": "linux-server-02",
+                "os": {
+                    "type": "linux",
+                    "family": "redhat",
+                    "platform": "centos"
+                }
+            },
+            "user": {
+                "name": "privileged-user-1"
+            },
+            "process": {
+                "name": "visudo",
+                "pid": 23457,
+                "command_line": "visudo -c",
+                "executable": "/usr/sbin/visudo",
+                "args": [
+                    "visudo",
+                    "-c"
+                ]
+            },
+            "agent": {
+                "type": "auditbeat"
+            }
+        }
+    }
+}
+
+{
+    "type": "doc",
+    "value": {
+        "index": "winlogbeat-windows-services",
+        "source": {
+            "@timestamp": "2025-11-01T09:15:00.000Z",
+            "event": {
+                "category": "process",
+                "type": "start",
+                "action": "executed"
+            },
+            "host": {
+                "name": "linux-server-03",
+                "os": {
+                    "type": "Linux",
+                    "family": "debian",
+                    "platform": "ubuntu"
+                }
+            },
+            "user": {
+                "name": "privileged-user-2"
+            },
+            "process": {
+                "name": "chown",
+                "pid": 34567,
+                "command_line": "chown root:root /etc/shadow",
+                "executable": "/bin/chown",
+                "args": [
+                    "chown",
+                    "root:root",
+                    "/etc/shadow"
+                ]
+            },
+            "agent": {
+                "type": "auditbeat"
+            }
+        }
+    }
+}

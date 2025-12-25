@@ -256,6 +256,8 @@ dependsOn:
   - '@kbn/onechat-genai-utils'
   - '@kbn/onechat-server'
   - '@kbn/object-utils'
+  - '@kbn/onechat-plugin'
+  - '@kbn/onechat-common'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/response-ops-rule-form'

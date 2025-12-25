@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ModuleJob } from '@kbn/ml-plugin/common/types/modules';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../../../../../common/constants';
+import { DEFAULT_ANOMALY_SCORE, ML_GROUP_IDS } from '../../../../../common/constants';
+import type { EntityType } from '../../../../../common/search_strategy';
+import type { EntityAnalyticsSubTool } from './types';
+
+export const isSecurityJob = (job: ModuleJob): boolean =>
+  job.config?.groups?.some((group) =>
+    ML_GROUP_IDS.includes(group as typeof ML_GROUP_ID | typeof LEGACY_ML_GROUP_ID)
+  ) || false;
+
+export const getAnomalyDetectionSubTool: EntityAnalyticsSubTool = async (
+  entityType: EntityType,
+  { uiSettingsClient, request, soClient, ml, modelProvider, prompt }
+) => {
+  const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
+  const mlModulesProvider = ml?.modulesProvider(request, soClient);
+  const modules = await mlModulesProvider?.listModules?.();
+
+  const jobServiceProvider = ml?.jobServiceProvider(request, soClient);
+  const allJobsWithStatus = await jobServiceProvider?.jobsSummary();
+
+  const formattedModulesJobs = modules?.map((module) => {
+    return {
+      moduleTitle: module.title,
+      moduleDescription: module.description,
+      moduleJobs: module.jobs.filter(isSecurityJob).map((job) => {
+        const jobStatus = allJobsWithStatus?.find(({ id }) => id === job.id);
+
+        return {
+          id: job.id,
+          description: job.config.description,
+          influencers: job.config.analysis_config.influencers,
+          isJobStarted: jobStatus
+            ? isJobStarted(jobStatus.jobState, jobStatus.datafeedState)
+            : false,
+        };
+      }),
+    };
+  });
+
+  const model = await modelProvider.getDefaultModel();
+  const recommendedJobsResp = await model.inferenceClient.output({
+    id: 'entity_analytics_threat_hunting_ml_anomaly_filter',
+    input: `
+      You are a capable security solution analyst who must filter a list of ML jobs and return only the ones that can satisfy the user's prompt.
+      Carefully consider the module title, description and job description and influencers to determine if the job can help answer the user prompt.
+      Return only the list of job IDs that can be used to answer the user prompt for the given entity type.
+          
+      User prompt: "${prompt}""
+      Entity type: "${entityType}"
+      Available Modules and Jobs: ${JSON.stringify(formattedModulesJobs)}`,
+    schema: {
+      type: 'object',
+      properties: {
+        filteredJobIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  });
+
+  const recommendedJobIds = recommendedJobsResp.output.filteredJobIds as string[];
+  const securityJobsFormatted = formattedModulesJobs?.flatMap((module) => module.moduleJobs) ?? [];
+  const recommendedJobs = securityJobsFormatted.filter((job) => recommendedJobIds.includes(job.id));
+  const recommendedStartedJobIds = recommendedJobs
+    .filter((job) => job.isJobStarted)
+    .map((job) => job.id);
+
+  if (recommendedStartedJobIds.length === 0) {
+    return {
+      message: `
+        There are no started machine learning anomaly detection jobs in this environment that can be used to anser the user prompt for entity type '${entityType}'. 
+        The following jobs could be used to answer the user prompt: \n${JSON.stringify(
+          recommendedJobIds,
+          null,
+          2
+        )}
+        \nThe user needs to start at least one job so that this assistant can answer the prompt.
+        You must prompt the user to start the jobs before generating any ES|QL query.
+
+        Here is a complete list with all security solution jobs in the environment: \n${JSON.stringify(
+          securityJobsFormatted,
+          null,
+          2
+        )}
+      `,
+    };
+  }
+
+  const whereList = recommendedStartedJobIds.map((id) => `"${id}"`).join(', ');
+  const whereClause = `| WHERE job_id IN (${whereList})`;
+
+  return {
+    message: `
+      When generating ES|QL queries for machine learning jobs, you **MUST ALWAYS** use the following filter: '${whereClause}'
+      You **MUST ONLY** return anomalies with a 'record_score' bigger than ${anomalyScore} (Anomaly threshold set in the UI settings). Use this filter: "| WHERE record_score > ${anomalyScore}".
+      All records inside the anomaly job index are of type 'result_type:record'.
+
+      Fields that you should use to answer the question:
+        * record_score: The anomaly score.
+        * @timestamp: The timestamp of the anomaly. This timestamp might be in a different timezone than the user's timezone. You should not compare this field with hour of the day to avoid timezone issues.
+        * job_id: The job ID of the anomaly.
+        * partition_field_name: The field used to segment the analysis.
+        * partition_field_value: The value of the partition field.
+        * actual: The anomalous value that triggered the anomaly creation.
+        * typical: The typical value expected for the field.
+
+        ### Common influencers fields (Other fields may be available depending on the job): user.name, host.name, agent.name, process.name, client.geo.country_name, client.geo.region_name
+
+        ### This is a list of recommended jobs that can be used to answer the user prompt for entity type '${entityType}' (You should suggest that the user install these jobs):
+        ${JSON.stringify(recommendedJobs, null, 2)}         
+`,
+    index: `.ml-anomalies-*`,
+  };
+};

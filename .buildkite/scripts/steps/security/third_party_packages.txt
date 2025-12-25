@@ -26,3 +26,4 @@ ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
 yaml-language-server
+@babel/plugin-bugfix-firefox-class-in-computed-class-key
