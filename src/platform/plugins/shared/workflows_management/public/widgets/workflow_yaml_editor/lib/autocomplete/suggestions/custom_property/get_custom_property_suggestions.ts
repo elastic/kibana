@@ -11,8 +11,13 @@ import { monaco } from '@kbn/monaco';
 import type { StepPropertyHandler } from '@kbn/workflows';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
+export type GetCustomPropertySuggestionsContext = Pick<
+  AutocompleteContext,
+  'focusedStepInfo' | 'focusedYamlPair' | 'yamlLineCounter'
+>;
+
 export async function getCustomPropertySuggestions(
-  autocompleteContext: AutocompleteContext,
+  autocompleteContext: GetCustomPropertySuggestionsContext,
   getPropertyHandler: (
     stepType: string,
     scope: 'config' | 'input',
