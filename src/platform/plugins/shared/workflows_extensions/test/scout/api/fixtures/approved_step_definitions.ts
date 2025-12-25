@@ -42,11 +42,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.regex_extract',
-    handlerHash: '5477f5381bb2f339da3323b1bcc8402ae10b3011c52497c6066a32130c94d0ab',
+    handlerHash: '68d9855b90667afca12e1022078805aa55de6244ce37fdbd28a77375ae51c122',
   },
   {
     id: 'data.regex_replace',
-    handlerHash: '17821b34339152e19dfd47f5345e13da3754f905fc2b3bfd69ab887854e66eb1',
+    handlerHash: 'f70dc506c0c1e9dbb7cf7520c6549524a87e2995ab496f3151df5842e9d91a73',
   },
   {
     id: 'onechat.runAgent',
