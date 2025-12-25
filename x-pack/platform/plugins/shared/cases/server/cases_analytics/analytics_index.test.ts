@@ -21,7 +21,7 @@ import type {
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { scheduleCAIBackfillTask } from './tasks/backfill_task';
 
-jest.mock('@kbn/response-ops-retry-service');
+jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
 jest.mock('./tasks/backfill_task');
 
 const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;

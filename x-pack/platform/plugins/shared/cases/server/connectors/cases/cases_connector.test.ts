@@ -21,7 +21,7 @@ import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('./cases_connector_executor');
-jest.mock('@kbn/response-ops-retry-service');
+jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
 
 const CasesConnectorExecutorMock = CasesConnectorExecutor as jest.Mock;
 const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
