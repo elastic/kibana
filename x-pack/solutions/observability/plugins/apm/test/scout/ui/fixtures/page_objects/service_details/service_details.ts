@@ -8,11 +8,13 @@
 import { createLazyPageObject, type KibanaUrl, type ScoutPage } from '@kbn/scout-oblt';
 import { testData } from '../..';
 import { DependenciesTab } from './dependencies_tab';
+import { AlertsTab } from './alerts_tab';
 
 export class ServiceDetailsPage {
   public readonly SERVICE_NAME = 'opbeans-java';
 
   public readonly dependenciesTab: DependenciesTab;
+  public readonly alertsTab: AlertsTab;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.dependenciesTab = createLazyPageObject(
@@ -21,6 +23,7 @@ export class ServiceDetailsPage {
       this.kbnUrl,
       this.SERVICE_NAME
     );
+    this.alertsTab = createLazyPageObject(AlertsTab, this.page, this.kbnUrl, this.SERVICE_NAME);
   }
 
   public async goToPage(

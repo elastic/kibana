@@ -15779,7 +15779,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_latest_readiness_tasks.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_readiness_categories.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17385,6 +17385,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts/set_workflow_status_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts/set_alert_tags_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts/set_alert_assignees_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/exceptions/api/manage_exceptions/route.ts"
               },
               {
@@ -17586,10 +17598,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/install_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/post_readiness_task.ts"
               },
               {
                 "plugin": "securitySolution",
