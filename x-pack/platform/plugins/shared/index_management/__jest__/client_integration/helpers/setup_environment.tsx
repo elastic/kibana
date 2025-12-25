@@ -75,6 +75,10 @@ applicationService.capabilities = {
   },
 };
 
+const http = httpServiceMock.createSetupContract();
+
+http.get.mockResolvedValue({ count: '10000' });
+
 const appDependencies = {
   services,
   history,
@@ -82,7 +86,7 @@ const appDependencies = {
   core: {
     getUrlForApp: applicationService.getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),
-    http: httpServiceMock.createSetupContract(),
+    http,
     application: applicationService,
     chrome: chromeServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
