@@ -67,7 +67,7 @@ export class QueryUtils {
 
   /**
    * Get all usage counters for a specific domain
-   * @param domainId - Domain identifier (e.g., 'agentBuilder')
+   * @param domainId - Domain identifier (e.g., 'agent_builder')
    * @returns Array of usage counter data
    */
   async getCountersByDomain(domainId: string): Promise<UsageCounterData[]> {
@@ -654,7 +654,7 @@ export class QueryUtils {
    */
   calculatePercentilesFromBuckets(
     buckets: Map<string, number>,
-    domainPrefix: string = 'agentBuilder'
+    domainPrefix: string = 'agent_builder'
   ): {
     p50: number;
     p75: number;

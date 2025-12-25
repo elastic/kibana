@@ -564,7 +564,7 @@ describe('query_utils', () => {
       it('returns all zeros for empty buckets', () => {
         const buckets = new Map<string, number>();
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agent_builder');
 
         expect(result).toEqual({
           p50: 0,
@@ -579,7 +579,7 @@ describe('query_utils', () => {
       it('calculates percentiles for single bucket', () => {
         const buckets = new Map<string, number>([['agent_builder_query_to_result_time_<1s', 100]]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agent_builder');
 
         // All percentiles should be within the <1s bucket (0-1000ms)
         expect(result.p50).toBe(500); // 50% of 100 = 50, linear interpolation in 0-1000
@@ -599,7 +599,7 @@ describe('query_utils', () => {
           ['agent_builder_query_to_result_time_30s+', 1],
         ]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agent_builder');
 
         // Total count = 100
         // p50 (50th item) should be in <1s bucket
@@ -619,7 +619,7 @@ describe('query_utils', () => {
           ['agent_builder_query_to_result_time_<1s', 100], // midpoint 500
         ]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agent_builder');
 
         // Mean for single bucket should be midpoint
         expect(result.mean).toBe(500);
@@ -631,7 +631,7 @@ describe('query_utils', () => {
           ['agent_builder_query_to_result_time_1-5s', 50], // midpoint 3000, weight 50
         ]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agent_builder');
 
         // Mean should be (500*50 + 3000*50) / 100 = 1750
         expect(result.mean).toBe(1750);
@@ -640,7 +640,7 @@ describe('query_utils', () => {
       it('handles only high duration buckets', () => {
         const buckets = new Map<string, number>([['agent_builder_query_to_result_time_30s+', 10]]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agent_builder');
 
         // All percentiles should be within 30s+ bucket
         expect(result.p50).toBeGreaterThanOrEqual(30000);
