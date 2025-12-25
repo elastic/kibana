@@ -97,8 +97,6 @@ export const AdHocRunAttributesToEncrypt = ['apiKeyToUse'];
 export const AdHocRunAttributesIncludedInAAD = ['rule', 'spaceId'];
 export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
 
-// NOTE: ES|QL rule saved object type has moved to `alerting_v2`.
-
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -135,7 +133,6 @@ export function setupSavedObjects(
     },
     modelVersions: ruleModelVersions,
   });
-
 
   savedObjects.registerType({
     name: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -283,5 +280,4 @@ export function setupSavedObjects(
     attributesToEncrypt: new Set(AdHocRunAttributesToEncrypt),
     attributesToIncludeInAAD: new Set(AdHocRunAttributesIncludedInAAD),
   });
-
 }

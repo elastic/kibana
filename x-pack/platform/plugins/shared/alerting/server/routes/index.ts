@@ -148,7 +148,6 @@ export function defineRoutes(opts: RouteOptions) {
   registerAlertsValueSuggestionsRoute(router, licenseState, config$!, getAlertIndicesAlias);
   bulkUntrackAlertsRoute(router, licenseState);
   bulkUntrackAlertsByQueryRoute(router, licenseState);
-
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
   bulkMuteAlertsRoute(router, licenseState);

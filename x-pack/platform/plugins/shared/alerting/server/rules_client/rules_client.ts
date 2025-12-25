@@ -300,6 +300,4 @@ export class RulesClient {
   public getContext() {
     return this.context;
   }
-
-  // NOTE: ES|QL rule APIs have moved to `alerting_v2`.
 }
