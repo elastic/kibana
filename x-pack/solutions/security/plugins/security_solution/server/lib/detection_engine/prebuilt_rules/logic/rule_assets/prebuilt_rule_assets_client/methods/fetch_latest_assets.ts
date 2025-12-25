@@ -16,6 +16,12 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 
+/**
+ * Fetches the latest version of each prebuilt rule asset.
+ *
+ * @param savedObjectsClient - The saved objects client used to query the saved objects store
+ * @returns A promise that resolves to an array of prebuilt rule assets.
+ */
 export async function fetchLatestAssets(
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<PrebuiltRuleAsset[]> {
@@ -28,6 +34,7 @@ export async function fetchLatestAssets(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
+    // Aggregation groups prebuilt rule assets by rule_id and gets a rule with the highest version for each group.
     aggs: {
       rules: {
         terms: {

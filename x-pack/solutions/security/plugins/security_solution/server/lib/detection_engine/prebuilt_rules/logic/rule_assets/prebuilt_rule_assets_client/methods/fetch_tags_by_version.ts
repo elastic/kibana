@@ -11,6 +11,13 @@ import { invariant } from '../../../../../../../../common/utils/invariant';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 
+/**
+ * Fetches unique tags from prebuilt rule assets for specified rule versions.
+ *
+ * @param savedObjectsClient - Saved Objects client
+ * @param versions - An array of rule version specifiers, each containing a rule_id and version
+ * @returns A promise that resolves to an array of unique tags, sorted alphabetically.
+ */
 export async function fetchTagsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
   versions: RuleVersionSpecifier[]
@@ -36,7 +43,7 @@ export async function fetchTagsByVersion(
       unique_tags: {
         terms: {
           field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`,
-          size: 10000,
+          size: 10_000,
           order: { _key: 'asc' },
         },
       },

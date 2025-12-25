@@ -17,64 +17,55 @@ import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_s
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { PrebuiltRuleAssetsFilter } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import { buildEsQueryFilter, buildEsQuerySort } from '../utils';
 
-function transformSortParameter(
-  sort?: { field: 'name' | 'severity' | 'risk_score'; order: 'asc' | 'desc' }[]
-) {
-  const soSortFields = {
-    name: `${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`,
-    severity: `${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`,
-    risk_score: `${PREBUILT_RULE_ASSETS_SO_TYPE}.risk_score`,
-  };
-  return sort?.map((s) => {
-    return { field: soSortFields[s.field], order: s.order };
-  });
-}
-
+/**
+ * Fetches the BasicRuleInfo for prebuilt rule assets: rule_id, version and type.
+ * By default, fetches BasicRuleInfo for all prebuilt rule assets.
+ * If ruleIds are provided, only fetches for the provided ruleIds.
+ *
+ * @param savedObjectsClient - Saved Objects client
+ * @param queryParameters - Optional arguments object
+ * @param queryParameters.ruleIds - Optional array of rule IDs to query for
+ * @param queryParameters.filter - Optional filter configuration
+ * @param queryParameters.sort - Optional sort configuration
+ * @returns A promise that resolves to an array of BasicRuleInfo objects (rule_id, version, type).
+ */
 export async function fetchLatestVersions(
   savedObjectsClient: SavedObjectsClientContract,
-  args?: {
+  queryParameters?: {
     ruleIds?: string[];
-    sort?: PrebuiltRuleAssetsSort;
     filter?: PrebuiltRuleAssetsFilter;
+    sort?: PrebuiltRuleAssetsSort;
   }
 ): Promise<BasicRuleInfo[]> {
-  const { ruleIds, sort, filter } = args || {};
+  const { ruleIds, sort, filter } = queryParameters || {};
 
   if (ruleIds && ruleIds.length === 0) {
     return [];
   }
 
-  const queryFilter = [];
+  // First, fetch the latest version numbers for each rule_id.
+  const latestVersionSpecifiers: RuleVersionSpecifier[] = await fetchLatestVersionSpecifiers(
+    savedObjectsClient,
+    ruleIds,
+    filter
+  );
 
-  if (ruleIds) {
-    queryFilter.push({
-      terms: {
-        [`${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`]: ruleIds,
-      },
-    });
-  }
+  // Then, fetch the rule type for each latest version and sort the result.
+  const soIds = latestVersionSpecifiers.map(
+    (rule) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${rule.rule_id}_${rule.version}`
+  );
+  const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds, sort);
 
-  if (filter?.fields?.name?.include) {
-    filter.fields.name.include.forEach((name) => {
-      queryFilter.push({
-        wildcard: {
-          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`]: `*${name}*`,
-        },
-      });
-    });
-  }
+  return latestVersions;
+}
 
-  if (filter?.fields.tags?.include) {
-    filter.fields.tags.include.forEach((tag) => {
-      queryFilter.push({
-        term: {
-          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`]: tag,
-        },
-      });
-    });
-  }
-
+async function fetchLatestVersionSpecifiers(
+  savedObjectsClient: SavedObjectsClientContract,
+  ruleIds?: string[],
+  filter?: PrebuiltRuleAssetsFilter
+) {
   const latestVersionSpecifiersResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource,
     {
@@ -93,7 +84,7 @@ export async function fetchLatestVersions(
     size: 0,
     query: {
       bool: {
-        filter: queryFilter,
+        filter: buildEsQueryFilter(ruleIds, filter),
       },
     },
     aggs: {
@@ -138,13 +129,14 @@ export async function fetchLatestVersions(
       version: soAttributes.version,
     };
   });
+  return latestVersionSpecifiers;
+}
 
-  const soIds = latestVersionSpecifiers.map(
-    (rule) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${rule.rule_id}_${rule.version}`
-  );
-
-  const savedObjectSortParameter = transformSortParameter(sort);
-
+async function fetchVersionsBySoIds(
+  savedObjectsClient: SavedObjectsClientContract,
+  soIds: string[],
+  sort?: PrebuiltRuleAssetsSort
+) {
   const searchResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource & {
       [PREBUILT_RULE_ASSETS_SO_TYPE]: BasicRuleInfo;
@@ -167,9 +159,7 @@ export async function fetchLatestVersions(
         _id: soIds,
       },
     },
-    sort: savedObjectSortParameter?.map((s) => {
-      return { [s.field]: s.order };
-    }),
+    sort: buildEsQuerySort(sort),
     _source: [
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,

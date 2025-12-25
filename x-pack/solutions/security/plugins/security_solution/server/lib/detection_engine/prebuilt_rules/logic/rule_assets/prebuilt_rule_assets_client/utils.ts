@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ESFilter } from '@kbn/es-types';
+import type { Sort } from '@elastic/elasticsearch/lib/api/types';
+import type { PrebuiltRuleAssetsFilter } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
+import type { PrebuiltRuleAssetsSort } from '../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../prebuilt_rule_assets_type';
+
+export function buildEsQueryFilter(
+  ruleIds?: string[],
+  filter?: PrebuiltRuleAssetsFilter
+): ESFilter[] {
+  const queryFilter: ESFilter[] = [];
+
+  if (ruleIds) {
+    queryFilter.push({
+      terms: {
+        [`${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`]: ruleIds,
+      },
+    });
+  }
+
+  if (filter?.fields?.name?.include) {
+    filter.fields.name.include.forEach((name) => {
+      queryFilter.push({
+        wildcard: {
+          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`]: `*${name}*`,
+        },
+      });
+    });
+  }
+
+  if (filter?.fields.tags?.include) {
+    filter.fields.tags.include.forEach((tag) => {
+      queryFilter.push({
+        term: {
+          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`]: tag,
+        },
+      });
+    });
+  }
+  return queryFilter;
+}
+
+export function buildEsQuerySort(sort?: PrebuiltRuleAssetsSort): Sort | undefined {
+  const soSortFields = {
+    name: `${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`,
+    severity: `${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`,
+    risk_score: `${PREBUILT_RULE_ASSETS_SO_TYPE}.risk_score`,
+  };
+
+  return sort?.map((s) => {
+    return { [soSortFields[s.field]]: s.order };
+  });
+}

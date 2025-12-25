@@ -13,6 +13,16 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import type { RuleVersionSpecifier } from '../../../rule_versions/rule_version_specifier';
 
+/**
+ * Fetches prebuilt rule assets for specified rule versions.
+ *
+ * Takes a list of objects with "rule_id" and "version" properties.
+ * Returns full prebuilt rule.
+ *
+ * @param savedObjectsClient - The saved objects client used to query the saved objects store
+ * @param versions - An array of rule version specifiers, each containing a rule_id and version.
+ * @returns A promise that resolves to an array of prebuilt rule assets.
+ */
 export async function fetchAssetsByVersion(
   savedObjectsClient: SavedObjectsClientContract,
   versions: RuleVersionSpecifier[]
@@ -49,13 +59,13 @@ export async function fetchAssetsByVersion(
     return savedObject;
   });
 
+  // Ensure the order of the returned assets matches the order of the "versions" argument.
   const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
   for (const asset of ruleAssets) {
     const key = `${PREBUILT_RULE_ASSETS_SO_TYPE}:${asset.rule_id}_${asset.version}`;
     ruleAssetsMap.set(key, asset);
   }
 
-  // Preserve the input order by mapping over the input versions array
   const orderedRuleAssets = soIds
     .map((soId) => ruleAssetsMap.get(soId))
     .filter((asset) => asset !== undefined);
