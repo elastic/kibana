@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
-} from '@kbn/onechat-server/allow_lists';
+} from '@kbn/agent-builder-server/allow_lists';
 import { createHash } from 'crypto';
 
-const BUILTIN_AGENT_IDS = new Set([oneChatDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
+const BUILTIN_AGENT_IDS = new Set([agentBuilderDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
 const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 
 const CUSTOM = 'custom';

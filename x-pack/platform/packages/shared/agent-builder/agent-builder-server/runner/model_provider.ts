@@ -13,7 +13,7 @@ import type {
 } from '@kbn/inference-common';
 
 /**
- * Represents a model that can be used within the onechat framework (e.g. tools).
+ * Represents a model that can be used within the agentBuilder framework (e.g. tools).
  *
  * It exposes different interfaces to models.
  */

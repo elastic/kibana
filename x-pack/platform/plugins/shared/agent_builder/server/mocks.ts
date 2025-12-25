@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup, OnechatPluginStart } from './types';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
 import { createFormatContextMock } from './test_utils/attachments';
 
-const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
+const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {
     agents: {
       register: jest.fn(),
@@ -23,7 +23,7 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   };
 };
 
-const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
+const createStartContractMock = (): jest.Mocked<AgentBuilderPluginStart> => {
   return {
     agents: {
       runAgent: jest.fn(),
@@ -35,7 +35,7 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   };
 };
 
-export const onechatMocks = {
+export const agentBuilderMocks = {
   createSetup: createSetupContractMock,
   createStart: createStartContractMock,
   createTool: createMockedExecutableTool,

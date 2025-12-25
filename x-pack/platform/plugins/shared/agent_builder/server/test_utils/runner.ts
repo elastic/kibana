@@ -20,9 +20,9 @@ import type {
   AgentHandlerContext,
   ScopedRunner,
   ToolProvider,
-} from '@kbn/onechat-server';
-import type { AttachmentsService } from '@kbn/onechat-server/runner/attachments_service';
-import type { ConversationStateManager, PromptManager } from '@kbn/onechat-server/runner';
+} from '@kbn/agent-builder-server';
+import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
+import type { ConversationStateManager, PromptManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateScopedRunnerDeps, CreateRunnerDeps } from '../services/runner/runner';
 import type { ModelProviderMock, ModelProviderFactoryMock } from './model_provider';

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '../../../agent_builder_api_integration/utils/llm_proxy';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -30,7 +30,7 @@ const CONVERSATION_DATA = [
 ];
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const es = getService('es');
@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Create conversations once for all tests
       for (const conv of CONVERSATION_DATA) {
-        const conversationId = await onechat.createConversationViaUI(
+        const conversationId = await agentBuilder.createConversationViaUI(
           conv.title,
           conv.userMessage,
           conv.expectedResponse,
@@ -71,9 +71,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('can navigate between multiple conversations using the conversation history', async () => {
       // Assert all conversations are in the history
-      expect(await onechat.isConversationInHistory(conversationIds[0])).to.be(true);
-      expect(await onechat.isConversationInHistory(conversationIds[1])).to.be(true);
-      expect(await onechat.isConversationInHistory(conversationIds[2])).to.be(true);
+      expect(await agentBuilder.isConversationInHistory(conversationIds[0])).to.be(true);
+      expect(await agentBuilder.isConversationInHistory(conversationIds[1])).to.be(true);
+      expect(await agentBuilder.isConversationInHistory(conversationIds[2])).to.be(true);
 
       // Test navigating between all 3 conversations using the conversation history sidebar
       for (let i = 0; i < CONVERSATION_DATA.length; i++) {
@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const convId = conversationIds[i];
 
         // Navigate to the conversation
-        await onechat.navigateToConversationViaHistory(convId);
+        await agentBuilder.navigateToConversationViaHistory(convId);
 
         // Wait for conversation content to load
         await retry.try(async () => {
@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const convId = conversationIds[i];
 
         // Click on the conversation in the history sidebar
-        await onechat.navigateToConversationById(convId);
+        await agentBuilder.navigateToConversationById(convId);
 
         // Wait for conversation content to load
         await retry.try(async () => {
@@ -119,10 +119,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'LLM response continuing the conversation';
 
       const conversationIdToContinue = conversationIds[1];
-      await onechat.navigateToConversationViaHistory(conversationIdToContinue);
+      await agentBuilder.navigateToConversationViaHistory(conversationIdToContinue);
 
       // Continue the conversation with a new message
-      await onechat.continueConversation(MOCKED_INPUT, MOCKED_RESPONSE, llmProxy);
+      await agentBuilder.continueConversation(MOCKED_INPUT, MOCKED_RESPONSE, llmProxy);
 
       // Assert the new response content (continueConversation already waits for it)
       const responseElements = await testSubjects.findAll('agentBuilderRoundResponse');
@@ -133,17 +133,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('can delete conversations and updates conversation history', async () => {
       const conversationIdToDelete = conversationIds[0];
-      await onechat.deleteConversation(conversationIdToDelete);
+      await agentBuilder.deleteConversation(conversationIdToDelete);
 
       // Wait for the deleted conversation to disappear from history (wait for refetch to complete)
       await retry.try(async () => {
-        const isInHistory = await onechat.isConversationInHistory(conversationIdToDelete);
+        const isInHistory = await agentBuilder.isConversationInHistory(conversationIdToDelete);
         expect(isInHistory).to.be(false);
       });
 
       // Assert the remaining conversations are still in history
-      expect(await onechat.isConversationInHistory(conversationIds[1])).to.be(true);
-      expect(await onechat.isConversationInHistory(conversationIds[2])).to.be(true);
+      expect(await agentBuilder.isConversationInHistory(conversationIds[1])).to.be(true);
+      expect(await agentBuilder.isConversationInHistory(conversationIds[2])).to.be(true);
     });
 
     it('can rename a conversation and the title updates correctly', async () => {
@@ -151,7 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const newTitle = 'Renamed Conversation Title';
 
       // Navigate to the conversation
-      await onechat.navigateToConversationViaHistory(conversationIdToRename);
+      await agentBuilder.navigateToConversationViaHistory(conversationIdToRename);
 
       // Wait for conversation content to load
       await retry.try(async () => {
@@ -159,7 +159,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Rename the conversation
-      const updatedTitle = await onechat.renameConversation(newTitle);
+      const updatedTitle = await agentBuilder.renameConversation(newTitle);
 
       // Assert the title was updated correctly
       expect(updatedTitle).to.be(newTitle);

@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 export const progressMessages = {
   selectingTarget: () => {
-    return i18n.translate('xpack.onechat.tools.search.progress.selectingTarget', {
+    return i18n.translate('xpack.agentBuilder.tools.search.progress.selectingTarget', {
       defaultMessage: 'Identifying the most relevant data source',
     });
   },
   resolvingSearchStrategy: ({ target }: { target: string }) => {
-    return i18n.translate('xpack.onechat.tools.search.progress.searchStrategy', {
+    return i18n.translate('xpack.agentBuilder.tools.search.progress.searchStrategy', {
       defaultMessage: 'Analyzing strategy to search against "{target}"',
       values: {
         target,
@@ -22,7 +22,7 @@ export const progressMessages = {
     });
   },
   performingRelevanceSearch: ({ term }: { term: string }) => {
-    return i18n.translate('xpack.onechat.tools.search.progress.performingRelevanceSearch', {
+    return i18n.translate('xpack.agentBuilder.tools.search.progress.performingRelevanceSearch', {
       defaultMessage: 'Searching documents for "{term}"',
       values: {
         term,
@@ -30,7 +30,7 @@ export const progressMessages = {
     });
   },
   performingNlSearch: ({ query }: { query: string }) => {
-    return i18n.translate('xpack.onechat.tools.search.progress.performingTextSearch', {
+    return i18n.translate('xpack.agentBuilder.tools.search.progress.performingTextSearch', {
       defaultMessage: 'Generating an ES|QL query for "{query}"',
       values: {
         query,

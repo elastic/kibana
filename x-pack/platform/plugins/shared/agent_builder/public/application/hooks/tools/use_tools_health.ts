@@ -8,14 +8,14 @@
 import { useQuery } from '@kbn/react-query';
 import type { ToolHealthState, McpToolHealthState } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 
 const EMPTY_MCP_HEALTH_STATES: readonly McpToolHealthState[] = [];
 
 const EMPTY_HEALTH_STATES: readonly ToolHealthState[] = [];
 
 export const useToolsHealth = () => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.health.list(),
@@ -35,7 +35,7 @@ export interface UseToolHealthOptions {
 }
 
 export const useToolHealth = ({ toolId }: UseToolHealthOptions) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.health.byId(toolId),
@@ -51,7 +51,7 @@ export const useToolHealth = ({ toolId }: UseToolHealthOptions) => {
 };
 
 export const useMcpToolsHealth = ({ enabled = true }: { enabled?: boolean } = {}) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.health.mcp(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChatEventType, ToolProgressEventData, ChatEventBase } from '@kbn/onechat-common';
+import type { ChatEventType, ToolProgressEventData, ChatEventBase } from '@kbn/agent-builder-common';
 
 export type InternalToolProgressEventData = Omit<ToolProgressEventData, 'tool_call_id'>;
 
@@ -14,12 +14,12 @@ export type InternalToolProgressEvent = ChatEventBase<
   InternalToolProgressEventData
 >;
 
-export type OnechatToolEvent = InternalToolProgressEvent;
+export type AgentBuilderToolEvent = InternalToolProgressEvent;
 
 /**
- * Event handler function to listen to run events during execution of tools, agents or other onechat primitives.
+ * Event handler function to listen to run events during execution of tools, agents or other agentBuilder primitives.
  */
-export type ToolEventHandlerFn = (event: OnechatToolEvent) => void;
+export type ToolEventHandlerFn = (event: AgentBuilderToolEvent) => void;
 
 /**
  * Progress event reporter, sending a tool progress event based on the provided progress info

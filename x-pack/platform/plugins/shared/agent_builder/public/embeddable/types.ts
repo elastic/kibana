@@ -6,12 +6,12 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { OnechatInternalService } from '../services';
+import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AgentBuilderInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
-  services: OnechatInternalService;
+  services: AgentBuilderInternalService;
   coreStart: CoreStart;
 }
 

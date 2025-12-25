@@ -11,17 +11,17 @@ import { RunAgentStepTypeId, runAgentStepCommonDefinition } from '../../common/s
 
 export const runAgentStepDefinition: PublicStepDefinition = {
   ...runAgentStepCommonDefinition,
-  label: i18n.translate('xpack.onechat.runAgentStep.label', {
+  label: i18n.translate('xpack.agentBuilder.runAgentStep.label', {
     defaultMessage: 'Run Agent',
   }),
-  description: i18n.translate('xpack.onechat.runAgentStep.description', {
-    defaultMessage: 'Execute an Onechat AI agent to process input and generate responses',
+  description: i18n.translate('xpack.agentBuilder.runAgentStep.description', {
+    defaultMessage: 'Execute an AgentBuilder AI agent to process input and generate responses',
   }),
   actionsMenuGroup: ActionsMenuGroup.ai,
   documentation: {
-    details: i18n.translate('xpack.onechat.runAgentStep.documentation.details', {
+    details: i18n.translate('xpack.agentBuilder.runAgentStep.documentation.details', {
       defaultMessage:
-        'The onechat.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context.',
+        'The agentBuilder.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context.',
     }),
     examples: [
       `## Basic agent invocation

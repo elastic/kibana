@@ -8,10 +8,10 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
-import type { EsqlToolDefinition } from '@kbn/onechat-common/tools/types/esql';
-import type { IndexSearchToolDefinition } from '@kbn/onechat-common/tools/types/index_search';
-import type { WorkflowToolDefinition } from '@kbn/onechat-common/tools/types/workflow';
+import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
+import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
+import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolHandlerFn } from './handler';
 

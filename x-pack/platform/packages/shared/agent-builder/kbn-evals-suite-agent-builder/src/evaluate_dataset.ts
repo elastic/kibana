@@ -23,7 +23,7 @@ import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { OnechatEvaluationChatClient } from './chat_client';
+import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
   input: {
@@ -57,7 +57,7 @@ export function createEvaluateDataset({
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
-  chatClient: OnechatEvaluationChatClient;
+  chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {

@@ -52,7 +52,7 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
       aria-labelledby={confirmModalTitleId}
       title={
         <FormattedMessage
-          id="xpack.onechat.conversationTitle.deleteConversationModal.title"
+          id="xpack.agentBuilder.conversationTitle.deleteConversationModal.title"
           defaultMessage="Delete conversation"
         />
       }
@@ -61,13 +61,13 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
       onConfirm={handleDelete}
       cancelButtonText={
         <FormattedMessage
-          id="xpack.onechat.conversationTitle.deleteConversationModal.cancelButton"
+          id="xpack.agentBuilder.conversationTitle.deleteConversationModal.cancelButton"
           defaultMessage="Cancel"
         />
       }
       confirmButtonText={
         <FormattedMessage
-          id="xpack.onechat.conversationTitle.deleteConversationModal.confirmButton"
+          id="xpack.agentBuilder.conversationTitle.deleteConversationModal.confirmButton"
           defaultMessage="Delete"
         />
       }
@@ -77,7 +77,7 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
     >
       <p>
         <FormattedMessage
-          id="xpack.onechat.conversationTitle.deleteConversationModal.description"
+          id="xpack.agentBuilder.conversationTitle.deleteConversationModal.description"
           defaultMessage="Are you sure you want to delete the conversation {title}? This action cannot be undone."
           values={{
             title: <strong>{title || ''}</strong>,

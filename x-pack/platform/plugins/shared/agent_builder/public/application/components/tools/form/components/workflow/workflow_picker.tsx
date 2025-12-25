@@ -53,7 +53,7 @@ export const WorkflowPicker: React.FC = () => {
 
   return (
     <EuiComboBox
-      placeholder={i18n.translate('xpack.onechat.tools.workflow.picker.placeholder', {
+      placeholder={i18n.translate('xpack.agentBuilder.tools.workflow.picker.placeholder', {
         defaultMessage: 'Select a workflow',
       })}
       options={options}
@@ -64,8 +64,8 @@ export const WorkflowPicker: React.FC = () => {
       singleSelection={{ asPlainText: false }}
       isLoading={isLoading}
       isInvalid={fieldState.invalid}
-      data-test-subj="onechatWorkflowPicker"
-      aria-label={i18n.translate('xpack.onechat.tools.workflow.picker.ariaLabel', {
+      data-test-subj="agentBuilderWorkflowPicker"
+      aria-label={i18n.translate('xpack.agentBuilder.tools.workflow.picker.ariaLabel', {
         defaultMessage: 'Workflow selection',
       })}
     />

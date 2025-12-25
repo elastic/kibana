@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EsResourceType } from '@kbn/onechat-common';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import type { ResourceDescriptor } from './index_explorer';
 import { createIndexSelectorPrompt, formatResource, indexExplorer } from './index_explorer';
 import { listSearchSources } from './steps/list_search_sources';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { ScopedModel } from '@kbn/onechat-server';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 
 jest.mock('./steps/list_search_sources');
 

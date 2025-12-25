@@ -15,10 +15,10 @@ import type {
   ToolCallProgress,
   ToolCallStep,
   Conversation,
-} from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
+} from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { AttachmentInput, Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';

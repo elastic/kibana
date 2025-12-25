@@ -6,20 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
+import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../../utils/one_chat_client';
+import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
 
-export default function ({ getService }: OneChatApiFtrProviderContext) {
+export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
   const supertest = getService('supertest');
 
   const log = getService('log');
-  const oneChatApiClient = createOneChatApiClient(supertest);
+  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
   describe('FOO POST /api/agent_builder/converse: multi rounds', function () {
     let llmProxy: LlmProxy;
@@ -46,8 +46,8 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         response: MOCKED_LLM_RESPONSE_1,
       });
 
-      const firstResponse = await oneChatApiClient.converse({
-        input: 'Hello OneChat',
+      const firstResponse = await agentBuilderApiClient.converse({
+        input: 'Hello AgentBuilder',
         connector_id: connectorId,
       });
 
@@ -61,7 +61,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         response: MOCKED_LLM_RESPONSE_2,
       });
 
-      const secondResponse = await oneChatApiClient.converse({
+      const secondResponse = await agentBuilderApiClient.converse({
         input: 'Follow up',
         conversation_id: conversationId,
         connector_id: connectorId,
@@ -71,7 +71,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
 
       expect(secondResponse.response.message).to.eql(MOCKED_LLM_RESPONSE_2);
 
-      const conversation = await oneChatApiClient.getConversation(conversationId);
+      const conversation = await agentBuilderApiClient.getConversation(conversationId);
 
       expect(conversation.rounds.length).to.eql(2);
       expect(conversation.rounds[0].response.message).to.eql(MOCKED_LLM_RESPONSE_1);

@@ -6,7 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { UnknownAttachment } from '@kbn/onechat-common/attachments';
+import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 
 /**
  * UI definition for rendering attachments of a specific type.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlToolFieldTypes, ToolType } from '@kbn/onechat-common';
+import type { EsqlToolFieldTypes, ToolType } from '@kbn/agent-builder-common';
 
 export interface EsqlParam {
   name: string;

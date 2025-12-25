@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { listSearchSources } from '@kbn/onechat-genai-utils';
-import { ToolType, validateToolId } from '@kbn/onechat-common';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils';
+import { ToolType, validateToolId } from '@kbn/agent-builder-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ListToolsResponse } from '@kbn/mcp-client';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { isMcpTool, type McpToolDefinition } from '@kbn/onechat-common/tools';
+import { isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -60,7 +60,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -114,7 +114,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -242,7 +242,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -289,7 +289,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -330,7 +330,7 @@ export function registerInternalToolsRoutes({
       validate: false,
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -358,7 +358,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -370,7 +370,7 @@ export function registerInternalToolsRoutes({
         });
       }
 
-      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
+      const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
       const { results } = await workflowsManagement.management.getWorkflows(
         { page: request.query.page, size: request.query.limit, enabled: [true] },
@@ -400,7 +400,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -414,7 +414,7 @@ export function registerInternalToolsRoutes({
         });
       }
 
-      const currentSpace = (await ctx.onechat).spaces.getSpaceId();
+      const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
       const workflow = await workflowsManagement.management.getWorkflow(
         request.params.id,
@@ -438,7 +438,7 @@ export function registerInternalToolsRoutes({
       validate: false,
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -465,7 +465,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -496,7 +496,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -529,7 +529,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -558,7 +558,7 @@ export function registerInternalToolsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -610,7 +610,7 @@ export function registerInternalToolsRoutes({
       validate: false,
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {

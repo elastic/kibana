@@ -8,7 +8,7 @@
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import React, { memo, useEffect, useState } from 'react';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
@@ -17,7 +17,7 @@ import { ToolsTableHeader } from './tools_table_header';
 import { toolQuickActionsHoverStyles } from './tools_table_quick_actions';
 import { useToolsTableSearch } from './tools_table_search';
 
-export const OnechatToolsTable = memo(() => {
+export const AgentBuilderToolsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
   const { tools, isLoading: isLoadingTools, error: toolsError } = useToolsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);

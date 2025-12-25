@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/onechat-common';
-import { AgentType } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { AgentType } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart, AgentRegistry } from '../services/agents';
 import type { InternalAgentDefinition } from '../services/agents/agent_registry';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
+import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 
 export interface BrowserToolCall {

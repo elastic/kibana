@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScopedRunnerRunAgentParams } from '@kbn/onechat-server';
+import type { ScopedRunnerRunAgentParams } from '@kbn/agent-builder-server';
 
 import { RunnerManager } from './runner';
 import { runAgent } from './run_agent';

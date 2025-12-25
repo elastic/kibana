@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Conversation, ConverseInput } from '@kbn/onechat-common';
-import type { PromptManager, ToolPromptManager } from '@kbn/onechat-server/runner';
-import type { ConfirmationPromptWithResponse } from '@kbn/onechat-server/agents/prompts';
-import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
-import { AgentPromptType, ConfirmationStatus } from '@kbn/onechat-common/agents/prompts';
+import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import type { PromptManager, ToolPromptManager } from '@kbn/agent-builder-server/runner';
+import type { ConfirmationPromptWithResponse } from '@kbn/agent-builder-server/agents/prompts';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 
 export const createPromptManager = (): PromptManager => {
   const promptMap = new Map<string, ConfirmationPromptWithResponse>();

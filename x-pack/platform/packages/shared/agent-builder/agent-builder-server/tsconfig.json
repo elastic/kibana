@@ -19,7 +19,7 @@
     "@kbn/utility-types",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
-    "@kbn/onechat-common",
+    "@kbn/agent-builder-common",
     "@kbn/inference-common",
     "@kbn/logging",
     "@kbn/core-ui-settings-server",

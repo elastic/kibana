@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { McpToolConfig } from '@kbn/onechat-common/tools';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ListToolsResponse } from '@kbn/mcp-client';

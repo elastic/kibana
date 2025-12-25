@@ -8,15 +8,15 @@
 import React from 'react';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
-import { OnechatConversationsView } from '../components/conversations/conversations_view';
+import { AgentBuilderConversationsView } from '../components/conversations/conversations_view';
 import { labels } from '../utils/i18n';
 
-export const OnechatConversationsPage: React.FC = () => {
+export const AgentBuilderConversationsPage: React.FC = () => {
   useBreadcrumb([
     {
       text: labels.conversations.title,
       path: appPaths.chat.new,
     },
   ]);
-  return <OnechatConversationsView />;
+  return <AgentBuilderConversationsView />;
 };

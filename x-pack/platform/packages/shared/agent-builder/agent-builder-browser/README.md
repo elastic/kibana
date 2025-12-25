@@ -1,3 +1,3 @@
-# @kbn/onechat-browser
+# @kbn/agent-builder-browser
 
-Browser-side types and utilities for the onechat framework.
+Browser-side types and utilities for the agentBuilder framework.

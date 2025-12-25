@@ -21,7 +21,7 @@ export type {
   RunToolReturn,
 } from './runner';
 export {
-  type OnechatToolEvent,
+  type AgentBuilderToolEvent,
   type ToolEventHandlerFn,
   type ToolEventEmitter,
   type ToolProgressEmitterFn,

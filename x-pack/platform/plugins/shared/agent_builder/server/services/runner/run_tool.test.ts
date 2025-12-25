@@ -8,10 +8,10 @@
 import { z } from '@kbn/zod';
 import type {
   ScopedRunnerRunToolsParams,
-  OnechatToolEvent,
+  AgentBuilderToolEvent,
   ToolHandlerFn,
-} from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/tools/utils';
+} from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
@@ -20,9 +20,9 @@ import {
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
-jest.mock('@kbn/onechat-server/tools/utils');
+jest.mock('@kbn/agent-builder-server/tools/utils');
 
 const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 
@@ -183,7 +183,7 @@ describe('runTool', () => {
   });
 
   it('exposes an event emitter to the tool handler caller can attach to using the onEvent param', async () => {
-    const emittedEvents: OnechatToolEvent[] = [];
+    const emittedEvents: AgentBuilderToolEvent[] = [];
 
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RunContext } from '@kbn/onechat-server';
+import type { RunContext } from '@kbn/agent-builder-server';
 import {
   createEmptyRunContext,
   forkContextForToolRun,

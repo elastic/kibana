@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createBadRequestError } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 export const validateWorkflowId = async ({

@@ -17,7 +17,7 @@ import type {
  * Factory function that creates an embeddable Conversation component
  * with services injected via closure.
  *
- * @param services - Internal onechat services
+ * @param services - Internal agentBuilder services
  * @param coreStart - Kibana core start services
  * @returns A configured Conversation component ready for external consumption
  */

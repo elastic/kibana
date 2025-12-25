@@ -9,8 +9,8 @@ import { v4 } from 'uuid';
 import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
 import { ToolMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
-import type { RunToolReturn } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
+import type { RunToolReturn } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import { isArray } from 'lodash';
 import { cleanPrompt } from '../prompts';
 
@@ -61,7 +61,7 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
 /**
  * Extract the structured tool return from a given tool message.
  * Note: this assumes the tool call was performed with the right configuration, so that
- * it was executed from a onechat agent.
+ * it was executed from a agentBuilder agent.
  */
 export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
   if (message.artifact) {

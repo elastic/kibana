@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { ServiceManager } from '../services';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
 
 /**
- * Server step definition for the onechat.runAgent step.
- * This step executes an onechat agent using the internal runner service.
+ * Server step definition for the agentBuilder.runAgent step.
+ * This step executes an agentBuilder agent using the internal runner service.
  */
 export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
   return createServerStepDefinition({
@@ -22,14 +22,14 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         const { message, schema } = context.input;
         const { agent_id: agentId } = context.config;
 
-        context.logger.debug('onechat.runAgent step started');
+        context.logger.debug('agentBuilder.runAgent step started');
         const request = context.contextManager.getFakeRequest();
         if (!request) {
           throw new Error('No request available in workflow context');
         }
 
-        context.logger.debug('Executing onechat.runAgent step', {
-          agentId: agentId || oneChatDefaultAgentId,
+        context.logger.debug('Executing agentBuilder.runAgent step', {
+          agentId: agentId || agentBuilderDefaultAgentId,
         });
 
         const runner = await serviceManager.internalStart?.runnerFactory?.getRunner();
@@ -38,7 +38,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         }
 
         const { result } = await runner.runAgent({
-          agentId: agentId || oneChatDefaultAgentId,
+          agentId: agentId || agentBuilderDefaultAgentId,
           request,
           abortSignal: context.abortSignal,
           agentParams: {
@@ -50,7 +50,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           },
         });
 
-        context.logger.debug('onechat.runAgent step completed successfully');
+        context.logger.debug('agentBuilder.runAgent step completed successfully');
 
         const outputMessage = schema
           ? result.round.response.structured_output
@@ -59,7 +59,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         return { output: outputMessage };
       } catch (error) {
         context.logger.error(
-          'onechat.runAgent step failed',
+          'agentBuilder.runAgent step failed',
           error instanceof Error ? error : new Error(String(error))
         );
         return {

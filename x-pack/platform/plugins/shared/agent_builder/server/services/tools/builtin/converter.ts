@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
   StaticToolRegistration,
   InternalToolDefinition,
-} from '@kbn/onechat-server/tools';
+} from '@kbn/agent-builder-server/tools';
 import type {
   ToolTypeDefinition,
   BuiltinToolTypeDefinition,

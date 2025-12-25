@@ -11,7 +11,7 @@ import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
-export const OnechatBulkImportMcpToolsPage = () => {
+export const AgentBuilderBulkImportMcpToolsPage = () => {
   useBreadcrumb([
     {
       text: labels.tools.title,

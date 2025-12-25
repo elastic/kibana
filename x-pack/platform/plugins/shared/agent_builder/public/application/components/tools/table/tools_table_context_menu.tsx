@@ -13,7 +13,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';

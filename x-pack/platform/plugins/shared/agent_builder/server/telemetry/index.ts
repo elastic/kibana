@@ -9,16 +9,16 @@ export { TrackingService, ToolCallSource } from './tracking_service';
 export { AnalyticsService } from './analytics_service';
 export { QueryUtils, type UsageCounterData } from './query_utils';
 export {
-  createOnechatUsageCounter,
+  createAgentBuilderUsageCounter,
   trackToolCall,
   trackLLMUsage,
   trackConversationRound,
   trackQueryToResultTime,
-  ONECHAT_USAGE_DOMAIN,
+  AGENTBUILDER_USAGE_DOMAIN,
 } from './usage_counters';
-export { registerTelemetryCollector, type OnechatTelemetry } from './telemetry_collector';
+export { registerTelemetryCollector, type AgentBuilderTelemetry } from './telemetry_collector';
 
-// Used to identify requests to EIS originating from OneChat (moved from old telemetry.ts)
+// Used to identify requests to EIS originating from AgentBuilder (moved from old telemetry.ts)
 export const MODEL_TELEMETRY_METADATA = {
-  pluginId: 'one_chat',
+  pluginId: 'agent_builder',
 } as const;

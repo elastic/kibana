@@ -9,7 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import type { Tool as McpTool } from '@kbn/mcp-client';
 import type { ConnectorItem } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 
 const EMPTY_CONNECTORS: readonly ConnectorItem[] = [];
 const EMPTY_TOOLS: readonly McpTool[] = [];
@@ -18,7 +18,7 @@ export interface UseListConnectorsOptions {
   type?: string;
 }
 export const useListConnectors = ({ type }: UseListConnectorsOptions) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
   const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.connectors.list(type),
     queryFn: () => toolsService.listConnectors({ type }),
@@ -30,7 +30,7 @@ export const useListConnectors = ({ type }: UseListConnectorsOptions) => {
 };
 
 export const useGetConnector = ({ connectorId }: { connectorId: string }) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
   const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.connectors.get(connectorId),
     queryFn: () => toolsService.getConnector({ connectorId }),
@@ -43,7 +43,7 @@ export const useGetConnector = ({ connectorId }: { connectorId: string }) => {
 };
 
 export const useListMcpTools = ({ connectorId }: { connectorId: string }) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
   const { data, ...queryFields } = useQuery({
     queryKey: queryKeys.tools.connectors.listMcpTools(connectorId),
     queryFn: () => toolsService.listMcpTools({ connectorId }),

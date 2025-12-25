@@ -8,8 +8,8 @@
 import type { Span } from '@opentelemetry/api';
 import { safeJsonStringify } from '@kbn/std';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { AgentDefinition } from '@kbn/onechat-common';
-import type { AgentHandlerReturn } from '@kbn/onechat-server';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
+import type { AgentHandlerReturn } from '@kbn/agent-builder-server';
 
 interface WithAgentSpanOptions {
   agent: AgentDefinition;

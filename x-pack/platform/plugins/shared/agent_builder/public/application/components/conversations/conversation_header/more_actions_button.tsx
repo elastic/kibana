@@ -34,52 +34,52 @@ import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { RobotIcon } from '../../common/icons/robot';
 
 const fullscreenLabels = {
-  actions: i18n.translate('xpack.onechat.conversationActions.actions', {
+  actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
     defaultMessage: 'More',
   }),
-  actionsAriaLabel: i18n.translate('xpack.onechat.conversationActions.actionsAriaLabel', {
+  actionsAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.actionsAriaLabel', {
     defaultMessage: 'More',
   }),
   conversationTitleLabel: i18n.translate(
-    'xpack.onechat.conversationActions.conversationTitleLabel',
+    'xpack.agentBuilder.conversationActions.conversationTitleLabel',
     {
       defaultMessage: 'Conversation',
     }
   ),
-  editCurrentAgent: i18n.translate('xpack.onechat.conversationActions.editCurrentAgent', {
+  editCurrentAgent: i18n.translate('xpack.agentBuilder.conversationActions.editCurrentAgent', {
     defaultMessage: 'Edit agent',
   }),
-  cloneAgentAsNew: i18n.translate('xpack.onechat.conversationActions.duplicateAgentAsNew', {
+  cloneAgentAsNew: i18n.translate('xpack.agentBuilder.conversationActions.duplicateAgentAsNew', {
     defaultMessage: 'Duplicate as new',
   }),
   conversationAgentLabel: i18n.translate(
-    'xpack.onechat.conversationActions.conversationAgentLabel',
+    'xpack.agentBuilder.conversationActions.conversationAgentLabel',
     {
       defaultMessage: 'Agent',
     }
   ),
   conversationManagementLabel: i18n.translate(
-    'xpack.onechat.conversationActions.conversationManagementLabel',
+    'xpack.agentBuilder.conversationActions.conversationManagementLabel',
     {
       defaultMessage: 'Management',
     }
   ),
-  agents: i18n.translate('xpack.onechat.conversationActions.agents', {
+  agents: i18n.translate('xpack.agentBuilder.conversationActions.agents', {
     defaultMessage: 'View all agents',
   }),
-  tools: i18n.translate('xpack.onechat.conversationActions.tools', {
+  tools: i18n.translate('xpack.agentBuilder.conversationActions.tools', {
     defaultMessage: 'View all tools',
   }),
-  rename: i18n.translate('xpack.onechat.conversationActions.rename', {
+  rename: i18n.translate('xpack.agentBuilder.conversationActions.rename', {
     defaultMessage: 'Rename',
   }),
-  delete: i18n.translate('xpack.onechat.conversationActions.delete', {
+  delete: i18n.translate('xpack.agentBuilder.conversationActions.delete', {
     defaultMessage: 'Delete',
   }),
-  genAiSettings: i18n.translate('xpack.onechat.conversationActions.genAiSettings', {
+  genAiSettings: i18n.translate('xpack.agentBuilder.conversationActions.genAiSettings', {
     defaultMessage: 'Gen AI Settings',
   }),
-  externalLinkAriaLabel: i18n.translate('xpack.onechat.conversationActions.externalLinkAriaLabel', {
+  externalLinkAriaLabel: i18n.translate('xpack.agentBuilder.conversationActions.externalLinkAriaLabel', {
     defaultMessage: 'Open in new tab',
   }),
 };
@@ -117,7 +117,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const hasPersistedConversation = useHasPersistedConversation();
   const agentId = useAgentId();
   const isAgentReadOnly = useIsAgentReadOnly(agentId);
-  const { createOnechatUrl } = useNavigation();
+  const { createAgentBuilderUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
 
@@ -177,7 +177,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       size="s"
       disabled={isAgentReadOnly || !manageAgents}
       onClick={closePopover}
-      href={agentId ? createOnechatUrl(appPaths.agents.edit({ agentId })) : undefined}
+      href={agentId ? createAgentBuilderUrl(appPaths.agents.edit({ agentId })) : undefined}
     >
       {fullscreenLabels.editCurrentAgent}
     </EuiContextMenuItem>,
@@ -189,7 +189,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       onClick={closePopover}
       href={
         agentId
-          ? createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agentId })
+          ? createAgentBuilderUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agentId })
           : undefined
       }
     >
@@ -203,8 +203,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="agents"
       icon={<RobotIcon />}
       onClick={closePopover}
-      href={createOnechatUrl(appPaths.agents.list)}
-      data-test-subj="onechatActionsAgents"
+      href={createAgentBuilderUrl(appPaths.agents.list)}
+      data-test-subj="agentBuilderActionsAgents"
     >
       {fullscreenLabels.agents}
     </EuiContextMenuItem>,
@@ -212,8 +212,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
       key="tools"
       icon="wrench"
       onClick={closePopover}
-      href={createOnechatUrl(appPaths.tools.list)}
-      data-test-subj="onechatActionsTools"
+      href={createAgentBuilderUrl(appPaths.tools.list)}
+      data-test-subj="agentBuilderActionsTools"
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,

@@ -18,7 +18,7 @@ import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
-import { useOnechatAgents } from '../../../hooks/agents/use_agents';
+import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { useAgentId } from '../../../hooks/use_conversation';
@@ -56,7 +56,7 @@ const useInputShadowStyles = () => {
   `;
 };
 
-const containerAriaLabel = i18n.translate('xpack.onechat.conversationInput.container.label', {
+const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
 });
 
@@ -102,14 +102,14 @@ interface ConversationInputProps {
 }
 
 const disabledPlaceholder = (agentId?: string) =>
-  i18n.translate('xpack.onechat.conversationInput.textArea.disabledPlaceholder', {
+  i18n.translate('xpack.agentBuilder.conversationInput.textArea.disabledPlaceholder', {
     defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
     values: {
       agentId,
     },
   });
 const enabledPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.textArea.enabledPlaceholder',
+  'xpack.agentBuilder.conversationInput.textArea.enabledPlaceholder',
   {
     defaultMessage: 'Ask anything',
   }
@@ -118,7 +118,7 @@ const enabledPlaceholder = i18n.translate(
 export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
   const { sendMessage, pendingMessage, error } = useSendMessage();
-  const { isFetched } = useOnechatAgents();
+  const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();

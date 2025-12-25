@@ -18,19 +18,19 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ToolCallStep } from '@kbn/onechat-common';
+import type { ToolCallStep } from '@kbn/agent-builder-common';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { codeblockStyles } from './codeblock.styles';
 
 const labels = {
-  parameters: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.parameters', {
+  parameters: i18n.translate('xpack.agentBuilder.round.thinking.steps.thinkingItemLayout.parameters', {
     defaultMessage: 'Parameters',
   }),
-  close: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.close', {
+  close: i18n.translate('xpack.agentBuilder.round.thinking.steps.thinkingItemLayout.close', {
     defaultMessage: 'Close',
   }),
-  open: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.open', {
+  open: i18n.translate('xpack.agentBuilder.round.thinking.steps.thinkingItemLayout.open', {
     defaultMessage: 'Open',
   }),
 };

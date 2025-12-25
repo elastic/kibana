@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ToolType } from '@kbn/onechat-common';
-import { createBadRequestError, isToolNotFoundError } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
+import { createBadRequestError, isToolNotFoundError } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { WritableToolProvider, ToolProviderFn } from '../tool_provider';

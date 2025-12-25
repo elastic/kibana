@@ -7,9 +7,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { tool as toTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
 /**
  * Create a browser tool adapter that registers browser tools as LLM tools

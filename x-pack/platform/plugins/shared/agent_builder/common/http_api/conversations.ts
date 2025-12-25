@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
 export interface ListConversationsResponse {
   results: ConversationWithoutRounds[];

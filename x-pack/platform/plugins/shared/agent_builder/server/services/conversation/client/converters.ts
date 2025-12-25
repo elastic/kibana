@@ -13,9 +13,9 @@ import type {
   ConversationWithoutRounds,
   ToolResult,
   UserIdAndName,
-} from '@kbn/onechat-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/onechat-common';
-import { getToolResultId } from '@kbn/onechat-server';
+} from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,

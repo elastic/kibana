@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { RunContext } from '@kbn/onechat-server';
+import type { RunContext } from '@kbn/agent-builder-server';
 
 export const createEmptyRunContext = ({
   runId = uuidv4(),

@@ -22,7 +22,7 @@ import {
   useUpdateEffect,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema, ToolType } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
@@ -90,13 +90,13 @@ export type ToolProps = ToolCreateProps | ToolEditProps | ToolViewProps;
 export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting, saveTool }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
-  const deferNavigateToOnechatUrl = useCallback(
-    (...args: Parameters<typeof navigateToOnechatUrl>) => {
-      defer(() => navigateToOnechatUrl(...args));
+  const deferNavigateToAgentBuilderUrl = useCallback(
+    (...args: Parameters<typeof navigateToAgentBuilderUrl>) => {
+      defer(() => navigateToAgentBuilderUrl(...args));
     },
-    [navigateToOnechatUrl]
+    [navigateToAgentBuilderUrl]
   );
   const [openTestFlyoutParam, setOpenTestFlyoutParam] = useQueryState<boolean>(
     OPEN_TEST_FLYOUT_QUERY_PARAM,
@@ -142,8 +142,8 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
 
   const handleCancel = useCallback(() => {
     setIsCancelling(true);
-    deferNavigateToOnechatUrl(appPaths.tools.list);
-  }, [deferNavigateToOnechatUrl]);
+    deferNavigateToAgentBuilderUrl(appPaths.tools.list);
+  }, [deferNavigateToAgentBuilderUrl]);
 
   const handleSave = useCallback(
     async (
@@ -167,10 +167,10 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         setSubmittingButtonId(undefined);
       }
       if (navigateToListView) {
-        deferNavigateToOnechatUrl(appPaths.tools.list);
+        deferNavigateToAgentBuilderUrl(appPaths.tools.list);
       }
     },
-    [mode, saveTool, deferNavigateToOnechatUrl]
+    [mode, saveTool, deferNavigateToAgentBuilderUrl]
   );
 
   const handleTestTool = useCallback(() => {
@@ -331,7 +331,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
             description={
               mode === ToolFormMode.Create ? (
                 <FormattedMessage
-                  id="xpack.onechat.tools.createToolDescription"
+                  id="xpack.agentBuilder.tools.createToolDescription"
                   defaultMessage="Give your new tool a unique ID and a clear description, so both humans and LLMs can understand its purpose. Add labels for organization, and write the index pattern or ES|QL query that powers its functionality. {learnMoreLink}"
                   values={{
                     learnMoreLink: (
@@ -339,13 +339,13 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                         href={docLinks.tools}
                         target="_blank"
                         aria-label={i18n.translate(
-                          'xpack.onechat.tools.createToolDocumentationAriaLabel',
+                          'xpack.agentBuilder.tools.createToolDocumentationAriaLabel',
                           {
                             defaultMessage: 'Learn more about creating tools in the documentation',
                           }
                         )}
                       >
-                        {i18n.translate('xpack.onechat.tools.createToolDocumentation', {
+                        {i18n.translate('xpack.agentBuilder.tools.createToolDocumentation', {
                           defaultMessage: 'Learn more',
                         })}
                       </EuiLink>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 
 /**
  * Public-faving contract for AgentBuilder's agents service.

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { editableToolTypes } from '@kbn/onechat-common';
+import { editableToolTypes } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
@@ -32,7 +32,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     .get({
       path: `${publicApiPath}/tools`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'List tools',
@@ -71,7 +71,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     .get({
       path: `${publicApiPath}/tools/{toolId}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Get a tool by id',
@@ -117,7 +117,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     .post({
       path: `${publicApiPath}/tools`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
       access: 'public',
       summary: 'Create a tool',
@@ -189,7 +189,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     .put({
       path: `${publicApiPath}/tools/{toolId}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
       access: 'public',
       summary: 'Update a tool',
@@ -262,7 +262,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     .delete({
       path: `${publicApiPath}/tools/{toolId}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
       access: 'public',
       summary: 'Delete a tool',
@@ -306,7 +306,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     .post({
       path: `${publicApiPath}/tools/_execute`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Execute a Tool',

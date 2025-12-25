@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { RunAgentFn } from '@kbn/onechat-server';
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentRegistry } from './agent_registry';
 
 export interface AgentsServiceSetup {

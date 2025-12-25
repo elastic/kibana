@@ -8,22 +8,22 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { ONECHAT_APP_ID } from '../../../common/features';
+import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
-interface OnechatBreadcrumb {
+interface AgentBuilderBreadcrumb {
   text: string;
   path?: string;
 }
 
-export const useBreadcrumb = (breadcrumbs: OnechatBreadcrumb[]) => {
+export const useBreadcrumb = (breadcrumbs: AgentBuilderBreadcrumb[]) => {
   const {
     services: { chrome, application },
   } = useKibana();
 
   const getUrl = useCallback(
     (path: string) => {
-      return application.getUrlForApp(ONECHAT_APP_ID, { path });
+      return application.getUrlForApp(AGENTBUILDER_APP_ID, { path });
     },
     [application]
   );
@@ -35,7 +35,7 @@ export const useBreadcrumb = (breadcrumbs: OnechatBreadcrumb[]) => {
   const baseCrumbs: ChromeBreadcrumb[] = useMemo(() => {
     return [
       {
-        text: i18n.translate('xpack.onechat.breadcrumb.onechat', {
+        text: i18n.translate('xpack.agentBuilder.breadcrumb.agentBuilder', {
           defaultMessage: 'Agent Builder',
         }),
         href: appUrl,

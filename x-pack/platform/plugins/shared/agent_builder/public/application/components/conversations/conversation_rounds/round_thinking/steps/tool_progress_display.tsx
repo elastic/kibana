@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolCallProgress } from '@kbn/onechat-common/chat/conversation';
+import type { ToolCallProgress } from '@kbn/agent-builder-common/chat/conversation';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ThinkingItemLayout } from './thinking_item_layout';

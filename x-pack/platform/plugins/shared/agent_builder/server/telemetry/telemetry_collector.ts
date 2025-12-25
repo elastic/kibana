@@ -11,7 +11,7 @@ import type {
 } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { QueryUtils } from './query_utils';
-import { ONECHAT_USAGE_DOMAIN } from './usage_counters';
+import { AGENTBUILDER_USAGE_DOMAIN } from './usage_counters';
 
 /**
  * Timing percentile metrics structure
@@ -40,7 +40,7 @@ interface LatencyStats {
 /**
  * Telemetry payload schema for Agent Builder
  */
-export interface OnechatTelemetry {
+export interface AgentBuilderTelemetry {
   custom_tools: {
     total: number;
     by_type: Array<{
@@ -125,7 +125,7 @@ export function registerTelemetryCollector(
   }
 
   usageCollection.registerCollector(
-    usageCollection.makeUsageCollector<OnechatTelemetry>({
+    usageCollection.makeUsageCollector<AgentBuilderTelemetry>({
       type: 'agent_builder',
       isReady: () => true,
       schema: {
@@ -533,7 +533,7 @@ export function registerTelemetryCollector(
           },
         },
       },
-      fetch: async (context: CollectorFetchContext): Promise<OnechatTelemetry> => {
+      fetch: async (context: CollectorFetchContext): Promise<AgentBuilderTelemetry> => {
         const { esClient, soClient } = context;
         const queryUtils = new QueryUtils(esClient, soClient, logger);
 
@@ -545,12 +545,12 @@ export function registerTelemetryCollector(
           const conversations = await queryUtils.getConversationMetrics();
 
           const queryTimeCounters = await queryUtils.getCountersByPrefix(
-            ONECHAT_USAGE_DOMAIN,
-            `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_`
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_`
           );
           const queryToResultTime = queryUtils.calculatePercentilesFromBuckets(
             queryTimeCounters,
-            ONECHAT_USAGE_DOMAIN
+            AGENTBUILDER_USAGE_DOMAIN
           );
 
           // Fetch TTFT/TTLT metrics from conversation data
@@ -560,18 +560,18 @@ export function registerTelemetryCollector(
           const latencyByAgentType = await queryUtils.getLatencyByAgentType();
 
           const toolCallCounters = await queryUtils.getCountersByPrefix(
-            ONECHAT_USAGE_DOMAIN,
-            `${ONECHAT_USAGE_DOMAIN}_tool_call_`
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_`
           );
 
           const toolCallsBySource = {
             default_agent:
-              toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_default_agent`) || 0,
+              toolCallCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_default_agent`) || 0,
             custom_agent:
-              toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_custom_agent`) || 0,
-            mcp: toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_mcp`) || 0,
-            api: toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_api`) || 0,
-            a2a: toolCallCounters.get(`${ONECHAT_USAGE_DOMAIN}_tool_call_a2a`) || 0,
+              toolCallCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_custom_agent`) || 0,
+            mcp: toolCallCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_mcp`) || 0,
+            api: toolCallCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_api`) || 0,
+            a2a: toolCallCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_a2a`) || 0,
           };
           const totalToolCalls = Object.values(toolCallsBySource).reduce(
             (sum, count) => sum + count,
@@ -579,17 +579,17 @@ export function registerTelemetryCollector(
           );
 
           const llmProviderCounters = await queryUtils.getCountersByPrefix(
-            ONECHAT_USAGE_DOMAIN,
-            `${ONECHAT_USAGE_DOMAIN}_llm_provider_`
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_`
           );
           const llmModelCounters = await queryUtils.getCountersByPrefix(
-            ONECHAT_USAGE_DOMAIN,
-            `${ONECHAT_USAGE_DOMAIN}_llm_model_`
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_`
           );
 
           const llmUsageByProvider: Array<{ provider: string; count: number }> = [];
           for (const [counterName, count] of Array.from(llmProviderCounters.entries())) {
-            const provider = counterName.replace(`${ONECHAT_USAGE_DOMAIN}_llm_provider_`, '');
+            const provider = counterName.replace(`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_`, '');
             if (provider && count > 0) {
               llmUsageByProvider.push({ provider, count });
             }
@@ -598,7 +598,7 @@ export function registerTelemetryCollector(
 
           const llmUsageByModel: Array<{ model: string; count: number }> = [];
           for (const [counterName, count] of Array.from(llmModelCounters.entries())) {
-            const model = counterName.replace(`${ONECHAT_USAGE_DOMAIN}_llm_model_`, '');
+            const model = counterName.replace(`${AGENTBUILDER_USAGE_DOMAIN}_llm_model_`, '');
             if (model && count > 0) {
               llmUsageByModel.push({ model, count });
             }
@@ -606,13 +606,13 @@ export function registerTelemetryCollector(
           llmUsageByModel.sort((a, b) => b.count - a.count);
 
           const errorCounters = await queryUtils.getCountersByPrefix(
-            ONECHAT_USAGE_DOMAIN,
-            `${ONECHAT_USAGE_DOMAIN}_error_`
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_error_`
           );
 
-          const totalErrors = errorCounters.get(`${ONECHAT_USAGE_DOMAIN}_error_total`) || 0;
+          const totalErrors = errorCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_error_total`) || 0;
           const totalConversationsWithErrors =
-            errorCounters.get(`${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`) || 0;
+            errorCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`) || 0;
           const avgErrorsPerConversation =
             totalConversationsWithErrors > 0 ? totalErrors / totalConversationsWithErrors : 0;
 
@@ -620,8 +620,8 @@ export function registerTelemetryCollector(
 
           for (const [counterName, count] of Array.from(errorCounters.entries())) {
             if (count > 0) {
-              if (counterName.startsWith(`${ONECHAT_USAGE_DOMAIN}_error_by_type_`)) {
-                const errorType = counterName.replace(`${ONECHAT_USAGE_DOMAIN}_error_by_type_`, '');
+              if (counterName.startsWith(`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_`)) {
+                const errorType = counterName.replace(`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_`, '');
                 if (errorType) {
                   errorsByType.push({ type: errorType, count });
                 }
@@ -631,7 +631,7 @@ export function registerTelemetryCollector(
 
           errorsByType.sort((a, b) => b.count - a.count);
 
-          const telemetry: OnechatTelemetry = {
+          const telemetry: AgentBuilderTelemetry = {
             custom_tools: customTools,
             custom_agents: { total: customAgents },
             conversations,

@@ -13,9 +13,9 @@ import {
   agentBuilderServerEbtEvents,
   ConversationRoundStatus,
   ConversationRoundStepType,
-  oneChatDefaultAgentId,
+  agentBuilderDefaultAgentId,
   type ConversationRound,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import { ModelProvider } from '@kbn/inference-common';
 import { AnalyticsService } from './analytics_service';
 
@@ -80,7 +80,7 @@ describe('AnalyticsService', () => {
 
     it('reports the RoundComplete event', () => {
       service.reportRoundComplete({
-        agentId: oneChatDefaultAgentId,
+        agentId: agentBuilderDefaultAgentId,
         conversationId: 'conversation-1',
         round,
         roundCount: 2,
@@ -88,7 +88,7 @@ describe('AnalyticsService', () => {
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
-        agent_id: oneChatDefaultAgentId,
+        agent_id: agentBuilderDefaultAgentId,
         conversation_id: 'conversation-1',
         input_tokens: 4,
         llm_calls: 3,
@@ -141,7 +141,7 @@ describe('AnalyticsService', () => {
 
       expect(() =>
         service.reportRoundComplete({
-          agentId: oneChatDefaultAgentId,
+          agentId: agentBuilderDefaultAgentId,
           conversationId: 'conversation-1',
           round,
           roundCount: 2,
@@ -156,7 +156,7 @@ describe('AnalyticsService', () => {
       });
 
       service.reportRoundComplete({
-        agentId: oneChatDefaultAgentId,
+        agentId: agentBuilderDefaultAgentId,
         conversationId: 'conversation-1',
         round,
         roundCount: 2,
@@ -169,7 +169,7 @@ describe('AnalyticsService', () => {
 
   describe('reportRoundError', () => {
     const defaultArgs = {
-      agentId: oneChatDefaultAgentId,
+      agentId: agentBuilderDefaultAgentId,
       conversationId: 'conversation-1',
       error: new Error('boom'),
       modelProvider: ModelProvider.OpenAI,

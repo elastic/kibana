@@ -6,12 +6,12 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { useOnechatServices } from '../../hooks/use_onechat_service';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { AddLlmConnectionPrompt } from './prompts/add_llm_connection_prompt';
 import { UpgradeLicensePrompt } from './prompts/upgrade_license_prompt';
 
 export const AccessBoundary: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { accessChecker } = useOnechatServices();
+  const { accessChecker } = useAgentBuilderServices();
   const { hasRequiredLicense, hasLlmConnector } = accessChecker.getAccess();
 
   if (!hasRequiredLicense) {

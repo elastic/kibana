@@ -8,7 +8,7 @@
 import type {
   ConfirmationPrompt,
   ConfirmationPromptResponse,
-} from '@kbn/onechat-common/agents/prompts';
+} from '@kbn/agent-builder-common/agents/prompts';
 
 export type ConfirmationPromptWithResponse = ConfirmationPrompt & {
   response: ConfirmationPromptResponse;

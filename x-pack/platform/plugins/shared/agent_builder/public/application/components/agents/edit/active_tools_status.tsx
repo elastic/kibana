@@ -29,7 +29,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   activeToolsCount,
   warningThreshold,
 }) => {
-  const { createOnechatUrl } = useNavigation();
+  const { createAgentBuilderUrl } = useNavigation();
   const isOverThreshold = activeToolsCount > warningThreshold;
   const isZeroTools = activeToolsCount === 0;
   const shouldShowWarning = isOverThreshold || isZeroTools;
@@ -38,11 +38,11 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   const iconType = shouldShowWarning ? 'alert' : 'checkInCircleFilled';
 
   const statusMessage = shouldShowWarning
-    ? i18n.translate('xpack.onechat.activeToolsStatus.warningStatusMessage', {
+    ? i18n.translate('xpack.agentBuilder.activeToolsStatus.warningStatusMessage', {
         defaultMessage: 'Warning status: {count} active tools',
         values: { count: activeToolsCount },
       })
-    : i18n.translate('xpack.onechat.activeToolsStatus.goodStatusMessage', {
+    : i18n.translate('xpack.agentBuilder.activeToolsStatus.goodStatusMessage', {
         defaultMessage: 'Good status: {count} active tools',
         values: { count: activeToolsCount },
       });
@@ -52,7 +52,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
       hasBorder={true}
       hasShadow={false}
       paddingSize="m"
-      aria-label={i18n.translate('xpack.onechat.activeToolsStatus.panelLabel', {
+      aria-label={i18n.translate('xpack.agentBuilder.activeToolsStatus.panelLabel', {
         defaultMessage: 'Active tools status panel',
       })}
       role="region"
@@ -69,10 +69,10 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                     size="m"
                     aria-label={
                       shouldShowWarning
-                        ? i18n.translate('xpack.onechat.activeToolsStatus.warningStatusIcon', {
+                        ? i18n.translate('xpack.agentBuilder.activeToolsStatus.warningStatusIcon', {
                             defaultMessage: 'Warning status icon',
                           })
-                        : i18n.translate('xpack.onechat.activeToolsStatus.successStatusIcon', {
+                        : i18n.translate('xpack.agentBuilder.activeToolsStatus.successStatusIcon', {
                             defaultMessage: 'Success status icon',
                           })
                     }
@@ -81,7 +81,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
                     <strong aria-label={statusMessage}>
-                      {i18n.translate('xpack.onechat.activeToolsStatus.title', {
+                      {i18n.translate('xpack.agentBuilder.activeToolsStatus.title', {
                         defaultMessage: 'This agent has {count} active tools',
                         values: { count: activeToolsCount },
                       })}
@@ -93,12 +93,12 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.onechat.activeToolsStatus.description"
+                  id="xpack.agentBuilder.activeToolsStatus.description"
                   defaultMessage="{toolsLink} enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options."
                   values={{
                     toolsLink: (
-                      <EuiLink href={createOnechatUrl(appPaths.tools.list)}>
-                        {i18n.translate('xpack.onechat.activeToolsStatus.toolsLinkText', {
+                      <EuiLink href={createAgentBuilderUrl(appPaths.tools.list)}>
+                        {i18n.translate('xpack.agentBuilder.activeToolsStatus.toolsLinkText', {
                           defaultMessage: 'Tools',
                         })}
                       </EuiLink>
@@ -119,11 +119,11 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                 max={warningThreshold}
                 color={statusColor}
                 size="m"
-                label={i18n.translate('xpack.onechat.activeToolsStatus.progressLabel', {
+                label={i18n.translate('xpack.agentBuilder.activeToolsStatus.progressLabel', {
                   defaultMessage: 'Active tools',
                 })}
                 valueText={`${activeToolsCount}/${warningThreshold}`}
-                aria-label={i18n.translate('xpack.onechat.activeToolsStatus.progressAriaLabel', {
+                aria-label={i18n.translate('xpack.agentBuilder.activeToolsStatus.progressAriaLabel', {
                   defaultMessage: 'Progress: {current} out of {max} active tools',
                   values: { current: activeToolsCount, max: warningThreshold },
                 })}

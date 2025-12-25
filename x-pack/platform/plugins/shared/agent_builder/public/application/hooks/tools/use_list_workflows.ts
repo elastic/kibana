@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
 export const useListWorkflows = () => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const result = useQuery({
     queryKey: queryKeys.tools.workflows.list(),

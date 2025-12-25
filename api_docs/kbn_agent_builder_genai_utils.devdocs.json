@@ -1,5 +1,5 @@
 {
-  "id": "@kbn/onechat-genai-utils",
+  "id": "@kbn/agent-builder-genai-utils",
   "client": {
     "classes": [],
     "functions": [],
@@ -12,7 +12,7 @@
     "classes": [],
     "functions": [
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.cleanupMapping",
         "type": "Function",
         "tags": [],
@@ -26,12 +26,12 @@
           ") => ",
           "MappingTypeMapping"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/cleanup_mapping.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/cleanup_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.cleanupMapping.$1",
             "type": "Object",
             "tags": [],
@@ -40,7 +40,7 @@
             "signature": [
               "MappingTypeMapping"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/cleanup_mapping.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/cleanup_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -50,7 +50,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.esqlResponseToJson",
         "type": "Function",
         "tags": [],
@@ -63,12 +63,12 @@
           "EsqlResponse",
           ") => Record<string, any>[]"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/misc.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/misc.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.esqlResponseToJson.$1",
             "type": "Object",
             "tags": [],
@@ -77,7 +77,7 @@
             "signature": [
               "EsqlResponse"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/misc.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/misc.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,7 +87,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.executeEsql",
         "type": "Function",
         "tags": [],
@@ -102,34 +102,34 @@
           "EsqlResponse",
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.executeEsql.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  query,\n  esClient,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.executeEsql.$1.query",
                 "type": "string",
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.executeEsql.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -1124,7 +1124,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/esql/execute_esql.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/esql/execute_esql.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1135,7 +1135,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.flattenMapping",
         "type": "Function",
         "tags": [],
@@ -1148,20 +1148,20 @@
           "MappingTypeMapping",
           ") => ",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.MappingField",
             "text": "MappingField"
           },
           "[]"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/flatten_mapping.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/flatten_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.flattenMapping.$1",
             "type": "Object",
             "tags": [],
@@ -1170,7 +1170,7 @@
             "signature": [
               "MappingTypeMapping"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/flatten_mapping.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/flatten_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1180,7 +1180,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.generateEsql",
         "type": "Function",
         "tags": [],
@@ -1191,20 +1191,20 @@
           "GenerateEsqlParams",
           ") => Promise<",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.GenerateEsqlResponse",
             "text": "GenerateEsqlResponse"
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql/nl_to_esql.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.generateEsql.$1",
             "type": "CompoundType",
             "tags": [],
@@ -1213,7 +1213,7 @@
             "signature": [
               "GenerateEsqlParams"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql/nl_to_esql.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1223,7 +1223,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.getDocumentById",
         "type": "Function",
         "tags": [],
@@ -1234,53 +1234,53 @@
           "ElasticsearchClient",
           "; }) => Promise<",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.GetDocumentByIdResult",
             "text": "GetDocumentByIdResult"
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_documents.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/get_documents.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.getDocumentById.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  id,\n  index,\n  esClient,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_documents.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/get_documents.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.getDocumentById.$1.id",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_documents.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/get_documents.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.getDocumentById.$1.index",
                 "type": "string",
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_documents.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/get_documents.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.getDocumentById.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -2275,7 +2275,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_documents.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/get_documents.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2286,7 +2286,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.getIndexMappings",
         "type": "Function",
         "tags": [],
@@ -2301,23 +2301,23 @@
           "GetIndexMappingsResult",
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/get_index_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.getIndexMappings.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  indices,\n  cleanup = true,\n  esClient,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/get_index_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.getIndexMappings.$1.indices",
                 "type": "Array",
                 "tags": [],
@@ -2326,12 +2326,12 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/get_index_mappings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.getIndexMappings.$1.cleanup",
                 "type": "CompoundType",
                 "tags": [],
@@ -2340,12 +2340,12 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/get_index_mappings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.getIndexMappings.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -3340,7 +3340,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/get_index_mappings.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/get_index_mappings.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3351,7 +3351,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.indexExplorer",
         "type": "Function",
         "tags": [],
@@ -3362,9 +3362,9 @@
           "ElasticsearchClient",
           "; model: ",
           {
-            "pluginId": "@kbn/onechat-server",
+            "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
-            "docId": "kibKbnOnechatServerPluginApi",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
             "section": "def-common.ScopedModel",
             "text": "ScopedModel"
           },
@@ -3378,42 +3378,42 @@
           },
           " | undefined; }) => Promise<",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.IndexExplorerResponse",
             "text": "IndexExplorerResponse"
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.indexExplorer.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  nlQuery,\n  indexPattern = '*',\n  includeAliases = true,\n  includeDatastream = true,\n  limit = 1,\n  esClient,\n  model,\n  logger,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.nlQuery",
                 "type": "string",
                 "tags": [],
                 "label": "nlQuery",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.indexPattern",
                 "type": "string",
                 "tags": [],
@@ -3422,12 +3422,12 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.includeAliases",
                 "type": "CompoundType",
                 "tags": [],
@@ -3436,12 +3436,12 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.includeDatastream",
                 "type": "CompoundType",
                 "tags": [],
@@ -3450,12 +3450,12 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.limit",
                 "type": "number",
                 "tags": [],
@@ -3464,12 +3464,12 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -4464,12 +4464,12 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.model",
                 "type": "Object",
                 "tags": [],
@@ -4477,19 +4477,19 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/onechat-server",
+                    "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
-                    "docId": "kibKbnOnechatServerPluginApi",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
                     "section": "def-common.ScopedModel",
                     "text": "ScopedModel"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.indexExplorer.$1.logger",
                 "type": "Object",
                 "tags": [],
@@ -4505,7 +4505,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4516,7 +4516,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.listSearchSources",
         "type": "Function",
         "tags": [],
@@ -4529,42 +4529,42 @@
           "ElasticsearchClient",
           "; }) => Promise<",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.ListSourcesResponse",
             "text": "ListSourcesResponse"
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.listSearchSources.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  pattern,\n  perTypeLimit = 100,\n  includeHidden = false,\n  includeKibanaIndices = false,\n  excludeIndicesRepresentedAsAlias = true,\n  excludeIndicesRepresentedAsDatastream = true,\n  esClient,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.listSearchSources.$1.pattern",
                 "type": "string",
                 "tags": [],
                 "label": "pattern",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.listSearchSources.$1.perTypeLimit",
                 "type": "number",
                 "tags": [],
@@ -4573,12 +4573,12 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.listSearchSources.$1.includeHidden",
                 "type": "CompoundType",
                 "tags": [],
@@ -4587,12 +4587,12 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.listSearchSources.$1.includeKibanaIndices",
                 "type": "CompoundType",
                 "tags": [],
@@ -4601,12 +4601,12 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.listSearchSources.$1.excludeIndicesRepresentedAsAlias",
                 "type": "CompoundType",
                 "tags": [],
@@ -4615,12 +4615,12 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.listSearchSources.$1.excludeIndicesRepresentedAsDatastream",
                 "type": "CompoundType",
                 "tags": [],
@@ -4629,12 +4629,12 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.listSearchSources.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -5629,7 +5629,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5640,7 +5640,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.naturalLanguageSearch",
         "type": "Function",
         "tags": [],
@@ -5649,9 +5649,9 @@
         "signature": [
           "({ nlQuery, target, model, esClient, logger, events, rowLimit, customInstructions, }: { nlQuery: string; target: string; model: ",
           {
-            "pluginId": "@kbn/onechat-server",
+            "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
-            "docId": "kibKbnOnechatServerPluginApi",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
             "section": "def-common.ScopedModel",
             "text": "ScopedModel"
           },
@@ -5667,61 +5667,61 @@
           },
           "; events: ",
           {
-            "pluginId": "@kbn/onechat-server",
+            "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
-            "docId": "kibKbnOnechatServerPluginApi",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
             "section": "def-common.ToolEventEmitter",
             "text": "ToolEventEmitter"
           },
           "; rowLimit?: number | undefined; customInstructions?: string | undefined; }) => Promise<",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.NaturalLanguageSearchResponse",
             "text": "NaturalLanguageSearchResponse"
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.naturalLanguageSearch.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  nlQuery,\n  target,\n  model,\n  esClient,\n  logger,\n  events,\n  rowLimit,\n  customInstructions,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.nlQuery",
                 "type": "string",
                 "tags": [],
                 "label": "nlQuery",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.target",
                 "type": "string",
                 "tags": [],
                 "label": "target",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.model",
                 "type": "Object",
                 "tags": [],
@@ -5729,19 +5729,19 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/onechat-server",
+                    "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
-                    "docId": "kibKbnOnechatServerPluginApi",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
                     "section": "def-common.ScopedModel",
                     "text": "ScopedModel"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -6736,12 +6736,12 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.logger",
                 "type": "Object",
                 "tags": [],
@@ -6756,12 +6756,12 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.events",
                 "type": "Object",
                 "tags": [],
@@ -6769,19 +6769,19 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/onechat-server",
+                    "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
-                    "docId": "kibKbnOnechatServerPluginApi",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
                     "section": "def-common.ToolEventEmitter",
                     "text": "ToolEventEmitter"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.rowLimit",
                 "type": "number",
                 "tags": [],
@@ -6790,12 +6790,12 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.naturalLanguageSearch.$1.customInstructions",
                 "type": "string",
                 "tags": [],
@@ -6804,7 +6804,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -6815,7 +6815,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.relevanceSearch",
         "type": "Function",
         "tags": [],
@@ -6824,9 +6824,9 @@
         "signature": [
           "({ term, target, size, model, esClient, }: { term: string; target: string; size?: number | undefined; model: ",
           {
-            "pluginId": "@kbn/onechat-server",
+            "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
-            "docId": "kibKbnOnechatServerPluginApi",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
             "section": "def-common.ScopedModel",
             "text": "ScopedModel"
           },
@@ -6836,45 +6836,45 @@
           "PerformMatchSearchResponse",
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.relevanceSearch.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  term,\n  target,\n  size = 10,\n  model,\n  esClient,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.relevanceSearch.$1.term",
                 "type": "string",
                 "tags": [],
                 "label": "term",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.relevanceSearch.$1.target",
                 "type": "string",
                 "tags": [],
                 "label": "target",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.relevanceSearch.$1.size",
                 "type": "number",
                 "tags": [],
@@ -6883,12 +6883,12 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.relevanceSearch.$1.model",
                 "type": "Object",
                 "tags": [],
@@ -6896,19 +6896,19 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/onechat-server",
+                    "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
-                    "docId": "kibKbnOnechatServerPluginApi",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
                     "section": "def-common.ScopedModel",
                     "text": "ScopedModel"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.relevanceSearch.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -7903,7 +7903,7 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7914,7 +7914,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.runSearchTool",
         "type": "Function",
         "tags": [],
@@ -7923,9 +7923,9 @@
         "signature": [
           "({ nlQuery, index, rowLimit, customInstructions, model, esClient, logger, events, }: { nlQuery: string; index?: string | undefined; rowLimit?: number | undefined; customInstructions?: string | undefined; model: ",
           {
-            "pluginId": "@kbn/onechat-server",
+            "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
-            "docId": "kibKbnOnechatServerPluginApi",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
             "section": "def-common.ScopedModel",
             "text": "ScopedModel"
           },
@@ -7941,58 +7941,58 @@
           },
           "; events: ",
           {
-            "pluginId": "@kbn/onechat-server",
+            "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
-            "docId": "kibKbnOnechatServerPluginApi",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
             "section": "def-common.ToolEventEmitter",
             "text": "ToolEventEmitter"
           },
           "; }) => Promise<",
           {
-            "pluginId": "@kbn/onechat-server",
+            "pluginId": "@kbn/agent-builder-server",
             "scope": "common",
-            "docId": "kibKbnOnechatServerPluginApi",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
             "section": "def-common.ToolHandlerResult",
             "text": "ToolHandlerResult"
           },
           "<",
           {
-            "pluginId": "@kbn/onechat-common",
+            "pluginId": "@kbn/agent-builder-common",
             "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
             "section": "def-common.ToolResult",
             "text": "ToolResult"
           },
           "<Record<string, unknown>>>[]>"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.runSearchTool.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  nlQuery,\n  index,\n  rowLimit,\n  customInstructions,\n  model,\n  esClient,\n  logger,\n  events,\n}",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.nlQuery",
                 "type": "string",
                 "tags": [],
                 "label": "nlQuery",
                 "description": [],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.index",
                 "type": "string",
                 "tags": [],
@@ -8001,12 +8001,12 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.rowLimit",
                 "type": "number",
                 "tags": [],
@@ -8015,12 +8015,12 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.customInstructions",
                 "type": "string",
                 "tags": [],
@@ -8029,12 +8029,12 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.model",
                 "type": "Object",
                 "tags": [],
@@ -8042,19 +8042,19 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/onechat-server",
+                    "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
-                    "docId": "kibKbnOnechatServerPluginApi",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
                     "section": "def-common.ScopedModel",
                     "text": "ScopedModel"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.esClient",
                 "type": "Object",
                 "tags": [],
@@ -9049,12 +9049,12 @@
                   "default",
                   "; }"
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.logger",
                 "type": "Object",
                 "tags": [],
@@ -9069,12 +9069,12 @@
                     "text": "Logger"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "@kbn/onechat-genai-utils",
+                "parentPluginId": "@kbn/agent-builder-genai-utils",
                 "id": "def-server.runSearchTool.$1.events",
                 "type": "Object",
                 "tags": [],
@@ -9082,14 +9082,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/onechat-server",
+                    "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
-                    "docId": "kibKbnOnechatServerPluginApi",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
                     "section": "def-common.ToolEventEmitter",
                     "text": "ToolEventEmitter"
                   }
                 ],
-                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -9102,18 +9102,18 @@
     ],
     "interfaces": [
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.AliasSearchSource",
         "type": "Interface",
         "tags": [],
         "label": "AliasSearchSource",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.AliasSearchSource.type",
             "type": "string",
             "tags": [],
@@ -9121,31 +9121,31 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/onechat-common",
+                "pluginId": "@kbn/agent-builder-common",
                 "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
                 "section": "def-common.EsResourceType",
                 "text": "EsResourceType"
               },
               ".alias"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.AliasSearchSource.name",
             "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.AliasSearchSource.indices",
             "type": "Array",
             "tags": [],
@@ -9154,7 +9154,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9162,18 +9162,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.DataStreamSearchSource",
         "type": "Interface",
         "tags": [],
         "label": "DataStreamSearchSource",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.DataStreamSearchSource.type",
             "type": "string",
             "tags": [],
@@ -9181,31 +9181,31 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/onechat-common",
+                "pluginId": "@kbn/agent-builder-common",
                 "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
                 "section": "def-common.EsResourceType",
                 "text": "EsResourceType"
               },
               ".dataStream"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.DataStreamSearchSource.name",
             "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.DataStreamSearchSource.indices",
             "type": "Array",
             "tags": [],
@@ -9214,18 +9214,18 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.DataStreamSearchSource.timestamp_field",
             "type": "string",
             "tags": [],
             "label": "timestamp_field",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9233,18 +9233,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.GenerateEsqlResponse",
         "type": "Interface",
         "tags": [],
         "label": "GenerateEsqlResponse",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql/nl_to_esql.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.GenerateEsqlResponse.query",
             "type": "string",
             "tags": [],
@@ -9252,12 +9252,12 @@
             "description": [
               "\nThe ES|QL query which was generated"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql/nl_to_esql.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.GenerateEsqlResponse.answer",
             "type": "string",
             "tags": [],
@@ -9265,12 +9265,12 @@
             "description": [
               "\nThe full text answer which was provided by the LLM when generating the query."
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql/nl_to_esql.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.GenerateEsqlResponse.results",
             "type": "Object",
             "tags": [],
@@ -9282,12 +9282,12 @@
               "EsqlResponse",
               " | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql/nl_to_esql.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.GenerateEsqlResponse.error",
             "type": "string",
             "tags": [],
@@ -9298,7 +9298,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql/nl_to_esql.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/nl_to_esql.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9306,18 +9306,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.IndexExplorerResponse",
         "type": "Interface",
         "tags": [],
         "label": "IndexExplorerResponse",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.IndexExplorerResponse.resources",
             "type": "Array",
             "tags": [],
@@ -9327,7 +9327,7 @@
               "RelevantResource",
               "[]"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9335,18 +9335,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.IndexSearchSource",
         "type": "Interface",
         "tags": [],
         "label": "IndexSearchSource",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.IndexSearchSource.type",
             "type": "string",
             "tags": [],
@@ -9354,26 +9354,26 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/onechat-common",
+                "pluginId": "@kbn/agent-builder-common",
                 "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
                 "section": "def-common.EsResourceType",
                 "text": "EsResourceType"
               },
               ".index"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.IndexSearchSource.name",
             "type": "string",
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9381,35 +9381,35 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.ListIndexBasicInfo",
         "type": "Interface",
         "tags": [],
         "label": "ListIndexBasicInfo",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListIndexBasicInfo.index",
             "type": "string",
             "tags": [],
             "label": "index",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListIndexBasicInfo.docsCount",
             "type": "number",
             "tags": [],
             "label": "docsCount",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9417,7 +9417,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.ListIndexDetailInfo",
         "type": "Interface",
         "tags": [],
@@ -9425,77 +9425,77 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.ListIndexDetailInfo",
             "text": "ListIndexDetailInfo"
           },
           " extends ",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.ListIndexBasicInfo",
             "text": "ListIndexBasicInfo"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListIndexDetailInfo.status",
             "type": "string",
             "tags": [],
             "label": "status",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListIndexDetailInfo.health",
             "type": "string",
             "tags": [],
             "label": "health",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListIndexDetailInfo.uuid",
             "type": "string",
             "tags": [],
             "label": "uuid",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListIndexDetailInfo.primaries",
             "type": "number",
             "tags": [],
             "label": "primaries",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListIndexDetailInfo.replicas",
             "type": "number",
             "tags": [],
             "label": "replicas",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9503,18 +9503,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.ListSourcesResponse",
         "type": "Interface",
         "tags": [],
         "label": "ListSourcesResponse",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListSourcesResponse.indices",
             "type": "Array",
             "tags": [],
@@ -9522,20 +9522,20 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/onechat-genai-utils",
+                "pluginId": "@kbn/agent-builder-genai-utils",
                 "scope": "server",
-                "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+                "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
                 "section": "def-server.IndexSearchSource",
                 "text": "IndexSearchSource"
               },
               "[]"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListSourcesResponse.aliases",
             "type": "Array",
             "tags": [],
@@ -9543,20 +9543,20 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/onechat-genai-utils",
+                "pluginId": "@kbn/agent-builder-genai-utils",
                 "scope": "server",
-                "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+                "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
                 "section": "def-server.AliasSearchSource",
                 "text": "AliasSearchSource"
               },
               "[]"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListSourcesResponse.data_streams",
             "type": "Array",
             "tags": [],
@@ -9564,20 +9564,20 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/onechat-genai-utils",
+                "pluginId": "@kbn/agent-builder-genai-utils",
                 "scope": "server",
-                "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+                "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
                 "section": "def-server.DataStreamSearchSource",
                 "text": "DataStreamSearchSource"
               },
               "[]"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.ListSourcesResponse.warnings",
             "type": "Array",
             "tags": [],
@@ -9586,7 +9586,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9594,7 +9594,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.MappingField",
         "type": "Interface",
         "tags": [],
@@ -9602,12 +9602,12 @@
         "description": [
           "\nRepresents the relevant information of an field"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.MappingField.path",
             "type": "string",
             "tags": [],
@@ -9615,12 +9615,12 @@
             "description": [
               "the path of the field"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.MappingField.type",
             "type": "string",
             "tags": [],
@@ -9628,12 +9628,12 @@
             "description": [
               "the type of the field"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.MappingField.meta",
             "type": "Object",
             "tags": [],
@@ -9644,7 +9644,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/utils/mappings/types.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/mappings/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9652,18 +9652,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.NaturalLanguageSearchResponse",
         "type": "Interface",
         "tags": [],
         "label": "NaturalLanguageSearchResponse",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.NaturalLanguageSearchResponse.generatedQuery",
             "type": "string",
             "tags": [],
@@ -9671,12 +9671,12 @@
             "description": [
               "\nThe ES|QL query which was generated based on the provided NL query, index and context"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.NaturalLanguageSearchResponse.esqlData",
             "type": "Object",
             "tags": [],
@@ -9688,12 +9688,12 @@
               "EsqlResponse",
               " | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "@kbn/onechat-genai-utils",
+            "parentPluginId": "@kbn/agent-builder-genai-utils",
             "id": "def-server.NaturalLanguageSearchResponse.error",
             "type": "string",
             "tags": [],
@@ -9704,7 +9704,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/nl_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9715,7 +9715,7 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.EsSearchSource",
         "type": "Type",
         "tags": [],
@@ -9723,36 +9723,36 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.AliasSearchSource",
             "text": "AliasSearchSource"
           },
           " | ",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.IndexSearchSource",
             "text": "IndexSearchSource"
           },
           " | ",
           {
-            "pluginId": "@kbn/onechat-genai-utils",
+            "pluginId": "@kbn/agent-builder-genai-utils",
             "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
+            "docId": "kibKbnAgentBuilderGenaiUtilsPluginApi",
             "section": "def-server.DataStreamSearchSource",
             "text": "DataStreamSearchSource"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_search_sources.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.GetDocumentByIdResult",
         "type": "Type",
         "tags": [],
@@ -9763,25 +9763,25 @@
           " | ",
           "GetDocumentByIdFailure"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_documents.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/get_documents.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.listIndices",
         "type": "boolean",
         "tags": [],
         "label": "listIndices",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/list_indices.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_indices.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@kbn/onechat-genai-utils",
+        "parentPluginId": "@kbn/agent-builder-genai-utils",
         "id": "def-server.RelevanceSearchResponse",
         "type": "Type",
         "tags": [],
@@ -9790,7 +9790,7 @@
         "signature": [
           "PerformMatchSearchResponse"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/relevance_search.ts",
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { chatSystemIndex } from '@kbn/onechat-server';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
 
 const agents = [
@@ -19,7 +19,7 @@ export function setupAgents({
   getPageObjects: FtrProviderContext['getPageObjects'];
   getService: FtrProviderContext['getService'];
 }) {
-  const { onechat } = getPageObjects(['onechat']);
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const es = getService('es');
 
   return {
@@ -27,7 +27,7 @@ export function setupAgents({
     agentsHooks: {
       async before() {
         for (const agent of agents) {
-          await onechat.createAgentViaUI(agent);
+          await agentBuilder.createAgentViaUI(agent);
         }
       },
       async after() {

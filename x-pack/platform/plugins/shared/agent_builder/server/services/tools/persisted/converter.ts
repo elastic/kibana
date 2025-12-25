@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
+import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { ToolTypeDefinition } from '../tool_types';
 import type { ToolPersistedDefinition } from './client';
 import type { ToolTypeConversionContext } from '../tool_types/definitions';

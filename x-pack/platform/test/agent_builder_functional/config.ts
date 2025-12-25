@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '../onechat/common/config';
-import { oneChatFunctionalServices } from '../onechat/services/functional';
+import { createStatefulTestConfig } from '../agent_builder/common/config';
+import { agentBuilderFunctionalServices } from '../agent_builder/services/functional';
 
 export default createStatefulTestConfig({
-  services: oneChatFunctionalServices,
+  services: agentBuilderFunctionalServices,
   testFiles: [require.resolve('./tests')],
   junit: {
     reportName: 'X-Pack Agent Builder Functional Tests',
@@ -17,7 +17,7 @@ export default createStatefulTestConfig({
   kbnServerArgs: [
     '--uiSettings.overrides.agentBuilder:enabled=true',
     `--logging.loggers=${JSON.stringify([
-      { name: 'plugins.onechat', level: 'debug', appenders: ['console'] },
+      { name: 'plugins.agentBuilder', level: 'debug', appenders: ['console'] },
     ])}`,
   ],
 });

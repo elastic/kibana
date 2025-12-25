@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { ONECHAT_APP_ID } from '../../../common/features';
+import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
 export interface LocationState {
@@ -19,10 +19,10 @@ export const useNavigation = () => {
     services: { application },
   } = useKibana();
 
-  const navigateToOnechatUrl = useCallback(
+  const navigateToAgentBuilderUrl = useCallback(
     (path: string, params?: Record<string, string>, state?: LocationState) => {
       const queryParams = new URLSearchParams(params);
-      application.navigateToApp(ONECHAT_APP_ID, {
+      application.navigateToApp(AGENTBUILDER_APP_ID, {
         path: queryParams.size ? `${path}?${queryParams}` : path,
         state,
       });
@@ -30,10 +30,10 @@ export const useNavigation = () => {
     [application]
   );
 
-  const createOnechatUrl = useCallback(
+  const createAgentBuilderUrl = useCallback(
     (path: string, params?: Record<string, string>) => {
       const queryParams = new URLSearchParams(params);
-      return application.getUrlForApp(ONECHAT_APP_ID, {
+      return application.getUrlForApp(AGENTBUILDER_APP_ID, {
         path: queryParams.size ? `${path}?${queryParams}` : path,
       });
     },
@@ -49,8 +49,8 @@ export const useNavigation = () => {
   );
 
   return {
-    createOnechatUrl,
-    navigateToOnechatUrl,
+    createAgentBuilderUrl,
+    navigateToAgentBuilderUrl,
     navigateToManageConnectors,
   };
 };

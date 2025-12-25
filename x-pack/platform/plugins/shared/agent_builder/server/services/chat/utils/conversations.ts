@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
-import { type Conversation, type RoundCompleteEvent } from '@kbn/onechat-common';
+import { type Conversation, type RoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 

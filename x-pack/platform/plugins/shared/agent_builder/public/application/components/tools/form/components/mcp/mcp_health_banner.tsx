@@ -17,20 +17,20 @@ import {
 
 const mcpHealthI18nMessages = {
   toolNotFound: {
-    title: i18n.translate('xpack.onechat.tools.mcpHealthBanner.toolNotFound.title', {
+    title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolNotFound.title', {
       defaultMessage: 'Tool not found on MCP server',
     }),
-    description: i18n.translate('xpack.onechat.tools.mcpHealthBanner.toolNotFound.description', {
+    description: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolNotFound.description', {
       defaultMessage:
         'The tool below no longer exists on the selected MCP server. It may have been removed or renamed.',
     }),
   },
   connectorNotFound: {
-    title: i18n.translate('xpack.onechat.tools.mcpHealthBanner.connectorNotFound.title', {
+    title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.connectorNotFound.title', {
       defaultMessage: 'MCP connector unavailable',
     }),
     description: i18n.translate(
-      'xpack.onechat.tools.mcpHealthBanner.connectorNotFound.description',
+      'xpack.agentBuilder.tools.mcpHealthBanner.connectorNotFound.description',
       {
         defaultMessage:
           'The MCP connector used by this tool is no longer available. Please create a new tool.',
@@ -38,43 +38,43 @@ const mcpHealthI18nMessages = {
     ),
   },
   listToolsFailed: {
-    title: i18n.translate('xpack.onechat.tools.mcpHealthBanner.listToolsFailed.title', {
+    title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.listToolsFailed.title', {
       defaultMessage: "Can't retrieve tools from MCP server",
     }),
-    description: i18n.translate('xpack.onechat.tools.mcpHealthBanner.listToolsFailed.description', {
+    description: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.listToolsFailed.description', {
       defaultMessage:
         "We're unable to fetch tools from this MCP server. This is usually caused by a connection or configuration issue with the MCP connector.",
     }),
   },
   toolUnhealthy: {
-    title: i18n.translate('xpack.onechat.tools.mcpHealthBanner.toolUnhealthy.title', {
+    title: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolUnhealthy.title', {
       defaultMessage: 'Tool execution failed',
     }),
-    description: i18n.translate('xpack.onechat.tools.mcpHealthBanner.toolUnhealthy.description', {
+    description: i18n.translate('xpack.agentBuilder.tools.mcpHealthBanner.toolUnhealthy.description', {
       defaultMessage:
         'This tool encountered an error while running in Agent Builder. Please verify the MCP connector configuration and try again.',
     }),
   },
   deleteToolButtonLabel: i18n.translate(
-    'xpack.onechat.tools.mcpHealthBanner.deleteToolButtonLabel',
+    'xpack.agentBuilder.tools.mcpHealthBanner.deleteToolButtonLabel',
     {
       defaultMessage: 'Delete this tool',
     }
   ),
   createNewToolButtonLabel: i18n.translate(
-    'xpack.onechat.tools.mcpHealthBanner.createNewToolButtonLabel',
+    'xpack.agentBuilder.tools.mcpHealthBanner.createNewToolButtonLabel',
     {
       defaultMessage: 'Create a new tool',
     }
   ),
   viewConnectorsButtonLabel: i18n.translate(
-    'xpack.onechat.tools.mcpHealthBanner.viewConnectorsButtonLabel',
+    'xpack.agentBuilder.tools.mcpHealthBanner.viewConnectorsButtonLabel',
     {
       defaultMessage: 'View connectors',
     }
   ),
   viewMcpServerButtonLabel: i18n.translate(
-    'xpack.onechat.tools.mcpHealthBanner.viewMcpServerButtonLabel',
+    'xpack.agentBuilder.tools.mcpHealthBanner.viewMcpServerButtonLabel',
     {
       defaultMessage: 'View MCP server',
     }

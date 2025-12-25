@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import { subj } from '@kbn/test-subj-selector';
-import { AGENT_BUILDER_APP_ID } from '../../onechat/common/constants';
-import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
+import { AGENT_BUILDER_APP_ID } from '../../agent_builder/common/constants';
+import type { LlmProxy } from '../../agent_builder_api_integration/utils/llm_proxy';
 import {
   setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
   setupAgentDirectAnswer,
-} from '../../onechat_api_integration/utils/proxy_scenario';
+} from '../../agent_builder_api_integration/utils/proxy_scenario';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
 
-export class OneChatPageObject extends FtrService {
+export class AgentBuilderPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
@@ -29,7 +29,7 @@ export class OneChatPageObject extends FtrService {
   }
 
   /**
-   * Navigate to the OneChat app
+   * Navigate to the AgentBuilder app
    */
   async navigateToApp(path: string = 'conversations/new') {
     await this.common.navigateToApp(AGENT_BUILDER_APP_ID, { path });
@@ -119,7 +119,7 @@ export class OneChatPageObject extends FtrService {
     }
 
     const conversationsHistoryToggleBtn = await this.testSubjects.find(
-      'onechatConversationsHistoryToggleBtn'
+      'agentBuilderConversationsHistoryToggleBtn'
     );
     await conversationsHistoryToggleBtn.click();
 
@@ -350,7 +350,7 @@ export class OneChatPageObject extends FtrService {
   }
 
   async setIndexPattern(indexPattern: string) {
-    await this.testSubjects.setValue('onechatIndexPatternInput', indexPattern);
+    await this.testSubjects.setValue('agentBuilderIndexPatternInput', indexPattern);
   }
 
   async setEsqlQuery(query: string) {
@@ -628,7 +628,7 @@ export class OneChatPageObject extends FtrService {
         return titleElement.getVisibleText();
       },
       clickConfirm: async () => {
-        const confirmButtonSelector = 'onechatAgentDeleteConfirmButton';
+        const confirmButtonSelector = 'agentBuilderAgentDeleteConfirmButton';
         const confirmButton = await this.testSubjects.findDescendant(confirmButtonSelector, modal);
         await confirmButton.click();
       },

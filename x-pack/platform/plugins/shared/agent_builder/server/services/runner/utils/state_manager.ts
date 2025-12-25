@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/onechat-common';
-import type { ConversationStateManager, ToolStateManager } from '@kbn/onechat-server/runner';
+import type { Conversation } from '@kbn/agent-builder-common';
+import type { ConversationStateManager, ToolStateManager } from '@kbn/agent-builder-server/runner';
 
 export const createConversationStateManager = (
   conversation?: Conversation | undefined

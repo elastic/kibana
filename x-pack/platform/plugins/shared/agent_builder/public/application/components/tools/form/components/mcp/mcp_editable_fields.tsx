@@ -49,7 +49,7 @@ export const McpEditableFields = ({
   setMcpHealthStatus,
 }: McpConfigurationFieldsProps) => {
   const euiThemeContext = useEuiTheme();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
 
   const {
     control,
@@ -72,8 +72,8 @@ export const McpEditableFields = ({
   } = useAddMcpServerFlyout({ onConnectorCreated: handleConnectorCreated });
 
   const handleBulkImportClick = useCallback(() => {
-    navigateToOnechatUrl(appPaths.tools.bulkImportMcp);
-  }, [navigateToOnechatUrl]);
+    navigateToAgentBuilderUrl(appPaths.tools.bulkImportMcp);
+  }, [navigateToAgentBuilderUrl]);
 
   const { connectors, isLoading: isLoadingConnectors } = useListConnectors({
     type: MCP_CONNECTOR_TYPE,

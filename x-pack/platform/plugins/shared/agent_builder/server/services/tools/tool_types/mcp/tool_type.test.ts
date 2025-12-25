@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getMcpToolType, listMcpTools } from './tool_type';

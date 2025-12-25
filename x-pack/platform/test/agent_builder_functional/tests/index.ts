@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
-import type { OneChatUiFtrProviderContext } from '../../onechat/services/functional';
+import type { LlmProxy } from '../../agent_builder_api_integration/utils/llm_proxy';
+import type { AgentBuilderUiFtrProviderContext } from '../../agent_builder/services/functional';
 import { setupConnector, teardownConnector } from '../utils/connector_helpers';
 
-export default function ({ loadTestFile, getService }: OneChatUiFtrProviderContext) {
+export default function ({ loadTestFile, getService }: AgentBuilderUiFtrProviderContext) {
   describe('Agent Builder', function () {
     function llmSetup() {
       let llmProxy: LlmProxy;

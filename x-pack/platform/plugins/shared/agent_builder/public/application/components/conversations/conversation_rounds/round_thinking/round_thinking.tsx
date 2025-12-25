@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
-import { isReasoningStep } from '@kbn/onechat-common';
+import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
+import { isReasoningStep } from '@kbn/agent-builder-common';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { RoundThinkingTitle } from './round_thinking_title';

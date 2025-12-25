@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { isInternalError } from '@kbn/onechat-common';
+import { isInternalError } from '@kbn/agent-builder-common';
 import { createClient, type ToolHealthClient } from './client';
 import type { ToolHealthStatus } from './types';
 

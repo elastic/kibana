@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
+import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { ToolCreateParams, ToolTypeUpdateParams } from '../../tool_provider';
 import type { ToolStorage } from './storage';

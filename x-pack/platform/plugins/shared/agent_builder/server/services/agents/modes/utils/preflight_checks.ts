@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createBadRequestError } from '@kbn/onechat-common/base/errors';
-import type { Conversation, ConverseInput } from '@kbn/onechat-common';
-import { ConversationRoundStatus } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
+import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 export const ensureValidInput = ({
   input,

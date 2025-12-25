@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createOnechatError, OnechatErrorCode } from '@kbn/onechat-common';
-import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
+import { createAgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import {
   normalizeErrorType,
   getAgentExecutionErrorCode,
@@ -18,7 +18,7 @@ const createMockAgentExecutionError = (
   errCode: AgentExecutionErrorCode,
   meta: Record<string, any> = {}
 ) => {
-  const error = createOnechatError(OnechatErrorCode.agentExecutionError, 'Execution error', {
+  const error = createAgentBuilderError(AgentBuilderErrorCode.agentExecutionError, 'Execution error', {
     errCode,
     ...meta,
   });
@@ -27,18 +27,18 @@ const createMockAgentExecutionError = (
 
 describe('error_utils', () => {
   describe('normalizeErrorType', () => {
-    it('returns the error code for OnechatError', () => {
-      const error = createOnechatError(OnechatErrorCode.badRequest, 'Bad request');
-      expect(normalizeErrorType(error)).toBe(OnechatErrorCode.badRequest);
+    it('returns the error code for AgentBuilderError', () => {
+      const error = createAgentBuilderError(AgentBuilderErrorCode.badRequest, 'Bad request');
+      expect(normalizeErrorType(error)).toBe(AgentBuilderErrorCode.badRequest);
     });
 
-    it('returns internalError for OnechatError without code', () => {
-      // Create an OnechatError-like object without a code
-      const error = createOnechatError(OnechatErrorCode.internalError, 'Internal error');
-      expect(normalizeErrorType(error)).toBe(OnechatErrorCode.internalError);
+    it('returns internalError for AgentBuilderError without code', () => {
+      // Create an AgentBuilderError-like object without a code
+      const error = createAgentBuilderError(AgentBuilderErrorCode.internalError, 'Internal error');
+      expect(normalizeErrorType(error)).toBe(AgentBuilderErrorCode.internalError);
     });
 
-    it('returns "other" for non-OnechatError', () => {
+    it('returns "other" for non-AgentBuilderError', () => {
       const error = new Error('Regular error');
       expect(normalizeErrorType(error)).toBe('other');
     });
@@ -59,19 +59,19 @@ describe('error_utils', () => {
       expect(normalizeErrorType({ message: 'error' })).toBe('other');
     });
 
-    it('handles all OnechatErrorCode values', () => {
+    it('handles all AgentBuilderErrorCode values', () => {
       const errorCodes = [
-        OnechatErrorCode.internalError,
-        OnechatErrorCode.badRequest,
-        OnechatErrorCode.toolNotFound,
-        OnechatErrorCode.agentNotFound,
-        OnechatErrorCode.conversationNotFound,
-        OnechatErrorCode.agentExecutionError,
-        OnechatErrorCode.requestAborted,
+        AgentBuilderErrorCode.internalError,
+        AgentBuilderErrorCode.badRequest,
+        AgentBuilderErrorCode.toolNotFound,
+        AgentBuilderErrorCode.agentNotFound,
+        AgentBuilderErrorCode.conversationNotFound,
+        AgentBuilderErrorCode.agentExecutionError,
+        AgentBuilderErrorCode.requestAborted,
       ];
 
       for (const code of errorCodes) {
-        const error = createOnechatError(code, `Error with code ${code}`);
+        const error = createAgentBuilderError(code, `Error with code ${code}`);
         expect(normalizeErrorType(error)).toBe(code);
       }
     });
@@ -83,8 +83,8 @@ describe('error_utils', () => {
       expect(getAgentExecutionErrorCode(error)).toBe(AgentExecutionErrorCode.contextLengthExceeded);
     });
 
-    it('returns undefined for non-agentExecutionError OnechatError', () => {
-      const error = createOnechatError(OnechatErrorCode.badRequest, 'Bad request');
+    it('returns undefined for non-agentExecutionError AgentBuilderError', () => {
+      const error = createAgentBuilderError(AgentBuilderErrorCode.badRequest, 'Bad request');
       expect(getAgentExecutionErrorCode(error)).toBeUndefined();
     });
 

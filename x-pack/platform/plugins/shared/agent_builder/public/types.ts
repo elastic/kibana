@@ -18,7 +18,7 @@ import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
   ToolServiceStartContract,
-} from '@kbn/onechat-browser';
+} from '@kbn/agent-builder-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -42,7 +42,7 @@ export interface OpenConversationFlyoutReturn {
 
 export interface ConfigSchema {}
 
-export interface OnechatSetupDependencies {
+export interface AgentBuilderSetupDependencies {
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -52,7 +52,7 @@ export interface OnechatSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
-export interface OnechatStartDependencies {
+export interface AgentBuilderStartDependencies {
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;
@@ -65,12 +65,12 @@ export interface OnechatStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
-export interface OnechatPluginSetup {}
+export interface AgentBuilderPluginSetup {}
 
 /**
- * Public start contract for the browser-side onechat plugin.
+ * Public start contract for the browser-side agentBuilder plugin.
  */
-export interface OnechatPluginStart {
+export interface AgentBuilderPluginStart {
   /**
    * Agent service contract, can be used to list agents.
    */
@@ -92,7 +92,7 @@ export interface OnechatPluginStart {
    * @example
    * ```tsx
    * // Open a new conversation with close handler
-   * const { flyoutRef } = plugins.onechat.openConversationFlyout({
+   * const { flyoutRef } = plugins.agentBuilder.openConversationFlyout({
    *   onClose: () => console.log('Flyout closed')
    * });
    *

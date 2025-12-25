@@ -6,10 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AttachmentsService, ExecutableTool } from '@kbn/onechat-server/runner';
-import type { Runner, StaticToolRegistration } from '@kbn/onechat-server';
-import type { ToolType } from '@kbn/onechat-common';
-import type { AttachmentBoundedTool } from '@kbn/onechat-server/attachments';
+import type { AttachmentsService, ExecutableTool } from '@kbn/agent-builder-server/runner';
+import type { Runner, StaticToolRegistration } from '@kbn/agent-builder-server';
+import type { ToolType } from '@kbn/agent-builder-common';
+import type { AttachmentBoundedTool } from '@kbn/agent-builder-server/attachments';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../../tools/tool_types';
 import { convertTool } from '../../tools/builtin/converter';
 import { toExecutableTool } from '../../tools/utils/tool_conversion';

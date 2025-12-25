@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useToasts } from '../use_toasts';
 import { useTool } from './use_tools';
 
@@ -37,7 +37,7 @@ export interface UseEditToolServiceProps {
 
 export const useEditToolService = ({ onSuccess, onError }: UseEditToolServiceProps = {}) => {
   const queryClient = useQueryClient();
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const { mutate, mutateAsync, isLoading } = useMutation<
     UpdateToolResponse,
@@ -78,7 +78,7 @@ export const useEditTool = ({ toolId, onSuccess, onError, onLoadingError }: UseE
     (error, variables, context) => {
       addErrorToast({
         title: labels.tools.editEsqlToolErrorToast(variables.toolId),
-        text: formatOnechatErrorMessage(error),
+        text: formatAgentBuilderErrorMessage(error),
       });
       onError?.(error, variables, context);
     },

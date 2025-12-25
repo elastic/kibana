@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
-import type { ConversationRound } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
+import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ConversationRound } from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import type { ResearchAgentAction } from '../default/actions';
 import { toolCallAction, executeToolAction } from '../default/actions';

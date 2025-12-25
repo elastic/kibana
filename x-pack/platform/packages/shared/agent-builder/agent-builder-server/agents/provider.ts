@@ -13,10 +13,10 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
   ScopedRunner,
@@ -71,7 +71,7 @@ export interface AgentHandlerContext {
    */
   toolProvider: ToolProvider;
   /**
-   * Onechat runner scoped to the current execution.
+   * AgentBuilder runner scoped to the current execution.
    */
   runner: ScopedRunner;
   /**
@@ -101,7 +101,7 @@ export interface AgentHandlerContext {
 }
 
 /**
- * Event handler function to listen to run events during execution of tools, agents or other onechat primitives.
+ * Event handler function to listen to run events during execution of tools, agents or other agentBuilder primitives.
  */
 export type AgentEventEmitterFn = (event: ChatAgentEvent) => void;
 

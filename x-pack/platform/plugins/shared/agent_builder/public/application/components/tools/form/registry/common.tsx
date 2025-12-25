@@ -6,9 +6,9 @@
  */
 
 import type { Resolver } from 'react-hook-form';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 
-import type { OnechatInternalService } from '../../../../../services/types';
+import type { AgentBuilderInternalService } from '../../../../../services/types';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../../../../common/http_api/tools';
 import type { ToolFormData } from '../types/tool_form_types';
 import type { ToolFormMode } from '../tool_form';
@@ -30,5 +30,5 @@ export interface ToolTypeRegistryEntry<TFormData extends ToolFormData = ToolForm
   toolToFormData: (tool: ToolDefinitionWithSchema) => TFormData;
   formDataToCreatePayload: (data: TFormData) => CreateToolPayload;
   formDataToUpdatePayload: (data: TFormData) => UpdateToolPayload;
-  getValidationResolver: (services?: OnechatInternalService) => Resolver<TFormData>;
+  getValidationResolver: (services?: AgentBuilderInternalService) => Resolver<TFormData>;
 }

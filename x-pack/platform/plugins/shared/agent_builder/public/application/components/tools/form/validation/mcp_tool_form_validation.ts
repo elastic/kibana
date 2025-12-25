@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { sharedValidationSchemas } from './shared_tool_validation';
 
 const mcpI18nMessages = {
   connector: {
     requiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.mcp.connector_id.requiredError',
+      'xpack.agentBuilder.tools.newTool.validation.mcp.connector_id.requiredError',
       {
         defaultMessage: 'MCP Server is required.',
       }
@@ -21,7 +21,7 @@ const mcpI18nMessages = {
   },
   mcpTool: {
     requiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.mcp.mcp_tool_name.requiredError',
+      'xpack.agentBuilder.tools.newTool.validation.mcp.mcp_tool_name.requiredError',
       {
         defaultMessage: 'Tool is required.',
       }

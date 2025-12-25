@@ -8,8 +8,8 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateConfig } from './validate_configuration';
 import { validateQuery } from '@kbn/esql-language';
-import type { EsqlToolFieldTypes } from '@kbn/onechat-common';
-import { createBadRequestError } from '@kbn/onechat-common';
+import type { EsqlToolFieldTypes } from '@kbn/agent-builder-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/esql-language', () => ({
   validateQuery: jest.fn(),
@@ -19,7 +19,7 @@ jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryVariables: jest.fn(),
 }));
 
-jest.mock('@kbn/onechat-common', () => ({
+jest.mock('@kbn/agent-builder-common', () => ({
   createBadRequestError: jest.fn(),
 }));
 
@@ -88,7 +88,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue(['case_id']);
       mockCreateBadRequestError.mockImplementation((message: string) => {
         const error = new Error(message);
-        error.name = 'OnechatBadRequestError';
+        error.name = 'AgentBuilderBadRequestError';
         return error as any;
       });
 
@@ -113,7 +113,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue(['case_id', 'owner']);
       mockCreateBadRequestError.mockImplementation((message: string) => {
         const error = new Error(message);
-        error.name = 'OnechatBadRequestError';
+        error.name = 'AgentBuilderBadRequestError';
         return error as any;
       });
 
@@ -134,7 +134,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue(['case_id']);
       mockCreateBadRequestError.mockImplementation((message: string) => {
         const error = new Error(message);
-        error.name = 'OnechatBadRequestError';
+        error.name = 'AgentBuilderBadRequestError';
         return error as any;
       });
 
@@ -158,7 +158,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue(['case_id']);
       mockCreateBadRequestError.mockImplementation((message: string) => {
         const error = new Error(message);
-        error.name = 'OnechatBadRequestError';
+        error.name = 'AgentBuilderBadRequestError';
         return error as any;
       });
 
@@ -181,7 +181,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue([]);
       mockCreateBadRequestError.mockImplementation((message: string) => {
         const error = new Error(message);
-        error.name = 'OnechatBadRequestError';
+        error.name = 'AgentBuilderBadRequestError';
         return error as any;
       });
 
@@ -199,7 +199,7 @@ describe('validateConfig', () => {
       mockGetESQLQueryVariables.mockReturnValue(['param1']);
       mockCreateBadRequestError.mockImplementation((message: string) => {
         const error = new Error(message);
-        error.name = 'OnechatBadRequestError';
+        error.name = 'AgentBuilderBadRequestError';
         return error as any;
       });
     });

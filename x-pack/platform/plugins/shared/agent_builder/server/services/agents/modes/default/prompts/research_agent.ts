@@ -6,9 +6,9 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
-import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
-import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/onechat-common';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
 import type { ResearchAgentAction } from '../actions';
 import { attachmentTypeInstructions } from './utils/attachments';

@@ -9,14 +9,14 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/platform/plugins/shared/onechat/public',
-    '<rootDir>/x-pack/platform/plugins/shared/onechat/server',
-    '<rootDir>/x-pack/platform/plugins/shared/onechat/common',
+    '<rootDir>/x-pack/platform/plugins/shared/agent_builder/public',
+    '<rootDir>/x-pack/platform/plugins/shared/agent_builder/server',
+    '<rootDir>/x-pack/platform/plugins/shared/agent_builder/common',
   ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/onechat/{public,server,common}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/agent_builder/{public,server,common}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

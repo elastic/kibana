@@ -11,13 +11,13 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
-import { validateAgentId } from '@kbn/onechat-common/agents';
+import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
   createAgentNotFoundError,
   createBadRequestError,
   type ToolSelection,
   type UserIdAndName,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import { getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,

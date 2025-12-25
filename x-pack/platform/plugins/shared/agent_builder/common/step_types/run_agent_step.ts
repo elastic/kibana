@@ -9,9 +9,9 @@ import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
- * Step type ID for the onechat run agent step.
+ * Step type ID for the agentBuilder run agent step.
  */
-export const RunAgentStepTypeId = 'onechat.runAgent';
+export const RunAgentStepTypeId = 'agentBuilder.runAgent';
 
 /**
  * Input schema for the run agent step.

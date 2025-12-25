@@ -7,14 +7,14 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { queryKeys } from '../../query_keys';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useKibana } from '../use_kibana';
 
 export const useToolTypes = () => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
   const {
     services: { settings },
   } = useKibana();

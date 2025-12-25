@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiText, EuiLink, useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -17,18 +17,18 @@ import { useToolsActions } from '../../context/tools_provider';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
-import { OnechatToolsTable } from './table/tools_table';
+import { AgentBuilderToolsTable } from './table/tools_table';
 import { McpConnectionButton } from './mcp_server/mcp_connection_button';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 
-const manageAgentsLabel = i18n.translate('xpack.onechat.tools.manageAgentsLabel', {
+const manageAgentsLabel = i18n.translate('xpack.agentBuilder.tools.manageAgentsLabel', {
   defaultMessage: 'Manage agents',
 });
 
-export const OnechatTools = () => {
+export const AgentBuilderTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
-  const { createOnechatUrl } = useNavigation();
+  const { createAgentBuilderUrl } = useNavigation();
 
   const { manageTools } = useUiPrivileges();
 
@@ -38,18 +38,18 @@ export const OnechatTools = () => {
         pageTitle={labels.tools.title}
         description={
           <FormattedMessage
-            id="xpack.onechat.tools.toolsDescription"
+            id="xpack.agentBuilder.tools.toolsDescription"
             defaultMessage="Tools are modular, reusable Elasticsearch operations. Agents use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink
                   href={docLinks.tools}
                   target="_blank"
-                  aria-label={i18n.translate('xpack.onechat.tools.toolsDocumentationAriaLabel', {
+                  aria-label={i18n.translate('xpack.agentBuilder.tools.toolsDocumentationAriaLabel', {
                     defaultMessage: 'Learn more about tools in the documentation',
                   })}
                 >
-                  {i18n.translate('xpack.onechat.tools.toolsDocumentation', {
+                  {i18n.translate('xpack.agentBuilder.tools.toolsDocumentation', {
                     defaultMessage: 'Learn more',
                   })}
                 </EuiLink>
@@ -74,7 +74,7 @@ export const OnechatTools = () => {
           ),
           <EuiButtonEmpty
             key="agents-button"
-            href={createOnechatUrl(appPaths.agents.list)}
+            href={createAgentBuilderUrl(appPaths.agents.list)}
             aria-label={manageAgentsLabel}
           >
             <EuiText size="s">{manageAgentsLabel}</EuiText>
@@ -83,7 +83,7 @@ export const OnechatTools = () => {
         ]}
       />
       <KibanaPageTemplate.Section>
-        <OnechatToolsTable />
+        <AgentBuilderToolsTable />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

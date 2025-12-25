@@ -9,7 +9,7 @@ import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PromptLayout, type PromptLayoutVariant } from './prompt_layout';
-import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
@@ -21,12 +21,12 @@ export interface UpgradeLicensePromptProps {
 export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ variant }) => {
   const assetBasePath = useAssetBasePath();
   const { colorMode } = useEuiTheme();
-  const { navigationService } = useOnechatServices();
+  const { navigationService } = useAgentBuilderServices();
 
   const primaryButton = (
     <EuiButton fill href={SUBSCRIPTIONS_LINK} target="_blank">
       <FormattedMessage
-        id="xpack.onechat.access.prompt.upgradeLicense.actions.subscriptionPlansButton"
+        id="xpack.agentBuilder.access.prompt.upgradeLicense.actions.subscriptionPlansButton"
         defaultMessage="Subscription plans"
       />
     </EuiButton>
@@ -39,7 +39,7 @@ export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ vari
       }}
     >
       <FormattedMessage
-        id="xpack.onechat.access.prompt.upgradeLicense.actions.manageLicenseButton"
+        id="xpack.agentBuilder.access.prompt.upgradeLicense.actions.manageLicenseButton"
         defaultMessage="Manage your license"
       />
     </EuiButtonEmpty>
@@ -53,13 +53,13 @@ export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ vari
       }
       title={
         <FormattedMessage
-          id="xpack.onechat.access.prompt.upgradeLicense.title"
+          id="xpack.agentBuilder.access.prompt.upgradeLicense.title"
           defaultMessage="Upgrade your cluster license"
         />
       }
       subtitle={
         <FormattedMessage
-          id="xpack.onechat.access.prompt.upgradeLicense.description"
+          id="xpack.agentBuilder.access.prompt.upgradeLicense.description"
           defaultMessage="Your cluster needs an Enterprise license to use the Elastic Agent Builder."
         />
       }

@@ -9,11 +9,11 @@ import { useCallback } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { getToolTypeConfig } from '../../components/tools/form/registry/tools_form_registry';
 import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import type { ToolTypeRegistryEntry } from '../../components/tools/form/registry/common';
 
 export function useToolRegistryResolver(): Resolver<ToolFormData> {
-  const services = useOnechatServices();
+  const services = useAgentBuilderServices();
 
   return useCallback(
     async (data, context, options) => {

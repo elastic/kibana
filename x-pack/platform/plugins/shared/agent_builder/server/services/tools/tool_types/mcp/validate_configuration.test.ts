@@ -7,11 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { createBadRequestError } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
 import { validateConnector, validateToolName, validateConfig } from './validate_configuration';
 
-jest.mock('@kbn/onechat-common', () => ({
+jest.mock('@kbn/agent-builder-common', () => ({
   createBadRequestError: jest.fn(),
 }));
 
@@ -50,7 +50,7 @@ describe('MCP validate_configuration', () => {
 
     mockCreateBadRequestError.mockImplementation((message: string) => {
       const error = new Error(message) as Error & { isBoom: boolean };
-      error.name = 'OnechatBadRequestError';
+      error.name = 'AgentBuilderBadRequestError';
       error.isBoom = true;
       return error as any;
     });

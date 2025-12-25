@@ -18,18 +18,18 @@ import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
-const manageToolsLabel = i18n.translate('xpack.onechat.agents.manageToolsLabel', {
+const manageToolsLabel = i18n.translate('xpack.agentBuilder.agents.manageToolsLabel', {
   defaultMessage: 'Manage tools',
 });
 
-export const OnechatAgents = () => {
+export const AgentBuilderAgents = () => {
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
   const headerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border-style: none;
   `;
-  const { createOnechatUrl } = useNavigation();
+  const { createAgentBuilderUrl } = useNavigation();
   const headerButtons = [
     manageAgents && (
       <EuiButton
@@ -37,15 +37,15 @@ export const OnechatAgents = () => {
         color="primary"
         fill
         iconSide="left"
-        href={createOnechatUrl(appPaths.agents.new)}
+        href={createAgentBuilderUrl(appPaths.agents.new)}
         data-test-subj="agentBuilderNewAgentButton"
       >
-        {i18n.translate('xpack.onechat.agents.newAgentButton', {
+        {i18n.translate('xpack.agentBuilder.agents.newAgentButton', {
           defaultMessage: 'New agent',
         })}
       </EuiButton>
     ),
-    <EuiButtonEmpty aria-label={manageToolsLabel} href={createOnechatUrl(appPaths.tools.list)}>
+    <EuiButtonEmpty aria-label={manageToolsLabel} href={createAgentBuilderUrl(appPaths.tools.list)}>
       <EuiText size="s">{manageToolsLabel}</EuiText>
     </EuiButtonEmpty>,
   ];
@@ -53,20 +53,20 @@ export const OnechatAgents = () => {
     <DeleteAgentProvider>
       <KibanaPageTemplate
         mainProps={{
-          'aria-label': i18n.translate('xpack.onechat.agents.mainAriaLabel', {
+          'aria-label': i18n.translate('xpack.agentBuilder.agents.mainAriaLabel', {
             defaultMessage: 'Agent Builder agents list',
           }),
         }}
       >
         <KibanaPageTemplate.Header
           css={headerStyles}
-          pageTitle={i18n.translate('xpack.onechat.agents.title', {
+          pageTitle={i18n.translate('xpack.agentBuilder.agents.title', {
             defaultMessage: 'Agents',
           })}
           pageTitleProps={{ 'data-test-subj': 'agentBuilderAgentsListPageTitle' }}
           description={
             <FormattedMessage
-              id="xpack.onechat.agents.description"
+              id="xpack.agentBuilder.agents.description"
               defaultMessage="Define agents with custom instructions and assign them tools to answer questions about your data and take actions on your behalf. {learnMoreLink}"
               values={{
                 learnMoreLink: (
@@ -74,13 +74,13 @@ export const OnechatAgents = () => {
                     href={docLinks.agentBuilderAgents}
                     target="_blank"
                     aria-label={i18n.translate(
-                      'xpack.onechat.agents.agentsDocumentationAriaLabel',
+                      'xpack.agentBuilder.agents.agentsDocumentationAriaLabel',
                       {
                         defaultMessage: 'Learn more about agents in the documentation',
                       }
                     )}
                   >
-                    {i18n.translate('xpack.onechat.agents.agentsDocumentation', {
+                    {i18n.translate('xpack.agentBuilder.agents.agentsDocumentation', {
                       defaultMessage: 'Learn more',
                     })}
                   </EuiLink>

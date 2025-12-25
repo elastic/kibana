@@ -10,7 +10,7 @@ import { inspect } from 'util';
 /*
  * Produce a string version of an error,
  */
-export function formatOnechatErrorMessage(error: any): string {
+export function formatAgentBuilderErrorMessage(error: any): string {
   if (typeof error === 'string') {
     return error;
   }

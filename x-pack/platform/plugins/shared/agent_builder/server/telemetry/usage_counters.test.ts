@@ -7,24 +7,24 @@
 
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
-  createOnechatUsageCounter,
+  createAgentBuilderUsageCounter,
   trackToolCall,
   trackLLMUsage,
   trackConversationRound,
   trackQueryToResultTime,
-  ONECHAT_USAGE_DOMAIN,
+  AGENTBUILDER_USAGE_DOMAIN,
 } from './usage_counters';
 
 describe('usage_counters', () => {
-  describe('ONECHAT_USAGE_DOMAIN', () => {
+  describe('AGENTBUILDER_USAGE_DOMAIN', () => {
     it('has the correct value', () => {
-      expect(ONECHAT_USAGE_DOMAIN).toBe('agent_builder');
+      expect(AGENTBUILDER_USAGE_DOMAIN).toBe('agent_builder');
     });
   });
 
-  describe('createOnechatUsageCounter', () => {
+  describe('createAgentBuilderUsageCounter', () => {
     it('returns undefined when usageCollection is undefined', () => {
-      const result = createOnechatUsageCounter(undefined);
+      const result = createAgentBuilderUsageCounter(undefined);
       expect(result).toBeUndefined();
     });
 
@@ -34,9 +34,9 @@ describe('usage_counters', () => {
         createUsageCounter: jest.fn().mockReturnValue(mockUsageCounter),
       } as unknown as UsageCollectionSetup;
 
-      const result = createOnechatUsageCounter(mockUsageCollection);
+      const result = createAgentBuilderUsageCounter(mockUsageCollection);
 
-      expect(mockUsageCollection.createUsageCounter).toHaveBeenCalledWith(ONECHAT_USAGE_DOMAIN);
+      expect(mockUsageCollection.createUsageCounter).toHaveBeenCalledWith(AGENTBUILDER_USAGE_DOMAIN);
       expect(result).toBe(mockUsageCounter);
     });
   });

@@ -9,56 +9,56 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
-import { OnechatAgentsCreate } from './pages/agent_create';
-import { OnechatAgentsEdit } from './pages/agent_edit';
-import { OnechatAgentsPage } from './pages/agents';
-import { OnechatConversationsPage } from './pages/conversations';
-import { OnechatToolCreatePage } from './pages/tool_create';
-import { OnechatToolDetailsPage } from './pages/tool_details';
-import { OnechatToolsPage } from './pages/tools';
-import { OnechatBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
+import { AgentBuilderAgentsCreate } from './pages/agent_create';
+import { AgentBuilderAgentsEdit } from './pages/agent_edit';
+import { AgentBuilderAgentsPage } from './pages/agents';
+import { AgentBuilderConversationsPage } from './pages/conversations';
+import { AgentBuilderToolCreatePage } from './pages/tool_create';
+import { AgentBuilderToolDetailsPage } from './pages/tool_details';
+import { AgentBuilderToolsPage } from './pages/tools';
+import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tools';
 
-export const OnechatRoutes: React.FC<{}> = () => {
+export const AgentBuilderRoutes: React.FC<{}> = () => {
   const mcpEnabled = useUiSetting(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false);
   return (
     <Routes>
       <Route path="/conversations/:conversationId">
-        <OnechatConversationsPage />
+        <AgentBuilderConversationsPage />
       </Route>
 
       <Route path="/agents/new">
-        <OnechatAgentsCreate />
+        <AgentBuilderAgentsCreate />
       </Route>
 
       <Route path="/agents/:agentId">
-        <OnechatAgentsEdit />
+        <AgentBuilderAgentsEdit />
       </Route>
 
       <Route path="/agents">
-        <OnechatAgentsPage />
+        <AgentBuilderAgentsPage />
       </Route>
 
       <Route path="/tools/new">
-        <OnechatToolCreatePage />
+        <AgentBuilderToolCreatePage />
       </Route>
 
       {mcpEnabled && (
         <Route path="/tools/bulk_import_mcp">
-          <OnechatBulkImportMcpToolsPage />
+          <AgentBuilderBulkImportMcpToolsPage />
         </Route>
       )}
 
       <Route path="/tools/:toolId">
-        <OnechatToolDetailsPage />
+        <AgentBuilderToolDetailsPage />
       </Route>
 
       <Route path="/tools">
-        <OnechatToolsPage />
+        <AgentBuilderToolsPage />
       </Route>
 
       {/* Default to conversations page */}
       <Route path="/">
-        <OnechatConversationsPage />
+        <AgentBuilderConversationsPage />
       </Route>
     </Routes>
   );

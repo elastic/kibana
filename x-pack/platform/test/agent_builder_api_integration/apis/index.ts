@@ -9,7 +9,7 @@ import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
-  describe('OneChat Endpoints', function () {
+  describe('AgentBuilder Endpoints', function () {
     const kibanaServer = getService('kibanaServer');
 
     before(async () => {

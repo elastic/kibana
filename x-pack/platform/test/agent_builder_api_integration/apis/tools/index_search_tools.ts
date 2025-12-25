@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Index Search Tools API', () => {
     const createdToolIds: string[] = [];
-    const testIndex = 'test-search-onechat-index';
+    const testIndex = 'test-search-agent-builder-index';
 
     const mockTool = {
       id: 'search-tool',

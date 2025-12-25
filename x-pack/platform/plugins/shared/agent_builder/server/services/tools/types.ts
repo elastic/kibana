@@ -7,7 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { StaticToolRegistration } from '@kbn/onechat-server/tools';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
 import type { AnyToolTypeDefinition } from './tool_types';
 import type { ToolRegistry } from './tool_registry';
 import type { ToolHealthClient } from './health';

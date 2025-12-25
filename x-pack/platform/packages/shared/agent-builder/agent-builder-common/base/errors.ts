@@ -10,9 +10,9 @@ import { AgentExecutionErrorCode } from '../agents/execution_errors';
 import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
 
 /**
- * Code to identify onechat errors
+ * Code to identify agentBuilder errors
  */
-export enum OnechatErrorCode {
+export enum AgentBuilderErrorCode {
   internalError = 'internalError',
   badRequest = 'badRequest',
   toolNotFound = 'toolNotFound',
@@ -22,78 +22,78 @@ export enum OnechatErrorCode {
   requestAborted = 'requestAborted',
 }
 
-const OnechatError = ServerSentEventError;
+const AgentBuilderError = ServerSentEventError;
 
 /**
- * Base error class used for all onechat errors.
+ * Base error class used for all agentBuilder errors.
  */
-export type OnechatError<
-  TCode extends OnechatErrorCode,
+export type AgentBuilderError<
+  TCode extends AgentBuilderErrorCode,
   TMeta extends Record<string, any> = Record<string, any>
 > = ServerSentEventError<TCode, TMeta>;
 
-export type SerializedOnechatError = ReturnType<OnechatError<OnechatErrorCode>['toJSON']>;
+export type SerializedAgentBuilderError = ReturnType<AgentBuilderError<AgentBuilderErrorCode>['toJSON']>;
 
-export const isOnechatError = (err: unknown): err is OnechatError<OnechatErrorCode> => {
-  return err instanceof OnechatError;
+export const isAgentBuilderError = (err: unknown): err is AgentBuilderError<AgentBuilderErrorCode> => {
+  return err instanceof AgentBuilderError;
 };
 
-export const createOnechatError = (
-  errorCode: OnechatErrorCode,
+export const createAgentBuilderError = (
+  errorCode: AgentBuilderErrorCode,
   message: string,
   meta?: Record<string, any>
-): OnechatError<OnechatErrorCode> => {
-  return new OnechatError(errorCode, message, meta ?? {});
+): AgentBuilderError<AgentBuilderErrorCode> => {
+  return new AgentBuilderError(errorCode, message, meta ?? {});
 };
 
 /**
  * Represents an internal error
  */
-export type OnechatInternalError = OnechatError<OnechatErrorCode.internalError>;
+export type AgentBuilderInternalError = AgentBuilderError<AgentBuilderErrorCode.internalError>;
 
 /**
- * Checks if the given error is a {@link OnechatInternalError}
+ * Checks if the given error is a {@link AgentBuilderInternalError}
  */
-export const isInternalError = (err: unknown): err is OnechatInternalError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.internalError;
+export const isInternalError = (err: unknown): err is AgentBuilderInternalError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.internalError;
 };
 
 export const createInternalError = (
   message: string,
   meta?: Record<string, any>
-): OnechatInternalError => {
-  return new OnechatError(OnechatErrorCode.internalError, message, meta ?? {});
+): AgentBuilderInternalError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.internalError, message, meta ?? {});
 };
 
 /**
  * Represents a generic bad request error
  */
-export type OnechatBadRequestError = OnechatError<OnechatErrorCode.badRequest>;
+export type AgentBuilderBadRequestError = AgentBuilderError<AgentBuilderErrorCode.badRequest>;
 
 /**
- * Checks if the given error is a {@link OnechatInternalError}
+ * Checks if the given error is a {@link AgentBuilderInternalError}
  */
-export const isBadRequestError = (err: unknown): err is OnechatBadRequestError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.badRequest;
+export const isBadRequestError = (err: unknown): err is AgentBuilderBadRequestError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.badRequest;
 };
 
 export const createBadRequestError = (
   message: string,
   meta: Record<string, any> = {}
-): OnechatBadRequestError => {
-  return new OnechatError(OnechatErrorCode.badRequest, message, { ...meta, statusCode: 400 });
+): AgentBuilderBadRequestError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.badRequest, message, { ...meta, statusCode: 400 });
 };
 
 /**
  * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
  */
-export type OnechatToolNotFoundError = OnechatError<OnechatErrorCode.toolNotFound>;
+export type AgentBuilderToolNotFoundError = AgentBuilderError<AgentBuilderErrorCode.toolNotFound>;
 
 /**
- * Checks if the given error is a {@link OnechatToolNotFoundError}
+ * Checks if the given error is a {@link AgentBuilderToolNotFoundError}
  */
-export const isToolNotFoundError = (err: unknown): err is OnechatToolNotFoundError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.toolNotFound;
+export const isToolNotFoundError = (err: unknown): err is AgentBuilderToolNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.toolNotFound;
 };
 
 export const createToolNotFoundError = ({
@@ -104,9 +104,9 @@ export const createToolNotFoundError = ({
   toolId: string;
   customMessage?: string;
   meta?: Record<string, any>;
-}): OnechatToolNotFoundError => {
-  return new OnechatError(
-    OnechatErrorCode.toolNotFound,
+}): AgentBuilderToolNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.toolNotFound,
     customMessage ?? `Tool ${toolId} not found`,
     { ...meta, toolId, statusCode: 404 }
   );
@@ -115,13 +115,13 @@ export const createToolNotFoundError = ({
 /**
  * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
  */
-export type OnechatAgentNotFoundError = OnechatError<OnechatErrorCode.agentNotFound>;
+export type AgentBuilderAgentNotFoundError = AgentBuilderError<AgentBuilderErrorCode.agentNotFound>;
 
 /**
- * Checks if the given error is a {@link OnechatInternalError}
+ * Checks if the given error is a {@link AgentBuilderInternalError}
  */
-export const isAgentNotFoundError = (err: unknown): err is OnechatAgentNotFoundError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.agentNotFound;
+export const isAgentNotFoundError = (err: unknown): err is AgentBuilderAgentNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.agentNotFound;
 };
 
 export const createAgentNotFoundError = ({
@@ -132,9 +132,9 @@ export const createAgentNotFoundError = ({
   agentId: string;
   customMessage?: string;
   meta?: Record<string, any>;
-}): OnechatAgentNotFoundError => {
-  return new OnechatError(
-    OnechatErrorCode.agentNotFound,
+}): AgentBuilderAgentNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.agentNotFound,
     customMessage ?? `Agent ${agentId} not found`,
     { ...meta, agentId, statusCode: 404 }
   );
@@ -143,15 +143,15 @@ export const createAgentNotFoundError = ({
 /**
  * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
  */
-export type OnechatConversationNotFoundError = OnechatError<OnechatErrorCode.conversationNotFound>;
+export type AgentBuilderConversationNotFoundError = AgentBuilderError<AgentBuilderErrorCode.conversationNotFound>;
 
 /**
- * Checks if the given error is a {@link OnechatConversationNotFoundError}
+ * Checks if the given error is a {@link AgentBuilderConversationNotFoundError}
  */
 export const isConversationNotFoundError = (
   err: unknown
-): err is OnechatConversationNotFoundError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.conversationNotFound;
+): err is AgentBuilderConversationNotFoundError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationNotFound;
 };
 
 export const createConversationNotFoundError = ({
@@ -162,9 +162,9 @@ export const createConversationNotFoundError = ({
   conversationId: string;
   customMessage?: string;
   meta?: Record<string, any>;
-}): OnechatConversationNotFoundError => {
-  return new OnechatError(
-    OnechatErrorCode.conversationNotFound,
+}): AgentBuilderConversationNotFoundError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationNotFound,
     customMessage ?? `Conversation ${conversationId} not found`,
     { ...meta, conversationId, statusCode: 404 }
   );
@@ -173,45 +173,45 @@ export const createConversationNotFoundError = ({
 /**
  * Represents an internal error
  */
-export type OnechatRequestAbortedError = OnechatError<OnechatErrorCode.requestAborted>;
+export type AgentBuilderRequestAbortedError = AgentBuilderError<AgentBuilderErrorCode.requestAborted>;
 
 /**
- * Checks if the given error is a {@link OnechatRequestAbortedError}
+ * Checks if the given error is a {@link AgentBuilderRequestAbortedError}
  */
-export const isRequestAbortedError = (err: unknown): err is OnechatRequestAbortedError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.requestAborted;
+export const isRequestAbortedError = (err: unknown): err is AgentBuilderRequestAbortedError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.requestAborted;
 };
 
 export const createRequestAbortedError = (
   message: string,
   meta?: Record<string, any>
-): OnechatRequestAbortedError => {
-  return new OnechatError(OnechatErrorCode.requestAborted, message, meta ?? {});
+): AgentBuilderRequestAbortedError => {
+  return new AgentBuilderError(AgentBuilderErrorCode.requestAborted, message, meta ?? {});
 };
 
 /**
  * Represents an error related to agent execution
  */
-export type OnechatAgentExecutionError<
+export type AgentBuilderAgentExecutionError<
   ErrCode extends AgentExecutionErrorCode = AgentExecutionErrorCode
-> = OnechatError<
-  OnechatErrorCode.agentExecutionError,
+> = AgentBuilderError<
+  AgentBuilderErrorCode.agentExecutionError,
   { errCode: ErrCode } & ExecutionErrorMetaOf<ErrCode>
 >;
 
 /**
- * Checks if the given error is a {@link OnechatInternalError}
+ * Checks if the given error is a {@link AgentBuilderInternalError}
  */
-export const isAgentExecutionError = (err: unknown): err is OnechatAgentExecutionError => {
-  return isOnechatError(err) && err.code === OnechatErrorCode.agentExecutionError;
+export const isAgentExecutionError = (err: unknown): err is AgentBuilderAgentExecutionError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.agentExecutionError;
 };
 
 export const createAgentExecutionError = <ErrCode extends AgentExecutionErrorCode>(
   message: string,
   code: ErrCode,
   meta: ExecutionErrorMetaOf<ErrCode>
-): OnechatAgentExecutionError<ErrCode> => {
-  return new OnechatError(OnechatErrorCode.agentExecutionError, message, {
+): AgentBuilderAgentExecutionError<ErrCode> => {
+  return new AgentBuilderError(AgentBuilderErrorCode.agentExecutionError, message, {
     ...meta,
     errCode: code,
   });
@@ -222,7 +222,7 @@ export const createAgentExecutionError = <ErrCode extends AgentExecutionErrorCod
  */
 export const isContextLengthExceededAgentError = (
   err: unknown
-): err is OnechatAgentExecutionError<AgentExecutionErrorCode.contextLengthExceeded> => {
+): err is AgentBuilderAgentExecutionError<AgentExecutionErrorCode.contextLengthExceeded> => {
   return (
     isAgentExecutionError(err) && err.meta.errCode === AgentExecutionErrorCode.contextLengthExceeded
   );
@@ -231,8 +231,8 @@ export const isContextLengthExceededAgentError = (
 /**
  * Global utility exposing all error utilities from a single export.
  */
-export const OnechatErrorUtils = {
-  isOnechatError,
+export const AgentBuilderErrorUtils = {
+  isAgentBuilderError,
   isInternalError,
   isToolNotFoundError,
   isAgentNotFoundError,

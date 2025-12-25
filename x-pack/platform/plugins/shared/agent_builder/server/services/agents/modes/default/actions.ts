@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
-import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
-import type { ToolCall } from '@kbn/onechat-genai-utils/langchain';
+import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
 
 export enum AgentActionType {
   Error = 'error',
@@ -29,7 +29,7 @@ export interface ToolCallResult {
 
 export interface AgentErrorAction {
   type: AgentActionType.Error;
-  error: OnechatAgentExecutionError;
+  error: AgentBuilderAgentExecutionError;
 }
 
 export interface ToolCallAction {
@@ -114,7 +114,7 @@ export function isStructuredAnswerAction(action: AgentAction): action is Structu
 
 // creation helpers
 
-export function errorAction(error: OnechatAgentExecutionError): AgentErrorAction {
+export function errorAction(error: AgentBuilderAgentExecutionError): AgentErrorAction {
   return {
     type: AgentActionType.Error,
     error,

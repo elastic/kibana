@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { AgentType, createAgentNotFoundError } from '@kbn/onechat-common';
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import { AgentType, createAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { BuiltinAgentRegistry } from './registry';
 import type { AgentProviderFn, ReadonlyAgentProvider } from '../agent_source';
 import type { InternalAgentDefinition } from '../agent_registry';

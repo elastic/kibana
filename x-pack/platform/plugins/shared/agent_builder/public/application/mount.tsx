@@ -13,10 +13,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { OnechatRoutes } from './routes';
-import type { OnechatInternalService } from '../services';
-import type { OnechatStartDependencies } from '../types';
-import { OnechatServicesContext } from './context/onechat_services_context';
+import { AgentBuilderRoutes } from './routes';
+import type { AgentBuilderInternalService } from '../services';
+import type { AgentBuilderStartDependencies } from '../types';
+import { AgentBuilderServicesContext } from './context/agent_builder_services_context';
 import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
 
@@ -29,10 +29,10 @@ export const mountApp = async ({
   onAppLeave,
 }: {
   core: CoreStart;
-  plugins: OnechatStartDependencies;
+  plugins: AgentBuilderStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
-  services: OnechatInternalService;
+  services: AgentBuilderInternalService;
   onAppLeave: OnAppLeave;
 }) => {
   const kibanaServices = { ...core, plugins, appParams: { history } };
@@ -44,17 +44,17 @@ export const mountApp = async ({
       <KibanaContextProvider services={kibanaServices}>
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
-            <OnechatServicesContext.Provider value={services}>
+            <AgentBuilderServicesContext.Provider value={services}>
               <AppLeaveContext.Provider value={onAppLeave}>
                 <RedirectAppLinks coreStart={core}>
                   <PageWrapper>
                     <Router history={history}>
-                      <OnechatRoutes />
+                      <AgentBuilderRoutes />
                     </Router>
                   </PageWrapper>
                 </RedirectAppLinks>
               </AppLeaveContext.Provider>
-            </OnechatServicesContext.Provider>
+            </AgentBuilderServicesContext.Provider>
           </QueryClientProvider>
         </I18nProvider>
       </KibanaContextProvider>

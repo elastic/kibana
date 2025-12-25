@@ -26,7 +26,7 @@ import { appPaths } from '../../../utils/app_paths';
 
 export const McpConnectionButton = () => {
   const mcpEnabled = useUiSetting(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false);
-  const { createOnechatUrl } = useNavigation();
+  const { createAgentBuilderUrl } = useNavigation();
   const { kibanaUrl } = useKibanaUrl();
 
   const [isContextOpen, toggleContextOpen] = useToggle(false);
@@ -42,7 +42,7 @@ export const McpConnectionButton = () => {
           onClick={toggleContextOpen}
         >
           <EuiText size="s">
-            {i18n.translate('xpack.onechat.tools.mcpServerConnectionButton', {
+            {i18n.translate('xpack.agentBuilder.tools.mcpServerConnectionButton', {
               defaultMessage: 'Manage MCP',
             })}
           </EuiText>
@@ -62,7 +62,7 @@ export const McpConnectionButton = () => {
           >
             {(copy) => (
               <EuiContextMenuItem key="copy" icon="copy" onClick={copy}>
-                {i18n.translate('xpack.onechat.tools.copyMcpServerUrlButton', {
+                {i18n.translate('xpack.agentBuilder.tools.copyMcpServerUrlButton', {
                   defaultMessage: 'Copy MCP Server URL',
                 })}
               </EuiContextMenuItem>
@@ -73,9 +73,9 @@ export const McpConnectionButton = () => {
                 <EuiContextMenuItem
                   key="bulkImportMcpTools"
                   icon="plus"
-                  href={createOnechatUrl(appPaths.tools.bulkImportMcp)}
+                  href={createAgentBuilderUrl(appPaths.tools.bulkImportMcp)}
                 >
-                  {i18n.translate('xpack.onechat.tools.bulkImportMcpToolsButton', {
+                  {i18n.translate('xpack.agentBuilder.tools.bulkImportMcpToolsButton', {
                     defaultMessage: 'Bulk import MCP tools',
                   })}
                 </EuiContextMenuItem>,
@@ -87,7 +87,7 @@ export const McpConnectionButton = () => {
             href={docLinks.mcpServer}
             target="_blank"
           >
-            {i18n.translate('xpack.onechat.tools.aboutMcpServerDocumentationButton', {
+            {i18n.translate('xpack.agentBuilder.tools.aboutMcpServerDocumentationButton', {
               defaultMessage: 'Documentation',
             })}
           </EuiContextMenuItem>,

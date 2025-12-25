@@ -10,7 +10,7 @@ import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elast
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 
@@ -86,7 +86,7 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiSwitch
-                label={i18n.translate('xpack.onechat.tools.showActiveOnly', {
+                label={i18n.translate('xpack.agentBuilder.tools.showActiveOnly', {
                   defaultMessage: 'Show active only',
                 })}
                 checked={showActiveOnly}

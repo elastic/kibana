@@ -17,13 +17,13 @@ import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../../utils/one_chat_client';
-import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
+import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
+import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 
-export default function ({ getService }: OneChatApiFtrProviderContext) {
+export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
-  const oneChatApiClient = createOneChatApiClient(supertest);
+  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
   describe('POST /api/agent_builder/converse: error handling', () => {
     let llmProxy: LlmProxy;
@@ -50,7 +50,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
         response: MOCKED_LLM_RESPONSE,
       });
 
-      const body = await oneChatApiClient.converse({
+      const body = await agentBuilderApiClient.converse({
         input: USER_PROMPT,
         connector_id: connectorId,
       });

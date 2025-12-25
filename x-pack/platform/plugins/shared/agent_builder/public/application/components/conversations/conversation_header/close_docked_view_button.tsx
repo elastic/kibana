@@ -18,11 +18,11 @@ export const CloseDockedViewButton: React.FC<CloseDockedViewButtonProps> = ({ on
     <EuiButtonIcon
       color="text"
       iconType="cross"
-      aria-label={i18n.translate('xpack.onechat.embedded.conversationActions.closeConversation', {
+      aria-label={i18n.translate('xpack.agentBuilder.embedded.conversationActions.closeConversation', {
         defaultMessage: 'Close conversation',
       })}
       onClick={onClose}
-      data-test-subj="onechatEmbeddedCloseConversationButton"
+      data-test-subj="agentBuilderEmbeddedCloseConversationButton"
     />
   );
 };

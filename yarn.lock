@@ -6619,7 +6619,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-onechat@link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat":
+"@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
   version "0.0.0"
   uid ""
 
@@ -7691,23 +7691,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/onechat-browser@link:x-pack/platform/packages/shared/onechat/onechat-browser":
+"@kbn/agent-builder-browser@link:x-pack/platform/packages/shared/agent-builder/agent-builder-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/onechat-common@link:x-pack/platform/packages/shared/onechat/onechat-common":
+"@kbn/agent-builder-common@link:x-pack/platform/packages/shared/agent-builder/agent-builder-common":
   version "0.0.0"
   uid ""
 
-"@kbn/onechat-genai-utils@link:x-pack/platform/packages/shared/onechat/onechat-genai-utils":
+"@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/onechat-plugin@link:x-pack/platform/plugins/shared/onechat":
+"@kbn/agent-builder-plugin@link:x-pack/platform/plugins/shared/agent_builder":
   version "0.0.0"
   uid ""
 
-"@kbn/onechat-server@link:x-pack/platform/packages/shared/onechat/onechat-server":
+"@kbn/agent-builder-server@link:x-pack/platform/packages/shared/agent-builder/agent-builder-server":
   version "0.0.0"
   uid ""
 

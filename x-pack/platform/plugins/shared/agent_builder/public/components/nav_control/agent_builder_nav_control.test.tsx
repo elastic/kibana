@@ -14,7 +14,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
-import { OnechatNavControl } from './onechat_nav_control';
+import { AgentBuilderNavControl } from './agent_builder_nav_control';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -27,7 +27,7 @@ jest.mock('../../application/hooks/use_ui_privileges', () => ({
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseUiPrivileges = useUiPrivileges as jest.MockedFunction<typeof useUiPrivileges>;
 
-describe('OnechatNavControl', () => {
+describe('AgentBuilderNavControl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -39,7 +39,7 @@ describe('OnechatNavControl', () => {
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
       services: {
-        onechat: {
+        agentBuilder: {
           toggleConversationFlyout,
           openConversationFlyout: jest.fn(),
         },
@@ -52,7 +52,7 @@ describe('OnechatNavControl', () => {
 
     render(
       <IntlProvider locale="en">
-        <OnechatNavControl />
+        <AgentBuilderNavControl />
       </IntlProvider>
     );
 
@@ -67,7 +67,7 @@ describe('OnechatNavControl', () => {
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
       services: {
-        onechat: {
+        agentBuilder: {
           toggleConversationFlyout,
           openConversationFlyout: jest.fn(),
         },
@@ -80,7 +80,7 @@ describe('OnechatNavControl', () => {
 
     render(
       <IntlProvider locale="en">
-        <OnechatNavControl />
+        <AgentBuilderNavControl />
       </IntlProvider>
     );
 
@@ -98,7 +98,7 @@ describe('OnechatNavControl', () => {
     mockUseUiPrivileges.mockReturnValue({ show: true } as any);
     mockUseKibana.mockReturnValue({
       services: {
-        onechat: {
+        agentBuilder: {
           toggleConversationFlyout,
           openConversationFlyout,
         },
@@ -111,7 +111,7 @@ describe('OnechatNavControl', () => {
 
     render(
       <IntlProvider locale="en">
-        <OnechatNavControl />
+        <AgentBuilderNavControl />
       </IntlProvider>
     );
 

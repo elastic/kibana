@@ -10,7 +10,7 @@ import type {
   AgentAvailabilityContext,
   AgentAvailabilityConfig,
   AgentAvailabilityResult,
-} from '@kbn/onechat-server/agents/builtin_definition';
+} from '@kbn/agent-builder-server/agents/builtin_definition';
 
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes default TTL
 

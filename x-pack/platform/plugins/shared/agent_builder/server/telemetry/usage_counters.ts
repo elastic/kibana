@@ -8,23 +8,23 @@
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 /**
- * Domain ID for all onechat usage counters
+ * Domain ID for all agentBuilder usage counters
  */
-export const ONECHAT_USAGE_DOMAIN = 'agent_builder';
+export const AGENTBUILDER_USAGE_DOMAIN = 'agent_builder';
 
 /**
- * Create usage counter for onechat plugin
+ * Create usage counter for agentBuilder plugin
  * @param usageCollection - Usage collection setup contract
  * @returns Usage counter instance
  */
-export function createOnechatUsageCounter(
+export function createAgentBuilderUsageCounter(
   usageCollection?: UsageCollectionSetup
 ): UsageCounter | undefined {
   if (!usageCollection) {
     return undefined;
   }
 
-  return usageCollection.createUsageCounter(ONECHAT_USAGE_DOMAIN);
+  return usageCollection.createUsageCounter(AGENTBUILDER_USAGE_DOMAIN);
 }
 
 /**
@@ -39,7 +39,7 @@ export function trackToolCall(
   if (!usageCounter) return;
 
   usageCounter.incrementCounter({
-    counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_${source}`,
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_${source}`,
     counterType: 'count',
     incrementBy: 1,
   });
@@ -59,13 +59,13 @@ export function trackLLMUsage(
   if (!usageCounter) return;
 
   usageCounter.incrementCounter({
-    counterName: `${ONECHAT_USAGE_DOMAIN}_llm_provider_${provider}`,
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_${provider}`,
     counterType: 'count',
     incrementBy: 1,
   });
 
   usageCounter.incrementCounter({
-    counterName: `${ONECHAT_USAGE_DOMAIN}_llm_model_${model}`,
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_${model}`,
     counterType: 'count',
     incrementBy: 1,
   });
@@ -96,7 +96,7 @@ export function trackConversationRound(
   }
 
   usageCounter.incrementCounter({
-    counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_${bucket}`,
     counterType: 'count',
     incrementBy: 1,
   });
@@ -127,7 +127,7 @@ export function trackQueryToResultTime(
   }
 
   usageCounter.incrementCounter({
-    counterName: `${ONECHAT_USAGE_DOMAIN}_${bucket}`,
+    counterName: `${AGENTBUILDER_USAGE_DOMAIN}_${bucket}`,
     counterType: 'count',
     incrementBy: 1,
   });

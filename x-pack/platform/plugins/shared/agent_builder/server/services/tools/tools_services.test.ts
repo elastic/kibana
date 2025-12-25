@@ -6,11 +6,11 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
+import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import { ToolsService } from './tools_service';
 import { createMockedBuiltinTool } from '../../test_utils/tools';
 
-jest.mock('@kbn/onechat-server/allow_lists');
+jest.mock('@kbn/agent-builder-server/allow_lists');
 
 const isAllowedBuiltinToolMock = isAllowedBuiltinTool as jest.MockedFunction<
   typeof isAllowedBuiltinTool
@@ -46,7 +46,7 @@ describe('ToolsService', () => {
       expect(() => serviceSetup.register(createMockedBuiltinTool()))
         .toThrowErrorMatchingInlineSnapshot(`
         "Built-in tool with id \\"test-tool\\" is not in the list of allowed built-in tools.
-                     Please add it to the list of allowed built-in tools in the \\"@kbn/onechat-server/allow_lists.ts\\" file."
+                     Please add it to the list of allowed built-in tools in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
       `);
     });
   });

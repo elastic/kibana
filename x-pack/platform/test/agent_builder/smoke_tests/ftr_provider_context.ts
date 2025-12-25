@@ -6,7 +6,7 @@
  */
 
 import type { GenericFtrProviderContext } from '@kbn/test';
-import { oneChatApiServices as services } from '../services/api';
+import { agentBuilderApiServices as services } from '../services/api';
 import { pageObjects } from '../../functional/page_objects';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

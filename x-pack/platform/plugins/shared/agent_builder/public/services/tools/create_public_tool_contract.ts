@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolServiceStartContract } from '@kbn/onechat-browser';
+import type { ToolServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ToolsService } from './tools_service';
 
 export const createPublicToolContract = ({

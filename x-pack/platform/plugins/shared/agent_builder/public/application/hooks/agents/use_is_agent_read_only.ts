@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useOnechatAgentById } from './use_agent_by_id';
+import { useAgentBuilderAgentById } from './use_agent_by_id';
 
 export const useIsAgentReadOnly = (agentId?: string) => {
-  const { agent } = useOnechatAgentById(agentId);
+  const { agent } = useAgentBuilderAgentById(agentId);
   return !!agent?.readonly;
 };

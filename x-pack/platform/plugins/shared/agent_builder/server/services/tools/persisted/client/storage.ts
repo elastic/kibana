@@ -6,10 +6,10 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import { chatSystemIndex } from '@kbn/onechat-server';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
 
 export const toolIndexName = chatSystemIndex('tools');
 

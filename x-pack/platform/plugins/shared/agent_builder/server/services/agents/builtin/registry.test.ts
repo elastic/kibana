@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { BuiltinAgentRegistry } from './registry';
 import { createBuiltinAgentRegistry } from './registry';
 

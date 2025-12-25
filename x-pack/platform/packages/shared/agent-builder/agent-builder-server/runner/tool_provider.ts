@@ -8,7 +8,7 @@
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 
 /**
@@ -31,7 +31,7 @@ export interface ToolProvider {
 }
 
 /**
- * Onechat tool, as exposed by tool providers.
+ * AgentBuilder tool, as exposed by tool providers.
  */
 export interface ExecutableTool<
   TConfig extends object = {},

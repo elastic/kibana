@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasActiveConversation } from '../../../../../hooks/use_conversation';
@@ -31,23 +31,23 @@ import { AgentAvatar } from '../../../../common/agent_avatar';
 const AGENT_OPTION_ROW_HEIGHT = 88;
 
 const selectAgentAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.selectAgent.ariaLabel',
+  'xpack.agentBuilder.conversationInput.agentSelector.selectAgent.ariaLabel',
   {
     defaultMessage: 'Select an agent',
   }
 );
 const selectAgentFallbackButtonLabel = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.fallbackButtonLabel',
+  'xpack.agentBuilder.conversationInput.agentSelector.fallbackButtonLabel',
   { defaultMessage: 'Agents' }
 );
 const createAgentAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.createAgent.ariaLabel',
+  'xpack.agentBuilder.conversationInput.agentSelector.createAgent.ariaLabel',
   {
     defaultMessage: 'Create an agent',
   }
 );
 const manageAgentsAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.manageAgents.ariaLabel',
+  'xpack.agentBuilder.conversationInput.agentSelector.manageAgents.ariaLabel',
   {
     defaultMessage: 'Manage agents',
   }
@@ -78,9 +78,9 @@ const AgentSelectPopoverButton: React.FC<{
 };
 
 const AgentListFooter: React.FC = () => {
-  const { createOnechatUrl } = useNavigation();
-  const createAgentHref = createOnechatUrl(appPaths.agents.new);
-  const manageAgentsHref = createOnechatUrl(appPaths.agents.list);
+  const { createAgentBuilderUrl } = useNavigation();
+  const createAgentHref = createAgentBuilderUrl(appPaths.agents.new);
+  const manageAgentsHref = createAgentBuilderUrl(appPaths.agents.list);
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
@@ -92,7 +92,7 @@ const AgentListFooter: React.FC = () => {
             href={manageAgentsHref}
           >
             <FormattedMessage
-              id="xpack.onechat.conversationInput.agentSelector.manageAgents"
+              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
               defaultMessage="Manage"
             />
           </EuiButton>
@@ -100,7 +100,7 @@ const AgentListFooter: React.FC = () => {
         <EuiFlexItem>
           <EuiButton iconType="plus" aria-label={createAgentAriaLabel} href={createAgentHref}>
             <FormattedMessage
-              id="xpack.onechat.conversationInput.agentSelector.createNewAgent"
+              id="xpack.agentBuilder.conversationInput.agentSelector.createNewAgent"
               defaultMessage="New"
             />
           </EuiButton>

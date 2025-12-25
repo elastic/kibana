@@ -8,9 +8,9 @@
 import type {
   ToolDefinition,
   ToolDefinitionWithSchema,
-  SerializedOnechatError,
-} from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+  SerializedAgentBuilderError,
+} from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { Tool as McpTool } from '@kbn/mcp-client';
 import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ToolTypeInfo } from '../tools';
@@ -46,7 +46,7 @@ interface BulkDeleteToolSuccessResult extends BulkDeleteToolResultBase {
 
 interface BulkDeleteToolFailureResult extends BulkDeleteToolResultBase {
   success: false;
-  reason: SerializedOnechatError;
+  reason: SerializedAgentBuilderError;
 }
 
 export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolFailureResult;
@@ -153,7 +153,7 @@ interface BulkCreateMcpToolSkippedResult extends BulkCreateMcpToolResultBase {
 
 interface BulkCreateMcpToolFailureResult extends BulkCreateMcpToolResultBase {
   success: false;
-  reason: SerializedOnechatError;
+  reason: SerializedAgentBuilderError;
 }
 
 export type BulkCreateMcpToolResult =

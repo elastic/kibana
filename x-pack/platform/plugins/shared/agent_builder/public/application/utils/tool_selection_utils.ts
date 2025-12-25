@@ -9,13 +9,13 @@ import type {
   ToolDefinition,
   ToolSelection,
   ToolSelectionRelevantFields,
-} from '@kbn/onechat-common';
-import { allToolsSelectionWildcard, toolMatchSelection } from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
+import { allToolsSelectionWildcard, toolMatchSelection } from '@kbn/agent-builder-common';
 import type { AgentEditState } from '../hooks/agents/use_agent_edit';
 
 /**
  * Check if a specific tool is selected based on the current tool selections.
- * This uses existing onechat-common utilities for consistent logic.
+ * This uses existing agent-builder-common utilities for consistent logic.
  */
 export const isToolSelected = (
   tool: ToolSelectionRelevantFields,

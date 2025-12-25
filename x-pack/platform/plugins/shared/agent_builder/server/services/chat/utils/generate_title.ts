@@ -11,8 +11,8 @@ import { z } from '@kbn/zod';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import type { Conversation, ConversationRound, ConverseInput } from '@kbn/onechat-common';
-import { createUserMessage } from '@kbn/onechat-genai-utils/langchain';
+import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
+import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 
 /**
  * Generates a title for a conversation

@@ -19,8 +19,8 @@ import type {
   ToolCallStep,
   ToolProgressEvent,
   ToolResultEvent,
-} from '@kbn/onechat-common';
-import type { RoundState } from '@kbn/onechat-common/chat/round_state';
+} from '@kbn/agent-builder-common';
+import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -33,13 +33,13 @@ import {
   isPromptRequestEvent,
   isReasoningEvent,
   isToolCallStep,
-} from '@kbn/onechat-common';
-import type { RoundModelUsageStats } from '@kbn/onechat-common/chat';
+} from '@kbn/agent-builder-common';
+import type { RoundModelUsageStats } from '@kbn/agent-builder-common/chat';
 import type {
   ConversationStateManager,
   ModelProvider,
   ModelProviderStats,
-} from '@kbn/onechat-server/runner';
+} from '@kbn/agent-builder-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';

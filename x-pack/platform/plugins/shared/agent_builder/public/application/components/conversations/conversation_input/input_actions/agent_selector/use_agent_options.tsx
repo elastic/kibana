@@ -14,7 +14,7 @@ import {
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +35,7 @@ const usePaddingStyles = () => {
   return paddingStyles;
 };
 
-const readonlyAgentTooltip = i18n.translate('xpack.onechat.agentSelector.readonlyAgentTooltip', {
+const readonlyAgentTooltip = i18n.translate('xpack.agentBuilder.agentSelector.readonlyAgentTooltip', {
   defaultMessage: 'This agent is read-only.',
 });
 

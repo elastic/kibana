@@ -14,13 +14,13 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useConversationList } from '../../../hooks/use_conversation_list';
 
 const labels = {
-  open: i18n.translate('xpack.onechat.conversationsHistory.open', {
+  open: i18n.translate('xpack.agentBuilder.conversationsHistory.open', {
     defaultMessage: 'Open conversations',
   }),
-  close: i18n.translate('xpack.onechat.conversationsHistory.close', {
+  close: i18n.translate('xpack.agentBuilder.conversationsHistory.close', {
     defaultMessage: 'Close conversations',
   }),
-  conversations: i18n.translate('xpack.onechat.conversationsHistory.conversations', {
+  conversations: i18n.translate('xpack.agentBuilder.conversationsHistory.conversations', {
     defaultMessage: 'Conversations',
   }),
 };
@@ -51,7 +51,7 @@ export const ConversationsHistoryButton: React.FC = () => {
       aria-label={isPopoverOpen ? labels.close : labels.open}
       onClick={togglePopover}
       display="empty"
-      data-test-subj="onechatConversationsHistoryToggleBtn"
+      data-test-subj="agentBuilderConversationsHistoryToggleBtn"
     />
   ) : (
     <EuiButtonEmpty
@@ -59,7 +59,7 @@ export const ConversationsHistoryButton: React.FC = () => {
       color="text"
       aria-label={isPopoverOpen ? labels.close : labels.open}
       onClick={togglePopover}
-      data-test-subj="onechatConversationsHistoryToggleBtn"
+      data-test-subj="agentBuilderConversationsHistoryToggleBtn"
       disabled={hasNoConversations}
     >
       {labels.conversations}

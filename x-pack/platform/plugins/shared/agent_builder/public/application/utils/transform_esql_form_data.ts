@@ -6,8 +6,8 @@
  */
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
+import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import {

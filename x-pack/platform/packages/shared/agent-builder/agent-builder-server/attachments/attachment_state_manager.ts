@@ -12,14 +12,14 @@ import type {
   AttachmentVersionRef,
   AttachmentDiff,
   VersionedAttachmentInput,
-} from '@kbn/onechat-common/attachments';
+} from '@kbn/agent-builder-common/attachments';
 import {
   hashContent,
   estimateTokens,
   getLatestVersion,
   getVersion,
   isAttachmentActive,
-} from '@kbn/onechat-common/attachments';
+} from '@kbn/agent-builder-common/attachments';
 
 /**
  * Input for updating an existing attachment.

@@ -7,7 +7,7 @@
 
 import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsTags } from '../../../hooks/tools/use_tool_tags';

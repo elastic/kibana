@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { validateAgentId } from '@kbn/onechat-common/agents';
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import { validateAgentId } from '@kbn/agent-builder-common/agents';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 
 export interface BuiltinAgentRegistry {
   register(agent: BuiltInAgentDefinition): void;

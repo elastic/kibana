@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import React from 'react';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { useToolsActions } from '../../../context/tools_provider';

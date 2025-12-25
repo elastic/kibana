@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod';
 
 import { transformBuiltInToolToFormData } from '../../../../../utils/transform_built_in_form_data';

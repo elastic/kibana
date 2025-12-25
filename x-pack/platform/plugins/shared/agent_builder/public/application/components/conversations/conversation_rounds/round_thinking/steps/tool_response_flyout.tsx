@@ -19,14 +19,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const toolResponseFlyoutTitle = i18n.translate(
-  'xpack.onechat.conversation.toolResponseFlyout.title',
+  'xpack.agentBuilder.conversation.toolResponseFlyout.title',
   {
     defaultMessage: 'Inspect tool response',
   }
 );
 
 const toolResponseFlyoutText = i18n.translate(
-  'xpack.onechat.conversation.toolResponseFlyout.text',
+  'xpack.agentBuilder.conversation.toolResponseFlyout.text',
   {
     defaultMessage: 'Inspect the response to the tool call in this step',
   }

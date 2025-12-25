@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UnknownAttachment } from '@kbn/onechat-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/onechat-browser';
+import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 
 /**
  * Internal service for managing attachment UI definitions.

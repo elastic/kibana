@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 

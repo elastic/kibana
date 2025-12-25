@@ -6,10 +6,10 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useOnechatAgents } from './use_agents';
+import { useAgentBuilderAgents } from './use_agents';
 
 export const useValidateAgentId = () => {
-  const { agents } = useOnechatAgents();
+  const { agents } = useAgentBuilderAgents();
 
   const agentIds = useMemo(() => new Set(agents.map((agent) => agent.id)), [agents]);
 

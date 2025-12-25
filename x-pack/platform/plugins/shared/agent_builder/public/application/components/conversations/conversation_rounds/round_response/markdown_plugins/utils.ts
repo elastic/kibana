@@ -6,8 +6,8 @@
  */
 import type { Parent } from 'mdast';
 import type { Node } from 'unist';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
-import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 export type MutableNode = Node & {
   value?: string;

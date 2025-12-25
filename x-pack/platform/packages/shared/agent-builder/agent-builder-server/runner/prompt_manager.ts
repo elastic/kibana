@@ -8,7 +8,7 @@
 import type {
   ConfirmPromptDefinition,
   ConfirmationStatus,
-} from '@kbn/onechat-common/agents/prompts';
+} from '@kbn/agent-builder-common/agents/prompts';
 import type { ConfirmationPromptWithResponse } from '../agents/prompts';
 import type { ToolHandlerPromptReturn } from '../tools/handler';
 

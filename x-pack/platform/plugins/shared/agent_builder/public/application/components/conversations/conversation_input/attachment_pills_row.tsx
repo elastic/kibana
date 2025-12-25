@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
@@ -19,7 +19,7 @@ export interface AttachmentPillsRowProps {
 }
 
 const labels = {
-  attachments: i18n.translate('xpack.onechat.attachmentPillsRow.attachments', {
+  attachments: i18n.translate('xpack.agentBuilder.attachmentPillsRow.attachments', {
     defaultMessage: 'Attachments',
   }),
 };
@@ -43,7 +43,7 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       justifyContent={justifyContent}
       role="list"
       aria-label={labels.attachments}
-      data-test-subj="onechatAttachmentPillsRow"
+      data-test-subj="agentBuilderAttachmentPillsRow"
     >
       {attachments.map((attachment, index) => (
         <EuiFlexItem key={attachment.id ?? `${attachment.type}-${index}`} grow={false}>

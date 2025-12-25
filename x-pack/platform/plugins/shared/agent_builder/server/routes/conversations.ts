@@ -28,7 +28,7 @@ export function registerConversationRoutes({
     .get({
       path: `${publicApiPath}/conversations`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'List conversations',
@@ -82,7 +82,7 @@ export function registerConversationRoutes({
     .get({
       path: `${publicApiPath}/conversations/{conversation_id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Get conversation by ID',
@@ -130,7 +130,7 @@ export function registerConversationRoutes({
     .delete({
       path: `${publicApiPath}/conversations/{conversation_id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Delete conversation by ID',

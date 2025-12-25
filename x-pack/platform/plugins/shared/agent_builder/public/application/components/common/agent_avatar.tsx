@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiAvatar, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { EuiAvatarProps } from '@elastic/eui';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { roundedBorderRadiusStyles } from '../../../common.styles';
 

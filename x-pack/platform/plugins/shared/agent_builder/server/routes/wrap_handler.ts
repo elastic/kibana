@@ -7,9 +7,9 @@
 
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { isOnechatError } from '@kbn/onechat-common';
+import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { isValidLicense } from '../../common/license';
-import type { OnechatHandlerContext } from '../request_handler_context';
+import type { AgentBuilderHandlerContext } from '../request_handler_context';
 
 export interface RouteWrapConfig {
   /**
@@ -25,7 +25,7 @@ export interface RouteWrapConfig {
 
 export const getHandlerWrapper =
   ({ logger }: { logger: Logger }) =>
-  <P, Q, B, Context extends OnechatHandlerContext>(
+  <P, Q, B, Context extends AgentBuilderHandlerContext>(
     handler: RequestHandler<P, Q, B, Context>,
     { featureFlag = AGENT_BUILDER_ENABLED_SETTING_ID, ignoreLicense = false }: RouteWrapConfig = {}
   ): RequestHandler<P, Q, B, Context> => {
@@ -48,7 +48,7 @@ export const getHandlerWrapper =
       try {
         return await handler(ctx, req, res);
       } catch (e) {
-        if (isOnechatError(e)) {
+        if (isAgentBuilderError(e)) {
           logger.error(e);
           return res.customError({
             body: {

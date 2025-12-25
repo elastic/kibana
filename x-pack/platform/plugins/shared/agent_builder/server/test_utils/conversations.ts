@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Conversation } from '@kbn/onechat-common';
+import { type Conversation } from '@kbn/agent-builder-common';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {

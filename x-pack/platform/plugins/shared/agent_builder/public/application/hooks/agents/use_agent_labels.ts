@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { useOnechatAgents } from './use_agents';
+import { useAgentBuilderAgents } from './use_agents';
 
 export const useAgentLabels = () => {
-  const { agents, isLoading, error } = useOnechatAgents();
+  const { agents, isLoading, error } = useAgentBuilderAgents();
 
   const labels = useMemo(() => {
     if (!agents || agents.length === 0) {

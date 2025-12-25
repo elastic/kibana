@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolCallStep } from '@kbn/onechat-common/chat/conversation';
+import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
@@ -16,10 +16,10 @@ import { appPaths } from '../../../../../utils/app_paths';
 import { ThinkingItemLayout } from './thinking_item_layout';
 
 const labels = {
-  toolCall: i18n.translate('xpack.onechat.thinking.toolCallLabel', {
+  toolCall: i18n.translate('xpack.agentBuilder.thinking.toolCallLabel', {
     defaultMessage: 'Tool call',
   }),
-  toolLink: i18n.translate('xpack.onechat.thinking.toolLinkLabel', {
+  toolLink: i18n.translate('xpack.agentBuilder.thinking.toolLinkLabel', {
     defaultMessage: 'View tool details',
   }),
 };
@@ -32,8 +32,8 @@ interface ToolCallDisplayProps {
 
 export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, textColor }) => {
   const { tool_id: toolId } = step;
-  const { createOnechatUrl } = useNavigation();
-  const toolHref = createOnechatUrl(appPaths.tools.details({ toolId }));
+  const { createAgentBuilderUrl } = useNavigation();
+  const toolHref = createAgentBuilderUrl(appPaths.tools.details({ toolId }));
   const toolLinkId = `tool-link-${toolId}`;
 
   return (
@@ -41,7 +41,7 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
       <EuiText size="s">
         <p role="status" aria-label={labels.toolCall}>
           <FormattedMessage
-            id="xpack.onechat.thinking.toolCallThinkingItem"
+            id="xpack.agentBuilder.thinking.toolCallThinkingItem"
             defaultMessage="Calling tool {tool}"
             values={{
               tool: (

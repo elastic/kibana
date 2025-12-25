@@ -12,7 +12,7 @@ import {
   agentBuilderServerEbtEvents,
   type ConversationRound,
   ConversationRoundStepType,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/inference-common';
 import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
 import { normalizeAgentIdForTelemetry, normalizeToolIdForTelemetry } from './utils';

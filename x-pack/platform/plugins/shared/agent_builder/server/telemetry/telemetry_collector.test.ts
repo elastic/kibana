@@ -8,9 +8,9 @@
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { OnechatTelemetry } from './telemetry_collector';
+import type { AgentBuilderTelemetry } from './telemetry_collector';
 import { registerTelemetryCollector } from './telemetry_collector';
-import { ONECHAT_USAGE_DOMAIN } from './usage_counters';
+import { AGENTBUILDER_USAGE_DOMAIN } from './usage_counters';
 
 // Mock the QueryUtils class
 jest.mock('./query_utils', () => ({
@@ -217,48 +217,48 @@ describe('telemetry_collector', () => {
           },
         ]),
         getCountersByPrefix: jest.fn().mockImplementation((domain, prefix) => {
-          if (prefix === `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_`) {
+          if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_`) {
             return Promise.resolve(
               new Map([
-                [`${ONECHAT_USAGE_DOMAIN}_query_to_result_time_<1s`, 50],
-                [`${ONECHAT_USAGE_DOMAIN}_query_to_result_time_1-5s`, 30],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_<1s`, 50],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_1-5s`, 30],
               ])
             );
           }
-          if (prefix === `${ONECHAT_USAGE_DOMAIN}_tool_call_`) {
+          if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_`) {
             return Promise.resolve(
               new Map([
-                [`${ONECHAT_USAGE_DOMAIN}_tool_call_default_agent`, 100],
-                [`${ONECHAT_USAGE_DOMAIN}_tool_call_custom_agent`, 50],
-                [`${ONECHAT_USAGE_DOMAIN}_tool_call_mcp`, 25],
-                [`${ONECHAT_USAGE_DOMAIN}_tool_call_api`, 10],
-                [`${ONECHAT_USAGE_DOMAIN}_tool_call_a2a`, 5],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_default_agent`, 100],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_custom_agent`, 50],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_mcp`, 25],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_api`, 10],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_a2a`, 5],
               ])
             );
           }
-          if (prefix === `${ONECHAT_USAGE_DOMAIN}_llm_provider_`) {
+          if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_`) {
             return Promise.resolve(
               new Map([
-                [`${ONECHAT_USAGE_DOMAIN}_llm_provider_openai`, 80],
-                [`${ONECHAT_USAGE_DOMAIN}_llm_provider_bedrock`, 20],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_openai`, 80],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_bedrock`, 20],
               ])
             );
           }
-          if (prefix === `${ONECHAT_USAGE_DOMAIN}_llm_model_`) {
+          if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_`) {
             return Promise.resolve(
               new Map([
-                [`${ONECHAT_USAGE_DOMAIN}_llm_model_gpt-4`, 60],
-                [`${ONECHAT_USAGE_DOMAIN}_llm_model_claude-3`, 40],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_llm_model_gpt-4`, 60],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_llm_model_claude-3`, 40],
               ])
             );
           }
-          if (prefix === `${ONECHAT_USAGE_DOMAIN}_error_`) {
+          if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_error_`) {
             return Promise.resolve(
               new Map([
-                [`${ONECHAT_USAGE_DOMAIN}_error_total`, 15],
-                [`${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`, 10],
-                [`${ONECHAT_USAGE_DOMAIN}_error_by_type_badRequest`, 8],
-                [`${ONECHAT_USAGE_DOMAIN}_error_by_type_internalError`, 7],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_error_total`, 15],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`, 10],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_badRequest`, 8],
+                [`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_internalError`, 7],
               ])
             );
           }
@@ -284,7 +284,7 @@ describe('telemetry_collector', () => {
     });
 
     it('fetches and returns telemetry data', async () => {
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.custom_tools).toEqual({
         total: 10,
@@ -349,7 +349,7 @@ describe('telemetry_collector', () => {
     it('returns default values when fetch throws error', async () => {
       mockQueryUtils.getCustomToolsMetrics.mockRejectedValue(new Error('Fetch error'));
 
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(logger.error).toHaveBeenCalledWith('Failed to collect telemetry: Fetch error');
 
@@ -417,43 +417,43 @@ describe('telemetry_collector', () => {
 
     it('filters out zero-count LLM providers', async () => {
       mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_llm_provider_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_`) {
           return Promise.resolve(
             new Map([
-              [`${ONECHAT_USAGE_DOMAIN}_llm_provider_openai`, 80],
-              [`${ONECHAT_USAGE_DOMAIN}_llm_provider_unused`, 0],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_openai`, 80],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_unused`, 0],
             ])
           );
         }
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_llm_model_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_`) {
           return Promise.resolve(new Map());
         }
         return Promise.resolve(new Map());
       });
 
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.llm_usage.by_provider).toEqual([{ provider: 'openai', count: 80 }]);
     });
 
     it('sorts LLM providers by count descending', async () => {
       mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_llm_provider_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_`) {
           return Promise.resolve(
             new Map([
-              [`${ONECHAT_USAGE_DOMAIN}_llm_provider_least`, 10],
-              [`${ONECHAT_USAGE_DOMAIN}_llm_provider_most`, 100],
-              [`${ONECHAT_USAGE_DOMAIN}_llm_provider_middle`, 50],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_least`, 10],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_most`, 100],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_middle`, 50],
             ])
           );
         }
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_llm_model_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_`) {
           return Promise.resolve(new Map());
         }
         return Promise.resolve(new Map());
       });
 
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.llm_usage.by_provider).toEqual([
         { provider: 'most', count: 100 },
@@ -464,21 +464,21 @@ describe('telemetry_collector', () => {
 
     it('sorts error types by count descending', async () => {
       mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_error_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_error_`) {
           return Promise.resolve(
             new Map([
-              [`${ONECHAT_USAGE_DOMAIN}_error_total`, 30],
-              [`${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`, 20],
-              [`${ONECHAT_USAGE_DOMAIN}_error_by_type_least`, 5],
-              [`${ONECHAT_USAGE_DOMAIN}_error_by_type_most`, 20],
-              [`${ONECHAT_USAGE_DOMAIN}_error_by_type_middle`, 10],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_total`, 30],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`, 20],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_least`, 5],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_most`, 20],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_middle`, 10],
             ])
           );
         }
         return Promise.resolve(new Map());
       });
 
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.errors.by_type).toEqual([
         { type: 'most', count: 20 },
@@ -489,46 +489,46 @@ describe('telemetry_collector', () => {
 
     it('calculates avg_errors_per_conversation correctly', async () => {
       mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_error_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_error_`) {
           return Promise.resolve(
             new Map([
-              [`${ONECHAT_USAGE_DOMAIN}_error_total`, 30],
-              [`${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`, 10],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_total`, 30],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`, 10],
             ])
           );
         }
         return Promise.resolve(new Map());
       });
 
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.errors.avg_errors_per_conversation).toBe(3); // 30 / 10
     });
 
     it('returns 0 for avg_errors_per_conversation when no conversations have errors', async () => {
       mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_error_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_error_`) {
           return Promise.resolve(
             new Map([
-              [`${ONECHAT_USAGE_DOMAIN}_error_total`, 0],
-              [`${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`, 0],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_total`, 0],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`, 0],
             ])
           );
         }
         return Promise.resolve(new Map());
       });
 
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.errors.avg_errors_per_conversation).toBe(0);
     });
 
     it('handles missing tool_call counters with default 0', async () => {
       mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_tool_call_`) {
+        if (prefix === `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_`) {
           return Promise.resolve(
             new Map([
-              [`${ONECHAT_USAGE_DOMAIN}_tool_call_default_agent`, 10],
+              [`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_default_agent`, 10],
               // Missing other sources
             ])
           );
@@ -536,7 +536,7 @@ describe('telemetry_collector', () => {
         return Promise.resolve(new Map());
       });
 
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
+      const result: AgentBuilderTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.tool_calls.by_source).toEqual({
         default_agent: 10,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType, type McpToolDefinition } from '@kbn/onechat-common/tools';
+import { ToolType, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import type { McpToolFormData } from '../components/tools/form/types/tool_form_types';

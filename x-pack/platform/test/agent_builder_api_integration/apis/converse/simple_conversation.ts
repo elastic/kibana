@@ -7,21 +7,21 @@
 
 import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
-import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
-import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
+import type { ChatResponse } from '@kbn/agent-builder-plugin/common/http_api/chat';
+import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import { setupAgentDirectAnswer } from '../../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
-import { createOneChatApiClient } from '../../utils/one_chat_client';
+import { createAgentBuilderApiClient } from '../../utils/agent_builder_client';
 
-export default function ({ getService }: OneChatApiFtrProviderContext) {
+export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
   const supertest = getService('supertest');
 
   const log = getService('log');
-  const oneChatApiClient = createOneChatApiClient(supertest);
+  const agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
   describe('POST /api/agent_builder/converse: simple conversation', function () {
     let llmProxy: LlmProxy;
@@ -49,8 +49,8 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
           response: MOCKED_LLM_RESPONSE,
         });
 
-        body = await oneChatApiClient.converse({
-          input: 'Hello OneChat',
+        body = await agentBuilderApiClient.converse({
+          input: 'Hello AgentBuilder',
           connector_id: connectorId,
         });
 
@@ -62,19 +62,19 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
       });
 
       it('persists the conversation with a title', async () => {
-        const conversation = await oneChatApiClient.getConversation(body.conversation_id);
+        const conversation = await agentBuilderApiClient.getConversation(body.conversation_id);
         expect(conversation.title).to.eql(MOCKED_LLM_TITLE);
       });
 
       it('persists the final LLM response in the conversation', async () => {
-        const conversation = await oneChatApiClient.getConversation(body.conversation_id);
+        const conversation = await agentBuilderApiClient.getConversation(body.conversation_id);
         expect(conversation.rounds[0].response.message).to.eql(MOCKED_LLM_RESPONSE);
       });
     });
 
     describe('Error cases', () => {
       it('returns 400 when payload is invalid', async () => {
-        const res = (await oneChatApiClient.converse({} as any)) as unknown as Payload;
+        const res = (await agentBuilderApiClient.converse({} as any)) as unknown as Payload;
 
         expect(res.error).to.eql('Bad Request');
       });

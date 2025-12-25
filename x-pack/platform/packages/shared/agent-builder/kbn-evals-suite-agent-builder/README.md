@@ -1,10 +1,10 @@
-# @kbn/evals-suite-onechat
+# @kbn/evals-suite-agent-builder
 
-Evaluation test suites for OneChat API, built on top of [`@kbn/evals`](../kbn-evals/README.md).
+Evaluation test suites for AgentBuilder API, built on top of [`@kbn/evals`](../kbn-evals/README.md).
 
 ## Overview
 
-This package contains evaluation tests specifically for OneChat API and its default agent.
+This package contains evaluation tests specifically for AgentBuilder API and its default agent.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../kbn-evals/README.md).
 
@@ -48,7 +48,7 @@ Or via environment variable:
 export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector","actionTypeId":".inference","config":{"provider":"openai","taskType":"completion"},"secrets":{"apiKey":"your-api-key"}}}'
 ```
 
-## Running OneChat Evaluations
+## Running AgentBuilder Evaluations
 
 ### Start Scout Server
 
@@ -71,18 +71,18 @@ The EDOT Collector receives traces from Kibana via the HTTP exporter configured 
 
 **Note:** If your EDOT Collector stores traces in a different Elasticsearch cluster than your test environment (i.e common cluster for the team), specify the trace cluster URL when running evaluations using `TRACING_ES_URL=https://<username>:<password>@<url>`. Dedicated ES client will be instantiated to query traces from the specified cluster.
 
-### Load OneChat Datasets
+### Load AgentBuilder Datasets
 
-**Note**: You need to be a member of the Elastic organization on HuggingFace to access OneChat datasets. Sign up with your `@elastic.co` email address.
+**Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up with your `@elastic.co` email address.
 
-Load the required OneChat datasets into Elasticsearch using the HuggingFace dataset loader:
+Load the required AgentBuilder datasets into Elasticsearch using the HuggingFace dataset loader:
 
 ```bash
 # Load Wix knowledge base and users datasets
 HUGGING_FACE_ACCESS_TOKEN=<your-token> \
 node --require ./src/setup_node_env/index.js \
   x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
-  --datasets onechat/knowledge-base/* \
+  --datasets agent_builder/knowledge-base/* \
   --clear
   --kibana-url http://elastic:changeme@localhost:5620
 ```
@@ -97,26 +97,26 @@ For more information about HuggingFace dataset loading, refer to the [HuggingFac
 Then run the evaluations:
 
 ```bash
-# Run all OneChat evaluations
-node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+# Run all AgentBuilder evaluations
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Run specific test file
-node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts evals/kb/kb.spec.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/kb/kb.spec.ts
 
 # Run with specific connector
-node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts --project="my-connector"
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts --project="my-connector"
 
 # Run with LLM-as-a-judge for consistent evaluation results
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Run only selected evaluators
-SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Override RAG evaluator K value (takes priority over config)
-RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Retrieve traces from another (monitoring) closter
-TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 ```
 
@@ -128,7 +128,7 @@ You can compare evaluation results between different runs using the comparison f
 ```bash
 # Compare current run against a reference run
 EVALUATION_RUN_ID=<evaluation-run-id> REFERENCE_EVALUATION_RUN_ID=<reference-evaluation-run-id> \
-node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/reporting.playwright.config.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/reporting.playwright.config.ts
 ```
 
 #### Environment Variables

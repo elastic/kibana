@@ -7,13 +7,13 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import type { ToolDefinition } from '@kbn/onechat-common/tools';
+import type { ToolDefinition } from '@kbn/agent-builder-common/tools';
 import React, { useMemo } from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { labels } from '../../../utils/i18n';
-import { OnechatToolTags } from '../tags/tool_tags';
+import { AgentBuilderToolTags } from '../tags/tool_tags';
 import { ToolContextMenu } from './tools_table_context_menu';
 import { ToolIdWithDescription } from './tools_table_id';
 import { ToolQuickActions } from './tools_table_quick_actions';
@@ -87,7 +87,7 @@ export const useToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
       {
         field: 'tags',
         name: labels.tools.tagsLabel,
-        render: (tags: string[]) => <OnechatToolTags tags={tags} />,
+        render: (tags: string[]) => <AgentBuilderToolTags tags={tags} />,
       },
       {
         width: '100px',

@@ -6,7 +6,7 @@
  */
 
 import { createHandler, resolveToolParameters } from './create_handler';
-import type { EsqlToolConfig } from '@kbn/onechat-common';
+import type { EsqlToolConfig } from '@kbn/agent-builder-common';
 
 // Mock the ES client
 const mockEsClient = {

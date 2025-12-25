@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConversationRound, ToolResult } from '@kbn/onechat-common';
-import type { ToolResultStore, WritableToolResultStore } from '@kbn/onechat-server';
+import type { ConversationRound, ToolResult } from '@kbn/agent-builder-common';
+import type { ToolResultStore, WritableToolResultStore } from '@kbn/agent-builder-server';
 import { extractConversationToolResults } from './utils';
 
 export const createResultStore = (conversation?: ConversationRound[]): WritableToolResultStore => {

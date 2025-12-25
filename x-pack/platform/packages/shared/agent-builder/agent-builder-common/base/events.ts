@@ -6,9 +6,9 @@
  */
 
 /**
- * Base type for all onechat events
+ * Base type for all agentBuilder events
  */
-export interface OnechatEvent<TEventType extends string, TData extends Record<string, any>> {
+export interface AgentBuilderEvent<TEventType extends string, TData extends Record<string, any>> {
   /**
    * Unique type identifier for the event.
    */

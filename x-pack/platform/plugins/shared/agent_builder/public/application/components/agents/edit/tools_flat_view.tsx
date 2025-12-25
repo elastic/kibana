@@ -12,10 +12,10 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ToolDefinition, ToolSelection } from '@kbn/onechat-common';
-import type { ToolSelectionRelevantFields } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolSelection } from '@kbn/agent-builder-common';
+import type { ToolSelectionRelevantFields } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
-import { OnechatToolTags } from '../../tools/tags/tool_tags';
+import { AgentBuilderToolTags } from '../../tools/tags/tool_tags';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { isToolSelected } from '../../../utils/tool_selection_utils';
 
@@ -84,7 +84,7 @@ const createToolDetailsColumn = () => ({
 const createTagsColumn = () => ({
   field: 'tags',
   name: labels.tools.tagsLabel,
-  render: (tags: string[]) => <OnechatToolTags tags={tags} />,
+  render: (tags: string[]) => <AgentBuilderToolTags tags={tags} />,
 });
 
 export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
@@ -120,7 +120,7 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
 
   const noItemsMessage = (
     <EuiText component="p" size="s" textAlign="center" color="subdued">
-      {i18n.translate('xpack.onechat.tools.noToolsAvailable', {
+      {i18n.translate('xpack.agentBuilder.tools.noToolsAvailable', {
         defaultMessage: 'No tools available',
       })}
     </EuiText>
@@ -131,7 +131,7 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
       <EuiFlexGroup justifyContent="flexStart">
         <EuiText size="xs">
           <FormattedMessage
-            id="xpack.onechat.tools.toolsSelectionSummary"
+            id="xpack.agentBuilder.tools.toolsSelectionSummary"
             defaultMessage="Showing {start}-{end} of {total} {tools}"
             values={{
               start: <strong>{Math.min(pageIndex * pageSize + 1, tools.length)}</strong>,

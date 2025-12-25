@@ -6,8 +6,8 @@
  */
 
 import type supertest from 'supertest';
-import type { ToolDefinition } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { spaceUrl } from './spaces';
 
 export const createTool = async (

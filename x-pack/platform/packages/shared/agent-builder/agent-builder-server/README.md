@@ -1,3 +1,3 @@
-# @kbn/onechat-server
+# @kbn/agent-builder-server
 
-Server-side types and utilities for the onechat framework.
+Server-side types and utilities for the agentBuilder framework.

@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useController, useFormContext } from 'react-hook-form';
 import { css } from '@emotion/react';
-import { EsResourceType } from '@kbn/onechat-common';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import { labels } from '../../../../../utils/i18n';
 import { useIndexSearchSources } from '../../../../../hooks/tools/use_resolve_search_sources';
 import type { IndexSearchToolFormData } from '../../types/tool_form_types';
@@ -59,13 +59,13 @@ export const IndexSearchPattern: React.FC = () => {
   const columns: Array<EuiBasicTableColumn<{ type: string; name: string }>> = [
     {
       field: 'type',
-      name: i18n.translate('xpack.onechat.tools.indexPattern.pattern.typeCol', {
+      name: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.typeCol', {
         defaultMessage: 'Target',
       }),
       width: '120px',
       render: (type: string) => {
         return (
-          <EuiBadge color="hollow" data-test-subj="onechatIndexPatternBadge">
+          <EuiBadge color="hollow" data-test-subj="agentBuilderIndexPatternBadge">
             {type === EsResourceType.index
               ? labels.tools.indexTypeLabel
               : type === EsResourceType.alias
@@ -79,7 +79,7 @@ export const IndexSearchPattern: React.FC = () => {
     },
     {
       field: 'name',
-      name: i18n.translate('xpack.onechat.tools.indexPattern.pattern.nameCol', {
+      name: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.nameCol', {
         defaultMessage: 'Name',
       }),
       truncateText: true,
@@ -89,10 +89,10 @@ export const IndexSearchPattern: React.FC = () => {
       width: '80px',
       actions: [
         {
-          name: i18n.translate('xpack.onechat.tools.indexPattern.pattern.useAction', {
+          name: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.useAction', {
             defaultMessage: 'Use',
           }),
-          description: i18n.translate('xpack.onechat.tools.indexPattern.pattern.useActionDesc', {
+          description: i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.useActionDesc', {
             defaultMessage: 'Use this value as the pattern',
           }),
           icon: 'plusInCircle',
@@ -115,10 +115,10 @@ export const IndexSearchPattern: React.FC = () => {
         onBlur={onBlur}
         inputRef={ref}
         isInvalid={fieldState.invalid}
-        aria-label={i18n.translate('xpack.onechat.tools.indexPattern.pattern.inputAriaLabel', {
+        aria-label={i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.inputAriaLabel', {
           defaultMessage: 'Index pattern',
         })}
-        data-test-subj="onechatIndexPatternInput"
+        data-test-subj="agentBuilderIndexPatternInput"
       />
 
       {hasQuery && (
@@ -128,7 +128,7 @@ export const IndexSearchPattern: React.FC = () => {
             <EuiCallOut
               announceOnMount
               size="s"
-              title={i18n.translate('xpack.onechat.tools.indexPattern.pattern.matchSuccess', {
+              title={i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.matchSuccess', {
                 defaultMessage:
                   'Your index pattern matches {count, plural, one {# source} other {# sources}}.',
                 values: { count: total },
@@ -152,10 +152,10 @@ export const IndexSearchPattern: React.FC = () => {
         rowHeader="name"
         noItemsMessage={
           hasQuery
-            ? i18n.translate('xpack.onechat.tools.indexPattern.pattern.noResultsTable', {
+            ? i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.noResultsTable', {
                 defaultMessage: 'No results',
               })
-            : i18n.translate('xpack.onechat.tools.indexPattern.pattern.typeToSearch', {
+            : i18n.translate('xpack.agentBuilder.tools.indexPattern.pattern.typeToSearch', {
                 defaultMessage: 'Start typing to see matching sources',
               })
         }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnechatEvent } from '../base/events';
+import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
@@ -29,7 +29,7 @@ export enum ChatEventType {
 export type ChatEventBase<
   TEventType extends ChatEventType,
   TData extends Record<string, any>
-> = OnechatEvent<TEventType, TData>;
+> = AgentBuilderEvent<TEventType, TData>;
 
 // Tool call
 
@@ -41,7 +41,7 @@ export interface ToolCallEventData {
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
 
-export const isToolCallEvent = (event: OnechatEvent<string, any>): event is ToolCallEvent => {
+export const isToolCallEvent = (event: AgentBuilderEvent<string, any>): event is ToolCallEvent => {
   return event.type === ChatEventType.toolCall;
 };
 
@@ -57,7 +57,7 @@ export type BrowserToolCallEvent = ChatEventBase<
 >;
 
 export const isBrowserToolCallEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is BrowserToolCallEvent => {
   return event.type === ChatEventType.browserToolCall;
 };
@@ -72,7 +72,7 @@ export interface ToolProgressEventData {
 export type ToolProgressEvent = ChatEventBase<ChatEventType.toolProgress, ToolProgressEventData>;
 
 export const isToolProgressEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is ToolProgressEvent => {
   return event.type === ChatEventType.toolProgress;
 };
@@ -87,7 +87,7 @@ export interface ToolResultEventData {
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;
 
-export const isToolResultEvent = (event: OnechatEvent<string, any>): event is ToolResultEvent => {
+export const isToolResultEvent = (event: AgentBuilderEvent<string, any>): event is ToolResultEvent => {
   return event.type === ChatEventType.toolResult;
 };
 
@@ -101,7 +101,7 @@ export interface PromptRequestEventData {
 export type PromptRequestEvent = ChatEventBase<ChatEventType.promptRequest, PromptRequestEventData>;
 
 export const isPromptRequestEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is PromptRequestEvent => {
   return event.type === ChatEventType.promptRequest;
 };
@@ -117,7 +117,7 @@ export interface ReasoningEventData {
 
 export type ReasoningEvent = ChatEventBase<ChatEventType.reasoning, ReasoningEventData>;
 
-export const isReasoningEvent = (event: OnechatEvent<string, any>): event is ReasoningEvent => {
+export const isReasoningEvent = (event: AgentBuilderEvent<string, any>): event is ReasoningEvent => {
   return event.type === ChatEventType.reasoning;
 };
 
@@ -133,7 +133,7 @@ export interface MessageChunkEventData {
 export type MessageChunkEvent = ChatEventBase<ChatEventType.messageChunk, MessageChunkEventData>;
 
 export const isMessageChunkEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is MessageChunkEvent => {
   return event.type === ChatEventType.messageChunk;
 };
@@ -155,7 +155,7 @@ export type MessageCompleteEvent = ChatEventBase<
 >;
 
 export const isMessageCompleteEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is MessageCompleteEvent => {
   return event.type === ChatEventType.messageComplete;
 };
@@ -173,7 +173,7 @@ export type ThinkingCompleteEvent = ChatEventBase<
 >;
 
 export const isThinkingCompleteEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is ThinkingCompleteEvent => {
   return event.type === ChatEventType.thinkingComplete;
 };
@@ -190,7 +190,7 @@ export interface RoundCompleteEventData {
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
 
 export const isRoundCompleteEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is RoundCompleteEvent => {
   return event.type === ChatEventType.roundComplete;
 };
@@ -208,7 +208,7 @@ export type ConversationCreatedEvent = ChatEventBase<
 >;
 
 export const isConversationCreatedEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is ConversationCreatedEvent => {
   return event.type === ChatEventType.conversationCreated;
 };
@@ -226,7 +226,7 @@ export type ConversationUpdatedEvent = ChatEventBase<
 >;
 
 export const isConversationUpdatedEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is ConversationUpdatedEvent => {
   return event.type === ChatEventType.conversationUpdated;
 };
@@ -243,7 +243,7 @@ export type ConversationIdSetEvent = ChatEventBase<
 >;
 
 export const isConversationIdSetEvent = (
-  event: OnechatEvent<string, any>
+  event: AgentBuilderEvent<string, any>
 ): event is ConversationIdSetEvent => {
   return event.type === ChatEventType.conversationIdSet;
 };

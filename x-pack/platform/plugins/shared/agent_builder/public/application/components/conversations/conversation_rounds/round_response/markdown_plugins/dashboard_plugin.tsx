@@ -17,13 +17,13 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   dashboardElement,
   type DashboardElementAttributes,
   type DashboardResult,
   ToolResultType,
-} from '@kbn/onechat-common/tools/tool_result';
+} from '@kbn/agent-builder-common/tools/tool_result';
 
 import { createTagParser, findToolResult } from './utils';
 

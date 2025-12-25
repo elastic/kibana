@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolProvider, Runner } from '@kbn/onechat-server';
+import type { ToolProvider, Runner } from '@kbn/agent-builder-server';
 import type { ToolRegistry } from '../../tools/tool_registry';
 import { toExecutableTool } from '../../tools/utils/tool_conversion';
 

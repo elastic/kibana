@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import React from 'react';
 import { TabularDataResultStep } from './tabular_data_result_step';
 import { OtherResultStep } from './other_result_step';

@@ -9,7 +9,7 @@ import type {
   ToolAvailabilityContext,
   ToolAvailabilityConfig,
   ToolAvailabilityResult,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { ToolAvailabilityCache } from './availability_cache';

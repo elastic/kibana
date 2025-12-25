@@ -21,9 +21,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
-import { visualizationElement, dashboardElement } from '@kbn/onechat-common/tools/tool_result';
-import { useOnechatServices } from '../../../../hooks/use_onechat_service';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import { visualizationElement, dashboardElement } from '@kbn/agent-builder-common/tools/tool_result';
+import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import {
   Cursor,
   esqlLanguagePlugin,
@@ -60,7 +60,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
     }
   `;
 
-  const { startDependencies } = useOnechatServices();
+  const { startDependencies } = useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {

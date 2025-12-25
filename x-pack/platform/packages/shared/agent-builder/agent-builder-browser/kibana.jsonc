@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/onechat-browser",
+  "id": "@kbn/agent-builder-browser",
   "owner": "@elastic/workchat-eng",
   "group": "platform",
   "visibility": "shared"

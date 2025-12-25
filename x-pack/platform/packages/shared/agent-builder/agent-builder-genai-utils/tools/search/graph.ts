@@ -10,8 +10,8 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { extractTextContent } from '../../langchain';
 import { indexExplorer } from '../index_explorer';
@@ -104,7 +104,7 @@ export const createSearchToolGraph = ({
 
     const tools = [relevanceTool, nlSearchTool];
     const searchModel = model.chatModel.bindTools(tools).withConfig({
-      tags: ['onechat-search-tool'],
+      tags: ['agent-builder-search-tool'],
     });
 
     const response = await searchModel.invoke(

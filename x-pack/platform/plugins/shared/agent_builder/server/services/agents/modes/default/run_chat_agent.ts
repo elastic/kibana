@@ -12,10 +12,10 @@ import {
   isStreamEvent,
   type ToolIdMapping,
   toolsToLangchain,
-} from '@kbn/onechat-genai-utils/langchain';
-import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
-import { ConversationRoundStatus } from '@kbn/onechat-common';
-import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/onechat-server';
+} from '@kbn/agent-builder-genai-utils/langchain';
+import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
@@ -38,7 +38,7 @@ import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
 import type { StateType } from './state';
 
-const chatAgentGraphName = 'default-onechat-agent';
+const chatAgentGraphName = 'default-agent-builder-agent';
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
   browserApiTools?: BrowserApiToolMetadata[];
@@ -51,7 +51,7 @@ export type RunChatAgentFn = (
 ) => Promise<RunAgentResponse>;
 
 /**
- * Create the handler function for the default onechat agent.
+ * Create the handler function for the default agentBuilder agent.
  */
 export const runDefaultAgentMode: RunChatAgentFn = async (
   {
@@ -103,7 +103,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const {
     tools: langchainTools,
     idMappings: toolIdMapping,
-    onechatToLangchainIdMap,
+    agentBuilderToLangchainIdMap,
   } = await toolsToLangchain({
     tools: selectedTools,
     logger,
@@ -144,7 +144,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       conversation: processedConversation,
-      onechatToLangchainIdMap,
+      agentBuilderToLangchainIdMap,
       cycleLimit,
     }),
     {
@@ -206,11 +206,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 const createInitializerCommand = ({
   conversation,
   cycleLimit,
-  onechatToLangchainIdMap,
+  agentBuilderToLangchainIdMap,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
-  onechatToLangchainIdMap: ToolIdMapping;
+  agentBuilderToLangchainIdMap: ToolIdMapping;
 }): Command => {
   const initialMessages = conversationToLangchainMessages({
     conversation,
@@ -226,7 +226,7 @@ const createInitializerCommand = ({
   if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
     initialState.mainActions = roundToActions({
       round: lastRound,
-      toolIdMapping: onechatToLangchainIdMap,
+      toolIdMapping: agentBuilderToLangchainIdMap,
     });
 
     startAt = steps.executeTool;

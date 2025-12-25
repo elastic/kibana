@@ -12,9 +12,9 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { Runner } from '@kbn/onechat-server';
+import type { Runner } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
+import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
@@ -59,7 +59,7 @@ export class ToolsService {
         if (!isAllowedBuiltinTool(reg.id)) {
           throw new Error(
             `Built-in tool with id "${reg.id}" is not in the list of allowed built-in tools.
-             Please add it to the list of allowed built-in tools in the "@kbn/onechat-server/allow_lists.ts" file.`
+             Please add it to the list of allowed built-in tools in the "@kbn/agent-builder-server/allow_lists.ts" file.`
           );
         }
         return this.builtinRegistry.register(reg);

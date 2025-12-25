@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ChatMessageText } from './chat_message_text';
 
 const TOKEN_DELAY = 17;

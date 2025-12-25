@@ -22,11 +22,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type AgentDefinition } from '@kbn/onechat-common';
+import { type AgentDefinition } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
-import { useOnechatAgents } from '../../../hooks/agents/use_agents';
+import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
@@ -36,33 +36,33 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const columnNames = {
-  name: i18n.translate('xpack.onechat.agents.nameColumn', { defaultMessage: 'Name' }),
-  labels: i18n.translate('xpack.onechat.agents.labelsColumn', { defaultMessage: 'Labels' }),
+  name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
+  labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
 };
 
 const actionLabels = {
-  chat: i18n.translate('xpack.onechat.agents.actions.chat', { defaultMessage: 'Chat' }),
-  chatDescription: i18n.translate('xpack.onechat.agents.actions.chatDescription', {
+  chat: i18n.translate('xpack.agentBuilder.agents.actions.chat', { defaultMessage: 'Chat' }),
+  chatDescription: i18n.translate('xpack.agentBuilder.agents.actions.chatDescription', {
     defaultMessage: 'Chat with agent',
   }),
-  edit: i18n.translate('xpack.onechat.agents.actions.edit', { defaultMessage: 'Edit' }),
-  editDescription: i18n.translate('xpack.onechat.agents.actions.editDescription', {
+  edit: i18n.translate('xpack.agentBuilder.agents.actions.edit', { defaultMessage: 'Edit' }),
+  editDescription: i18n.translate('xpack.agentBuilder.agents.actions.editDescription', {
     defaultMessage: 'Edit agent',
   }),
-  clone: i18n.translate('xpack.onechat.agents.actions.clone', { defaultMessage: 'Clone' }),
-  cloneDescription: i18n.translate('xpack.onechat.agents.actions.cloneDescription', {
+  clone: i18n.translate('xpack.agentBuilder.agents.actions.clone', { defaultMessage: 'Clone' }),
+  cloneDescription: i18n.translate('xpack.agentBuilder.agents.actions.cloneDescription', {
     defaultMessage: 'Clone agent',
   }),
-  delete: i18n.translate('xpack.onechat.agents.actions.delete', { defaultMessage: 'Delete' }),
-  deleteDescription: i18n.translate('xpack.onechat.agents.actions.deleteDescription', {
+  delete: i18n.translate('xpack.agentBuilder.agents.actions.delete', { defaultMessage: 'Delete' }),
+  deleteDescription: i18n.translate('xpack.agentBuilder.agents.actions.deleteDescription', {
     defaultMessage: 'Delete agent',
   }),
 };
 
 export const AgentsList: React.FC = () => {
-  const { agents, isLoading, error } = useOnechatAgents();
+  const { agents, isLoading, error } = useAgentBuilderAgents();
   const { manageAgents } = useUiPrivileges();
-  const { createOnechatUrl } = useNavigation();
+  const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
@@ -88,7 +88,7 @@ export const AgentsList: React.FC = () => {
             ) : (
               <EuiLink
                 data-test-subj="agentBuilderAgentsListName"
-                href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}
+                href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
               >
                 {name}
               </EuiLink>
@@ -126,7 +126,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) =>
-            createOnechatUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
+            createAgentBuilderUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
         },
         {
           type: 'icon',
@@ -136,7 +136,7 @@ export const AgentsList: React.FC = () => {
           'data-test-subj': (agent) => `agentBuilderAgentsListEdit-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
-          href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
+          href: (agent) => createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id })),
           available: (agent) => !agent.readonly && manageAgents,
         },
         {
@@ -147,7 +147,7 @@ export const AgentsList: React.FC = () => {
           'data-test-subj': (agent) => `agentBuilderAgentsListClone-${agent.id}`,
           showOnHover: true,
           href: (agent) =>
-            createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
+            createAgentBuilderUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
           available: () => manageAgents,
         },
         {
@@ -177,12 +177,12 @@ export const AgentsList: React.FC = () => {
     };
 
     return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createOnechatUrl, deleteAgent, manageAgents]);
+  }, [createAgentBuilderUrl, deleteAgent, manageAgents]);
 
   const errorMessage = useMemo(
     () =>
       error
-        ? i18n.translate('xpack.onechat.agents.listErrorMessage', {
+        ? i18n.translate('xpack.agentBuilder.agents.listErrorMessage', {
             defaultMessage: 'Failed to fetch agents',
           })
         : undefined,

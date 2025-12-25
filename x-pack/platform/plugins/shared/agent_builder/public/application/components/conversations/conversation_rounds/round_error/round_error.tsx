@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
-import { isContextLengthExceededAgentError } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import { isContextLengthExceededAgentError } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
@@ -23,10 +23,10 @@ interface RoundErrorProps {
 }
 
 const labels = {
-  retryAriaLabel: i18n.translate('xpack.onechat.round.error.retryLabel', {
+  retryAriaLabel: i18n.translate('xpack.agentBuilder.round.error.retryLabel', {
     defaultMessage: 'Retry',
   }),
-  tryAgain: i18n.translate('xpack.onechat.round.error.tryAgain', {
+  tryAgain: i18n.translate('xpack.agentBuilder.round.error.tryAgain', {
     defaultMessage: 'Try again?',
   }),
 };

@@ -11,7 +11,7 @@ import type {
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,
-} from '@kbn/onechat-server/runner';
+} from '@kbn/agent-builder-server/runner';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';

@@ -8,7 +8,7 @@
 import type {
   AgentAnswerStepConfiguration,
   AgentResearchStepConfiguration,
-} from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
 
 export type ResolvedAnswerStepConfiguration = Required<AgentAnswerStepConfiguration>;
 export type ResolvedResearchStepConfiguration = Required<AgentResearchStepConfiguration>;

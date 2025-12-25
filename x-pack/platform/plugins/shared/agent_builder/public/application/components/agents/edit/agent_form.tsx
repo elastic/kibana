@@ -28,8 +28,8 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import { filterToolsBySelection, type AgentDefinition } from '@kbn/onechat-common';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import { filterToolsBySelection, type AgentDefinition } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -79,13 +79,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { manageAgents } = useUiPrivileges();
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
-  const deferNavigateToOnechatUrl = useCallback(
-    (...args: Parameters<typeof navigateToOnechatUrl>) => {
-      defer(() => navigateToOnechatUrl(...args));
+  const deferNavigateToAgentBuilderUrl = useCallback(
+    (...args: Parameters<typeof navigateToAgentBuilderUrl>) => {
+      defer(() => navigateToAgentBuilderUrl(...args));
     },
-    [navigateToOnechatUrl]
+    [navigateToAgentBuilderUrl]
   );
   const { services } = useKibana();
   const {
@@ -104,10 +104,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const onSaveSuccess = () => {
     notifications.toasts.addSuccess(
       isCreateMode
-        ? i18n.translate('xpack.onechat.agents.createSuccessMessage', {
+        ? i18n.translate('xpack.agentBuilder.agents.createSuccessMessage', {
             defaultMessage: 'Agent created successfully',
           })
-        : i18n.translate('xpack.onechat.agents.updateSuccessMessage', {
+        : i18n.translate('xpack.agentBuilder.agents.updateSuccessMessage', {
             defaultMessage: 'Agent updated successfully',
           })
     );
@@ -115,16 +115,16 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const onSaveError = (err: Error) => {
     const errorMessageTitle = isCreateMode
-      ? i18n.translate('xpack.onechat.agents.createErrorMessage', {
+      ? i18n.translate('xpack.agentBuilder.agents.createErrorMessage', {
           defaultMessage: 'Failed to create agent',
         })
-      : i18n.translate('xpack.onechat.agents.updateErrorMessage', {
+      : i18n.translate('xpack.agentBuilder.agents.updateErrorMessage', {
           defaultMessage: 'Failed to update agent',
         });
 
     notifications.toasts.addDanger({
       title: errorMessageTitle,
-      text: formatOnechatErrorMessage(err),
+      text: formatAgentBuilderErrorMessage(err),
     });
   };
   const {
@@ -159,8 +159,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const handleCancel = useCallback(() => {
     setIsCancelling(true);
-    defer(() => navigateToOnechatUrl(appPaths.agents.list));
-  }, [navigateToOnechatUrl]);
+    defer(() => navigateToAgentBuilderUrl(appPaths.agents.list));
+  }, [navigateToAgentBuilderUrl]);
 
   const handleSave = useCallback(
     async (
@@ -177,10 +177,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         setSubmittingButtonId(undefined);
       }
       if (navigateToListView) {
-        deferNavigateToOnechatUrl(appPaths.agents.list);
+        deferNavigateToAgentBuilderUrl(appPaths.agents.list);
       }
     },
-    [submit, deferNavigateToOnechatUrl]
+    [submit, deferNavigateToAgentBuilderUrl]
   );
 
   const handleSaveAndChat = useCallback(
@@ -189,9 +189,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      deferNavigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+      deferNavigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
     },
-    [deferNavigateToOnechatUrl, handleSave]
+    [deferNavigateToAgentBuilderUrl, handleSave]
   );
 
   const isFormDisabled = isLoading || isSubmitting;
@@ -220,7 +220,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     () => [
       {
         id: 'settings',
-        name: i18n.translate('xpack.onechat.agents.form.settingsTab', {
+        name: i18n.translate('xpack.agentBuilder.agents.form.settingsTab', {
           defaultMessage: 'Settings',
         }),
         content: (
@@ -234,7 +234,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       },
       {
         id: 'tools',
-        name: i18n.translate('xpack.onechat.agents.form.toolsTab', {
+        name: i18n.translate('xpack.agentBuilder.agents.form.toolsTab', {
           defaultMessage: 'Tools',
         }),
         content: (
@@ -292,7 +292,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           isLoading={submittingButtonId === BUTTON_IDS.SAVE}
           isDisabled={isSaveDisabled}
         >
-          {i18n.translate('xpack.onechat.agents.form.saveButton', {
+          {i18n.translate('xpack.agentBuilder.agents.form.saveButton', {
             defaultMessage: 'Save',
           })}
         </EuiButton>
@@ -300,7 +300,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       return hasErrors ? (
         <EuiToolTip
           display="block"
-          content={i18n.translate('xpack.onechat.agents.form.saveButtonTooltip', {
+          content={i18n.translate('xpack.agentBuilder.agents.form.saveButtonTooltip', {
             defaultMessage: 'Resolve all form errors to save.',
           })}
         >
@@ -325,10 +325,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         <EuiButton
           {...commonProps}
           onClick={() =>
-            navigateToOnechatUrl(appPaths.chat.newWithAgent({ agentId: editingAgentId }))
+            navigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: editingAgentId }))
           }
         >
-          {i18n.translate('xpack.onechat.agents.form.chatButton', {
+          {i18n.translate('xpack.agentBuilder.agents.form.chatButton', {
             defaultMessage: 'Chat',
           })}
         </EuiButton>
@@ -338,14 +338,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_CHAT}
           onClick={handleSubmit(handleSaveAndChat)}
         >
-          {i18n.translate('xpack.onechat.agents.form.saveAndChatButton', {
+          {i18n.translate('xpack.agentBuilder.agents.form.saveAndChatButton', {
             defaultMessage: 'Save and chat',
           })}
         </EuiButton>
       );
     },
     [
-      navigateToOnechatUrl,
+      navigateToAgentBuilderUrl,
       isFormDisabled,
       hasErrors,
       editingAgentId,
@@ -370,14 +370,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     return (
       <EuiCallOut
         announceOnMount
-        title={i18n.translate('xpack.onechat.agents.errorTitle', {
+        title={i18n.translate('xpack.agentBuilder.agents.errorTitle', {
           defaultMessage: 'Error loading agent',
         })}
         color="danger"
         iconType="error"
       >
         <p>
-          {i18n.translate('xpack.onechat.agents.errorMessage', {
+          {i18n.translate('xpack.agentBuilder.agents.errorMessage', {
             defaultMessage: 'Unable to load the agent. {errorMessage}',
             values: {
               errorMessage: (error as Error)?.message || String(error),
@@ -385,8 +385,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           })}
         </p>
         <EuiSpacer size="m" />
-        <EuiButton onClick={() => navigateToOnechatUrl(appPaths.agents.list)}>
-          {i18n.translate('xpack.onechat.agents.backToListButton', {
+        <EuiButton onClick={() => navigateToAgentBuilderUrl(appPaths.agents.list)}>
+          {i18n.translate('xpack.agentBuilder.agents.backToListButton', {
             defaultMessage: 'Back to agents list',
           })}
         </EuiButton>
@@ -426,7 +426,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         description={
           isCreateMode ? (
             <FormattedMessage
-              id="xpack.onechat.createAgent.description"
+              id="xpack.agentBuilder.createAgent.description"
               defaultMessage="Create an AI agent with custom instructions, assign it tools to work with your data, and make it easily findable for your team. {learnMoreLink}"
               values={{
                 learnMoreLink: (
@@ -434,14 +434,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                     href={docLinks.agentBuilderAgents}
                     target="_blank"
                     aria-label={i18n.translate(
-                      'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
+                      'xpack.agentBuilder.agents.form.settings.systemReferencesLearnMoreAriaLabel',
                       {
                         defaultMessage: 'Learn more about agents in the documentation',
                       }
                     )}
                   >
                     {i18n.translate(
-                      'xpack.onechat.agents.form.settings.systemReferencesLearnMore',
+                      'xpack.agentBuilder.agents.form.settings.systemReferencesLearnMore',
                       {
                         defaultMessage: 'Learn more',
                       }
@@ -468,7 +468,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                     zIndex={Number(euiTheme.levels.header) - 1}
                     button={
                       <EuiButtonIcon
-                        aria-label={i18n.translate('xpack.onechat.agents.form.openMenuLabel', {
+                        aria-label={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
                           defaultMessage: 'Open menu',
                         })}
                         size="m"
@@ -488,7 +488,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                           disabled={isSaveDisabled}
                           onClick={handleSubmit(handleSaveAndChat)}
                         >
-                          {i18n.translate('xpack.onechat.agents.form.saveAndChatButton', {
+                          {i18n.translate('xpack.agentBuilder.agents.form.saveAndChatButton', {
                             defaultMessage: 'Save and chat',
                           })}
                         </EuiContextMenuItem>,
@@ -507,7 +507,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   button={
                     <EuiButtonIcon
                       size="m"
-                      aria-label={i18n.translate('xpack.onechat.agents.form.openMenuLabel', {
+                      aria-label={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
                         defaultMessage: 'Open menu',
                       })}
                       iconType="boxesVertical"
@@ -528,12 +528,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         size="s"
                         onClick={() => {
                           setContextMenuOpen(false);
-                          navigateToOnechatUrl(appPaths.agents.new, {
+                          navigateToAgentBuilderUrl(appPaths.agents.new, {
                             [searchParamNames.sourceId]: editingAgentId,
                           });
                         }}
                       >
-                        {i18n.translate('xpack.onechat.agents.form.cloneButton', {
+                        {i18n.translate('xpack.agentBuilder.agents.form.cloneButton', {
                           defaultMessage: 'Clone',
                         })}
                       </EuiContextMenuItem>,
@@ -548,7 +548,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                           onDelete?.();
                         }}
                       >
-                        {i18n.translate('xpack.onechat.agents.form.deleteButton', {
+                        {i18n.translate('xpack.agentBuilder.agents.form.deleteButton', {
                           defaultMessage: 'Delete',
                         })}
                       </EuiContextMenuItem>,

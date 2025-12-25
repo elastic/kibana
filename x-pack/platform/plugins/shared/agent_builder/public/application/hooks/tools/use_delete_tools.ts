@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef, useState } from 'react';
 import type { BulkDeleteToolResponse, DeleteToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useToasts } from '../use_toasts';
 
 interface DeleteToolMutationVariables {
@@ -49,7 +49,7 @@ export const useDeleteToolService = ({
   onError?: DeleteToolErrorCallback;
 } = {}) => {
   const queryClient = useQueryClient();
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const { mutate, mutateAsync, isLoading } = useMutation<
     DeleteToolResponse,
@@ -73,7 +73,7 @@ export const useDeleteToolsService = ({
   onError?: DeleteToolsErrorCallback;
 } = {}) => {
   const queryClient = useQueryClient();
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const { mutate, mutateAsync, isLoading } = useMutation<
     BulkDeleteToolResponse,
@@ -119,7 +119,7 @@ export const useDeleteTool = ({
     if (!data.success) {
       addErrorToast({
         title: labels.tools.deleteToolErrorToast(toolId),
-        text: formatOnechatErrorMessage(
+        text: formatAgentBuilderErrorMessage(
           new Error('Delete operation failed. API returned: { success: false }')
         ),
       });
@@ -135,7 +135,7 @@ export const useDeleteTool = ({
   const handleError: DeleteToolErrorCallback = (error, { toolId }) => {
     addErrorToast({
       title: labels.tools.deleteToolErrorToast(toolId),
-      text: formatOnechatErrorMessage(error),
+      text: formatAgentBuilderErrorMessage(error),
     });
   };
 
@@ -194,12 +194,12 @@ export const useDeleteTools = ({
       if (failedTools.length === toolIds.length) {
         addErrorToast({
           title: labels.tools.bulkDeleteToolsErrorToast(toolIds.length),
-          text: formatOnechatErrorMessage(new Error('Delete operation failed for all tools.')),
+          text: formatAgentBuilderErrorMessage(new Error('Delete operation failed for all tools.')),
         });
       } else {
         addErrorToast({
           title: labels.tools.bulkDeleteToolsErrorToast(failedTools.length),
-          text: formatOnechatErrorMessage(
+          text: formatAgentBuilderErrorMessage(
             new Error('Delete operation failed for some tools: ' + failedTools.join(', '))
           ),
         });
@@ -217,7 +217,7 @@ export const useDeleteTools = ({
   const handleError: DeleteToolsErrorCallback = (error, { toolIds }) => {
     addErrorToast({
       title: labels.tools.bulkDeleteToolsErrorToast(toolIds.length),
-      text: formatOnechatErrorMessage(error),
+      text: formatAgentBuilderErrorMessage(error),
     });
   };
 

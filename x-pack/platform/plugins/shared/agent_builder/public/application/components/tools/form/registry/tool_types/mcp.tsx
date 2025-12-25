@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
-import { isMcpTool } from '@kbn/onechat-common/tools';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
+import { isMcpTool } from '@kbn/agent-builder-common/tools';
 import {
   transformMcpFormDataForCreate,
   transformMcpFormDataForUpdate,

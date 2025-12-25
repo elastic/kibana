@@ -17,13 +17,13 @@ import {
 import { RenameConversationInput } from './rename_conversation_input';
 
 const labels = {
-  ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
+  ariaLabel: i18n.translate('xpack.agentBuilder.conversationTitle.ariaLabel', {
     defaultMessage: 'Conversation title',
   }),
-  rename: i18n.translate('xpack.onechat.conversationTitle.rename', {
+  rename: i18n.translate('xpack.agentBuilder.conversationTitle.rename', {
     defaultMessage: 'Rename conversation',
   }),
-  newConversation: i18n.translate('xpack.onechat.conversationTitle.newConversation', {
+  newConversation: i18n.translate('xpack.agentBuilder.conversationTitle.newConversation', {
     defaultMessage: 'New conversation',
   }),
 };

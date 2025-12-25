@@ -10,7 +10,7 @@ import type {
   ToolAvailabilityContext,
   ToolAvailabilityConfig,
   ToolAvailabilityResult,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes default TTL
 

@@ -56,7 +56,7 @@ export const BulkImportMcpTools: React.FC = () => {
     http,
     appParams: { history },
   } = services;
-  const { navigateToOnechatUrl } = useNavigation();
+  const { navigateToAgentBuilderUrl } = useNavigation();
   const { addSuccessToast, addErrorToast } = useToasts();
 
   const [isCancelling, setIsCancelling] = useState(false);
@@ -88,17 +88,17 @@ export const BulkImportMcpTools: React.FC = () => {
     shouldPromptOnReplace: false,
   });
 
-  const deferNavigateToOnechatUrl = useCallback(
-    (...args: Parameters<typeof navigateToOnechatUrl>) => {
-      defer(() => navigateToOnechatUrl(...args));
+  const deferNavigateToAgentBuilderUrl = useCallback(
+    (...args: Parameters<typeof navigateToAgentBuilderUrl>) => {
+      defer(() => navigateToAgentBuilderUrl(...args));
     },
-    [navigateToOnechatUrl]
+    [navigateToAgentBuilderUrl]
   );
 
   const handleCancel = useCallback(() => {
     setIsCancelling(true);
-    deferNavigateToOnechatUrl(appPaths.tools.list);
-  }, [deferNavigateToOnechatUrl]);
+    deferNavigateToAgentBuilderUrl(appPaths.tools.list);
+  }, [deferNavigateToAgentBuilderUrl]);
 
   const handleImport = useCallback(
     async (data: BulkImportMcpToolsFormData) => {
@@ -116,7 +116,7 @@ export const BulkImportMcpTools: React.FC = () => {
           title: labels.tools.bulkImportMcp.importSuccessToast(result.summary.created),
         });
 
-        deferNavigateToOnechatUrl(appPaths.tools.list);
+        deferNavigateToAgentBuilderUrl(appPaths.tools.list);
       } catch (error) {
         addErrorToast({
           title: labels.tools.bulkImportMcp.importErrorToast,
@@ -124,7 +124,7 @@ export const BulkImportMcpTools: React.FC = () => {
         });
       }
     },
-    [bulkImportTools, deferNavigateToOnechatUrl, addSuccessToast, addErrorToast]
+    [bulkImportTools, deferNavigateToAgentBuilderUrl, addSuccessToast, addErrorToast]
   );
 
   const renderImportToolsButton = ({

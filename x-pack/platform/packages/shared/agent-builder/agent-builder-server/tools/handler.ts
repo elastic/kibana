@@ -9,8 +9,8 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -96,7 +96,7 @@ export interface ToolHandlerContext {
    */
   toolProvider: ToolProvider;
   /**
-   * Onechat runner scoped to the current execution.
+   * AgentBuilder runner scoped to the current execution.
    */
   runner: ScopedRunner;
   /**

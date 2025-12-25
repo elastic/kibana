@@ -11,7 +11,7 @@ import type {
   IndicesResolveIndexResolveIndexAliasItem,
   IndicesResolveIndexResolveIndexDataStreamsItem,
 } from '@elastic/elasticsearch/lib/api/types';
-import { EsResourceType } from '@kbn/onechat-common';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { listSearchSources } from './list_search_sources';
 

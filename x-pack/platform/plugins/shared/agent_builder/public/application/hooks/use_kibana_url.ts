@@ -7,14 +7,14 @@
 import { useMemo } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import { getSpaceIdFromPath, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { useOnechatServices } from './use_onechat_service';
+import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';
 
 export const useKibanaUrl = () => {
   const {
     startDependencies: { cloud, spaces },
-  } = useOnechatServices();
+  } = useAgentBuilderServices();
   const {
     services: { http },
   } = useKibana();

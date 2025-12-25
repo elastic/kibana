@@ -15,10 +15,10 @@ import type {
   PromptRequestEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
-} from '@kbn/onechat-common/chat/events';
-import { ChatEventType } from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { PromptRequestSource, PromptRequest } from '@kbn/onechat-common/agents/prompts';
+} from '@kbn/agent-builder-common/chat/events';
+import { ChatEventType } from '@kbn/agent-builder-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { PromptRequestSource, PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;

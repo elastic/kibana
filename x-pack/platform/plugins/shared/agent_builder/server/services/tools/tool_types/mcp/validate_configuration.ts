@@ -7,9 +7,9 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { createBadRequestError } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
-import type { McpToolConfig } from '@kbn/onechat-common/tools';
+import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import { listMcpTools } from './tool_type';
 
 /**

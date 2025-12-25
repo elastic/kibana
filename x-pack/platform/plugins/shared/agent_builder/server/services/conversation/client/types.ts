@@ -12,7 +12,7 @@ import type {
   ReasoningStep,
   ConversationRoundStepType,
   Conversation,
-} from '@kbn/onechat-common/chat/conversation';
+} from '@kbn/agent-builder-common/chat/conversation';
 
 export type ConversationCreateRequest = Omit<
   Conversation,

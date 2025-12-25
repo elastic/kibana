@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isEsqlTool } from '@kbn/onechat-common/tools';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { isEsqlTool } from '@kbn/agent-builder-common/tools';
 
 import { EsqlConfiguration } from '../../sections/configuration_fields/esql_configuration_fields';
 

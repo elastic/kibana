@@ -6,8 +6,8 @@
  */
 
 import { createContext, useCallback, useContext, useState } from 'react';
-import type { AgentDefinition } from '@kbn/onechat-common';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,12 +21,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import React from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { queryKeys } from '../query_keys';
-import { useOnechatServices } from '../hooks/use_onechat_service';
+import { useAgentBuilderServices } from '../hooks/use_agent_builder_service';
 
 interface UseDeleteAgentMutationOptions {
   onSuccess?: () => void;
@@ -37,7 +37,7 @@ function useDeleteAgentMutation({
   onSuccess: handleSuccess,
   onError: handleError,
 }: UseDeleteAgentMutationOptions = {}) {
-  const { agentService } = useOnechatServices();
+  const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
 
   const deleteAgentMutation = useMutation({
@@ -93,7 +93,7 @@ const AgentDeleteModal: React.FC<AgentDeleteModalProps> = ({
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
-            id="xpack.onechat.agents.deleteModal.title"
+            id="xpack.agentBuilder.agents.deleteModal.title"
             defaultMessage="Delete {name}"
             values={{ name: agent.name }}
           />
@@ -103,7 +103,7 @@ const AgentDeleteModal: React.FC<AgentDeleteModalProps> = ({
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.onechat.agents.deleteModal.description"
+              id="xpack.agentBuilder.agents.deleteModal.description"
               defaultMessage="Are you sure you want to delete this agent? This action cannot be undone."
             />
           </p>
@@ -112,7 +112,7 @@ const AgentDeleteModal: React.FC<AgentDeleteModalProps> = ({
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} isDisabled={isDeleting}>
           <FormattedMessage
-            id="xpack.onechat.agents.deleteModal.cancelButton"
+            id="xpack.agentBuilder.agents.deleteModal.cancelButton"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -123,10 +123,10 @@ const AgentDeleteModal: React.FC<AgentDeleteModalProps> = ({
           color="danger"
           fill
           isLoading={isDeleting}
-          data-test-subj="onechatAgentDeleteConfirmButton"
+          data-test-subj="agentBuilderAgentDeleteConfirmButton"
         >
           <FormattedMessage
-            id="xpack.onechat.agents.deleteModal.confirmButton"
+            id="xpack.agentBuilder.agents.deleteModal.confirmButton"
             defaultMessage="Delete"
           />
         </EuiButton>
@@ -164,7 +164,7 @@ export const DeleteAgentProvider: React.FC<DeleteAgentProviderProps> = ({
 
   const handleSuccess = useCallback(() => {
     notifications.toasts.addSuccess(
-      i18n.translate('xpack.onechat.agents.deleteSuccessMessage', {
+      i18n.translate('xpack.agentBuilder.agents.deleteSuccessMessage', {
         defaultMessage: 'Agent deleted successfully',
       })
     );
@@ -174,10 +174,10 @@ export const DeleteAgentProvider: React.FC<DeleteAgentProviderProps> = ({
   const handleError = useCallback(
     (error: Error) => {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.onechat.agents.deleteErrorMessage', {
+        title: i18n.translate('xpack.agentBuilder.agents.deleteErrorMessage', {
           defaultMessage: 'Failed to delete agent',
         }),
-        text: formatOnechatErrorMessage(error),
+        text: formatAgentBuilderErrorMessage(error),
       });
       onError?.(error);
     },
@@ -194,7 +194,7 @@ export const DeleteAgentProvider: React.FC<DeleteAgentProviderProps> = ({
     <DeleteAgentContext.Provider
       value={{
         deleteAgent: ({ agent, forceWithoutConfirmation = false }) => {
-          if (agent.id === oneChatDefaultAgentId) {
+          if (agent.id === agentBuilderDefaultAgentId) {
             return;
           }
 

@@ -6,18 +6,18 @@
  */
 
 import type { ZodObject } from '@kbn/zod';
-import type { ToolResult, ToolType } from '@kbn/onechat-common';
-import { createBadRequestError } from '@kbn/onechat-common';
+import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import type { RunToolReturn, ToolHandlerContext, ToolHandlerReturn } from '@kbn/onechat-server';
+import type { RunToolReturn, ToolHandlerContext, ToolHandlerReturn } from '@kbn/agent-builder-server';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
-} from '@kbn/onechat-server/runner';
-import { createErrorResult } from '@kbn/onechat-server';
-import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
-import { isToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+} from '@kbn/agent-builder-server/runner';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import type { InternalToolDefinition } from '@kbn/agent-builder-server/tools';
+import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { ToolCallSource } from '../../telemetry';
 import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';

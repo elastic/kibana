@@ -6,7 +6,7 @@
  */
 
 import { createSchemaFromParams } from './create_schema';
-import type { EsqlToolConfig } from '@kbn/onechat-common';
+import type { EsqlToolConfig } from '@kbn/agent-builder-common';
 
 const TEST_VALUES = {
   name: 'John',

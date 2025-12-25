@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/onechat-common';
+import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import { useOnechatServices } from '../use_onechat_service';
-import { useOnechatAgentById } from './use_agent_by_id';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
+import { useAgentBuilderAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
@@ -48,7 +48,7 @@ export function useAgentEdit({
   onSaveError: (err: Error) => void;
 }) {
   const [searchParams] = useSearchParams();
-  const { agentService } = useOnechatServices();
+  const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
@@ -56,7 +56,7 @@ export function useAgentEdit({
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
-  const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId);
+  const { agent, isLoading: agentLoading, error: agentError } = useAgentBuilderAgentById(agentId);
 
   const createMutation = useMutation({
     mutationFn: (data: AgentEditState) => agentService.create(data),

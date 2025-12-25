@@ -8,7 +8,7 @@
 import { EuiInlineEditText } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
@@ -16,13 +16,13 @@ import { useConversationTitle } from '../../../hooks/use_conversation';
 import { useToasts } from '../../../hooks/use_toasts';
 
 const labels = {
-  inputPlaceholder: i18n.translate('xpack.onechat.renameConversationInput.inputPlaceholder', {
+  inputPlaceholder: i18n.translate('xpack.agentBuilder.renameConversationInput.inputPlaceholder', {
     defaultMessage: 'Enter conversation name',
   }),
-  inputAriaLabel: i18n.translate('xpack.onechat.renameConversationInput.inputAriaLabel', {
+  inputAriaLabel: i18n.translate('xpack.agentBuilder.renameConversationInput.inputAriaLabel', {
     defaultMessage: 'Edit conversation title',
   }),
-  renameErrorToast: i18n.translate('xpack.onechat.renameConversationInput.renameErrorToast', {
+  renameErrorToast: i18n.translate('xpack.agentBuilder.renameConversationInput.renameErrorToast', {
     defaultMessage: 'Failed to rename conversation',
   }),
 };
@@ -72,7 +72,7 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
     } catch (error) {
       addErrorToast({
         title: labels.renameErrorToast,
-        text: formatOnechatErrorMessage(error),
+        text: formatAgentBuilderErrorMessage(error),
       });
       return false; // Stay in edit mode on error
     } finally {

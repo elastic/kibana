@@ -10,28 +10,28 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import type { OnechatPluginStart, OnechatStartDependencies } from '../../types';
+import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || event.key === ';';
 
-interface OnechatNavControlServices {
-  onechat: OnechatPluginStart;
-  aiAssistantManagementSelection: OnechatStartDependencies['aiAssistantManagementSelection'];
+interface AgentBuilderNavControlServices {
+  agentBuilder: AgentBuilderPluginStart;
+  aiAssistantManagementSelection: AgentBuilderStartDependencies['aiAssistantManagementSelection'];
 }
 
-export function OnechatNavControl() {
+export function AgentBuilderNavControl() {
   const {
-    services: { onechat, aiAssistantManagementSelection },
-  } = useKibana<OnechatNavControlServices>();
+    services: { agentBuilder, aiAssistantManagementSelection },
+  } = useKibana<AgentBuilderNavControlServices>();
 
   const { show: hasShowPrivilege } = useUiPrivileges();
 
   const toggleFlyout = useCallback(() => {
-    onechat.toggleConversationFlyout();
-  }, [onechat]);
+    agentBuilder.toggleConversationFlyout();
+  }, [agentBuilder]);
 
   useEffect(() => {
     if (!hasShowPrivilege) {
@@ -40,7 +40,7 @@ export function OnechatNavControl() {
 
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
       if (selection === AIChatExperience.Agent) {
-        onechat.openConversationFlyout();
+        agentBuilder.openConversationFlyout();
         aiAssistantManagementSelection.completeOpenChat();
       }
     });
@@ -48,7 +48,7 @@ export function OnechatNavControl() {
     return () => {
       openChatSubscription.unsubscribe();
     };
-  }, [hasShowPrivilege, onechat, aiAssistantManagementSelection]);
+  }, [hasShowPrivilege, agentBuilder, aiAssistantManagementSelection]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -78,7 +78,7 @@ export function OnechatNavControl() {
       <EuiToolTip content={tooltipContent}>
         <EuiButton
           aria-label={buttonLabel}
-          data-test-subj="OnechatNavControlButton"
+          data-test-subj="AgentBuilderNavControlButton"
           onClick={() => {
             toggleFlyout();
           }}
@@ -88,18 +88,18 @@ export function OnechatNavControl() {
           minWidth={0}
         >
           <RobotIcon size="m" />
-          <FormattedMessage id="xpack.onechat.navControl.linkLabel" defaultMessage="AI Agent" />
+          <FormattedMessage id="xpack.agentBuilder.navControl.linkLabel" defaultMessage="AI Agent" />
         </EuiButton>
       </EuiToolTip>
     </>
   );
 }
 
-const buttonLabel = i18n.translate('xpack.onechat.navControl.openTheOnechatFlyoutLabel', {
+const buttonLabel = i18n.translate('xpack.agentBuilder.navControl.openTheAgentBuilderFlyoutLabel', {
   defaultMessage: 'Open Agent Builder',
 });
 
-const shortcutLabel = i18n.translate('xpack.onechat.navControl.keyboardShortcutTooltip', {
+const shortcutLabel = i18n.translate('xpack.agentBuilder.navControl.keyboardShortcutTooltip', {
   values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
   defaultMessage: '(Keyboard shortcut {keyboardShortcut})',
 });

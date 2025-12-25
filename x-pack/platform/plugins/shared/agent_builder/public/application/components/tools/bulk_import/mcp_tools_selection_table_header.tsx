@@ -85,7 +85,7 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
                   <FormattedMessage
-                    id="xpack.onechat.tools.bulkImportMcp.sourceSection.tableSummary"
+                    id="xpack.agentBuilder.tools.bulkImportMcp.sourceSection.tableSummary"
                     defaultMessage="Showing {start}-{end} of {total}"
                     values={{
                       start: <strong>{paginationStart}</strong>,

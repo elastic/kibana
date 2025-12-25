@@ -1,20 +1,20 @@
-# Onechat plugin
+# AgentBuilder plugin
 
 Home of the **Agent Builder** framework.
 
-Note: as many other platform features, onechat isolates its public types and static utils, exposed from packages,
+Note: as many other platform features, agentBuilder isolates its public types and static utils, exposed from packages,
 from its APIs, exposed from the plugin.
 
-The onechat plugin has 4 main packages:
+The agentBuilder plugin has 4 main packages:
 
-- `@kbn/onechat-common`: types and utilities which are shared between browser and server
-- `@kbn/onechat-server`: server-specific types and utilities
-- `@kbn/onechat-browser`: browser-specific types and utilities.
-- `@kbn/onechat-genai-utils`: server-side utilities for our built-in tools and agents.
+- `@kbn/agent-builder-common`: types and utilities which are shared between browser and server
+- `@kbn/agent-builder-server`: server-specific types and utilities
+- `@kbn/agent-builder-browser`: browser-specific types and utilities.
+- `@kbn/agent-builder-genai-utils`: server-side utilities for our built-in tools and agents.
 
 ## Enable all feature flags
 
-All features in the Onechat plugin are developed behind UI settings (feature flags). 
+All features in the AgentBuilder plugin are developed behind UI settings (feature flags). 
 By default, in-progress or experimental features are disabled. 
 To enable all features for development or testing, add the following to your `kibana.dev.yml`:
 
@@ -23,7 +23,7 @@ uiSettings.overrides:
   agentBuilder:enabled: true
 ```
 
-This will ensure all Onechat features are available in your Kibana instance.
+This will ensure all AgentBuilder features are available in your Kibana instance.
 
 If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
 
@@ -38,7 +38,7 @@ POST kbn://internal/kibana/settings
 
 ## Enabling tracing
 
-Onechat agents are compatible with the Kibana inference tracing.
+AgentBuilder agents are compatible with the Kibana inference tracing.
 
 You can enable tracing on your local instance by adding the following config parameters:
 
@@ -70,13 +70,13 @@ telemetry.tracing.exporters.phoenix.project_name: '1chat'
 
 ## Overview
 
-The onechat plugin exposes APIs to interact with onechat primitives.
+The agentBuilder plugin exposes APIs to interact with agentBuilder primitives.
 
 The main primitives are:
 
 - [tools](#tools)
 
-Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools and [A2A server](#a2a-server) that exposes onechat agents for agent-to-agent communication.
+Additionally, the plugin implements [MCP server](#mcp-server) that exposes agentBuilder tools and [A2A server](#a2a-server) that exposes agentBuilder agents for agent-to-agent communication.
 
 ## Tools
 
@@ -124,10 +124,10 @@ Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and exa
 
 ### Executing a tool
 
-Executing a tool can be done using the `execute` API of the onechat tool start service:
+Executing a tool can be done using the `execute` API of the agentBuilder tool start service:
 
 ```ts
-const { result } = await onechat.tools.execute({
+const { result } = await agentBuilder.tools.execute({
   toolId: 'my_tool',
   toolParams: { someNumber: 9000 },
   request,
@@ -137,22 +137,22 @@ const { result } = await onechat.tools.execute({
 It can also be done directly from a tool definition:
 
 ```ts
-const tool = await onechat.tools.registry.get({ toolId: 'my_tool', request });
+const tool = await agentBuilder.tools.registry.get({ toolId: 'my_tool', request });
 const { result } = await tool.execute({ toolParams: { someNumber: 9000 } });
 ```
 
 ### Error handling
 
-All onechat errors inherit from the `OnechatError` error type. Various error utilities
-are exposed from the `@kbn/onechat-common` package to identify and handle those errors.
+All agentBuilder errors inherit from the `AgentBuilderError` error type. Various error utilities
+are exposed from the `@kbn/agent-builder-common` package to identify and handle those errors.
 
 Some simple example of handling a specific type of error:
 
 ```ts
-import { isToolNotFoundError } from '@kbn/onechat-common';
+import { isToolNotFoundError } from '@kbn/agent-builder-common';
 
 try {
-  const { result } = await onechat.tools.execute({
+  const { result } = await agentBuilder.tools.execute({
     toolId: 'my_tool',
     toolParams: { someNumber: 9000 },
     request,
@@ -174,7 +174,7 @@ Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and exa
 
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/agent_builder/mcp` endpoint.
+The MCP server provides a standardized interface for external MCP clients to access agentBuilder tools. It's available on `/api/agent_builder/mcp` endpoint.
 
 ### Running with Claude Desktop
 
@@ -200,9 +200,9 @@ Configure Claude Desktop by adding this to its configuration:
 
 ## A2A Server
 
-The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
+The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with agentBuilder agents, enabling agent-to-agent collaboration following the A2A protocol specification.
 
-Agentcards for onechat agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
+Agentcards for agentBuilder agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
 
 ## ES|QL Based Tools
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ToolResultType, type ErrorResult } from '@kbn/onechat-common';
-import type { ToolHandlerContext, ToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
+import { ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
+import type { ToolHandlerContext, ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import {

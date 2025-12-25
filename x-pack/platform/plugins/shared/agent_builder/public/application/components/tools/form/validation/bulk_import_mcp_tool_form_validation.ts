@@ -6,17 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isInProtectedNamespace, hasNamespaceName } from '@kbn/onechat-common/base/namespaces';
-import { toolIdRegexp, toolIdMaxLength } from '@kbn/onechat-common/tools';
+import { isInProtectedNamespace, hasNamespaceName } from '@kbn/agent-builder-common/base/namespaces';
+import { toolIdRegexp, toolIdMaxLength } from '@kbn/agent-builder-common/tools';
 import { useQueryClient } from '@kbn/react-query';
 import { z } from '@kbn/zod';
-import { useOnechatServices } from '../../../../hooks/use_onechat_service';
+import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { queryKeys } from '../../../../query_keys';
 
 export const bulkImportMcpI18nMessages = {
   connectorId: {
     requiredError: i18n.translate(
-      'xpack.onechat.tools.bulkImportMcp.validation.connectorId.requiredError',
+      'xpack.agentBuilder.tools.bulkImportMcp.validation.connectorId.requiredError',
       {
         defaultMessage: 'MCP server is required.',
       }
@@ -24,7 +24,7 @@ export const bulkImportMcpI18nMessages = {
   },
   tools: {
     requiredError: i18n.translate(
-      'xpack.onechat.tools.bulkImportMcp.validation.tools.requiredError',
+      'xpack.agentBuilder.tools.bulkImportMcp.validation.tools.requiredError',
       {
         defaultMessage: 'At least one tool is required.',
       }
@@ -32,20 +32,20 @@ export const bulkImportMcpI18nMessages = {
   },
   namespace: {
     requiredError: i18n.translate(
-      'xpack.onechat.tools.bulkImportMcp.validation.namespace.requiredError',
+      'xpack.agentBuilder.tools.bulkImportMcp.validation.namespace.requiredError',
       {
         defaultMessage: 'Namespace is required.',
       }
     ),
     tooLongError: i18n.translate(
-      'xpack.onechat.tools.bulkImportMcp.validation.namespace.tooLongError',
+      'xpack.agentBuilder.tools.bulkImportMcp.validation.namespace.tooLongError',
       {
         defaultMessage: 'Namespace must be {maxLength} characters or less.',
         values: { maxLength: toolIdMaxLength },
       }
     ),
     formatError: i18n.translate(
-      'xpack.onechat.tools.bulkImportMcp.validation.namespace.formatError',
+      'xpack.agentBuilder.tools.bulkImportMcp.validation.namespace.formatError',
       {
         defaultMessage:
           'Namespace must start with a letter and contain only lowercase letters, numbers, and hyphens.',
@@ -53,14 +53,14 @@ export const bulkImportMcpI18nMessages = {
     ),
     protectedNamespaceError: (name: string) =>
       i18n.translate(
-        'xpack.onechat.tools.bulkImportMcp.validation.namespace.protectedNamespaceError',
+        'xpack.agentBuilder.tools.bulkImportMcp.validation.namespace.protectedNamespaceError',
         {
           defaultMessage: '"{name}" is a protected namespace and cannot be used.',
           values: { name },
         }
       ),
     conflictError: i18n.translate(
-      'xpack.onechat.tools.bulkImportMcp.validation.namespace.conflictError',
+      'xpack.agentBuilder.tools.bulkImportMcp.validation.namespace.conflictError',
       {
         defaultMessage: 'This namespace is already in use by existing tools.',
       }
@@ -69,7 +69,7 @@ export const bulkImportMcpI18nMessages = {
 };
 
 export const useBulkImportMcpToolFormValidationSchema = () => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
 
   return z.object({

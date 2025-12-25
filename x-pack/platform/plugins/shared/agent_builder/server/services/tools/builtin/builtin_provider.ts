@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolType } from '@kbn/onechat-common';
-import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
+import type { ToolType } from '@kbn/agent-builder-common';
+import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import type {

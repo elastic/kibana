@@ -119,7 +119,7 @@ describe('query_utils', () => {
               id: '1',
               type: 'usage-counter',
               attributes: {
-                domainId: 'onechat',
+                domainId: 'agentBuilder',
                 counterName: 'tool_call_default_agent',
                 counterType: 'count',
                 count: 10,
@@ -131,7 +131,7 @@ describe('query_utils', () => {
               id: '2',
               type: 'usage-counter',
               attributes: {
-                domainId: 'onechat',
+                domainId: 'agentBuilder',
                 counterName: 'tool_call_mcp',
                 counterType: 'count',
                 count: 5,
@@ -145,12 +145,12 @@ describe('query_utils', () => {
           per_page: 10000,
         });
 
-        const result = await queryUtils.getCountersByDomain('onechat');
+        const result = await queryUtils.getCountersByDomain('agentBuilder');
 
         expect(soClient.find).toHaveBeenCalledWith({
           type: 'usage-counter',
           perPage: 10000,
-          filter: 'usage-counter.attributes.domainId:"onechat"',
+          filter: 'usage-counter.attributes.domainId:"agentBuilder"',
         });
 
         expect(result).toEqual([
@@ -158,13 +158,13 @@ describe('query_utils', () => {
             counterName: 'tool_call_default_agent',
             counterType: 'count',
             count: 10,
-            domainId: 'onechat',
+            domainId: 'agentBuilder',
           },
           {
             counterName: 'tool_call_mcp',
             counterType: 'count',
             count: 5,
-            domainId: 'onechat',
+            domainId: 'agentBuilder',
           },
         ]);
       });
@@ -177,7 +177,7 @@ describe('query_utils', () => {
           per_page: 10000,
         });
 
-        const result = await queryUtils.getCountersByDomain('onechat');
+        const result = await queryUtils.getCountersByDomain('agentBuilder');
 
         expect(result).toEqual([]);
       });
@@ -185,7 +185,7 @@ describe('query_utils', () => {
       it('returns empty array and logs error on exception', async () => {
         soClient.find.mockRejectedValue(new Error('Database error'));
 
-        const result = await queryUtils.getCountersByDomain('onechat');
+        const result = await queryUtils.getCountersByDomain('agentBuilder');
 
         expect(result).toEqual([]);
         expect(logger.error).toHaveBeenCalledWith('Failed to query usage counters: Database error');
@@ -200,7 +200,7 @@ describe('query_utils', () => {
               id: '1',
               type: 'usage-counter',
               attributes: {
-                domainId: 'onechat',
+                domainId: 'agentBuilder',
                 counterName: 'tool_call_default_agent',
                 counterType: 'count',
                 count: 10,
@@ -212,7 +212,7 @@ describe('query_utils', () => {
               id: '2',
               type: 'usage-counter',
               attributes: {
-                domainId: 'onechat',
+                domainId: 'agentBuilder',
                 counterName: 'tool_call_mcp',
                 counterType: 'count',
                 count: 5,
@@ -224,7 +224,7 @@ describe('query_utils', () => {
               id: '3',
               type: 'usage-counter',
               attributes: {
-                domainId: 'onechat',
+                domainId: 'agentBuilder',
                 counterName: 'error_total',
                 counterType: 'count',
                 count: 2,
@@ -238,7 +238,7 @@ describe('query_utils', () => {
           per_page: 10000,
         });
 
-        const result = await queryUtils.getCountersByPrefix('onechat', 'tool_call_');
+        const result = await queryUtils.getCountersByPrefix('agentBuilder', 'tool_call_');
 
         expect(result.size).toBe(2);
         expect(result.get('tool_call_default_agent')).toBe(10);
@@ -253,7 +253,7 @@ describe('query_utils', () => {
               id: '1',
               type: 'usage-counter',
               attributes: {
-                domainId: 'onechat',
+                domainId: 'agentBuilder',
                 counterName: 'error_total',
                 counterType: 'count',
                 count: 2,
@@ -267,7 +267,7 @@ describe('query_utils', () => {
           per_page: 10000,
         });
 
-        const result = await queryUtils.getCountersByPrefix('onechat', 'tool_call_');
+        const result = await queryUtils.getCountersByPrefix('agentBuilder', 'tool_call_');
 
         expect(result.size).toBe(0);
       });
@@ -275,7 +275,7 @@ describe('query_utils', () => {
       it('returns empty map and logs error on exception', async () => {
         soClient.find.mockRejectedValue(new Error('Database error'));
 
-        const result = await queryUtils.getCountersByPrefix('onechat', 'tool_call_');
+        const result = await queryUtils.getCountersByPrefix('agentBuilder', 'tool_call_');
 
         expect(result.size).toBe(0);
         // The error is logged in getCountersByDomain which is called internally
@@ -564,7 +564,7 @@ describe('query_utils', () => {
       it('returns all zeros for empty buckets', () => {
         const buckets = new Map<string, number>();
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
 
         expect(result).toEqual({
           p50: 0,
@@ -577,9 +577,9 @@ describe('query_utils', () => {
       });
 
       it('calculates percentiles for single bucket', () => {
-        const buckets = new Map<string, number>([['onechat_query_to_result_time_<1s', 100]]);
+        const buckets = new Map<string, number>([['agent_builder_query_to_result_time_<1s', 100]]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
 
         // All percentiles should be within the <1s bucket (0-1000ms)
         expect(result.p50).toBe(500); // 50% of 100 = 50, linear interpolation in 0-1000
@@ -592,14 +592,14 @@ describe('query_utils', () => {
 
       it('calculates percentiles for multiple buckets', () => {
         const buckets = new Map<string, number>([
-          ['onechat_query_to_result_time_<1s', 50],
-          ['onechat_query_to_result_time_1-5s', 30],
-          ['onechat_query_to_result_time_5-10s', 15],
-          ['onechat_query_to_result_time_10-30s', 4],
-          ['onechat_query_to_result_time_30s+', 1],
+          ['agent_builder_query_to_result_time_<1s', 50],
+          ['agent_builder_query_to_result_time_1-5s', 30],
+          ['agent_builder_query_to_result_time_5-10s', 15],
+          ['agent_builder_query_to_result_time_10-30s', 4],
+          ['agent_builder_query_to_result_time_30s+', 1],
         ]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
 
         // Total count = 100
         // p50 (50th item) should be in <1s bucket
@@ -616,10 +616,10 @@ describe('query_utils', () => {
 
       it('calculates mean correctly', () => {
         const buckets = new Map<string, number>([
-          ['onechat_query_to_result_time_<1s', 100], // midpoint 500
+          ['agent_builder_query_to_result_time_<1s', 100], // midpoint 500
         ]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
 
         // Mean for single bucket should be midpoint
         expect(result.mean).toBe(500);
@@ -627,20 +627,20 @@ describe('query_utils', () => {
 
       it('calculates weighted mean for multiple buckets', () => {
         const buckets = new Map<string, number>([
-          ['onechat_query_to_result_time_<1s', 50], // midpoint 500, weight 50
-          ['onechat_query_to_result_time_1-5s', 50], // midpoint 3000, weight 50
+          ['agent_builder_query_to_result_time_<1s', 50], // midpoint 500, weight 50
+          ['agent_builder_query_to_result_time_1-5s', 50], // midpoint 3000, weight 50
         ]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
 
         // Mean should be (500*50 + 3000*50) / 100 = 1750
         expect(result.mean).toBe(1750);
       });
 
       it('handles only high duration buckets', () => {
-        const buckets = new Map<string, number>([['onechat_query_to_result_time_30s+', 10]]);
+        const buckets = new Map<string, number>([['agent_builder_query_to_result_time_30s+', 10]]);
 
-        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'onechat');
+        const result = queryUtils.calculatePercentilesFromBuckets(buckets, 'agentBuilder');
 
         // All percentiles should be within 30s+ bucket
         expect(result.p50).toBeGreaterThanOrEqual(30000);
@@ -648,9 +648,9 @@ describe('query_utils', () => {
       });
 
       it('uses default domain prefix when not specified', () => {
-        const buckets = new Map<string, number>([['onechat_query_to_result_time_<1s', 100]]);
+        const buckets = new Map<string, number>([['agent_builder_query_to_result_time_<1s', 100]]);
 
-        // Call without second parameter - should use 'onechat' as default
+        // Call without second parameter - should use 'agentBuilder' as default
         const result = queryUtils.calculatePercentilesFromBuckets(buckets);
 
         expect(result.p50).toBe(500);

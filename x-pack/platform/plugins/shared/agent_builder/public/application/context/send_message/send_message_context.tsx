@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 

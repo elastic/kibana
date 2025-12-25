@@ -7,13 +7,13 @@
 
 import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
-import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
+import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
 import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
-import { useOnechatServices } from '../../hooks/use_onechat_service';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
@@ -24,7 +24,7 @@ interface UseSendMessageMutationProps {
 }
 
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
-  const { chatService } = useOnechatServices();
+  const { chatService } = useAgentBuilderServices();
   const { services } = useKibana();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
     useConversationContext();

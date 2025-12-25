@@ -25,11 +25,11 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
     { scope: 'test' },
   ],
 });
-evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@svlSearch' }, () => {
+evaluate.describe('Default Agent Knowledge Base Retrieval - AgentBuilder', { tag: '@svlSearch' }, () => {
   evaluate('text retrieval queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'onechat: default-agent-text-retrieval-queries',
+        name: 'agentBuilder: default-agent-text-retrieval-queries',
         description: 'Dataset containing Text Retrieval queries',
         examples: [
           {
@@ -206,7 +206,7 @@ evaluate.describe('Default Agent Knowledge Base Retrieval - OneChat', { tag: '@s
   evaluate('analytical queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'onechat: default-agent-analytical-queries',
+        name: 'agentBuilder: default-agent-analytical-queries',
         description: 'Dataset containing Analytical queries',
         examples: [
           {
@@ -494,7 +494,7 @@ c06a4866-f097-4eed-b7ca-28d60c9ba864, 4890`,
   evaluate('hybrid queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'onechat: default-agent-hybrid-queries',
+        name: 'agentBuilder: default-agent-hybrid-queries',
         description: 'Dataset containing Hybrid queries',
         examples: [
           {
@@ -646,7 +646,7 @@ The agent with the slowest response time of about 44 hours has assignee id: 8315
   evaluate('unanswerable queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'onechat: default-agent-unanswerable-queries',
+        name: 'agentBuilder: default-agent-unanswerable-queries',
         description: 'Dataset containing Unanswerable queries',
         examples: [
           {
@@ -803,7 +803,7 @@ To transfer your domain:
   evaluate('ambiguous queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'onechat: default-agent-ambiguous-queries',
+        name: 'agentBuilder: default-agent-ambiguous-queries',
         description: 'Dataset containing Ambiguous queries',
         examples: [
           {

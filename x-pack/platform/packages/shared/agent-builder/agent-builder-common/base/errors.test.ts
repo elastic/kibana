@@ -6,34 +6,34 @@
  */
 
 import {
-  isOnechatError,
+  isAgentBuilderError,
   createInternalError,
   createToolNotFoundError,
   isInternalError,
   isToolNotFoundError,
-  OnechatErrorCode,
-  createOnechatError,
+  AgentBuilderErrorCode,
+  createAgentBuilderError,
   isAgentNotFoundError,
   createAgentNotFoundError,
 } from './errors';
 
-describe('Onechat errors', () => {
-  describe('isOnechatError', () => {
-    it('should return true for a OnechatError instance', () => {
+describe('AgentBuilder errors', () => {
+  describe('isAgentBuilderError', () => {
+    it('should return true for a AgentBuilderError instance', () => {
       const error = createInternalError('test error');
-      expect(isOnechatError(error)).toBe(true);
+      expect(isAgentBuilderError(error)).toBe(true);
     });
 
     it('should return false for a regular Error', () => {
       const error = new Error('test error');
-      expect(isOnechatError(error)).toBe(false);
+      expect(isAgentBuilderError(error)).toBe(false);
     });
 
     it('should return false for non-error values', () => {
-      expect(isOnechatError(null)).toBe(false);
-      expect(isOnechatError(undefined)).toBe(false);
-      expect(isOnechatError('string')).toBe(false);
-      expect(isOnechatError({})).toBe(false);
+      expect(isAgentBuilderError(null)).toBe(false);
+      expect(isAgentBuilderError(undefined)).toBe(false);
+      expect(isAgentBuilderError('string')).toBe(false);
+      expect(isAgentBuilderError({})).toBe(false);
     });
   });
 
@@ -74,7 +74,7 @@ describe('Onechat errors', () => {
   describe('createInternalError', () => {
     it('should create an error with the correct code and message', () => {
       const error = createInternalError('test error');
-      expect(error.code).toBe(OnechatErrorCode.internalError);
+      expect(error.code).toBe(AgentBuilderErrorCode.internalError);
       expect(error.message).toBe('test error');
     });
 
@@ -93,7 +93,7 @@ describe('Onechat errors', () => {
   describe('createToolNotFoundError', () => {
     it('should create an error with the correct code and default message', () => {
       const error = createToolNotFoundError({ toolId: 'test-tool' });
-      expect(error.code).toBe(OnechatErrorCode.toolNotFound);
+      expect(error.code).toBe(AgentBuilderErrorCode.toolNotFound);
       expect(error.message).toBe(`Tool test-tool not found`);
       expect(error.meta).toEqual({
         toolId: 'test-tool',
@@ -114,21 +114,21 @@ describe('Onechat errors', () => {
     });
   });
 
-  describe('createOnechatError', () => {
+  describe('createAgentBuilderError', () => {
     it('should create an error with the correct code and message', () => {
-      const error = createOnechatError(OnechatErrorCode.internalError, 'test error');
-      expect(error.code).toBe(OnechatErrorCode.internalError);
+      const error = createAgentBuilderError(AgentBuilderErrorCode.internalError, 'test error');
+      expect(error.code).toBe(AgentBuilderErrorCode.internalError);
       expect(error.message).toBe('test error');
     });
 
     it('should include optional metadata', () => {
       const meta = { foo: 'bar' };
-      const error = createOnechatError(OnechatErrorCode.internalError, 'test error', meta);
+      const error = createAgentBuilderError(AgentBuilderErrorCode.internalError, 'test error', meta);
       expect(error.meta).toEqual(meta);
     });
 
     it('should use empty object as default metadata', () => {
-      const error = createOnechatError(OnechatErrorCode.internalError, 'test error');
+      const error = createAgentBuilderError(AgentBuilderErrorCode.internalError, 'test error');
       expect(error.meta).toEqual({});
     });
   });
@@ -157,7 +157,7 @@ describe('Onechat errors', () => {
       const error = createAgentNotFoundError({
         agentId: 'test-agent',
       });
-      expect(error.code).toBe(OnechatErrorCode.agentNotFound);
+      expect(error.code).toBe(AgentBuilderErrorCode.agentNotFound);
       expect(error.message).toBe(`Agent test-agent not found`);
       expect(error.meta).toEqual({
         agentId: 'test-agent',

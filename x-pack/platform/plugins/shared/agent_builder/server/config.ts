@@ -12,8 +12,8 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
-export type OnechatConfig = TypeOf<typeof configSchema>;
+export type AgentBuilderConfig = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<OnechatConfig> = {
+export const config: PluginConfigDescriptor<AgentBuilderConfig> = {
   schema: configSchema,
 };

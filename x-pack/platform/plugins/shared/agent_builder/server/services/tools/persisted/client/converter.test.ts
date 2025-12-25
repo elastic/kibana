@@ -9,7 +9,7 @@ import type { ToolCreateParams, ToolTypeUpdateParams } from '../../tool_provider
 import type { ToolDocument } from './types';
 import type { ToolProperties } from './storage';
 import { createAttributes, fromEs, updateDocument } from './converters';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 
 const creationDate = '2024-09-04T06:44:17.944Z';
 const updateDate = '2025-08-04T06:44:19.123Z';

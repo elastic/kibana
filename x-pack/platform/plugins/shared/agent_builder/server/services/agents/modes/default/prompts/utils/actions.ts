@@ -12,10 +12,10 @@ import {
   createToolResultMessage,
   createToolCallMessage,
   generateFakeToolCallId,
-} from '@kbn/onechat-genai-utils/langchain/messages';
-import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
-import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
-import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
+} from '@kbn/agent-builder-genai-utils/langchain/messages';
+import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type {
   AgentErrorAction,
   HandoverAction,
@@ -162,8 +162,8 @@ const formatErrorAction = ({ error }: AgentErrorAction): BaseMessage[] => {
 };
 
 const isExecutionError = <TCode extends AgentExecutionErrorCode>(
-  error: OnechatAgentExecutionError,
+  error: AgentBuilderAgentExecutionError,
   code: TCode
-): error is OnechatAgentExecutionError<TCode> => {
+): error is AgentBuilderAgentExecutionError<TCode> => {
   return error.meta.errCode === code;
 };

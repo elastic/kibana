@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ModelProvider } from '@kbn/onechat-server';
+import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { ModelProviderFactoryFn } from '../services/runner/model_provider';
 import type { ChangeReturnType } from './common';
 

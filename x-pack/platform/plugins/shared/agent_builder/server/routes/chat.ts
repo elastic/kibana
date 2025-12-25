@@ -13,15 +13,15 @@ import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
+import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/agent-builder-common';
 import {
-  oneChatDefaultAgentId,
+  agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
   createBadRequestError,
-} from '@kbn/onechat-common';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+} from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -43,7 +43,7 @@ export function registerChatRoutes({
 
   const conversePayloadSchema = schema.object({
     agent_id: schema.string({
-      defaultValue: oneChatDefaultAgentId,
+      defaultValue: agentBuilderDefaultAgentId,
       meta: {
         description: 'The ID of the agent to chat with. Defaults to the default Elastic AI agent.',
       },
@@ -200,7 +200,7 @@ export function registerChatRoutes({
     .post({
       path: `${publicApiPath}/converse`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Send chat message',
@@ -279,7 +279,7 @@ export function registerChatRoutes({
     .post({
       path: `${publicApiPath}/converse/async`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Send chat message (streaming)',

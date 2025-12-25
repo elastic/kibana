@@ -8,8 +8,8 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import { chatSystemIndex } from '@kbn/onechat-server';
-import type { VersionedAttachment } from '@kbn/onechat-common/attachments';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');

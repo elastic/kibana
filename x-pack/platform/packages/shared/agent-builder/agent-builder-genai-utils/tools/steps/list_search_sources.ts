@@ -7,7 +7,7 @@
 
 import { take } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { EsResourceType } from '@kbn/onechat-common';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import { isNotFoundError } from '@kbn/es-errors';
 
 export interface DataStreamSearchSource {

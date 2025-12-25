@@ -10,33 +10,33 @@ import { randomUUID } from 'crypto';
 import type { HuggingFaceDatasetSpec } from '../types';
 import { getFileContent } from '../huggingface_utils';
 
-const ONECHAT_REPO = 'elastic/OneChatAgent';
+const AGENTBUILDER_REPO = 'elastic/AgentBuilderAgent';
 
-interface OneChatIndexMapping {
+interface AgentBuilderIndexMapping {
   name: string;
   mappings: any;
 }
 
 // Cache mappings per directory to support multiple categories
-const cachedMappings: Map<string, Map<string, OneChatIndexMapping>> = new Map();
+const cachedMappings: Map<string, Map<string, AgentBuilderIndexMapping>> = new Map();
 
 /**
- * Fetches and caches the index mappings from the OneChat repository for a specific directory
+ * Fetches and caches the index mappings from the AgentBuilder repository for a specific directory
  */
-export async function getOneChatIndexMappings(
+export async function getAgentBuilderIndexMappings(
   directory: string,
   accessToken: string,
   logger: Logger
-): Promise<Map<string, OneChatIndexMapping>> {
+): Promise<Map<string, AgentBuilderIndexMapping>> {
   if (cachedMappings.has(directory)) {
     return cachedMappings.get(directory)!;
   }
 
-  logger.debug(`Fetching OneChat index mappings for directory: ${directory}`);
+  logger.debug(`Fetching AgentBuilder index mappings for directory: ${directory}`);
 
-  const onechatMappingsFileContent = await getFileContent(
+  const agentBuilderMappingsFileContent = await getFileContent(
     {
-      repo: ONECHAT_REPO,
+      repo: AGENTBUILDER_REPO,
       path: `${directory}/index-mappings.jsonl`,
       revision: 'main',
       accessToken,
@@ -44,13 +44,13 @@ export async function getOneChatIndexMappings(
     logger
   );
 
-  const mappings = new Map<string, OneChatIndexMapping>();
+  const mappings = new Map<string, AgentBuilderIndexMapping>();
 
-  const lines = onechatMappingsFileContent.split('\n');
+  const lines = agentBuilderMappingsFileContent.split('\n');
   for (const line of lines) {
     if (!line.trim()) continue;
     try {
-      const mapping: OneChatIndexMapping = JSON.parse(line);
+      const mapping: AgentBuilderIndexMapping = JSON.parse(line);
       mappings.set(mapping.name, mapping);
     } catch (error) {
       logger.warn(`Failed to parse mapping line: ${line}`, error);
@@ -59,24 +59,24 @@ export async function getOneChatIndexMappings(
 
   cachedMappings.set(directory, mappings);
 
-  logger.debug(`Loaded ${mappings.size} OneChat index mappings for directory: ${directory}`);
+  logger.debug(`Loaded ${mappings.size} AgentBuilder index mappings for directory: ${directory}`);
   return mappings;
 }
 
 /**
- * Parses OneChat dataset name to extract directory and dataset name
- * Format: onechat/<directory>/<dataset> -> { directory: "directory", dataset: "dataset" }
+ * Parses AgentBuilder dataset name to extract directory and dataset name
+ * Format: agent_builder/<directory>/<dataset> -> { directory: "directory", dataset: "dataset" }
  */
-function parseOneChatDatasetName(datasetName: string): { directory: string; dataset: string } {
-  // Remove "onechat/" prefix
-  const withoutPrefix = datasetName.startsWith('onechat/')
-    ? datasetName.slice('onechat/'.length)
+function parseAgentBuilderDatasetName(datasetName: string): { directory: string; dataset: string } {
+  // Remove "agent_builder/" prefix
+  const withoutPrefix = datasetName.startsWith('agent_builder/')
+    ? datasetName.slice('agent_builder/'.length)
     : datasetName;
 
   const parts = withoutPrefix.split('/');
   if (parts.length !== 2) {
     throw new Error(
-      `Invalid OneChat dataset format: '${datasetName}'. Expected format: onechat/<directory>/<dataset>, got ${datasetName}.`
+      `Invalid AgentBuilder dataset format: '${datasetName}'. Expected format: agent_builder/<directory>/<dataset>, got ${datasetName}.`
     );
   }
 
@@ -87,29 +87,29 @@ function parseOneChatDatasetName(datasetName: string): { directory: string; data
 }
 
 /**
- * Creates a HuggingFaceDatasetSpec for a OneChat dataset
+ * Creates a HuggingFaceDatasetSpec for a AgentBuilder dataset
  */
-export async function createOneChatDatasetSpec(
+export async function createAgentBuilderDatasetSpec(
   datasetName: string,
   accessToken: string,
   logger: Logger
 ): Promise<HuggingFaceDatasetSpec> {
-  const { directory, dataset } = parseOneChatDatasetName(datasetName);
+  const { directory, dataset } = parseAgentBuilderDatasetName(datasetName);
 
-  const mappings = await getOneChatIndexMappings(directory, accessToken, logger);
+  const mappings = await getAgentBuilderIndexMappings(directory, accessToken, logger);
   const mapping = mappings.get(dataset);
 
   if (!mapping) {
     const availableDatasets = Array.from(mappings.keys()).join(', ');
     throw new Error(
-      `OneChat dataset '${dataset}' not found in directory '${directory}'. Available datasets: ${availableDatasets}`
+      `AgentBuilder dataset '${dataset}' not found in directory '${directory}'. Available datasets: ${availableDatasets}`
     );
   }
 
-  logger.debug(`Creating dataset spec for OneChat dataset: ${datasetName}`);
+  logger.debug(`Creating dataset spec for AgentBuilder dataset: ${datasetName}`);
   return {
     name: datasetName,
-    repo: ONECHAT_REPO,
+    repo: AGENTBUILDER_REPO,
     file: `${directory}/datasets/${dataset}.csv`,
     revision: 'main',
     index: dataset,
@@ -124,34 +124,34 @@ export async function createOneChatDatasetSpec(
 }
 
 /**
- * Checks if a dataset name refers to a OneChat dataset
- * Expected format: onechat/<directory>/<dataset>
+ * Checks if a dataset name refers to a AgentBuilder dataset
+ * Expected format: agent_builder/<directory>/<dataset>
  */
-export function isOneChatDataset(datasetName: string): boolean {
-  return datasetName.startsWith('onechat/') && datasetName.split('/').length === 3;
+export function isAgentBuilderDataset(datasetName: string): boolean {
+  return datasetName.startsWith('agent_builder/') && datasetName.split('/').length === 3;
 }
 
-export function isOneChatWildcard(datasetName: string): boolean {
-  return isOneChatDataset(datasetName) && datasetName.endsWith('/*');
+export function isAgentBuilderWildcard(datasetName: string): boolean {
+  return isAgentBuilderDataset(datasetName) && datasetName.endsWith('/*');
 }
 
 /**
- * Lists all available OneChat datasets for a specific directory
+ * Lists all available AgentBuilder datasets for a specific directory
  */
-export async function listOneChatDatasets(
+export async function listAgentBuilderDatasets(
   directory: string,
   accessToken: string,
   logger: Logger
 ): Promise<string[]> {
-  const mappings = await getOneChatIndexMappings(directory, accessToken, logger);
-  return Array.from(mappings.keys()).map((name) => `onechat/${directory}/${name}`);
+  const mappings = await getAgentBuilderIndexMappings(directory, accessToken, logger);
+  return Array.from(mappings.keys()).map((name) => `agent_builder/${directory}/${name}`);
 }
 
 /**
- * Lists all available OneChat datasets across common directories
+ * Lists all available AgentBuilder datasets across common directories
  * This is a convenience function that tries common directory names
  */
-export async function listAllOneChatDatasets(
+export async function listAllAgentBuilderDatasets(
   accessToken: string,
   logger: Logger
 ): Promise<string[]> {
@@ -160,7 +160,7 @@ export async function listAllOneChatDatasets(
 
   for (const directory of commonDirectories) {
     try {
-      const datasets = await listOneChatDatasets(directory, accessToken, logger);
+      const datasets = await listAgentBuilderDatasets(directory, accessToken, logger);
       allDatasets.push(...datasets);
     } catch (error) {
       logger.debug(`Could not fetch datasets from directory '${directory}': ${error}`);

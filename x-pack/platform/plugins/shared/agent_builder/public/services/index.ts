@@ -12,4 +12,4 @@ export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { NavigationService } from './navigation';
 export { ToolsService } from './tools';
-export type { OnechatInternalService } from './types';
+export type { AgentBuilderInternalService } from './types';

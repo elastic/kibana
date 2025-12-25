@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import React, { useCallback } from 'react';
 import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
@@ -76,7 +76,7 @@ export const ToolsTableHeader = ({
         >
           <EuiText size="xs">
             <FormattedMessage
-              id="xpack.onechat.tools.toolsTableSummary"
+              id="xpack.agentBuilder.tools.toolsTableSummary"
               defaultMessage="Showing {start}-{end} of {total} {tools}"
               values={{
                 start: <strong>{Math.min(pageIndex * 10 + 1, tools.length)}</strong>,

@@ -13,10 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { useToasts } from '../../../../hooks/use_toasts';
 
 const labels = {
-  copy: i18n.translate('xpack.onechat.roundResponseActions.copy', {
+  copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
     defaultMessage: 'Copy response',
   }),
-  copySuccess: i18n.translate('xpack.onechat.roundResponseActions.copySuccess', {
+  copySuccess: i18n.translate('xpack.agentBuilder.roundResponseActions.copySuccess', {
     defaultMessage: 'Response copied to clipboard',
   }),
 };

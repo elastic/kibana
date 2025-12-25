@@ -9,31 +9,31 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
-  ONECHAT_APP_ID,
-  ONECHAT_FEATURE_ID,
-  ONECHAT_FEATURE_NAME,
+  AGENTBUILDER_APP_ID,
+  AGENTBUILDER_FEATURE_ID,
+  AGENTBUILDER_FEATURE_NAME,
   uiPrivileges,
   apiPrivileges,
 } from '../common/features';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
-    id: ONECHAT_FEATURE_ID,
-    name: ONECHAT_FEATURE_NAME,
+    id: AGENTBUILDER_FEATURE_ID,
+    name: AGENTBUILDER_FEATURE_NAME,
     minimumLicense: 'enterprise',
     order: 1000,
     category: DEFAULT_APP_CATEGORIES.kibana,
-    app: ['kibana', ONECHAT_APP_ID],
-    catalogue: [ONECHAT_FEATURE_ID],
+    app: ['kibana', AGENTBUILDER_APP_ID],
+    catalogue: [AGENTBUILDER_FEATURE_ID],
     privileges: {
       all: {
-        app: ['kibana', ONECHAT_APP_ID],
+        app: ['kibana', AGENTBUILDER_APP_ID],
         api: [
-          apiPrivileges.readOnechat,
-          apiPrivileges.manageOnechat,
+          apiPrivileges.readAgentBuilder,
+          apiPrivileges.manageAgentBuilder,
           ApiPrivileges.manage('llm_product_doc'),
         ],
-        catalogue: [ONECHAT_FEATURE_ID],
+        catalogue: [AGENTBUILDER_FEATURE_ID],
         savedObject: {
           all: [],
           read: [],
@@ -46,9 +46,9 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ],
       },
       read: {
-        app: ['kibana', ONECHAT_APP_ID],
-        api: [apiPrivileges.readOnechat],
-        catalogue: [ONECHAT_FEATURE_ID],
+        app: ['kibana', AGENTBUILDER_APP_ID],
+        api: [apiPrivileges.readAgentBuilder],
+        catalogue: [AGENTBUILDER_FEATURE_ID],
         savedObject: {
           all: [],
           read: [],

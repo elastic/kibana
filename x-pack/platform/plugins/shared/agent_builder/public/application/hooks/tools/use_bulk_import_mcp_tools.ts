@@ -7,7 +7,7 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { BulkCreateMcpToolsResponse } from '../../../../common/http_api/tools';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
 export interface BulkImportMcpToolsOptions {
@@ -19,7 +19,7 @@ export interface BulkImportMcpToolsOptions {
 }
 
 export const useBulkImportMcpTools = () => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
 
   return useMutation({

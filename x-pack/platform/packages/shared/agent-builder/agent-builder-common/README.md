@@ -1,6 +1,6 @@
-# @kbn/onechat-common
+# @kbn/agent-builder-common
 
-Common (server+browser) types and utilities for the onechat framework.
+Common (server+browser) types and utilities for the agentBuilder framework.
 
 ## Tool identifier utilities
 
@@ -16,8 +16,8 @@ convert tool identifiers
 
 ## Error utilities
 
-The package exposes type guards for all onechat error types
+The package exposes type guards for all agentBuilder error types
 
-- `isOnechatError`
+- `isAgentBuilderError`
 - `isToolNotFoundError`
 - `isInternalError`

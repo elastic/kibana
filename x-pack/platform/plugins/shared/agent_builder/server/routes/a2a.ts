@@ -37,7 +37,7 @@ export function registerA2ARoutes({
     .get({
       path: `${A2A_SERVER_PATH}/{agentId}.json`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Get A2A agent card',
@@ -78,7 +78,7 @@ export function registerA2ARoutes({
     .post({
       path: `${A2A_SERVER_PATH}/{agentId}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Send A2A task',

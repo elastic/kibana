@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
+import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
 import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
@@ -30,7 +30,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   <EuiFlexGroup
     direction="column"
     gutterSize="m"
-    aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
+    aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
       defaultMessage: 'Assistant response',
     })}
     data-test-subj="agentBuilderRoundResponse"

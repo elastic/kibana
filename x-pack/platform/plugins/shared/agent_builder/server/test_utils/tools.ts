@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
   ExecutableTool,
@@ -14,7 +14,7 @@ import type {
   ToolHandlerFn,
   ToolProvider,
   InternalToolDefinition,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 import type { ToolsServiceStart } from '../services/tools/types';
 import type { ToolRegistry } from '../services/tools/tool_registry';
 

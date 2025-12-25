@@ -10,8 +10,8 @@ import type {
   ConversationUpdatedEvent,
   Conversation,
   ConversationIdSetEvent,
-} from '@kbn/onechat-common';
-import { ChatEventType } from '@kbn/onechat-common';
+} from '@kbn/agent-builder-common';
+import { ChatEventType } from '@kbn/agent-builder-common';
 
 export const createConversationCreatedEvent = (
   conversation: Conversation

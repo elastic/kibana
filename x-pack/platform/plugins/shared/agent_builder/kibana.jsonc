@@ -1,16 +1,16 @@
 {
   "type": "plugin",
-  "id": "@kbn/onechat-plugin",
+  "id": "@kbn/agent-builder-plugin",
   "owner": "@elastic/workchat-eng",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "onechat",
+    "id": "agentBuilder",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
-      "onechat"
+      "agentBuilder"
     ],
     "requiredPlugins": [
       "actions",

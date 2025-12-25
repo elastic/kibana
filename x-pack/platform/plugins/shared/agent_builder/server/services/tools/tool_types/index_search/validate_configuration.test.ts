@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EsResourceType } from '@kbn/onechat-common';
+import { EsResourceType } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { IndexSearchToolConfig } from '@kbn/onechat-common/tools';
+import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
 import { validateConfig } from './validate_configuration';
-import { listSearchSources as _listSearchSources } from '@kbn/onechat-genai-utils';
+import { listSearchSources as _listSearchSources } from '@kbn/agent-builder-genai-utils';
 
-jest.mock('@kbn/onechat-genai-utils');
+jest.mock('@kbn/agent-builder-genai-utils');
 
 const listSearchSourcesMock = _listSearchSources as jest.MockedFunction<typeof _listSearchSources>;
 

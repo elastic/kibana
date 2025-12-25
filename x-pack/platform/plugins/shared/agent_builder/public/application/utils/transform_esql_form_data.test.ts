@@ -6,8 +6,8 @@
  */
 
 import { omit } from 'lodash';
-import type { EsqlToolDefinition } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
+import type { EsqlToolDefinition } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { CreateToolPayload } from '../../../common/http_api/tools';
 import {
   transformEsqlFormDataForCreate,

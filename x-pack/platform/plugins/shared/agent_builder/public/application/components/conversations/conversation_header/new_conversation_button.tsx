@@ -19,7 +19,7 @@ interface NewConversationButtonProps {
 }
 
 export const NewConversationButton: React.FC<NewConversationButtonProps> = ({ onClose }) => {
-  const { createOnechatUrl } = useNavigation();
+  const { createAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
@@ -39,14 +39,14 @@ export const NewConversationButton: React.FC<NewConversationButtonProps> = ({ on
   const buttonProps = isEmbeddedContext
     ? {}
     : {
-        href: createOnechatUrl(appPaths.chat.new),
+        href: createAgentBuilderUrl(appPaths.chat.new),
       };
 
   const labels = {
-    ariaLabel: i18n.translate('xpack.onechat.newConversationButton.ariaLabel', {
+    ariaLabel: i18n.translate('xpack.agentBuilder.newConversationButton.ariaLabel', {
       defaultMessage: 'Create new conversation',
     }),
-    display: i18n.translate('xpack.onechat.newConversationButton.display', {
+    display: i18n.translate('xpack.agentBuilder.newConversationButton.display', {
       defaultMessage: 'New',
     }),
   };

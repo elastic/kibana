@@ -6,9 +6,9 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { AgentCapabilities, ChatEvent, ConverseInput } from '@kbn/onechat-common';
+import type { AgentCapabilities, ChatEvent, ConverseInput } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 
 export interface ChatService {
   converse(params: ChatConverseParams): Observable<ChatEvent>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnechatEvent } from '@kbn/onechat-common';
+import type { AgentBuilderEvent } from '@kbn/agent-builder-common';
 import type { StateType } from './state';
 
 export enum AgentExecutionEventType {
@@ -16,9 +16,9 @@ export interface FinalStateEventData {
   state: StateType;
 }
 
-export type FinalStateEvent = OnechatEvent<AgentExecutionEventType.finalState, FinalStateEventData>;
+export type FinalStateEvent = AgentBuilderEvent<AgentExecutionEventType.finalState, FinalStateEventData>;
 
-export const isFinalStateEvent = (event: OnechatEvent<any, any>): event is FinalStateEvent => {
+export const isFinalStateEvent = (event: AgentBuilderEvent<any, any>): event is FinalStateEvent => {
   return event.type === AgentExecutionEventType.finalState;
 };
 
@@ -31,6 +31,6 @@ export const createFinalStateEvent = (state: StateType): FinalStateEvent => {
 
 export type InternalEvent = FinalStateEvent;
 
-export const isInternalEvent = (event: OnechatEvent<any, any>): event is InternalEvent => {
+export const isInternalEvent = (event: AgentBuilderEvent<any, any>): event is InternalEvent => {
   return Object.values(AgentExecutionEventType).includes(event.type);
 };

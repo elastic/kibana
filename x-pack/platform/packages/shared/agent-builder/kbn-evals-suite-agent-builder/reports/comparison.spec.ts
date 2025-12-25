@@ -10,7 +10,7 @@ import { table } from 'table';
 import chalk from 'chalk';
 
 evaluate.describe(
-  'OneChat Evaluation Results and Historical Analysis',
+  'AgentBuilder Evaluation Results and Historical Analysis',
   { tag: '@svlSearch' },
   () => {
     // Run-to-Run Comparison
@@ -66,7 +66,7 @@ evaluate.describe(
           }, {} as Record<string, typeof comparison>);
 
           for (const [dataset, comps] of Object.entries(comparisonsByDataset)) {
-            const datasetDisplayName = dataset.replace('onechat: default-agent-', '');
+            const datasetDisplayName = dataset.replace('agentBuilder: default-agent-', '');
 
             log.info(`\n${chalk.bold.cyan(`📈 ${datasetDisplayName} Performance Comparison:`)}`);
 

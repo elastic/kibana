@@ -8,17 +8,17 @@
 import type { MonoTypeOperatorFunction } from 'rxjs';
 import { catchError, throwError } from 'rxjs';
 import { isSSEError } from '@kbn/sse-utils';
-import type { OnechatErrorCode } from '@kbn/onechat-common';
-import { createOnechatError } from '@kbn/onechat-common';
+import type { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import { createAgentBuilderError } from '@kbn/agent-builder-common';
 
 /**
- * Convert SSE errors to Onechat errors and rethrow them.
+ * Convert SSE errors to AgentBuilder errors and rethrow them.
  */
-export function unwrapOnechatErrors<T>(): MonoTypeOperatorFunction<T> {
+export function unwrapAgentBuilderErrors<T>(): MonoTypeOperatorFunction<T> {
   return catchError((err) => {
     if (isSSEError(err)) {
       return throwError(() =>
-        createOnechatError(err.code as OnechatErrorCode, err.message, err.meta)
+        createAgentBuilderError(err.code as AgentBuilderErrorCode, err.message, err.meta)
       );
     }
     return throwError(() => err);

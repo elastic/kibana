@@ -11,9 +11,9 @@ import type {
   ConversationRound,
   ConverseInput,
   AgentConfiguration,
-} from '@kbn/onechat-common';
-import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
-import type { AgentHandlerContext } from '@kbn/onechat-server';
+} from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { runDefaultAgentMode } from './default';
 
 export interface RunAgentParams {

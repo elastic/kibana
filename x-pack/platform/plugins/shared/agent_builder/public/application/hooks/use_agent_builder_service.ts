@@ -6,13 +6,13 @@
  */
 
 import { useContext } from 'react';
-import { OnechatServicesContext } from '../context/onechat_services_context';
+import { AgentBuilderServicesContext } from '../context/agent_builder_services_context';
 
-export const useOnechatServices = () => {
-  const services = useContext(OnechatServicesContext);
+export const useAgentBuilderServices = () => {
+  const services = useContext(AgentBuilderServicesContext);
   if (services === undefined) {
     throw new Error(
-      `OnechatServicesContext not set. Did you wrap your component in <OnechatServicesContext.Provider> ?`
+      `AgentBuilderServicesContext not set. Did you wrap your component in <AgentBuilderServicesContext.Provider> ?`
     );
   }
   return services;

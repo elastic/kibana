@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { chatSystemIndex } from '@kbn/onechat-server';
+import { chatSystemIndex } from '@kbn/agent-builder-server';
 
 export const isIndexNotFoundError = (error: unknown): boolean => {
   if (!error || typeof error !== 'object') {
@@ -67,7 +67,7 @@ export class QueryUtils {
 
   /**
    * Get all usage counters for a specific domain
-   * @param domainId - Domain identifier (e.g., 'onechat')
+   * @param domainId - Domain identifier (e.g., 'agentBuilder')
    * @returns Array of usage counter data
    */
   async getCountersByDomain(domainId: string): Promise<UsageCounterData[]> {
@@ -654,7 +654,7 @@ export class QueryUtils {
    */
   calculatePercentilesFromBuckets(
     buckets: Map<string, number>,
-    domainPrefix: string = 'onechat'
+    domainPrefix: string = 'agentBuilder'
   ): {
     p50: number;
     p75: number;

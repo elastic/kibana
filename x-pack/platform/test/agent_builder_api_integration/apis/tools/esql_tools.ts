@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/agent_builder/tools/_execute', () => {
-      const testIndex = 'test-onechat-index';
+      const testIndex = 'test-agent-builder-index';
 
       before(async () => {
         await es.indices.create({

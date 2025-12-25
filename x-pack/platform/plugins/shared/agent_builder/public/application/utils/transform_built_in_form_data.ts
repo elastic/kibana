@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolFormData } from '../components/tools/form/types/tool_form_types';
 
 /**

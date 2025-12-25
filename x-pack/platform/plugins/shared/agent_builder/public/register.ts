@@ -10,26 +10,26 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { agentBuilderPublicEbtEvents } from '@kbn/onechat-common/telemetry';
+import { agentBuilderPublicEbtEvents } from '@kbn/agent-builder-common/telemetry';
 import {
   AGENT_BUILDER_FULL_TITLE,
   AGENT_BUILDER_SHORT_TITLE,
-  ONECHAT_APP_ID,
-  ONECHAT_PATH,
+  AGENTBUILDER_APP_ID,
+  AGENTBUILDER_PATH,
 } from '../common/features';
-import type { OnechatInternalService } from './services';
-import type { OnechatStartDependencies } from './types';
+import type { AgentBuilderInternalService } from './services';
+import type { AgentBuilderStartDependencies } from './types';
 
 export const registerApp = ({
   core,
   getServices,
 }: {
-  core: CoreSetup<OnechatStartDependencies>;
-  getServices: () => OnechatInternalService;
+  core: CoreSetup<AgentBuilderStartDependencies>;
+  getServices: () => AgentBuilderInternalService;
 }) => {
   core.application.register({
-    id: ONECHAT_APP_ID,
-    appRoute: ONECHAT_PATH,
+    id: AGENTBUILDER_APP_ID,
+    appRoute: AGENTBUILDER_PATH,
     category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     title: AGENT_BUILDER_SHORT_TITLE,
     euiIconType: 'logoElasticsearch',
@@ -38,19 +38,19 @@ export const registerApp = ({
       {
         id: 'conversations',
         path: '/conversations',
-        title: i18n.translate('xpack.onechat.chat.conversationsTitle', {
+        title: i18n.translate('xpack.agentBuilder.chat.conversationsTitle', {
           defaultMessage: 'Agent Chat',
         }),
       },
       {
         id: 'tools',
         path: '/tools',
-        title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
+        title: i18n.translate('xpack.agentBuilder.tools.title', { defaultMessage: 'Tools' }),
       },
       {
         id: 'agents',
         path: '/agents',
-        title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
+        title: i18n.translate('xpack.agentBuilder.agents.title', { defaultMessage: 'Agents' }),
       },
     ],
     async mount({ element, history, onAppLeave }: AppMountParameters) {

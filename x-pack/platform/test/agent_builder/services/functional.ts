@@ -8,18 +8,18 @@
 import type { GenericFtrProviderContext } from '@kbn/test';
 import type { pageObjects } from '../../functional/page_objects';
 import { services as deploymentAgnosticFunctionalServices } from '../../serverless/functional/services/deployment_agnostic_services';
-import { oneChatCommonServices } from './common';
+import { agentBuilderCommonServices } from './common';
 
 /**
- * Onechat UI-only services.
- * Composes common services and functional/UI-specific services needed by onechat functional tests.
+ * AgentBuilder UI-only services.
+ * Composes common services and functional/UI-specific services needed by agentBuilder functional tests.
  */
-export const oneChatFunctionalServices = {
-  ...oneChatCommonServices,
+export const agentBuilderFunctionalServices = {
+  ...agentBuilderCommonServices,
   ...deploymentAgnosticFunctionalServices,
 };
 
-export type OneChatUiFtrProviderContext = GenericFtrProviderContext<
-  typeof oneChatFunctionalServices,
+export type AgentBuilderUiFtrProviderContext = GenericFtrProviderContext<
+  typeof agentBuilderFunctionalServices,
   typeof pageObjects
 >;

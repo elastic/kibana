@@ -8,14 +8,14 @@
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { createOnechatError, OnechatErrorCode } from '@kbn/onechat-common';
-import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
+import { createAgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { TrackingService, ToolCallSource } from './tracking_service';
-import { ONECHAT_USAGE_DOMAIN } from './usage_counters';
+import { AGENTBUILDER_USAGE_DOMAIN } from './usage_counters';
 
 // Helper to create mock agentExecutionError since createAgentExecutionError isn't exported
 const createMockAgentExecutionError = (errCode: AgentExecutionErrorCode) => {
-  return createOnechatError(OnechatErrorCode.agentExecutionError, 'Execution error', {
+  return createAgentBuilderError(AgentBuilderErrorCode.agentExecutionError, 'Execution error', {
     errCode,
   });
 };
@@ -52,7 +52,7 @@ describe('TrackingService', () => {
       trackingService.trackToolCall('tool-1', ToolCallSource.DEFAULT_AGENT);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_default_agent`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_default_agent`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -62,7 +62,7 @@ describe('TrackingService', () => {
       trackingService.trackToolCall('tool-2', ToolCallSource.CUSTOM_AGENT);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_custom_agent`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_custom_agent`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -72,7 +72,7 @@ describe('TrackingService', () => {
       trackingService.trackToolCall('tool-3', ToolCallSource.MCP);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_mcp`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_mcp`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -82,7 +82,7 @@ describe('TrackingService', () => {
       trackingService.trackToolCall('tool-4', ToolCallSource.API);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_api`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_api`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -92,7 +92,7 @@ describe('TrackingService', () => {
       trackingService.trackToolCall('tool-5', ToolCallSource.A2A);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_tool_call_a2a`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_tool_call_a2a`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -121,7 +121,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 1);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_1-5`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_1-5`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -131,7 +131,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 5);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_1-5`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_1-5`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -141,7 +141,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 6);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_6-10`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_6-10`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -151,7 +151,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 10);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_6-10`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_6-10`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -161,7 +161,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 11);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_11-20`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_11-20`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -171,7 +171,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 20);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_11-20`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_11-20`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -181,7 +181,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 21);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_21-50`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_21-50`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -191,7 +191,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 50);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_21-50`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_21-50`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -201,7 +201,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 51);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_51+`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_51+`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -211,7 +211,7 @@ describe('TrackingService', () => {
       trackingService.trackConversationRound('conv-1', 100);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_rounds_51+`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_rounds_51+`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -269,7 +269,7 @@ describe('TrackingService', () => {
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_<1s`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_<1s`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -288,7 +288,7 @@ describe('TrackingService', () => {
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_1-5s`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_1-5s`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -307,7 +307,7 @@ describe('TrackingService', () => {
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_5-10s`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_5-10s`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -326,7 +326,7 @@ describe('TrackingService', () => {
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_10-30s`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_10-30s`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -345,7 +345,7 @@ describe('TrackingService', () => {
       trackingService.trackQueryEnd(requestId!);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_query_to_result_time_30s+`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_30s+`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -420,12 +420,12 @@ describe('TrackingService', () => {
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_llm_provider_openai`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_openai`,
         counterType: 'count',
         incrementBy: 1,
       });
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_llm_model_gpt-4`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_gpt-4`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -435,7 +435,7 @@ describe('TrackingService', () => {
       trackingService.trackLLMUsage(undefined, 'gpt-4');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_llm_provider_unknown`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_unknown`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -445,7 +445,7 @@ describe('TrackingService', () => {
       trackingService.trackLLMUsage('openai', undefined);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_llm_model_unknown`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_unknown`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -455,12 +455,12 @@ describe('TrackingService', () => {
       trackingService.trackLLMUsage('OpenAI@Cloud', 'GPT-4-Turbo!');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_llm_provider_openai_cloud`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_provider_openai_cloud`,
         counterType: 'count',
         incrementBy: 1,
       });
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_llm_model_gpt-4-turbo`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_llm_model_gpt-4-turbo`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -489,18 +489,18 @@ describe('TrackingService', () => {
       trackingService.trackError(error);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_total`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_total`,
         counterType: 'count',
         incrementBy: 1,
       });
     });
 
-    it('increments error by type counter for OnechatError', () => {
-      const error = createOnechatError(OnechatErrorCode.badRequest, 'Bad request');
+    it('increments error by type counter for AgentBuilderError', () => {
+      const error = createAgentBuilderError(AgentBuilderErrorCode.badRequest, 'Bad request');
       trackingService.trackError(error);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_badrequest`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_badrequest`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -511,7 +511,7 @@ describe('TrackingService', () => {
       trackingService.trackError(error);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_other`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_other`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -523,7 +523,7 @@ describe('TrackingService', () => {
 
       // Note: the prefix agentExecutionError is not lowercased, only the error code part
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_agentExecutionError_context_length_exceeded`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_agentExecutionError_context_length_exceeded`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -537,7 +537,7 @@ describe('TrackingService', () => {
       trackingService.trackError(error, 'conv-1');
 
       const conversationsWithErrorsCalls = mockUsageCounter.incrementCounter.mock.calls.filter(
-        (call) => call[0].counterName === `${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`
+        (call) => call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
       );
 
       expect(conversationsWithErrorsCalls).toHaveLength(1);
@@ -551,7 +551,7 @@ describe('TrackingService', () => {
       trackingService.trackError(error, 'conv-3');
 
       const conversationsWithErrorsCalls = mockUsageCounter.incrementCounter.mock.calls.filter(
-        (call) => call[0].counterName === `${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`
+        (call) => call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
       );
 
       expect(conversationsWithErrorsCalls).toHaveLength(3);
@@ -563,7 +563,7 @@ describe('TrackingService', () => {
       trackingService.trackError(error);
 
       const conversationsWithErrorsCalls = mockUsageCounter.incrementCounter.mock.calls.filter(
-        (call) => call[0].counterName === `${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`
+        (call) => call[0].counterName === `${AGENTBUILDER_USAGE_DOMAIN}_error_conversations_with_errors`
       );
 
       expect(conversationsWithErrorsCalls).toHaveLength(0);
@@ -583,12 +583,12 @@ describe('TrackingService', () => {
       trackingService.trackError(null);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_total`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_total`,
         counterType: 'count',
         incrementBy: 1,
       });
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_other`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_other`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -598,12 +598,12 @@ describe('TrackingService', () => {
       trackingService.trackError(undefined);
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_total`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_total`,
         counterType: 'count',
         incrementBy: 1,
       });
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_other`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_other`,
         counterType: 'count',
         incrementBy: 1,
       });
@@ -613,12 +613,12 @@ describe('TrackingService', () => {
       trackingService.trackError('string error');
 
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_total`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_total`,
         counterType: 'count',
         incrementBy: 1,
       });
       expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_other`,
+        counterName: `${AGENTBUILDER_USAGE_DOMAIN}_error_by_type_other`,
         counterType: 'count',
         incrementBy: 1,
       });

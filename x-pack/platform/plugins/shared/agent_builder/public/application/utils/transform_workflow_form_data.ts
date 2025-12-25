@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { WorkflowToolDefinition } from '@kbn/onechat-common/tools';
-import { ToolType } from '@kbn/onechat-common';
+import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools';
+import { ToolType } from '@kbn/agent-builder-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import type { WorkflowToolFormData } from '../components/tools/form/types/tool_form_types';

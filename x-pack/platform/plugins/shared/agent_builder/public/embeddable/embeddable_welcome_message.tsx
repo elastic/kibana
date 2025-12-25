@@ -50,7 +50,7 @@ export const EmbeddableWelcomeMessage = () => {
   const documentationLink = (
     <EuiLink href={docLinks.agentBuilder} target="_blank" external>
       <FormattedMessage
-        id="xpack.onechat.welcomeMessage.documentationLink"
+        id="xpack.agentBuilder.welcomeMessage.documentationLink"
         defaultMessage="documentation"
       />
     </EuiLink>
@@ -63,7 +63,7 @@ export const EmbeddableWelcomeMessage = () => {
       external
     >
       <FormattedMessage
-        id="xpack.onechat.welcomeMessage.genAiSettingsLink"
+        id="xpack.agentBuilder.welcomeMessage.genAiSettingsLink"
         defaultMessage="GenAI Settings"
       />
     </EuiLink>
@@ -81,7 +81,7 @@ export const EmbeddableWelcomeMessage = () => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.onechat.welcomeMessage.title"
+            id="xpack.agentBuilder.welcomeMessage.title"
             defaultMessage="Welcome to our new agentic experience"
           />
         }
@@ -90,7 +90,7 @@ export const EmbeddableWelcomeMessage = () => {
       >
         {hasAccessToGenAiSettings ? (
           <FormattedMessage
-            id="xpack.onechat.welcomeMessage.contentAdvanced"
+            id="xpack.agentBuilder.welcomeMessage.contentAdvanced"
             defaultMessage="Based on the new <strong>Agent Builder</strong> platform, <strong>AI Agent</strong> is the new agentic chat experience for this space. Learn more in our {documentationLink} or switch back to the default experience in the {genAiSettingsLink}."
             values={{
               strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
@@ -100,7 +100,7 @@ export const EmbeddableWelcomeMessage = () => {
           />
         ) : (
           <FormattedMessage
-            id="xpack.onechat.welcomeMessage.content"
+            id="xpack.agentBuilder.welcomeMessage.content"
             defaultMessage="Based on the new <strong>Agent Builder</strong> platform, <strong>AI Agent</strong> is the new agentic chat experience for this space. Learn more in our {documentationLink}."
             values={{
               strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,

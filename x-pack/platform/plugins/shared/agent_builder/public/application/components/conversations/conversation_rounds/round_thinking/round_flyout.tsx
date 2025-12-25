@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { ConversationRound } from '@kbn/onechat-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 
 const rawResponseFlyoutTitle = i18n.translate(
-  'xpack.onechat.conversation.rawResponseFlyout.title',
+  'xpack.agentBuilder.conversation.rawResponseFlyout.title',
   {
     defaultMessage: 'Raw Response',
   }

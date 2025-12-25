@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentCapabilities, ResolvedAgentCapabilities } from '@kbn/onechat-common';
+import type { AgentCapabilities, ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 
 export const getDefaultCapabilities = (): ResolvedAgentCapabilities => {
   return {

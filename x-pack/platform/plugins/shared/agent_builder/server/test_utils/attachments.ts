@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import type { AttachmentFormatContext } from '@kbn/onechat-server/attachments';
+import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 
 type AttachmentFormatContextMock = AttachmentFormatContext;
 

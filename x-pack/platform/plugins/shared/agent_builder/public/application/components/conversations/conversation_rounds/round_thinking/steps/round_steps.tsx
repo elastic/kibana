@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
-import { isReasoningStep, isToolCallStep } from '@kbn/onechat-common/chat/conversation';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
+import { isReasoningStep, isToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -22,16 +22,16 @@ import { ToolResultDisplay } from './tool_result_display';
 import { FlyoutResultItem } from './flyout_result_item';
 
 const labels = {
-  roundThinkingSteps: i18n.translate('xpack.onechat.conversation.thinking.stepsList', {
+  roundThinkingSteps: i18n.translate('xpack.agentBuilder.conversation.thinking.stepsList', {
     defaultMessage: 'Round thinking steps',
   }),
-  agentReasoning: i18n.translate('xpack.onechat.thinking.agentReasoningLabel', {
+  agentReasoning: i18n.translate('xpack.agentBuilder.thinking.agentReasoningLabel', {
     defaultMessage: 'Agent reasoning',
   }),
-  flyoutTitle: i18n.translate('xpack.onechat.thinking.flyoutTitle', {
+  flyoutTitle: i18n.translate('xpack.agentBuilder.thinking.flyoutTitle', {
     defaultMessage: 'Tool response details',
   }),
-  loading: i18n.translate('xpack.onechat.conversation.thinking.loading', {
+  loading: i18n.translate('xpack.agentBuilder.conversation.thinking.loading', {
     defaultMessage: 'Loading...',
   }),
 };

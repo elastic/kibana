@@ -15,13 +15,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useOnechatServices } from '../application/hooks/use_onechat_service';
+import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../application/hooks/use_ui_privileges';
 import { UpgradeLicensePrompt } from '../application/components/access/prompts/upgrade_license_prompt';
 import { AddLlmConnectionPrompt } from '../application/components/access/prompts/add_llm_connection_prompt';
 import { NoPrivilegePrompt } from '../application/components/access/prompts/no_privilege_prompt';
 
-const closeButtonLabel = i18n.translate('xpack.onechat.embeddable.accessBoundary.closeButton', {
+const closeButtonLabel = i18n.translate('xpack.agentBuilder.embeddable.accessBoundary.closeButton', {
   defaultMessage: 'Close',
 });
 
@@ -87,7 +87,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   children,
   onClose,
 }) => {
-  const { accessChecker } = useOnechatServices();
+  const { accessChecker } = useAgentBuilderServices();
   const { show: hasShowPrivilege } = useUiPrivileges();
 
   const [accessState, setAccessState] = useState<AccessState>({

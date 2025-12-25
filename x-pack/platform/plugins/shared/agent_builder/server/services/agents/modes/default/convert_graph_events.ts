@@ -11,9 +11,9 @@ import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracer
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type { ChatAgentEvent, ConversationRound, ToolResultEvent } from '@kbn/onechat-common/chat';
-import { isToolCallStep } from '@kbn/onechat-common/chat';
-import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
+import type { ChatAgentEvent, ConversationRound, ToolResultEvent } from '@kbn/agent-builder-common/chat';
+import { isToolCallStep } from '@kbn/agent-builder-common/chat';
+import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import {
   createBrowserToolCallEvent,
   createMessageEvent,
@@ -29,11 +29,11 @@ import {
   matchGraphName,
   matchName,
   toolIdentifierFromToolCall,
-} from '@kbn/onechat-genai-utils/langchain';
+} from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import type { RunToolReturn } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
-import { AgentPromptRequestSourceType } from '@kbn/onechat-common/agents';
+import type { RunToolReturn } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
 import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';

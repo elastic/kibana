@@ -26,7 +26,7 @@ export type {
   RunToolFn,
   Runner,
   RunToolReturn,
-  OnechatToolEvent,
+  AgentBuilderToolEvent,
   ToolEventHandlerFn,
   ToolEventEmitter,
   ToolProgressEmitterFn,

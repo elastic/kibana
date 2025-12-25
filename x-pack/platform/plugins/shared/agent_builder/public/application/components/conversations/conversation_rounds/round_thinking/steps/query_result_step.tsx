@@ -8,12 +8,12 @@
 import { EuiCodeBlock, EuiSplitPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { QueryResult } from '@kbn/onechat-common/tools/tool_result';
+import type { QueryResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { css } from '@emotion/react';
 import { codeblockStyles } from './codeblock.styles';
 
 const labels = {
-  title: i18n.translate('xpack.onechat.round.thinking.steps.queryResultStep.title', {
+  title: i18n.translate('xpack.agentBuilder.round.thinking.steps.queryResultStep.title', {
     defaultMessage: 'ESQL',
   }),
 };

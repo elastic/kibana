@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/onechat-common';
-import { ConversationRoundStatus } from '@kbn/onechat-common';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 export const getPendingRound = (
   conversation: Conversation | undefined

@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import pRetry from 'p-retry';
 
 type Messages = { message: string }[];
@@ -30,7 +30,7 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   traceId?: string;
 }>;
 
-export class OnechatEvaluationChatClient {
+export class AgentBuilderEvaluationChatClient {
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
@@ -40,7 +40,7 @@ export class OnechatEvaluationChatClient {
   converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
     this.log.info('Calling converse');
 
-    const { agentId = oneChatDefaultAgentId } = options;
+    const { agentId = agentBuilderDefaultAgentId } = options;
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;
@@ -49,7 +49,7 @@ export class OnechatEvaluationChatClient {
       steps?: any[];
       traceId?: string;
     }> => {
-      // Use the non-async OneChat API endpoint
+      // Use the non-async AgentBuilder API endpoint
       const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',

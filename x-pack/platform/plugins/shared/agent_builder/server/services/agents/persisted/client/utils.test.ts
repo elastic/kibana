@@ -7,7 +7,7 @@
 
 import { validateToolSelection } from './utils';
 import type { KibanaRequest } from '@kbn/core/server';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod';
 
 const mockRequest = {} as KibanaRequest;

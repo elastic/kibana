@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import { OnechatTools } from '../components/tools/tools';
+import { AgentBuilderTools } from '../components/tools/tools';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { ToolsProvider } from '../context/tools_provider';
 
-export const OnechatToolsPage = () => {
+export const AgentBuilderToolsPage = () => {
   useBreadcrumb([{ text: labels.tools.title, path: appPaths.tools.list }]);
   return (
     <ToolsProvider>
-      <OnechatTools />
+      <AgentBuilderTools />
     </ToolsProvider>
   );
 };

@@ -7,10 +7,10 @@
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { z, ZodObject } from '@kbn/zod';
-import type { ToolHandlerFn } from '@kbn/onechat-server';
-import { interpolateEsqlQuery } from '@kbn/onechat-genai-utils/tools/utils';
-import { type EsqlToolConfig, ToolResultType } from '@kbn/onechat-common';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import type { ToolHandlerFn } from '@kbn/agent-builder-server';
+import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
+import { type EsqlToolConfig, ToolResultType } from '@kbn/agent-builder-common';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 /**
  * Resolves parameter values by applying defaults for missing parameters.

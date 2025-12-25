@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { queryKeys } from '../../query_keys';
-import { useOnechatServices } from '../use_onechat_service';
+import { useAgentBuilderServices } from '../use_agent_builder_service';
 
 export interface UseValidateNamespaceOptions {
   namespace: string;
@@ -15,7 +15,7 @@ export interface UseValidateNamespaceOptions {
 }
 
 export const useValidateNamespace = ({ namespace, enabled }: UseValidateNamespaceOptions) => {
-  const { toolsService } = useOnechatServices();
+  const { toolsService } = useAgentBuilderServices();
 
   const isEnabled = enabled ?? namespace.length > 0;
 

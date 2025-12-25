@@ -9,7 +9,7 @@ import type {
   AgentAvailabilityContext,
   AgentAvailabilityConfig,
   AgentAvailabilityResult,
-} from '@kbn/onechat-server/agents';
+} from '@kbn/agent-builder-server/agents';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AgentAvailabilityCache } from './availability_cache';

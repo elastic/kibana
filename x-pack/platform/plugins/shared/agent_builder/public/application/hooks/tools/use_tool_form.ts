@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { ToolType } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import { useForm } from 'react-hook-form';
 import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
 import { getToolTypeDefaultValues } from '../../components/tools/form/registry/tools_form_registry';

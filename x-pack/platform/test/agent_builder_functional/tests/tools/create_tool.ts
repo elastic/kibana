@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { ToolType } from '@kbn/onechat-common';
-import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 
-export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
     let testIndexName: string;
 
     before(async () => {
-      testIndexName = `ftr_onechat_${Date.now()}`;
+      testIndexName = `ftr_agent_builder_${Date.now()}`;
       await es.indices.create({ index: testIndexName });
       await es.index({
         index: testIndexName,
@@ -41,40 +41,40 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
 
     it('should create an esql tool', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
-      await onechat.navigateToNewTool();
+      await agentBuilder.navigateToNewTool();
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await onechat.setToolId(toolId);
+      await agentBuilder.setToolId(toolId);
 
       await testSubjects.existOrFail('agentBuilderToolTypeSelect');
-      await onechat.selectToolType(ToolType.esql);
+      await agentBuilder.selectToolType(ToolType.esql);
 
-      await onechat.setToolDescription('FTR created ES|QL tool');
+      await agentBuilder.setToolDescription('FTR created ES|QL tool');
 
       await testSubjects.existOrFail('agentBuilderEsqlEditor');
-      await onechat.setEsqlQuery('FROM .kibana | LIMIT 1');
+      await agentBuilder.setEsqlQuery('FROM .kibana | LIMIT 1');
 
-      await onechat.saveTool();
+      await agentBuilder.saveTool();
 
-      expect(await onechat.isToolInTable(toolId)).to.be(true);
+      expect(await agentBuilder.isToolInTable(toolId)).to.be(true);
     });
 
     it('should create an index search tool', async () => {
       const toolId = `ftr.index.${Date.now()}`;
-      await onechat.navigateToNewTool();
+      await agentBuilder.navigateToNewTool();
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await onechat.setToolId(toolId);
+      await agentBuilder.setToolId(toolId);
 
       await testSubjects.existOrFail('agentBuilderToolTypeSelect');
-      await onechat.selectToolType(ToolType.index_search);
+      await agentBuilder.selectToolType(ToolType.index_search);
 
-      await testSubjects.existOrFail('onechatIndexPatternInput');
-      await onechat.setIndexPattern(testIndexName);
+      await testSubjects.existOrFail('agentBuilderIndexPatternInput');
+      await agentBuilder.setIndexPattern(testIndexName);
 
-      await onechat.setToolDescription('FTR created Index Search tool');
+      await agentBuilder.setToolDescription('FTR created Index Search tool');
 
-      await onechat.saveTool();
+      await agentBuilder.saveTool();
 
-      expect(await onechat.isToolInTable(toolId)).to.be(true);
+      expect(await agentBuilder.isToolInTable(toolId)).to.be(true);
     });
   });
 }

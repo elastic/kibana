@@ -27,13 +27,13 @@ import { InputPopoverButton } from '../input_popover_button';
 import { ConnectorIcon } from './connector_icon';
 
 const selectableAriaLabel = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.selectableAriaLabel',
+  'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
   {
     defaultMessage: 'Select a connector',
   }
 );
 const defaultConnectorLabel = i18n.translate(
-  'xpack.onechat.conversationInput.connectorSelector.defaultConnectorLabel',
+  'xpack.agentBuilder.conversationInput.connectorSelector.defaultConnectorLabel',
   {
     defaultMessage: 'Default',
   }
@@ -60,7 +60,7 @@ const ConnectorPopoverButton: React.FC<{
     >
       {selectedConnectorName ?? (
         <FormattedMessage
-          id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
+          id="xpack.agentBuilder.conversationInput.connectorSelector.buttonLabel"
           defaultMessage="LLM"
         />
       )}

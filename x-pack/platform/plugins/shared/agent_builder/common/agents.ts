@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentDefinition, AgentConfiguration } from '@kbn/onechat-common';
+import type { AgentDefinition, AgentConfiguration } from '@kbn/agent-builder-common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentListOptions {}

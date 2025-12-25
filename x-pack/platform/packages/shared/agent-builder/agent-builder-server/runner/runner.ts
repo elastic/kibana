@@ -6,9 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { PromptRequest } from '@kbn/onechat-common/agents/prompts';
-import type { ToolType } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 import type { InternalToolDefinition } from '../tools/internal';
@@ -31,7 +31,7 @@ export interface RunToolReturn {
 }
 
 /**
- * Represents a runner, which is the entry point to execute all onechat primitives,
+ * Represents a runner, which is the entry point to execute all agentBuilder primitives,
  * such as tools or agents.
  *
  * This version is not scoped to a given request, and is the version exposed from the plugin's contract.
@@ -52,7 +52,7 @@ export interface Runner {
 }
 
 /**
- * Represents a runner, which is the entry point to execute all onechat primitives,
+ * Represents a runner, which is the entry point to execute all agentBuilder primitives,
  * such as tools or agents.
  *
  * This version is pre-scoped to a given request, meaning APIs don't need to be passed
@@ -74,14 +74,14 @@ export interface ScopedRunner {
 }
 
 /**
- * Public onechat API to execute a tools.
+ * Public agentBuilder API to execute a tools.
  */
 export type ScopedRunToolFn = <TParams = Record<string, unknown>>(
   params: ScopedRunnerRunToolsParams<TParams>
 ) => Promise<RunToolReturn>;
 
 /**
- * Public onechat API to execute a tools.
+ * Public agentBuilder API to execute a tools.
  */
 export type ScopedRunInternalToolFn = <TParams = Record<string, unknown>>(
   params: ScopedRunnerRunInternalToolParams<TParams>
@@ -166,7 +166,7 @@ export type ScopedRunnerRunInternalToolParams<TParams = Record<string, unknown>>
 >;
 
 /**
- * Public onechat API to execute a tools.
+ * Public agentBuilder API to execute a tools.
  */
 export type RunToolFn = <TParams = Record<string, unknown>>(
   params: RunToolParams<TParams>

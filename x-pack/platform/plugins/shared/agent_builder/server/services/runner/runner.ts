@@ -11,8 +11,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { isOnechatError, createInternalError } from '@kbn/onechat-common';
-import type { Conversation, ConverseInput } from '@kbn/onechat-common';
+import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
+import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {
   ScopedRunner,
   ScopedRunnerRunAgentParams,
@@ -22,13 +22,13 @@ import type {
   RunAgentReturn,
   WritableToolResultStore,
   ModelProvider,
-} from '@kbn/onechat-server';
+} from '@kbn/agent-builder-server';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
   ConversationStateManager,
   PromptManager,
-} from '@kbn/onechat-server/runner';
+} from '@kbn/agent-builder-server/runner';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
@@ -97,7 +97,7 @@ export class RunnerManager {
         try {
           return runTool<TParams>({ toolExecutionParams, parentManager: this });
         } catch (e) {
-          if (isOnechatError(e)) {
+          if (isAgentBuilderError(e)) {
             throw e;
           } else {
             throw createInternalError(e.message);
@@ -110,7 +110,7 @@ export class RunnerManager {
         try {
           return runInternalTool<TParams>({ toolExecutionParams, parentManager: this });
         } catch (e) {
-          if (isOnechatError(e)) {
+          if (isAgentBuilderError(e)) {
             throw e;
           } else {
             throw createInternalError(e.message);
@@ -121,7 +121,7 @@ export class RunnerManager {
         try {
           return runAgent({ agentExecutionParams, parentManager: this });
         } catch (e) {
-          if (isOnechatError(e)) {
+          if (isAgentBuilderError(e)) {
             throw e;
           } else {
             throw createInternalError(e.message);

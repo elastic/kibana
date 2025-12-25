@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { oneChatDefaultAgentId, defaultAgentToolIds } from '@kbn/onechat-common';
-import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import { agentBuilderDefaultAgentId, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 
 export const createDefaultAgentDefinition = (): BuiltInAgentDefinition => {
   return {
-    id: oneChatDefaultAgentId,
+    id: agentBuilderDefaultAgentId,
     name: 'Elastic AI Agent',
     description: 'Elastic AI Agent',
     configuration: {

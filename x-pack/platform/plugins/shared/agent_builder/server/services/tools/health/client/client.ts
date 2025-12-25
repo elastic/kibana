@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { createInternalError } from '@kbn/onechat-common';
+import { createInternalError } from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { ToolHealthStorage } from './storage';
 import { createStorage } from './storage';

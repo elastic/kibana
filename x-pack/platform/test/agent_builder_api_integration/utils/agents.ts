@@ -6,7 +6,7 @@
  */
 
 import type supertest from 'supertest';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { spaceUrl } from './spaces';
 
 export const createAgent = async (

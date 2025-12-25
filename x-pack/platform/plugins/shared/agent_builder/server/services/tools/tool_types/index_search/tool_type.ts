@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import type { IndexSearchToolConfig } from '@kbn/onechat-common/tools';
-import { runSearchTool } from '@kbn/onechat-genai-utils';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils';
 import type { ToolTypeDefinition } from '../definitions';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';

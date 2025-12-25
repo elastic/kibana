@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChatEvent } from '@kbn/onechat-common';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   isConversationCreatedEvent,
   isMessageChunkEvent,
@@ -16,10 +16,10 @@ import {
   isToolProgressEvent,
   isToolResultEvent,
   isThinkingCompleteEvent,
-} from '@kbn/onechat-common';
-import { createReasoningStep, createToolCallStep } from '@kbn/onechat-common/chat/conversation';
+} from '@kbn/agent-builder-common';
+import { createReasoningStep, createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { finalize, type Observable, type Subscription } from 'rxjs';
-import { isBrowserToolCallEvent } from '@kbn/onechat-common/chat/events';
+import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
 import { useRef } from 'react';
 import { useConversationContext } from '../conversation/conversation_context';
 import type { BrowserToolExecutor } from '../../services/browser_tool_executor';

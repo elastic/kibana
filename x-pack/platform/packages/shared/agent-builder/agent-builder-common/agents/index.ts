@@ -7,7 +7,7 @@
 
 export {
   AgentType,
-  oneChatDefaultAgentId,
+  agentBuilderDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,

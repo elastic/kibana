@@ -8,8 +8,8 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-language';
 import { i18n } from '@kbn/i18n';
-import type { EsqlToolFieldTypes } from '@kbn/onechat-common/tools';
-import { EsqlToolFieldType, ToolType } from '@kbn/onechat-common/tools';
+import type { EsqlToolFieldTypes } from '@kbn/agent-builder-common/tools';
+import { EsqlToolFieldType, ToolType } from '@kbn/agent-builder-common/tools';
 import { z } from '@kbn/zod';
 import { sharedValidationSchemas } from './shared_tool_validation';
 import { EsqlParamSource } from '../types/tool_form_types';
@@ -17,35 +17,35 @@ import { EsqlParamSource } from '../types/tool_form_types';
 const esqlI18nMessages = {
   // Specific errors will be provided by the ES|QL editor
   esql: {
-    requiredError: i18n.translate('xpack.onechat.tools.newTool.validation.esql.requiredError', {
+    requiredError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.esql.requiredError', {
       defaultMessage: 'ES|QL query is required.',
     }),
-    esqlError: i18n.translate('xpack.onechat.tools.newTool.validation.esql.esqlError', {
+    esqlError: i18n.translate('xpack.agentBuilder.tools.newTool.validation.esql.esqlError', {
       defaultMessage: 'Please fix the errors in your ES|QL query.',
     }),
   },
   params: {
     nameRequiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.params.nameRequiredError',
+      'xpack.agentBuilder.tools.newTool.validation.params.nameRequiredError',
       {
         defaultMessage: 'Parameter name is required.',
       }
     ),
     nameFormatError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.params.nameFormatError',
+      'xpack.agentBuilder.tools.newTool.validation.params.nameFormatError',
       {
         defaultMessage:
           'Parameter name must start with a letter or underscore and contain only letters, numbers, and underscores.',
       }
     ),
     descriptionRequiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.params.descriptionRequiredError',
+      'xpack.agentBuilder.tools.newTool.validation.params.descriptionRequiredError',
       {
         defaultMessage: 'Parameter description is required.',
       }
     ),
     duplicateError: (name: string) =>
-      i18n.translate('xpack.onechat.tools.newTool.validation.params.duplicateError', {
+      i18n.translate('xpack.agentBuilder.tools.newTool.validation.params.duplicateError', {
         defaultMessage: 'Duplicate parameter: "{name}".',
         values: { name },
       }),

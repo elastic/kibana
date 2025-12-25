@@ -13,9 +13,9 @@ import type {
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { isAllowedBuiltinAgent } from '@kbn/onechat-server/allow_lists';
+import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { Runner } from '@kbn/onechat-server';
+import type { Runner } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
@@ -60,7 +60,7 @@ export class AgentsService {
       register: (agent) => {
         if (!isAllowedBuiltinAgent(agent.id)) {
           throw new Error(`Built-in agent with id "${agent.id}" is not in the list of allowed built-in agents.
-             Please add it to the list of allowed built-in agents in the "@kbn/onechat-server/allow_lists.ts" file.`);
+             Please add it to the list of allowed built-in agents in the "@kbn/agent-builder-server/allow_lists.ts" file.`);
         }
         this.builtinRegistry.register(agent);
       },

@@ -23,7 +23,7 @@ export const NoPrivilegePrompt: React.FC<NoPrivilegePromptProps> = ({ variant })
   const primaryButton = (
     <EuiButtonEmpty href={docLinks.agentBuilder} target="_blank" iconType="popout" iconSide="right">
       <FormattedMessage
-        id="xpack.onechat.access.prompt.noPrivilege.actions.docsLink"
+        id="xpack.agentBuilder.access.prompt.noPrivilege.actions.docsLink"
         defaultMessage="Learn more"
       />
     </EuiButtonEmpty>
@@ -37,13 +37,13 @@ export const NoPrivilegePrompt: React.FC<NoPrivilegePromptProps> = ({ variant })
       }
       title={
         <FormattedMessage
-          id="xpack.onechat.access.prompt.noPrivilege.title"
+          id="xpack.agentBuilder.access.prompt.noPrivilege.title"
           defaultMessage="Access denied"
         />
       }
       subtitle={
         <FormattedMessage
-          id="xpack.onechat.access.prompt.noPrivilege.description"
+          id="xpack.agentBuilder.access.prompt.noPrivilege.description"
           defaultMessage="You don't have the required privileges to access the Agent Builder. Please contact your administrator."
         />
       }

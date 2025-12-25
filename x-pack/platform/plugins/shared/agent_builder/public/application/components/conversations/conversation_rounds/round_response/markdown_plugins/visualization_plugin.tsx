@@ -6,16 +6,16 @@
  */
 import React from 'react';
 import { EuiCode, EuiText } from '@elastic/eui';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   visualizationElement,
   type VisualizationElementAttributes,
   type TabularDataResult,
   type VisualizationResult,
   ToolResultType,
-} from '@kbn/onechat-common/tools/tool_result';
+} from '@kbn/agent-builder-common/tools/tool_result';
 
-import type { OnechatStartDependencies } from '../../../../../../types';
+import type { AgentBuilderStartDependencies } from '../../../../../../types';
 import { VisualizeESQL } from '../../../../tools/esql/visualize_esql';
 import { VisualizeLens } from '../../../../tools/esql/visualize_lens';
 import { createTagParser, findToolResult } from './utils';
@@ -45,7 +45,7 @@ export function createVisualizationRenderer({
   stepsFromCurrentRound,
   stepsFromPrevRounds,
 }: {
-  startDependencies: OnechatStartDependencies;
+  startDependencies: AgentBuilderStartDependencies;
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {

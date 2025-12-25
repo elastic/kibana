@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolCallStep } from '@kbn/onechat-common/chat/conversation';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { ThinkingItemLayout } from './thinking_item_layout';
 
 const labels = {
-  toolResponse: i18n.translate('xpack.onechat.flyoutResultItem.toolResponseLabel', {
+  toolResponse: i18n.translate('xpack.agentBuilder.flyoutResultItem.toolResponseLabel', {
     defaultMessage: 'Tool response',
   }),
-  inspectResponse: i18n.translate('xpack.onechat.flyoutResultItem.inspectResponseLabel', {
+  inspectResponse: i18n.translate('xpack.agentBuilder.flyoutResultItem.inspectResponseLabel', {
     defaultMessage: 'Inspect tool response details',
   }),
 };
@@ -48,12 +48,12 @@ export const FlyoutResultItem: React.FC<FlyoutResultItemProps> = ({
       <EuiText size="s">
         <p id={responseId} role="status" aria-label={labels.toolResponse}>
           <FormattedMessage
-            id="xpack.onechat.flyoutResultItem.toolCallThinkingItem"
+            id="xpack.agentBuilder.flyoutResultItem.toolCallThinkingItem"
             defaultMessage="Tool {tool} returned response. {inspectResponse}"
             values={{
               tool: (
                 <EuiCode
-                  aria-label={i18n.translate('xpack.onechat.flyoutResultItem.toolName', {
+                  aria-label={i18n.translate('xpack.agentBuilder.flyoutResultItem.toolName', {
                     defaultMessage: 'Tool {toolId}',
                     values: { toolId: step.tool_id },
                   })}
@@ -69,7 +69,7 @@ export const FlyoutResultItem: React.FC<FlyoutResultItemProps> = ({
                   aria-label={labels.inspectResponse}
                   role="button"
                 >
-                  {i18n.translate('xpack.onechat.flyoutResultItem.roundResultsButton', {
+                  {i18n.translate('xpack.agentBuilder.flyoutResultItem.roundResultsButton', {
                     defaultMessage: 'Inspect response',
                   })}
                 </EuiLink>

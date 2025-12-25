@@ -7,10 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 import { queryKeys } from '../query_keys';
-import { useOnechatServices } from './use_onechat_service';
+import { useAgentBuilderServices } from './use_agent_builder_service';
 
 export const useConversationList = ({ agentId }: { agentId?: string } = {}) => {
-  const { conversationsService } = useOnechatServices();
+  const { conversationsService } = useAgentBuilderServices();
 
   const {
     data: conversations,

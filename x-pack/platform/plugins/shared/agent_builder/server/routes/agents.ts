@@ -45,7 +45,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     .get({
       path: `${publicApiPath}/agents`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'List agents',
@@ -80,7 +80,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     .get({
       path: `${publicApiPath}/agents/{id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Get an agent by ID',
@@ -124,7 +124,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     .post({
       path: `${publicApiPath}/agents`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
       access: 'public',
       summary: 'Create an agent',
@@ -210,7 +210,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     .put({
       path: `${publicApiPath}/agents/{id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
       access: 'public',
       summary: 'Update an agent',
@@ -303,7 +303,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
     .delete({
       path: `${publicApiPath}/agents/{id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
       access: 'public',
       summary: 'Delete an agent',

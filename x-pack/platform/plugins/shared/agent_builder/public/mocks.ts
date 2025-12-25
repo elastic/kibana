@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup, OnechatPluginStart, ConversationFlyoutRef } from './types';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart, ConversationFlyoutRef } from './types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
-const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
+const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {};
 };
 
-const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
+const createStartContractMock = (): jest.Mocked<AgentBuilderPluginStart> => {
   return {
     agents: {} as any,
     attachments: {} as any,
@@ -33,7 +33,7 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   };
 };
 
-export const onechatMocks = {
+export const agentBuilderMocks = {
   createSetup: createSetupContractMock,
   createStart: createStartContractMock,
 };

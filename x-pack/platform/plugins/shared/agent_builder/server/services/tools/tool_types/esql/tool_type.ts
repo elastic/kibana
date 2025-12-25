@@ -6,8 +6,8 @@
  */
 
 import type { ZodObject } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import type { EsqlToolConfig } from '@kbn/onechat-common/tools/types/esql';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { EsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql';
 import type { ToolTypeDefinition } from '../definitions';
 import { createHandler } from './create_handler';
 import { createSchemaFromParams } from './create_schema';

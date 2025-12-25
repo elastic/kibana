@@ -8,12 +8,12 @@
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { queryKeys } from '../query_keys';
 import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
-import { useOnechatServices } from './use_onechat_service';
+import { useAgentBuilderServices } from './use_agent_builder_service';
 import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
@@ -21,7 +21,7 @@ import { useConversationContext } from '../context/conversation/conversation_con
 
 export const useConversation = () => {
   const conversationId = useConversationId();
-  const { conversationsService } = useOnechatServices();
+  const { conversationsService } = useAgentBuilderServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
 
@@ -61,7 +61,7 @@ const useGetNewConversationAgentId = () => {
     if (isAgentIdValid) {
       return agentIdStorage;
     }
-    return oneChatDefaultAgentId;
+    return agentBuilderDefaultAgentId;
   };
 };
 

@@ -33,7 +33,7 @@ export function registerInternalConversationRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {

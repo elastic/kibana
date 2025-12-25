@@ -9,7 +9,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
-import { createToolIdMappings } from '@kbn/onechat-genai-utils/langchain';
+import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -26,7 +26,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     .post({
       path: MCP_SERVER_PATH,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'MCP server',

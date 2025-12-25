@@ -12,7 +12,7 @@ import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { EditAgent } from '../components/agents/edit/edit_agent';
 
-export const OnechatAgentsEdit = () => {
+export const AgentBuilderAgentsEdit = () => {
   const { agentId } = useParams<{ agentId: string }>();
   useBreadcrumb([
     {

@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
+import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
 
-export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
-  const { onechat } = getPageObjects(['onechat']);
+export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
+  const { agentBuilder } = getPageObjects(['agentBuilder']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
@@ -28,18 +28,18 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
         })
         .expect(200);
 
-      await onechat.navigateToTool(toolId);
+      await agentBuilder.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await onechat.setToolDescription('FTR updated description');
+      await agentBuilder.setToolDescription('FTR updated description');
 
-      await onechat.saveTool();
+      await agentBuilder.saveTool();
 
       // Navigate back to the tool details page and verify edited fields
-      await onechat.navigateToTool(toolId);
+      await agentBuilder.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      const idValue = await onechat.getToolIdValue();
+      const idValue = await agentBuilder.getToolIdValue();
       expect(idValue).to.be(toolId);
-      const descriptionValue = await onechat.getToolDescriptionValue();
+      const descriptionValue = await agentBuilder.getToolDescriptionValue();
       expect(descriptionValue).to.contain('FTR updated description');
     });
 
@@ -56,23 +56,23 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await onechat.navigateToTool(toolId);
+      await agentBuilder.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await onechat.openToolContextMenu();
-      await onechat.clickToolCloneButton();
+      await agentBuilder.openToolContextMenu();
+      await agentBuilder.clickToolCloneButton();
       await testSubjects.existOrFail('agentBuilderToolFormPage');
 
       // Save the cloned tool ID
-      const clonedToolId = await onechat.getToolIdValue();
+      const clonedToolId = await agentBuilder.getToolIdValue();
 
-      await onechat.saveTool();
+      await agentBuilder.saveTool();
 
       // After cloning, navigate to the cloned tool details and verify fields
-      await onechat.navigateToTool(clonedToolId!);
+      await agentBuilder.navigateToTool(clonedToolId!);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      const clonedIdValue = await onechat.getToolIdValue();
+      const clonedIdValue = await agentBuilder.getToolIdValue();
       expect(clonedIdValue).to.be(clonedToolId);
-      const clonedDescriptionValue = await onechat.getToolDescriptionValue();
+      const clonedDescriptionValue = await agentBuilder.getToolDescriptionValue();
       expect(clonedDescriptionValue).to.contain('FTR clone source');
     });
 
@@ -89,10 +89,10 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await onechat.navigateToTool(toolId);
-      await onechat.openToolTestFlyout();
-      await onechat.submitToolTest();
-      await onechat.waitForToolTestResponseNotEmpty();
+      await agentBuilder.navigateToTool(toolId);
+      await agentBuilder.openToolTestFlyout();
+      await agentBuilder.submitToolTest();
+      await agentBuilder.waitForToolTestResponseNotEmpty();
     });
 
     it('should delete a tool from the tool details page', async () => {
@@ -108,18 +108,18 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await onechat.navigateToTool(toolId);
+      await agentBuilder.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await onechat.openToolContextMenu();
-      await onechat.clickToolDeleteButton();
-      await onechat.confirmModalConfirm();
+      await agentBuilder.openToolContextMenu();
+      await agentBuilder.clickToolDeleteButton();
+      await agentBuilder.confirmModalConfirm();
       await testSubjects.existOrFail('agentBuilderToolsPage');
-      expect(await onechat.isToolInTable(toolId)).to.be(false);
+      expect(await agentBuilder.isToolInTable(toolId)).to.be(false);
     });
 
     it('views built-in as read-only', async () => {
       const builtInToolId = 'platform.core.search';
-      await onechat.navigateToTool(builtInToolId);
+      await agentBuilder.navigateToTool(builtInToolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.existOrFail('agentBuilderToolReadOnlyBadge');
       await testSubjects.missingOrFail('agentBuilderToolContextMenuButton');
