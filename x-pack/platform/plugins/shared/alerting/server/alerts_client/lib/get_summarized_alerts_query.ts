@@ -150,14 +150,18 @@ const getQueryByExecutionUuid = ({
     },
     {
       bool: {
-        must_not: {
-          exists: {
-            field: ALERT_MAINTENANCE_WINDOW_IDS,
+        must_not: [
+          {
+            exists: {
+              field: ALERT_MAINTENANCE_WINDOW_IDS,
+            },
           },
-          term: {
-            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          {
+            term: {
+              [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+            },
           },
-        },
+        ],
       },
     },
   ];
