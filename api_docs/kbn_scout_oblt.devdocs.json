@@ -858,6 +858,22 @@
           },
           {
             "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.EuiDataGridWrapper.ensureGridVisible",
+            "type": "Function",
+            "tags": [],
+            "label": "ensureGridVisible",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/data_grid.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
             "id": "def-common.EuiDataGridWrapper.doActionOnColumn",
             "type": "Function",
             "tags": [],
