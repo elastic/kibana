@@ -253,6 +253,15 @@ export interface UserActionsStatsAggsResult {
       }>;
     };
   };
+  creations: {
+    doc_count: number;
+    creations: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {

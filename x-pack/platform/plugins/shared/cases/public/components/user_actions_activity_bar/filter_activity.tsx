@@ -58,9 +58,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isSelected={type === 'user'}
           hasActiveFilters={type === 'user'}
           numFilters={
-            userActionsStats && userActionsStats.totalComments > 0
-              ? userActionsStats.totalComments - userActionsStats.totalCommentDeletions
-              : 0
+            (userActionsStats?.totalCommentCreations ?? 0) -
+            (userActionsStats?.totalCommentDeletions ?? 0)
           }
           isLoading={isLoading}
           isDisabled={isLoading}

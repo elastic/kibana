@@ -728,6 +728,7 @@ export class CaseUserActionService {
       total_deletions: response.aggregations?.deletions?.doc_count ?? 0,
       total_comments: 0,
       total_comment_deletions: 0,
+      total_comment_creations: 0,
       total_other_actions: 0,
       total_other_action_deletions: 0,
     };
@@ -741,6 +742,12 @@ export class CaseUserActionService {
     response.aggregations?.deletions.deletions.buckets.forEach(({ key, doc_count: docCount }) => {
       if (key === 'user') {
         result.total_comment_deletions = docCount;
+      }
+    });
+
+    response.aggregations?.creations.creations.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (key === 'user') {
+        result.total_comment_creations = docCount;
       }
     });
 
@@ -769,6 +776,21 @@ export class CaseUserActionService {
         },
         aggs: {
           deletions: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+              size: 100,
+            },
+          },
+        },
+      },
+      creations: {
+        filter: {
+          term: {
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: UserActionActions.create,
+          },
+        },
+        aggs: {
+          creations: {
             terms: {
               field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
               size: 100,

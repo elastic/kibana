@@ -758,8 +758,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(response.userActions.length).to.be(1);
-        expect(response.latestAttachments.length).to.be(1);
+        expect(response.userActions.length).to.be(3);
+        expect(response.latestAttachments.length).to.be(3);
 
         const userCommentUserAction = response.userActions[0] as CommentUserAction;
 

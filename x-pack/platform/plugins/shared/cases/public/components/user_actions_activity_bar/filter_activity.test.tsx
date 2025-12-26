@@ -21,6 +21,7 @@ describe('FilterActivity ', () => {
     total: 20,
     totalDeletions: 0,
     totalComments: 11,
+    totalCommentCreations: 2,
     totalCommentDeletions: 0,
     totalOtherActions: 9,
     totalOtherActionDeletions: 0,
@@ -31,6 +32,7 @@ describe('FilterActivity ', () => {
     totalDeletions: 2,
     totalComments: 11,
     totalCommentDeletions: 3,
+    totalCommentCreations: 5,
     totalOtherActions: 9,
     totalOtherActionDeletions: 4,
   };
@@ -57,7 +59,7 @@ describe('FilterActivity ', () => {
 
     expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('18');
     expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toHaveTextContent(
-      '8'
+      '2'
     );
     expect(screen.getByTestId('user-actions-filter-activity-button-history')).toHaveTextContent(
       '5'
@@ -110,7 +112,11 @@ describe('FilterActivity ', () => {
 
     expect(screen.getByLabelText(`${userActionsStats.total} active filters`)).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalComments} available filters`)
+      screen.getByLabelText(
+        `${
+          userActionsStats.totalCommentCreations - userActionsStats.totalCommentDeletions
+        } available filters`
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
