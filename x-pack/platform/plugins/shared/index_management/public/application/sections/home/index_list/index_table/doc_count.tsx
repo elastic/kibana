@@ -45,5 +45,9 @@ export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
     );
   }
 
-  return !count ? <EuiLoadingSpinner size="m" /> : Number(count).toLocaleString();
+  if (count === undefined) {
+    return <EuiLoadingSpinner size="m" />
+  }
+  
+  return Number(count).toLocaleString();
 };
