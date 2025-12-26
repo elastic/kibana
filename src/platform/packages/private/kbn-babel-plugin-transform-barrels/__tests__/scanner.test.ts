@@ -8,9 +8,17 @@
  */
 
 import Path from 'path';
+import Fsp from 'fs/promises';
+import Os from 'os';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { readPackageExports, buildExportsReverseMap, resolvePublicSubpath } = require('../scanner');
+/* eslint-disable @typescript-eslint/no-var-requires */
+const {
+  readPackageExports,
+  buildExportsReverseMap,
+  resolvePublicSubpath,
+  buildBarrelIndex,
+} = require('../scanner');
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 describe('scanner exports reverse mapping', () => {
   describe('buildExportsReverseMap', () => {
@@ -161,6 +169,61 @@ describe('scanner exports reverse mapping', () => {
       expect(result).not.toBeNull();
       // Use bracket notation because './internal/*' contains special characters
       expect(result?.['./internal/*']).toBeDefined();
+    });
+  });
+
+  describe('export * chain resolution', () => {
+    let tempDir: string;
+
+    beforeAll(async () => {
+      // Create a temporary directory with test barrel files
+      tempDir = await Fsp.mkdtemp(Path.join(Os.tmpdir(), 'barrel-test-'));
+
+      // Create a multi-level barrel structure:
+      // index.ts -> subbarrel/index.ts (export *) -> source.ts
+      await Fsp.mkdir(Path.join(tempDir, 'subbarrel'), { recursive: true });
+
+      // source.ts - the actual source file with exports
+      await Fsp.writeFile(
+        Path.join(tempDir, 'subbarrel', 'source.ts'),
+        `export const MyComponent = () => {};
+export const MyHelper = 'helper';
+export default function defaultFn() {}`
+      );
+
+      // subbarrel/index.ts - uses export * from './source'
+      await Fsp.writeFile(Path.join(tempDir, 'subbarrel', 'index.ts'), `export * from './source';`);
+
+      // index.ts - main barrel that re-exports from subbarrel
+      await Fsp.writeFile(
+        Path.join(tempDir, 'index.ts'),
+        `export { MyComponent, MyHelper } from './subbarrel';`
+      );
+    });
+
+    afterAll(async () => {
+      // Clean up temp directory
+      await Fsp.rm(tempDir, { recursive: true, force: true });
+    });
+
+    it('follows export * chains to find the actual source file', async () => {
+      const barrelIndex = await buildBarrelIndex(tempDir);
+
+      // The main barrel should be in the index
+      const mainBarrelPath = Path.join(tempDir, 'index.ts');
+      expect(barrelIndex[mainBarrelPath]).toBeDefined();
+
+      const exports = barrelIndex[mainBarrelPath].exports;
+
+      // MyComponent should resolve to source.ts, not subbarrel/index.ts
+      expect(exports.MyComponent).toBeDefined();
+      expect(exports.MyComponent.path).toBe(Path.join(tempDir, 'subbarrel', 'source.ts'));
+      expect(exports.MyComponent.localName).toBe('MyComponent');
+
+      // MyHelper should also resolve to source.ts
+      expect(exports.MyHelper).toBeDefined();
+      expect(exports.MyHelper.path).toBe(Path.join(tempDir, 'subbarrel', 'source.ts'));
+      expect(exports.MyHelper.localName).toBe('MyHelper');
     });
   });
 });

@@ -663,6 +663,25 @@ function parseAllFileExports(filePath, visited) {
       }
     },
 
+    // Handle: export * from './source'
+    ExportAllDeclaration(nodePath) {
+      const node = nodePath.node;
+      const sourcePath = node.source.value;
+      const resolved = resolveModulePath(sourcePath, barrelDir);
+
+      if (!resolved) return;
+
+      // Recursively get all exports from the source file
+      const sourceExports = parseAllFileExports(resolved, new Set(visited));
+
+      for (const [name, info] of sourceExports) {
+        if (name !== 'default') {
+          // export * doesn't re-export default
+          exports.set(name, info);
+        }
+      }
+    },
+
     ExportDefaultDeclaration(nodePath) {
       const node = nodePath.node;
       let localName = 'default';
