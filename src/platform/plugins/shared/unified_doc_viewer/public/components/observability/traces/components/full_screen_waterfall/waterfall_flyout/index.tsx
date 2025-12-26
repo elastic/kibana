@@ -94,7 +94,6 @@ export function WaterfallFlyout({
       session="never"
       size="s"
       includeFixedHeadersInFocusTrap={false}
-      ownFocus={false}
       onClose={onCloseFlyout}
       aria-label={title}
       id={flyoutId}
