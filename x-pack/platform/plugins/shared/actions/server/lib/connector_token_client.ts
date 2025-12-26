@@ -25,14 +25,14 @@ interface ConstructorOptions {
 interface CreateOptions {
   connectorId: string;
   token: string;
-  expiresAtMillis: string;
+  expiresAtMillis?: string;
   tokenType?: string;
 }
 
 export interface UpdateOptions {
   id: string;
   token: string;
-  expiresAtMillis: string;
+  expiresAtMillis?: string;
   tokenType?: string;
 }
 
@@ -216,7 +216,10 @@ export class ConnectorTokenClient {
       return { hasErrors: true, connectorToken: null };
     }
 
-    if (isNaN(Date.parse(connectorTokensResult[0].attributes.expiresAt))) {
+    if (
+      connectorTokensResult[0].attributes.expiresAt &&
+      isNaN(Date.parse(connectorTokensResult[0].attributes.expiresAt))
+    ) {
       this.logger.error(
         `Failed to get connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
@@ -315,7 +318,7 @@ export class ConnectorTokenClient {
     connectorId: string;
     accessToken: string;
     refreshToken?: string;
-    expiresAtMillis: string;
+    expiresAtMillis?: string;
     refreshTokenExpiresAtMillis?: string;
     tokenType?: string;
   }): Promise<ConnectorToken> {
@@ -364,7 +367,7 @@ export class ConnectorTokenClient {
     id: string;
     token: string;
     refreshToken?: string;
-    expiresAtMillis: string;
+    expiresAtMillis?: string;
     refreshTokenExpiresAtMillis?: string;
     tokenType?: string;
   }): Promise<ConnectorToken | null> {
