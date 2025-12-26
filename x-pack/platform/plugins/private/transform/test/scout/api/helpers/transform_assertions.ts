@@ -18,8 +18,9 @@ export async function expectUnauthorizedTransform(
   const transformInfo = await apiServices.transform.getTransform(transformId);
   const expectedApiKeyId = createdByUserCredentials.apiKey.id;
 
-  expect(typeof transformInfo.authorization.api_key).toBe('object');
-  expect(transformInfo.authorization.api_key.id).toBe(expectedApiKeyId);
+  expect(transformInfo.authorization).toBeDefined();
+  expect(transformInfo.authorization?.api_key).toBeDefined();
+  expect(transformInfo.authorization?.api_key?.id).toBe(expectedApiKeyId);
 
   const stats = await apiServices.transform.getTransformStats(transformId);
   expect(stats.state).toBe(TRANSFORM_STATE.STOPPED);
@@ -35,7 +36,7 @@ export async function expectReauthorizedTransform(
   const transformInfo = await apiServices.transform.getTransform(transformId);
 
   // assumption: each reauthorization generates a brand new API key, even for the same user
-  expect(transformInfo.authorization.api_key.id).not.toBe(createdByUserCredentials.apiKey.id);
+  expect(transformInfo.authorization?.api_key?.id).not.toBe(createdByUserCredentials.apiKey.id);
 
   const stats = await apiServices.transform.getTransformStats(transformId);
   expect(stats.health?.status).toBe('green');
