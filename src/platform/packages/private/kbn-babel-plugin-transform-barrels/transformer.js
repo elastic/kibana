@@ -169,13 +169,19 @@ function resolveToBarrelEntry(importSource, fromDir, barrelIndex) {
       const pkgDir = path.join(currentDir, 'node_modules', importSource);
       try {
         if (fs.existsSync(pkgDir)) {
-          return tryResolveBarrel(fs.realpathSync(pkgDir), barrelIndex);
+          const entry = tryResolveBarrel(fs.realpathSync(pkgDir), barrelIndex);
+          // Only use barrels with packageName for @kbn/* imports
+          if (entry && entry.packageName) {
+            return entry;
+          }
         }
       } catch {
         // Continue searching up
       }
       currentDir = path.dirname(currentDir);
     }
+
+    return null;
   }
 
   // For other package imports, use require.resolve

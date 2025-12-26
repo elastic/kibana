@@ -293,10 +293,13 @@ function parseBarrelExports(content, filePath) {
           const exportedName = exported.type === 'Identifier' ? exported.name : exported.value;
           const localName = specifier.local.name;
 
+          // Recursively follow the export chain to find the actual source file
+          const found = findExportSource(localName, resolvedPath, new Set());
+
           exports[exportedName] = {
-            path: resolvedPath,
+            path: found ? found.path : resolvedPath,
             type: 'named',
-            localName: localName,
+            localName: found ? found.localName : localName,
             importedName: localName,
           };
         }
@@ -529,6 +532,129 @@ function extractDirectExports(content, filePath) {
   });
 
   return exports;
+}
+
+/**
+ * Recursively find where an export is defined by following re-export chains.
+ * This handles multi-level barrel files like:
+ *   index.ts -> exports from ./errors/index.ts -> exports from ./schema_type_error.ts
+ *
+ * @param {string} exportName - The export name to find
+ * @param {string} filePath - File to search in
+ * @param {Set<string>} [visited] - Visited files (prevent infinite loops)
+ * @returns {{ path: string, localName: string } | null}
+ */
+function findExportSource(exportName, filePath, visited = new Set()) {
+  if (visited.has(filePath)) return null;
+  visited.add(filePath);
+
+  let content;
+  try {
+    content = fs.readFileSync(filePath, 'utf-8');
+  } catch {
+    return null;
+  }
+
+  const ast = parser.parse(content, {
+    sourceType: 'unambiguous',
+    plugins: getParserPlugins(filePath),
+    allowReturnOutsideFunction: true,
+  });
+
+  const barrelDir = path.dirname(filePath);
+  /** @type {{ path: string, localName: string } | null} */
+  let result = null;
+
+  traverse(ast, {
+    ExportNamedDeclaration(nodePath) {
+      if (result) return; // Already found
+      const node = nodePath.node;
+
+      // Re-export: export { X } from './source'
+      if (node.source) {
+        for (const spec of node.specifiers) {
+          if (spec.type === 'ExportSpecifier') {
+            const exported = spec.exported;
+            const expName = exported.type === 'Identifier' ? exported.name : exported.value;
+
+            if (expName === exportName) {
+              const localName = spec.local.name;
+              const resolved = resolveModulePath(node.source.value, barrelDir);
+
+              if (resolved) {
+                // Recursively follow the export chain
+                const found = findExportSource(localName, resolved, visited);
+                if (found) {
+                  result = found;
+                } else {
+                  // Source file is the final destination (has direct export)
+                  result = { path: resolved, localName };
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Direct export: export const X = ..., export function X() {}, etc.
+      if (!node.source && node.declaration) {
+        const decl = node.declaration;
+        /** @type {string[]} */
+        let names = [];
+
+        if (decl.type === 'VariableDeclaration') {
+          names = decl.declarations
+            .filter((d) => d.id.type === 'Identifier')
+            .map((d) => /** @type {import('@babel/types').Identifier} */ (d.id).name);
+        } else if (
+          (decl.type === 'FunctionDeclaration' || decl.type === 'ClassDeclaration') &&
+          decl.id
+        ) {
+          names = [decl.id.name];
+        } else if (
+          (decl.type === 'TSTypeAliasDeclaration' || decl.type === 'TSInterfaceDeclaration') &&
+          decl.id
+        ) {
+          names = [decl.id.name];
+        }
+
+        if (names.includes(exportName)) {
+          result = { path: filePath, localName: exportName };
+        }
+      }
+
+      // Direct export from local: export { X }
+      if (!node.source && node.specifiers) {
+        for (const spec of node.specifiers) {
+          if (spec.type === 'ExportSpecifier') {
+            const exported = spec.exported;
+            const expName = exported.type === 'Identifier' ? exported.name : exported.value;
+            if (expName === exportName) {
+              result = { path: filePath, localName: spec.local.name };
+            }
+          }
+        }
+      }
+    },
+
+    ExportDefaultDeclaration(nodePath) {
+      if (result) return;
+      if (exportName === 'default') {
+        const node = nodePath.node;
+        let localName = 'default';
+        if (node.declaration) {
+          if (node.declaration.type === 'Identifier') {
+            localName = node.declaration.name;
+          } else if ('id' in node.declaration && node.declaration.id) {
+            localName = /** @type {{ name: string }} */ (node.declaration.id).name;
+          }
+        }
+        result = { path: filePath, localName };
+      }
+    },
+  });
+
+  return result;
 }
 
 /**
