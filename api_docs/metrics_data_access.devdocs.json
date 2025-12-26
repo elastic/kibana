@@ -1492,7 +1492,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1508,7 +1508,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2116,7 +2116,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2354,7 +2354,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2946,7 +2946,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2962,7 +2962,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3126,7 +3126,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3142,7 +3142,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4654,7 +4654,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4670,7 +4670,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5278,7 +5278,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5516,7 +5516,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6108,7 +6108,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6124,7 +6124,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6288,7 +6288,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6304,7 +6304,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6910,7 +6910,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpuV2\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"txV2\" | \"rxV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
+          "\"count\" | \"rx\" | \"custom\" | \"memory\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpuV2\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"txV2\" | \"rxV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
