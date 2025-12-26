@@ -16,18 +16,13 @@ import * as i18n from './translations';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from '../common/check_resources';
-import type {
-  MigrationSource,
-  MigrationStepProps,
-  OnMissingResourcesFetched,
-} from '../../../../../common/types';
+import type { MigrationStepProps, OnMissingResourcesFetched } from '../../../../../common/types';
 import { SplunkDataInputStep } from '../../../../../common/types';
 import type { DashboardMigrationStats } from '../../../../types';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: DashboardMigrationStats;
   missingMacros: string[];
-  migrationSource: MigrationSource;
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
 
@@ -72,7 +67,6 @@ export const MacrosDataInput = React.memo<MigrationStepProps>(
                 migrationStats={migrationStats}
                 missingMacros={missingMacros}
                 onMissingResourcesFetched={onMissingResourcesFetched}
-                migrationSource={migrationSource}
               />
             </EuiFlexItem>
           )}
@@ -86,7 +80,7 @@ MacrosDataInput.displayName = 'MacrosDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | 3 | typeof END;
 export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
-  ({ migrationStats, missingMacros, migrationSource, onMissingResourcesFetched }) => {
+  ({ migrationStats, missingMacros, onMissingResourcesFetched }) => {
     const [subStep, setSubStep] = useState<SubStep>(missingMacros.length ? 1 : 3);
     const { telemetry } = useKibana().services.siemMigrations.dashboards;
 
@@ -95,9 +89,9 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       setSubStep(2);
       telemetry.reportSetupMacrosQueryCopied({
         migrationId: migrationStats.id,
-        vendor: migrationSource,
+        vendor: migrationStats.vendor,
       });
-    }, [telemetry, migrationStats.id, migrationSource]);
+    }, [telemetry, migrationStats.id, migrationStats.vendor]);
     const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(1, subStep), onCopied });
 
     // Upload macros step

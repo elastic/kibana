@@ -324,7 +324,6 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     const migrationDashboard = migrationDashboards[0];
     telemetry.reportTranslatedItemUpdate({
       migrationItem: migrationDashboard,
-      vendor: MigrationSource.SPLUNK,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.TranslatedItemUpdate,
@@ -343,7 +342,6 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     const migrationDashboard = migrationDashboards[0];
     telemetry.reportTranslatedItemUpdate({
       migrationItem: migrationDashboard,
-      vendor: MigrationSource.SPLUNK,
       error,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
@@ -363,7 +361,6 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     const migrationDashboard = migrationDashboards[0];
     telemetry.reportTranslatedItemInstall({
       migrationItem: migrationDashboard,
-      vendor: MigrationSource.SPLUNK,
       enabled: true,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
@@ -385,7 +382,6 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     const migrationDashboard = migrationDashboards[0];
     telemetry.reportTranslatedItemInstall({
       migrationItem: migrationDashboard,
-      vendor: MigrationSource.SPLUNK,
       enabled: true,
       error,
     });

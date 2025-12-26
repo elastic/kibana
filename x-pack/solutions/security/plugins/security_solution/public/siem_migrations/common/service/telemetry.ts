@@ -34,6 +34,18 @@ export class SiemBaseMigrationsTelemetry {
     ...(error && { errorMessage: error.message }),
   });
 
+  protected getVendor = (migrationItem: RuleMigrationRule | DashboardMigrationDashboard) => {
+    if ('original_rule' in migrationItem && migrationItem.original_rule?.vendor) {
+      return migrationItem.original_rule.vendor;
+    }
+
+    if ('original_dashboard' in migrationItem && migrationItem.original_dashboard?.vendor) {
+      return migrationItem.original_dashboard.vendor;
+    }
+
+    return undefined;
+  };
+
   // Setup actions
 
   reportConnectorSelected = (params: { connector: ActionConnector }) => {
@@ -110,7 +122,7 @@ export class SiemBaseMigrationsTelemetry {
     });
   };
 
-  reportSetupQueryCopied = (params: { migrationId?: string; vendor: SiemMigrationVendor }) => {
+  reportSetupQueryCopied = (params: { migrationId?: string; vendor?: SiemMigrationVendor }) => {
     const { migrationId, vendor } = params;
     this.telemetryService.reportEvent(this.eventTypes.SetupQueryCopied, {
       migrationId,
@@ -119,14 +131,17 @@ export class SiemBaseMigrationsTelemetry {
     });
   };
 
-  reportSetupMacrosQueryCopied = (params: { migrationId: string; vendor: SiemMigrationVendor }) => {
+  reportSetupMacrosQueryCopied = (params: {
+    migrationId: string;
+    vendor?: SiemMigrationVendor;
+  }) => {
     this.telemetryService.reportEvent(this.eventTypes.SetupMacrosQueryCopied, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupMacrosQueryCopied],
       ...params,
     });
   };
 
-  reportSetupLookupNameCopied = (params: { migrationId: string; vendor: SiemMigrationVendor }) => {
+  reportSetupLookupNameCopied = (params: { migrationId: string; vendor?: SiemMigrationVendor }) => {
     this.telemetryService.reportEvent(this.eventTypes.SetupLookupNameCopied, {
       eventName: siemMigrationEventNames[this.eventTypes.SetupLookupNameCopied],
       ...params,
@@ -135,7 +150,7 @@ export class SiemBaseMigrationsTelemetry {
 
   reportStopTranslation = (params: {
     migrationId: string;
-    vendor: SiemMigrationVendor;
+    vendor?: SiemMigrationVendor;
     error?: Error;
   }) => {
     const { migrationId, vendor, error } = params;
@@ -151,33 +166,31 @@ export class SiemBaseMigrationsTelemetry {
 
   reportTranslatedItemUpdate = (params: {
     migrationItem: RuleMigrationRule | DashboardMigrationDashboard;
-    vendor: SiemMigrationVendor;
     error?: Error;
   }) => {
-    const { migrationItem, vendor, error } = params;
+    const { migrationItem, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.TranslatedItemUpdate, {
       eventName: siemMigrationEventNames[this.eventTypes.TranslatedItemUpdate],
       migrationId: migrationItem.migration_id,
       ruleMigrationId: migrationItem.id,
-      vendor,
+      vendor: this.getVendor(migrationItem),
       ...this.getBaseResultParams(error),
     });
   };
 
   reportTranslatedItemInstall = (params: {
     migrationItem: RuleMigrationRule | DashboardMigrationDashboard;
-    vendor: SiemMigrationVendor;
     enabled: boolean;
     error?: Error;
   }) => {
-    const { migrationItem, vendor, enabled, error } = params;
+    const { migrationItem, enabled, error } = params;
     const eventParams: ReportTranslatedItemInstallActionParams = {
       eventName: siemMigrationEventNames[this.eventTypes.TranslatedItemInstall],
       migrationId: migrationItem.migration_id,
       ruleMigrationId: migrationItem.id,
-      vendor,
       author: 'custom',
       enabled,
+      vendor: this.getVendor(migrationItem),
       ...this.getBaseResultParams(error),
     };
 
@@ -213,9 +226,10 @@ export class SiemBaseMigrationsTelemetry {
 
   reportStartTranslation = (
     params:
-      | StartDashboardsMigrationParams
+      | (StartDashboardsMigrationParams & { vendor: SiemMigrationVendor })
       | (StartRuleMigrationParams & {
           error?: Error;
+          vendor: SiemMigrationVendor;
         })
   ) => {
     const { migrationId, vendor, settings, retry } = params;

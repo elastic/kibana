@@ -154,7 +154,7 @@ describe('SiemRulesMigrationsService', () => {
         service.createRuleMigration({
           rules: [],
           migrationName: 'test',
-          migrationSource: MigrationSource.SPLUNK,
+          vendor: MigrationSource.SPLUNK,
         })
       ).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
     });
@@ -168,7 +168,7 @@ describe('SiemRulesMigrationsService', () => {
       const migrationId = await service.createRuleMigration({
         rules: body,
         migrationName: name,
-        migrationSource: MigrationSource.SPLUNK,
+        vendor: MigrationSource.SPLUNK,
       });
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
@@ -187,7 +187,7 @@ describe('SiemRulesMigrationsService', () => {
       const migrationId = await service.createRuleMigration({
         rules: body,
         migrationName: name,
-        migrationSource: MigrationSource.SPLUNK,
+        vendor: MigrationSource.SPLUNK,
       });
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);

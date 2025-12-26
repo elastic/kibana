@@ -215,7 +215,6 @@ describe('SiemRulesMigrationsTelemetry', () => {
     telemetry.reportTranslatedItemInstall({
       migrationItem: migrationRule,
       enabled: true,
-      vendor: MigrationSource.SPLUNK,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsRuleEventTypes.TranslatedItemInstall,

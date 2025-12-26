@@ -26,11 +26,7 @@ import type { CapabilitiesLevel, MissingCapability } from '../../common/service/
 import { getMissingCapabilitiesChecker } from '../../common/service/capabilities';
 import { requiredDashboardMigrationCapabilities } from './capabilities';
 import { SiemMigrationsServiceBase } from '../../common/service';
-import type {
-  MigrationSource,
-  GetMigrationsStatsAllParams,
-  GetMigrationStatsParams,
-} from '../../common/types';
+import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import type { DashboardMigrationStats } from '../types';
 import { SiemDashboardMigrationsTelemetry } from './telemetry';
@@ -98,7 +94,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   public async createDashboardMigration(
     data: CreateDashboardMigrationDashboardsRequestBody,
     migrationName: string,
-    vendor: MigrationSource
+    vendor: SiemMigrationVendor
   ): Promise<string> {
     const dashboardsCount = data.length;
     if (dashboardsCount === 0) {
@@ -190,7 +186,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     migrationId: string;
     retry?: api.StartDashboardsMigrationParams['retry'];
     settings?: api.StartDashboardsMigrationParams['settings'];
-    vendor: MigrationSource;
+    vendor: SiemMigrationVendor;
   }): Promise<StartDashboardsMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
@@ -206,7 +202,6 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     }
     const params: api.StartDashboardsMigrationParams = {
       migrationId,
-      vendor,
       settings: { connectorId },
       retry,
     };
@@ -231,10 +226,10 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
       this.startPolling();
 
-      this.telemetry.reportStartTranslation(params);
+      this.telemetry.reportStartTranslation({ ...params, vendor });
       return result;
     } catch (error) {
-      this.telemetry.reportStartTranslation({ ...params, error });
+      this.telemetry.reportStartTranslation({ ...params, error, vendor });
       throw error;
     }
   }
@@ -245,7 +240,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     vendor,
   }: {
     migrationId: string;
-    vendor: MigrationSource;
+    vendor?: SiemMigrationVendor;
   }): Promise<StopDashboardsMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
@@ -282,16 +277,15 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   }): Promise<void> {
     const params: api.StartDashboardsMigrationParams = {
       migrationId: taskStats.id,
-      vendor: taskStats.vendor,
       settings: { connectorId },
     };
     await api
       .startDashboardMigration(params)
       .then(() => {
-        this.telemetry.reportStartTranslation(params);
+        this.telemetry.reportStartTranslation({ ...params, vendor: taskStats.vendor });
       })
       .catch((error) => {
-        this.telemetry.reportStartTranslation({ ...params, error });
+        this.telemetry.reportStartTranslation({ ...params, error, vendor: taskStats.vendor });
         throw error;
       });
   }
@@ -319,7 +313,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     vendor,
   }: {
     migrationId: string;
-    vendor: MigrationSource;
+    vendor: SiemMigrationVendor;
   }): Promise<string> {
     try {
       await api.deleteDashboardMigration({ migrationId });

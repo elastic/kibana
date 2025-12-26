@@ -39,11 +39,12 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const { started } = await siemMigrations.dashboards.startDashboardMigration(
-            migrationStats,
+          const { started } = await siemMigrations.dashboards.startDashboardMigration({
+            migrationId: migrationStats.id,
+            vendor: migrationStats.vendor,
             retry,
-            settings
-          );
+            settings,
+          });
 
           if (started) {
             notifications.toasts.addSuccess(DASHBOARDS_DATA_INPUT_START_MIGRATION_SUCCESS);

@@ -41,7 +41,6 @@ import type {
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { DashboardMigrationStats } from '../types';
-import type { MigrationSource } from '../../common/types';
 
 interface GetDashboardMigrationParams {
   migrationId: string;
@@ -247,8 +246,6 @@ export const getDashboardMigrationResources = async ({
 export interface StartDashboardsMigrationParams {
   /** `id` of the migration to start */
   migrationId: string;
-  /** The vendor of the migration */
-  vendor: MigrationSource;
   /** Settings for the migration */
   settings: {
     /** The connector id to use for the migration */

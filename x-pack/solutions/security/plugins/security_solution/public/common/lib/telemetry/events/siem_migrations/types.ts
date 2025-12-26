@@ -109,7 +109,7 @@ export interface ReportSetupMigrationOpenResourcesActionParams {
 export interface ReportSetupQueryCopiedActionParams {
   eventName: string;
   migrationId?: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupMigrationCreatedActionParams extends BaseResultActionParams {
   eventName: string;
@@ -125,12 +125,12 @@ export interface ReportSetupMigrationDeletedActionParams extends BaseResultActio
 export interface ReportSetupMacrosQueryCopiedActionParams {
   eventName: string;
   migrationId: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupLookupNameCopiedActionParams {
   eventName: string;
   migrationId: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupResourcesUploadedActionParams extends BaseResultActionParams {
   eventName: string;
@@ -153,7 +153,7 @@ export interface ReportStartMigrationActionParams extends BaseResultActionParams
 export interface ReportStopMigrationActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
 }
 
 // Translated rule actions
@@ -162,13 +162,13 @@ export interface ReportTranslatedItemUpdateActionParams {
   eventName: string;
   migrationId: string;
   ruleMigrationId: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
 }
 
 export interface ReportTranslatedItemInstallActionParams {
   eventName: string;
   migrationId: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
   ruleMigrationId: string;
   author: 'elastic' | 'custom';
   enabled: boolean;

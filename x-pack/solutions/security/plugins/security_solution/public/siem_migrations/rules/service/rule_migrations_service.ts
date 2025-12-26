@@ -43,12 +43,12 @@ export type CreateRuleMigrationParams =
   | {
       rules: CreateRuleMigrationRulesRequestBody;
       migrationName: string;
-      migrationSource: MigrationSource.SPLUNK;
+      vendor: 'splunk';
     }
   | {
       rules: CreateQRadarRuleMigrationRulesRequestBody;
       migrationName: string;
-      migrationSource: MigrationSource.QRADAR;
+      vendor: 'qradar';
     };
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
@@ -119,20 +119,20 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   public async createRuleMigration({
     rules,
     migrationName,
-    migrationSource,
+    vendor,
   }: CreateRuleMigrationParams): Promise<string> {
     if (!rules) {
       const emptyRulesError = new Error(i18n.EMPTY_RULES_ERROR);
       this.telemetry.reportSetupMigrationCreated({
         count: 0,
         error: emptyRulesError,
-        vendor: migrationSource,
+        vendor,
       });
       throw emptyRulesError;
     }
 
     try {
-      if (migrationSource === MigrationSource.QRADAR) {
+      if (vendor === MigrationSource.QRADAR) {
         if (!rules.xml) {
           throw new Error(i18n.EMPTY_RULES_ERROR);
         }
@@ -142,7 +142,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
           name: migrationName,
         });
         const { count } = await this.addQradarRulesToMigration(migrationId, rules);
-        this.telemetry.reportSetupMigrationCreated({ migrationId, count, vendor: migrationSource });
+        this.telemetry.reportSetupMigrationCreated({ migrationId, count, vendor });
 
         return migrationId;
       } else {
@@ -158,13 +158,13 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
         this.telemetry.reportSetupMigrationCreated({
           migrationId,
           count: rules.length,
-          vendor: migrationSource,
+          vendor,
         });
 
         return migrationId;
       }
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ count: 0, error, vendor: migrationSource });
+      this.telemetry.reportSetupMigrationCreated({ count: 0, error, vendor });
       throw error;
     }
   }
@@ -172,10 +172,10 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   /** Deletes a rule migration by its ID, refreshing the stats to remove it from the list */
   public async deleteMigration({
     migrationId,
-    migrationSource,
+    vendor,
   }: {
     migrationId: string;
-    migrationSource: MigrationSource;
+    vendor: SiemMigrationVendor;
   }): Promise<string> {
     try {
       await api.deleteMigration({ migrationId });
@@ -183,13 +183,13 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
       // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
       await this.getMigrationsStats();
 
-      this.telemetry.reportSetupMigrationDeleted({ migrationId, vendor: migrationSource });
+      this.telemetry.reportSetupMigrationDeleted({ migrationId, vendor });
       return migrationId;
     } catch (error) {
       this.telemetry.reportSetupMigrationDeleted({
         migrationId,
         error,
-        vendor: migrationSource,
+        vendor,
       });
       throw error;
     }
@@ -262,7 +262,6 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     }
     const params: api.StartRuleMigrationParams = {
       migrationId,
-      vendor,
       settings: { connectorId, skipPrebuiltRulesMatching },
       retry,
     };
@@ -287,10 +286,10 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
 
       this.startPolling();
 
-      this.telemetry.reportStartTranslation(params);
+      this.telemetry.reportStartTranslation({ ...params, vendor });
       return result;
     } catch (error) {
-      this.telemetry.reportStartTranslation({ ...params, error });
+      this.telemetry.reportStartTranslation({ ...params, error, vendor });
       throw error;
     }
   }
@@ -301,7 +300,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     vendor,
   }: {
     migrationId: string;
-    vendor: SiemMigrationVendor;
+    vendor?: SiemMigrationVendor;
   }): Promise<StopRuleMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
@@ -339,7 +338,6 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     const skipPrebuiltRulesMatching = taskStats.last_execution?.skip_prebuilt_rules_matching;
     await api.startRuleMigration({
       migrationId: taskStats.id,
-      vendor: taskStats.vendor,
       settings: { connectorId, skipPrebuiltRulesMatching },
     });
   }

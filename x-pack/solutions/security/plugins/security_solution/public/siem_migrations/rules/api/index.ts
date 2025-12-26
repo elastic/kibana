@@ -9,10 +9,7 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { UpdateRuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../common/siem_migrations/rules/types';
-import type {
-  LangSmithOptions,
-  SiemMigrationVendor,
-} from '../../../../common/siem_migrations/model/common.gen';
+import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
@@ -187,7 +184,7 @@ export const upsertMigrationResources = async ({
 export interface StartRuleMigrationParams {
   /** `id` of the migration to start */
   migrationId: string;
-  vendor: SiemMigrationVendor;
+
   settings: {
     /** The connector id to use for the migration */
     connectorId: string;

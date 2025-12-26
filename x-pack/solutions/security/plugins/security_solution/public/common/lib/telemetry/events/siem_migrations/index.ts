@@ -169,7 +169,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   },
   [SiemMigrationsRuleEventTypes.SetupQueryCopied]: {
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
     migrationId: {
       ...migrationIdSchema.migrationId,
       _meta: {
@@ -181,12 +187,24 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   [SiemMigrationsRuleEventTypes.SetupMacrosQueryCopied]: {
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
   },
   [SiemMigrationsRuleEventTypes.SetupLookupNameCopied]: {
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
   },
   [SiemMigrationsRuleEventTypes.SetupResourcesUploaded]: {
     ...baseResultActionSchema,
@@ -252,7 +270,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
   },
 
   // Translated Rule Events
@@ -261,7 +285,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
     ruleMigrationId: {
       type: 'keyword',
       _meta: {
@@ -273,7 +303,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   [SiemMigrationsRuleEventTypes.TranslatedItemInstall]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
     ...eventNameSchema,
     ruleMigrationId: {
       type: 'keyword',
@@ -419,7 +455,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   },
   [SiemMigrationsDashboardEventTypes.SetupQueryCopied]: {
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
     migrationId: {
       ...migrationIdSchema.migrationId,
       _meta: {
@@ -431,12 +473,24 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   [SiemMigrationsDashboardEventTypes.SetupMacrosQueryCopied]: {
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
   },
   [SiemMigrationsDashboardEventTypes.SetupLookupNameCopied]: {
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
   },
   [SiemMigrationsDashboardEventTypes.SetupResourcesUploaded]: {
     ...baseResultActionSchema,
@@ -502,14 +556,26 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
   },
 
   [SiemMigrationsDashboardEventTypes.TranslatedItemUpdate]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
     ruleMigrationId: {
       type: 'keyword',
       _meta: {
@@ -521,7 +587,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   [SiemMigrationsDashboardEventTypes.TranslatedItemInstall]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    ...vendorSchema,
+    vendor: {
+      type: 'keyword',
+      _meta: {
+        description: 'Migration source/vendor',
+        optional: true,
+      },
+    },
     ...eventNameSchema,
     ruleMigrationId: {
       type: 'keyword',
