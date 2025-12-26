@@ -11372,7 +11372,7 @@
               "section": "def-common.FieldFormatsRegistry",
               "text": "FieldFormatsRegistry"
             },
-            ", \"init\" | \"register\"> & { deserialize: ",
+            ", \"register\" | \"init\"> & { deserialize: ",
             {
               "pluginId": "fieldFormats",
               "scope": "common",

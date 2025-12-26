@@ -21,6 +21,99 @@
     "functions": [
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.createAgentBuilderError",
+        "type": "Function",
+        "tags": [],
+        "label": "createAgentBuilderError",
+        "description": [],
+        "signature": [
+          "(errorCode: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ", message: string, meta?: Record<string, any> | undefined) => ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderError",
+            "text": "AgentBuilderError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ", Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.createAgentBuilderError.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "errorCode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentBuilderErrorCode",
+                "text": "AgentBuilderErrorCode"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.createAgentBuilderError.$2",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.createAgentBuilderError.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.createAgentNotFoundError",
         "type": "Function",
         "tags": [],
@@ -285,99 +378,6 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.createAgentBuilderError",
-        "type": "Function",
-        "tags": [],
-        "label": "createAgentBuilderError",
-        "description": [],
-        "signature": [
-          "(errorCode: ",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ", message: string, meta?: Record<string, any> | undefined) => ",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderError",
-            "text": "AgentBuilderError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ", Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.createAgentBuilderError.$1",
-            "type": "Enum",
-            "tags": [],
-            "label": "errorCode",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/agent-builder-common",
-                "scope": "common",
-                "docId": "kibKbnAgentBuilderCommonPluginApi",
-                "section": "def-common.AgentBuilderErrorCode",
-                "text": "AgentBuilderErrorCode"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.createAgentBuilderError.$2",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.createAgentBuilderError.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "meta",
-            "description": [],
-            "signature": [
-              "Record<string, any> | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.createRequestAbortedError",
         "type": "Function",
         "tags": [],
@@ -573,6 +573,55 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_selection.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.isAgentBuilderError",
+        "type": "Function",
+        "tags": [],
+        "label": "isAgentBuilderError",
+        "description": [],
+        "signature": [
+          "(err: unknown) => err is ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderError",
+            "text": "AgentBuilderError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ", Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.isAgentBuilderError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1209,55 +1258,6 @@
               "<string, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.isAgentBuilderError",
-        "type": "Function",
-        "tags": [],
-        "label": "isAgentBuilderError",
-        "description": [],
-        "signature": [
-          "(err: unknown) => err is ",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderError",
-            "text": "AgentBuilderError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ", Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.isAgentBuilderError.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "err",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2047,6 +2047,64 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentBuilderEvent",
+        "description": [
+          "\nBase type for all agentBuilder events"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderEvent",
+            "text": "AgentBuilderEvent"
+          },
+          "<TEventType, TData>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderEvent.type",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nUnique type identifier for the event."
+            ],
+            "signature": [
+              "TEventType"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderEvent.data",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nData bound to this event."
+            ],
+            "signature": [
+              "TData"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3469,64 +3527,6 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderEvent",
-        "type": "Interface",
-        "tags": [],
-        "label": "AgentBuilderEvent",
-        "description": [
-          "\nBase type for all agentBuilder events"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderEvent",
-            "text": "AgentBuilderEvent"
-          },
-          "<TEventType, TData>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.AgentBuilderEvent.type",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nUnique type identifier for the event."
-            ],
-            "signature": [
-              "TEventType"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-common",
-            "id": "def-common.AgentBuilderEvent.data",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "data",
-            "description": [
-              "\nData bound to this event."
-            ],
-            "signature": [
-              "TData"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.ReasoningEventData",
         "type": "Interface",
         "tags": [],
@@ -4368,6 +4368,20 @@
     "enums": [
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderErrorCode",
+        "type": "Enum",
+        "tags": [],
+        "label": "AgentBuilderErrorCode",
+        "description": [
+          "\nCode to identify agentBuilder errors"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.AgentExecutionErrorCode",
         "type": "Enum",
         "tags": [],
@@ -4444,20 +4458,6 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderErrorCode",
-        "type": "Enum",
-        "tags": [],
-        "label": "AgentBuilderErrorCode",
-        "description": [
-          "\nCode to identify agentBuilder errors"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.ToolResultType",
         "type": "Enum",
         "tags": [],
@@ -4503,6 +4503,177 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderAgentExecutionError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderAgentExecutionError",
+        "description": [
+          "\nRepresents an error related to agent execution"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".agentExecutionError, { errCode: ErrCode; } & ",
+          "ExecutionErrorMetaOf",
+          "<ErrCode>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderAgentNotFoundError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderAgentNotFoundError",
+        "description": [
+          "\nError thrown when trying to retrieve or execute a tool not present or available in the current context."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".agentNotFound, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderBadRequestError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderBadRequestError",
+        "description": [
+          "\nRepresents a generic bad request error"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".badRequest, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderConversationNotFoundError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderConversationNotFoundError",
+        "description": [
+          "\nError thrown when trying to retrieve or execute a tool not present or available in the current context."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".conversationNotFound, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.agentBuilderDefaultAgentId",
+        "type": "string",
+        "tags": [],
+        "label": "agentBuilderDefaultAgentId",
+        "description": [
+          "\nID of the agentBuilder default conversational agent"
+        ],
+        "signature": [
+          "\"elastic-ai-agent\""
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderError",
+        "description": [
+          "\nBase error class used for all agentBuilder errors."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<TCode, TMeta>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.AgentBuilderEventTypes",
         "type": "Type",
         "tags": [],
@@ -4512,6 +4683,38 @@
           "\"agent_builder_opt_in_action\" | \"agent_builder_opt_out\" | \"agent_builder_add_to_chat_clicked\" | \"agent_builder_round_complete\" | \"agent_builder_round_error\""
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderInternalError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderInternalError",
+        "description": [
+          "\nRepresents an internal error"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".internalError, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4534,6 +4737,38 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderRequestAbortedError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderRequestAbortedError",
+        "description": [
+          "\nRepresents an internal error"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".requestAborted, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.agentBuilderServerEbtEvents",
         "type": "Array",
         "tags": [],
@@ -4544,6 +4779,38 @@
           "<Record<string, unknown>>[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/telemetry/agent_builder_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderToolNotFoundError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderToolNotFoundError",
+        "description": [
+          "\nError thrown when trying to retrieve or execute a tool not present or available in the current context."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".toolNotFound, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5313,273 +5580,6 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderAgentExecutionError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderAgentExecutionError",
-        "description": [
-          "\nRepresents an error related to agent execution"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ".agentExecutionError, { errCode: ErrCode; } & ",
-          "ExecutionErrorMetaOf",
-          "<ErrCode>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderAgentNotFoundError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderAgentNotFoundError",
-        "description": [
-          "\nError thrown when trying to retrieve or execute a tool not present or available in the current context."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ".agentNotFound, Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderBadRequestError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderBadRequestError",
-        "description": [
-          "\nRepresents a generic bad request error"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ".badRequest, Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderConversationNotFoundError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderConversationNotFoundError",
-        "description": [
-          "\nError thrown when trying to retrieve or execute a tool not present or available in the current context."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ".conversationNotFound, Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.agentBuilderDefaultAgentId",
-        "type": "string",
-        "tags": [],
-        "label": "agentBuilderDefaultAgentId",
-        "description": [
-          "\nID of the agentBuilder default conversational agent"
-        ],
-        "signature": [
-          "\"elastic-ai-agent\""
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderError",
-        "description": [
-          "\nBase error class used for all agentBuilder errors."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<TCode, TMeta>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderInternalError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderInternalError",
-        "description": [
-          "\nRepresents an internal error"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ".internalError, Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderRequestAbortedError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderRequestAbortedError",
-        "description": [
-          "\nRepresents an internal error"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ".requestAborted, Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.AgentBuilderToolNotFoundError",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderToolNotFoundError",
-        "description": [
-          "\nError thrown when trying to retrieve or execute a tool not present or available in the current context."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/sse-utils",
-            "scope": "common",
-            "docId": "kibKbnSseUtilsPluginApi",
-            "section": "def-common.ServerSentEventError",
-            "text": "ServerSentEventError"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderErrorCode",
-            "text": "AgentBuilderErrorCode"
-          },
-          ".toolNotFound, Record<string, any>>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.OtherResult",
         "type": "Type",
         "tags": [],
@@ -6140,38 +6140,6 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.agentIdRegexp",
-        "type": "Object",
-        "tags": [],
-        "label": "agentIdRegexp",
-        "description": [],
-        "signature": [
-          "RegExp"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/agent_ids.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.internalNamespaces",
-        "type": "Object",
-        "tags": [],
-        "label": "internalNamespaces",
-        "description": [
-          "\nList of internally used namespaces\nNote: those are not necessarily all protected."
-        ],
-        "signature": [
-          "{ readonly platformCore: \"platform.core\"; readonly observability: \"observability\"; readonly platformDashboard: \"platform.dashboard\"; readonly security: \"security\"; }"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.AgentBuilderErrorUtils",
         "type": "Object",
         "tags": [],
@@ -6714,6 +6682,38 @@
             ]
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.agentIdRegexp",
+        "type": "Object",
+        "tags": [],
+        "label": "agentIdRegexp",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/agent_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.internalNamespaces",
+        "type": "Object",
+        "tags": [],
+        "label": "internalNamespaces",
+        "description": [
+          "\nList of internally used namespaces\nNote: those are not necessarily all protected."
+        ],
+        "signature": [
+          "{ readonly platformCore: \"platform.core\"; readonly observability: \"observability\"; readonly platformDashboard: \"platform.dashboard\"; readonly security: \"security\"; }"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
