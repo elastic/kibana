@@ -16,10 +16,10 @@ describe('cleanFiltersForSerialize', () => {
     expect(cleanFiltersForSerialize()).toBeUndefined();
   });
 
-  test('should remove undefined "meta.value" property from each filter', () => {
+  test('should remove "meta.value" property from each filter', () => {
     const filters: Filter[] = [
-      { query: { a: 'a' }, meta: { value: undefined } },
-      { query: { b: 'b' }, meta: { value: undefined } },
+      { query: { a: 'a' }, meta: { value: 'value1' } },
+      { query: { b: 'b' }, meta: { value: 'value2' } },
     ];
 
     const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];

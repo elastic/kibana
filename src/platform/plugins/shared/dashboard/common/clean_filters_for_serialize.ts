@@ -7,37 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isCombinedFilter, type Filter } from '@kbn/es-query';
-import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { Filter, FilterMeta } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
 import type { DashboardFilter } from '../server';
+
+const removeUndefinedProperty = <T extends Record<string, any>>(obj: T, key: string): T => {
+  const cleanedMeta: T = { ...obj };
+  if (cleanedMeta[key] === undefined) {
+    delete cleanedMeta[key];
+  }
+  return cleanedMeta;
+};
 
 export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] | undefined {
   if (!filters) return;
   return filters.map((filter) => {
     const cleanedFilter = { ...filter };
-    if (cleanedFilter.meta?.value === undefined) {
+    if (cleanedFilter.meta?.value) {
       // Create a new filter object with meta excluding 'value'
       const { value, ...metaWithoutValue } = cleanedFilter.meta;
       cleanedFilter.meta = metaWithoutValue;
     }
 
-    if (cleanedFilter.meta?.key === undefined) {
-      // Create a new filter object with meta excluding 'key'
-      const { key, ...metaWithoutKey } = cleanedFilter.meta;
-      cleanedFilter.meta = metaWithoutKey;
-    }
-
-    if (cleanedFilter.meta?.alias === undefined) {
-      // Create a new filter object with meta excluding 'alias'
-      const { alias, ...metaWithoutAlias } = cleanedFilter.meta;
-      cleanedFilter.meta = metaWithoutAlias;
-    }
+    cleanedFilter.meta = removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'key');
+    cleanedFilter.meta = removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'alias');
 
     if (isCombinedFilter(filter) && filter.meta?.params) {
       // Recursively clean filters in combined filters
       cleanedFilter.meta.params = cleanFiltersForSerialize(
         cleanedFilter.meta.params as Filter[]
-      ) as FilterMetaParams;
+      ) as FilterMeta['params'];
     }
 
     return cleanedFilter;
