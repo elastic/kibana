@@ -79,4 +79,20 @@ describe('FullScreenWaterfall', () => {
       expect(screen.queryByTestId('fullTraceWaterfall')).not.toBeInTheDocument();
     });
   });
+
+  describe('scrollElement integration', () => {
+    it('should pass scrollElement with correct EUI class to embeddable', async () => {
+      render(<FullScreenWaterfall {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddableRenderer')).toBeInTheDocument();
+      });
+
+      expect(capturedCallbacks.scrollElement).not.toBeNull();
+      expect(capturedCallbacks.scrollElement).toBeInstanceOf(Element);
+      expect(
+        capturedCallbacks.scrollElement.classList.contains(EUI_FLYOUT_BODY_OVERFLOW_CLASS)
+      ).toBe(true);
+    });
+  });
 });
