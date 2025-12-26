@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
-export function registerGetDocCountRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetIndexDocCountRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: addInternalBasePath('/index_doc_count/{indexName}'),
