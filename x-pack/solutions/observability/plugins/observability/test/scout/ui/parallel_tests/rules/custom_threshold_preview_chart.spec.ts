@@ -36,7 +36,7 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
 
     const lensFailure = page.testSubj.locator('embeddable-lens-failure');
     await expect(lensFailure).toBeVisible();
-    // await expect(lensFailure).toContainText('An error occurred while rendering the chart');
+    await expect(lensFailure).toContainText('An error occurred while rendering the chart');
 
     // Fix the introduced error
     await page.testSubj.click('customEquation');
