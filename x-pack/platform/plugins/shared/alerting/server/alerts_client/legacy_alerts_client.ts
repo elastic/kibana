@@ -71,6 +71,7 @@ export class LegacyAlertsClient<
     trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
     recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
     trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    delayed: Record<string, Alert<State, Context, ActionGroupIds>>;
   };
 
   private alertFactory?: AlertFactory<
@@ -86,6 +87,7 @@ export class LegacyAlertsClient<
       trackedActiveAlerts: {},
       recovered: {},
       trackedRecoveredAlerts: {},
+      delayed: {},
     };
   }
 
@@ -218,11 +220,18 @@ export class LegacyAlertsClient<
       shouldLogAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
+      delayedAlerts: this.processedAlerts.delayed,
     });
   }
 
   public getProcessedAlerts(
-    type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
+    type:
+      | 'new'
+      | 'active'
+      | 'trackedActiveAlerts'
+      | 'recovered'
+      | 'trackedRecoveredAlerts'
+      | 'delayed'
   ) {
     if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
@@ -237,6 +246,7 @@ export class LegacyAlertsClient<
       this.maxAlerts,
       this.processedAlerts.trackedActiveAlerts,
       this.processedAlerts.trackedRecoveredAlerts,
+      this.processedAlerts.delayed,
       shouldOptimizeTaskState
     );
   }
@@ -267,6 +277,7 @@ export class LegacyAlertsClient<
       trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
       recoveredAlerts: this.processedAlerts.recovered,
       trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
+      delayedAlerts: this.processedAlerts.delayed,
       alertDelay: opts.alertDelay,
       startedAt: this.startedAtString,
       ruleRunMetricsStore: opts.ruleRunMetricsStore,

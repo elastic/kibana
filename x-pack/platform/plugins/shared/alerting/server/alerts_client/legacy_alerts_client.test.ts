@@ -550,6 +550,7 @@ describe('Legacy Alerts Client', () => {
 
     expect(determineDelayedAlerts).toHaveBeenCalledWith({
       newAlerts: {},
+      delayedAlerts: {},
       activeAlerts: {},
       trackedActiveAlerts: {},
       recoveredAlerts: {},

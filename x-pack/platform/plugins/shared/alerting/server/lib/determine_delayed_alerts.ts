@@ -22,6 +22,7 @@ interface DetermineDelayedAlertsOpts<
   trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   alertDelay: number;
   startedAt?: string | null;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -38,6 +39,7 @@ export function determineDelayedAlerts<
   trackedActiveAlerts,
   recoveredAlerts,
   trackedRecoveredAlerts,
+  delayedAlerts,
   alertDelay,
   startedAt,
   ruleRunMetricsStore,
@@ -51,9 +53,10 @@ export function determineDelayedAlerts<
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {
       // remove from new alerts and active alerts
-      // delete newAlerts[id];
-      // delete activeAlerts[id];
+      delete newAlerts[id];
+      delete activeAlerts[id];
       alert.setStatus(ALERT_STATUS_DELAYED);
+      delayedAlerts[id] = alert;
       delayedAlertsCount += 1;
     } else {
       // if the active count is equal to the alertDelay it is considered a new alert
@@ -79,13 +82,12 @@ export function determineDelayedAlerts<
     alert.resetActiveCount();
   }
 
-  ruleRunMetricsStore.setNumberOfDelayedAlerts(delayedAlertsCount);
-
   return {
     newAlerts,
     activeAlerts,
     trackedActiveAlerts,
     recoveredAlerts,
     trackedRecoveredAlerts,
+    delayedAlerts,
   };
 }

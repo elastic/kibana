@@ -120,6 +120,7 @@ export class AlertsClient<
     active: Record<string, Alert & AlertData>;
     recovered: Record<string, Alert & AlertData>;
     delayed: Record<string, Alert & AlertData>;
+    all: Record<string, Alert & AlertData>;
     seqNo: Record<string, number | undefined>;
     primaryTerm: Record<string, number | undefined>;
     get: (uuid: string) => Alert & AlertData;
@@ -164,18 +165,14 @@ export class AlertsClient<
       active: {},
       recovered: {},
       delayed: {},
+      all: {},
       seqNo: {},
       primaryTerm: {},
       get(uuid: string) {
-        return this.active[uuid] ?? this.recovered[uuid];
+        return this.all[uuid];
       },
       getById(id: string) {
-        const alerts = [
-          ...Object.values(this.active),
-          ...Object.values(this.recovered),
-          ...Object.values(this.delayed),
-        ];
-        return alerts.find((alert) => get(alert, ALERT_INSTANCE_ID) === id);
+        return Object.values(this.all).find((alert) => get(alert, ALERT_INSTANCE_ID) === id);
       },
     };
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
@@ -245,6 +242,8 @@ export class AlertsClient<
         for (const hit of results) {
           const alertHit = hit._source as Alert & AlertData;
           const alertUuid = get(alertHit, ALERT_UUID);
+
+          this.trackedAlerts.all[alertUuid] = alertHit;
 
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
             this.trackedAlerts.active[alertUuid] = alertHit;
@@ -488,29 +487,38 @@ export class AlertsClient<
       ruleTypeAlertDef: this.ruleType.alerts,
       logger: this.options.logger,
     });
-    const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
+    const { rawActiveAlerts, rawRecoveredAlerts, rawDelayedAlerts } =
+      this.getRawAlertInstancesForState();
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_ACTIVE);
+    const delayedAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_DELAYED);
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
-    const activeAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(rawActiveAlerts)) {
+    const rawActiveAndDelayedAlerts = { ...rawActiveAlerts, ...rawDelayedAlerts };
+    const activeAndDelayedAlerts = { ...activeAlerts, ...delayedAlerts };
+
+    const activeAndDelayedAlertsToIndex: Array<Alert & AlertData> = [];
+    for (const id of keys(rawActiveAndDelayedAlerts)) {
       // See if there's an existing active alert document
-      if (activeAlerts[id]) {
-        const trackedAlert = this.trackedAlerts.get(activeAlerts[id].getUuid());
-        if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
+      if (activeAndDelayedAlerts[id]) {
+        const trackedAlert = this.trackedAlerts.get(activeAndDelayedAlerts[id].getUuid());
+        if (
+          !!trackedAlert &&
+          (get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE ||
+            get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_DELAYED)
+        ) {
           const isImproving = isAlertImproving<
             AlertData,
             LegacyState,
             LegacyContext,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(trackedAlert, activeAlerts[id], this.ruleType.actionGroups);
-          activeAlertsToIndex.push(
+          >(trackedAlert, activeAndDelayedAlerts[id], this.ruleType.actionGroups);
+          activeAndDelayedAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
               LegacyState,
@@ -519,7 +527,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               alert: trackedAlert,
-              legacyAlert: activeAlerts[id],
+              legacyAlert: activeAndDelayedAlerts[id],
               rule: this.rule,
               ruleData: this.options.rule,
               isImproving,
@@ -531,7 +539,7 @@ export class AlertsClient<
             })
           );
         } else {
-          activeAlertsToIndex.push(
+          activeAndDelayedAlertsToIndex.push(
             buildNewAlert<
               AlertData,
               LegacyState,
@@ -539,7 +547,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              legacyAlert: activeAlerts[id],
+              legacyAlert: activeAndDelayedAlerts[id],
               rule: this.rule,
               ruleData: this.options.rule,
               runTimestamp: this.runTimestampString,
@@ -595,7 +603,7 @@ export class AlertsClient<
       }
     }
 
-    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
+    const alertsToIndex = [...activeAndDelayedAlertsToIndex, ...recoveredAlertsToIndex].filter(
       (alert: Alert & AlertData) => {
         const alertUuid = get(alert, ALERT_UUID);
         const alertIndex = this.trackedAlerts.indices[alertUuid];

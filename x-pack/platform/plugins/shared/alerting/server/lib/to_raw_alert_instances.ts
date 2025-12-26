@@ -21,16 +21,23 @@ export function toRawAlertInstances<
   maxAlerts: number,
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
+  delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   shouldOptimizeTaskState: boolean = false
 ): {
   rawActiveAlerts: Record<string, RawAlertInstance>;
+  rawDelayedAlerts: Record<string, RawAlertInstance>;
   rawRecoveredAlerts: Record<string, RawAlertInstance>;
 } {
   const rawActiveAlerts: Record<string, RawAlertInstance> = {};
   const rawRecoveredAlerts: Record<string, RawAlertInstance> = {};
+  const rawDelayedAlerts: Record<string, RawAlertInstance> = {};
 
   for (const id of keys(activeAlerts)) {
     rawActiveAlerts[id] = activeAlerts[id].toRaw();
+  }
+
+  for (const id of keys(delayedAlerts)) {
+    rawDelayedAlerts[id] = delayedAlerts[id].toRaw();
   }
 
   if (shouldOptimizeTaskState) {
@@ -40,5 +47,5 @@ export function toRawAlertInstances<
     rawRecoveredAlerts[id] = recoveredAlerts[id].toRaw(true);
   }
 
-  return { rawActiveAlerts, rawRecoveredAlerts };
+  return { rawActiveAlerts, rawRecoveredAlerts, rawDelayedAlerts };
 }

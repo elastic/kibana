@@ -440,7 +440,7 @@ export class TaskRunner<
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
       const alerts = alertsClient.getRawAlertInstancesForState(true);
-      alertsToReturn = alerts.rawActiveAlerts;
+      alertsToReturn = Object.assign({}, alerts.rawActiveAlerts, alerts.rawDelayedAlerts);
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
       alertsToUpdateWithLastScheduledActions =
         alertsClient.getAlertsToUpdateWithLastScheduledActions();
