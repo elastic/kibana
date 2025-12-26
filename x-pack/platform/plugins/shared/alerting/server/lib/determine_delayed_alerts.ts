@@ -9,7 +9,6 @@ import { keys } from 'lodash';
 import { ALERT_STATUS_DELAYED } from '@kbn/rule-data-utils';
 import type { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../types';
-import type { RuleRunMetricsStore } from './rule_run_metrics_store';
 
 interface DetermineDelayedAlertsOpts<
   State extends AlertInstanceState,
@@ -25,7 +24,6 @@ interface DetermineDelayedAlertsOpts<
   delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   alertDelay: number;
   startedAt?: string | null;
-  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export function determineDelayedAlerts<
@@ -42,7 +40,6 @@ export function determineDelayedAlerts<
   delayedAlerts,
   alertDelay,
   startedAt,
-  ruleRunMetricsStore,
 }: DetermineDelayedAlertsOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   let delayedAlertsCount = 0;
 

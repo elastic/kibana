@@ -280,7 +280,6 @@ export class LegacyAlertsClient<
       delayedAlerts: this.processedAlerts.delayed,
       alertDelay: opts.alertDelay,
       startedAt: this.startedAtString,
-      ruleRunMetricsStore: opts.ruleRunMetricsStore,
     });
 
     this.processedAlerts.new = alerts.newAlerts;

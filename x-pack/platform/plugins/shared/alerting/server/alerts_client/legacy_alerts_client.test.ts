@@ -556,7 +556,6 @@ describe('Legacy Alerts Client', () => {
       recoveredAlerts: {},
       trackedRecoveredAlerts: {},
       alertDelay: 5,
-      ruleRunMetricsStore,
       startedAt: null,
     });
 
