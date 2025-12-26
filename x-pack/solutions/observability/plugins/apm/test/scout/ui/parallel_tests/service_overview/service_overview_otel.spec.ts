@@ -83,6 +83,7 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
 
     await test.step('Verify transaction type filter exists', async () => {
       await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).not.toBeEmpty();
     });
 
     await test.step('Click Transactions tab and verify filter persists', async () => {
