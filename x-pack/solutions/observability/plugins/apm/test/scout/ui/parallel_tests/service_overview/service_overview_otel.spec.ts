@@ -17,7 +17,7 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
   test('sendotlp service renders all components', async ({
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -30,23 +30,23 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
     });
 
     await test.step('Verify latency chart is visible', async () => {
-      await expect(serviceDetailsPage.latencyChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible();
     });
 
     await test.step('Verify throughput chart is visible', async () => {
-      await expect(serviceDetailsPage.throughputChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.throughputChart).toBeVisible();
     });
 
     await test.step('Verify transactions table is visible', async () => {
-      await expect(serviceDetailsPage.transactionsGroupTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.transactionsGroupTable).toBeVisible();
     });
 
     await test.step('Verify errors table is visible', async () => {
-      await expect(serviceDetailsPage.serviceOverviewErrorsTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewErrorsTable).toBeVisible();
     });
 
     await test.step('Verify instances table is visible', async () => {
-      await expect(serviceDetailsPage.serviceOverviewInstancesTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewInstancesTable).toBeVisible();
     });
   });
 
@@ -54,14 +54,14 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify instances table has data', async () => {
-      await expect(serviceDetailsPage.serviceOverviewInstancesTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewInstancesTable).toBeVisible();
       // Instance ID should be visible in the table
       await expect(page.getByText(testData.OTEL_INSTANCE_ID)).toBeVisible();
     });
@@ -71,7 +71,7 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
     pageObjects: { serviceDetailsPage },
     page,
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -82,13 +82,17 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
     });
 
     await test.step('Verify transaction type filter exists', async () => {
-      await expect(serviceDetailsPage.getTransactionTypeFilter()).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toBeVisible();
     });
 
     await test.step('Click Transactions tab and verify filter persists', async () => {
-      const initialValue = await serviceDetailsPage.getTransactionTypeFilter().inputValue();
-      await serviceDetailsPage.clickTransactionsTab();
-      await expect(serviceDetailsPage.getTransactionTypeFilter()).toHaveValue(initialValue);
+      const initialValue = await serviceDetailsPage.overviewTab
+        .getTransactionTypeFilter()
+        .inputValue();
+      await serviceDetailsPage.transactionsTab.clickTab();
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue(
+        initialValue
+      );
     });
   });
 
@@ -96,14 +100,14 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify errors table is visible', async () => {
-      await expect(serviceDetailsPage.serviceOverviewErrorsTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewErrorsTable).toBeVisible();
     });
 
     await test.step('Verify error is displayed in errors table', async () => {
@@ -116,14 +120,14 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Click errors tab', async () => {
-      await serviceDetailsPage.clickErrorsTab();
+      await serviceDetailsPage.errorsTab.clickTab();
     });
 
     await test.step('Verify errors page is displayed', async () => {
@@ -135,7 +139,7 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -145,7 +149,7 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
       await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
         testData.SERVICE_OTEL_SENDOTLP
       );
-      await serviceDetailsPage.clickServiceIcon();
+      await serviceDetailsPage.overviewTab.clickServiceIcon();
       await expect(page.getByText('go', { exact: true })).toBeVisible();
     });
   });

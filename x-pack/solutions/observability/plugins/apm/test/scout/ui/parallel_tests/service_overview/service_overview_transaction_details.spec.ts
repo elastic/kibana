@@ -17,14 +17,14 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Click Transactions tab', async () => {
-      await serviceDetailsPage.clickTransactionsTab();
+      await serviceDetailsPage.transactionsTab.clickTab();
     });
 
     await test.step('Click on transaction link and wait for page to load', async () => {
@@ -95,14 +95,14 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Click Transactions tab', async () => {
-      await serviceDetailsPage.clickTransactionsTab();
+      await serviceDetailsPage.transactionsTab.clickTab();
     });
 
     await test.step('Click on transaction link and wait for page to load', async () => {

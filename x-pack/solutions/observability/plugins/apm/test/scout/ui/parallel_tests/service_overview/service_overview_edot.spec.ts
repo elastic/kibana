@@ -17,7 +17,7 @@ test.describe('Service Overview - EDOT Services', { tag: ['@ess', '@svlOblt'] },
   test('adservice service renders all components', async ({
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -30,23 +30,23 @@ test.describe('Service Overview - EDOT Services', { tag: ['@ess', '@svlOblt'] },
     });
 
     await test.step('Verify latency chart is visible', async () => {
-      await expect(serviceDetailsPage.latencyChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible();
     });
 
     await test.step('Verify throughput chart is visible', async () => {
-      await expect(serviceDetailsPage.throughputChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.throughputChart).toBeVisible();
     });
 
     await test.step('Verify transactions table is visible', async () => {
-      await expect(serviceDetailsPage.transactionsGroupTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.transactionsGroupTable).toBeVisible();
     });
 
     await test.step('Verify errors table is visible', async () => {
-      await expect(serviceDetailsPage.serviceOverviewErrorsTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewErrorsTable).toBeVisible();
     });
 
     await test.step('Verify instances table is visible', async () => {
-      await expect(serviceDetailsPage.serviceOverviewInstancesTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewInstancesTable).toBeVisible();
     });
   });
 
@@ -54,14 +54,14 @@ test.describe('Service Overview - EDOT Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify instances table has data', async () => {
-      await expect(serviceDetailsPage.serviceOverviewInstancesTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewInstancesTable).toBeVisible();
       // Instance ID should be visible in the table
       await expect(page.getByText(testData.EDOT_INSTANCE_ID)).toBeVisible();
     });
@@ -71,14 +71,14 @@ test.describe('Service Overview - EDOT Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify errors table is visible', async () => {
-      await expect(serviceDetailsPage.serviceOverviewErrorsTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewErrorsTable).toBeVisible();
     });
 
     await test.step('Verify error is displayed', async () => {
@@ -91,14 +91,14 @@ test.describe('Service Overview - EDOT Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Click errors tab', async () => {
-      await serviceDetailsPage.clickErrorsTab();
+      await serviceDetailsPage.errorsTab.clickTab();
     });
 
     await test.step('Verify errors page is displayed', async () => {
@@ -110,14 +110,14 @@ test.describe('Service Overview - EDOT Services', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Click OpenTelemetry icon and verify metadata popup shows language', async () => {
-      await serviceDetailsPage.clickOpenTelemetryIcon();
+      await serviceDetailsPage.overviewTab.clickOpenTelemetryIcon();
       await expect(page.getByText('java')).toBeVisible();
     });
   });

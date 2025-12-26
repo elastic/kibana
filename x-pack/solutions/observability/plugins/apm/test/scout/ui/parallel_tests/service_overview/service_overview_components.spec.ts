@@ -17,7 +17,7 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -30,19 +30,19 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
     });
 
     await test.step('Renders latency chart', async () => {
-      await expect(serviceDetailsPage.latencyChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible();
     });
 
     await test.step('Renders throughput chart', async () => {
-      await expect(serviceDetailsPage.throughputChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.throughputChart).toBeVisible();
     });
 
     await test.step('Renders transactions group table', async () => {
-      await expect(serviceDetailsPage.transactionsGroupTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.transactionsGroupTable).toBeVisible();
     });
 
     await test.step('Renders errors table', async () => {
-      await expect(serviceDetailsPage.serviceOverviewErrorsTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewErrorsTable).toBeVisible();
     });
 
     await test.step('Renders dependencies table', async () => {
@@ -50,11 +50,11 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
     });
 
     await test.step('Renders instances latency distribution', async () => {
-      await expect(serviceDetailsPage.instancesLatencyDistribution).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.instancesLatencyDistribution).toBeVisible();
     });
 
     await test.step('Renders instances table', async () => {
-      await expect(serviceDetailsPage.serviceOverviewInstancesTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewInstancesTable).toBeVisible();
     });
 
     await test.step('Check a11y violations', async () => {
@@ -67,7 +67,7 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_RUM,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -87,7 +87,7 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
     });
 
     await test.step('Verify instances table is hidden', async () => {
-      await expect(serviceDetailsPage.getInstancesTableContainer()).toBeHidden();
+      await expect(serviceDetailsPage.overviewTab.getInstancesTableContainer()).toBeHidden();
     });
   });
 });

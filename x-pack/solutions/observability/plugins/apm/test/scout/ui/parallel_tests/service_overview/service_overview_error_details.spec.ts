@@ -17,7 +17,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -39,7 +39,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -67,7 +67,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -89,7 +89,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -111,7 +111,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -139,7 +139,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,

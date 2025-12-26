@@ -63,18 +63,20 @@ test.describe('Service Overview - Navigation', { tag: ['@ess', '@svlOblt'] }, ()
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_JAVA,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify transactions table is visible', async () => {
-      await expect(serviceDetailsPage.transactionsGroupTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.transactionsGroupTable).toBeVisible();
     });
 
     await test.step('Click on a transaction', async () => {
-      await serviceDetailsPage.clickTransactionLink(testData.PRODUCT_TRANSACTION_NAME);
+      await serviceDetailsPage.transactionsTab.clickTransactionLink(
+        testData.PRODUCT_TRANSACTION_NAME
+      );
     });
 
     await test.step('Verify navigated to transactions view', async () => {
@@ -86,18 +88,18 @@ test.describe('Service Overview - Navigation', { tag: ['@ess', '@svlOblt'] }, ()
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_JAVA,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify errors table is visible', async () => {
-      await expect(serviceDetailsPage.serviceOverviewErrorsTable).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.serviceOverviewErrorsTable).toBeVisible();
     });
 
     await test.step('Click on an error', async () => {
-      await serviceDetailsPage.clickErrorLink('MockError');
+      await serviceDetailsPage.errorsTab.clickErrorLink('MockError');
     });
 
     await test.step('Verify navigated to error details', async () => {

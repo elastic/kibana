@@ -16,60 +16,62 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   test('persists transaction type when clicking Transactions tab', async ({
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify initial transaction type is request', async () => {
-      await expect(serviceDetailsPage.getTransactionTypeFilter()).toHaveValue('request');
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue(
+        'request'
+      );
     });
 
     await test.step('Select Worker transaction type', async () => {
-      await serviceDetailsPage.selectTransactionType('Worker');
-      await expect(serviceDetailsPage.getTransactionTypeFilter()).toHaveValue('Worker');
+      await serviceDetailsPage.overviewTab.selectTransactionType('Worker');
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue('Worker');
     });
 
     await test.step('Click Transactions tab and verify type persists', async () => {
-      await serviceDetailsPage.clickTransactionsTab();
-      await expect(serviceDetailsPage.getTransactionTypeFilter()).toHaveValue('Worker');
+      await serviceDetailsPage.transactionsTab.clickTab();
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue('Worker');
     });
   });
 
   test('persists transaction type when clicking View transactions link', async ({
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Select Worker transaction type', async () => {
-      await serviceDetailsPage.selectTransactionType('Worker');
-      await expect(serviceDetailsPage.getTransactionTypeFilter()).toHaveValue('Worker');
+      await serviceDetailsPage.overviewTab.selectTransactionType('Worker');
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue('Worker');
     });
 
     await test.step('Click View transactions link and verify type persists', async () => {
-      await serviceDetailsPage.clickViewTransactionsLink();
-      await expect(serviceDetailsPage.getTransactionTypeFilter()).toHaveValue('Worker');
+      await serviceDetailsPage.overviewTab.clickViewTransactionsLink();
+      await expect(serviceDetailsPage.overviewTab.getTransactionTypeFilter()).toHaveValue('Worker');
     });
   });
 
   test('filters by environment', async ({ page, pageObjects: { serviceDetailsPage } }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify environment filter is visible', async () => {
-      await expect(serviceDetailsPage.getEnvironmentFilter()).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.getEnvironmentFilter()).toBeVisible();
     });
 
     await test.step('Select production environment', async () => {
-      await serviceDetailsPage.selectEnvironment('production');
+      await serviceDetailsPage.overviewTab.selectEnvironment('production');
     });
 
     await test.step('Verify URL contains environment parameter', async () => {
@@ -79,39 +81,39 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   });
 
   test('changes comparison window', async ({ pageObjects: { serviceDetailsPage } }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify default comparison is 1 day', async () => {
-      await expect(serviceDetailsPage.getComparisonSelect()).toHaveValue('1d');
+      await expect(serviceDetailsPage.overviewTab.getComparisonSelect()).toHaveValue('1d');
     });
 
     await test.step('Select 1 week comparison', async () => {
-      await serviceDetailsPage.selectComparison('1w');
+      await serviceDetailsPage.overviewTab.selectComparison('1w');
     });
 
     await test.step('Verify 1 week comparison is selected', async () => {
-      await expect(serviceDetailsPage.getComparisonSelect()).toHaveValue('1w');
+      await expect(serviceDetailsPage.overviewTab.getComparisonSelect()).toHaveValue('1w');
     });
   });
 
   test('refresh button refreshes data', async ({ pageObjects: { serviceDetailsPage } }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
     });
 
     await test.step('Verify refresh button is visible', async () => {
-      await expect(serviceDetailsPage.getRefreshButton()).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.getRefreshButton()).toBeVisible();
     });
 
     await test.step('Click refresh button and verify page still works', async () => {
-      await serviceDetailsPage.clickRefreshButton();
-      await expect(serviceDetailsPage.latencyChart).toBeVisible();
+      await serviceDetailsPage.overviewTab.clickRefreshButton();
+      await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible();
     });
   });
 
@@ -119,7 +121,7 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
     page,
     pageObjects: { serviceDetailsPage },
   }) => {
-    await serviceDetailsPage.goToOverviewTab({
+    await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
       rangeFrom: testData.OPBEANS_START_DATE,
       rangeTo: testData.OPBEANS_END_DATE,
@@ -152,7 +154,9 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
     });
 
     await test.step('Verify page still renders correctly', async () => {
-      await expect(serviceDetailsPage.latencyChart).toBeVisible({ timeout: BIGGER_TIMEOUT });
+      await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible({
+        timeout: BIGGER_TIMEOUT,
+      });
     });
   });
 });

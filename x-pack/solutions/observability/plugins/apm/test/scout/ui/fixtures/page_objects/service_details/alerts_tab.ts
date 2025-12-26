@@ -31,10 +31,10 @@ export class AlertsTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad() {
-    // Wait for alerts table to load (either empty state or with data)
-    await Promise.any([
-      this.alertsTableEmptyState.waitFor({ timeout: BIGGER_TIMEOUT }),
-      this.alertsTable.ensureGridVisible(),
-    ]);
+    await this.page
+      .getByTestId('showQueryBarMenu')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+
+    await Promise.any([this.alertsTableEmptyState.waitFor(), this.alertsTable.ensureGridVisible()]);
   }
 }

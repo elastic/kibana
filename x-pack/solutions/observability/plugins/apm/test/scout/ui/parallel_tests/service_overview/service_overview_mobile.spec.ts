@@ -72,11 +72,11 @@ test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] 
     });
 
     await test.step('Verify latency chart is visible', async () => {
-      await expect(serviceDetailsPage.latencyChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible();
     });
 
     await test.step('Verify throughput chart is visible', async () => {
-      await expect(serviceDetailsPage.throughputChart).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.throughputChart).toBeVisible();
     });
   });
 
