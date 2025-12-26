@@ -33,22 +33,6 @@ export class TransactionDetailsPage {
   }
 
   /**
-   * Navigate to transaction details page
-   */
-  async goto(
-    serviceName: string,
-    transactionName: string,
-    timeRange: { rangeFrom: string; rangeTo: string }
-  ) {
-    await this.goToTransactionDetails({
-      serviceName,
-      transactionName,
-      start: timeRange.rangeFrom,
-      end: timeRange.rangeTo,
-    });
-  }
-
-  /**
    * Navigate to service inventory page
    */
   async gotoServiceInventory(

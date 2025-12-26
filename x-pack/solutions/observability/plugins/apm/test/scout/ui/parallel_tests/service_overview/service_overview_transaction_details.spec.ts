@@ -45,14 +45,12 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
-    await transactionDetailsPage.goto(
-      testData.SERVICE_OTEL_SENDOTLP,
-      testData.OTEL_TRANSACTION_NAME,
-      {
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
-      }
-    );
+    await transactionDetailsPage.goToTransactionDetails({
+      serviceName: testData.SERVICE_OTEL_SENDOTLP,
+      transactionName: testData.OTEL_TRANSACTION_NAME,
+      start: testData.OPBEANS_START_DATE,
+      end: testData.OPBEANS_END_DATE,
+    });
 
     await test.step('Verify waterfall button is visible', async () => {
       await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
@@ -65,14 +63,12 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
-    await transactionDetailsPage.goto(
-      testData.SERVICE_OTEL_SENDOTLP,
-      testData.OTEL_TRANSACTION_NAME,
-      {
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
-      }
-    );
+    await transactionDetailsPage.goToTransactionDetails({
+      serviceName: testData.SERVICE_OTEL_SENDOTLP,
+      transactionName: testData.OTEL_TRANSACTION_NAME,
+      start: testData.OPBEANS_START_DATE,
+      end: testData.OPBEANS_END_DATE,
+    });
 
     await test.step('Click on waterfall accordion', async () => {
       await page.getByTestId('apmWaterfallButton').click();
@@ -123,14 +119,12 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
-    await transactionDetailsPage.goto(
-      testData.SERVICE_EDOT_ADSERVICE,
-      testData.EDOT_TRANSACTION_NAME,
-      {
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
-      }
-    );
+    await transactionDetailsPage.goToTransactionDetails({
+      serviceName: testData.SERVICE_EDOT_ADSERVICE,
+      transactionName: testData.EDOT_TRANSACTION_NAME,
+      start: testData.OPBEANS_START_DATE,
+      end: testData.OPBEANS_END_DATE,
+    });
 
     await test.step('Verify waterfall button is visible', async () => {
       await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
@@ -147,14 +141,12 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
-    await transactionDetailsPage.goto(
-      testData.SERVICE_EDOT_ADSERVICE,
-      testData.EDOT_TRANSACTION_NAME,
-      {
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
-      }
-    );
+    await transactionDetailsPage.goToTransactionDetails({
+      serviceName: testData.SERVICE_EDOT_ADSERVICE,
+      transactionName: testData.EDOT_TRANSACTION_NAME,
+      start: testData.OPBEANS_START_DATE,
+      end: testData.OPBEANS_END_DATE,
+    });
 
     await test.step('Click on waterfall accordion', async () => {
       await page.getByTestId('apmWaterfallButton').click();
