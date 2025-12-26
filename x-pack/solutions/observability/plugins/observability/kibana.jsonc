@@ -44,7 +44,7 @@
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
-      "onechat",
+      "agentBuilder",
       "aiops",
       "cases",
       "discover",
