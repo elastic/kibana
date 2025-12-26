@@ -22,8 +22,10 @@ import type { ICommandContext } from '../../../../registry/types';
 import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';
 
-/** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
+// Parses mapParams format: {name='paramName', values=[val1, val2]}
+const MAP_PARAMS_REGEX = /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*\}/g;
 
+/** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
 export class SignatureAnalyzer {
   private readonly signatures: Signature[];
 
@@ -458,27 +460,25 @@ export class SignatureAnalyzer {
 
   /**
    * Parses a mapParams definition string into MapParameters.
-   * This format is specific to function signature definitions.
    *
-   * E.g., "{name='boost', values=[2.5]}, {name='analyzer', values=[standard]}"
-   * → { boost: { type: 'number', suggestions: [...] }, analyzer: { type: 'string', suggestions: [...] } }
+   * Input:  "{name='boost', values=[2.5]}, {name='analyzer', values=[standard]}"
+   * Output: { boost: { type: 'number', ... }, analyzer: { type: 'string', ... } }
    */
   public static parseMapParams(mapParamsStr: string): MapParameters {
-    const paramRegex = /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*\}/g;
+    const result: MapParameters = {};
 
-    return [...mapParamsStr.matchAll(paramRegex)].reduce<MapParameters>(
-      (acc, [, name, valuesStr = '']) => {
-        // Parse and sanitize values (remove single quotes used in signature format)
-        const values = valuesStr
-          ? valuesStr
-              .split(',')
-              .map((val) => val.trim().replace(/^'|'$/g, ''))
-              .filter(Boolean)
-          : [];
-        acc[name] = parseMapValues(values);
-        return acc;
-      },
-      {}
-    );
+    for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
+      const paramName = match[1];
+      const rawValues = match[2] ?? '';
+
+      const values = rawValues
+        .split(',')
+        .map((val) => val.trim().replace(/^'|'$/g, ''))
+        .filter(Boolean);
+
+      result[paramName] = parseMapValues(values);
+    }
+
+    return result;
   }
 }

@@ -44,17 +44,12 @@ import type {
 import { FunctionDefinitionTypes } from '../../commands/definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../../commands/definitions/utils';
-import {
-  timeUnitsToSuggest,
-  type FullTextSearchFunctionName,
-} from '../../commands/definitions/constants';
+import { timeUnitsToSuggest } from '../../commands/definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
-
-// Functions to ignore per location (e.g., match_phrase is only shown inside SCORE, not in EVAL)
-const HIDDEN_FTS_FUNCTIONS: FullTextSearchFunctionName[] = ['match_phrase'];
+import { FUNCTIONS_TO_IGNORE } from '../../commands/registry/eval/autocomplete';
 
 export const IGNORED_FUNCTIONS_BY_LOCATION: { [K in Location]?: string[] } = {
-  eval: HIDDEN_FTS_FUNCTIONS,
+  eval: [...FUNCTIONS_TO_IGNORE.names],
 };
 
 export const DATE_DIFF_TIME_UNITS = (() => {

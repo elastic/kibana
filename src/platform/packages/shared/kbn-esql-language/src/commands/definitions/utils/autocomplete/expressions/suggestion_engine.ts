@@ -197,11 +197,8 @@ function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | nul
   }
 
   const functionName = getLastFunctionName(innerText);
-  const functionDef = functionName ? getFunctionDefinition(functionName) : undefined;
-
-  const mapParamsStr = functionDef?.signatures
-    .flatMap(({ params }) => params)
-    .find(({ mapParams }) => mapParams)?.mapParams;
+  const functionDef = functionName && getFunctionDefinition(functionName);
+  const mapParamsStr = functionDef && SignatureAnalyzer.extractMapParams(functionDef.signatures);
 
   if (!mapParamsStr) {
     return null;

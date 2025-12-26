@@ -24,7 +24,7 @@ import type {
   ParameterHint,
 } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
-import { FULL_TEXT_SEARCH_FUNCTIONS, type FullTextSearchFunctionName } from '../../../../constants';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import {
   allStarConstant,
   valuePlaceholderConstant,
@@ -35,18 +35,14 @@ import {
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
 // functionDefinition is guaranteed by in_function.ts early return
-type FunctionParamContext = NonNullable<
-  ExpressionContext['options']['functionParameterContext']
-> & {
-  functionDefinition: FunctionDefinition;
-};
+type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
 /** Handles suggestions when starting a new expression (empty position) */
 export async function suggestForEmptyExpression(
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   const { options } = ctx;
-  const functionParamContext = options.functionParameterContext as FunctionParamContext;
+  const functionParamContext = options.functionParameterContext;
 
   if (functionParamContext) {
     return handleFunctionParameterContext(functionParamContext, ctx);
@@ -182,9 +178,7 @@ function buildLiteralSuggestions(
   // - FTS functions
   // - BUCKET first parameter (field) in STATS
   // - When constantOnly params exist (already added via getCompatibleLiterals)
-  const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(
-    functionDefinition!.name as FullTextSearchFunctionName
-  );
+  const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(functionDefinition!.name);
   const isBucketFirstParam =
     matchesSpecialFunction(functionDefinition!.name, 'bucket') &&
     command.name === 'stats' &&

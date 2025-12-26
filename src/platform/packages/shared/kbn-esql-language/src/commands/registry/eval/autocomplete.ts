@@ -11,7 +11,7 @@ import { within } from '../../../ast/location';
 import { suggestForExpression } from '../../definitions/utils';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
-import { type FullTextSearchFunctionName } from '../../definitions/constants';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../definitions/constants';
 import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import {
   commaCompleteItem,
@@ -21,11 +21,11 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { Location, type ICommandContext, type ISuggestionItem } from '../types';
 
-const FUNCTIONS_TO_IGNORE = {
-  names: ['match_phrase'] as FullTextSearchFunctionName[],
-  allowedInsideFunctions: {
-    match_phrase: ['score'],
-  } as Record<FullTextSearchFunctionName, string[]>,
+export const FUNCTIONS_TO_IGNORE = {
+  names: [...FULL_TEXT_SEARCH_FUNCTIONS],
+  allowedInsideFunctions: Object.fromEntries(
+    FULL_TEXT_SEARCH_FUNCTIONS.map((fn) => [fn, ['scsore']])
+  ) as Record<(typeof FULL_TEXT_SEARCH_FUNCTIONS)[number], string[]>,
 };
 
 export async function autocomplete(

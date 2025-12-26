@@ -158,6 +158,4 @@ export const FULL_TEXT_SEARCH_FUNCTIONS = [
   'multi_match',
   'qstr',
   'kql',
-] as const;
-
-export type FullTextSearchFunctionName = (typeof FULL_TEXT_SEARCH_FUNCTIONS)[number];
+];

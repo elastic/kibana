@@ -18,6 +18,8 @@ import { findFinalWord } from './helpers';
 
 // Strip quoted segments so foo(bar) inside strings doesn't get picked as a function
 export const DOUBLE_QUOTED_STRING_REGEX = /"([^"\\]|\\.)*"/g;
+// Extracts all object keys from "key": patterns in JSON-like syntax
+export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
 
 export interface MapParameterValues {
   type: MapValueType;
@@ -61,8 +63,7 @@ export function getCommandMapExpressionSuggestions(
   }
   // Suggest a parameter entry after { or after a comma or when opening quotes after those
   if (/{\s*"?$/i.test(innerText) || /,\s*"?$/.test(innerText)) {
-    const usedParams = new Set([...innerText.matchAll(/"([^"]+)"\s*:/g)].map(([, name]) => name));
-
+    const usedParams = new Set([...innerText.matchAll(OBJECT_KEYS_REGEX)].map(([, name]) => name));
     const availableParamNames = Object.keys(availableParameters).filter(
       (paramName) => !usedParams.has(paramName)
     );
