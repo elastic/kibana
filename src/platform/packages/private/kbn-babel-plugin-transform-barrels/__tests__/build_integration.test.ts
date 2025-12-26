@@ -34,9 +34,11 @@ const BUILD_DIR = Path.join(REPO_ROOT, 'build', 'kibana');
 const CORE_SERVER_OUTPUT = Path.join(BUILD_DIR, CORE_SERVER_PKG.normalizedRepoRelativeDir, 'src');
 const CONFIG_OUTPUT = Path.join(BUILD_DIR, CONFIG_PKG.normalizedRepoRelativeDir, 'src');
 
+const LOGGER = new ToolingLog({ level: 'info', writeTo: process.stdout });
+const FILE_ENCODING = 'utf-8';
+
 // We allow extra time due to building packages. Runtime is about 2min.
 jest.setTimeout(300 * 1000);
-const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
 
 describe('barrel transform build integration', () => {
   beforeAll(async () => {
@@ -64,11 +66,11 @@ describe('barrel transform build integration', () => {
     mockConfig.getDistPackagesFromRepo = () => [CORE_SERVER_PKG, CONFIG_PKG];
 
     const build = new Build(mockConfig);
-    await BuildPackages.run(mockConfig, log, build);
+    await BuildPackages.run(mockConfig, LOGGER, build);
 
     const httpServerFileContent = await Fsp.readFile(
       Path.join(CORE_SERVER_OUTPUT, 'http_server.js'),
-      'utf-8'
+      FILE_ENCODING
     );
 
     // Original: import { getEcsResponseLog } from './logging';
@@ -89,9 +91,30 @@ describe('barrel transform build integration', () => {
     // 2. src/platform/packages/shared/kbn-std/src/url.ts (source)
     const basePathFileContent = await Fsp.readFile(
       Path.join(CORE_SERVER_OUTPUT, 'base_path_service.js'),
-      'utf-8'
+      FILE_ENCODING
     );
     expect(basePathFileContent).not.toMatch(/require\(['"]@kbn\/std['"]\)/);
     expect(basePathFileContent).toMatch(/require\(['"]@kbn\/std\/src\/url['"]\)/);
+
+    // Original: import { SchemaTypeError, ValidationError } from '@kbn/config-schema';
+    // Multi level barrel import
+    // 1. src/platform/packages/shared/kbn-config-schema/index.ts (barrel)
+    // 2. src/platform/packages/shared/kbn-config-schema/src/errors/index.ts (barrel)
+    // 3a. src/platform/packages/shared/kbn-config-schema/src/errors/schema_type_error.ts
+    // 3b. src/platform/packages/shared/kbn-config-schema/src/errors/validation_error.ts
+    const configServiceFileContent = await Fsp.readFile(
+      Path.join(CONFIG_OUTPUT, 'config_service.js'),
+      FILE_ENCODING
+    );
+    expect(configServiceFileContent).not.toMatch(/require\(['"]@kbn\/config-schema['"]\)/);
+    expect(configServiceFileContent).not.toMatch(
+      /require\(['"]@kbn\/config-schema\/src\/errors['"]\)/
+    );
+    expect(configServiceFileContent).toMatch(
+      /require\(['"]@kbn\/config-schema\/src\/errors\/schema_type_error['"]\)/
+    );
+    expect(configServiceFileContent).toMatch(
+      /require\(['"]@kbn\/config-schema\/src\/errors\/validation_error['"]\)/
+    );
   });
 });
