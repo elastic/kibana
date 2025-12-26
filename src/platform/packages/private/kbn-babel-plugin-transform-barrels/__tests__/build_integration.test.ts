@@ -18,24 +18,30 @@ import { BuildPackages } from '../../../../../dev/build/tasks/build_packages_tas
 import { Config } from '../../../../../dev/build/lib/config';
 import { Build } from '../../../../../dev/build/lib/build';
 
-const TEST_PACKAGE_PATH = 'src/core/packages/http/server-internal';
-const TEST_PACKAGE_MANIFEST = Path.join(REPO_ROOT, TEST_PACKAGE_PATH, 'kibana.jsonc');
+const CORE_SERVER_PKG_MANIFEST = Path.join(
+  REPO_ROOT,
+  'src/core/packages/http/server-internal/kibana.jsonc'
+);
+const CONFIG_PKG_MANIFEST = Path.join(
+  REPO_ROOT,
+  'src/platform/packages/shared/kbn-config/kibana.jsonc'
+);
+
+const CORE_SERVER_PKG = Package.fromManifest(REPO_ROOT, CORE_SERVER_PKG_MANIFEST);
+const CONFIG_PKG = Package.fromManifest(REPO_ROOT, CONFIG_PKG_MANIFEST);
+
+const BUILD_DIR = Path.join(REPO_ROOT, 'build', 'kibana');
+const CORE_SERVER_OUTPUT = Path.join(BUILD_DIR, CORE_SERVER_PKG.normalizedRepoRelativeDir, 'src');
+const CONFIG_OUTPUT = Path.join(BUILD_DIR, CONFIG_PKG.normalizedRepoRelativeDir, 'src');
 
 // We allow extra time due to building packages. Runtime is about 2min.
 jest.setTimeout(300 * 1000);
+const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
 
 describe('barrel transform build integration', () => {
-  let outputDir: string;
-  let testPackage: Package;
-  let log: ToolingLog;
-
   beforeAll(async () => {
-    testPackage = Package.fromManifest(REPO_ROOT, TEST_PACKAGE_MANIFEST);
-    outputDir = Path.join(REPO_ROOT, 'build', 'kibana', testPackage.normalizedRepoRelativeDir);
-    log = new ToolingLog({ level: 'info', writeTo: process.stdout });
-
     // Cleanup package build if it already exists
-    await Fsp.rm(outputDir, { recursive: true, force: true });
+    await Fsp.rm(BUILD_DIR, { recursive: true, force: true });
   });
 
   it('builds package with barrel transforms applied', async () => {
@@ -55,30 +61,37 @@ describe('barrel transform build integration', () => {
     });
 
     const mockConfig = Object.create(realConfig);
-    mockConfig.getDistPackagesFromRepo = () => [testPackage];
+    mockConfig.getDistPackagesFromRepo = () => [CORE_SERVER_PKG, CONFIG_PKG];
 
     const build = new Build(mockConfig);
     await BuildPackages.run(mockConfig, log, build);
 
-    const outputSrcDir = Path.join(outputDir, 'src');
-
-    const testFilePath = Path.join(outputSrcDir, 'http_server.js');
-    const testFileContent = await Fsp.readFile(testFilePath, 'utf-8');
+    const httpServerFileContent = await Fsp.readFile(
+      Path.join(CORE_SERVER_OUTPUT, 'http_server.js'),
+      'utf-8'
+    );
 
     // Original: import { getEcsResponseLog } from './logging';
-    expect(testFileContent).not.toMatch(/require\(['"]\.\/logging['"]\)/);
-    expect(testFileContent).toMatch(/require\(['"]\.\/logging\/get_response_log['"]\)/);
+    // Package internal (relative) barrel import
+    // 1. src/core/packages/http/server-internal/src/logging/index.ts (barrel)
+    // 2. src/core/packages/http/server-internal/src/logging/get_response_log.ts (source)
+    expect(httpServerFileContent).not.toMatch(/require\(['"]\.\/logging['"]\)/);
+    expect(httpServerFileContent).toMatch(/require\(['"]\.\/logging\/get_response_log['"]\)/);
 
     // Original: import { firstValueFrom, pairwise, take } from 'rxjs';
     // With package exports field, the import is transformed to use the public subpath
-    expect(testFileContent).not.toMatch(/require\(['"]rxjs['"]\)/);
-    expect(testFileContent).toMatch(/require\(['"]rxjs\/internal\/firstValueFrom['"]\)/);
+    expect(httpServerFileContent).not.toMatch(/require\(['"]rxjs['"]\)/);
+    expect(httpServerFileContent).toMatch(/require\(['"]rxjs\/internal\/firstValueFrom['"]\)/);
 
     // Original: import { modifyUrl } from '@kbn/std';
-    // @kbn/std has no exports field - tests symlinked package barrel transform
-    const basePathTestFilePath = Path.join(outputSrcDir, 'base_path_service.js');
-    const basePathTestFileContent = await Fsp.readFile(basePathTestFilePath, 'utf-8');
-    expect(basePathTestFileContent).not.toMatch(/require\(['"]@kbn\/std['"]\)/);
-    expect(basePathTestFileContent).toMatch(/require\(['"]@kbn\/std\/src\/url['"]\)/);
+    // Single level barrel import
+    // 1. src/platform/packages/shared/kbn-std/index.ts (barrel)
+    // 2. src/platform/packages/shared/kbn-std/src/url.ts (source)
+    const basePathFileContent = await Fsp.readFile(
+      Path.join(CORE_SERVER_OUTPUT, 'base_path_service.js'),
+      'utf-8'
+    );
+    expect(basePathFileContent).not.toMatch(/require\(['"]@kbn\/std['"]\)/);
+    expect(basePathFileContent).toMatch(/require\(['"]@kbn\/std\/src\/url['"]\)/);
   });
 });
