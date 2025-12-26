@@ -14,7 +14,7 @@ export const COMMON_API_HEADERS = {
   'elastic-api-version': '1',
 } as const;
 
-export const TRANSFORM_USERS = {
+export const TRANSFORM_USERS: Record<string, KibanaRole> = {
   transformPowerUser: {
     kibana: [
       {
@@ -32,7 +32,7 @@ export const TRANSFORM_USERS = {
         { names: ['user-*'], privileges: ['read', 'index', 'manage', 'delete'] },
       ],
     },
-  } as KibanaRole,
+  },
 
   transformViewerUser: {
     kibana: [
@@ -49,7 +49,7 @@ export const TRANSFORM_USERS = {
         { names: ['user-*'], privileges: ['read'] },
       ],
     },
-  } as KibanaRole,
+  },
 
   transformUnauthorizedUser: {
     kibana: [
@@ -63,5 +63,5 @@ export const TRANSFORM_USERS = {
       cluster: [],
       indices: [],
     },
-  } as KibanaRole,
+  },
 };
