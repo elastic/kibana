@@ -73,20 +73,20 @@ describe('barrel transform build integration', () => {
       FILE_ENCODING
     );
 
-    // Original: import { getEcsResponseLog } from './logging';
     // Package internal (relative) barrel import
+    // Original: import { getEcsResponseLog } from './logging';
     // 1. src/core/packages/http/server-internal/src/logging/index.ts (barrel)
     // 2. src/core/packages/http/server-internal/src/logging/get_response_log.ts (source)
     expect(httpServerFileContent).not.toMatch(/require\(['"]\.\/logging['"]\)/);
     expect(httpServerFileContent).toMatch(/require\(['"]\.\/logging\/get_response_log['"]\)/);
 
+    // Node module with public subpaths
     // Original: import { firstValueFrom, pairwise, take } from 'rxjs';
-    // With package exports field, the import is transformed to use the public subpath
     expect(httpServerFileContent).not.toMatch(/require\(['"]rxjs['"]\)/);
     expect(httpServerFileContent).toMatch(/require\(['"]rxjs\/internal\/firstValueFrom['"]\)/);
 
-    // Original: import { modifyUrl } from '@kbn/std';
     // Single level barrel import
+    // Original: import { modifyUrl } from '@kbn/std';
     // 1. src/platform/packages/shared/kbn-std/index.ts (barrel)
     // 2. src/platform/packages/shared/kbn-std/src/url.ts (source)
     const basePathFileContent = await Fsp.readFile(
@@ -96,8 +96,8 @@ describe('barrel transform build integration', () => {
     expect(basePathFileContent).not.toMatch(/require\(['"]@kbn\/std['"]\)/);
     expect(basePathFileContent).toMatch(/require\(['"]@kbn\/std\/src\/url['"]\)/);
 
-    // Original: import { SchemaTypeError, ValidationError } from '@kbn/config-schema';
     // Multi level barrel import
+    // Original: import { SchemaTypeError, ValidationError } from '@kbn/config-schema';
     // 1. src/platform/packages/shared/kbn-config-schema/index.ts (barrel)
     // 2. src/platform/packages/shared/kbn-config-schema/src/errors/index.ts (barrel)
     // 3a. src/platform/packages/shared/kbn-config-schema/src/errors/schema_type_error.ts
