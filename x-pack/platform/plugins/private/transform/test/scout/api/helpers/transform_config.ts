@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { PutTransformsRequestSchema } from '../../../../server/routes/api_schemas/transforms';
+import type { IndexName, PutTransformsRequestSchema, TransformId } from '../../../../common';
 
-export function generateDestIndex(transformId: string): string {
+export function generateDestIndex(transformId: TransformId): IndexName {
   return `user-${transformId}`;
 }
 
 export function generateTransformConfig(
-  transformId: string,
+  transformId: TransformId,
   continuous = false
 ): PutTransformsRequestSchema {
   const destinationIndex = generateDestIndex(transformId);

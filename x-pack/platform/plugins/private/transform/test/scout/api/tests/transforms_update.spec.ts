@@ -6,8 +6,10 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import type { GetTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
-import type { PostTransformsUpdateResponseSchema } from '../../../../server/routes/api_schemas/update_transforms';
+import type {
+  GetTransformsResponseSchema,
+  PostTransformsUpdateResponseSchema,
+} from '../../../../common';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';

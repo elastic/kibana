@@ -9,7 +9,7 @@ import { expect, tags } from '@kbn/scout';
 import type {
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
-} from '../../../../server/routes/api_schemas/transforms';
+} from '../../../../common';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';

@@ -5,28 +5,32 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { PutTransformsRequestSchema } from '../../../../server/routes/api_schemas/transforms';
+import type { Client, estypes } from '@elastic/elasticsearch';
+import type { PutTransformsRequestSchema, TransformId } from '../../../../common';
 
 export interface TransformApiService {
-  createTransform: (transformId: string, config: PutTransformsRequestSchema) => Promise<void>;
+  createTransform: (transformId: TransformId, config: PutTransformsRequestSchema) => Promise<void>;
   createTransformWithSecondaryAuth: (
-    transformId: string,
+    transformId: TransformId,
     config: PutTransformsRequestSchema,
     secondaryAuthValue: string,
     deferValidation?: boolean
   ) => Promise<void>;
-  getTransform: (transformId: string) => Promise<any>;
-  getTransformStats: (transformId: string) => Promise<any>;
-  deleteTransform: (transformId: string) => Promise<void>;
-  waitForTransformToExist: (transformId: string) => Promise<void>;
+  getTransform: (
+    transformId: TransformId
+  ) => Promise<estypes.TransformGetTransformTransformSummary>;
+  getTransformStats: (
+    transformId: TransformId
+  ) => Promise<estypes.TransformGetTransformStatsTransformStats>;
+  deleteTransform: (transformId: TransformId) => Promise<void>;
+  waitForTransformToExist: (transformId: TransformId) => Promise<void>;
   cleanTransformIndices: () => Promise<void>;
   deleteIndices: (index: string) => Promise<void>;
 }
 
 export function getTransformApiService(esClient: Client): TransformApiService {
   return {
-    async waitForTransformToExist(transformId: string) {
+    async waitForTransformToExist(transformId: TransformId) {
       let retries = 10;
       while (retries > 0) {
         try {
@@ -42,7 +46,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       }
     },
 
-    async createTransform(transformId: string, config: PutTransformsRequestSchema) {
+    async createTransform(transformId: TransformId, config: PutTransformsRequestSchema) {
       try {
         await esClient.transform.putTransform({
           transform_id: transformId,
@@ -55,7 +59,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
     },
 
     async createTransformWithSecondaryAuth(
-      transformId: string,
+      transformId: TransformId,
       config: PutTransformsRequestSchema,
       secondaryAuthEncodedApiKey: string,
       deferValidation = false
@@ -80,7 +84,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       }
     },
 
-    async getTransform(transformId: string) {
+    async getTransform(transformId: TransformId) {
       try {
         const response = await esClient.transform.getTransform({ transform_id: transformId });
         return response.transforms[0];
@@ -89,7 +93,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       }
     },
 
-    async getTransformStats(transformId: string) {
+    async getTransformStats(transformId: TransformId) {
       try {
         const response = await esClient.transform.getTransformStats({
           transform_id: transformId,
@@ -100,7 +104,7 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       }
     },
 
-    async deleteTransform(transformId: string) {
+    async deleteTransform(transformId: TransformId) {
       try {
         // Stop the transform first
         await esClient.transform.stopTransform({

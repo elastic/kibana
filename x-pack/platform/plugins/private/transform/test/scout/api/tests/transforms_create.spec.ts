@@ -7,7 +7,7 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { CookieHeader } from '@kbn/scout';
-import type { PutTransformsResponseSchema } from '../../../../server/routes/api_schemas/transforms';
+import type { PutTransformsResponseSchema } from '../../../../common';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';

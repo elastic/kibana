@@ -7,11 +7,11 @@
 
 import { expect } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { TRANSFORM_STATE } from '../../../../common/constants';
+import { TRANSFORM_STATE, type TransformId } from '../../../../common';
 import type { TransformApiServicesFixture } from '../fixtures';
 
 export async function expectUnauthorizedTransform(
-  transformId: string,
+  transformId: TransformId,
   createdByUserCredentials: RoleApiCredentials,
   apiServices: TransformApiServicesFixture
 ) {
@@ -28,7 +28,7 @@ export async function expectUnauthorizedTransform(
 }
 
 export async function expectReauthorizedTransform(
-  transformId: string,
+  transformId: TransformId,
   createdByUserCredentials: RoleApiCredentials,
   apiServices: TransformApiServicesFixture
 ) {

@@ -9,7 +9,7 @@ import { expect, tags } from '@kbn/scout';
 import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
-} from '../../../../server/routes/api_schemas/schedule_now_transforms';
+} from '../../../../common';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';

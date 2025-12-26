@@ -11,4 +11,4 @@ export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
   [ELASTIC_HTTP_VERSION_HEADER]: '1',
-};
+} as const;

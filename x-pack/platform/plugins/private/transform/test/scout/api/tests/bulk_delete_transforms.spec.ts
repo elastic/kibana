@@ -10,7 +10,7 @@ import type { CookieHeader } from '@kbn/scout';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
-} from '../../../../server/routes/api_schemas/delete_transforms';
+} from '../../../../common';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';

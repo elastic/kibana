@@ -10,7 +10,7 @@ import type { CookieHeader } from '@kbn/scout';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
-} from '../../../../server/routes/api_schemas/start_transforms';
+} from '../../../../common';
 import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';

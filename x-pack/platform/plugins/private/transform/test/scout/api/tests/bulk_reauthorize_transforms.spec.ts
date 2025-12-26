@@ -7,7 +7,7 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { CookieHeader, RoleApiCredentials } from '@kbn/scout';
-import type { ReauthorizeTransformsRequestSchema } from '../../../../server/routes/api_schemas/reauthorize_transforms';
+import type { ReauthorizeTransformsRequestSchema } from '../../../../common';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
 import { expectReauthorizedTransform } from '../helpers/transform_assertions';
 import { transformApiTest as apiTest } from '../fixtures';

@@ -7,10 +7,7 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { CookieHeader } from '@kbn/scout';
-import type {
-  StopTransformsRequestSchema,
-  StopTransformsResponseSchema,
-} from '../../../../server/routes/api_schemas/stop_transforms';
+import type { StopTransformsRequestSchema, StopTransformsResponseSchema } from '../../../../common';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
 
