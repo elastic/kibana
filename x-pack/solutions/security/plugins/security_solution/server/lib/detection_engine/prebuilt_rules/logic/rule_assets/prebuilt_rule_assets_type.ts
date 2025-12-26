@@ -79,17 +79,8 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
         },
       ],
       schemas: {
-        forwardCompatibility: schema.object(
-          {
-            rule_id: schema.string(),
-            version: schema.number(),
-            name: schema.string(),
-            tags: schema.maybe(schema.arrayOf(schema.string())),
-            severity: schema.string(),
-            risk_score: schema.number(),
-          },
-          { unknowns: 'ignore' }
-        ),
+        forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
+        create: schema.object({}, { unknowns: 'allow' }),
       },
     },
   },
