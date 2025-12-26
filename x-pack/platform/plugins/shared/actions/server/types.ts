@@ -271,7 +271,7 @@ export interface ConnectorToken extends SavedObjectAttributes {
   connectorId: string;
   tokenType: string;
   token: string;
-  expiresAt: string;
+  expiresAt?: string;
   createdAt: string;
   updatedAt?: string;
   refreshToken?: string;

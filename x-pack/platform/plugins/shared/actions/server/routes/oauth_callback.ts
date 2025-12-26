@@ -303,9 +303,9 @@ export const oauthCallbackRoute = (
           });
 
           const now = Date.now();
-          // TODO: if no expiresIn, can we set accessTokenExpiresAt to null and handle that?
-          const expiresIn = tokenResult.expiresIn ? tokenResult.expiresIn : 3600;
-          const accessTokenExpiresAt = new Date(now + expiresIn * 1000).toISOString();
+          const accessTokenExpiresAt = tokenResult.expiresIn
+            ? new Date(now + tokenResult.expiresIn * 1000).toISOString()
+            : undefined;
 
           const refreshTokenExpiresAt = tokenResult.refreshTokenExpiresIn
             ? new Date(now + tokenResult.refreshTokenExpiresIn * 1000).toISOString()
