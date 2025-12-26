@@ -25,16 +25,28 @@ export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
     if (count !== undefined || countError) {
       return;
     }
-    httpSetup
-      .get<{ count: number }>(
-        `${INTERNAL_API_BASE_PATH}/index_doc_count/${encodeURIComponent(indexName)}`
-      )
-      .then((response) => {
-        setCount(response.count);
-      })
-      .catch(() => {
-        setCountError(true);
-      });
+    const abortController = new AbortController();
+
+    (async () => {
+      try {
+        const { count: countResponse } = await httpSetup.get<{ count: number }>(
+          `${INTERNAL_API_BASE_PATH}/index_doc_count/${encodeURIComponent(indexName)}`,
+          { signal: abortController.signal }
+        );
+
+        if (!abortController.signal.aborted) {
+          setCount(countResponse);
+        }
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          setCountError(true);
+        }
+      }
+    })();
+
+    return () => {
+      abortController.abort();
+    };
   });
 
   if (countError) {
