@@ -9,8 +9,6 @@
 
 import { ControlsPlugin } from './plugin';
 
-export { ACTION_CLEAR_CONTROL } from './actions/constants';
-
 export type { DataControlApi } from './controls/data_controls/types';
 export type { OptionsListControlApi } from './controls/data_controls/options_list_control/types';
 export type { RangeSliderControlApi } from './controls/data_controls/range_slider/types';
