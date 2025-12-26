@@ -144,8 +144,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     //   /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
     // ];
     // const agentBuilderPaths = [
-    //   /^x-pack\/platform\/plugins\/shared\/onechat/,
-    //   /^x-pack\/platform\/packages\/shared\/onechat/,
+    //   /^x-pack\/platform\/plugins\/shared\/agent_builder/,
+    //   /^x-pack\/platform\/packages\/shared\/agent_builder/,
     // ];
 
     // if (
