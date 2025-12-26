@@ -44,7 +44,7 @@ describe('useAttacksPrivileges', () => {
     mockUseGetMissingIndexPrivileges.mockReturnValue({
       data: [],
       isLoading: false,
-    } as ReturnType<typeof useGetMissingIndexPrivileges>);
+    } as unknown as ReturnType<typeof useGetMissingIndexPrivileges>);
 
     const { result } = renderHook(() => useAttacksPrivileges(), { wrapper });
 
@@ -84,7 +84,7 @@ describe('useAttacksPrivileges', () => {
     mockUseGetMissingIndexPrivileges.mockReturnValue({
       data: [],
       isLoading: false,
-    } as ReturnType<typeof useGetMissingIndexPrivileges>);
+    } as unknown as ReturnType<typeof useGetMissingIndexPrivileges>);
 
     const { result } = renderHook(() => useAttacksPrivileges(), { wrapper });
 
@@ -104,7 +104,7 @@ describe('useAttacksPrivileges', () => {
     mockUseGetMissingIndexPrivileges.mockReturnValue({
       data: [],
       isLoading: false,
-    } as ReturnType<typeof useGetMissingIndexPrivileges>);
+    } as unknown as ReturnType<typeof useGetMissingIndexPrivileges>);
 
     const { result } = renderHook(() => useAttacksPrivileges(), { wrapper });
 
@@ -120,7 +120,7 @@ describe('useAttacksPrivileges', () => {
     mockUseGetMissingIndexPrivileges.mockReturnValue({
       data: [],
       isLoading: true,
-    } as ReturnType<typeof useGetMissingIndexPrivileges>);
+    } as unknown as ReturnType<typeof useGetMissingIndexPrivileges>);
 
     const { result } = renderHook(() => useAttacksPrivileges(), { wrapper });
 
@@ -136,7 +136,7 @@ describe('useAttacksPrivileges', () => {
     mockUseGetMissingIndexPrivileges.mockReturnValue({
       data: [],
       isLoading: false,
-    } as ReturnType<typeof useGetMissingIndexPrivileges>);
+    } as unknown as ReturnType<typeof useGetMissingIndexPrivileges>);
 
     const { result } = renderHook(() => useAttacksPrivileges(), { wrapper });
 
