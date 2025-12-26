@@ -159,7 +159,7 @@ export function RuleConditionChart({
           );
         }
       }
-    }, 10);
+    });
   }, [chartLoading, attributes]);
 
   // Build the warning threshold reference line
