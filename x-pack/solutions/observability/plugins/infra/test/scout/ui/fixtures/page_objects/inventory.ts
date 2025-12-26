@@ -10,8 +10,9 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 export class InventoryPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
-  async goto() {
+  async goToPage() {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
-    await this.page.testSubj.waitForSelector('infraMetricsPage');
+    await this.page.getByTestId('infraMetricsPage').waitFor();
+    await this.page.getByTestId('infraNodesOverviewLoadingPanel').waitFor({ state: 'hidden' });
   }
 }
