@@ -911,7 +911,7 @@
                     "section": "def-common.ToolEventHandlerFn",
                     "text": "ToolEventHandlerFn"
                   },
-                  " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; }"
+                  " | undefined; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
                 "deprecated": false,
@@ -2008,7 +2008,7 @@
                     "section": "def-common.ToolEventHandlerFn",
                     "text": "ToolEventHandlerFn"
                   },
-                  " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolId: string; toolParams: TParams; }"
+                  " | undefined; toolId: string; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
                 "deprecated": false,
@@ -2059,7 +2059,7 @@
                     "section": "def-common.ToolEventHandlerFn",
                     "text": "ToolEventHandlerFn"
                   },
-                  " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; tool: ",
+                  " | undefined; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; tool: ",
                   {
                     "pluginId": "@kbn/agent-builder-server",
                     "scope": "common",
@@ -3326,6 +3326,38 @@
     "misc": [
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentBuilderToolEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderToolEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderEvent",
+            "text": "AgentBuilderEvent"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
+          },
+          ".toolProgress, ",
+          "InternalToolProgressEventData",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.AgentEventEmitterFn",
         "type": "Type",
         "tags": [],
@@ -3586,7 +3618,7 @@
                 "section": "def-common.ToolEventHandlerFn",
                 "text": "ToolEventHandlerFn"
               },
-              " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; }"
+              " | undefined; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
             "deprecated": false,
@@ -3613,7 +3645,7 @@
             "section": "def-common.ToolEventHandlerFn",
             "text": "ToolEventHandlerFn"
           },
-          " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolParams: TParams; }"
+          " | undefined; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
         "deprecated": false,
@@ -3735,38 +3767,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-server",
-        "id": "def-common.AgentBuilderToolEvent",
-        "type": "Type",
-        "tags": [],
-        "label": "AgentBuilderToolEvent",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.AgentBuilderEvent",
-            "text": "AgentBuilderEvent"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/agent-builder-common",
-            "scope": "common",
-            "docId": "kibKbnAgentBuilderCommonPluginApi",
-            "section": "def-common.ChatEventType",
-            "text": "ChatEventType"
-          },
-          ".toolProgress, ",
-          "InternalToolProgressEventData",
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4116,7 +4116,7 @@
             "section": "def-common.ToolEventHandlerFn",
             "text": "ToolEventHandlerFn"
           },
-          " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolId: string; toolParams: TParams; }"
+          " | undefined; toolId: string; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
         "deprecated": false,
@@ -4172,7 +4172,7 @@
                 "section": "def-common.ToolEventHandlerFn",
                 "text": "ToolEventHandlerFn"
               },
-              " | undefined; defaultConnectorId?: string | undefined; toolCallId?: string | undefined; toolId: string; toolParams: TParams; }"
+              " | undefined; toolId: string; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
             "deprecated": false,
