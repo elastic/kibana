@@ -27,9 +27,7 @@ jest.mock('../../../public/application/components/mappings_editor/shared_imports
     resetForm: resetFormState,
     setMockForm: setMockFormRef,
     updateMockFormState,
-  } = jest.requireActual(
-    './create_field.helpers'
-  ) as typeof import('./create_field.helpers');
+  } = jest.requireActual('./create_field.helpers') as typeof import('./create_field.helpers');
   const DefaultFormWrapper = ({
     children,
     ...props
@@ -100,9 +98,7 @@ jest.mock(
   '../../../public/application/components/mappings_editor/components/document_fields/field_parameters',
   () => {
     const { getMockFormState: getMockFormStateFromHelpers, updateMockFormState } =
-      jest.requireActual(
-        './create_field.helpers'
-      ) as typeof import('./create_field.helpers');
+      jest.requireActual('./create_field.helpers') as typeof import('./create_field.helpers');
 
     return {
       TypeParameter: ({
