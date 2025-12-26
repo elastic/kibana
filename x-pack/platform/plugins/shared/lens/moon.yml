@@ -148,6 +148,9 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/controls-constants'
   - '@kbn/controls-renderer'
+  - '@kbn/react-env'
+  - '@kbn/core-base-browser-mocks'
+  - '@kbn/react-kibana-context-env'
 tags:
   - plugin
   - prod

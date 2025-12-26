@@ -53,7 +53,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   const [context, setContext] = useState('');
 
   const {
-    services: { onechat, application },
+    services: { agentBuilder, application },
   } = useKibana();
 
   const { getLicense } = useLicense();
@@ -80,16 +80,16 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   }, [fetchInsight]);
 
   const handleStartConversation = useCallback(() => {
-    if (!onechat?.openConversationFlyout) return;
+    if (!agentBuilder?.openConversationFlyout) return;
 
-    onechat.openConversationFlyout({
+    agentBuilder.openConversationFlyout({
       newConversation: true,
       attachments: buildAttachments(summary, context),
     });
-  }, [onechat, buildAttachments, summary, context]);
+  }, [agentBuilder, buildAttachments, summary, context]);
 
   if (
-    !onechat ||
+    !agentBuilder ||
     !isAgentChatExperienceEnabled ||
     !hasAgentBuilderAccess ||
     !hasEnterpriseLicense
