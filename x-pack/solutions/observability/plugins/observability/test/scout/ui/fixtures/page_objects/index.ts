@@ -8,9 +8,11 @@
 import type { ObltPageObjects, ScoutPage } from '@kbn/scout-oblt';
 import { createLazyPageObject } from '@kbn/scout-oblt';
 import { RulesPage } from './rules_page';
+import { AlertPage } from './alert_page';
 
 export interface TriggersActionsPageObjects extends ObltPageObjects {
   rulesPage: RulesPage;
+  alertPage: AlertPage;
 }
 
 export function extendPageObjects(
@@ -20,5 +22,6 @@ export function extendPageObjects(
   return {
     ...pageObjects,
     rulesPage: createLazyPageObject(RulesPage, page),
+    alertPage: createLazyPageObject(AlertPage, page),
   };
 }
