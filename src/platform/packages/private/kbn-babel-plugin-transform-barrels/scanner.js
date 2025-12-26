@@ -15,6 +15,13 @@ const traverse = require('@babel/traverse').default;
 const fs = require('fs');
 
 /**
+ * Cache for parsed file exports to avoid re-parsing the same file multiple times.
+ * Maps filePath -> Map<exportName, { path: string, localName: string }>
+ * @type {Map<string, Map<string, { path: string, localName: string }>>}
+ */
+const exportSourceCache = new Map();
+
+/**
  * @typedef {Object} ExportsReverseMapEntry
  * @property {string} subpathPattern - The public subpath pattern (e.g., './internal/*')
  * @property {RegExp} fileRegex - Regex to match file paths
@@ -247,6 +254,8 @@ async function buildBarrelIndex(repoRoot) {
       }
     })
   );
+
+  exportSourceCache.clear();
 
   return index;
 }
@@ -536,8 +545,7 @@ function extractDirectExports(content, filePath) {
 
 /**
  * Recursively find where an export is defined by following re-export chains.
- * This handles multi-level barrel files like:
- *   index.ts -> exports from ./errors/index.ts -> exports from ./schema_type_error.ts
+ * Uses caching to avoid re-parsing the same file multiple times.
  *
  * @param {string} exportName - The export name to find
  * @param {string} filePath - File to search in
@@ -546,13 +554,39 @@ function extractDirectExports(content, filePath) {
  */
 function findExportSource(exportName, filePath, visited = new Set()) {
   if (visited.has(filePath)) return null;
+
+  // Check cache first
+  if (exportSourceCache.has(filePath)) {
+    const cached = exportSourceCache.get(filePath);
+    return cached?.get(exportName) || null;
+  }
+
   visited.add(filePath);
+
+  // Parse file and cache ALL exports
+  const fileExports = parseAllFileExports(filePath, visited);
+  exportSourceCache.set(filePath, fileExports);
+
+  return fileExports.get(exportName) || null;
+}
+
+/**
+ * Parse a file and return a map of all export sources.
+ * This parses the file ONCE and resolves all exports recursively.
+ *
+ * @param {string} filePath - File to parse
+ * @param {Set<string>} visited - Visited files (prevent infinite loops)
+ * @returns {Map<string, { path: string, localName: string }>}
+ */
+function parseAllFileExports(filePath, visited) {
+  /** @type {Map<string, { path: string, localName: string }>} */
+  const exports = new Map();
 
   let content;
   try {
     content = fs.readFileSync(filePath, 'utf-8');
   } catch {
-    return null;
+    return exports;
   }
 
   const ast = parser.parse(content, {
@@ -562,35 +596,29 @@ function findExportSource(exportName, filePath, visited = new Set()) {
   });
 
   const barrelDir = path.dirname(filePath);
-  /** @type {{ path: string, localName: string } | null} */
-  let result = null;
 
   traverse(ast, {
     ExportNamedDeclaration(nodePath) {
-      if (result) return; // Already found
       const node = nodePath.node;
 
-      // Re-export: export { X } from './source'
+      // Re-export: export { X, Y, Z } from './source'
       if (node.source) {
+        const resolved = resolveModulePath(node.source.value, barrelDir);
+        if (!resolved) return;
+
         for (const spec of node.specifiers) {
           if (spec.type === 'ExportSpecifier') {
             const exported = spec.exported;
             const expName = exported.type === 'Identifier' ? exported.name : exported.value;
+            const localName = spec.local.name;
 
-            if (expName === exportName) {
-              const localName = spec.local.name;
-              const resolved = resolveModulePath(node.source.value, barrelDir);
-
-              if (resolved) {
-                // Recursively follow the export chain
-                const found = findExportSource(localName, resolved, visited);
-                if (found) {
-                  result = found;
-                } else {
-                  // Source file is the final destination (has direct export)
-                  result = { path: resolved, localName };
-                }
-              }
+            // Recursively follow the export chain
+            const found = findExportSource(localName, resolved, new Set(visited));
+            if (found) {
+              exports.set(expName, found);
+            } else {
+              // Source file is the final destination
+              exports.set(expName, { path: resolved, localName });
             }
           }
         }
@@ -618,43 +646,38 @@ function findExportSource(exportName, filePath, visited = new Set()) {
           names = [decl.id.name];
         }
 
-        if (names.includes(exportName)) {
-          result = { path: filePath, localName: exportName };
+        for (const name of names) {
+          exports.set(name, { path: filePath, localName: name });
         }
       }
 
-      // Direct export from local: export { X }
+      // Direct export from local: export { X, Y }
       if (!node.source && node.specifiers) {
         for (const spec of node.specifiers) {
           if (spec.type === 'ExportSpecifier') {
             const exported = spec.exported;
             const expName = exported.type === 'Identifier' ? exported.name : exported.value;
-            if (expName === exportName) {
-              result = { path: filePath, localName: spec.local.name };
-            }
+            exports.set(expName, { path: filePath, localName: spec.local.name });
           }
         }
       }
     },
 
     ExportDefaultDeclaration(nodePath) {
-      if (result) return;
-      if (exportName === 'default') {
-        const node = nodePath.node;
-        let localName = 'default';
-        if (node.declaration) {
-          if (node.declaration.type === 'Identifier') {
-            localName = node.declaration.name;
-          } else if ('id' in node.declaration && node.declaration.id) {
-            localName = /** @type {{ name: string }} */ (node.declaration.id).name;
-          }
+      const node = nodePath.node;
+      let localName = 'default';
+      if (node.declaration) {
+        if (node.declaration.type === 'Identifier') {
+          localName = node.declaration.name;
+        } else if ('id' in node.declaration && node.declaration.id) {
+          localName = /** @type {{ name: string }} */ (node.declaration.id).name;
         }
-        result = { path: filePath, localName };
       }
+      exports.set('default', { path: filePath, localName });
     },
   });
 
-  return result;
+  return exports;
 }
 
 /**
