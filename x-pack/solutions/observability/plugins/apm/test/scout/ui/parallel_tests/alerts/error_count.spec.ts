@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
+import { BIGGER_TIMEOUT, test } from '../../fixtures';
 
 const SERVICE_NAME = 'unstable-java';
 const START_DATE = 'now-15m';
@@ -61,7 +61,7 @@ test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
       const alert = foundResponse.data.data.find((obj: any) => obj.name === RULE_NAME);
       expect(alert).toBeDefined();
       await apiServices.alerting.rules.runSoon(alert!.id);
-      await apiServices.alerting.waiting.waitForNextExecution(alert!.id);
+      await apiServices.alerting.waiting.waitForNextExecution(alert!.id, undefined, BIGGER_TIMEOUT);
     });
 
     await test.step('see alert in service alerts tab', async () => {
