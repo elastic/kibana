@@ -18,6 +18,7 @@ import {
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 
 export interface CreateFirehoseOnboardingFlowRouteResponse {
@@ -61,6 +62,16 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
     }
 
     const fleetPluginStart = await plugins.fleet.start();
+
+    // Check Fleet integration privileges before attempting to install packages
+    const hasFleetPrivileges = await hasFleetIntegrationPrivileges(request, fleetPluginStart);
+
+    if (!hasFleetPrivileges) {
+      throw Boom.forbidden(
+        "You don't have adequate permissions to install Fleet packages. Contact your system administrator to grant you the required 'Integrations All' privilege."
+      );
+    }
+
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const [{ encoded: apiKeyEncoded }] = await Promise.all([

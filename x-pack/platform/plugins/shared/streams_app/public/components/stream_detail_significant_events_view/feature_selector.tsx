@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiText, EuiSpacer, EuiComboBox, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isFeature, type Feature } from '@kbn/streams-schema';
+import { type Feature } from '@kbn/streams-schema';
 import React from 'react';
+
+export const ALL_DATA_OPTION = {
+  label: 'All data',
+  value: { name: 'All data', type: 'all_data' as const },
+};
 
 export interface FeatureSelectorProps {
   features: Feature[];
@@ -17,26 +21,14 @@ export interface FeatureSelectorProps {
   onFeaturesChange: (features: Feature[]) => void;
 }
 
-export const ALL_DATA_OPTION = {
-  label: 'All data',
-  value: { name: 'All data', type: 'all_data' as const },
-};
-
-type FeatureSelectorOptionValue = Feature | typeof ALL_DATA_OPTION.value;
-
 export function FeaturesSelector({
+  isDisabled,
   features,
   selectedFeatures,
   onFeaturesChange,
-}: FeatureSelectorProps) {
+}: FeatureSelectorProps & { isDisabled: boolean }) {
   const { euiTheme } = useEuiTheme();
-  const options: Array<EuiComboBoxOptionOption<FeatureSelectorOptionValue>> = [
-    ALL_DATA_OPTION,
-    {
-      label: 'Features',
-      options: features.map((feature) => ({ label: feature.name, value: feature })),
-    },
-  ];
+  const options = features.map((feature) => ({ label: feature.name, value: feature }));
 
   return (
     <EuiFormRow
@@ -51,7 +43,7 @@ export function FeaturesSelector({
     >
       <>
         <EuiSpacer size="s" />
-        <EuiComboBox<FeatureSelectorOptionValue>
+        <EuiComboBox
           placeholder={i18n.translate(
             'xpack.streams.significantEvents.featuresSelector.featuresPlaceholder',
             {
@@ -59,22 +51,13 @@ export function FeaturesSelector({
             }
           )}
           options={options}
-          isDisabled={features.length === 0}
-          selectedOptions={
-            selectedFeatures.length === 0
-              ? [{ label: ALL_DATA_OPTION.label, value: ALL_DATA_OPTION.value }]
-              : selectedFeatures.map((feature) => ({
-                  label: feature.name,
-                  value: feature,
-                }))
-          }
+          isDisabled={features.length === 0 || isDisabled}
+          selectedOptions={selectedFeatures.map((feature) => ({
+            label: feature.name,
+            value: feature,
+          }))}
           onChange={(selected) => {
-            const addedOption = selected[selected.length - 1];
-            if (addedOption?.value?.type === ALL_DATA_OPTION.value.type) {
-              onFeaturesChange([]);
-            } else {
-              onFeaturesChange(selected.map((option) => option.value).filter(isFeature));
-            }
+            onFeaturesChange(selected.map((option) => option.value as Feature));
           }}
         />
       </>
