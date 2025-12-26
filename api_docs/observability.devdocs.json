@@ -9116,18 +9116,18 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.onechat",
+            "id": "def-public.ObservabilityPublicPluginsStart.agentBuilder",
             "type": "Object",
             "tags": [],
-            "label": "onechat",
+            "label": "agentBuilder",
             "description": [],
             "signature": [
               {
-                "pluginId": "onechat",
+                "pluginId": "agentBuilder",
                 "scope": "public",
-                "docId": "kibOnechatPluginApi",
-                "section": "def-public.OnechatPluginStart",
-                "text": "OnechatPluginStart"
+                "docId": "kibAgentBuilderPluginApi",
+                "section": "def-public.AgentBuilderPluginStart",
+                "text": "AgentBuilderPluginStart"
               },
               " | undefined"
             ],
