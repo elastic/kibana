@@ -73,7 +73,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
   // Check if access token is still valid
   const now = Date.now();
-  const expiresAt = Date.parse(connectorToken.expiresAt);
+  const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
 
   if (expiresAt > now) {
     // Token still valid

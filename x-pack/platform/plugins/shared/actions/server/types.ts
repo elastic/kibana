@@ -265,7 +265,6 @@ export interface ResponseSettings {
   timeout: number;
 }
 
-// FIXME: remove deprecated approach and use example from DataConnector SO
 export interface ConnectorToken extends SavedObjectAttributes {
   id?: string;
   connectorId: string;
