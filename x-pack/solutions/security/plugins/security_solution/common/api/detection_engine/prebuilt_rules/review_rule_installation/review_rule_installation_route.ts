@@ -21,7 +21,7 @@ export const ReviewRuleInstallationRequestBody = z
     /**
      * Rules per page
      */
-    per_page: z.coerce.number().int().min(0).optional(),
+    per_page: z.coerce.number().int().min(1).max(10_000).optional(),
 
     /**
      * Filtering criteria

@@ -20,7 +20,8 @@ import type SuperTest from 'supertest';
  */
 export const reviewPrebuiltRulesToInstall = async (
   supertest: SuperTest.Agent,
-  body?: ReviewRuleInstallationRequestBody
+  body?: ReviewRuleInstallationRequestBody,
+  expectedStatusCode: number = 200
 ): Promise<ReviewRuleInstallationResponseBody> => {
   const response = await supertest
     .post(REVIEW_RULE_INSTALLATION_URL)
@@ -28,7 +29,7 @@ export const reviewPrebuiltRulesToInstall = async (
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'securitySolution')
     .send(body)
-    .expect(200);
+    .expect(expectedStatusCode);
 
   return response.body;
 };

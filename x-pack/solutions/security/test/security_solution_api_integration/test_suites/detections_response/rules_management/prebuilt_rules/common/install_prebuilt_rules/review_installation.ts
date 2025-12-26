@@ -12,6 +12,7 @@ import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
+  installPrebuiltRules,
   reviewPrebuiltRulesToInstall,
 } from '../../../../utils';
 
@@ -24,6 +25,56 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deleteAllPrebuiltRuleAssets(es, log);
       await deleteAllRules(supertest, log);
+    });
+
+    describe('Base functionality', () => {
+      it('returns only latest versions of prebuilt rules', async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 2, name: 'Rule 1, version 2' }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest);
+
+        expect(response).toMatchObject({
+          rules: [
+            expect.objectContaining({ rule_id: 'rule-1', version: 2, name: 'Rule 1, version 2' }),
+          ],
+          stats: {
+            num_rules_to_install: 1,
+          },
+        });
+      });
+
+      it(`doesn't return rules that are already installed`, async () => {
+        const ruleAssets = [
+          createRuleAssetSavedObject({
+            rule_id: 'rule-1',
+            version: 1,
+            name: 'Rule 1',
+          }),
+          createRuleAssetSavedObject({
+            rule_id: 'rule-2',
+            version: 1,
+            name: 'Rule 2',
+          }),
+        ];
+
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+        await installPrebuiltRules(es, supertest, [{ rule_id: 'rule-1', version: 1 }]);
+
+        const response = await reviewPrebuiltRulesToInstall(supertest);
+
+        expect(response).toMatchObject({
+          rules: [expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' })],
+          stats: {
+            num_rules_to_install: 1,
+          },
+        });
+      });
     });
 
     describe('Using endpoint without providing all parameters', () => {
@@ -137,64 +188,100 @@ export default ({ getService }: FtrProviderContext): void => {
           expect.objectContaining({ rule_id: 'rule-3', version: 1 }),
         ]);
       });
-    });
 
-    describe('Counts', () => {
-      it('when filter matches all rules, number of installable rules is the same as the number of rules matching the filter', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-        ];
-
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { name: { include: ['Rule'] } } },
-        });
-
-        expect(response).toMatchObject({
-          stats: {
-            num_rules_to_install: 2,
-          },
-          total: 2,
-        });
-      });
-
-      it('when filter is not provided, number of installable rules is the same as the number of rules matching the filter', async () => {
+      it('returns correct rules for a page specified in the request', async () => {
         const ruleAssets = [
           createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
           createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1 }),
+          createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1 }),
+          createRuleAssetSavedObject({ rule_id: 'rule-4', version: 1 }),
         ];
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest);
+        const page1Response = await reviewPrebuiltRulesToInstall(supertest, {
+          page: 1,
+          per_page: 2,
+        });
 
-        expect(response).toMatchObject({
-          stats: {
-            num_rules_to_install: 2,
-          },
-          total: 2,
+        expect(page1Response).toMatchObject({
+          rules: [
+            expect.objectContaining({ rule_id: 'rule-1', version: 1 }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 1 }),
+          ],
+        });
+
+        const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
+          page: 2,
+          per_page: 2,
+        });
+
+        expect(page2Response).toMatchObject({
+          rules: [
+            expect.objectContaining({ rule_id: 'rule-3', version: 1 }),
+            expect.objectContaining({ rule_id: 'rule-4', version: 1 }),
+          ],
         });
       });
 
-      it('when some rules are filtered out, number of installable rules is bigger than the number of rules matching the filter', async () => {
+      it('returns correct number of rules for the last page', async () => {
         const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, tags: ['tag-b'] }),
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1 }),
+          createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1 }),
         ];
-
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
         const response = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: ['tag-a'] } } },
+          page: 2,
+          per_page: 2,
         });
 
         expect(response).toMatchObject({
-          stats: {
-            num_rules_to_install: 2,
-          },
-          total: 1,
+          rules: [expect.objectContaining({ rule_id: 'rule-3', version: 1 })],
+          total: 3,
+        });
+      });
+
+      describe('error handling', () => {
+        it('rejects invalid "page" parameter', async () => {
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                page: -1,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: page: Number must be greater than or equal to 1',
+          });
+        });
+
+        it('rejects invalid "per_page" parameter', async () => {
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                per_page: -1,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: per_page: Number must be greater than or equal to 1',
+          });
+
+          expect(
+            await reviewPrebuiltRulesToInstall(
+              supertest,
+              {
+                per_page: 10_001,
+              },
+              400
+            )
+          ).toMatchObject({
+            message: '[request body]: per_page: Number must be less than or equal to 10000',
+          });
         });
       });
     });
@@ -234,102 +321,141 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('Sorting', () => {
-      it('sorts rules by name', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1, name: 'Rule 3' }),
-        ];
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+      describe('by rule name', () => {
+        let ruleAssets = [];
 
-        const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'name', order: 'asc' }],
+        beforeEach(async () => {
+          ruleAssets = [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+            createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1, name: 'Rule 3' }),
+            createRuleAssetSavedObject({
+              rule_id: 'rule-2',
+              version: 1,
+              name: 'Rule 2, previous version',
+            }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 2, name: 'Rule 2' }),
+          ];
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
         });
 
-        expect(ascSortResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-          expect.objectContaining({ rule_id: 'rule-3', version: 1, name: 'Rule 3' }),
-        ]);
+        it('ascending', async () => {
+          const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
+            sort: [{ field: 'name', order: 'asc' }],
+          });
 
-        const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'name', order: 'desc' }],
+          expect(ascSortResponse.rules).toEqual([
+            expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 2, name: 'Rule 2' }),
+            expect.objectContaining({ rule_id: 'rule-3', version: 1, name: 'Rule 3' }),
+          ]);
         });
 
-        expect(descSortResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-3', version: 1, name: 'Rule 3' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-        ]);
+        it('descending', async () => {
+          const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
+            sort: [{ field: 'name', order: 'desc' }],
+          });
+
+          expect(descSortResponse.rules).toEqual([
+            expect.objectContaining({ rule_id: 'rule-3', version: 1, name: 'Rule 3' }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 2, name: 'Rule 2' }),
+            expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+          ]);
+        });
       });
 
-      it('sorts rules by severity', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, severity: 'low' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 2, severity: 'medium' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, severity: 'low' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1, severity: 'critical' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-4', version: 1, severity: 'high' }),
-        ];
+      describe('by severity', () => {
+        let ruleAssets = [];
 
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-        const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'severity', order: 'asc' }],
+        beforeEach(async () => {
+          ruleAssets = [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 2, severity: 'medium' }),
+            createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1, severity: 'critical' }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, severity: 'low' }),
+            createRuleAssetSavedObject({ rule_id: 'rule-4', version: 1, severity: 'high' }),
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, severity: 'low' }),
+            createRuleAssetSavedObject({
+              rule_id: 'rule-1',
+              name: 'Rule 1, previous version',
+              version: 1,
+              severity: 'low',
+            }),
+          ];
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
         });
 
-        expect(ascSortResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, severity: 'low' }),
-          expect.objectContaining({ rule_id: 'rule-1', version: 2, severity: 'medium' }),
-          expect.objectContaining({ rule_id: 'rule-4', version: 1, severity: 'high' }),
-          expect.objectContaining({ rule_id: 'rule-3', version: 1, severity: 'critical' }),
-        ]);
+        it('ascending', async () => {
+          const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
+            sort: [{ field: 'severity', order: 'asc' }],
+          });
 
-        const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'severity', order: 'desc' }],
+          expect(ascSortResponse.rules).toEqual([
+            expect.objectContaining({ rule_id: 'rule-2', version: 1, severity: 'low' }),
+            expect.objectContaining({ rule_id: 'rule-1', version: 2, severity: 'medium' }),
+            expect.objectContaining({ rule_id: 'rule-4', version: 1, severity: 'high' }),
+            expect.objectContaining({ rule_id: 'rule-3', version: 1, severity: 'critical' }),
+          ]);
         });
 
-        expect(descSortResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-3', version: 1, severity: 'critical' }),
-          expect.objectContaining({ rule_id: 'rule-4', version: 1, severity: 'high' }),
-          expect.objectContaining({ rule_id: 'rule-1', version: 2, severity: 'medium' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, severity: 'low' }),
-        ]);
+        it('descending', async () => {
+          const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
+            sort: [{ field: 'severity', order: 'desc' }],
+          });
+
+          expect(descSortResponse.rules).toEqual([
+            expect.objectContaining({ rule_id: 'rule-3', version: 1, severity: 'critical' }),
+            expect.objectContaining({ rule_id: 'rule-4', version: 1, severity: 'high' }),
+            expect.objectContaining({ rule_id: 'rule-1', version: 2, severity: 'medium' }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 1, severity: 'low' }),
+          ]);
+        });
       });
 
-      it('sorts rules by risk score', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, risk_score: 1 }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, risk_score: 100 }),
-          createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1, risk_score: 11 }),
-        ];
+      describe('by risk score', () => {
+        let ruleAssets = [];
 
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-        const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'risk_score', order: 'asc' }],
+        beforeEach(async () => {
+          ruleAssets = [
+            createRuleAssetSavedObject({ rule_id: 'rule-3', version: 2, risk_score: 11 }),
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, risk_score: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, risk_score: 100 }),
+            createRuleAssetSavedObject({
+              rule_id: 'rule-3',
+              name: 'Rule 3, previous version',
+              version: 1,
+              risk_score: 10,
+            }),
+          ];
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
         });
 
-        expect(ascSortResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, risk_score: 1 }),
-          expect.objectContaining({ rule_id: 'rule-3', version: 1, risk_score: 11 }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, risk_score: 100 }),
-        ]);
+        it('ascending', async () => {
+          const ascSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
+            sort: [{ field: 'risk_score', order: 'asc' }],
+          });
 
-        const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          sort: [{ field: 'risk_score', order: 'desc' }],
+          expect(ascSortResponse.rules).toEqual([
+            expect.objectContaining({ rule_id: 'rule-1', version: 1, risk_score: 1 }),
+            expect.objectContaining({ rule_id: 'rule-3', version: 2, risk_score: 11 }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 1, risk_score: 100 }),
+          ]);
         });
 
-        expect(descSortResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, risk_score: 100 }),
-          expect.objectContaining({ rule_id: 'rule-3', version: 1, risk_score: 11 }),
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, risk_score: 1 }),
-        ]);
+        it('descending', async () => {
+          const descSortResponse = await reviewPrebuiltRulesToInstall(supertest, {
+            sort: [{ field: 'risk_score', order: 'desc' }],
+          });
+
+          expect(descSortResponse.rules).toEqual([
+            expect.objectContaining({ rule_id: 'rule-2', version: 1, risk_score: 100 }),
+            expect.objectContaining({ rule_id: 'rule-3', version: 2, risk_score: 11 }),
+            expect.objectContaining({ rule_id: 'rule-1', version: 1, risk_score: 1 }),
+          ]);
+        });
       });
     });
 
     describe('Filtering', () => {
-      it('no filter provided', async () => {
+      it('no filter provided - returns unfiltered response', async () => {
         const ruleAssets = [
           createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
           createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
@@ -339,147 +465,332 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const response = await reviewPrebuiltRulesToInstall(supertest);
 
-        expect(response.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-        ]);
+        expect(response).toMatchObject({
+          rules: [
+            expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+            expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+          ],
+          total: 2,
+          stats: {
+            num_rules_to_install: 2,
+          },
+        });
       });
 
-      it('filters rules by name - empty filter provided', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-        ];
+      describe('by name', () => {
+        describe('empty filter provided - returns unfiltered response', () => {
+          let ruleAssets = [];
 
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          beforeEach(async () => {
+            ruleAssets = [
+              createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+              createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+            ];
+            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          });
 
-        const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { name: {} } },
+          it('with empty object', async () => {
+            const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { name: {} } },
+            });
+
+            expect(emptyNameResponse.rules).toEqual([
+              expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+              expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+            ]);
+          });
+
+          it('with empty include array', async () => {
+            const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { name: { include: [] } } },
+            });
+
+            expect(emptyNameResponse.rules).toEqual([
+              expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+              expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+            ]);
+          });
+
+          it('with empty string in include array', async () => {
+            const emptyNameResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { name: { include: [''] } } },
+            });
+
+            expect(emptyNameResponse.rules).toEqual([
+              expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+              expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+            ]);
+          });
         });
 
-        expect(emptyNameResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-        ]);
+        describe('name matching', () => {
+          let ruleAssets = [];
 
-        const emptyNameResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { name: { include: [] } } },
+          beforeEach(async () => {
+            ruleAssets = [
+              createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'My rule 1' }),
+              createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'My rule 2' }),
+              createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1, name: 'My rule 3' }),
+            ];
+            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          });
+
+          it('matches exact name', async () => {
+            const response = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { name: { include: ['My rule 1'] } } },
+            });
+
+            expect(response.rules).toEqual([
+              expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'My rule 1' }),
+            ]);
+          });
+
+          it('wildcard matching - matches partial name', async () => {
+            const response = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { name: { include: ['rule'] } } },
+            });
+
+            expect(response.rules).toEqual([
+              expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'My rule 1' }),
+              expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'My rule 2' }),
+              expect.objectContaining({ rule_id: 'rule-3', version: 1, name: 'My rule 3' }),
+            ]);
+          });
+
+          it('matches case-insensitively', async () => {
+            const response = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { name: { include: ['mY rulE 1'] } } },
+            });
+
+            expect(response.rules).toEqual([
+              expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'My rule 1' }),
+            ]);
+          });
         });
-
-        expect(emptyNameResponse2.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-        ]);
-
-        const emptyNameResponse3 = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { name: { include: [''] } } },
-        });
-
-        expect(emptyNameResponse3.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
-        ]);
       });
 
-      it('filters rules by name - wildcard matching', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'My rule 1' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'My rule 2' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1, name: 'My rule 3' }),
-        ];
+      describe('by tags', () => {
+        describe('empty filter provided - returns unfiltered response', () => {
+          let ruleAssets = [];
 
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          beforeEach(async () => {
+            ruleAssets = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 1,
+                tags: ['tag-a', 'tag-b'],
+              }),
+              createRuleAssetSavedObject({
+                rule_id: 'rule-2',
+                version: 1,
+                tags: ['tag-b', 'tag-c'],
+              }),
+            ];
+            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          });
 
-        const wildcardResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { name: { include: ['My rule 1'] } } },
+          it('with empty include array', async () => {
+            const emptyTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { tags: { include: [] } } },
+            });
+
+            expect(emptyTagResponse.rules).toEqual([
+              expect.objectContaining({
+                rule_id: 'rule-1',
+                version: 1,
+                tags: ['tag-a', 'tag-b'],
+              }),
+              expect.objectContaining({
+                rule_id: 'rule-2',
+                version: 1,
+                tags: ['tag-b', 'tag-c'],
+              }),
+            ]);
+          });
         });
 
-        expect(wildcardResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'My rule 1' }),
-        ]);
+        describe('single tag', () => {
+          let ruleAssets = [];
 
-        const wildcardResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { name: { include: ['rule'] } } },
+          beforeEach(async () => {
+            ruleAssets = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 1,
+                tags: ['tag-a', 'tag-b'],
+              }),
+              createRuleAssetSavedObject({
+                rule_id: 'rule-2',
+                version: 1,
+                tags: ['tag-b', 'tag-c'],
+              }),
+              createRuleAssetSavedObject({
+                rule_id: 'rule-3',
+                version: 1,
+                tags: ['tag-c'],
+              }),
+            ];
+            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          });
+
+          it('matches all rules with a tag', async () => {
+            const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { tags: { include: ['tag-b'] } } },
+            });
+
+            expect(singleTagResponse.rules).toEqual([
+              expect.objectContaining({
+                rule_id: 'rule-1',
+                version: 1,
+                tags: ['tag-a', 'tag-b'],
+              }),
+              expect.objectContaining({
+                rule_id: 'rule-2',
+                version: 1,
+                tags: ['tag-b', 'tag-c'],
+              }),
+            ]);
+          });
+
+          it('returns empty array if no matches are found', async () => {
+            const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { tags: { include: ['tag-d'] } } },
+            });
+
+            expect(singleTagResponse.rules).toEqual([]);
+          });
         });
 
-        expect(wildcardResponse2.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, name: 'My rule 1' }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, name: 'My rule 2' }),
-          expect.objectContaining({ rule_id: 'rule-3', version: 1, name: 'My rule 3' }),
-        ]);
+        describe('multiple tags use AND logic', () => {
+          let ruleAssets = [];
+
+          beforeEach(async () => {
+            ruleAssets = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 1,
+                tags: ['tag-a', 'tag-b'],
+              }),
+              createRuleAssetSavedObject({
+                rule_id: 'rule-2',
+                version: 1,
+                tags: ['tag-b', 'tag-c'],
+              }),
+              createRuleAssetSavedObject({
+                rule_id: 'rule-3',
+                version: 1,
+                tags: ['tag-c'],
+              }),
+            ];
+            await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          });
+
+          it('matches only rules with both tags present', async () => {
+            const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { tags: { include: ['tag-a', 'tag-b'] } } },
+            });
+
+            expect(multipleTagsResponse.rules).toEqual([
+              expect.objectContaining({
+                rule_id: 'rule-1',
+                version: 1,
+                tags: ['tag-a', 'tag-b'],
+              }),
+            ]);
+          });
+
+          it('returns empty array when no rule has both tags', async () => {
+            const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
+              filter: { fields: { tags: { include: ['tag-a', 'tag-c'] } } },
+            });
+
+            expect(multipleTagsResponse.rules).toEqual([]);
+          });
+        });
+
+        describe('tags with special characters', () => {
+          [' ', ':', '%', '&', '\\', '–', '{', '('].forEach((specialChar, index) => {
+            it(`matches tag with special character "${specialChar}"`, async () => {
+              const tag = `tag-with-${specialChar}-in-it`;
+              const ruleAsset = createRuleAssetSavedObject({
+                rule_id: `rule-${index}`,
+                version: 1,
+                tags: [tag],
+              });
+              await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+
+              const response = await reviewPrebuiltRulesToInstall(supertest, {
+                filter: { fields: { tags: { include: [tag] } } },
+              });
+              expect(response.rules).toEqual([
+                expect.objectContaining({
+                  rule_id: `rule-${index}`,
+                  tags: [tag],
+                }),
+              ]);
+            });
+          });
+        });
       });
 
-      it('filters rules by tags - empty filter provided', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, tags: ['tag-b', 'tag-c'] }),
-        ];
+      describe('stats', () => {
+        it('when filter matches all rules, number of installable rules is the same as the number of rules matching the filter', async () => {
+          const ruleAssets = [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, name: 'Rule 1' }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, name: 'Rule 2' }),
+          ];
 
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const emptyTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: [] } } },
+          const response = await reviewPrebuiltRulesToInstall(supertest, {
+            filter: { fields: { name: { include: ['Rule'] } } },
+          });
+
+          expect(response).toMatchObject({
+            stats: {
+              num_rules_to_install: 2,
+            },
+            total: 2,
+          });
         });
 
-        expect(emptyTagResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, tags: ['tag-b', 'tag-c'] }),
-        ]);
-      });
+        it('when filter is not provided, number of installable rules is the same as the number of rules matching the filter', async () => {
+          const ruleAssets = [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1 }),
+          ];
 
-      it('filters rules by tags - single tag', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, tags: ['tag-b', 'tag-c'] }),
-        ];
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+          const response = await reviewPrebuiltRulesToInstall(supertest);
 
-        const singleTagResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: ['tag-a'] } } },
+          expect(response).toMatchObject({
+            stats: {
+              num_rules_to_install: 2,
+            },
+            total: 2,
+          });
         });
 
-        expect(singleTagResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-        ]);
+        it('when filter matches some rules, number of installable rules is bigger than the number of rules matching the filter', async () => {
+          const ruleAssets = [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, tags: ['tag-b'] }),
+          ];
 
-        const singleTagResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: ['tag-b'] } } },
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
+
+          const response = await reviewPrebuiltRulesToInstall(supertest, {
+            filter: { fields: { tags: { include: ['tag-a'] } } },
+          });
+
+          expect(response).toMatchObject({
+            stats: {
+              num_rules_to_install: 2,
+            },
+            total: 1,
+          });
         });
-
-        expect(singleTagResponse2.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-          expect.objectContaining({ rule_id: 'rule-2', version: 1, tags: ['tag-b', 'tag-c'] }),
-        ]);
-
-        const singleTagResponse3 = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: ['tag-d'] } } },
-        });
-
-        expect(singleTagResponse3.rules).toEqual([]);
-      });
-
-      it('filters rules by tags - multiple tags use AND logic', async () => {
-        const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1, tags: ['tag-b', 'tag-c'] }),
-        ];
-
-        await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
-
-        const multipleTagsResponse = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: ['tag-a', 'tag-b'] } } },
-        });
-
-        expect(multipleTagsResponse.rules).toEqual([
-          expect.objectContaining({ rule_id: 'rule-1', version: 1, tags: ['tag-a', 'tag-b'] }),
-        ]);
-
-        const multipleTagsResponse2 = await reviewPrebuiltRulesToInstall(supertest, {
-          filter: { fields: { tags: { include: ['tag-a', 'tag-c'] } } },
-        });
-
-        expect(multipleTagsResponse2.rules).toEqual([]);
       });
     });
 
