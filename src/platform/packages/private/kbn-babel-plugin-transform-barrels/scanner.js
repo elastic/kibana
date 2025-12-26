@@ -123,7 +123,7 @@ async function buildBarrelIndex(repoRoot) {
   const index = {};
 
   // Step 1: Find files in parallel
-  const [kibanaBarrels, packageJsonFiles] = await Promise.all([
+  const [, packageJsonFiles] = await Promise.all([
     // Internal barrel files (exclude node_modules)
     fg('**/index.{ts,tsx,js,jsx}', {
       cwd: repoRoot,
@@ -230,23 +230,23 @@ async function buildBarrelIndex(repoRoot) {
   );
 
   // Step 3: Process internal barrels SECOND (skip if already indexed from node_modules)
-  await Promise.all(
-    kibanaBarrels.map(async (barrelPath) => {
-      // Skip if already indexed from node_modules scan (e.g., @kbn/* package entry points)
-      if (index[barrelPath]) return;
+  // await Promise.all(
+  //   kibanaBarrels.map(async (barrelPath) => {
+  //     // Skip if already indexed from node_modules scan (e.g., @kbn/* package entry points)
+  //     if (index[barrelPath]) return;
 
-      try {
-        const content = await readFile(barrelPath, 'utf-8');
-        const exports = parseBarrelExports(content, barrelPath);
+  //     try {
+  //       const content = await readFile(barrelPath, 'utf-8');
+  //       const exports = parseBarrelExports(content, barrelPath);
 
-        if (Object.keys(exports).length > 0) {
-          index[barrelPath] = { exports };
-        }
-      } catch (err) {
-        console.warn(`[barrel-transform] Error parsing barrel file ${barrelPath}: ${err.message}`);
-      }
-    })
-  );
+  //       if (Object.keys(exports).length > 0) {
+  //         index[barrelPath] = { exports };
+  //       }
+  //     } catch (err) {
+  //       console.warn(`[barrel-transform] Error parsing barrel file ${barrelPath}: ${err.message}`);
+  //     }
+  //   })
+  // );
 
   return index;
 }
