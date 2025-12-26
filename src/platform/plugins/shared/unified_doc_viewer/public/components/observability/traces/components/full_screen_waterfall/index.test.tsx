@@ -8,8 +8,12 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
+import { render, screen, act, waitFor } from '@testing-library/react';
+import {
+  FullScreenWaterfall,
+  type FullScreenWaterfallProps,
+  EUI_FLYOUT_BODY_OVERFLOW_CLASS,
+} from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 let capturedCallbacks: any = null;
@@ -123,6 +127,22 @@ describe('FullScreenWaterfall', () => {
 
       expect(screen.getByTestId('logsFlyout')).toHaveAttribute('data-id', 'test-error-log-id');
       expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('scrollElement integration', () => {
+    it('should pass scrollElement with correct EUI class to embeddable', async () => {
+      render(<FullScreenWaterfall {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddableRenderer')).toBeInTheDocument();
+      });
+
+      expect(capturedCallbacks.scrollElement).not.toBeNull();
+      expect(capturedCallbacks.scrollElement).toBeInstanceOf(Element);
+      expect(
+        capturedCallbacks.scrollElement.classList.contains(EUI_FLYOUT_BODY_OVERFLOW_CLASS)
+      ).toBe(true);
     });
   });
 });
