@@ -124,7 +124,9 @@ const getColumnConfigs = ({
         }),
         order: 60,
         render: (index) => {
-          return <DocCountCell indexName={index.name} httpSetup={http} />;
+          return (
+            <DocCountCell indexName={index.name} httpSetup={http} fallbackCount={index.documents} />
+          );
         },
       },
       {
@@ -264,10 +266,10 @@ export class IndexTable extends Component {
   }
 
   onSort = (column) => {
-    const { sortField, isSortAscending, sortChanged } = this.props;
+    const { sortField, isSortAscending, sortChanged, filteredIndices } = this.props;
 
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
-    sortChanged(column, newIsSortAscending);
+    sortChanged(column, newIsSortAscending, filteredIndices);
   };
 
   renderFilterError() {

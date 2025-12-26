@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { every } from 'lodash';
@@ -25,6 +25,7 @@ import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../ser
 import { useAppContext } from '../../../../app_context';
 import type { Index } from '../../../../../../common';
 import { ModalHost, type ModalHostHandles } from './modal_host/modal_host';
+import { useIndexDocCount } from '../../../../hooks/use_index_doc_count';
 
 export interface IndexActionsContextMenuProps {
   // either an array of indices selected in the list view or an array of 1 index name on the details panel/page
@@ -109,6 +110,13 @@ export const IndexActionsContextMenu = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const modalRef = useRef<ModalHostHandles | null>(null);
 
+  const selectedIndexName = indexNames.length === 1 ? indexNames[0] : undefined;
+
+  const { count: selectedDocCount, isError: selectedDocCountError } = useIndexDocCount({
+    http,
+    indexName: selectedIndexName,
+  });
+
   const onButtonClick = () => {
     setIsPopoverOpen((prevState) => !prevState);
   };
@@ -125,18 +133,15 @@ export const IndexActionsContextMenu = ({
 
   const isConvertableToLookupIndex = (indexName: string) => {
     const selectedIndex = indices.find((index) => index.name === indexName);
+    const docCount = indexName === selectedIndexName ? selectedDocCount : undefined;
 
-    if (
-      !selectedIndex ||
-      selectedIndex.documents === undefined ||
-      selectedIndex.primary === undefined
-    ) {
+    if (!selectedIndex || docCount === undefined || selectedIndex.primary === undefined) {
       return false;
     }
 
     if (
-      selectedIndex.documents >= 0 &&
-      selectedIndex.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
+      docCount >= 0 &&
+      docCount <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
       Number(selectedIndex.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX
     ) {
       return true;
@@ -328,6 +333,7 @@ export const IndexActionsContextMenu = ({
     if (selectedIndexCount === 1) {
       const indexName = indexNames[0];
       const isConvertable = isConvertableToLookupIndex(indexName);
+      const showConvertabilityMessage = selectedDocCount !== undefined || selectedDocCountError;
 
       const selectedIndex = indices.find((index) => index.name === indexName);
 
@@ -344,7 +350,7 @@ export const IndexActionsContextMenu = ({
                   defaultMessage="Convert to lookup index"
                 />
               </EuiText>
-              {!isConvertable && (
+              {!isConvertable && showConvertabilityMessage && (
                 <>
                   <EuiSpacer size="xs" />
                   <EuiText size="xs">

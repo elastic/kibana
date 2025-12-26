@@ -77,8 +77,6 @@ applicationService.capabilities = {
 
 const http = httpServiceMock.createSetupContract();
 
-http.get.mockResolvedValue({ count: '10000' });
-
 const appDependencies = {
   services,
   history,
@@ -149,6 +147,12 @@ export const WithAppDependencies =
         services: { httpService },
       },
       appDependencies,
+      {
+        core: {
+          // Ensure components use the same http mock that `httpRequestsMockHelpers` controls.
+          http: httpSetup,
+        },
+      },
       overridingDependencies
     );
     return (

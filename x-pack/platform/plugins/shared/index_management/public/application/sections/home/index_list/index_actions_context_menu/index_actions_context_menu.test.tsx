@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { AppContextProvider } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
 import { IndexActionsContextMenu } from './index_actions_context_menu';
+import { getIndexDocCount } from '../index_table/util/get_index_doc_count';
 import type { Index } from '@kbn/index-management-shared-types';
 import { notificationService } from '../../../../services/notification';
 import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
@@ -31,6 +32,10 @@ jest.mock('../../../../services/notification', () => ({
     showSuccessToast: jest.fn(),
     showDangerToast: jest.fn(),
   },
+}));
+
+jest.mock('../index_table/util/get_index_doc_count', () => ({
+  getIndexDocCount: jest.fn(),
 }));
 
 jest.mock(
@@ -177,6 +182,7 @@ const openContextMenu = async () => {
 describe('IndexActionsContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(getIndexDocCount).mockResolvedValue(10);
   });
 
   describe('WHEN rendering the component', () => {
@@ -539,6 +545,7 @@ describe('IndexActionsContextMenu', () => {
   describe('WHEN using Convert to Lookup Index action', () => {
     describe('AND WHEN index is convertible', () => {
       it('SHOULD show enabled convert action', async () => {
+        jest.mocked(getIndexDocCount).mockResolvedValueOnce(10);
         const props = getBaseProps();
         const convertible: MenuProps = {
           ...props,
@@ -546,7 +553,6 @@ describe('IndexActionsContextMenu', () => {
             {
               name: 'index-1',
               status: 'open' as Index['status'],
-              documents: 10,
               primary: 1,
               hidden: false,
               aliases: [],
@@ -560,10 +566,11 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
 
-        expect(convertBtn).not.toBeDisabled();
+        await waitFor(() => expect(convertBtn).not.toBeDisabled());
       });
 
       it('SHOULD open the Convert to Lookup modal', async () => {
+        jest.mocked(getIndexDocCount).mockResolvedValueOnce(10);
         const props = getBaseProps();
         const convertible: MenuProps = {
           ...props,
@@ -571,7 +578,6 @@ describe('IndexActionsContextMenu', () => {
             {
               name: 'index-1',
               status: 'open' as Index['status'],
-              documents: 10,
               primary: 1,
               hidden: false,
               aliases: [],
@@ -585,6 +591,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
 
+        await waitFor(() => expect(convertBtn).not.toBeDisabled());
         await user.click(convertBtn);
 
         expect(await screen.findByTestId('mockConvertToLookup')).toBeInTheDocument();
@@ -593,6 +600,7 @@ describe('IndexActionsContextMenu', () => {
 
     describe('AND WHEN index is not convertible', () => {
       it('SHOULD show disabled convert action with tooltip', async () => {
+        jest.mocked(getIndexDocCount).mockResolvedValueOnce(9999999999);
         const props = getBaseProps();
         const notConvertibleProps: MenuProps = {
           ...props,
@@ -600,7 +608,6 @@ describe('IndexActionsContextMenu', () => {
             {
               name: 'index-1',
               status: 'open' as Index['status'],
-              documents: 9999999999,
               primary: 2,
               hidden: false,
               aliases: [],
@@ -613,7 +620,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
 
         const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
-        expect(convertBtn).toBeDisabled();
+        await waitFor(() => expect(convertBtn).toBeDisabled());
 
         const tooltip = await screen.findByText(/less than 2 billion documents/i);
         expect(tooltip).toBeInTheDocument();
@@ -622,6 +629,7 @@ describe('IndexActionsContextMenu', () => {
 
     describe('AND WHEN index is hidden or already a lookup index', () => {
       it('SHOULD not show convert action', async () => {
+        jest.mocked(getIndexDocCount).mockResolvedValueOnce(10);
         const props = getBaseProps();
         const hiddenOrLookup: MenuProps = {
           ...props,
@@ -629,7 +637,6 @@ describe('IndexActionsContextMenu', () => {
             {
               name: 'index-1',
               status: 'open' as Index['status'],
-              documents: 10,
               primary: 1,
               hidden: true,
               mode: 'lookup',

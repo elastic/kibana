@@ -5,39 +5,28 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { INTERNAL_API_BASE_PATH } from '../../../../../../common/constants';
+import { useIndexDocCount } from '../../../../hooks/use_index_doc_count';
 
 interface DocCountCellProps {
   indexName: string;
   httpSetup: HttpSetup;
+  fallbackCount?: number;
 }
 
-export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
-  const [count, setCount] = React.useState<number>();
-  const [countError, setCountError] = React.useState<boolean>(false);
+export const DocCountCell = ({ indexName, httpSetup, fallbackCount }: DocCountCellProps) => {
+  const { count, isError } = useIndexDocCount({ http: httpSetup, indexName });
 
-  useEffect(() => {
-    // Avoid duplicate requests
-    if (count !== undefined || countError) {
-      return;
-    }
-    httpSetup
-      .get<{ count: number }>(
-        `${INTERNAL_API_BASE_PATH}/index_doc_count/${encodeURIComponent(indexName)}`
-      )
-      .then((response) => {
-        setCount(response.count);
-      })
-      .catch(() => {
-        setCountError(true);
-      });
-  });
+  // Defensive fallback: in real runtime `httpSetup` should always exist. This mainly helps
+  // environments/tests where core http isn't wired.
+  if (!httpSetup || typeof (httpSetup as any).post !== 'function') {
+    return fallbackCount !== undefined ? Number(fallbackCount).toLocaleString() : '—';
+  }
 
-  if (countError) {
+  if (isError) {
     return (
       <span data-test-subj="docCountError">
         <FormattedMessage defaultMessage="Error" id="xpack.idxMgmt.indexTable.docCountError" />
@@ -45,5 +34,9 @@ export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
     );
   }
 
-  return !count ? <EuiLoadingSpinner size="m" /> : Number(count).toLocaleString();
+  if (count === undefined) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  return Number(count).toLocaleString();
 };

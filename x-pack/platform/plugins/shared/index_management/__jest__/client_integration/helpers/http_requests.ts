@@ -8,13 +8,13 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common/constants';
 
-type HttpResponse = Record<string, any> | any[];
+type HttpResponse = unknown;
 type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
 
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 // Register helpers to mock HTTP Requests
@@ -179,6 +179,9 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
+  const setLoadIndexDocCountsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_counts`, response, error);
+
   const setCreateEnrichPolicy = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
 
@@ -241,6 +244,7 @@ const registerHttpRequestMockHelpers = (
     setCreateIndexResponse,
     setGetMatchingIndices,
     setGetFieldsFromIndices,
+    setLoadIndexDocCountsResponse,
     setCreateEnrichPolicy,
     setInferenceModels,
     setGetMatchingDataStreams,

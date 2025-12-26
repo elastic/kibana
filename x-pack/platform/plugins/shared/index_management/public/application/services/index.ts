@@ -7,6 +7,7 @@
 
 export {
   loadIndices,
+  loadIndexDocCounts,
   reloadIndices,
   closeIndices,
   deleteIndices,

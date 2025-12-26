@@ -8,13 +8,16 @@
 import type { HttpSetup } from '@kbn/core/public';
 
 export class HttpService {
-  private client: any;
+  private client?: HttpSetup;
 
   public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
   }
 
   public get httpClient(): HttpSetup {
+    if (!this.client) {
+      throw new Error('HttpService not initialized. Call httpService.setup(httpSetup) before use.');
+    }
     return this.client;
   }
 }
