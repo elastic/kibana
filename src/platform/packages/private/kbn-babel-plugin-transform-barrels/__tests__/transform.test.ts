@@ -318,6 +318,41 @@ describe('barrel transform plugin', () => {
     });
   });
 
+  describe('type-only imports', () => {
+    it('leaves pure type imports unchanged', () => {
+      const result = transform({ code: `import type { Button } from './components';` });
+
+      expect(result?.code).toContain(`import type { Button } from './components'`);
+      // Should NOT transform to direct path
+      expect(result?.code).not.toContain(COMPONENTS_BARREL.exports.Button.expectedPath);
+    });
+
+    it('only rewrites value specifiers when mixed with type specifiers', () => {
+      const result = transform({
+        code: `import { type Button, Modal } from './components';`,
+      });
+
+      // Type specifier should remain unchanged with original source
+      expect(result?.code).toContain(`type Button`);
+      expect(result?.code).toMatch(/['"]\.\/components['"]/);
+      // Value specifier should be transformed
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Modal.expectedPath);
+    });
+
+    it('preserves importKind on fallback declaration', () => {
+      const result = transform({
+        code: `import { type Button, Modal } from './components';`,
+      });
+
+      // Modal should be transformed, type Button should remain
+      expect(result?.code).toContain(COMPONENTS_BARREL.exports.Modal.expectedPath);
+      // The fallback should contain type Button and the original source
+      expect(result?.code).toMatch(
+        /import\s*{\s*type\s+Button\s*}\s*from\s*['"]\.\/components['"]/
+      );
+    });
+  });
+
   describe('internal package transformations with packageName', () => {
     // Simulates @kbn/* packages which have packageName set in the barrel index
     // When packageName is present, transforms should use package paths, not relative

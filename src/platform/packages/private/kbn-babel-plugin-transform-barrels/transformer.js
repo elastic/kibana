@@ -9,7 +9,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const { createImportDeclaration } = require('./ast_utils');
+const { createImportDeclaration, isTypeOnlyImport } = require('./ast_utils');
 
 /**
  * @typedef {import('./ast_utils').ImportSpecifierInfo} ImportSpecifierInfo
@@ -31,8 +31,23 @@ const { createImportDeclaration } = require('./ast_utils');
  */
 function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   const node = nodePath.node;
+
+  // Skip declarations that are explicitly `import type ...`
+  if (node.importKind === 'type') {
+    return;
+  }
+
   const importSource = node.source.value;
   const currentFileDir = path.dirname(state.filename);
+
+  /**
+   * Check if a specifier is type-only (either via specifier.importKind or isTypeOnlyImport).
+   * @param {import('@babel/types').ImportSpecifier | import('@babel/types').ImportDefaultSpecifier | import('@babel/types').ImportNamespaceSpecifier} specifier
+   * @returns {boolean}
+   */
+  const isTypeSpecifier = (specifier) =>
+    specifier.importKind === 'type' ||
+    (specifier.type === 'ImportSpecifier' && isTypeOnlyImport(specifier));
 
   // Resolve the import source to absolute path and get barrel entry
   const barrelEntry = resolveToBarrelEntry(importSource, currentFileDir, barrelIndex);
@@ -51,6 +66,12 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   const unchangedSpecifiers = [];
 
   for (const specifier of node.specifiers) {
+    // Keep type-only specifiers unchanged - they should not be transformed
+    if (isTypeSpecifier(specifier)) {
+      unchangedSpecifiers.push(specifier);
+      continue;
+    }
+
     if (specifier.type === 'ImportSpecifier') {
       const imported = specifier.imported;
       const importedName = imported.type === 'Identifier' ? imported.name : imported.value;
@@ -117,7 +138,9 @@ function transformImportDeclaration(nodePath, state, t, barrelIndex) {
   }
 
   if (unchangedSpecifiers.length > 0) {
-    newNodes.push(t.importDeclaration(unchangedSpecifiers, t.stringLiteral(importSource)));
+    const fallback = t.importDeclaration(unchangedSpecifiers, t.stringLiteral(importSource));
+    fallback.importKind = node.importKind;
+    newNodes.push(fallback);
   }
 
   if (newNodes.length === 1) {
