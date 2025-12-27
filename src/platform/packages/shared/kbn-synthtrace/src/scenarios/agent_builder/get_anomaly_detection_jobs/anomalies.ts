@@ -28,9 +28,9 @@
 import type { ApmFields } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { duration } from 'moment';
-import type { Scenario } from '../../cli/scenario';
-import { withClient } from '../../lib/utils/with_client';
-import { internalKibanaHeaders } from '../../lib/shared/client_headers';
+import type { Scenario } from '../../../cli/scenario';
+import { withClient } from '../../../lib/utils/with_client';
+import { internalKibanaHeaders } from '../../../lib/shared/client_headers';
 
 const SCENARIO_ENVIRONMENT = 'production';
 
@@ -63,7 +63,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
 
       const data = range
         .interval('1m')
-        .rate(1)
+        .rate(10)
         .generator((timestamp) => {
           const isSpike = timestamp >= spikeStart && timestamp <= spikeEnd;
           const traceDuration = isSpike ? 8000 : 200;

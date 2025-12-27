@@ -22,8 +22,8 @@
  *   "tool_id": "observability.run_log_rate_analysis",
  *   "tool_params": {
  *     "index": "logs-*",
- *     "baseline": { "from": "now-60m", "to": "now-20m" },
- *     "deviation": { "from": "now-20m", "to": "now" }
+ *     "baseline": { "start": "now-60m", "end": "now-20m" },
+ *     "deviation": { "start": "now-20m", "end": "now" }
  *   }
  * }
  * ```
@@ -31,10 +31,10 @@
 
 import type { LogDocument } from '@kbn/synthtrace-client';
 import { generateShortId, log } from '@kbn/synthtrace-client';
-import type { Scenario } from '../../cli/scenario';
-import { getSynthtraceEnvironment } from '../../lib/utils/get_synthtrace_environment';
-import { withClient } from '../../lib/utils/with_client';
-import { parseLogsScenarioOpts } from '../helpers/logs_scenario_opts_parser';
+import type { Scenario } from '../../../cli/scenario';
+import { getSynthtraceEnvironment } from '../../../lib/utils/get_synthtrace_environment';
+import { withClient } from '../../../lib/utils/with_client';
+import { parseLogsScenarioOpts } from '../../helpers/logs_scenario_opts_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const SPIKE_WINDOW_MS = 20 * 60 * 1000;
