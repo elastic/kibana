@@ -35,17 +35,17 @@ const config: InitialBenchConfig = {
   name: 'ftr',
   benchmarks: [
     createBenchmark('discover', 'src/platform/test/functional/apps/discover/group8/config.ts'),
-    createBenchmark('fleet', 'x-pack/platform/test/fleet_functional/config.ts'),
-    createBenchmark(
-      'security-saml',
-      'x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts'
-    ),
+    // createBenchmark('fleet', 'x-pack/platform/test/fleet_functional/config.ts'),
+    // createBenchmark(
+    //   'security-saml',
+    //   'x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts'
+    // ),
     createBenchmark(
       'lens',
       'x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts'
     ),
   ],
-  runs: 1,
+  runs: 3,
   timeout: 10 * 300_000,
 };
 
