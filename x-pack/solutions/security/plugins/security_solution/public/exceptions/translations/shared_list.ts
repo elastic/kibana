@@ -240,6 +240,13 @@ export const IMPORT_PROMPT = i18n.translate(
   }
 );
 
+export const IMPORT_FILE_PICKER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsFilePickerAriaLabel',
+  {
+    defaultMessage: 'Select exception list files to import',
+  }
+);
+
 export const RULES = i18n.translate('xpack.securitySolution.exceptionsTable.rulesCountLabel', {
   defaultMessage: 'Rules',
 });
