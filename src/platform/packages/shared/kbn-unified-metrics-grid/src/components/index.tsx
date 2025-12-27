@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../restorable_state';
@@ -16,13 +15,7 @@ import { MetricsExperienceStateProvider } from '../context/metrics_experience_st
 import type { UnifiedMetricsGridProps } from '../types';
 import { MetricsExperienceFieldsCapsProvider } from '../context/metrics_experience_fields_provider';
 
-const InternalUnifiedMetricsExperienceGrid = (
-  props: UnifiedMetricsGridProps & { client?: MetricsExperienceClient }
-) => {
-  if (!props.client) {
-    return null;
-  }
-
+const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
     <PerformanceContextProvider>
       <MetricsExperienceFieldsCapsProvider fetchParams={props.fetchParams}>
@@ -32,9 +25,7 @@ const InternalUnifiedMetricsExperienceGrid = (
   );
 };
 
-const InternalUnifiedMetricsExperienceGridWithState = (
-  props: UnifiedMetricsGridProps & { client?: MetricsExperienceClient }
-) => {
+const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
   return (
     <MetricsExperienceStateProvider>
       <InternalUnifiedMetricsExperienceGrid {...props} />
