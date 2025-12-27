@@ -114,6 +114,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               disableActions={false}
               text={i18n.AFFECTED_RULES(rules.length)}
               dataTestSubj={dataTestSubj}
+              ariaLabel="Affected rules"
             />
           </EuiFlexItem>
         )}

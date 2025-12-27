@@ -31,7 +31,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
             iconType="boxesHorizontal"
             disableActions={disableActions}
             actions={actions}
-            aria-label="Exception item actions menu"
+            ariaLabel={`Actions for ${item.name}`}
             dataTestSubj={dataTestSubj}
             anchorPosition="downCenter"
           />
