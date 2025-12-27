@@ -25,7 +25,11 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
+    <EuiButtonIcon
+      iconType="question"
+      onClick={togglePopover}
+      aria-label="Related integrations help"
+    />
   );
 
   return (
