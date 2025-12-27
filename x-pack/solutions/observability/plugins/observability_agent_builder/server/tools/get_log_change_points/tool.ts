@@ -26,12 +26,14 @@ const getLogChangePointsSchema = z.object({
   index: z.string().describe('The index or index pattern to find the logs').optional(),
   kqlFilter: z
     .string()
-    .describe('A KQL filter to filter the log documents, e.g.: my_field:foo')
+    .describe(
+      'A KQL query to filter the log documents. Examples: level:error, service.name:"my-service"'
+    )
     .optional(),
   messageField: z
     .string()
     .describe(
-      'The text field that contains the message to be analyzed, usually `message`. ONLY use field names from the conversation.'
+      'The unstructured text field to run the categorize_text aggregation on. This groups similar logs into patterns. Defaults to message'
     )
     .optional(),
 });
@@ -51,10 +53,9 @@ export function createGetLogChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogChangePointsSchema> = {
     id: OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Analyzes log messages to detect statistically significant changes like spikes and dips, in specific log patterns.
-
-How it works:
-It uses the "categorize_text" aggregation to group similar unstructured messages into categories and then detects change points (spikes/dips) within each cateogory.`,
+    description: `Analyzes logs to detect statistically significant changes, in specific log patterns.
+    How it works:
+    It looks at groups of similar logs patterns and then detects change points (spikes/dips) within those patterns.`,
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
     handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {
