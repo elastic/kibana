@@ -66,10 +66,7 @@ export function createGetMetricChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getMetricChangePointsSchema> = {
     id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Analyzes metrics to detect statistically significant changes like spikes and dips, in specific metric patterns.
-
-How it works:
-It uses the "auto_date_histogram" aggregation to group metrics by time and then detects change points (spikes/dips) within each time bucket.`,
+    description: `Detects statistically significant changes (spikes/dips) in metrics across groups (e.g., by service, host, or custom fields).`,
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
     handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
