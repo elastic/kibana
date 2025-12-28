@@ -50,7 +50,7 @@ describe('AlertsTab', () => {
       expect.objectContaining({
         tableType: expect.any(String),
         inputFilters: expect.arrayContaining([...defaultFilters, ...groupingFilters]),
-        isTableLoading: true,
+        isLoading: true,
         pageScope: expect.any(String),
         disableAdditionalToolbarControls: true,
       }),
