@@ -13,9 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertsTab } from './alerts_tab';
 import * as i18n from './translations';
 
-/** Tab ID constant for the Attack Summary tab */
 export const ATTACK_SUMMARY_TAB = 'attackSummaryTab';
-/** Tab ID constant for the Alerts tab */
 export const ALERTS_TAB = 'alertsTab';
 
 /** Test subject constant for the tabs container */

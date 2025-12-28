@@ -12,7 +12,6 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { AlertsTable } from '../../../alerts_table';
 
-/** Test subject constant for AlertsTab component */
 export const ALERTS_TAB_TEST_ID = 'alertsTab';
 
 interface AlertsTabProps {
