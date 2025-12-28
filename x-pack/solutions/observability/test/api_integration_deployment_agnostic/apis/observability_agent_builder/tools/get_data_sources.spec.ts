@@ -6,7 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { generateDataSourcesData, indexAll } from '@kbn/synthtrace';
 import { isOtherResult } from '@kbn/agent-builder-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
@@ -21,7 +23,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 import type { AgentBuilderApiClient } from '../utils/agent_builder_client';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
-import { createSyntheticLogsData, createSyntheticApmData } from '../utils/synthtrace_scenarios';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
@@ -54,8 +55,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
         agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsData({ getService }));
+        // Create synthtrace clients and generate data
+        const synthtrace = getService('synthtrace');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+
+        await apmSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
+
+        const range = timerange('now-15m', 'now');
+
+        await indexAll(
+          generateDataSourcesData({
+            range,
+            logsEsClient: logsSynthtraceEsClient,
+            apmEsClient: apmSynthtraceEsClient,
+          })
+        );
 
         setupToolCallThenAnswer({
           llmProxy,
