@@ -27,7 +27,7 @@
         "label": "getPaddedAlertTimeRange",
         "description": [],
         "signature": [
-          "(alertStart: string, alertEnd?: string | undefined, lookBackWindow?: { size: number; unit: \"m\" | \"s\" | \"d\" | \"h\"; } | undefined) => ",
+          "(alertStart: string, alertEnd?: string | undefined, lookBackWindow?: { size: number; unit: \"m\" | \"d\" | \"s\" | \"h\"; } | undefined) => ",
           "TimeRange"
         ],
         "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
@@ -94,7 +94,7 @@
                 "label": "unit",
                 "description": [],
                 "signature": [
-                  "\"m\" | \"s\" | \"d\" | \"h\""
+                  "\"m\" | \"d\" | \"s\" | \"h\""
                 ],
                 "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
                 "deprecated": false,
