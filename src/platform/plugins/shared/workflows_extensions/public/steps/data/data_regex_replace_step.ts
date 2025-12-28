@@ -131,7 +131,7 @@ export const dataRegexReplaceStepDefinition: PublicStepDefinition = {
   source: "\${{ steps.input.output }}"
   with:
     pattern: "(?<year>\\\\d{4})-(?<month>\\\\d{2})-(?<day>\\\\d{2})"
-    replacement: "$<month>/$<day>/$<year>"
+    replacement: "\$<month>/\$<day>/\$<year>"
 
 # Input: "2024-01-15"
 # Output: "01/15/2024"
