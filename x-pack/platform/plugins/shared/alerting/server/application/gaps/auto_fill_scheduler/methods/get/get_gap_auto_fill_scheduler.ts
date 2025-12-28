@@ -57,7 +57,12 @@ export async function getGapAutoFillScheduler(
     });
   } catch (err) {
     const errorMessage = `Failed to get gap fill auto scheduler by id: ${params.id}`;
-    context.logger.error(`${errorMessage} - ${err}`);
+    if (err?.output?.statusCode === 404) {
+      context.logger.info(`${errorMessage} - ${err}`);
+    } else {
+      context.logger.error(`${errorMessage} - ${err}`);
+    }
+
     throw Boom.boomify(err, { message: errorMessage });
   }
 }

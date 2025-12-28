@@ -107,6 +107,7 @@ xpack.searchAssistant.enabled: true
 xpack.searchAssistant.ui.enabled: true
 xpack.observabilityAIAssistant.scope: "search"
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+aiAssistantManagementSelection.preferredChatExperience: "agent"
 
 # Query Rules UI
 xpack.searchQueryRules.enabled: true

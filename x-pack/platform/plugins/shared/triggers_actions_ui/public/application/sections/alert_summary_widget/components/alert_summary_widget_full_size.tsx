@@ -93,6 +93,7 @@ export const AlertSummaryWidgetFullSize = ({
                 },
               ]}
               onBrushEnd={onBrushEnd}
+              baseTheme={baseTheme}
               locale={i18n.getLocale()}
             />
             <Axis

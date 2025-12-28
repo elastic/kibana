@@ -82,7 +82,7 @@ const soSchema = schema.object({
     schema.boolean({ defaultValue: true }),
     schema.boolean({ defaultValue: false })
   ),
-  enableAccessControl: schema.boolean({ defaultValue: false }),
+  enableAccessControl: schema.boolean({ defaultValue: true }),
 });
 
 export type SavedObjectsConfigType = TypeOf<typeof soSchema>;

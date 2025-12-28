@@ -15,7 +15,7 @@ import { generateFakeToolCallId } from '../../../../common';
 import type { GenerateContentResponseChunk } from './types';
 import { createToolValidationError } from '../../../../common/chat_complete/errors';
 
-export function processVertexStream() {
+export function processVertexStream(model?: string) {
   return (source: Observable<GenerateContentResponseChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext(value: GenerateContentResponseChunk) {
@@ -33,6 +33,7 @@ export function processVertexStream() {
                 cached: value.usageMetadata.cachedContentTokenCount,
                 total: value.usageMetadata.totalTokenCount,
               },
+              ...(model ? { model } : {}),
             });
           }
         }

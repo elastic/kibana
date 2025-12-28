@@ -341,7 +341,7 @@ export function setQuery({
       filters: filters ? filters : getFilters(getState()),
       searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
-      projectRouting,
+      projectRouting: projectRouting ?? getProjectRouting(getState()),
     };
 
     const prevQueryContext = {

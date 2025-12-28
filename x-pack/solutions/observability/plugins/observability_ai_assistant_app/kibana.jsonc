@@ -31,7 +31,7 @@
       "spaces",
       "llmTasks"
     ],
-    "optionalPlugins": ["cloud"],
+    "optionalPlugins": ["cloud", "agentBuilder"],
     "requiredBundles": ["kibanaReact", "esqlDataGrid"],
     "extraPublicDirs": []
   }
