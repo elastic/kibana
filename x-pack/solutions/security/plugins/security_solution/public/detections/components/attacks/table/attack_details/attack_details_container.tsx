@@ -35,7 +35,7 @@ interface AttackDetailsContainerProps {
   /** Default filters to apply to the alerts table */
   defaultFilters: Filter[];
   /** Whether the alerts table is in a loading state */
-  isLoading: boolean;
+  isTableLoading: boolean;
 }
 
 /**
@@ -45,7 +45,7 @@ interface AttackDetailsContainerProps {
  * If attack is undefined, only the Alerts tab will be rendered.
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
-  ({ attack, groupingFilters, defaultFilters, isLoading }) => {
+  ({ attack, groupingFilters, defaultFilters, isTableLoading }) => {
     const tabs = useMemo<TabInfo[]>(() => {
       const tabsList: TabInfo[] = [];
 
@@ -72,14 +72,14 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
             <AlertsTab
               groupingFilters={groupingFilters}
               defaultFilters={defaultFilters}
-              isLoading={isLoading}
+              isTableLoading={isTableLoading}
             />
           </>
         ),
       });
 
       return tabsList;
-    }, [attack, groupingFilters, defaultFilters, isLoading]);
+    }, [attack, groupingFilters, defaultFilters, isTableLoading]);
 
     const firstTabId = useMemo(() => (attack ? ATTACK_SUMMARY_TAB : ALERTS_TAB), [attack]);
 

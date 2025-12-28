@@ -25,7 +25,7 @@ describe('AttackDetailsContainer', () => {
     showAnonymized: false,
     groupingFilters: [],
     defaultFilters: [],
-    isLoading: false,
+    isTableLoading: false,
   };
 
   const renderContainer = (props = {}) =>
@@ -79,7 +79,7 @@ describe('AttackDetailsContainer', () => {
         expect.objectContaining({
           groupingFilters: [],
           defaultFilters: [],
-          isLoading: false,
+          isTableLoading: false,
         }),
         {}
       );

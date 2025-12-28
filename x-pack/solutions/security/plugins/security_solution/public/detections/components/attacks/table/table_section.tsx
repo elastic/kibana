@@ -155,7 +155,7 @@ export const TableSection = React.memo(
             showAnonymized={showAnonymized}
             groupingFilters={groupingFilters}
             defaultFilters={defaultFilters}
-            isLoading={isLoading}
+            isTableLoading={isLoading}
           />
         );
       },

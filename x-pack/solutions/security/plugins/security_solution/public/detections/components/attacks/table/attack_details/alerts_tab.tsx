@@ -20,7 +20,7 @@ interface AlertsTabProps {
   /** Default filters to apply to the alerts table */
   defaultFilters: Filter[];
   /** Whether the alerts table is in a loading state */
-  isLoading: boolean;
+  isTableLoading: boolean;
 }
 
 /**
@@ -28,13 +28,13 @@ interface AlertsTabProps {
  * with filters for the specific attack's alerts.
  */
 export const AlertsTab = React.memo<AlertsTabProps>(
-  ({ groupingFilters, defaultFilters, isLoading }) => {
+  ({ groupingFilters, defaultFilters, isTableLoading }) => {
     return (
       <div data-test-subj={ALERTS_TAB_TEST_ID}>
         <AlertsTable
           tableType={TableId.alertsOnAttacksPage}
           inputFilters={[...defaultFilters, ...groupingFilters]}
-          isLoading={isLoading}
+          isLoading={isTableLoading}
           pageScope={PageScope.alerts} // show only detection alerts
           disableAdditionalToolbarControls={groupingFilters.length > 0}
         />

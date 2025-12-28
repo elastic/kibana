@@ -20,7 +20,7 @@ describe('AlertsTab', () => {
   const defaultProps = {
     groupingFilters: [],
     defaultFilters: [],
-    isLoading: false,
+    isTableLoading: false,
   };
 
   const renderAlertsTab = (props = {}) =>
@@ -44,13 +44,13 @@ describe('AlertsTab', () => {
     const groupingFilters = [{ meta: { alias: 'group', disabled: false, negate: false } }];
     const defaultFilters = [{ meta: { alias: 'default', disabled: false, negate: false } }];
 
-    renderAlertsTab({ groupingFilters, defaultFilters, isLoading: true });
+    renderAlertsTab({ groupingFilters, defaultFilters, isTableLoading: true });
 
     expect(AlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
         tableType: expect.any(String),
         inputFilters: expect.arrayContaining([...defaultFilters, ...groupingFilters]),
-        isLoading: true,
+        isTableLoading: true,
         pageScope: expect.any(String),
         disableAdditionalToolbarControls: true,
       }),
