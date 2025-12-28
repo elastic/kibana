@@ -25,6 +25,10 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
+    id: 'agentBuilder.runAgent',
+    handlerHash: '5900dff8945512df13e3e082cec3750deddb8ca43675bde01e452b263c2f2d9d',
+  },
+  {
     id: 'ai.prompt',
     handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
   },
@@ -43,9 +47,5 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   {
     id: 'data.regex_replace',
     handlerHash: 'f70dc506c0c1e9dbb7cf7520c6549524a87e2995ab496f3151df5842e9d91a73',
-  },
-  {
-    id: 'onechat.runAgent',
-    handlerHash: '601727d71e669530e8ba222ae72d3c8a549145d3ea2e8f6a3dd5109d93e1ceff',
   },
 ];
