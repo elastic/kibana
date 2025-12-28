@@ -42,10 +42,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.regex_extract',
-    handlerHash: '68d9855b90667afca12e1022078805aa55de6244ce37fdbd28a77375ae51c122',
+    handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
   },
   {
     id: 'data.regex_replace',
-    handlerHash: 'f70dc506c0c1e9dbb7cf7520c6549524a87e2995ab496f3151df5842e9d91a73',
+    handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
   },
 ];
