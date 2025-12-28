@@ -6,11 +6,19 @@
  */
 import moment from 'moment';
 import { MessageRole, type InferenceClient } from '@kbn/inference-common';
-import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, CoreSetup, Logger } from '@kbn/core/server';
 import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getLogDocumentById } from './get_log_document_by_id';
+import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
+} from '../../types';
+import { getApmIndices } from '../../utils/get_apm_indices';
+import { fetchDistributedTrace } from './apm_error/fetch_distributed_trace';
+import { parseDatemath } from '../../utils/time';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
 
@@ -22,6 +30,12 @@ export interface GetLogAiInsightsParams {
   connectorId: string;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  logger: Logger;
 }
 
 export async function getLogAiInsights({
@@ -32,6 +46,9 @@ export async function getLogAiInsights({
   dataRegistry,
   inferenceClient,
   connectorId,
+  core,
+  plugins,
+  logger,
 }: GetLogAiInsightsParams): Promise<{ summary: string; context: string }> {
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
@@ -60,11 +77,17 @@ export async function getLogAiInsights({
     throw new Error('Log entry not found');
   }
 
+  const resourceAttrs = (logEntry.resource as { attributes?: Record<string, unknown> } | undefined)
+    ?.attributes;
+
   const serviceName =
-    (logEntry.service?.name || logEntry.resource?.attributes['service.name']);
+    ((logEntry.service as { name?: string } | undefined)?.name ||
+      (resourceAttrs?.['service.name'] as string | undefined)) ??
+    undefined;
 
   const serviceEnvironment =
-  (logEntry.service?.environment || logEntry.resource?.attributes['service.environment']) ||
+    ((logEntry.service as { environment?: string } | undefined)?.environment ||
+      (resourceAttrs?.['service.environment'] as string | undefined)) ??
     ENVIRONMENT_ALL_VALUE;
 
   let context = dedent(`
@@ -124,6 +147,53 @@ export async function getLogAiInsights({
         \`\`\`
         </DownstreamDependencies>
       `);
+    }
+
+    const traceId =
+      (logEntry.trace_id as string | undefined) ||
+      ((logEntry.trace as { id?: string } | undefined)?.id as string | undefined);
+
+    if (traceId) {
+      try {
+        const parsedStart = parseDatemath(start, { roundUp: false });
+        const parsedEnd = parseDatemath(end, { roundUp: true });
+        const apmIndices = await getApmIndices({ core, plugins, logger });
+
+        const traceData = await fetchDistributedTrace({
+          esClient,
+          apmIndices,
+          traceId,
+          start: parsedStart,
+          end: parsedEnd,
+          logger,
+        });
+
+        if (traceData.traceDocuments.length > 0) {
+          context += dedent(`
+            <TraceDocuments>
+            Time window: ${start} to ${end}
+            Trace ID: ${traceId}
+            \`\`\`json
+            ${safeJsonStringify(traceData.traceDocuments)}
+            \`\`\`
+            </TraceDocuments>
+          `);
+        }
+
+        if (traceData.services.length > 0) {
+          context += dedent(`
+            <TraceServices>
+            Time window: ${start} to ${end}
+            Services involved in this trace:
+            \`\`\`json
+            ${safeJsonStringify(traceData.services)}
+            \`\`\`
+            </TraceServices>
+          `);
+        }
+      } catch (err) {
+        logger.debug(`Log AI Insight: Failed to fetch trace data: ${err}`);
+      }
     }
   }
   const response = await inferenceClient.chatComplete({

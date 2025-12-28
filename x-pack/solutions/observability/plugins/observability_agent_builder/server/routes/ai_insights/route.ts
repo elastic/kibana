@@ -128,7 +128,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         id: t.string,
       }),
     }),
-    handler: async ({ request, core, dataRegistry, params }) => {
+    handler: async ({ request, core, dataRegistry, params, logger, plugins }) => {
       const { index, id } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
@@ -146,6 +146,9 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         request,
         esClient,
         dataRegistry,
+        core,
+        plugins,
+        logger,
       });
 
       return { summary, context };
