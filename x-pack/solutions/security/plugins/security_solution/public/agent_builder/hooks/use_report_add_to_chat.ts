@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { useCallback } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 export interface AgentBuilderAddToChatTelemetry {
