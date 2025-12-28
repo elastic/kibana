@@ -423,7 +423,6 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
           onAggregationsChange={props.onAggregationsChange}
           additionalToolbarControls={props.additionalToolbarControls}
-          emptyGroupingComponent={props.emptyGroupingComponent}
         />
       );
     },

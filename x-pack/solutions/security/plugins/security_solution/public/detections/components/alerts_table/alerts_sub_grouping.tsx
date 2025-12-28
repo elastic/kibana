@@ -110,9 +110,6 @@ interface OwnProps {
     aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
     groupingLevel?: number
   ) => void;
-
-  /** Optional custom component to render when there are no grouping results */
-  emptyGroupingComponent?: React.ReactElement;
 }
 
 export type AlertsTableComponentProps = OwnProps;
