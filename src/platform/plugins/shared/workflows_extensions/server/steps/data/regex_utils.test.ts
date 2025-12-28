@@ -10,7 +10,9 @@
 import {
   createRegex,
   detectRedosPatterns,
+  MAX_ARRAY_LENGTH,
   MAX_INPUT_LENGTH,
+  MAX_PATTERN_LENGTH,
   validateInputLength,
   validateSourceInput,
 } from './regex_utils';
@@ -194,6 +196,34 @@ describe('regex_utils', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
+    it('should reject patterns exceeding max length', () => {
+      const tooLongPattern = 'a'.repeat(MAX_PATTERN_LENGTH + 1);
+      const result = createRegex(tooLongPattern, undefined, mockLogger);
+
+      expect('error' in result).toBe(true);
+      if ('error' in result) {
+        expect(result.error).toBeInstanceOf(Error);
+        expect(result.error.message).toContain('exceeds maximum allowed length');
+        expect(result.error.message).toContain('10000');
+        expect(result.error.message).toContain('10001');
+      }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Pattern length limit exceeded',
+        expect.any(Error)
+      );
+    });
+
+    it('should accept patterns at max length', () => {
+      const maxLengthPattern = 'a'.repeat(MAX_PATTERN_LENGTH);
+      const result = createRegex(maxLengthPattern, undefined, mockLogger);
+
+      expect('regex' in result).toBe(true);
+      if ('regex' in result) {
+        expect(result.regex).toBeInstanceOf(RegExp);
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
     it('should reject patterns with ReDoS vulnerabilities', () => {
       const dangerousPatterns = ['(a+)+', '(a|aa)+', '(\\d+)+$', 'test++'];
 
@@ -310,6 +340,51 @@ describe('regex_utils', () => {
       if (result.valid) {
         expect(result.isArray).toBe(true);
       }
+    });
+
+    it('should reject arrays exceeding max length', () => {
+      const tooLargeArray = new Array(MAX_ARRAY_LENGTH + 1).fill('test');
+      const mockLoggerWithWarn = {
+        error: jest.fn(),
+        warn: jest.fn(),
+      };
+      const result = validateSourceInput(tooLargeArray, mockLoggerWithWarn);
+
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error).toBeInstanceOf(Error);
+        expect(result.error.message).toContain('exceeds maximum allowed length');
+        expect(result.error.message).toContain('10000');
+        expect(result.error.message).toContain('10001');
+      }
+      expect(mockLoggerWithWarn.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Input array exceeds max length')
+      );
+      expect(mockLoggerWithWarn.error).toHaveBeenCalledWith(
+        'Input array exceeds maximum allowed length'
+      );
+    });
+
+    it('should accept arrays at max length', () => {
+      const maxLengthArray = new Array(MAX_ARRAY_LENGTH).fill('test');
+      const result = validateSourceInput(maxLengthArray, mockLogger);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.isArray).toBe(true);
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should accept normal sized arrays', () => {
+      const normalArray = ['item1', 'item2', 'item3'];
+      const result = validateSourceInput(normalArray, mockLogger);
+
+      expect(result.valid).toBe(true);
+      if (result.valid) {
+        expect(result.isArray).toBe(true);
+      }
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('should reject null input', () => {

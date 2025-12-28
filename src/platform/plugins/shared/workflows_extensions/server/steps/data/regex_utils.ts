@@ -8,6 +8,8 @@
  */
 
 export const MAX_INPUT_LENGTH = 100000; // max 100,000 characters per string
+export const MAX_PATTERN_LENGTH = 10000; // max 10,000 characters for regex patterns
+export const MAX_ARRAY_LENGTH = 10000; // max 10,000 items in array
 
 /**
  * Validates that an input string does not exceed the maximum allowed length.
@@ -78,7 +80,7 @@ export function detectRedosPatterns(pattern: string): Error | undefined {
 
 /**
  * Creates a RegExp object from a pattern string and optional flags.
- * Validates the pattern for ReDoS vulnerabilities before creating the regex.
+ * Validates the pattern length and ReDoS vulnerabilities before creating the regex.
  *
  * @param pattern - The regex pattern string
  * @param flags - Optional regex flags (g, i, m, etc.)
@@ -90,7 +92,16 @@ export function createRegex(
   flags: string | undefined,
   logger: { error: (message: string, error?: unknown) => void; warn?: (message: string) => void }
 ): { regex: RegExp } | { error: Error } {
-  // Check for ReDoS patterns first
+  // Check pattern length first
+  if (pattern.length > MAX_PATTERN_LENGTH) {
+    const error = new Error(
+      `Pattern exceeds maximum allowed length of ${MAX_PATTERN_LENGTH} characters. Current length: ${pattern.length}`
+    );
+    logger.error('Pattern length limit exceeded', error);
+    return { error };
+  }
+
+  // Check for ReDoS patterns
   const redosError = detectRedosPatterns(pattern);
   if (redosError) {
     if (logger.warn) {
@@ -112,9 +123,13 @@ export function createRegex(
   }
 }
 
+/**
+ * Validates that the source input is either a string or an array of appropriate size.
+ * Prevents processing of excessively large arrays that could cause performance issues.
+ */
 export function validateSourceInput(
   source: unknown,
-  logger: { error: (message: string) => void }
+  logger: { error: (message: string) => void; warn?: (message: string) => void }
 ): { valid: true; isArray: boolean } | { valid: false; error: Error } {
   if (source == null) {
     logger.error('Input source is null or undefined');
@@ -133,6 +148,19 @@ export function validateSourceInput(
       valid: false,
       error: new Error(
         `Expected source to be a string or array, but received ${typeof source}. Please provide a string or array of strings.`
+      ),
+    };
+  }
+
+  if (isArray && source.length > MAX_ARRAY_LENGTH) {
+    if (logger.warn) {
+      logger.warn(`Input array exceeds max length (${source.length} > ${MAX_ARRAY_LENGTH})`);
+    }
+    logger.error('Input array exceeds maximum allowed length');
+    return {
+      valid: false,
+      error: new Error(
+        `Input array exceeds maximum allowed length of ${MAX_ARRAY_LENGTH} items to prevent performance issues. Current length: ${source.length}`
       ),
     };
   }
