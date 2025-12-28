@@ -9,6 +9,7 @@
 
 import {
   createRegex,
+  detectRedosPatterns,
   MAX_INPUT_LENGTH,
   validateInputLength,
   validateSourceInput,
@@ -71,9 +72,84 @@ describe('regex_utils', () => {
     });
   });
 
+  describe('detectRedosPatterns', () => {
+    it('should detect nested quantifiers', () => {
+      const patterns = ['(a+)+', '(a*)*', '(a?)+', '(\\d+)+', '([a-z]*)*'];
+
+      patterns.forEach((pattern) => {
+        const error = detectRedosPatterns(pattern);
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('nested quantifiers');
+        expect(error?.message).toContain('ReDoS');
+      });
+    });
+
+    it('should detect overlapping alternations with quantifiers', () => {
+      const patterns = ['(a|aa)+', '(a|ab)+', '(abc|abcd)*', '(x|xy|xyz)+'];
+
+      patterns.forEach((pattern) => {
+        const error = detectRedosPatterns(pattern);
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('overlapping alternations');
+        expect(error?.message).toContain('ReDoS');
+      });
+    });
+
+    it('should detect nested quantifiers with end anchor', () => {
+      const patterns = ['(a+)+$', '(\\d*)*$', '(test?)+$'];
+
+      patterns.forEach((pattern) => {
+        const error = detectRedosPatterns(pattern);
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('end anchor');
+        expect(error?.message).toContain('ReDoS');
+      });
+    });
+
+    it('should detect multiple consecutive quantifiers', () => {
+      const patterns = ['a++', 'b**', 'c*+', 'd+*', 'e{2,3}{4,5}'];
+
+      patterns.forEach((pattern) => {
+        const error = detectRedosPatterns(pattern);
+        expect(error).toBeDefined();
+        expect(error?.message).toContain('multiple consecutive quantifiers');
+        expect(error?.message).toContain('ReDoS');
+      });
+    });
+
+    it('should allow safe patterns', () => {
+      const safePatterns = [
+        '\\d+',
+        '[a-z]+',
+        '(abc)+',
+        '^test$',
+        '\\w{2,5}',
+        '(foo|bar)',
+        '(?:non|capturing)+',
+        '^\\d{4}-\\d{2}-\\d{2}$',
+        '[A-Z][a-z]*',
+      ];
+
+      safePatterns.forEach((pattern) => {
+        const error = detectRedosPatterns(pattern);
+        expect(error).toBeUndefined();
+      });
+    });
+
+    it('should allow non-overlapping alternations', () => {
+      const safePatterns = ['(cat|dog)+', '(red|blue|green)*', '(foo|bar|baz)+'];
+
+      safePatterns.forEach((pattern) => {
+        const error = detectRedosPatterns(pattern);
+        expect(error).toBeUndefined();
+      });
+    });
+  });
+
   describe('createRegex', () => {
     const mockLogger = {
       error: jest.fn(),
+      warn: jest.fn(),
     };
 
     beforeEach(() => {
@@ -116,6 +192,28 @@ describe('regex_utils', () => {
         expect(result.regex).toBeInstanceOf(RegExp);
       }
       expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('should reject patterns with ReDoS vulnerabilities', () => {
+      const dangerousPatterns = ['(a+)+', '(a|aa)+', '(\\d+)+$', 'test++'];
+
+      dangerousPatterns.forEach((pattern) => {
+        jest.clearAllMocks();
+        const result = createRegex(pattern, undefined, mockLogger);
+
+        expect('error' in result).toBe(true);
+        if ('error' in result) {
+          expect(result.error).toBeInstanceOf(Error);
+          expect(result.error.message).toContain('ReDoS');
+        }
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Dangerous regex pattern rejected',
+          expect.any(Error)
+        );
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('ReDoS pattern detected')
+        );
+      });
     });
 
     it('should reject invalid regex patterns', () => {

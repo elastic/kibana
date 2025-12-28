@@ -9,6 +9,11 @@
 
 export const MAX_INPUT_LENGTH = 100000; // max 100,000 characters per string
 
+/**
+ * Validates that an input string does not exceed the maximum allowed length.
+ * This helps prevent ReDoS attacks by limiting the size of input that can be
+ * processed by regular expressions.
+ */
 export function validateInputLength(
   item: string,
   logger: { warn: (message: string) => void }
@@ -25,11 +30,76 @@ export function validateInputLength(
   return { valid: true };
 }
 
+/**
+ * Detects potentially dangerous ReDoS (Regular Expression Denial of Service) patterns.
+ * Checks for common vulnerable patterns that can cause catastrophic backtracking.
+ *
+ * @param pattern - The regex pattern to validate
+ * @returns Error if a dangerous pattern is detected, undefined otherwise
+ */
+export function detectRedosPatterns(pattern: string): Error | undefined {
+  // Nested quantifiers: (a+)+, (a*)*, (a?)+, etc.
+  const nestedQuantifiers = /\([^)]*[*+?][^)]*\)[*+?]/;
+  if (nestedQuantifiers.test(pattern)) {
+    return new Error(
+      'Potentially dangerous regex pattern detected: nested quantifiers like (a+)+ can cause catastrophic backtracking (ReDoS vulnerability)'
+    );
+  }
+
+  // Overlapping alternations with quantifiers: (a|aa)+, (a|ab|abc)*, etc.
+  const overlappingAlternations = /\([^)]*\|[^)]*\)[*+]/;
+  if (overlappingAlternations.test(pattern)) {
+    const hasOverlap = /\((?:[^|)]+\|)*[^|)]*([a-z]+)[^|)]*(?:\|[^|)]*\1)/i.test(pattern);
+    if (hasOverlap) {
+      return new Error(
+        'Potentially dangerous regex pattern detected: overlapping alternations with quantifiers like (a|aa)+ can cause catastrophic backtracking (ReDoS vulnerability)'
+      );
+    }
+  }
+
+  // Nested quantifiers with end anchor: (a+)+$
+  const nestedQuantifiersWithAnchor = /\([^)]*[*+?][^)]*\)[*+?]\$$/;
+  if (nestedQuantifiersWithAnchor.test(pattern)) {
+    return new Error(
+      'Potentially dangerous regex pattern detected: nested quantifiers with end anchor like (a+)+$ can cause catastrophic backtracking (ReDoS vulnerability)'
+    );
+  }
+
+  // Multiple consecutive quantifiers on the same group
+  const multipleQuantifiers = /[*+?]\{|\}\{|[*+?][*+?]/;
+  if (multipleQuantifiers.test(pattern)) {
+    return new Error(
+      'Potentially dangerous regex pattern detected: multiple consecutive quantifiers can cause catastrophic backtracking (ReDoS vulnerability)'
+    );
+  }
+
+  return undefined;
+}
+
+/**
+ * Creates a RegExp object from a pattern string and optional flags.
+ * Validates the pattern for ReDoS vulnerabilities before creating the regex.
+ *
+ * @param pattern - The regex pattern string
+ * @param flags - Optional regex flags (g, i, m, etc.)
+ * @param logger - Logger for error messages
+ * @returns Object containing either the created RegExp or an Error
+ */
 export function createRegex(
   pattern: string,
   flags: string | undefined,
-  logger: { error: (message: string, error?: unknown) => void }
+  logger: { error: (message: string, error?: unknown) => void; warn?: (message: string) => void }
 ): { regex: RegExp } | { error: Error } {
+  // Check for ReDoS patterns first
+  const redosError = detectRedosPatterns(pattern);
+  if (redosError) {
+    if (logger.warn) {
+      logger.warn(`ReDoS pattern detected in regex: ${pattern}`);
+    }
+    logger.error('Dangerous regex pattern rejected', redosError);
+    return { error: redosError };
+  }
+
   try {
     return { regex: new RegExp(pattern, flags) };
   } catch (err) {

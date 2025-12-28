@@ -61,6 +61,7 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
       const regexResult = createRegex(pattern, flags, {
         error: (message: string, error?: unknown) =>
           context.logger.error(message, error as Error | undefined),
+        warn: (message: string) => context.logger.warn(message),
       });
       if ('error' in regexResult) {
         return { error: regexResult.error };
