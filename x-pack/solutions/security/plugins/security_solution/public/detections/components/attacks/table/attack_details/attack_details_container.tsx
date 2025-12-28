@@ -55,7 +55,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
           name: i18n.ATTACK_SUMMARY,
           content: (
             <>
-              <EuiSpacer />
+              <EuiSpacer size="s" />
               {/* TODO: Placeholder for `AttackSummaryTab` */}
               <div data-test-subj="attackSummaryTabPlaceholder" />
             </>
@@ -68,7 +68,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
         name: i18n.ALERTS,
         content: (
           <>
-            <EuiSpacer />
+            <EuiSpacer size="s" />
             <AlertsTab
               groupingFilters={groupingFilters}
               defaultFilters={defaultFilters}
