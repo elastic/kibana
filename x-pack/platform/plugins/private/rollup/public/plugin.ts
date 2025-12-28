@@ -47,6 +47,7 @@ export class RollupPlugin implements Plugin {
       if (indexManagement) {
         indexManagement.extensionsService.addBadge(rollupBadgeExtension);
         indexManagement.extensionsService.addToggle(rollupToggleExtension);
+        // todo
         indexManagement.indexDataEnricher.add(rollupDataEnricher);
       }
 

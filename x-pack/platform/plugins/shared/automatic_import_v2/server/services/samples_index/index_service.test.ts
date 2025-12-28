@@ -37,9 +37,12 @@ jest.mock('./storage', () => {
     },
   });
 
+  const mockDelete = jest.fn().mockResolvedValue({});
+
   const mockGetClient = jest.fn().mockReturnValue({
     bulk: mockBulk,
     search: mockSearch,
+    delete: mockDelete,
   });
 
   return {
@@ -262,6 +265,209 @@ describe('AutomaticImportSamplesIndexService', () => {
       });
 
       expect(samples).toEqual(['sample log 1', 'sample log 2']);
+    });
+  });
+
+  describe('deleteSamplesForDataStream', () => {
+    beforeEach(() => {
+      // Reset mocks for delete tests
+      const { createIndexAdapter } = jest.requireMock('./storage');
+      createIndexAdapter.mockClear();
+    });
+
+    it('should delete all samples for a data stream in a single batch', async () => {
+      const mockDelete = jest.fn().mockResolvedValue({});
+      const mockSearch = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'doc1', _source: { log_data: 'sample1' } },
+            { _id: 'doc2', _source: { log_data: 'sample2' } },
+            { _id: 'doc3', _source: { log_data: 'sample3' } },
+          ],
+        },
+      });
+
+      const mockGetClient = jest.fn().mockReturnValue({
+        search: mockSearch,
+        delete: mockDelete,
+      });
+
+      const { createIndexAdapter } = jest.requireMock('./storage');
+      createIndexAdapter.mockReturnValue({
+        getClient: mockGetClient,
+      });
+
+      const result = await service.deleteSamplesForDataStream(
+        'integration-123',
+        'data-stream-456',
+        mockEsClient
+      );
+
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+      expect(mockSearch).toHaveBeenCalledWith({
+        query: {
+          bool: {
+            must: [
+              { term: { integration_id: 'integration-123' } },
+              { term: { data_stream_id: 'data-stream-456' } },
+            ],
+          },
+        },
+        size: 1000,
+        track_total_hits: false,
+      });
+
+      expect(mockDelete).toHaveBeenCalledTimes(3);
+      expect(mockDelete).toHaveBeenCalledWith({ id: 'doc1' });
+      expect(mockDelete).toHaveBeenCalledWith({ id: 'doc2' });
+      expect(mockDelete).toHaveBeenCalledWith({ id: 'doc3' });
+
+      expect(result).toEqual({ deleted: 3 });
+    });
+
+    it('should delete samples in multiple batches when exceeding batch size', async () => {
+      const mockDelete = jest.fn().mockResolvedValue({});
+
+      // First batch: 1000 documents
+      const firstBatchHits = Array.from({ length: 1000 }, (_, i) => ({
+        _id: `doc${i}`,
+        _source: { log_data: `sample${i}` },
+      }));
+
+      // Second batch: 500 documents (less than batch size, so loop ends)
+      const secondBatchHits = Array.from({ length: 500 }, (_, i) => ({
+        _id: `doc${1000 + i}`,
+        _source: { log_data: `sample${1000 + i}` },
+      }));
+
+      const mockSearch = jest
+        .fn()
+        .mockResolvedValueOnce({
+          hits: { hits: firstBatchHits },
+        })
+        .mockResolvedValueOnce({
+          hits: { hits: secondBatchHits },
+        });
+
+      const mockGetClient = jest.fn().mockReturnValue({
+        search: mockSearch,
+        delete: mockDelete,
+      });
+
+      const { createIndexAdapter } = jest.requireMock('./storage');
+      createIndexAdapter.mockReturnValue({
+        getClient: mockGetClient,
+      });
+
+      const result = await service.deleteSamplesForDataStream(
+        'integration-123',
+        'data-stream-456',
+        mockEsClient
+      );
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      expect(mockDelete).toHaveBeenCalledTimes(1500);
+      expect(result).toEqual({ deleted: 1500 });
+    });
+
+    it('should return zero deleted count when no samples exist', async () => {
+      const mockDelete = jest.fn();
+      const mockSearch = jest.fn().mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const mockGetClient = jest.fn().mockReturnValue({
+        search: mockSearch,
+        delete: mockDelete,
+      });
+
+      const { createIndexAdapter } = jest.requireMock('./storage');
+      createIndexAdapter.mockReturnValue({
+        getClient: mockGetClient,
+      });
+
+      const result = await service.deleteSamplesForDataStream(
+        'integration-123',
+        'data-stream-456',
+        mockEsClient
+      );
+
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+      expect(mockDelete).not.toHaveBeenCalled();
+      expect(result).toEqual({ deleted: 0 });
+    });
+
+    it('should handle errors during search', async () => {
+      const mockSearch = jest.fn().mockRejectedValue(new Error('Search failed'));
+
+      const mockGetClient = jest.fn().mockReturnValue({
+        search: mockSearch,
+        delete: jest.fn(),
+      });
+
+      const { createIndexAdapter } = jest.requireMock('./storage');
+      createIndexAdapter.mockReturnValue({
+        getClient: mockGetClient,
+      });
+
+      await expect(
+        service.deleteSamplesForDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Search failed');
+    });
+
+    it('should handle errors during delete', async () => {
+      const mockDelete = jest.fn().mockRejectedValue(new Error('Delete failed'));
+      const mockSearch = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [{ _id: 'doc1', _source: { log_data: 'sample1' } }],
+        },
+      });
+
+      const mockGetClient = jest.fn().mockReturnValue({
+        search: mockSearch,
+        delete: mockDelete,
+      });
+
+      const { createIndexAdapter } = jest.requireMock('./storage');
+      createIndexAdapter.mockReturnValue({
+        getClient: mockGetClient,
+      });
+
+      await expect(
+        service.deleteSamplesForDataStream('integration-123', 'data-stream-456', mockEsClient)
+      ).rejects.toThrow('Delete failed');
+    });
+
+    it('should use correct query parameters for filtering', async () => {
+      const mockDelete = jest.fn().mockResolvedValue({});
+      const mockSearch = jest.fn().mockResolvedValue({
+        hits: { hits: [] },
+      });
+
+      const mockGetClient = jest.fn().mockReturnValue({
+        search: mockSearch,
+        delete: mockDelete,
+      });
+
+      const { createIndexAdapter } = jest.requireMock('./storage');
+      createIndexAdapter.mockReturnValue({
+        getClient: mockGetClient,
+      });
+
+      await service.deleteSamplesForDataStream('test-integration', 'test-datastream', mockEsClient);
+
+      expect(mockSearch).toHaveBeenCalledWith({
+        query: {
+          bool: {
+            must: [
+              { term: { integration_id: 'test-integration' } },
+              { term: { data_stream_id: 'test-datastream' } },
+            ],
+          },
+        },
+        size: 1000,
+        track_total_hits: false,
+      });
     });
   });
 

@@ -8,7 +8,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import { AwsAccountTypeSelect } from './aws_account_type_selector';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { createAwsCloudSetupMock } from '../test/cloud_setup_mocks';
@@ -33,7 +33,7 @@ const defaultInput: NewPackagePolicyInput = {
       data_stream: { type: 'aws-policy-type', dataset: 'aws.test' },
       vars: {
         'aws.account_type': {
-          value: AWS_SINGLE_ACCOUNT,
+          value: SINGLE_ACCOUNT,
         },
       },
     },
@@ -116,7 +116,7 @@ describe('AwsAccountTypeSelect', () => {
         {
           vars: {
             'aws.account_type': {
-              value: AWS_ORGANIZATION_ACCOUNT,
+              value: ORGANIZATION_ACCOUNT,
             },
           },
         },

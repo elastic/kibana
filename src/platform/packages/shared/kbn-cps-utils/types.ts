@@ -42,11 +42,6 @@ export interface ProjectsData {
   linkedProjects: CPSProject[];
 }
 
-export interface ProjectPickerAccessInfo {
-  access: ProjectRoutingAccess;
-  readonlyMessage?: string;
-}
-
 export interface ICPSManager {
   fetchProjects(): Promise<ProjectsData | null>;
   refresh(): Promise<ProjectsData | null>;
@@ -54,5 +49,6 @@ export interface ICPSManager {
   setProjectRouting(projectRouting: ProjectRouting | undefined): void;
   getProjectRouting(): ProjectRouting | undefined;
   getDefaultProjectRouting(): ProjectRouting;
-  getProjectPickerAccess$(): Observable<ProjectPickerAccessInfo>;
+  getProjectPickerAccess$(): Observable<ProjectRoutingAccess>;
+  getProjectPickerAccess(): ProjectRoutingAccess;
 }

@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/onechat-common",
-  "owner": "@elastic/workchat-eng",
-  "group": "platform",
-  "visibility": "shared"
-}

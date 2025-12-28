@@ -6,14 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { RegionMapState } from './region_map';
@@ -113,27 +105,6 @@ describe('Region Map Schema', () => {
       const validated = regionMapStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
-
-    it('validates with ems boundaries', () => {
-      const input: RegionMapWithoutDefaultsConfig = {
-        ...baseRegionMapConfig,
-        metric: {
-          operation: 'average',
-          field: 'bytes',
-        },
-        region: {
-          operation: 'terms',
-          fields: ['location'],
-          size: 5,
-          ems: {
-            boundaries: 'world_countries',
-          },
-        },
-      };
-
-      const validated = regionMapStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
-    });
   });
 
   describe('validation errors', () => {
@@ -176,6 +147,28 @@ describe('Region Map Schema', () => {
           fields: ['location'],
         },
       };
+      expect(() => regionMapStateSchema.validate(input)).toThrow();
+    });
+
+    it('throws on missing ems join field', () => {
+      const input: Omit<RegionMapWithoutDefaultsConfig, 'region'> & {
+        region: { operation: 'terms'; fields: string[]; size: number; ems: { boundaries: string } };
+      } = {
+        ...baseRegionMapConfig,
+        metric: {
+          operation: 'average',
+          field: 'bytes',
+        },
+        region: {
+          operation: 'terms',
+          fields: ['location'],
+          size: 5,
+          ems: {
+            boundaries: 'world_countries',
+          },
+        },
+      };
+
       expect(() => regionMapStateSchema.validate(input)).toThrow();
     });
 

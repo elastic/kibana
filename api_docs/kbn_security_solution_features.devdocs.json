@@ -107,9 +107,9 @@
             "signature": [
               "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
-              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+              " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
               "AppCategory",
-              "; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
+              "; app: readonly string[]; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -385,9 +385,9 @@
         "signature": [
           "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
-          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
+          " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
           "AppCategory",
-          "; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
+          "; app: readonly string[]; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",
@@ -1273,6 +1273,16 @@
           },
           "<",
           "SecuritySubFeatureId",
+          "> | undefined; rule_gaps_auto_fill?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
           "> | undefined; detections?: ",
           {
             "pluginId": "@kbn/security-solution-features",
@@ -1483,6 +1493,16 @@
           },
           "<",
           "SecuritySubFeatureId",
+          "> | undefined; graph_visualization?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
           "> | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
@@ -1543,7 +1563,7 @@
         "label": "SubFeaturesPrivileges",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"read\" | \"all\" | undefined; minimumLicense?: ",
+          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"all\" | \"read\" | undefined; minimumLicense?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

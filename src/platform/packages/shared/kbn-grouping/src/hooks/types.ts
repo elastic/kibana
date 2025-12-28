@@ -11,6 +11,7 @@
 export enum ActionType {
   updateActiveGroups = 'UPDATE_ACTIVE_GROUPS',
   updateGroupOptions = 'UPDATE_GROUP_OPTIONS',
+  updateGroupSettings = 'UPDATE_GROUP_SETTINGS',
 }
 
 export interface UpdateActiveGroups {
@@ -23,7 +24,12 @@ export interface UpdateGroupOptions {
   payload: { newOptionList: GroupOption[]; id: string };
 }
 
-export type Action = UpdateActiveGroups | UpdateGroupOptions;
+export interface UpdateGroupSettings {
+  type: ActionType.updateGroupSettings;
+  payload: { settings?: GroupSettings; id: string };
+}
+
+export type Action = UpdateActiveGroups | UpdateGroupOptions | UpdateGroupSettings;
 
 // state
 
@@ -32,9 +38,41 @@ export interface GroupOption {
   label: string;
 }
 
+export interface GroupSettings {
+  /**
+   * Allows to hide the None option in the group selection dropdown.
+   */
+  hideNoneOption?: boolean;
+  /**
+   * Allows to hide the Custom field option in the group selection dropdown.
+   */
+  hideCustomFieldOption?: boolean;
+  /**
+   * Allows to hide the title in the group selection dropdown.
+   */
+  hideOptionsTitle?: boolean;
+  /**
+   * Allows to customize the label of the group selection dropdown.
+   */
+  popoverButtonLabel?: string;
+  /**
+   * Array of group keys that are enforced and cannot be deselected by users.
+   * Enforced groups are automatically added to activeGroups on initialization.
+   * Constraints:
+   * - 'none' cannot be in enforcedGroups
+   * - enforcedGroups cannot be used when maxGroupingLevels === 1 (toggle mode)
+   * - enforcedGroups.length must be <= maxGroupingLevels
+   */
+  enforcedGroups?: string[];
+}
+
 export interface GroupModel {
   activeGroups: string[];
   options: GroupOption[];
+  /**
+   * Allows to customize the group selection dropdown.
+   */
+  settings?: GroupSettings;
 }
 
 export interface GroupsById {

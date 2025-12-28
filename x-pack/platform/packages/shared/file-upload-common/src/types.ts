@@ -178,8 +178,8 @@ export interface IngestPipelineWrapper {
 }
 
 export interface IngestPipeline {
-  description: string;
-  processors: any[];
+  description?: string;
+  processors?: any[];
   isManaged?: boolean;
   name?: string;
 }

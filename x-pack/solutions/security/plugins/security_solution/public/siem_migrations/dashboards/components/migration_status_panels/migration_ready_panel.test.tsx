@@ -17,6 +17,7 @@ import * as useStartMigrationModule from '../../logic/use_start_migration';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { TestProviders } from '../../../../common/mock';
 import { MigrationDataInputContextProvider } from '../../../common/components';
+import { MigrationSource } from '../../../common/types';
 
 const mockMigrationStats: DashboardMigrationStats = {
   id: 'mig-1',
@@ -29,6 +30,7 @@ const mockMigrationStats: DashboardMigrationStats = {
     processing: 0,
     completed: 0,
   },
+  vendor: MigrationSource.SPLUNK,
   created_at: '2024-06-01T12:00:00Z',
   last_updated_at: '2024-06-01T12:30:00Z',
   last_execution: {

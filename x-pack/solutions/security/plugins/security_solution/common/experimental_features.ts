@@ -68,7 +68,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enable privmon modifier in risk scoring calculation
    */
-  enableRiskScorePrivmonModifier: false,
+  enableRiskScorePrivmonModifier: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -78,7 +78,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
-  entityDetailsHighlightsEnabled: false,
+  entityDetailsHighlightsEnabled: true,
 
   /**
    * Enables the experimental Threat Hunting home experience.
@@ -204,9 +204,10 @@ export const allowedExperimentalValues = Object.freeze({
    */
   gapAutoFillSchedulerEnabled: false,
   /**
-   * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
+   * Enables DNS events toggle for Linux in Endpoint policy configuration.
+   * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
-  agentBuilderEnabled: false,
+  linuxDnsEvents: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

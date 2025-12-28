@@ -45,14 +45,10 @@ const findListItems = async ({
   http,
   cursor,
   page,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_field,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   sort_order,
   filter,
 }: ApiParams & FindListItemSchema): Promise<FoundListItemSchema> => {
@@ -188,7 +184,7 @@ const createListItem = async ({
   http,
   signal,
   value,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   list_id,
   refresh,
 }: ApiParams & CreateListItemSchema): Promise<ListItemSchema> =>

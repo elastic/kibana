@@ -9,15 +9,12 @@ import type { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/c
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { getCapabilitiesForRollupIndices } from '@kbn/data-views-plugin/server';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
 import type { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
-import { IndexPatternsFetcher } from './shared_imports';
-import { handleEsError } from './shared_imports';
-import { formatEsError } from './lib/format_es_error';
 import type { RollupConfig } from './config';
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
@@ -68,11 +65,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       license: this.license,
       lib: {
         handleEsError,
-        formatEsError,
-        getCapabilitiesForRollupIndices,
-      },
-      sharedImports: {
-        IndexPatternsFetcher,
       },
     });
 
