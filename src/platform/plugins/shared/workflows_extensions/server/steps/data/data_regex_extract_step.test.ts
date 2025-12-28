@@ -543,4 +543,52 @@ describe('dataRegexExtractStepDefinition', () => {
       expect(() => createMockContext(config, input)).not.toThrow();
     });
   });
+
+  describe('abort signal handling', () => {
+    it('should stop processing when abort signal is triggered', async () => {
+      const abortController = new AbortController();
+      const config = {
+        source: ['item1', 'item2', 'item3', 'item4', 'item5'],
+        errorIfNoMatch: false,
+      };
+      const input = {
+        pattern: '(\\w+)',
+        fields: { word: '$1' },
+      };
+
+      const context = createMockContext(config, input);
+      context.abortSignal = abortController.signal;
+
+      // Abort after a short delay to simulate cancellation during processing
+      setTimeout(() => abortController.abort(), 1);
+
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('Operation cancelled');
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        'Regex extraction cancelled via abort signal'
+      );
+    });
+
+    it('should complete normally when abort signal is not triggered', async () => {
+      const abortController = new AbortController();
+      const config = {
+        source: ['test1', 'test2'],
+        errorIfNoMatch: false,
+      };
+      const input = {
+        pattern: '(\\w+)',
+        fields: { word: '$1' },
+      };
+
+      const context = createMockContext(config, input);
+      context.abortSignal = abortController.signal;
+
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.error).toBeUndefined();
+      expect(Array.isArray(result.output)).toBe(true);
+    });
+  });
 });

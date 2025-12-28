@@ -76,6 +76,14 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
       let matchCount = 0;
 
       for (const item of sourceArray) {
+        // Check for cancellation to allow prompt workflow termination
+        if (context.abortSignal.aborted) {
+          context.logger.debug('Regex extraction cancelled via abort signal');
+          return {
+            error: new Error('Operation cancelled'),
+          };
+        }
+
         if (typeof item !== 'string') {
           context.logger.warn(`Skipping non-string item in array: ${typeof item}`);
           extractedItems.push(null);
