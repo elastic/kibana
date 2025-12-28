@@ -8,8 +8,11 @@ source .buildkite/scripts/common/util.sh
 
 export KBN_NP_PLUGINS_BUILT=true
 
-# VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
-VERSION="$(jq -r '.version' package.json)-WORKFLOWS"
+# VERSION for downloading the artifact (must match what build_kibana.sh created)
+VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
+
+# Custom docker tag without SNAPSHOT (to enable APM in Cloud)
+DOCKER_TAG="$(jq -r '.version' package.json)-$GIT_COMMIT"
 
 echo "--- Download Kibana Distribution"
 
@@ -25,7 +28,7 @@ node scripts/build \
   --skip-cdn-assets \
   --skip-archives \
   --docker-images \
-  --docker-tag-qualifier="$GIT_COMMIT" \
+  --docker-tag="$DOCKER_TAG" \
   --docker-push \
   --skip-docker-ubi \
   --skip-docker-cloud-fips \
