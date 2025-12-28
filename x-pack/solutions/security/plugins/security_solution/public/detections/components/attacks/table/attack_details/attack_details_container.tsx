@@ -27,7 +27,7 @@ interface TabInfo {
   name: string;
 }
 
-interface Props {
+interface AttackDetailsContainerProps {
   /** The attack discovery alert document. If undefined, only the Alerts tab will be shown. */
   attack?: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
@@ -46,7 +46,7 @@ interface Props {
  * Manages tab selection state and resets to first tab when the attack changes.
  * If attack is undefined, only the Alerts tab will be rendered.
  */
-export const AttackDetailsContainer = React.memo<Props>(
+export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
   ({ attack, groupingFilters, defaultFilters, isLoading }) => {
     const tabs = useMemo<TabInfo[]>(() => {
       const tabsList: TabInfo[] = [];

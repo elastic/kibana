@@ -15,7 +15,7 @@ import { AlertsTable } from '../../../alerts_table';
 /** Test subject constant for AlertsTab component */
 export const ALERTS_TAB_TEST_ID = 'alertsTab';
 
-interface Props {
+interface AlertsTabProps {
   /** Filters applied from grouping */
   groupingFilters: Filter[];
   /** Default filters to apply to the alerts table */
@@ -28,17 +28,19 @@ interface Props {
  * Component that displays the alerts tab content, rendering an AlertsTable
  * with filters for the specific attack's alerts.
  */
-export const AlertsTab = React.memo<Props>(({ groupingFilters, defaultFilters, isLoading }) => {
-  return (
-    <div data-test-subj={ALERTS_TAB_TEST_ID}>
-      <AlertsTable
-        tableType={TableId.alertsOnAttacksPage}
-        inputFilters={[...defaultFilters, ...groupingFilters]}
-        isLoading={isLoading}
-        pageScope={PageScope.alerts} // show only detection alerts
-        disableAdditionalToolbarControls={groupingFilters.length > 0}
-      />
-    </div>
-  );
-});
+export const AlertsTab = React.memo<AlertsTabProps>(
+  ({ groupingFilters, defaultFilters, isLoading }) => {
+    return (
+      <div data-test-subj={ALERTS_TAB_TEST_ID}>
+        <AlertsTable
+          tableType={TableId.alertsOnAttacksPage}
+          inputFilters={[...defaultFilters, ...groupingFilters]}
+          isLoading={isLoading}
+          pageScope={PageScope.alerts} // show only detection alerts
+          disableAdditionalToolbarControls={groupingFilters.length > 0}
+        />
+      </div>
+    );
+  }
+);
 AlertsTab.displayName = 'AlertsTab';
