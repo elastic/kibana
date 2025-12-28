@@ -18,7 +18,7 @@ export const ConfigSchema = z.object({
 });
 
 export const InputSchema = z.object({
-  pattern: z.string(),
+  pattern: z.string().max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters'),
   fields: z.record(z.string(), z.string()),
   flags: z.string().optional(),
 });

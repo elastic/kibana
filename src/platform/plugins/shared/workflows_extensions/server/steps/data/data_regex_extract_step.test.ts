@@ -502,4 +502,45 @@ describe('dataRegexExtractStepDefinition', () => {
       expect(output[3]).toEqual({ letters: 'jkl', digits: '012' });
     });
   });
+
+  describe('pattern length validation', () => {
+    it('should reject patterns exceeding 10,000 characters', () => {
+      const config = {
+        source: 'test string',
+        errorIfNoMatch: false,
+      };
+      const input = {
+        pattern: 'a'.repeat(10001),
+        fields: { result: '$0' },
+      };
+
+      expect(() => createMockContext(config, input)).toThrow();
+    });
+
+    it('should accept patterns at exactly 10,000 characters', () => {
+      const config = {
+        source: 'test string',
+        errorIfNoMatch: false,
+      };
+      const input = {
+        pattern: 'a'.repeat(10000),
+        fields: { result: '$0' },
+      };
+
+      expect(() => createMockContext(config, input)).not.toThrow();
+    });
+
+    it('should accept normal length patterns', () => {
+      const config = {
+        source: 'test string',
+        errorIfNoMatch: false,
+      };
+      const input = {
+        pattern: '^[a-z]+$',
+        fields: { result: '$0' },
+      };
+
+      expect(() => createMockContext(config, input)).not.toThrow();
+    });
+  });
 });

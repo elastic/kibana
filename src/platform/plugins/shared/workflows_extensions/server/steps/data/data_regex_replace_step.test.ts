@@ -441,4 +441,45 @@ describe('dataRegexReplaceStepDefinition', () => {
       );
     });
   });
+
+  describe('pattern length validation', () => {
+    it('should reject patterns exceeding 10,000 characters', () => {
+      const config = {
+        source: 'test string',
+        detailed: false,
+      };
+      const input = {
+        pattern: 'a'.repeat(10001),
+        replacement: 'b',
+      };
+
+      expect(() => createMockContext(config, input)).toThrow();
+    });
+
+    it('should accept patterns at exactly 10,000 characters', () => {
+      const config = {
+        source: 'test string',
+        detailed: false,
+      };
+      const input = {
+        pattern: 'a'.repeat(10000),
+        replacement: 'b',
+      };
+
+      expect(() => createMockContext(config, input)).not.toThrow();
+    });
+
+    it('should accept normal length patterns', () => {
+      const config = {
+        source: 'test string',
+        detailed: false,
+      };
+      const input = {
+        pattern: 'test',
+        replacement: 'replaced',
+      };
+
+      expect(() => createMockContext(config, input)).not.toThrow();
+    });
+  });
 });
