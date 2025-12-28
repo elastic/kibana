@@ -145,6 +145,7 @@ export const TableSection = React.memo(
         selectedGroup?: string,
         fieldBucket?: RawBucket<AlertsGroupingAggregation>
       ) => {
+        // attack is undefined for the generic group marked as `-` which means this is the group of alerts that do not belong to any attack.
         const attack =
           selectedGroup && fieldBucket ? getAttack(selectedGroup, fieldBucket) : undefined;
 
