@@ -8,7 +8,8 @@ source .buildkite/scripts/common/util.sh
 
 export KBN_NP_PLUGINS_BUILT=true
 
-VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
+# VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
+VERSION="$(jq -r '.version' package.json)-WORKFLOWS"
 
 echo "--- Download Kibana Distribution"
 
