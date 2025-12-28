@@ -2822,10 +2822,10 @@
     "@elastic/react-search-ui-views" "1.24.1"
     "@elastic/search-ui" "1.24.1"
 
-"@elastic/request-converter@^9.2.2":
-  version "9.2.2"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.2.2.tgz#0aa5586c272a9624cb1148be773cde60da29d2d8"
-  integrity sha512-CbKhDKGAKUZG/RQaHlAdjomavYoi0mJUMXVX4iJM/U2Glm1Yg8MBB9gyfRaAb8l1eQ1TMLFX4KUNqtGVSxL7Tw==
+"@elastic/request-converter@^9.3.0":
+  version "9.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-9.3.0.tgz#8efb90d859ad74fb46b5c65623115b77d88b5a12"
+  integrity sha512-4v2a6R3r9Ts0udmnj4NG44bv++kmDe9m8BNljJO2oGFCFf2EwEnxQfj5lK7K3y5FhOsI31hfH91w5tInoX/6dA==
   dependencies:
     base64url "^3.0.1"
     commander "^12.1.0"
@@ -3895,10 +3895,13 @@
     react-redux "^9.2.0"
     redux "^5.0.1"
 
-"@hey-api/codegen-core@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@hey-api/codegen-core/-/codegen-core-0.3.3.tgz#a93d2a6b338a5525fe53be42c29e2dd839122e43"
-  integrity sha512-vArVDtrvdzFewu1hnjUm4jX1NBITlSCeO81EdWq676MxQbyxsGcDPAgohaSA+Wvr4HjPSvsg2/1s2zYxUtXebg==
+"@hey-api/codegen-core@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@hey-api/codegen-core/-/codegen-core-0.4.0.tgz#f2f56d67ecae9fb9f2b90ced3358b25f1faa80c8"
+  integrity sha512-o8rBbEXEUhEPzrHbqImYjwIHm4Oj0r1RPS+5cp8Z66kPO7SEN7PYUgK7XpmSxoy9LPMNK1M5qmCO4cGGwT+ELQ==
+  dependencies:
+    ansi-colors "4.1.3"
+    color-support "1.1.3"
 
 "@hey-api/json-schema-ref-parser@1.2.2":
   version "1.2.2"
@@ -3910,12 +3913,12 @@
     js-yaml "^4.1.1"
     lodash "^4.17.21"
 
-"@hey-api/openapi-ts@0.88.2":
-  version "0.88.2"
-  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.88.2.tgz#9dd0ed66431361a8b3ebd7efb16afc04073f4ff1"
-  integrity sha512-JMae1RJ8S8D8lVCFQnsrWaKY0CxrR4TUmZIoU1SuvaeZ+pkMPYuQoj8fO37R5d8juUfFVzCGYV5/Ro0vbDqBbA==
+"@hey-api/openapi-ts@0.89.0":
+  version "0.89.0"
+  resolved "https://registry.yarnpkg.com/@hey-api/openapi-ts/-/openapi-ts-0.89.0.tgz#b6115e22861137f5e9c7e23248824366677ab5bd"
+  integrity sha512-6cnHppAR6vM8osyWqiCoHy35J3CqFz114ggOLHwaTb795XUnzoP/pdbvyz+TBpukY08QQh69kHMAXdi2Kuq9Ow==
   dependencies:
-    "@hey-api/codegen-core" "^0.3.3"
+    "@hey-api/codegen-core" "^0.4.0"
     "@hey-api/json-schema-ref-parser" "1.2.2"
     ansi-colors "4.1.3"
     c12 "3.3.2"
@@ -4555,7 +4558,27 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-browser@link:x-pack/platform/packages/shared/agent-builder/agent-builder-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-common@link:x-pack/platform/packages/shared/agent-builder/agent-builder-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-genai-utils@link:x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-platform-plugin@link:x-pack/platform/plugins/shared/agent_builder_platform":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-plugin@link:x-pack/platform/plugins/shared/agent_builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-server@link:x-pack/platform/packages/shared/agent-builder/agent-builder-server":
   version "0.0.0"
   uid ""
 
@@ -6615,11 +6638,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-obs-ai-assistant@link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant":
+"@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-onechat@link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat":
+"@kbn/evals-suite-obs-ai-assistant@link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant":
   version "0.0.0"
   uid ""
 
@@ -7688,26 +7711,6 @@
   uid ""
 
 "@kbn/oidc-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/oidc_provider":
-  version "0.0.0"
-  uid ""
-
-"@kbn/onechat-browser@link:x-pack/platform/packages/shared/onechat/onechat-browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/onechat-common@link:x-pack/platform/packages/shared/onechat/onechat-common":
-  version "0.0.0"
-  uid ""
-
-"@kbn/onechat-genai-utils@link:x-pack/platform/packages/shared/onechat/onechat-genai-utils":
-  version "0.0.0"
-  uid ""
-
-"@kbn/onechat-plugin@link:x-pack/platform/plugins/shared/onechat":
-  version "0.0.0"
-  uid ""
-
-"@kbn/onechat-server@link:x-pack/platform/packages/shared/onechat/onechat-server":
   version "0.0.0"
   uid ""
 
@@ -14062,19 +14065,19 @@
   resolved "https://registry.yarnpkg.com/@types/mapbox__point-geometry/-/mapbox__point-geometry-0.1.4.tgz#0ef017b75eedce02ff6243b4189210e2e6d5e56d"
   integrity sha512-mUWlSxAmYLfwnRBmgYV86tgYmMIICX4kza8YnE/eIlywGe2XoOxlpVnXWwir92xRLjwyarqwpu2EJKD2pk0IUA==
 
-"@types/mapbox__vector-tile@1.3.0", "@types/mapbox__vector-tile@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@types/mapbox__vector-tile/-/mapbox__vector-tile-1.3.0.tgz#8fa1379dbaead1e1b639b8d96cfd174404c379d6"
-  integrity sha512-kDwVreQO5V4c8yAxzZVQLE5tyWF+IPToAanloQaSnwfXmIcJ7cyOrv8z4Ft4y7PsLYmhWXmON8MBV8RX0Rgr8g==
+"@types/mapbox__vector-tile@1.3.4", "@types/mapbox__vector-tile@^1.3.4":
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/@types/mapbox__vector-tile/-/mapbox__vector-tile-1.3.4.tgz#ad757441ef1d34628d9e098afd9c91423c1f8734"
+  integrity sha512-bpd8dRn9pr6xKvuEBQup8pwQfD4VUyqO/2deGjfpe6AwC8YRlyEipvefyRJUSiCJTZuCb8Pl1ciVV5ekqJ96Bg==
   dependencies:
     "@types/geojson" "*"
     "@types/mapbox__point-geometry" "*"
     "@types/pbf" "*"
 
-"@types/mapbox__vector-tile@^1.3.4":
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/@types/mapbox__vector-tile/-/mapbox__vector-tile-1.3.4.tgz#ad757441ef1d34628d9e098afd9c91423c1f8734"
-  integrity sha512-bpd8dRn9pr6xKvuEBQup8pwQfD4VUyqO/2deGjfpe6AwC8YRlyEipvefyRJUSiCJTZuCb8Pl1ciVV5ekqJ96Bg==
+"@types/mapbox__vector-tile@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@types/mapbox__vector-tile/-/mapbox__vector-tile-1.3.0.tgz#8fa1379dbaead1e1b639b8d96cfd174404c379d6"
+  integrity sha512-kDwVreQO5V4c8yAxzZVQLE5tyWF+IPToAanloQaSnwfXmIcJ7cyOrv8z4Ft4y7PsLYmhWXmON8MBV8RX0Rgr8g==
   dependencies:
     "@types/geojson" "*"
     "@types/mapbox__point-geometry" "*"
