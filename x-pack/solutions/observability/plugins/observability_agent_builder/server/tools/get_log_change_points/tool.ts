@@ -55,7 +55,7 @@ export function createGetLogChangePointsTool({
     type: ToolType.builtin,
     description: `Analyzes logs to detect statistically significant changes, in specific log patterns.
     How it works:
-    It looks at groups of similar logs patterns and then detects change points (spikes/dips) within those patterns.`,
+    It uses the "categorize_text" aggregation to group similar unstructured messages into categories and then detects change points (spikes/dips) within each category.``,
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
     handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {
