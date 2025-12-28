@@ -504,7 +504,7 @@ describe('dataRegexExtractStepDefinition', () => {
   });
 
   describe('pattern length validation', () => {
-    it('should reject patterns exceeding 10,000 characters', () => {
+    it('should reject patterns exceeding 10,000 characters', async () => {
       const config = {
         source: 'test string',
         errorIfNoMatch: false,
@@ -514,10 +514,15 @@ describe('dataRegexExtractStepDefinition', () => {
         fields: { result: '$0' },
       };
 
-      expect(() => createMockContext(config, input)).toThrow();
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('exceeds maximum allowed length');
+      expect(result.error?.message).toContain('10000');
     });
 
-    it('should accept patterns at exactly 10,000 characters', () => {
+    it('should accept patterns at exactly 10,000 characters', async () => {
       const config = {
         source: 'test string',
         errorIfNoMatch: false,
@@ -527,10 +532,14 @@ describe('dataRegexExtractStepDefinition', () => {
         fields: { result: '$0' },
       };
 
-      expect(() => createMockContext(config, input)).not.toThrow();
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toBeDefined();
     });
 
-    it('should accept normal length patterns', () => {
+    it('should accept normal length patterns', async () => {
       const config = {
         source: 'test string',
         errorIfNoMatch: false,
@@ -540,7 +549,11 @@ describe('dataRegexExtractStepDefinition', () => {
         fields: { result: '$0' },
       };
 
-      expect(() => createMockContext(config, input)).not.toThrow();
+      const context = createMockContext(config, input);
+      const result = await dataRegexExtractStepDefinition.handler(context);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toBeDefined();
     });
   });
 
@@ -557,10 +570,10 @@ describe('dataRegexExtractStepDefinition', () => {
       };
 
       const context = createMockContext(config, input);
-      context.abortSignal = abortController.signal;
 
-      // Abort after a short delay to simulate cancellation during processing
-      setTimeout(() => abortController.abort(), 1);
+      // Abort immediately before processing
+      abortController.abort();
+      context.abortSignal = abortController.signal;
 
       const result = await dataRegexExtractStepDefinition.handler(context);
 

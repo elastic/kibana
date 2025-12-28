@@ -40,8 +40,19 @@ export function validateInputLength(
  * @returns Error if a dangerous pattern is detected, undefined otherwise
  */
 export function detectRedosPatterns(pattern: string): Error | undefined {
+  // Check for nested quantifiers with end anchor FIRST: (a+)+$
+  // This is especially dangerous and needs specific error message
+  const nestedQuantifiersWithAnchor = /\([^)]*[*+?{]\s*\)[*+?{]\$$/;
+  if (nestedQuantifiersWithAnchor.test(pattern)) {
+    return new Error(
+      'Potentially dangerous regex pattern detected: nested quantifiers with end anchor like (a+)+$ can cause catastrophic backtracking (ReDoS vulnerability)'
+    );
+  }
+
   // Nested quantifiers: (a+)+, (a*)*, (a?)+, etc.
-  const nestedQuantifiers = /\([^)]*[*+?][^)]*\)[*+?]/;
+  // Match patterns where there's a quantifier just before the closing paren, followed by another quantifier
+  // This catches (a+)+ but not (abc)+ or (?:foo|bar)+
+  const nestedQuantifiers = /\([^)]*[*+?{]\s*\)[*+?{]/;
   if (nestedQuantifiers.test(pattern)) {
     return new Error(
       'Potentially dangerous regex pattern detected: nested quantifiers like (a+)+ can cause catastrophic backtracking (ReDoS vulnerability)'
@@ -49,22 +60,24 @@ export function detectRedosPatterns(pattern: string): Error | undefined {
   }
 
   // Overlapping alternations with quantifiers: (a|aa)+, (a|ab|abc)*, etc.
+  // Only flag patterns where one alternative is a prefix of another
   const overlappingAlternations = /\([^)]*\|[^)]*\)[*+]/;
   if (overlappingAlternations.test(pattern)) {
-    const hasOverlap = /\((?:[^|)]+\|)*[^|)]*([a-z]+)[^|)]*(?:\|[^|)]*\1)/i.test(pattern);
-    if (hasOverlap) {
-      return new Error(
-        'Potentially dangerous regex pattern detected: overlapping alternations with quantifiers like (a|aa)+ can cause catastrophic backtracking (ReDoS vulnerability)'
-      );
+    // Extract the alternation group content
+    const match = pattern.match(/\(([^)]*\|[^)]*)\)[*+]/);
+    if (match) {
+      const alternatives = match[1].split('|').map((alt) => alt.trim());
+      // Check if any alternative is a prefix of another
+      for (let i = 0; i < alternatives.length; i++) {
+        for (let j = 0; j < alternatives.length; j++) {
+          if (i !== j && alternatives[j].startsWith(alternatives[i])) {
+            return new Error(
+              'Potentially dangerous regex pattern detected: overlapping alternations with quantifiers like (a|aa)+ can cause catastrophic backtracking (ReDoS vulnerability)'
+            );
+          }
+        }
+      }
     }
-  }
-
-  // Nested quantifiers with end anchor: (a+)+$
-  const nestedQuantifiersWithAnchor = /\([^)]*[*+?][^)]*\)[*+?]\$$/;
-  if (nestedQuantifiersWithAnchor.test(pattern)) {
-    return new Error(
-      'Potentially dangerous regex pattern detected: nested quantifiers with end anchor like (a+)+$ can cause catastrophic backtracking (ReDoS vulnerability)'
-    );
   }
 
   // Multiple consecutive quantifiers on the same group
