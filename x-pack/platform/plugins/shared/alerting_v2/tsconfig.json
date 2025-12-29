@@ -25,7 +25,9 @@
     "@kbn/es-types",
     "@kbn/spaces-utils",
     "@kbn/search-types",
-    "@kbn/es-query"
+    "@kbn/core-di",
+    "@kbn/core-di-server",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*"
