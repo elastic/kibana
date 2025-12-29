@@ -21,16 +21,27 @@ export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
   const [countError, setCountError] = React.useState<boolean>(false);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     httpSetup
       .get<{ count: number }>(
-        `${INTERNAL_API_BASE_PATH}/index_doc_count/${encodeURIComponent(indexName)}`
+        `${INTERNAL_API_BASE_PATH}/index_doc_count/${encodeURIComponent(indexName)}`,
+        { signal: abortController.signal }
       )
       .then((response) => {
-        setCount(response.count);
+        if (!abortController.signal.aborted) {
+          setCount(response.count);
+        }
       })
       .catch(() => {
-        setCountError(true);
+        if (!abortController.signal.aborted) {
+          setCountError(true);
+        }
       });
+
+    return () => {
+      abortController.abort();
+    };
   }, [httpSetup, indexName]);
 
   if (countError) {
@@ -41,5 +52,9 @@ export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
     );
   }
 
-  return !count ? <EuiLoadingSpinner size="m" /> : Number(count).toLocaleString();
+  if (count === undefined) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  return Number(count).toLocaleString();
 };
