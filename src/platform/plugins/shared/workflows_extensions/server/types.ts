@@ -24,8 +24,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  // Accept any input and output types to avoid type inference issues within the plugin
-  registerStepDefinition<TInput, TOutput>(definition: ServerStepDefinition<TInput, TOutput>): void;
+  registerStepDefinition(definition: ServerStepDefinition): void;
 }
 
 /**

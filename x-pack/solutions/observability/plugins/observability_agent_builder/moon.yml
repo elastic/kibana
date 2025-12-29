@@ -19,13 +19,13 @@ project:
     sourceRoot: x-pack/solutions/observability/plugins/observability_agent_builder
 dependsOn:
   - '@kbn/core'
-  - '@kbn/onechat-common'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/apm-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/logs-data-access-plugin'
   - '@kbn/zod'
-  - '@kbn/onechat-server'
+  - '@kbn/agent-builder-server'
   - '@kbn/security-plugin'
   - '@kbn/es-query'
   - '@kbn/core-elasticsearch-server'
@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/observability-nav-icons'
   - '@kbn/server-route-repository-client'
+  - '@kbn/agent-builder-browser'
 tags:
   - plugin
   - prod

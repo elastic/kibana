@@ -73,11 +73,13 @@ export const AlertDetailFlyout = ({
                 title: (column.displayAsText as string) ?? column.id,
                 description:
                   value != null ? (
-                    <DefaultCellValue
-                      columnId={column.id}
-                      alert={alert}
-                      openLinksInNewTab={openLinksInNewTab}
-                    />
+                    <div className="eui-textBreakWord">
+                      <DefaultCellValue
+                        columnId={column.id}
+                        alert={alert}
+                        openLinksInNewTab={openLinksInNewTab}
+                      />
+                    </div>
                   ) : (
                     '—'
                   ),
