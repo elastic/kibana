@@ -36,25 +36,25 @@ globalSetupHook(
 
     // Create data views for custom threshold tests
     log.info('Creating data views for custom threshold tests...');
-    await createDataView({
-      kbnClient,
-      log,
+    await createDataView(kbnClient, {
       id: DATA_VIEWS.FILEBEAT.ID,
       name: DATA_VIEWS.FILEBEAT.NAME,
       title: DATA_VIEWS.FILEBEAT.TITLE,
-    });
-    await createDataView({
-      kbnClient,
       log,
-      id: DATA_VIEWS.METRICBEAT.ID,
-      name: DATA_VIEWS.METRICBEAT.NAME,
-      title: DATA_VIEWS.METRICBEAT.TITLE,
     });
 
     await createDataView(kbnClient, {
-      name: 'test-data-view-name_1',
+      id: DATA_VIEWS.METRICBEAT.ID,
+      name: DATA_VIEWS.METRICBEAT.NAME,
+      title: DATA_VIEWS.METRICBEAT.TITLE,
+      log,
+    });
+
+    await createDataView(kbnClient, {
       id: 'test-data-view-id_1',
+      name: 'test-data-view-name_1',
       title: 'logs-*',
+      log,
     });
   }
 );
