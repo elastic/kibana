@@ -187,5 +187,4 @@ export const applicationUsageSchema = {
   uptime: commonSchema,
   synthetics: commonSchema,
   ux: commonSchema,
-  entityStore: commonSchema,
 };
