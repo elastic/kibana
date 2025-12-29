@@ -200,18 +200,25 @@ export class ESQLService extends FtrService {
   }
 
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
-    const editor = await this.testSubjects.find(editorSubjId);
-    const textarea = await editor.findByCssSelector('textarea');
-    await textarea.type([Key.CONTROL, Key.SPACE]);
+    await this.retry.try(async () => {
+      const editor = await this.testSubjects.find(editorSubjId);
+      const textarea = await editor.findByCssSelector('textarea');
+      await textarea.type([Key.CONTROL, Key.SPACE]);
+      const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+      await suggestionWidget.isDisplayed();
+    });
   }
 
   public async selectEsqlSuggestionByLabel(label: string, editorSubjId = 'ESQLEditor') {
     await this.retry.try(async () => {
       await this.triggerSuggestions(editorSubjId);
 
-      const suggestions = await this.findService.allByCssSelector(
-        '.monaco-editor .suggest-widget .monaco-list-row'
-      );
+      const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+      const suggestions = await suggestionWidget.findAllByCssSelector('.monaco-list-row');
+
+      if (!suggestions.length) {
+        throw new Error('No suggestions found');
+      }
 
       let suggestionToSelect;
       for (const suggestion of suggestions) {

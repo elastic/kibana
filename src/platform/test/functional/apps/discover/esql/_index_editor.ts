@@ -46,8 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246944
-  describe.skip('Index editor', function () {
+  describe('Index editor', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['superuser']);
@@ -76,11 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows creation by file upload', async function () {
       // Type lookup join query with index name inside it
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue(
-        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_FILE}`,
-        'ESQLEditor'
-      );
+      await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_FILE}`);
 
       // Click Create lookup index suggestion
       await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_FILE}"`);
@@ -148,8 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows creation by manually adding data', async function () {
       // Type lookup join query
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue('from logstash-* | LOOKUP JOIN ', 'ESQLEditor');
+      await esql.typeEsqlEditorQuery('from logstash-* | LOOKUP JOIN ');
 
       // Click Create lookup index suggestion
       await esql.selectEsqlSuggestionByLabel('Create lookup index');
@@ -278,11 +272,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
 
       // Type lookup join query
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue(
-        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_EDITION}`,
-        'ESQLEditor'
-      );
+      await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_EDITION}`);
 
       // Hover the index badge and click on the edit option
       await esql.selectEsqlBadgeHoverOption('lookupIndexBadge', 'Edit lookup index');
@@ -379,11 +369,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows to save an edition without closing the flyout', async function () {
       // Type lookup join query with index name inside it
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue(
-        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_MANUAL}`,
-        'ESQLEditor'
-      );
+      await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_MANUAL}`);
 
       // Click Create lookup index suggestion
       await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_MANUAL}"`);
