@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
+import { KUBERNETES_TOUR_STORAGE_KEY } from '../../../../../public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { test } from '../../fixtures';
 import {
   CONTAINER_NAMES,
@@ -20,6 +21,9 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
     await inventoryPage.goToPage();
+    // Dismiss k8s tour if it's present to avoid interference with other test assertions
+    // The k8s tour specific test will take care of adding it back during its own execution
+    await inventoryPage.dismissK8sTour();
   });
 
   test('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
@@ -37,9 +41,11 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(inventoryPage.waffleMap).toBeVisible();
     });
 
-    await test.step('open and display timeline', async () => {
+    await test.step('open and close timeline', async () => {
       await inventoryPage.toggleTimeline();
       await expect(inventoryPage.timelineContainerOpen).toBeVisible();
+      await inventoryPage.toggleTimeline();
+      await expect(inventoryPage.timelineContainerClosed).toBeVisible();
     });
 
     await test.step('switch to table view and display inventory table', async () => {
@@ -49,7 +55,15 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Render and dismiss k8s tour', async ({ pageObjects: { inventoryPage } }) => {
+  test('Render and dismiss k8s tour', async ({ page, pageObjects: { inventoryPage } }) => {
+    await test.step('reset k8s tour seen state', async () => {
+      await page.evaluate(
+        ([k8sTourStorageKey]) => localStorage.setItem(k8sTourStorageKey, 'false'),
+        [KUBERNETES_TOUR_STORAGE_KEY]
+      );
+      await inventoryPage.reload();
+    });
+
     await test.step('display k8s tour with proper message', async () => {
       await expect(inventoryPage.k8sTourText).toBeVisible();
       await expect(inventoryPage.k8sTourText).toHaveText(

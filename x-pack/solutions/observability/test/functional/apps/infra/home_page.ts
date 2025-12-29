@@ -141,6 +141,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY));
 
+      // Done
       it('renders the correct page title', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -150,6 +151,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
 
+      // Done
       it('renders the inventory survey link', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.infraHome.waitForLoading();
@@ -157,6 +159,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
       });
 
+      // Done
       it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const kubernetesTourText =
@@ -177,11 +180,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      // Done
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);
         await pageObjects.infraHome.getNoMetricsDataPrompt();
       });
 
+      // Done
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
@@ -428,6 +433,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      // Done
       it('toggle the timeline', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
@@ -435,6 +441,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeTimeline();
       });
 
+      // Done
       it('toggles the inventory switcher', async () => {
         await pageObjects.infraHome.toggleInventorySwitcher();
       });
