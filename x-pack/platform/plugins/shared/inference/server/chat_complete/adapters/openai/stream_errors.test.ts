@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { InferenceTaskProviderError } from '@kbn/inference-common';
 import type { OpenAIErrorLine, ElasticInferenceErrorLine, UnknownErrorLine } from './stream_errors';
 import { convertStreamError } from './stream_errors';
 
@@ -16,7 +15,7 @@ describe('convertStreamError', () => {
         message: 'something bad happened',
       },
     };
-    const error = convertStreamError(line) as InferenceTaskProviderError;
+    const error = convertStreamError(line);
 
     expect(error.toJSON()).toEqual({
       type: 'error',
@@ -35,7 +34,7 @@ describe('convertStreamError', () => {
         reason: 'something bad happened',
       },
     };
-    const error = convertStreamError(line) as InferenceTaskProviderError;
+    const error = convertStreamError(line);
 
     expect(error.toJSON()).toEqual({
       type: 'error',
@@ -53,7 +52,7 @@ describe('convertStreamError', () => {
         anotherErrorField: 'something bad happened',
       },
     };
-    const error = convertStreamError(line) as InferenceTaskProviderError;
+    const error = convertStreamError(line);
 
     expect(error.toJSON()).toEqual({
       type: 'error',

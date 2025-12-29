@@ -7,24 +7,16 @@
 
 import type { InferenceTaskProviderError } from '@kbn/inference-common';
 import { createInferenceProviderError } from '@kbn/inference-common';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { ChatCompletionContextLengthExceededError } from '@kbn/inference-common/src/chat_complete/errors';
-import type { DecoratedError } from '@kbn/task-manager-plugin/server';
 import { createContextLengthExceededError } from '../../../common/chat_complete/errors';
 
 const connectorStatusCodeRegexp = /Status code: ([0-9]{3})/i;
 const inferenceStatusCodeRegexp = /status \[([0-9]{3})\]/i;
-/**
- * Checks for 429 error due to user exceeding their quota and creates and throws a user error if appropriate.
- * This is a temporary measure until the backend is updated to return the original error code instead of a general 400 or 500 (https://github.com/elastic/elasticsearch/issues/139710).
- */
-const isUserError = (source: string | Error) =>
-  typeof source === 'string' && source.includes('status [429]') && source.includes('quota');
 
 export const convertUpstreamError = (
   source: string | Error,
   { statusCode, messagePrefix }: { statusCode?: number; messagePrefix?: string } = {}
-): InferenceTaskProviderError | ChatCompletionContextLengthExceededError | DecoratedError => {
+): InferenceTaskProviderError | ChatCompletionContextLengthExceededError => {
   const message = typeof source === 'string' ? source : source.message;
 
   let status = statusCode;
@@ -48,10 +40,6 @@ export const convertUpstreamError = (
 
   if (isTooManyTokensError(message)) {
     return createContextLengthExceededError({ message });
-  }
-
-  if (isUserError(source)) {
-    return createTaskRunError(new Error(source as string), TaskErrorSource.USER);
   }
 
   return createInferenceProviderError(messageWithPrefix, { status });
