@@ -16,7 +16,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { DataPluginStart } from '@kbn/data-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export type AlertingServerSetup = void;

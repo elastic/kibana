@@ -6,9 +6,8 @@
  */
 
 import { truncate, trim } from 'lodash';
-import { HTTPAuthorizationHeader } from '@kbn/core-http-server';
+import { HTTPAuthorizationHeader, type SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
