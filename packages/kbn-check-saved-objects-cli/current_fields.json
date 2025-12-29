@@ -89,6 +89,21 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_esql_rule": [
+    "createdAt",
+    "createdBy",
+    "enabled",
+    "esql",
+    "groupKey",
+    "lookbackWindow",
+    "name",
+    "schedule",
+    "scheduledTaskId",
+    "tags",
+    "timeField",
+    "updatedAt",
+    "updatedBy"
+  ],
   "alerting_rule_template": [
     "name",
     "ruleTypeId",

@@ -298,6 +298,50 @@
       }
     }
   },
+  "alerting_esql_rule": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "esql": {
+        "type": "text"
+      },
+      "groupKey": {
+        "type": "keyword"
+      },
+      "lookbackWindow": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "schedule": {
+        "type": "keyword"
+      },
+      "scheduledTaskId": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "timeField": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
