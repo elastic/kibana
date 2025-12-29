@@ -122,7 +122,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
         defaultMessage: 'Anomaly detection',
       })}
       title={i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
-        defaultMessage: 'Spot anomalies faster',
+        defaultMessage: 'Anomaly detection',
       })}
       body={
         <p>
