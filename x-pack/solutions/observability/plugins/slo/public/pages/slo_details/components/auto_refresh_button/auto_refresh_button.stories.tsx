@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import type { StoryObj } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { AutoRefreshButton as Component } from './auto_refresh_button';
 
 export default {
