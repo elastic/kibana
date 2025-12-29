@@ -25,6 +25,15 @@ import type {
 } from '@kbn/lens-common';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
+export interface TextBasedQueryState {
+  /** Whether the query has syntax errors (client-side parsing) */
+  hasSyntaxErrors: boolean;
+  /** Whether the query has errors from the last run attempt */
+  hasErrors: boolean;
+  /** Whether the query has been modified but not yet submitted */
+  isQueryPendingSubmit: boolean;
+}
+
 export interface LensConfigPanelBaseProps {
   framePublicAPI: FramePublicAPI;
   core: DatasourceDimensionEditorProps['core'];
@@ -46,6 +55,8 @@ export interface LensConfigPanelBaseProps {
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
+  /** Callback to report text-based query state changes */
+  onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
 }
 
 export interface ConfigPanelWrapperProps extends LensConfigPanelBaseProps {

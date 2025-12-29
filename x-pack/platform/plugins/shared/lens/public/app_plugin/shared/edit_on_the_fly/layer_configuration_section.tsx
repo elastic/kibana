@@ -34,6 +34,7 @@ export function LayerConfiguration({
   closeFlyout,
   canEditTextBasedQuery,
   editorContainer,
+  onTextBasedQueryStateChange,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -75,6 +76,7 @@ export function LayerConfiguration({
     closeFlyout,
     canEditTextBasedQuery,
     editorContainer,
+    onTextBasedQueryStateChange,
   };
   return (
     <div

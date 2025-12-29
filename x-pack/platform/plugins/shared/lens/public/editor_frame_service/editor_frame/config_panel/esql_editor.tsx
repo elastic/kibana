@@ -17,6 +17,7 @@ import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import { getESQLQuerySyntaxErrors } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -56,6 +57,7 @@ export type ESQLEditorProps = Simplify<
     | 'updateSuggestion'
     | 'dataLoading$'
     | 'parentApi'
+    | 'onTextBasedQueryStateChange'
   >
 >;
 
@@ -83,6 +85,7 @@ export function ESQLEditor({
   dataLoading$,
   setCurrentAttributes,
   updateSuggestion,
+  onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
   const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
   const [query, setQuery] = useState<AggregateQuery | Query>(
@@ -93,6 +96,10 @@ export function ESQLEditor({
   const { visualization } = useLensSelector((state) => state.lens);
 
   const [errors, setErrors] = useState<Error[]>([]);
+  const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
+  const [submittedQuery, setSubmittedQuery] = useState<AggregateQuery | Query>(
+    attributes?.state.query || { esql: '' }
+  );
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
@@ -169,6 +176,7 @@ export function ESQLEditor({
         updateSuggestion?.(attrs);
       }
       prevQuery.current = q;
+      setSubmittedQuery(q);
       setIsVisualizationLoading(false);
     },
     [
@@ -197,6 +205,28 @@ export function ESQLEditor({
     setIsInitialized,
   });
 
+  // Handle query change with syntax validation
+  const handleQueryChange = useCallback(
+    (newQuery: AggregateQuery | Query) => {
+      setQuery(newQuery);
+      // Validate syntax on every query change
+      if (isOfAggregateQueryType(newQuery)) {
+        const syntaxErrors = getESQLQuerySyntaxErrors(newQuery.esql);
+        setHasSyntaxErrors(syntaxErrors.length > 0);
+      }
+    },
+    [setQuery]
+  );
+
+  // Track and report query state to parent
+  useEffect(() => {
+    onTextBasedQueryStateChange?.({
+      hasSyntaxErrors,
+      hasErrors: errors.length > 0,
+      isQueryPendingSubmit: !isEqual(query, submittedQuery),
+    });
+  }, [query, submittedQuery, errors.length, hasSyntaxErrors, onTextBasedQueryStateChange]);
+
   // Early exit if it's not in TextBased mode
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
     return null;
@@ -207,7 +237,7 @@ export function ESQLEditor({
       <InnerESQLEditor
         query={query}
         prevQuery={prevQuery}
-        setQuery={setQuery}
+        setQuery={handleQueryChange}
         runQuery={runQuery}
         adHocDataViews={adHocDataViews}
         errors={errors}

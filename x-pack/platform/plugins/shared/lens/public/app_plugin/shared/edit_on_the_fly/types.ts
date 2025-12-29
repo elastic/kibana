@@ -13,6 +13,7 @@ import type {
   LensDocument,
   LensInspector,
 } from '@kbn/lens-common';
+import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
 
 export interface FlyoutWrapperProps {
@@ -29,6 +30,8 @@ export interface FlyoutWrapperProps {
   navigateToLensEditor?: () => void;
   isReadOnly?: boolean;
   applyButtonLabel?: string;
+  /** Tooltip message to display when the Apply button is disabled */
+  applyButtonDisabledTooltip?: string;
 }
 
 export interface EditConfigPanelProps {
@@ -116,6 +119,8 @@ export interface LayerConfigurationProps {
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
+  /** Callback to report text-based query state changes */
+  onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;
 }
 
 export interface LayerTabsProps {

@@ -24,6 +24,7 @@ import {
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { FormBasedLayer, TypedLensSerializedState } from '@kbn/lens-common';
 import { useIsDevMode } from '@kbn/react-env';
+import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -77,6 +78,7 @@ export function LensEditConfigurationFlyout({
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [esqlQueryState, setESQLQueryState] = useState<TextBasedQueryState | null>(null);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -183,6 +185,10 @@ export function LensEditConfigurationFlyout({
     initialAttributes: attributes,
   });
 
+  const onTextBasedQueryStateChange = useCallback((state: TextBasedQueryState) => {
+    setESQLQueryState(state);
+  }, []);
+
   const onApply = useCallback(() => {
     if (visualization.activeId == null || !currentAttributes) {
       return;
@@ -242,6 +248,16 @@ export function LensEditConfigurationFlyout({
     if (!visualization.state || !visualization.activeId) {
       return false;
     }
+    // For text-based mode, check if query has been successfully concluded (no syntax errors, no runtime errors, and not pending)
+    if (textBasedMode && esqlQueryState) {
+      if (
+        esqlQueryState.hasSyntaxErrors ||
+        esqlQueryState.hasErrors ||
+        esqlQueryState.isQueryPendingSubmit
+      ) {
+        return false;
+      }
+    }
     const visualizationErrors = getUserMessages(['visualization'], {
       severity: 'error',
     });
@@ -275,7 +291,33 @@ export function LensEditConfigurationFlyout({
     visualization.activeId,
     visualization.state,
     getUserMessages,
+    textBasedMode,
+    esqlQueryState,
   ]);
+
+  const applyButtonDisabledTooltip = useMemo(() => {
+    if (textBasedMode && esqlQueryState) {
+      // Check syntax errors first (these are for the current query, validated client-side)
+      if (esqlQueryState.hasSyntaxErrors) {
+        return i18n.translate('xpack.lens.config.applyButtonDisabledQueryError', {
+          defaultMessage: 'Fix the ES|QL query errors before applying',
+        });
+      }
+      // Check if query needs to be run (query changed, any previous errors are stale)
+      if (esqlQueryState.isQueryPendingSubmit) {
+        return i18n.translate('xpack.lens.config.applyButtonDisabledQueryNotRun', {
+          defaultMessage: 'Run the ES|QL query before applying',
+        });
+      }
+      // Check runtime errors last (from the last run of the current query)
+      if (esqlQueryState.hasErrors) {
+        return i18n.translate('xpack.lens.config.applyButtonDisabledQueryError', {
+          defaultMessage: 'Fix the ES|QL query errors before applying',
+        });
+      }
+    }
+    return undefined;
+  }, [textBasedMode, esqlQueryState]);
 
   const addLayerButton = useAddLayerButton(
     framePublicAPI,
@@ -437,10 +479,10 @@ export function LensEditConfigurationFlyout({
           navigateToLensEditor={navigateToLensEditor}
           onApply={onApply}
           isScrollable
-          isNewPanel={isNewPanel}
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
+          applyButtonDisabledTooltip={applyButtonDisabledTooltip}
           toolbar={toolbar}
           layerTabs={layerTabs}
         >
@@ -461,6 +503,7 @@ export function LensEditConfigurationFlyout({
             parentApi={parentApi}
             panelId={panelId}
             canEditTextBasedQuery={canEditTextBasedQuery}
+            onTextBasedQueryStateChange={onTextBasedQueryStateChange}
           />
         </FlyoutWrapper>
       </>
@@ -478,9 +521,9 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isSaveable={isSaveable}
         isScrollable
-        isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
+        applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
         layerTabs={layerTabs}
       >
@@ -596,6 +639,7 @@ export function LensEditConfigurationFlyout({
                   panelId={panelId}
                   canEditTextBasedQuery={canEditTextBasedQuery}
                   editorContainer={editorContainer.current || undefined}
+                  onTextBasedQueryStateChange={onTextBasedQueryStateChange}
                 />
               </>
             </EuiAccordion>

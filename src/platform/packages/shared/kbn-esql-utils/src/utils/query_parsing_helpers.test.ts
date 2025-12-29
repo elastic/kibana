@@ -32,6 +32,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasDateBreakdown,
+  getESQLQuerySyntaxErrors,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1184,6 +1185,25 @@ describe('esql query helpers', () => {
           },
         ])
       ).toBe(true);
+    });
+  });
+
+  describe('getESQLQuerySyntaxErrors', () => {
+    it('should return an empty array for a valid ES|QL query', () => {
+      const errors = getESQLQuerySyntaxErrors(
+        'FROM logs* | WHERE status == 200 | STATS count = COUNT() BY host | SORT count DESC | LIMIT 10'
+      );
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should return an empty array for runtime errors that are syntactically valid', () => {
+      const errors = getESQLQuerySyntaxErrors('FROM logs* | LIMIT 10r');
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should return errors for a query with syntax errors', () => {
+      const errors = getESQLQuerySyntaxErrors('LIMIT 10');
+      expect(errors.length).toBeGreaterThan(0);
     });
   });
 });
