@@ -65,8 +65,7 @@ Each service includes a 'sources' array indicating where it was found: 'apm', 'l
 Useful for:
 - Getting a high-level system overview of all services
 - Identifying unhealthy APM services
-- Discovering services that may not be instrumented with APM but appear in logs or metrics
-- Understanding which observability signals are available for each service`,
+- Discovering services that may not be instrumented with APM but appear in logs or metrics`,
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {

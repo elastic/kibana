@@ -13,12 +13,10 @@ import minimatch from 'minimatch';
  */
 function matchesPatterns({ index, patterns }: { index: string; patterns: string[] }): boolean {
   return patterns.some((pattern) => {
-    // Direct match
     if (minimatch(index, pattern)) {
       return true;
     }
 
-    // Handle data stream backing indices: .ds-{data-stream-name}-{date}-{generation}
     if (index.startsWith('.ds-') && minimatch(index, `.ds-${pattern}-*`)) {
       return true;
     }
