@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { registerRoutes } from './register_routes';
+import { z } from '@kbn/zod';
+
+export type EntityType = z.infer<typeof EntityType>;
+export const EntityType = z.enum(['user', 'host', 'service', 'generic']);

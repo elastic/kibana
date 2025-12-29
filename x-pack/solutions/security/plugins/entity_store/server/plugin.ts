@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
-
-import { defineRoutes } from './routes';
+import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
+import { registerRoutes } from './routes';
+import type { EntityStoreDependencies } from './dependencies';
+import { initDependencies } from './dependencies';
 
 export class EntityStorePlugin implements Plugin {
-  private readonly logger: Logger;
+  private readonly dependencies: EntityStoreDependencies;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+    this.dependencies = initDependencies(initializerContext);
   }
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
 
-    // Register server side APIs
-    defineRoutes(router, this.logger);
+    registerRoutes(router, this.dependencies);
   }
 
-  public start() {}
+  public start() {
+    this.dependencies.logger.info('Initializing plugin');
+  }
 
-  public stop() {}
+  public stop() {
+    this.dependencies.logger.info('Stopping plugin');
+  }
 }
