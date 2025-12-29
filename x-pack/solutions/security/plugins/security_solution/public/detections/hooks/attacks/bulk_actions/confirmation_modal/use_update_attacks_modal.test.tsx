@@ -21,11 +21,9 @@ jest.mock('./update_attacks_modal', () => ({
     onCancel: () => void;
     onClose: () => void;
     onConfirm: (params: { updateAlerts: boolean }) => Promise<void>;
-    actionType: 'workflow_status' | 'assignees' | 'tags';
   }) => (
     <div
       data-test-subj="updateAttacksModal"
-      data-action-type={props.actionType}
       data-alerts-count={props.alertsCount}
       data-attack-discoveries-count={props.attackDiscoveriesCount}
     >
@@ -85,7 +83,7 @@ describe('useUpdateAttacksModal', () => {
   });
 
   it('should call overlays.openModal when showModal is called', () => {
-    const { result } = renderHook(() => useUpdateAttacksModal('workflow_status'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     act(() => {
       result.current({
@@ -112,7 +110,7 @@ describe('useUpdateAttacksModal', () => {
       };
     });
 
-    const { result } = renderHook(() => useUpdateAttacksModal('workflow_status'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     let promise: Promise<{ updateAlerts: boolean } | null>;
     act(() => {
@@ -146,7 +144,7 @@ describe('useUpdateAttacksModal', () => {
       };
     });
 
-    const { result } = renderHook(() => useUpdateAttacksModal('assignees'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     let promise: Promise<{ updateAlerts: boolean } | null>;
     act(() => {
@@ -180,7 +178,7 @@ describe('useUpdateAttacksModal', () => {
       };
     });
 
-    const { result } = renderHook(() => useUpdateAttacksModal('tags'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     let promise: Promise<{ updateAlerts: boolean } | null>;
     act(() => {
@@ -214,7 +212,7 @@ describe('useUpdateAttacksModal', () => {
       };
     });
 
-    const { result } = renderHook(() => useUpdateAttacksModal('workflow_status'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     let promise: Promise<{ updateAlerts: boolean } | null>;
     act(() => {
@@ -240,7 +238,7 @@ describe('useUpdateAttacksModal', () => {
       close: mockClose,
     }));
 
-    const { result: resultWorkflow } = renderHook(() => useUpdateAttacksModal('workflow_status'));
+    const { result: resultWorkflow } = renderHook(() => useUpdateAttacksModal());
     act(() => {
       resultWorkflow.current({
         alertsCount: 0,
@@ -248,7 +246,7 @@ describe('useUpdateAttacksModal', () => {
       });
     });
 
-    const { result: resultAssignees } = renderHook(() => useUpdateAttacksModal('assignees'));
+    const { result: resultAssignees } = renderHook(() => useUpdateAttacksModal());
     act(() => {
       resultAssignees.current({
         alertsCount: 0,
@@ -256,7 +254,7 @@ describe('useUpdateAttacksModal', () => {
       });
     });
 
-    const { result: resultTags } = renderHook(() => useUpdateAttacksModal('tags'));
+    const { result: resultTags } = renderHook(() => useUpdateAttacksModal());
     act(() => {
       resultTags.current({
         alertsCount: 0,
@@ -265,18 +263,6 @@ describe('useUpdateAttacksModal', () => {
     });
 
     expect(mockOverlays.openModal).toHaveBeenCalledTimes(3);
-
-    // Verify actionType is passed correctly
-    const calls = mockOverlays.openModal.mock.calls;
-    const getActionType = (call: [React.ReactElement]) => {
-      const component = call[0];
-      const updateAttacksModal = React.Children.only(component.props.children);
-      return updateAttacksModal.props.actionType;
-    };
-
-    expect(getActionType(calls[0])).toBe('workflow_status');
-    expect(getActionType(calls[1])).toBe('assignees');
-    expect(getActionType(calls[2])).toBe('tags');
   });
 
   it('should pass correct counts to UpdateAttacksModal', () => {
@@ -285,7 +271,7 @@ describe('useUpdateAttacksModal', () => {
       close: mockClose,
     }));
 
-    const { result } = renderHook(() => useUpdateAttacksModal('workflow_status'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     act(() => {
       result.current({
@@ -311,7 +297,7 @@ describe('useUpdateAttacksModal', () => {
       hasSearchAILakeConfigurations: true,
     } as ReturnType<typeof useAssistantAvailability>);
 
-    const { result } = renderHook(() => useUpdateAttacksModal('workflow_status'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     let promise: Promise<{ updateAlerts: boolean } | null>;
     await act(async () => {
@@ -331,7 +317,7 @@ describe('useUpdateAttacksModal', () => {
       hasSearchAILakeConfigurations: false,
     } as ReturnType<typeof useAssistantAvailability>);
 
-    const { result } = renderHook(() => useUpdateAttacksModal('workflow_status'));
+    const { result } = renderHook(() => useUpdateAttacksModal());
 
     act(() => {
       result.current({

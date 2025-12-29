@@ -40,7 +40,7 @@ interface ApplyAttackTagsProps extends BaseApplyAttackProps {
  */
 export const useApplyAttackTags = () => {
   const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();
-  const showModalIfNeeded = useUpdateAttacksModal('tags');
+  const showModalIfNeeded = useUpdateAttacksModal();
 
   const applyTags = useCallback(
     async ({ tags, attackIds, relatedAlertIds, setIsLoading, onSuccess }: ApplyAttackTagsProps) => {

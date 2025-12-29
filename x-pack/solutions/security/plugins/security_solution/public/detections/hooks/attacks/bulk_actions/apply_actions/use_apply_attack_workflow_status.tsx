@@ -45,7 +45,7 @@ interface ApplyAttackWorkflowStatusProps extends BaseApplyAttackProps {
  */
 export const useApplyAttackWorkflowStatus = () => {
   const { mutateAsync: setUnifiedAlertsWorkflowStatus } = useSetUnifiedAlertsWorkflowStatus();
-  const showModalIfNeeded = useUpdateAttacksModal('workflow_status');
+  const showModalIfNeeded = useUpdateAttacksModal();
 
   const applyWorkflowStatus = useCallback(
     async ({

@@ -54,8 +54,6 @@ export interface UpdateAttacksModalProps {
   onClose: () => void;
   /** Callback when user confirms the action */
   onConfirm: ({ updateAlerts }: { updateAlerts: boolean }) => Promise<void>;
-  /** Type of action being performed */
-  actionType: AttackActionType;
 }
 
 /**
@@ -66,7 +64,7 @@ export interface UpdateAttacksModalProps {
  * @returns Modal component
  */
 export const UpdateAttacksModal = React.memo<UpdateAttacksModalProps>(
-  ({ alertsCount, attackDiscoveriesCount, onCancel, onClose, onConfirm, actionType }) => {
+  ({ alertsCount, attackDiscoveriesCount, onCancel, onClose, onConfirm }) => {
     const { euiTheme } = useEuiTheme();
     const modalId = useGeneratedHtmlId({ prefix: 'updateAttacksModal' });
     const titleId = useGeneratedHtmlId();

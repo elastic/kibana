@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { KibanaContextProvider, useKibana } from '../../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
-import { UpdateAttacksModal, type AttackActionType } from './update_attacks_modal';
+import { UpdateAttacksModal } from './update_attacks_modal';
 
 /**
  * Props for the showModalIfNeeded function returned by useUpdateAttacksModal
@@ -25,7 +25,6 @@ export interface ShowUpdateAttacksModalProps {
  * The modal allows users to choose whether to update only attack alerts or both attack alerts and related detection alerts.
  * For EASE (when hasSearchAILakeConfigurations is true), the modal is skipped and the function resolves with updateAlerts: false.
  *
- * @param actionType - The type of action being performed ('workflow_status', 'assignees', or 'tags')
  * @returns Function that shows the modal (if needed) and returns a promise that resolves to:
  *   - `null` if the user cancels or closes the modal (no update should be performed)
  *   - `{ updateAlerts: boolean }` if the user confirms or if EASE is enabled:
@@ -46,7 +45,7 @@ export interface ShowUpdateAttacksModalProps {
  * // Proceed with update using result.updateAlerts
  * ```
  */
-export const useUpdateAttacksModal = (actionType: AttackActionType) => {
+export const useUpdateAttacksModal = () => {
   const { overlays, services } = useKibana();
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 
@@ -81,13 +80,12 @@ export const useUpdateAttacksModal = (actionType: AttackActionType) => {
                 modalRef.close();
                 resolve({ updateAlerts });
               }}
-              actionType={actionType}
             />
           </KibanaContextProvider>
         );
       });
     },
-    [overlays, services, actionType, hasSearchAILakeConfigurations]
+    [overlays, services, hasSearchAILakeConfigurations]
   );
 
   return showModalIfNeeded;

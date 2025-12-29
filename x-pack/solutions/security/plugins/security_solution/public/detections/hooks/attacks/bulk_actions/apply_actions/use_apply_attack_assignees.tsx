@@ -41,7 +41,7 @@ interface ApplyAttackAssigneesProps extends BaseApplyAttackProps {
  */
 export const useApplyAttackAssignees = () => {
   const { mutateAsync: setUnifiedAlertsAssignees } = useSetUnifiedAlertsAssignees();
-  const showModalIfNeeded = useUpdateAttacksModal('assignees');
+  const showModalIfNeeded = useUpdateAttacksModal();
 
   const applyAssignees = useCallback(
     async ({
