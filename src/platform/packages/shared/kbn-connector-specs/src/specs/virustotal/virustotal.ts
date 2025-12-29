@@ -43,13 +43,6 @@ interface ErrorHandlerOptions {
 
 interface ErrorResult {
   id: null;
-  attributes?: null;
-  status?: null;
-  stats?: null;
-  type?: null;
-  links?: null;
-  reputation?: null;
-  country?: null;
   error: {
     status: number | undefined;
     message: string;

@@ -121,19 +121,11 @@ describe('VirusTotalConnector', () => {
         hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
       })) as {
         id: null;
-        attributes: null;
-        stats: null;
         error: { status: number; message: string; details: unknown };
       };
 
       expect(result).toEqual({
         id: null,
-        attributes: null,
-        stats: null,
-        type: null,
-        links: null,
-        reputation: null,
-        country: null,
         error: {
           status: 404,
           message: 'Hash not found in VirusTotal database',
@@ -163,8 +155,6 @@ describe('VirusTotalConnector', () => {
         failOnError: false,
       })) as {
         id: null;
-        attributes: null;
-        stats: null;
         error: { status: number; message: string; details: unknown };
       };
 
@@ -210,19 +200,11 @@ describe('VirusTotalConnector', () => {
         hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
       })) as {
         id: null;
-        attributes: null;
-        stats: null;
         error: { status: number; message: string; details: unknown };
       };
 
       expect(result).toEqual({
         id: null,
-        attributes: null,
-        stats: null,
-        type: null,
-        links: null,
-        reputation: null,
-        country: null,
         error: {
           status: 429,
           message: 'VirusTotal API request failed',
@@ -370,8 +352,6 @@ describe('VirusTotalConnector', () => {
         url: 'https://example.com',
       })) as {
         id: null;
-        status: null;
-        stats: null;
         error: { status: number; message: string };
       };
 
@@ -471,13 +451,11 @@ describe('VirusTotalConnector', () => {
         file: 'dGVzdCBmaWxlIGNvbnRlbnQ=',
       })) as {
         id: null;
-        type: null;
-        links: null;
         error: { status: number; message: string };
       };
 
       expect(result.error.status).toBe(413);
-      expect(result.error.message).toBe('File submission failed');
+      expect(result.error.message).toBe('VirusTotal file submission failed');
     });
 
     it('should throw error when submission fails and failOnError is true', async () => {
@@ -586,9 +564,6 @@ describe('VirusTotalConnector', () => {
         ip: '1.2.3.4',
       })) as {
         id: null;
-        attributes: null;
-        reputation: null;
-        country: null;
         error: { status: number; message: string };
       };
 
