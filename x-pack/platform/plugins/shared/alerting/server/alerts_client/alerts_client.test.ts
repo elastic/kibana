@@ -960,7 +960,7 @@ describe('Alerts Client', () => {
           expect(spy).toHaveBeenNthCalledWith(3, 'recovered');
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
+            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active or delayed alerts ${ruleInfo}.`,
             logTags
           );
           spy.mockRestore();

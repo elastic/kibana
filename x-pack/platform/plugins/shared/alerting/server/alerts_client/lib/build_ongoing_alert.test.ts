@@ -1012,22 +1012,6 @@ for (const flattened of [true, false]) {
       });
     });
 
-    test('should set status to "delayed" when the alert is delayed', () => {
-      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
-      legacyAlert.scheduleActions('default');
-      legacyAlert.setStatus('delayed');
-      const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-        alert: existingFlattenedNewAlert,
-        legacyAlert,
-        rule: alertRule,
-        isImproving: null,
-        timestamp: '2023-03-28T12:27:28.159Z',
-        kibanaVersion: '8.9.0',
-      });
-
-      expect((result as Record<string, unknown>)[ALERT_STATUS]).toBe('delayed');
-    });
-
     describe('ALERT_MUTED field', () => {
       const ruleData: AlertRuleData = {
         consumer: 'bar',

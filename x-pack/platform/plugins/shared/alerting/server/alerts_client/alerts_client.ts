@@ -68,6 +68,7 @@ import type {
 import {
   buildNewAlert,
   buildOngoingAlert,
+  buildDelayedAlert,
   buildUpdatedRecoveredAlert,
   buildRecoveredAlert,
   formatRule,
@@ -498,10 +499,25 @@ export class AlertsClient<
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawActiveAlerts)) {
-      // See if there's an existing active alert document
-      const activeOrDelayedAlert = activeAlerts[id] ?? delayedAlerts[id];
-      if (activeOrDelayedAlert) {
-        const trackedAlert = this.trackedAlerts.get(activeOrDelayedAlert.getUuid());
+      const delayedAlert = delayedAlerts[id];
+      const activeAlert = activeAlerts[id];
+
+      if (delayedAlert) {
+        activeAlertsToIndex.push(
+          buildDelayedAlert<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >({
+            legacyAlert: delayedAlert,
+            timestamp: currentTime,
+            rule: this.rule,
+          })
+        );
+      } else if (activeAlert) {
+        const trackedAlert = this.trackedAlerts.get(activeAlert.getUuid());
         if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
           const isImproving = isAlertImproving<
             AlertData,
@@ -509,7 +525,7 @@ export class AlertsClient<
             LegacyContext,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(trackedAlert, activeOrDelayedAlert, this.ruleType.actionGroups);
+          >(trackedAlert, activeAlert, this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -519,7 +535,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               alert: trackedAlert,
-              legacyAlert: activeOrDelayedAlert,
+              legacyAlert: activeAlert,
               rule: this.rule,
               ruleData: this.options.rule,
               isImproving,
@@ -539,7 +555,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              legacyAlert: activeOrDelayedAlert,
+              legacyAlert: activeAlert,
               rule: this.rule,
               ruleData: this.options.rule,
               runTimestamp: this.runTimestampString,
@@ -552,7 +568,7 @@ export class AlertsClient<
         }
       } else {
         this.options.logger.error(
-          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts ${this.ruleInfoMessage}.`,
+          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active or delayed alerts ${this.ruleInfoMessage}.`,
           this.logTags
         );
       }
@@ -611,6 +627,7 @@ export class AlertsClient<
         return true;
       }
     );
+
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
         alertsToIndex.map((alert: Alert & AlertData) => {

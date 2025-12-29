@@ -436,21 +436,6 @@ describe('buildNewAlert', () => {
     });
   });
 
-  test('should set status to "delayed" when the alert is delayed', () => {
-    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
-    legacyAlert.scheduleActions('default');
-    legacyAlert.setStatus('delayed');
-
-    expect(
-      buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
-        legacyAlert,
-        rule: alertRule,
-        timestamp: '2023-03-28T12:27:28.159Z',
-        kibanaVersion: '8.9.0',
-      })
-    ).toEqual(expect.objectContaining({ [ALERT_STATUS]: 'delayed' }));
-  });
-
   describe('ALERT_MUTED field', () => {
     const ruleData: AlertRuleData = {
       consumer: 'bar',
