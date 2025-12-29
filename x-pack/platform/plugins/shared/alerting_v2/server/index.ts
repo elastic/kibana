@@ -15,8 +15,8 @@ import type { AlertingV2Config } from './config';
 import { configSchema } from './config';
 import { setupSavedObjects } from './saved_objects';
 import { initializeRuleExecutorTaskDefinition } from './rule_executor';
-import { CreateEsqlRuleRoute } from './routes/esql_rule/routes/create_esql_rule_route';
-import { UpdateEsqlRuleRoute } from './routes/esql_rule/routes/update_esql_rule_route';
+import { CreateEsqlRuleRoute } from './routes/create_esql_rule_route';
+import { UpdateEsqlRuleRoute } from './routes/update_esql_rule_route';
 import { registerFeaturePrivileges } from './lib/security/privileges';
 
 export const config: PluginConfigDescriptor<AlertingV2Config> = {
