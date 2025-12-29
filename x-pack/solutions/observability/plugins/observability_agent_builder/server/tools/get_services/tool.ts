@@ -33,7 +33,7 @@ const getServicesSchema = z.object({
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
     .describe(
-      'Optionally filter the services by their health status. Note: Only APM services have health status. When filtering by health status, services only found in logs or metrics will be excluded.'
+      'Optional list of health statuses to filter services by (e.g., ["healthy", "warning"]). Valid values: "unknown", "healthy", "warning", "critical".'
     ),
 });
 
