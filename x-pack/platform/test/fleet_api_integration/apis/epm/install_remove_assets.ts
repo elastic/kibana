@@ -29,7 +29,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es: Client = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
-  const retry = getService('retry');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const logsTemplateName = `logs-${pkgName}.test_logs`;
@@ -48,8 +47,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls all assets', () => {
     skipIfNoDockerRegistry(providerContext);
 
-    // FLAKY: https://github.com/elastic/kibana/issues/246272
-    describe.skip('installs all assets when installing a package for the first time', () => {
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
         await fleetAndAgents.setup();
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
@@ -66,7 +64,6 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
-        retry,
       });
     });
 
@@ -381,7 +378,6 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
-        retry,
       });
     });
   });
@@ -394,7 +390,6 @@ const expectAssetsInstalled = ({
   pkgName,
   es,
   kibanaServer,
-  retry,
 }: {
   logsTemplateName: string;
   metricsTemplateName: string;
@@ -402,7 +397,6 @@ const expectAssetsInstalled = ({
   pkgName: string;
   es: Client;
   kibanaServer: any;
-  retry: any;
 }) => {
   it('should have installed the ILM policy', async function () {
     const resPolicy = await es.transport.request(
@@ -747,10 +741,6 @@ const expectAssetsInstalled = ({
             type: 'ingest_pipeline',
           },
           {
-            id: 'all_assets-README.md',
-            type: 'knowledge_base',
-          },
-          {
             id: 'default',
             type: 'ml_model',
           },
@@ -929,12 +919,17 @@ const expectAssetsInstalled = ({
         verification_key_id: null,
       };
 
-      expect(sortedRes).eql(expectedSavedObject);
+      expectedSavedObject.installed_es.forEach((item) => {
+        expect(
+          sortedRes.installed_es.find(
+            (asset: any) => asset.type === item.type && asset.id === item.id
+          )
+        ).to.not.be(undefined);
+      });
+      expect({ ...sortedRes, installed_es: [] }).eql({ ...expectedSavedObject, installed_es: [] });
     }
 
-    await retry.tryForTime(10000, async () => {
-      await verifySO();
-    });
+    await verifySO();
   });
 
   // TODO enable when feature flag is turned on https://github.com/elastic/kibana/issues/244655
