@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo } from 'react';
-import { EuiPanel, EuiIcon, EuiText } from '@elastic/eui';
-import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import React, { useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import type { Connector } from '../../types/connector';
+import { getConnectorIcon } from '../../utils';
 
 interface ConnectorCardProps {
   connector: Connector;
@@ -16,69 +17,56 @@ interface ConnectorCardProps {
   isDisabled?: boolean;
 }
 
+const contentStyle = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100%',
+  gap: 16,
+};
+
+const textStyle = ({ euiTheme }: UseEuiTheme) => ({
+  fontWeight: euiTheme.font.weight.semiBold,
+  textAlign: 'center' as const,
+});
+
+const getPanelStyle =
+  (isDisabled: boolean) =>
+  ({ euiTheme }: UseEuiTheme) => ({
+    height: 122,
+    cursor: isDisabled ? 'not-allowed' : 'pointer',
+    opacity: isDisabled ? 0.5 : 1,
+    border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+    transition: 'all 0.2s ease',
+    '&:hover': !isDisabled
+      ? {
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          transform: 'translateY(-2px)',
+          borderColor: euiTheme.colors.primary,
+        }
+      : {},
+  });
+
 export const ConnectorCard: React.FC<ConnectorCardProps> = ({
   connector,
   onClick,
   isDisabled = false,
 }) => {
-  // Resolve icon at render time to properly handle lazy components, require clean up later
-  const iconComponent = useMemo(() => {
-    if (connector.connectorSpecId) {
-      const LazyIcon = ConnectorIconsMap.get(connector.connectorSpecId);
-      if (LazyIcon) {
-        return (
-          <Suspense fallback={<EuiIcon type="application" size="l" />}>
-            <LazyIcon size="l" />
-          </Suspense>
-        );
-      }
-    }
-
-    if (connector.icon) {
-      return <EuiIcon type={connector.icon} size="l" />;
-    }
-  }, [connector.connectorSpecId, connector.icon]);
+  const iconComponent = useMemo(() => getConnectorIcon(connector, 'l'), [connector]);
 
   return (
     <EuiPanel
-      css={({ euiTheme }) => ({
-        height: '122px',
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        opacity: isDisabled ? 0.5 : 1,
-        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-        transition: 'all 0.2s ease',
-        '&:hover': isDisabled
-          ? {}
-          : {
-              boxShadow: `0 2px 8px rgba(0, 0, 0, 0.1)`,
-              transform: 'translateY(-2px)',
-              borderColor: euiTheme.colors.primary,
-            },
-      })}
+      css={getPanelStyle(isDisabled)}
       paddingSize="l"
       hasShadow={false}
       hasBorder={false}
       onClick={() => !isDisabled && onClick?.(connector)}
       data-test-subj={`connectorCard-${connector.id}`}
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          gap: '16px',
-        }}
-      >
+      <div css={contentStyle}>
         {iconComponent}
-        <EuiText
-          css={({ euiTheme }) => ({
-            fontWeight: euiTheme.font.weight.semiBold,
-            textAlign: 'center',
-          })}
-          size="s"
-        >
+        <EuiText css={textStyle} size="s">
           <span>{connector.name}</span>
         </EuiText>
       </div>

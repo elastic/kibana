@@ -8,7 +8,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -25,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActiveSource } from '../../types/connector';
 import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
 import { AgentAvatarGroup } from './agent_avatar_group';
+import { getConnectorIcon, getConnectorSpecIdFromType } from '../../utils';
 
 interface ActiveSourcesTableProps {
   sources: ActiveSource[];
@@ -33,6 +33,21 @@ interface ActiveSourcesTableProps {
   onEdit?: (source: ActiveSource) => void;
   onDelete?: (source: ActiveSource) => void;
 }
+
+const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
+  const iconComponent = useMemo(() => {
+    const connector = {
+      id: source.type,
+      name: source.name,
+      type: source.type,
+      category: 'all' as const,
+      connectorSpecId: getConnectorSpecIdFromType(source.type),
+    };
+    return getConnectorIcon(connector, 'm', 'integration');
+  }, [source.type, source.name]);
+
+  return iconComponent;
+};
 
 const ActionsCell: React.FC<{
   source: ActiveSource;
@@ -153,7 +168,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       render: (name: string, source: ActiveSource) => (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="integration" size="m" />
+            <SourceIcon source={source} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">{name}</EuiText>

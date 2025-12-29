@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-// Utilities will be exported here as needed
+export { getConnectorIcon } from './get_connector_icon';
+export { getConnectorSpecIdFromType } from './get_connector_spec_id';
