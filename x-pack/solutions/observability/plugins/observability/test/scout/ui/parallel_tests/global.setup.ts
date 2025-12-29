@@ -6,7 +6,12 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import { generateRulesData, createDataView, DATA_VIEWS } from '../fixtures/generators';
+import {
+  createDataView,
+  generateLogsData,
+  generateRulesData,
+  DATA_VIEWS,
+} from '../fixtures/generators';
 
 // ES archive path for metrics and logs test data
 const ES_ARCHIVE_METRICS_AND_LOGS =
@@ -15,9 +20,15 @@ const ES_ARCHIVE_METRICS_AND_LOGS =
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apiServices, esArchiver, kbnClient, log }) => {
+  async ({ apiServices, log, logsSynthtraceEsClient, kbnClient, esArchiver }) => {
     log.info('Generating Observability data...');
     await generateRulesData(apiServices);
+
+    await generateLogsData({
+      from: Date.now() - 15 * 60 * 1000, // 15 minutes ago
+      to: Date.now(),
+      client: logsSynthtraceEsClient,
+    });
 
     // Load ES archive for metrics and logs data (needed for custom threshold tests)
     log.info('Loading ES archive for metrics and logs...');
@@ -38,6 +49,12 @@ globalSetupHook(
       id: DATA_VIEWS.METRICBEAT.ID,
       name: DATA_VIEWS.METRICBEAT.NAME,
       title: DATA_VIEWS.METRICBEAT.TITLE,
+    });
+
+    await createDataView(kbnClient, {
+      name: 'test-data-view-name_1',
+      id: 'test-data-view-id_1',
+      title: 'logs-*',
     });
   }
 );
