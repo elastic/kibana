@@ -11,7 +11,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { SLOGroupingValueSelector } from './slo_grouping_value_selector';
 
-export function SLOGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
+export function SloGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
   const groupings = Object.entries(slo.groupings ?? {});
 
   if (!groupings.length) {
