@@ -61,11 +61,11 @@ export async function mockPackagePoliciesEmptyWithCapture(
       });
     } else if (request.method() === 'POST') {
       const body = request.postDataJSON() as Record<string, unknown>;
-      onPostCapture(body);
+      const responseBody = onPostCapture(body);
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(onPostCapture(body)),
+        body: JSON.stringify(responseBody),
       });
     } else {
       await route.continue();
