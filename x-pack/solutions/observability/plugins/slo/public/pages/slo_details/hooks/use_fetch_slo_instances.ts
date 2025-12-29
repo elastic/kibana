@@ -16,6 +16,7 @@ interface Params {
   searchAfter?: string;
   size?: number;
   enabled: boolean;
+  remoteName?: string;
 }
 
 interface Response {
@@ -31,11 +32,12 @@ export function useFetchSloInstances({
   searchAfter,
   size = 100,
   enabled = true,
+  remoteName,
 }: Params): Response {
   const { sloClient } = usePluginContext();
 
   const { isLoading, isInitialLoading, isError, data } = useQuery({
-    queryKey: sloKeys.instances({ sloId, search, searchAfter, size }),
+    queryKey: sloKeys.instances({ sloId, search, searchAfter, size, remoteName }),
     queryFn: async ({ signal }) => {
       return sloClient.fetch(`GET /internal/observability/slos/{id}/_instances`, {
         params: {
@@ -44,6 +46,7 @@ export function useFetchSloInstances({
             search,
             size,
             searchAfter,
+            remoteName,
           },
         },
         signal,

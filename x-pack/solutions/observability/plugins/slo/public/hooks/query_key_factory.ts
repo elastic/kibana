@@ -91,8 +91,13 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'groupings', params] as const,
-  instances: (params: { sloId: string; search?: string; searchAfter?: string; size: number }) =>
-    [...sloKeys.all, 'instances', params] as const,
+  instances: (params: {
+    sloId: string;
+    search?: string;
+    searchAfter?: string;
+    size: number;
+    remoteName?: string;
+  }) => [...sloKeys.all, 'instances', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
 };
 

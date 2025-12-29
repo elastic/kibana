@@ -15,6 +15,7 @@ const findSLOInstancesParamsSchema = t.type({
       search: t.string,
       size: toNumberRt,
       searchAfter: t.string,
+      remoteName: t.string,
     }),
   ]),
 });
@@ -30,6 +31,7 @@ interface FindSLOInstancesParams {
   search?: string;
   size?: number;
   searchAfter?: string;
+  remoteName?: string;
 }
 
 export { findSLOInstancesParamsSchema };

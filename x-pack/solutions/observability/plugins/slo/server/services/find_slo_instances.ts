@@ -20,7 +20,7 @@ export async function findSLOInstances(
   params: FindSLOInstancesParams,
   { scopedClusterClient }: Dependencies
 ): Promise<FindSLOInstancesResponse> {
-  const { search, size = DEFAULT_SIZE, searchAfter, sloId, spaceId } = params;
+  const { search, size = DEFAULT_SIZE, searchAfter, sloId, spaceId, remoteName } = params;
   if (size <= 0 || size > 1000) {
     throw new IllegalArgumentError('Size must be between 1 and 1000');
   }
@@ -34,7 +34,9 @@ export async function findSLOInstances(
       };
     }
   >({
-    index: SUMMARY_DESTINATION_INDEX_PATTERN,
+    index: remoteName
+      ? `${remoteName}:${SUMMARY_DESTINATION_INDEX_PATTERN}`
+      : SUMMARY_DESTINATION_INDEX_PATTERN,
     size: 0,
     query: {
       bool: {

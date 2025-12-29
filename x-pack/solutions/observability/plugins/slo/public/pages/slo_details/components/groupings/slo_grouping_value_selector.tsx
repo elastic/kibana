@@ -72,11 +72,10 @@ export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
       search: urlSearchParams.toString(),
     });
   };
+
   const copySLOGroupingValueAriaLabel = i18n.translate(
     'xpack.slo.sLOGroupingValueSelector.copyButton.label',
-    {
-      defaultMessage: 'Copy SLO Grouping Value',
-    }
+    { defaultMessage: 'Copy SLO Grouping Value' }
   );
 
   return (

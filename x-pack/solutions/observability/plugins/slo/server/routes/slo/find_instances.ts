@@ -33,6 +33,7 @@ export const findSLOInstancesRoute = createSloServerRoute({
         searchAfter: params.query?.searchAfter,
         sloId: params.path.id,
         spaceId,
+        remoteName: params.query?.remoteName,
       },
       { scopedClusterClient }
     );
