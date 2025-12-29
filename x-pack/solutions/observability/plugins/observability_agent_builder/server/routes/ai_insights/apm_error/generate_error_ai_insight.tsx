@@ -44,6 +44,28 @@ const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   - <TraceErrors>: Related errors within the trace (type, message, culprit, spanId, timestampUs)
   - <TraceServices>: Service aggregates for the trace (serviceName, count, errorCount)
   - <TraceLogCategories>: Categorized log patterns tied to the trace (errorCategory, docCount, sampleMessage)
+
+  ## Entity Linking
+  When you identify the following entities in your context or data, you MUST format them using the specific relative URL paths defined below.
+
+    ### Services
+      - Trigger: When mentioning a service by its \`service.name\`.
+      - Template: \`[<service.name>](/app/apm/services/<service.name>)\`
+      - Example:
+      - Text: "The billing-service is down."
+      - Output: "The [billing-service](/app/apm/services/billing-service) is down."
+    ### Traces
+      - Trigger: When mentioning a trace by its \`trace.id\`.
+      - Template: \`[<trace.id>](/app/apm/link-to/trace/<trace.id>)\`
+      - Example:
+      - Text: "Investigate trace 8a3c42."
+      - Output: "Investigate trace [8a3c42](/app/apm/link-to/trace/8a3c42)"
+    ### Errors
+      - Trigger: When mentioning an error that has an associated \`service.name\` and \`error.grouping_key\`.
+      - Template: \`[<error.grouping_key>](/app/apm/services/<service.name>/errors/<error.grouping_key>)\`
+      - Example:
+      - Text: "Found NullPointer in frontend."
+      - Output: "Found [abcde](/app/apm/services/frontend/errors/abcde) in [frontend](/app/apm/services/frontend)."
 `);
 
 const buildUserPrompt = (errorContext: string) => {
