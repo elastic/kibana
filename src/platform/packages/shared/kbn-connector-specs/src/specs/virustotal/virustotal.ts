@@ -78,9 +78,13 @@ export const VirusTotalConnector: ConnectorSpec = {
             typeof error.response === 'object'
           ) {
             const response = error.response as { status?: number; data?: { error?: unknown } };
-            // If failOnError is true, preserve current behavior by re-throwing
+            // If failOnError is true, throw descriptive error
             if (typedInput.failOnError) {
-              throw error;
+              const errorMessage =
+                response.status === 404
+                  ? `Hash not found in VirusTotal database (HTTP ${response.status})`
+                  : `VirusTotal API request failed (HTTP ${response.status})`;
+              throw new Error(errorMessage);
             }
             // Return error information instead of throwing
             return {
@@ -107,27 +111,71 @@ export const VirusTotalConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({
         url: z.url().describe('URL to scan'),
+        failOnError: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            'If true, throw error on API failures. If false (default), return error details'
+          ),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { url: string };
-        const submitResponse = await ctx.client.post(
-          'https://www.virustotal.com/api/v3/urls',
-          new URLSearchParams({ url: typedInput.url }),
-          {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
+        const typedInput = input as { url: string; failOnError?: boolean };
+        try {
+          const submitResponse = await ctx.client.post(
+            'https://www.virustotal.com/api/v3/urls',
+            new URLSearchParams({ url: typedInput.url }),
+            {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            }
+          );
+          const analysisId = submitResponse.data.data.id;
+          const analysisResponse = await ctx.client.get(
+            `https://www.virustotal.com/api/v3/analyses/${analysisId}`
+          );
+          return {
+            id: analysisId,
+            status: analysisResponse.data.data.attributes.status,
+            stats: analysisResponse.data.data.attributes.stats,
+          };
+        } catch (error: unknown) {
+          // Handle axios errors with response
+          if (
+            error &&
+            typeof error === 'object' &&
+            'response' in error &&
+            error.response &&
+            typeof error.response === 'object'
+          ) {
+            const response = error.response as { status?: number; data?: { error?: unknown } };
+            // If failOnError is true, throw descriptive error
+            if (typedInput.failOnError) {
+              const errorMessage =
+                response.status === 404
+                  ? `URL not found in VirusTotal database (HTTP ${response.status})`
+                  : `VirusTotal API request failed (HTTP ${response.status})`;
+              throw new Error(errorMessage);
+            }
+            // Return error information instead of throwing
+            return {
+              id: null,
+              status: null,
+              stats: null,
+              error: {
+                status: response.status,
+                message:
+                  response.status === 404
+                    ? 'URL not found in VirusTotal database'
+                    : 'API request failed',
+                details: response.data?.error,
+              },
+            };
           }
-        );
-        const analysisId = submitResponse.data.data.id;
-        const analysisResponse = await ctx.client.get(
-          `https://www.virustotal.com/api/v3/analyses/${analysisId}`
-        );
-        return {
-          id: analysisId,
-          status: analysisResponse.data.data.attributes.status,
-          stats: analysisResponse.data.data.attributes.stats,
-        };
+          // For non-axios errors, always throw
+          throw error;
+        }
       },
     },
 
@@ -136,19 +184,60 @@ export const VirusTotalConnector: ConnectorSpec = {
       input: z.object({
         file: z.string().describe('Base64-encoded file content'),
         filename: z.string().optional().describe('Original filename'),
+        failOnError: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            'If true, throw error on API failures. If false (default), return error details'
+          ),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { file: string; filename?: string };
-        const buffer = Buffer.from(typedInput.file, 'base64');
-        const formData = new FormData();
-        formData.append('file', new Blob([buffer]), typedInput.filename || 'file');
+        const typedInput = input as { file: string; filename?: string; failOnError?: boolean };
+        try {
+          const buffer = Buffer.from(typedInput.file, 'base64');
+          const formData = new FormData();
+          formData.append('file', new Blob([buffer]), typedInput.filename || 'file');
 
-        const response = await ctx.client.post('https://www.virustotal.com/api/v3/files', formData);
-        return {
-          id: response.data.data.id,
-          type: response.data.data.type,
-          links: response.data.data.links,
-        };
+          const response = await ctx.client.post(
+            'https://www.virustotal.com/api/v3/files',
+            formData
+          );
+          return {
+            id: response.data.data.id,
+            type: response.data.data.type,
+            links: response.data.data.links,
+          };
+        } catch (error: unknown) {
+          // Handle axios errors with response
+          if (
+            error &&
+            typeof error === 'object' &&
+            'response' in error &&
+            error.response &&
+            typeof error.response === 'object'
+          ) {
+            const response = error.response as { status?: number; data?: { error?: unknown } };
+            // If failOnError is true, throw descriptive error
+            if (typedInput.failOnError) {
+              const errorMessage = `VirusTotal file submission failed (HTTP ${response.status})`;
+              throw new Error(errorMessage);
+            }
+            // Return error information instead of throwing
+            return {
+              id: null,
+              type: null,
+              links: null,
+              error: {
+                status: response.status,
+                message: 'File submission failed',
+                details: response.data?.error,
+              },
+            };
+          }
+          // For non-axios errors, always throw
+          throw error;
+        }
       },
     },
 
@@ -156,18 +245,63 @@ export const VirusTotalConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({
         ip: z.ipv4().describe('IP address'),
+        failOnError: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            'If true, throw error on API failures. If false (default), return error details'
+          ),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { ip: string };
-        const response = await ctx.client.get(
-          `https://www.virustotal.com/api/v3/ip_addresses/${typedInput.ip}`
-        );
-        return {
-          id: response.data.data.id,
-          attributes: response.data.data.attributes,
-          reputation: response.data.data.attributes.reputation,
-          country: response.data.data.attributes.country,
-        };
+        const typedInput = input as { ip: string; failOnError?: boolean };
+        try {
+          const response = await ctx.client.get(
+            `https://www.virustotal.com/api/v3/ip_addresses/${typedInput.ip}`
+          );
+          return {
+            id: response.data.data.id,
+            attributes: response.data.data.attributes,
+            reputation: response.data.data.attributes.reputation,
+            country: response.data.data.attributes.country,
+          };
+        } catch (error: unknown) {
+          // Handle axios errors with response
+          if (
+            error &&
+            typeof error === 'object' &&
+            'response' in error &&
+            error.response &&
+            typeof error.response === 'object'
+          ) {
+            const response = error.response as { status?: number; data?: { error?: unknown } };
+            // If failOnError is true, throw descriptive error
+            if (typedInput.failOnError) {
+              const errorMessage =
+                response.status === 404
+                  ? `IP address not found in VirusTotal database (HTTP ${response.status})`
+                  : `VirusTotal API request failed (HTTP ${response.status})`;
+              throw new Error(errorMessage);
+            }
+            // Return error information instead of throwing
+            return {
+              id: null,
+              attributes: null,
+              reputation: null,
+              country: null,
+              error: {
+                status: response.status,
+                message:
+                  response.status === 404
+                    ? 'IP address not found in VirusTotal database'
+                    : 'API request failed',
+                details: response.data?.error,
+              },
+            };
+          }
+          // For non-axios errors, always throw
+          throw error;
+        }
       },
     },
   },
