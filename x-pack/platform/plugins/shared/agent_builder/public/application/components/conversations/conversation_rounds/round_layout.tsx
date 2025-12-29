@@ -17,7 +17,7 @@ import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { RoundError } from './round_error/round_error';
-import { ConfirmationPrompt } from './round_confirmation_prompt';
+import { ConfirmationPrompt } from './round_prompt';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;

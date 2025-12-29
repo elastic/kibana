@@ -18,20 +18,20 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConfirmPromptDefinition } from '@kbn/onechat-common/agents';
+import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
 import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const defaultLabels = {
-  title: i18n.translate('xpack.onechat.confirmationPrompt.defaultTitle', {
+  title: i18n.translate('xpack.agentBuilder.confirmationPrompt.defaultTitle', {
     defaultMessage: 'Confirmation required',
   }),
-  message: i18n.translate('xpack.onechat.confirmationPrompt.defaultMessage', {
+  message: i18n.translate('xpack.agentBuilder.confirmationPrompt.defaultMessage', {
     defaultMessage: 'Do you want to proceed with this action?',
   }),
-  confirmText: i18n.translate('xpack.onechat.confirmationPrompt.confirm', {
+  confirmText: i18n.translate('xpack.agentBuilder.confirmationPrompt.confirm', {
     defaultMessage: 'Confirm',
   }),
-  cancelText: i18n.translate('xpack.onechat.confirmationPrompt.cancel', {
+  cancelText: i18n.translate('xpack.agentBuilder.confirmationPrompt.cancel', {
     defaultMessage: 'Cancel',
   }),
 };
