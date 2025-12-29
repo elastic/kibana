@@ -23,7 +23,7 @@ export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] 
   if (!filters) return;
   return filters.map((filter) => {
     const cleanedFilter = { ...filter };
-    if (cleanedFilter.meta?.value) {
+    if ('value' in cleanedFilter.meta) {
       // Create a new filter object with meta excluding 'value'
       const { value, ...metaWithoutValue } = cleanedFilter.meta;
       cleanedFilter.meta = metaWithoutValue;

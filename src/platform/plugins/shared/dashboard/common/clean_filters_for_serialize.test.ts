@@ -19,7 +19,7 @@ describe('cleanFiltersForSerialize', () => {
   test('should remove "meta.value" property from each filter', () => {
     const filters: Filter[] = [
       { query: { a: 'a' }, meta: { value: 'value1' } },
-      { query: { b: 'b' }, meta: { value: 'value2' } },
+      { query: { b: 'b' }, meta: { value: undefined } },
     ];
 
     const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
