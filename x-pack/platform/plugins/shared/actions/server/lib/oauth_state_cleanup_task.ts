@@ -17,7 +17,7 @@ import { OAuthStateClient } from './oauth_state_client';
 
 export const OAUTH_STATE_CLEANUP_TASK_TYPE = 'actions:oauth_state_cleanup';
 export const OAUTH_STATE_CLEANUP_TASK_ID = `Actions-${OAUTH_STATE_CLEANUP_TASK_TYPE}`;
-export const OAUTH_STATE_CLEANUP_SCHEDULE: IntervalSchedule = { interval: '1h' };
+export const OAUTH_STATE_CLEANUP_SCHEDULE: IntervalSchedule = { interval: '30m' };
 
 interface TaskState {
   runs: number;
