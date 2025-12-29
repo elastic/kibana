@@ -57,6 +57,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -87,6 +88,7 @@ export function InternalDashboardTopNav({
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
+  const dashboardInternalApi = useDashboardInternalApi();
 
   const [
     allDataViews,
@@ -114,8 +116,8 @@ export function InternalDashboardTopNav({
     dashboardApi.unpublishedChildFilters$,
     dashboardApi.publishedTimeslice$,
     dashboardApi.unpublishedTimeslice$,
-    dashboardApi.publishedEsqlVariables$,
-    dashboardApi.unpublishedEsqlVariables$
+    dashboardInternalApi.publishedEsqlVariables$,
+    dashboardInternalApi.unpublishedEsqlVariables$
   );
 
   const hasUnpublishedFilters = useMemo(() => {
@@ -408,7 +410,7 @@ export function InternalDashboardTopNav({
           }
           if (hasUnpublishedFilters) dashboardApi.publishFilters();
           if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
-          if (hasUnpublishedVariables) dashboardApi.publishVariables();
+          if (hasUnpublishedVariables) dashboardInternalApi.publishVariables();
         }}
         onSavedQueryIdChange={setSavedQueryId}
         hasDirtyState={hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables}

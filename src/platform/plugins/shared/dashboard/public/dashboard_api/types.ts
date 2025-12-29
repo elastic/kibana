@@ -170,10 +170,6 @@ export type DashboardApi = CanExpandPanels &
     unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     publishTimeslice: () => void;
 
-    publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[] | undefined>;
-    unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[] | undefined>;
-    publishVariables: () => void;
-
     layout$: BehaviorSubject<DashboardLayout>;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
@@ -191,6 +187,9 @@ export interface DashboardInternalApi {
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
+  publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  publishVariables: () => void;
 }
 
 export interface DashboardUser {
