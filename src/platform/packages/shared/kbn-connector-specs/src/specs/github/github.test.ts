@@ -474,6 +474,152 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('getDoc action', () => {
+    it('should get a single file from repository', async () => {
+      const mockResponse = {
+        data: {
+          name: 'README.md',
+          path: 'README.md',
+          content: Buffer.from('File content').toString('base64'),
+          html_url: 'https://github.com/owner/repo/blob/main/README.md',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getDoc.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        path: 'README.md',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/contents/README.md',
+        {
+          params: { ref: 'main' },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      expect(result).toEqual({
+        name: 'README.md',
+        path: 'README.md',
+        content: Buffer.from('File content').toString('base64'),
+        html_url: 'https://github.com/owner/repo/blob/main/README.md',
+      });
+    });
+
+    it('should use custom ref when provided', async () => {
+      const mockResponse = {
+        data: {
+          name: 'docs/guide.md',
+          path: 'docs/guide.md',
+          content: Buffer.from('Guide content').toString('base64'),
+          html_url: 'https://github.com/owner/repo/blob/develop/docs/guide.md',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getDoc.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        path: 'docs/guide.md',
+        ref: 'develop',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.github.com/repos/owner/repo/contents/docs/guide.md',
+        {
+          params: { ref: 'develop' },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+      const typedResult = result as { name: string; path: string; content: string; html_url: string };
+      expect(typedResult.path).toBe('docs/guide.md');
+    });
+
+    it('should get non-markdown files', async () => {
+      const mockResponse = {
+        data: {
+          name: 'config.json',
+          path: 'config.json',
+          content: Buffer.from('{"key": "value"}').toString('base64'),
+          html_url: 'https://github.com/owner/repo/blob/main/config.json',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.getDoc.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        path: 'config.json',
+      });
+
+      const typedResult = result as { name: string; path: string; content: string; html_url: string };
+      expect(typedResult.name).toBe('config.json');
+      expect(typedResult.path).toBe('config.json');
+    });
+
+    it('should throw descriptive error when file is not found', async () => {
+      const error: HttpError = new Error('Not found');
+      error.response = { status: 404 };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.getDoc.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+          path: 'nonexistent.md',
+        })
+      ).rejects.toThrow('File not found: nonexistent.md in repository owner/repo');
+    });
+
+    it('should include ref in error message when file is not found with custom ref', async () => {
+      const error: HttpError = new Error('Not found');
+      error.response = { status: 404 };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.getDoc.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+          path: 'nonexistent.md',
+          ref: 'develop',
+        })
+      ).rejects.toThrow('File not found: nonexistent.md in repository owner/repo (ref: develop)');
+    });
+
+    it('should rethrow non-404 errors', async () => {
+      const error: HttpError = new Error('Server error');
+      error.response = { status: 500 };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.getDoc.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+          path: 'file.md',
+        })
+      ).rejects.toThrow('Server error');
+    });
+
+    it('should handle authentication errors', async () => {
+      const error: HttpError = new Error('Unauthorized');
+      error.response = { status: 401 };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.getDoc.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+          path: 'file.md',
+        })
+      ).rejects.toThrow('Unauthorized');
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {

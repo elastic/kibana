@@ -157,6 +157,63 @@ export const GithubConnector: ConnectorSpec = {
         return getDocsResponseSchema.parse(markdownFilesWithContent);
       },
     },
+    getDoc: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        path: z.string(),
+        ref: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          path: string;
+          ref?: string;
+        };
+
+        const ref = typedInput.ref || 'main';
+
+        // Get the content of the specified file
+        let response;
+        try {
+          response = await ctx.client.get(
+            `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
+            {
+              params: { ref },
+              headers: {
+                Accept: 'application/vnd.github.v3+json',
+              },
+            }
+          );
+        } catch (error: unknown) {
+          const httpError = error as { response?: { status?: number } };
+          if (httpError.response?.status === 404) {
+            throw new Error(
+              `File not found: ${typedInput.path} in repository ${typedInput.owner}/${typedInput.repo}${ref !== 'main' ? ` (ref: ${ref})` : ''}`
+            );
+          }
+          throw error;
+        }
+
+        const getDocResponseSchema = z.object({
+          name: z.string(),
+          path: z.string(),
+          content: z.string(),
+          html_url: z.string(),
+        });
+
+        // Return the name, path, content, and html_url of the file
+        // Note: GitHub API returns content as base64-encoded string
+        return getDocResponseSchema.parse({
+          name: response.data.name,
+          path: response.data.path,
+          content: response.data.content,
+          html_url: response.data.html_url,
+        });
+      },
+    },
   },
 
   test: {
