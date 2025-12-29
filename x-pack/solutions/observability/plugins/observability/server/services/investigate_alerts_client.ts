@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import {
+  OBSERVABILITY_RULE_TYPE_IDS,
+  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+} from '@kbn/rule-data-utils';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { AlertNotFoundError } from '../common/errors/alert_not_found_error';
@@ -37,6 +40,9 @@ export class InvestigateAlertsClient {
   }
 
   async getAlertsIndices() {
-    return await this.alertsClient.getAuthorizedAlertsIndices(OBSERVABILITY_RULE_TYPE_IDS);
+    return await this.alertsClient.getAuthorizedAlertsIndices([
+      ...OBSERVABILITY_RULE_TYPE_IDS,
+      ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+    ]);
   }
 }
