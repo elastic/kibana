@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 import { MLOverviewCard } from './overview_ml_page';
 import { ML_PAGES } from '../../locator';
 
@@ -23,37 +23,10 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
         layout="horizontal"
         path={ML_PAGES.DATA_VISUALIZER_ESQL}
         title={
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.selectESQLTitle"
-                    defaultMessage="ES|QL"
-                  />
-                </h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label=""
-                aria-label={i18n.translate(
-                  'xpack.ml.datavisualizer.selector.technicalPreviewBetaBadgeLabel',
-                  { defaultMessage: 'Technical Preview' }
-                )}
-                iconType="beaker"
-                size="m"
-                color="hollow"
-                tooltipContent={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
-                    defaultMessage="ES|QL data visualizer is in technical preview."
-                  />
-                }
-                tooltipPosition={'right'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.selector.selectESQLTitle"
+            defaultMessage="ES|QL"
+          />
         }
         description={i18n.translate(
           'xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg',
@@ -110,29 +83,10 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
       layout="horizontal"
       path="/data_drift_index_select"
       title={
-        <>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
-            defaultMessage="Visualize data using data drift"
-          />{' '}
-          <EuiBetaBadge
-            label=""
-            aria-label={i18n.translate(
-              'xpack.ml.datavisualizer.selector.technicalPreviewBetaBadgeLabel',
-              { defaultMessage: 'Technical Preview' }
-            )}
-            iconType="beaker"
-            size="m"
-            color="hollow"
-            tooltipContent={
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.selector.dataDriftTechnicalPreviewBadge.titleMsg"
-                defaultMessage="Data drift visualizer is in technical preview."
-              />
-            }
-            tooltipPosition={'right'}
-          />
-        </>
+        <FormattedMessage
+          id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
+          defaultMessage="Visualize data using data drift"
+        />
       }
       description={i18n.translate('xpack.ml.datavisualizer.selector.dataDriftDescription', {
         defaultMessage:
