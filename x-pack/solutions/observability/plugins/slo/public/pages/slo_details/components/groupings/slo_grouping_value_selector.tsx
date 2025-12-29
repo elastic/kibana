@@ -28,7 +28,7 @@ interface Field {
   value: string;
 }
 
-export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
+export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
   const isAvailable = window.location.pathname.includes(SLOS_BASE_PATH);
   const { search: searchParams } = useLocation();
   const history = useHistory();

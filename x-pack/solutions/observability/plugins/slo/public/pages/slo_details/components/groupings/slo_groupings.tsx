@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { SLOGroupingValueSelector } from './slo_grouping_value_selector';
+import { SloGroupingValueSelector } from './slo_grouping_value_selector';
 
 export function SloGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
   const groupings = Object.entries(slo.groupings ?? {});
@@ -31,7 +31,7 @@ export function SloGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
       </EuiFlexItem>
       {groupings.map(([groupingKey, groupingValue]) => {
         return (
-          <SLOGroupingValueSelector
+          <SloGroupingValueSelector
             key={groupingKey}
             slo={slo}
             groupingKey={groupingKey}
