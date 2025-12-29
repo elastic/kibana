@@ -13,7 +13,7 @@ import {
   PREDEFINED_HUGGING_FACE_DATASETS,
   getDatasetSpecs,
 } from '../src/hf_dataset_loader/datasets/config';
-import { listAllOneChatDatasets } from '../src/hf_dataset_loader/datasets/onechat';
+import { listAllAgentBuilderDatasets } from '../src/hf_dataset_loader/datasets/agent_builder';
 import type { HuggingFaceDatasetSpec } from '../src/hf_dataset_loader/types';
 
 interface Flags {
@@ -36,18 +36,18 @@ async function showAvailableDatasets(accessToken: string, logger: any) {
   );
   output += '\n\n';
 
-  const oneChatDatasets = await listAllOneChatDatasets(accessToken, logger);
-  output += 'OneChat datasets:\n';
-  if (oneChatDatasets.length > 0) {
-    output += oneChatDatasets.map((dataset, index) => `  ${index + 1}. ${dataset}`).join('\n');
+  const agentBuilderDatasets = await listAllAgentBuilderDatasets(accessToken, logger);
+  output += 'AgentBuilder datasets:\n';
+  if (agentBuilderDatasets.length > 0) {
+    output += agentBuilderDatasets.map((dataset, index) => `  ${index + 1}. ${dataset}`).join('\n');
   } else {
     output +=
-      '  (none available - you may need to join Elastic oranization on HuggingFace to access OneChat datasets)';
+      '  (none available - you may need to join Elastic oranization on HuggingFace to access AgentBuilder datasets)';
   }
 
   output += '\n\n';
   output += 'Usage: Use --datasets to specify which datasets to load\n';
-  output += 'Example: --datasets onechat/knowledge-base/wix_knowledge_base';
+  output += 'Example: --datasets agent_builder/knowledge-base/wix_knowledge_base';
 
   logger.info(output);
 }
@@ -114,8 +114,8 @@ run(
         Usage: node --require ./src/setup_node_env/index.js x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts [options]
 
         --datasets          Comma-separated list of HuggingFace dataset names to load.
-                           For OneChat datasets, use format: onechat/<directory>/<dataset_name>
-                           Example: --datasets onechat/knowledge-base/wix_knowledge_base
+                           For AgentBuilder datasets, use format: agent_builder/<directory>/<dataset_name>
+                           Example: --datasets agent_builder/knowledge-base/wix_knowledge_base
         --limit             Number of rows per dataset to load into Elasticsearch
         --clear             Clear the existing indices for the specified datasets before loading
         --kibana-url        Kibana URL to connect to (bypasses auto-discovery when provided)
