@@ -6,16 +6,20 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isConditionBlock } from '@kbn/streamlang';
-import React from 'react';
-import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { CreateStepButton } from '../../../create_step_button';
-import { StepContextMenu } from '../context_menu';
-import { BlockDisableOverlay } from '../block_disable_overlay';
+import { isConditionBlock } from '@kbn/streamlang';
+import { useSelector } from '@xstate5/react';
+import React from 'react';
 import { ConditionDisplay } from '../../../../shared';
+import { CreateStepButton } from '../../../create_step_button';
 import type { StepConfigurationProps } from '../../steps_list';
+import { BlockDisableOverlay } from '../block_disable_overlay';
+import { StepContextMenu } from '../context_menu';
+
+interface WhereBlockSummaryProps extends StepConfigurationProps {
+  onClick?: () => void;
+}
 
 export const WhereBlockSummary = ({
   stepRef,
@@ -25,10 +29,12 @@ export const WhereBlockSummary = ({
   isFirstStepInLevel,
   isLastStepInLevel,
   readOnly = false,
-}: StepConfigurationProps) => {
+  onClick,
+}: WhereBlockSummaryProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
-  const handleTitleClick = () => {
+  const handleTitleClick = (event?: React.MouseEvent) => {
+    event?.stopPropagation();
     stepRef.send({ type: 'step.edit' });
   };
 
@@ -39,6 +45,11 @@ export const WhereBlockSummary = ({
       gutterSize="s"
       css={css`
         position: relative;
+        // Pointer events are disabled in order to "pass-through" hover events
+        // and let the background condition container handle them.
+        // Pointer events are selectively re-enabled on child elements
+        // that require interaction.
+        pointer-events: none;
       `}
       alignItems="center"
     >
@@ -52,6 +63,7 @@ export const WhereBlockSummary = ({
           // Facilitates text truncation
           overflow: hidden;
         `}
+        onClick={onClick}
       >
         <ConditionDisplay
           condition={step.condition}
@@ -68,6 +80,9 @@ export const WhereBlockSummary = ({
               )}
             >
               <EuiButtonEmpty
+                css={css`
+                  pointer-events: all;
+                `}
                 onClick={handleTitleClick}
                 color="text"
                 size="xs"
@@ -92,6 +107,7 @@ export const WhereBlockSummary = ({
           css={css`
             // Facilitates text truncation for the condition summary
             flex-shrink: 0;
+            pointer-events: all;
           `}
         >
           <EuiFlexGroup gutterSize="none">

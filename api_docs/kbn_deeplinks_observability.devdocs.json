@@ -1541,7 +1541,7 @@
         "label": "SloTabId",
         "description": [],
         "signature": [
-          "\"history\" | \"alerts\" | \"overview\" | \"definition\""
+          "\"definition\" | \"history\" | \"alerts\" | \"overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
         "deprecated": false,

@@ -6,8 +6,12 @@
  */
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/onechat-server';
-import { isToolResultId, type ToolResultStore } from '@kbn/onechat-server';
+import {
+  isToolResultId,
+  type ToolAvailabilityContext,
+  type ToolAvailabilityResult,
+  type ToolResultStore,
+} from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import {

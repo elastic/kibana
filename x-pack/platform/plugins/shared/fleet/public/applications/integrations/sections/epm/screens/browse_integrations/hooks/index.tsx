@@ -32,7 +32,7 @@ export function useBrowseIntegrationHook({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     searchTerm,
-    setSearchTerm,
+    setSearchTerm: setSearchTermState,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards: originalFilteredCards,
@@ -45,7 +45,7 @@ export function useBrowseIntegrationHook({
 
   const filteredCards = useMemo(() => {
     const searchResults = searchTerm
-      ? (localSearch?.search(searchTerm) as IntegrationCardItem[]).map(
+      ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
           (match) => match[searchIdField]
         ) ?? []
       : [];
@@ -58,7 +58,7 @@ export function useBrowseIntegrationHook({
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
       setCategory(id as ExtendedIntegrationCategory);
-      setSearchTerm('');
+      setSearchTermState('');
       setSelectedSubCategory(undefined);
       setUrlandPushHistory({
         searchString: '',
@@ -67,7 +67,25 @@ export function useBrowseIntegrationHook({
         onlyAgentless: onlyAgentlessFilter,
       });
     },
-    [setCategory, setSearchTerm, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
+    [
+      setCategory,
+      setSearchTermState,
+      setSelectedSubCategory,
+      setUrlandPushHistory,
+      onlyAgentlessFilter,
+    ]
+  );
+
+  const setSearchTerm = useCallback(
+    (term: string) => {
+      setSearchTermState(term);
+      setUrlandReplaceHistory({
+        searchString: term,
+        categoryId: selectedCategory,
+        subCategoryId: selectedSubCategory || '',
+      });
+    },
+    [setSearchTermState, selectedCategory, selectedSubCategory, setUrlandReplaceHistory]
   );
 
   return {

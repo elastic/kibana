@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType, SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
@@ -17,7 +17,7 @@ import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_build
 import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
 import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
 import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
-import { getToolResultId } from '@kbn/onechat-server';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
