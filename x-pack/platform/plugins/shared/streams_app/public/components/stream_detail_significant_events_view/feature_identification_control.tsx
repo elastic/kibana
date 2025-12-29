@@ -8,14 +8,7 @@
 import type { Feature, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
@@ -39,6 +32,7 @@ export function FeatureIdentificationControl({
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const [features, setFeatures] = useState<Feature[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     getFeatureIdentificationTask,
@@ -72,10 +66,6 @@ export function FeatureIdentificationControl({
     />
   );
 
-  if (loading) {
-    return <EuiLoadingSpinner size="m" />;
-  }
-
   if (error) {
     return (
       <EuiCallOut
@@ -101,10 +91,13 @@ export function FeatureIdentificationControl({
       buttonProps={{
         size: 'm',
         iconType: 'sparkles',
+        isLoading: isLoading || loading,
         isDisabled: disabled,
         onClick: () => {
+          setIsLoading(true);
           scheduleFeatureIdentificationTask(aiFeatures?.genAiConnectors.selectedConnector!).then(
             () => {
+              setIsLoading(false);
               getTask();
             }
           );
@@ -132,22 +125,19 @@ export function FeatureIdentificationControl({
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <ConnectorListButton
-            buttonProps={{
-              size: 'm',
-              iconType: 'sparkles',
-              iconSide: 'right',
-              isDisabled: true,
-              isLoading: true,
-              'data-test-subj': 'feature_identification_identify_features_button',
-              children: i18n.translate(
-                'xpack.streams.streamDetailView.featureIdentificationButtonInProgressLabel',
-                {
-                  defaultMessage: 'Feature identification in progress',
-                }
-              ),
-            }}
-          />
+          <EuiButton
+            iconType="sparkle"
+            iconSide="right"
+            isLoading={true}
+            data-test-subj="feature_identification_identify_features_button"
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.featureIdentificationButtonInProgressLabel',
+              {
+                defaultMessage: 'Feature identification in progress',
+              }
+            )}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
