@@ -82,7 +82,7 @@ export function setBreadcrumbsTitle(
   }
 ) {
   const breadcrumbs: EuiBreadcrumb[] = [];
-  if (isFromLegacyEditor && originatingAppName && redirectToOrigin) {
+  if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {
         redirectToOrigin();
@@ -90,7 +90,7 @@ export function setBreadcrumbsTitle(
       text: originatingAppName,
     });
   }
-  if (!isByValueMode) {
+  if (!isByValueMode && !originatingAppName) {
     breadcrumbs.push({
       href: application.getUrlForApp(VISUALIZE_APP_ID),
       onClick: (e) => {

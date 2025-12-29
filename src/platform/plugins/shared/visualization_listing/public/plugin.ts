@@ -12,6 +12,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationListingPageServices } from './get_table_list';
@@ -19,6 +20,7 @@ import type { VisualizationListingPageServices } from './get_table_list';
 export interface VisualizationListingStartDependencies {
   visualizations: VisualizationsStart;
   contentManagement: ContentManagementPublicStart;
+  embeddable: EmbeddableStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
@@ -56,6 +58,7 @@ export class VisualizationListingPlugin
           core: coreStart,
           visualizations: pluginsStart.visualizations,
           contentManagement: pluginsStart.contentManagement,
+          embeddable: pluginsStart.embeddable,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi,
         };
 

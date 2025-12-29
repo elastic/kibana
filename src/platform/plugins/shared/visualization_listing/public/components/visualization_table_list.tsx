@@ -8,11 +8,13 @@
  */
 
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import { firstValueFrom } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -23,14 +25,16 @@ import {
   type VisualizeUserContent,
 } from '@kbn/visualizations-plugin/public';
 import {
+  VISUALIZE_APP_NAME,
+  SAVED_OBJECTS_LIMIT_SETTING,
+  SAVED_OBJECTS_PER_PAGE_SETTING,
+} from '@kbn/visualizations-common';
+import {
   getCustomColumn,
   getCustomSortingOptions,
   getNoItemsMessage,
   getVisualizationListingTableStyles,
 } from '@kbn/visualization-listing-components';
-
-const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
-const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 interface SavedObjectWithReferences {
   id: string;
@@ -43,6 +47,7 @@ interface VisualizationTableListProps {
   core: CoreStart;
   visualizations: VisualizationsStart;
   contentManagement: ContentManagementPublicStart;
+  embeddable: EmbeddableStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
 }
@@ -51,6 +56,7 @@ export const VisualizationTableList = ({
   core,
   visualizations,
   contentManagement,
+  embeddable,
   savedObjectsTagging,
   parentProps,
 }: VisualizationTableListProps) => {
@@ -85,15 +91,25 @@ export const VisualizationTableList = ({
       }
 
       const { editApp, editUrl } = editor as { editApp?: string; editUrl?: string };
-      if (editApp) {
-        core.application.navigateToApp(editApp, { path: editUrl });
+      const targetApp = editApp ?? VISUALIZE_APP_NAME;
+      const path = editApp ? editUrl : `#${editUrl}`;
+      const currentApp = await firstValueFrom(core.application.currentAppId$);
+
+      // Use state transfer for proper breadcrumb context when embedded in another app
+      if (currentApp && currentApp !== VISUALIZE_APP_NAME) {
+        await embeddable.getStateTransfer().navigateToEditor(targetApp, {
+          path,
+          state: {
+            originatingApp: currentApp,
+            originatingPath: window.location.hash.replace(/^#/, ''),
+          },
+        });
         return;
       }
-      // is there something we can do about breadcrumbs and where we go back to? that if i access viz from dashboard, i should go back to dashboard when i click on the visualization in the list
-      // Navigate to visualize app for editing
-      core.application.navigateToApp('visualize', { path: `#${editUrl}` });
+
+      core.application.navigateToApp(targetApp, { path });
     },
-    [core.application]
+    [core.application, embeddable]
   );
 
   const fetchItems = useCallback(

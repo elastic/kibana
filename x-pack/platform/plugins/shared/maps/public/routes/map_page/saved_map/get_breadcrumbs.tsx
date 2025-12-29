@@ -47,7 +47,7 @@ export function getBreadcrumbs({
     });
   }
 
-  if (!isByValue) {
+  if (!isByValue && !originatingApp) {
     breadcrumbs.push({
       text: APP_NAME,
       onClick: async () => {
