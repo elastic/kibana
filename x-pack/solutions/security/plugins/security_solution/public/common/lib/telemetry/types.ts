@@ -9,7 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type {
   AgentBuilderEventTypes,
   AgentBuilderTelemetryEventsMap,
-} from '@kbn/onechat-common/telemetry';
+} from '@kbn/agent-builder-common/telemetry';
 import type {
   AlertsEventTypes,
   AlertsGroupingTelemetryEventsMap,
@@ -70,7 +70,7 @@ export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
 export * from './events/preview_rule/types';
 export * from './events/notes/types';
-export * from '@kbn/onechat-common/telemetry';
+export * from '@kbn/agent-builder-common/telemetry';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
