@@ -58,7 +58,7 @@ This tool will:
     tags: [],
     handler: async (
       { id, title, description, panels, markdownContent },
-      { logger, request, esClient }
+      { logger, request, esClient, resultStore }
     ) => {
       try {
         const coreContext = {
@@ -76,7 +76,7 @@ This tool will:
 
         const markdownPanel = buildMarkdownPanel(markdownContent);
         const yOffset = markdownPanel.grid.h;
-        const normalizedPanels = normalizePanels(panels, yOffset);
+        const normalizedPanels = normalizePanels(panels, yOffset, resultStore);
         const updatedPanels = [markdownPanel, ...normalizedPanels];
 
         // Merge existing data with provided updates. Dashboard update is a full replace, so we

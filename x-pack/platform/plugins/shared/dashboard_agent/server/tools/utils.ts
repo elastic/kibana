@@ -7,6 +7,8 @@
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/onechat-server';
+import { isToolResultId, type ToolResultStore } from '@kbn/onechat-server';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import {
   LensConfigBuilder,
@@ -84,7 +86,8 @@ export const filterOutMarkdownPanels = (
  */
 export const normalizePanels = (
   panels: unknown[] | undefined,
-  yOffset: number = 0
+  yOffset: number = 0,
+  resultStore?: ToolResultStore
 ): DashboardPanel[] => {
   const panelConfigs = panels ?? [];
   const dashboardPanels: DashboardPanel[] = [];
@@ -92,7 +95,7 @@ export const normalizePanels = (
   let currentY = yOffset;
 
   for (const panel of panelConfigs) {
-    const config = panel as LensApiSchemaType;
+    const config = resolveLensConfig(panel, resultStore);
     const w = getPanelWidth(config.type);
 
     // Check if panel fits in current row, if not move to next row
@@ -109,6 +112,37 @@ export const normalizePanels = (
   }
 
   return dashboardPanels;
+};
+
+const resolveLensConfig = (panel: unknown, resultStore?: ToolResultStore): LensApiSchemaType => {
+  if (typeof panel === 'string') {
+    if (!isToolResultId(panel)) {
+      throw new Error(
+        `Invalid panel reference "${panel}". Expected a tool_result_id from a previous visualization tool call.`
+      );
+    }
+    if (!resultStore || !resultStore.has(panel)) {
+      throw new Error(`Panel reference "${panel}" was not found in the tool result store.`);
+    }
+
+    const result = resultStore.get(panel);
+    if (result.type !== ToolResultType.visualization) {
+      throw new Error(
+        `Provided tool_result_id "${panel}" is not a visualization result (got "${result.type}").`
+      );
+    }
+
+    const visualization = result.data.visualization;
+    if (!visualization || typeof visualization !== 'object') {
+      throw new Error(
+        `Visualization result "${panel}" does not contain a valid visualization config.`
+      );
+    }
+
+    return visualization as LensApiSchemaType;
+  }
+
+  return panel as LensApiSchemaType;
 };
 
 const buildLensPanelFromApi = (
