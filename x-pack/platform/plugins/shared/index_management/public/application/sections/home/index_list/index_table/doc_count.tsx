@@ -21,10 +21,6 @@ export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
   const [countError, setCountError] = React.useState<boolean>(false);
 
   useEffect(() => {
-    // Avoid duplicate requests
-    if (count !== undefined || countError) {
-      return;
-    }
     httpSetup
       .get<{ count: number }>(
         `${INTERNAL_API_BASE_PATH}/index_doc_count/${encodeURIComponent(indexName)}`
@@ -35,7 +31,7 @@ export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
       .catch(() => {
         setCountError(true);
       });
-  });
+  }, [httpSetup, indexName]);
 
   if (countError) {
     return (
