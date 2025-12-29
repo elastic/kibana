@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureType, StreamType } from '@kbn/streams-schema';
+import type { FeatureType } from '@kbn/streams-schema';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 

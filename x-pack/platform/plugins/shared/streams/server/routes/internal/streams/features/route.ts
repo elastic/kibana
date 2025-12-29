@@ -22,6 +22,7 @@ import type { Observable } from 'rxjs';
 import { catchError, from, map } from 'rxjs';
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { conflict } from '@hapi/boom';
+import type { IdentifyFeaturesResult } from '../../../../lib/streams/feature/feature_type_registry';
 import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
 import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
 import { isStale } from '../../../../lib/tasks/is_stale';
@@ -337,6 +338,7 @@ export const identifyFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<FeatureIdentificationTaskResult> => {
     const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
       {
@@ -356,6 +358,12 @@ export const identifyFeaturesRoute = createServerRoute({
     if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
+
+    const connectorId = await resolveConnectorId({
+      connectorId: connectorIdParam,
+      uiSettingsClient,
+      logger,
+    });
 
     if (params.query.schedule) {
       try {
