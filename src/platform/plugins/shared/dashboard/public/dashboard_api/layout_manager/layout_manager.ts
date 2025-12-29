@@ -51,9 +51,6 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/const
 import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
-import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
-import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { coreServices, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
@@ -68,6 +65,11 @@ import {
   type DashboardPinnableControl,
 } from './types';
 import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
+import {
+  getPanelSettings,
+  placeClonePanel,
+  runPanelPlacementStrategy,
+} from '../../panel_placement';
 
 export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
