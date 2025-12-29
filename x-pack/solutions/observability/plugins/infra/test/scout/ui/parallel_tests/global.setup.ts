@@ -8,6 +8,9 @@
 import { globalSetupHook } from '@kbn/scout-oblt';
 import { generateHostData } from '../fixtures/synthtrace/host_data';
 import {
+  CONTAINER_COUNT,
+  DATE_WITH_DOCKER_DATA_FROM,
+  DATE_WITH_DOCKER_DATA_TO,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
   DATE_WITH_HOSTS_WITHOUT_DATA_FROM,
@@ -26,6 +29,7 @@ import { generateHostsWithK8sNodeData } from '../fixtures/synthtrace/hosts_with_
 import { generatePodsData } from '../fixtures/synthtrace/pods_data';
 import { generateLogsDataForHosts } from '../fixtures/synthtrace/logs_data_for_hosts';
 import { generateAddServicesToExistingHost } from '../fixtures/synthtrace/add_services_to_existing_hosts';
+import { generateDockerContainersData } from '../fixtures/synthtrace/docker_containers_data';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -57,6 +61,13 @@ globalSetupHook(
           from: DATE_WITH_POD_DATA_FROM,
           to: DATE_WITH_POD_DATA_TO,
           count: POD_COUNT,
+        })
+      ),
+      infraSynthtraceEsClient.index(
+        generateDockerContainersData({
+          from: DATE_WITH_DOCKER_DATA_FROM,
+          to: DATE_WITH_DOCKER_DATA_TO,
+          count: CONTAINER_COUNT,
         })
       ),
       logsSynthtraceEsClient.index(

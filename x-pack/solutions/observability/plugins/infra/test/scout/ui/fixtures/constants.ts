@@ -73,7 +73,7 @@ export const DATE_WITH_K8S_HOSTS_DATA = moment()
   .subtract(1, 'second')
   .format('MM/DD/YYYY h:mm:ss A');
 
-export const K8S_POD_NAME = 'pod-1';
+export const K8S_POD_NAME = 'demo-stack-kubernetes-pod-1';
 export const K8S_HOST_NAME = 'demo-stack-kubernetes-01';
 
 // cpuValue is sent to the generator to simulate different 'system.cpu.total.norm.pct' metric
@@ -85,10 +85,25 @@ export const K8S_HOSTS = [
   },
 ];
 
-export const DATE_WITH_POD_DATA_FROM = moment().subtract(44, 'minutes').toISOString();
-export const DATE_WITH_POD_DATA_TO = moment().subtract(34, 'minutes').toISOString();
-export const DATE_WITH_POD_DATA = moment()
+export const DATE_WITH_DOCKER_DATA_FROM = moment().subtract(44, 'minutes').toISOString();
+export const DATE_WITH_DOCKER_DATA_TO = moment().subtract(34, 'minutes').toISOString();
+export const DATE_WITH_DOCKER_DATA = moment()
   .subtract(34, 'minutes')
   .subtract(1, 'second')
   .format('MM/DD/YYYY h:mm:ss A');
+export const CONTAINER_COUNT = 1;
+export const CONTAINER_NAMES = Array.from(
+  { length: CONTAINER_COUNT },
+  (_, i) => `container-container-id-${i}`
+);
+
+export const DATE_WITH_POD_DATA_FROM = moment().subtract(94, 'minutes').toISOString();
+export const DATE_WITH_POD_DATA_TO = moment().subtract(84, 'minutes').toISOString();
+export const DATE_WITH_POD_DATA = moment()
+  .subtract(84, 'minutes')
+  .subtract(1, 'second')
+  .format('MM/DD/YYYY h:mm:ss A');
 export const POD_COUNT = 1;
+export const POD_NAMES = Array.from({ length: POD_COUNT }, (_, i) => `pod-${i}`);
+
+export const DATE_WITHOUT_DATA = moment().add(20, 'minutes').format('MM/DD/YYYY h:mm:ss A');

@@ -7,6 +7,14 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
+import {
+  CONTAINER_NAMES,
+  DATE_WITH_DOCKER_DATA,
+  DATE_WITH_POD_DATA,
+  DATE_WITHOUT_DATA,
+  HOSTS,
+  POD_NAMES,
+} from '../../fixtures/constants';
 
 test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
@@ -14,56 +22,104 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     await inventoryPage.goToPage();
   });
 
-  test('Render expected content', async ({ page }) => {
+  test('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
     await test.step('set the correct browser page title', async () => {
       const title = await page.title();
       expect(title).toBe('Infrastructure inventory - Infrastructure - Observability - Elastic');
     });
 
     await test.step('display inventory survey link', async () => {
-      await expect(page.getByTestId('infraInventoryFeedbackLink')).toBeVisible();
+      await expect(inventoryPage.feedbackLink).toBeVisible();
     });
 
     await test.step('display waffle map', async () => {
-      await expect(page.getByTestId('waffleMap')).toBeVisible();
+      await expect(inventoryPage.mapViewButton).toHaveAttribute('aria-pressed', 'true');
+      await expect(inventoryPage.waffleMap).toBeVisible();
     });
 
     await test.step('open and display timeline', async () => {
-      const toggleTimelineButton = page.getByTestId('toggleTimelineButton');
-      await expect(toggleTimelineButton).toBeVisible();
-      await toggleTimelineButton.click();
-      await expect(page.getByTestId('timelineContainerOpen')).toBeVisible();
+      await inventoryPage.toggleTimeline();
+      await expect(inventoryPage.timelineContainerOpen).toBeVisible();
     });
 
     await test.step('switch to table view and display inventory table', async () => {
-      const tableViewButton = page.getByRole('button', { name: 'Table view' });
-      await expect(tableViewButton).toBeVisible();
-      await tableViewButton.click();
-      await expect(page.getByTestId('infraNodesOverviewTable')).toBeVisible();
+      await inventoryPage.switchToTableView();
+      await expect(inventoryPage.tableViewButton).toHaveAttribute('aria-pressed', 'true');
+      await expect(inventoryPage.nodesOverviewTable).toBeVisible();
     });
   });
 
-  test('Render and dismiss k8s tour', async ({ page }) => {
+  test('Render and dismiss k8s tour', async ({ pageObjects: { inventoryPage } }) => {
     await test.step('display k8s tour with proper message', async () => {
-      const tourText = page.getByTestId('infra-kubernetesTour-text');
-      await expect(tourText).toBeVisible();
-      await expect(tourText).toHaveText(
+      await expect(inventoryPage.k8sTourText).toBeVisible();
+      await expect(inventoryPage.k8sTourText).toHaveText(
         'Click here to see your infrastructure in different ways, including Kubernetes pods.'
       );
     });
 
     await test.step('dismiss k8s tour', async () => {
-      const dismissButton = page.getByTestId('infra-kubernetesTour-dismiss');
-      await expect(dismissButton).toBeVisible();
-      await dismissButton.click();
-      await expect(page.getByTestId('infra-kubernetesTour-text')).toBeHidden();
+      await inventoryPage.dismissK8sTour();
+      await expect(inventoryPage.k8sTourText).toBeHidden();
     });
 
     await test.step('reload page and verify tour remains dismissed', async () => {
-      await page.reload();
-      await page.getByTestId('infraMetricsPage').waitFor();
-      await page.getByTestId('infraNodesOverviewLoadingPanel').waitFor({ state: 'hidden' });
-      await expect(page.getByTestId('infra-kubernetesTour-text')).toBeHidden();
+      await inventoryPage.reload();
+      await expect(inventoryPage.k8sTourText).toBeHidden();
+    });
+  });
+
+  test('Render empty data prompt for dates with no data', async ({
+    pageObjects: { inventoryPage },
+  }) => {
+    await test.step('go to a date with no data', async () => {
+      await inventoryPage.goToTime(DATE_WITHOUT_DATA);
+      await expect(inventoryPage.datePickerInput).toHaveValue(DATE_WITHOUT_DATA);
+    });
+
+    await test.step('map view displays empty data prompt', async () => {
+      await expect(inventoryPage.mapViewButton).toHaveAttribute('aria-pressed', 'true');
+      await expect(inventoryPage.noDataPrompt).toBeVisible();
+    });
+
+    await test.step('switch to table view and display empty data prompt', async () => {
+      await inventoryPage.switchToTableView();
+      await expect(inventoryPage.tableViewButton).toHaveAttribute('aria-pressed', 'true');
+      await expect(inventoryPage.noDataPrompt).toBeVisible();
+    });
+  });
+
+  test('Inventory switcher changes node types', async ({ pageObjects: { inventoryPage } }) => {
+    await test.step('show hosts by default', async () => {
+      await expect(inventoryPage.inventorySwitcherButton).toContainText('Hosts');
+      const nodeValues = await inventoryPage.getWaffleNodes();
+      expect(nodeValues.length).toBeGreaterThan(0);
+      const nodeName = await nodeValues[0].name.textContent();
+      expect(nodeName).toBeDefined();
+      expect(HOSTS.map((h) => h.hostName)).toContain(nodeName!.trim());
+    });
+
+    await test.step('switch to k8s pods', async () => {
+      await inventoryPage.goToTime(DATE_WITH_POD_DATA);
+      await inventoryPage.goToPods();
+      await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+      const nodeValues = await inventoryPage.getWaffleNodes();
+      expect(nodeValues.length).toBeGreaterThan(0);
+      const nodeName = await nodeValues[0].name.textContent();
+      expect(nodeName).toBeDefined();
+      expect(POD_NAMES).toContain(nodeName!.trim());
+
+      await expect(inventoryPage.k8sFeedbackLink).toBeVisible();
+    });
+
+    await test.step('switch to containers', async () => {
+      await inventoryPage.goToTime(DATE_WITH_DOCKER_DATA);
+      await inventoryPage.goToContainers();
+      await expect(inventoryPage.inventorySwitcherButton).toContainText('Docker Containers');
+      const nodeValues = await inventoryPage.getWaffleNodes();
+      expect(nodeValues.length).toBeGreaterThan(0);
+      const nodeName = await nodeValues[0].name.textContent();
+      expect(nodeName).toBeDefined();
+      expect(CONTAINER_NAMES).toContain(nodeName!.trim());
     });
   });
 });
