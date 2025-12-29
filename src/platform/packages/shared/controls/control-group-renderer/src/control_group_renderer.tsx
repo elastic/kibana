@@ -30,6 +30,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 import type { ActionExecutionMeta, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import { ACTION_CREATE_CONTROL } from '@kbn/controls-constants';
 import type {
   ControlGroupCreationOptions,
   ControlGroupRendererApi,
@@ -185,7 +186,7 @@ export const ControlGroupRenderer = ({
     const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] = async (
       options
     ) => {
-      const action = await uiActions.getAction('createControl');
+      const action = await uiActions.getAction(ACTION_CREATE_CONTROL);
       // get up to date control state transform
       action.execute({
         embeddable: {

@@ -12,9 +12,8 @@ import { apiCanPinPanel } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { ACTION_CREATE_TIME_SLIDER, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { map } from 'rxjs';
-import { ACTION_CREATE_TIME_SLIDER } from './constants';
 
 import { apiPublishesControlsLayout } from './types';
 

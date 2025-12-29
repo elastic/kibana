@@ -10,12 +10,13 @@
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ACTION_CREATE_CONTROL } from '@kbn/controls-constants';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 import type { DashboardApi } from '../dashboard_api/types';
 
 export async function executeCreateControlPanelAction(dashboardApi: DashboardApi) {
   try {
-    const createControlPanelAction = await uiActionsService.getAction('createControl');
+    const createControlPanelAction = await uiActionsService.getAction(ACTION_CREATE_CONTROL);
     createControlPanelAction.execute({
       embeddable: dashboardApi,
       trigger: addPanelMenuTrigger,

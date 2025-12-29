@@ -14,7 +14,6 @@ import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-// import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';

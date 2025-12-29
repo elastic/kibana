@@ -28,3 +28,9 @@ export {
   TIME_SLIDER_CONTROL,
 } from './src/control_constants';
 export { DEFAULT_SEARCH_TECHNIQUE, OPTIONS_LIST_DEFAULT_SORT } from './src/options_list_constants';
+
+export {
+  ACTION_CREATE_CONTROL,
+  ACTION_CREATE_ESQL_CONTROL,
+  ACTION_CREATE_TIME_SLIDER,
+} from './src/control_action_constants';

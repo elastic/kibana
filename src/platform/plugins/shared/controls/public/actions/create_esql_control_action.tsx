@@ -19,7 +19,8 @@ import {
   EsqlControlType,
   apiPublishesESQLVariables,
 } from '@kbn/esql-types';
-import { ACTION_CREATE_ESQL_CONTROL, ADD_PANEL_CONTROL_GROUP } from './constants';
+import { ACTION_CREATE_ESQL_CONTROL } from '@kbn/controls-constants';
+import { ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
 export const createESQLControlAction = (): ActionDefinition<

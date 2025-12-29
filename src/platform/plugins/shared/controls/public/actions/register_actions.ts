@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTROL_HOVER_TRIGGER_ID, CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
+import {
+  ACTION_CREATE_CONTROL,
+  ACTION_CREATE_ESQL_CONTROL,
+  CONTROL_HOVER_TRIGGER_ID,
+  CONTROL_MENU_TRIGGER,
+} from '@kbn/controls-constants';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-plugin/public';
 import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_CLEAR_CONTROL,
-  ACTION_CREATE_CONTROL,
-  ACTION_CREATE_ESQL_CONTROL,
   ACTION_CREATE_TIME_SLIDER,
   ACTION_EDIT_CONTROL_DISPLAY_SETTINGS,
   ACTION_PIN_CONTROL,

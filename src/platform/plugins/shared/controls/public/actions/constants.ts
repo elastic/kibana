@@ -10,9 +10,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ACTION_CLEAR_CONTROL = 'clearControl';
-export const ACTION_CREATE_CONTROL = 'createControl';
-export const ACTION_CREATE_ESQL_CONTROL = 'createESQLControl';
-export const ACTION_CREATE_TIME_SLIDER = 'createTimeSlider';
 export const ACTION_PIN_CONTROL = 'pinControl';
 export const ACTION_EDIT_CONTROL_DISPLAY_SETTINGS = 'editControlDisplaySettings';
 

@@ -10,12 +10,13 @@
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ACTION_CREATE_TIME_SLIDER } from '@kbn/controls-constants';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 import type { DashboardApi } from '../dashboard_api/types';
 
 export async function executeCreateTimeSliderControlPanelAction(dashboardApi: DashboardApi) {
   try {
-    const createControlPanelAction = await uiActionsService.getAction('createTimeSlider');
+    const createControlPanelAction = await uiActionsService.getAction(ACTION_CREATE_TIME_SLIDER);
     createControlPanelAction.execute({
       embeddable: dashboardApi,
       trigger: addPanelMenuTrigger,
@@ -33,7 +34,7 @@ export async function isTimeSliderControlCreationCompatible(
   dashboardApi: DashboardApi
 ): Promise<boolean> {
   try {
-    const createControlPanelAction = await uiActionsService.getAction('createTimeSlider');
+    const createControlPanelAction = await uiActionsService.getAction(ACTION_CREATE_TIME_SLIDER);
     return await createControlPanelAction.isCompatible({
       embeddable: dashboardApi,
       trigger: addPanelMenuTrigger,
