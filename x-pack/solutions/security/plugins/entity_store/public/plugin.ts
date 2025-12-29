@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { AppPluginSetupDependencies } from './types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+// import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 export class EntityStorePlugin implements Plugin {
   public setup(core: CoreSetup, deps: AppPluginSetupDependencies) {
-    // Register an application into the side navigation menu
-    core.application.register({
-      id: PLUGIN_ID,
-      title: PLUGIN_NAME,
-      visibleIn: [],
-      async mount(params: AppMountParameters) {
-        // Load application bundle
-        const { renderApp } = await import('./application');
-        // Get start services as specified in kibana.json
-        const [coreStart] = await core.getStartServices();
-        // Render the application
-        return renderApp(coreStart, params);
-      },
-    });
+    // DON'T REGISTER APPLICATION ON THIS STAGE, WILL BE DONE LATER ON DEVELOPMENT STAGE
+    //
+    // core.application.register({
+    //   id: PLUGIN_ID,
+    //   title: PLUGIN_NAME,
+    //   visibleIn: [],
+    //   async mount(params: AppMountParameters) {
+    //     // Load application bundle
+    //     const { renderApp } = await import('./application');
+    //     // Get start services as specified in kibana.json
+    //     const [coreStart] = await core.getStartServices();
+    //     // Render the application
+    //     return renderApp(coreStart, params);
+    //   },
+    // });
   }
 
   public start(core: CoreStart) {}
