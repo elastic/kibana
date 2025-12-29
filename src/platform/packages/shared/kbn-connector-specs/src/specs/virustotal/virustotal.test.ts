@@ -130,6 +130,10 @@ describe('VirusTotalConnector', () => {
         id: null,
         attributes: null,
         stats: null,
+        type: null,
+        links: null,
+        reputation: null,
+        country: null,
         error: {
           status: 404,
           message: 'Hash not found in VirusTotal database',
@@ -215,9 +219,13 @@ describe('VirusTotalConnector', () => {
         id: null,
         attributes: null,
         stats: null,
+        type: null,
+        links: null,
+        reputation: null,
+        country: null,
         error: {
           status: 429,
-          message: 'API request failed',
+          message: 'VirusTotal API request failed',
           details: {
             code: 'QuotaExceededError',
             message: 'You have exceeded your API quota',

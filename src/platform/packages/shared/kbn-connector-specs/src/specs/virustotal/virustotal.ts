@@ -19,9 +19,83 @@
  * MVP implementation focusing on core threat intelligence actions.
  */
 
-import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+
+/**
+ * Common error handling for VirusTotal API responses
+ */
+interface AxiosError {
+  response?: {
+    status?: number;
+    data?: {
+      error?: unknown;
+    };
+  };
+}
+
+interface ErrorHandlerOptions {
+  failOnError?: boolean;
+  notFoundMessage: string;
+  genericMessage: string;
+}
+
+interface ErrorResult {
+  id: null;
+  attributes?: null;
+  status?: null;
+  stats?: null;
+  type?: null;
+  links?: null;
+  reputation?: null;
+  country?: null;
+  error: {
+    status: number | undefined;
+    message: string;
+    details: unknown;
+  };
+}
+
+function handleVirusTotalError(error: unknown, options: ErrorHandlerOptions): ErrorResult | never {
+  // Only handle axios errors with response
+  if (
+    error &&
+    typeof error === 'object' &&
+    'response' in error &&
+    error.response &&
+    typeof error.response === 'object'
+  ) {
+    const axiosError = error as AxiosError;
+    const response = axiosError.response;
+    if (!response) {
+      throw error;
+    }
+    const status = response.status;
+    const isNotFound = status === 404;
+
+    // If failOnError is true, throw descriptive error
+    if (options.failOnError) {
+      const errorMessage = isNotFound
+        ? `${options.notFoundMessage} (HTTP ${status})`
+        : `${options.genericMessage} (HTTP ${status})`;
+      throw new Error(errorMessage);
+    }
+
+    // Return error information instead of throwing
+    return {
+      id: null,
+      error: {
+        status,
+        message: isNotFound ? options.notFoundMessage : options.genericMessage,
+        details: response.data?.error,
+      },
+    };
+  }
+
+  // For non-axios errors, always throw
+  throw error;
+}
 
 export const VirusTotalConnector: ConnectorSpec = {
   metadata: {
@@ -69,40 +143,11 @@ export const VirusTotalConnector: ConnectorSpec = {
             stats: response.data.data.attributes.last_analysis_stats,
           };
         } catch (error: unknown) {
-          // Handle axios errors with response
-          if (
-            error &&
-            typeof error === 'object' &&
-            'response' in error &&
-            error.response &&
-            typeof error.response === 'object'
-          ) {
-            const response = error.response as { status?: number; data?: { error?: unknown } };
-            // If failOnError is true, throw descriptive error
-            if (typedInput.failOnError) {
-              const errorMessage =
-                response.status === 404
-                  ? `Hash not found in VirusTotal database (HTTP ${response.status})`
-                  : `VirusTotal API request failed (HTTP ${response.status})`;
-              throw new Error(errorMessage);
-            }
-            // Return error information instead of throwing
-            return {
-              id: null,
-              attributes: null,
-              stats: null,
-              error: {
-                status: response.status,
-                message:
-                  response.status === 404
-                    ? 'Hash not found in VirusTotal database'
-                    : 'API request failed',
-                details: response.data?.error,
-              },
-            };
-          }
-          // For non-axios errors, always throw
-          throw error;
+          return handleVirusTotalError(error, {
+            failOnError: typedInput.failOnError,
+            notFoundMessage: 'Hash not found in VirusTotal database',
+            genericMessage: 'VirusTotal API request failed',
+          });
         }
       },
     },
@@ -141,40 +186,11 @@ export const VirusTotalConnector: ConnectorSpec = {
             stats: analysisResponse.data.data.attributes.stats,
           };
         } catch (error: unknown) {
-          // Handle axios errors with response
-          if (
-            error &&
-            typeof error === 'object' &&
-            'response' in error &&
-            error.response &&
-            typeof error.response === 'object'
-          ) {
-            const response = error.response as { status?: number; data?: { error?: unknown } };
-            // If failOnError is true, throw descriptive error
-            if (typedInput.failOnError) {
-              const errorMessage =
-                response.status === 404
-                  ? `URL not found in VirusTotal database (HTTP ${response.status})`
-                  : `VirusTotal API request failed (HTTP ${response.status})`;
-              throw new Error(errorMessage);
-            }
-            // Return error information instead of throwing
-            return {
-              id: null,
-              status: null,
-              stats: null,
-              error: {
-                status: response.status,
-                message:
-                  response.status === 404
-                    ? 'URL not found in VirusTotal database'
-                    : 'API request failed',
-                details: response.data?.error,
-              },
-            };
-          }
-          // For non-axios errors, always throw
-          throw error;
+          return handleVirusTotalError(error, {
+            failOnError: typedInput.failOnError,
+            notFoundMessage: 'URL not found in VirusTotal database',
+            genericMessage: 'VirusTotal API request failed',
+          });
         }
       },
     },
@@ -209,34 +225,11 @@ export const VirusTotalConnector: ConnectorSpec = {
             links: response.data.data.links,
           };
         } catch (error: unknown) {
-          // Handle axios errors with response
-          if (
-            error &&
-            typeof error === 'object' &&
-            'response' in error &&
-            error.response &&
-            typeof error.response === 'object'
-          ) {
-            const response = error.response as { status?: number; data?: { error?: unknown } };
-            // If failOnError is true, throw descriptive error
-            if (typedInput.failOnError) {
-              const errorMessage = `VirusTotal file submission failed (HTTP ${response.status})`;
-              throw new Error(errorMessage);
-            }
-            // Return error information instead of throwing
-            return {
-              id: null,
-              type: null,
-              links: null,
-              error: {
-                status: response.status,
-                message: 'File submission failed',
-                details: response.data?.error,
-              },
-            };
-          }
-          // For non-axios errors, always throw
-          throw error;
+          return handleVirusTotalError(error, {
+            failOnError: typedInput.failOnError,
+            notFoundMessage: 'File submission failed',
+            genericMessage: 'VirusTotal file submission failed',
+          });
         }
       },
     },
@@ -266,41 +259,11 @@ export const VirusTotalConnector: ConnectorSpec = {
             country: response.data.data.attributes.country,
           };
         } catch (error: unknown) {
-          // Handle axios errors with response
-          if (
-            error &&
-            typeof error === 'object' &&
-            'response' in error &&
-            error.response &&
-            typeof error.response === 'object'
-          ) {
-            const response = error.response as { status?: number; data?: { error?: unknown } };
-            // If failOnError is true, throw descriptive error
-            if (typedInput.failOnError) {
-              const errorMessage =
-                response.status === 404
-                  ? `IP address not found in VirusTotal database (HTTP ${response.status})`
-                  : `VirusTotal API request failed (HTTP ${response.status})`;
-              throw new Error(errorMessage);
-            }
-            // Return error information instead of throwing
-            return {
-              id: null,
-              attributes: null,
-              reputation: null,
-              country: null,
-              error: {
-                status: response.status,
-                message:
-                  response.status === 404
-                    ? 'IP address not found in VirusTotal database'
-                    : 'API request failed',
-                details: response.data?.error,
-              },
-            };
-          }
-          // For non-axios errors, always throw
-          throw error;
+          return handleVirusTotalError(error, {
+            failOnError: typedInput.failOnError,
+            notFoundMessage: 'IP address not found in VirusTotal database',
+            genericMessage: 'VirusTotal API request failed',
+          });
         }
       },
     },
