@@ -311,9 +311,12 @@ export const chatCompleteSuite = (
         expect(tokenEvent.tokens.prompt).to.be.greaterThan(0);
         expect(tokenEvent.tokens.completion).to.be.greaterThan(0);
         // can include thinking token depending on the model
-        expect(tokenEvent.tokens.total).to.greaterThan(
-          tokenEvent.tokens.prompt + tokenEvent.tokens.completion - 1
-        );
+        const totalIsPromptAndCompletion =
+          tokenEvent.tokens.total === tokenEvent.tokens.prompt + tokenEvent.tokens.completion;
+        const totalIsPromptCompletionAndThinking =
+          tokenEvent.tokens.total ===
+          tokenEvent.tokens.prompt + tokenEvent.tokens.completion + tokenEvent.tokens.thinking;
+        expect(totalIsPromptAndCompletion || totalIsPromptCompletionAndThinking).to.be(true);
         // Model field is optional and may be present if provided by the connector
         if (tokenEvent.model !== undefined) {
           expect(tokenEvent.model).to.be.a('string');
