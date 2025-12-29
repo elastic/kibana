@@ -7,6 +7,7 @@
 
 import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import type { StreamsAppRouter, StreamsAppRoutes } from '../routes/config';
 import { streamsAppRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
@@ -24,13 +25,11 @@ export interface StatefulStreamsAppRouter extends StreamsAppRouter {
 
 export function useStreamsAppRouter(): StatefulStreamsAppRouter {
   const {
-    core: {
-      http,
-      application: { navigateToApp },
-    },
+    core: { http },
   } = useKibana();
+  const history = useHistory();
 
-  const link = (...args: any[]) => {
+  const getRouterPath = (...args: any[]) => {
     // @ts-expect-error
     return streamsAppRouter.link(...args);
   };
@@ -38,18 +37,21 @@ export function useStreamsAppRouter(): StatefulStreamsAppRouter {
   return useMemo<StatefulStreamsAppRouter>(
     () => ({
       ...streamsAppRouter,
+      // Use history.push/replace to preserve search params (_g) during within-app navigation
       push: (...args) => {
-        const next = link(...args);
-        navigateToApp('streams', { path: next, replace: false });
+        const path = getRouterPath(...args);
+        history.push({ pathname: path, search: history.location.search });
       },
       replace: (path, ...args) => {
-        const next = link(path, ...args);
-        navigateToApp('streams', { path: next, replace: true });
+        const nextPath = getRouterPath(path, ...args);
+        history.replace({ pathname: nextPath, search: history.location.search });
       },
       link: (path, ...args) => {
-        return http.basePath.prepend('/app/streams' + link(path, ...args));
+        const routerPath = getRouterPath(path, ...args);
+        const search = history.location.search || '';
+        return http.basePath.prepend(`/app/streams${routerPath}${search}`);
       },
     }),
-    [navigateToApp, http.basePath]
+    [history, http.basePath]
   );
 }
