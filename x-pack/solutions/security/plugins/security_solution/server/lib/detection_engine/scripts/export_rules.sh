@@ -22,5 +22,6 @@ EXCLUDE_DETAILS=${1:-false}
 
 curl -s -k \
   -H 'kbn-xsrf: 123' \
+  -H 'elastic-api-version: 2023-10-31' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_export?exclude_export_details=${EXCLUDE_DETAILS}

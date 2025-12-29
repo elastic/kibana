@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { FormBasedLayer, TypedLensSerializedState } from '@kbn/lens-common';
+import { useIsDevMode } from '@kbn/react-env';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -304,10 +305,11 @@ export function LensEditConfigurationFlyout({
 
   const isSingleLayerVisualization = layerIds.length === 1;
 
+  const isDevMode = useIsDevMode();
+
   const showConvertToEsqlButton = useMemo(() => {
-    const isDevMode = process.env.NODE_ENV === 'development';
     return isDevMode && !textBasedMode && isSingleLayerVisualization;
-  }, [textBasedMode, isSingleLayerVisualization]);
+  }, [isDevMode, textBasedMode, isSingleLayerVisualization]);
 
   // The button is disabled when the visualization cannot be converted to ES|QL
   const {

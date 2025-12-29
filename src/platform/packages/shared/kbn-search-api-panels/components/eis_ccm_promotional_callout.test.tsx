@@ -28,7 +28,7 @@ jest.mock('../hooks/use_kibana');
 
 const mockUiSettingsGet = jest.fn();
 const mockNavigateToApp = jest.fn();
-const mockOnDismissTour = jest.fn();
+const mockOnDismissPromo = jest.fn();
 
 const mockUseKibana = (overrides?: Partial<any>) => {
   (useKibana as jest.Mock).mockReturnValue({
@@ -74,7 +74,7 @@ describe('EisCloudConnectPromoCallout', () => {
     mockUseKibana();
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     });
   });
 
@@ -95,13 +95,13 @@ describe('EisCloudConnectPromoCallout', () => {
     expect(screen.getByText(EIS_CLOUD_CONNECT_PROMO_TOUR_CTA)).toBeInTheDocument();
   });
 
-  it('calls onDismissTour when dismiss button is clicked', () => {
+  it('calls onDismissPromo when dismiss button is clicked', () => {
     renderComponent();
 
     const dismissButton = screen.getByTestId('euiDismissCalloutButton');
     fireEvent.click(dismissButton);
 
-    expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
   });
 
   it('calls navigateToApp when CTA button is clicked', () => {
@@ -116,7 +116,7 @@ describe('EisCloudConnectPromoCallout', () => {
   it('does not render when promo is not visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     });
 
     renderComponent();
