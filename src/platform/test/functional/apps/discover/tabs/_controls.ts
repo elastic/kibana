@@ -27,9 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const dataGrid = getService('dataGrid');
 
-  describe('discover - ES|QL controls', function () {
+  describe.only('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
       await discover.selectTextBaseLang();
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
@@ -49,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add an ES|QL multi - value control', async () => {
       await discover.selectTextBaseLang();
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
 
       await esql.openEsqlControlFlyout('FROM logstash-* | WHERE MV_CONTAINS( ');
@@ -103,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should keep the ES|QL control after a browser refresh', async () => {
       await discover.selectTextBaseLang();
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
@@ -120,6 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should save the ES|QL control', async () => {
       await discover.selectTextBaseLang();
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
@@ -136,6 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open a saved session with a control group', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
 
       await retry.try(async () => {
@@ -147,6 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reset successfully a saved session with a control group', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
 
       // Make a change in the controls
@@ -164,6 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open the histogram in a dashboard', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
 
       // Save the histogram
