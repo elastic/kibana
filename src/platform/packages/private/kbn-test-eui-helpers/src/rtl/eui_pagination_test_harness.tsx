@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 
 type Root = Document | HTMLElement;
 
@@ -23,16 +23,29 @@ export class EuiPaginationTestHarness {
     this.#root = root;
   }
 
+  #queries() {
+    return this.#root instanceof HTMLElement ? within(this.#root) : screen;
+  }
+
   public get buttons(): HTMLButtonElement[] {
-    return Array.from(this.#root.querySelectorAll<HTMLButtonElement>('button.euiPaginationButton'));
+    return this.#queries().queryAllByTestId(/^pagination-button-/) as HTMLButtonElement[];
   }
 
   public getButtonByLabel(label: string): HTMLButtonElement {
-    const button = this.buttons.find((b) => (b.textContent || '').trim() === label);
-    if (!button) {
-      throw new Error(`Expected pagination button "${label}" to exist`);
+    const queries = this.#queries();
+
+    // EUI uses `data-test-subj="pagination-button-${pageIndex}"` (0-based) for numeric buttons.
+    // It also uses `data-test-subj="pagination-button-${type}"` for arrow buttons (first/previous/next/last).
+    const pageNumber = Number(label);
+    const testId = Number.isFinite(pageNumber)
+      ? `pagination-button-${pageNumber - 1}`
+      : `pagination-button-${label}`;
+
+    const el = queries.queryByTestId(testId);
+    if (!el) {
+      throw new Error(`Expected pagination button "${label}" (${testId}) to exist`);
     }
-    return button;
+    return el as HTMLButtonElement;
   }
 
   public clickButton(label: string) {

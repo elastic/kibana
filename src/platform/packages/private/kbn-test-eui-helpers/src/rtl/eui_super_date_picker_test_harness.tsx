@@ -56,6 +56,14 @@ export class EuiSuperDatePickerTestHarness {
    * Opens the popover for the date picker
    */
   static async togglePopover() {
+    // Prefer EUI's stable test subject. This is used by EUI itself in tests.
+    const toggle = screen.queryByTestId('superDatePickerToggleQuickMenuButton');
+    if (toggle) {
+      await userEvent.click(toggle);
+      return;
+    }
+
+    // Fallback for older/embedded variants where the test subject may differ.
     await userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
   }
 

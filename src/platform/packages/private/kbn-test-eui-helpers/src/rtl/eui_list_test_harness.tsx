@@ -9,6 +9,22 @@
 
 import { fireEvent, screen, within } from '@testing-library/react';
 
+export interface EuiListTestHarnessOptions {
+  /**
+   * Optional selector to identify the "row" element for an item label (e.g. `li`, `[role="option"]`, `tr`).
+   *
+   * If provided, action lookup will start at the closest matching ancestor.
+   */
+  rowSelector?: string;
+
+  /**
+   * Optional callback to identify the "row" element for an item label.
+   *
+   * Prefer this over `rowSelector` for complex DOM where a CSS selector is not sufficient.
+   */
+  getRow?: (labelEl: HTMLElement, containerEl: HTMLElement) => HTMLElement | null;
+}
+
 /**
  * Generic harness for EUI "list-ish" UIs (selectables, list groups, option lists) where:
  * - Items are rendered as repeated DOM nodes containing an item label text
@@ -21,13 +37,15 @@ import { fireEvent, screen, within } from '@testing-library/react';
  */
 export class EuiListTestHarness {
   #testId: string;
+  #options?: EuiListTestHarnessOptions;
 
   get #containerEl() {
     return screen.getByTestId(this.#testId);
   }
 
-  constructor(testId: string) {
+  constructor(testId: string, options?: EuiListTestHarnessOptions) {
     this.#testId = testId;
+    this.#options = options;
   }
 
   public get testId() {
@@ -36,6 +54,20 @@ export class EuiListTestHarness {
 
   public get self() {
     return screen.queryByTestId(this.#testId);
+  }
+
+  #getRowRoot(labelEl: HTMLElement): HTMLElement | null {
+    const containerEl = this.#containerEl;
+    const { getRow, rowSelector } = this.#options ?? {};
+
+    const userRoot =
+      getRow?.(labelEl, containerEl) ??
+      (rowSelector ? (labelEl.closest(rowSelector) as HTMLElement | null) : null);
+
+    // Ensure we never search outside the harness container.
+    if (userRoot && containerEl.contains(userRoot)) return userRoot;
+
+    return null;
   }
 
   /**
@@ -56,21 +88,32 @@ export class EuiListTestHarness {
    * Exposed to enable assertions before clicking if needed.
    */
   public getItemActionElement(labelEl: HTMLElement, actionTestId: string) {
-    let el: HTMLElement | null = labelEl;
+    const containerEl = this.#containerEl;
+    const rowRoot = this.#getRowRoot(labelEl);
+    let el: HTMLElement | null = rowRoot ?? labelEl;
 
-    // Bound the walk so we fail fast and don't accidentally traverse the whole document.
-    for (let i = 0; i < 12 && el; i++) {
-      const action = within(el).queryByTestId(actionTestId);
-      if (action) return action;
+    // Walk upwards but never beyond the harness container.
+    while (el) {
+      const matches = within(el).queryAllByTestId(actionTestId);
+      if (matches.length === 1) return matches[0];
+      if (matches.length > 1 && el === containerEl) {
+        throw new Error(
+          `Found multiple actions "${actionTestId}" for item "${
+            labelEl.textContent ?? ''
+          }" within "${this.#testId}". ` +
+            `Pass { rowSelector } or { getRow } to EuiListTestHarness to scope actions to a single row.`
+        );
+      }
 
-      if (el === this.#containerEl) break;
+      if (el === containerEl) break;
       el = el.parentElement;
     }
 
     throw new Error(
       `Unable to find action "${actionTestId}" for item "${labelEl.textContent ?? ''}" within "${
         this.#testId
-      }"`
+      }". ` +
+        `If the action is not a descendant of the label's row, pass { rowSelector } or { getRow } to EuiListTestHarness.`
     );
   }
 }

@@ -29,8 +29,6 @@ describe('<ComponentTemplateEdit />', () => {
     jest.spyOn(breadcrumbService, 'setBreadcrumbs');
   });
 
-  afterAll(() => {});
-
   beforeEach(() => {
     jest.clearAllMocks();
     const env = setupEnvironment();

@@ -42,13 +42,11 @@ describe('Enrich policies tab', () => {
       setDelayResponse(true);
       httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([]);
 
-      const renderPromise = renderHome(httpSetup, {
+      renderHome(httpSetup, {
         initialEntries: ['/enrich_policies'],
       });
 
       expect(await screen.findByTestId('sectionLoading')).toBeInTheDocument();
-
-      await renderPromise;
     });
 
     test('displays a error prompt', async () => {

@@ -32,9 +32,6 @@ jest.mock('../../../component_templates/component_templates_context', () => ({
 }));
 
 describe('Mappings editor: core', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
   interface TestMappings {
     dynamic?: boolean;
     numeric_detection?: boolean;
@@ -538,26 +535,20 @@ describe('Mappings editor: core', () => {
       });
 
       test('props.value => should prepopulate the editor data', async () => {
-        /**
-         * Mapped fields
-         */
+        // Mapped fields
         // Test that root-level mappings "properties" are rendered as root-level "DOM tree items"
         const fieldElements = screen.getAllByTestId(/^fieldsListItem/);
         const fields = fieldElements.map((el) => within(el).getByTestId(/fieldName/).textContent);
         expect(fields.sort()).toEqual(Object.keys(defaultMappings.properties!).sort());
 
-        /**
-         * Dynamic templates
-         */
+        // Dynamic templates
         await selectTab('templates');
 
         // Test that dynamic templates JSON is rendered in the templates editor
         const templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
         expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
 
-        /**
-         * Advanced settings
-         */
+        // Advanced settings
         await selectTab('advanced');
 
         const isDynamicMappingsEnabled = getToggleValue(
@@ -589,9 +580,7 @@ describe('Mappings editor: core', () => {
       test('props.onChange() => should forward the changes to the consumer component', async () => {
         let updatedMappings = { ...defaultMappings };
 
-        /**
-         * Mapped fields
-         */
+        // Mapped fields
         const addFieldButton = screen.getByTestId('addFieldButton');
         fireEvent.click(addFieldButton);
 
@@ -615,9 +604,7 @@ describe('Mappings editor: core', () => {
           expect(data).toEqual(updatedMappings);
         });
 
-        /**
-         * Dynamic templates
-         */
+        // Dynamic templates
         await selectTab('templates');
 
         const updatedTemplatesValue = [{ someTemplateProp: 'updated' }];
@@ -634,9 +621,7 @@ describe('Mappings editor: core', () => {
           expect(data).toEqual(updatedMappings);
         });
 
-        /**
-         * Advanced settings
-         */
+        // Advanced settings
         await selectTab('advanced');
 
         // Disable dynamic mappings
@@ -674,9 +659,7 @@ describe('Mappings editor: core', () => {
       test('updates mapping without inference id for semantic_text field', async () => {
         let updatedMappings = { ...defaultMappings };
 
-        /**
-         * Mapped fields
-         */
+        // Mapped fields
         const addFieldButton = screen.getByTestId('addFieldButton');
         fireEvent.click(addFieldButton);
 
@@ -704,9 +687,7 @@ describe('Mappings editor: core', () => {
       test('updates mapping with reference field value for semantic_text field', async () => {
         let updatedMappings = { ...defaultMappings };
 
-        /**
-         * Mapped fields - Use an existing text field as reference
-         */
+        // Mapped fields - Use an existing text field as reference
         const addFieldButton = screen.getByTestId('addFieldButton');
         fireEvent.click(addFieldButton);
 

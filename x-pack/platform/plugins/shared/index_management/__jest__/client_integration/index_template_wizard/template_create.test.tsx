@@ -576,7 +576,7 @@ describe('<TemplateCreate />', () => {
     }, 6000);
   });
 
-  describe('DSL', () => {
+  describe('Data stream lifecycle', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
@@ -593,7 +593,7 @@ describe('<TemplateCreate />', () => {
       });
     }, 10000);
 
-    test('should include DSL in summary when set in step 1', async () => {
+    test('should include data stream lifecycle in summary when set in step 1', async () => {
       await completeStepTwo();
       await completeStepThree();
       await completeStepFour();

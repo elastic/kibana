@@ -34,7 +34,7 @@ describe('<TemplateClone />', () => {
   });
 
   // RTL test - migrated
-  describe('page title (RTL)', () => {
+  describe('page title', () => {
     beforeEach(async () => {
       renderTemplateClone(httpSetup);
       await screen.findByTestId('pageTitle');

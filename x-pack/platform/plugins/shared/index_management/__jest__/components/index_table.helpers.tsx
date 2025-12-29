@@ -106,14 +106,18 @@ export const getStatusTextAtRow = (rowIndex: number) => {
   return (cell?.textContent || '').trim();
 };
 
-export const openMenuAndClickOption = async (rowIndex: number, optionTestSubj: string) => {
+export const openMenu = async (rowIndex: number) => {
   const checkboxes = screen.getAllByTestId('indexTableRowCheckbox');
   fireEvent.click(checkboxes[rowIndex]);
 
   const manageButton = await screen.findByTestId('indexActionsContextMenuButton');
   fireEvent.click(manageButton);
 
-  const menu = await screen.findByTestId('indexContextMenu');
+  return await screen.findByTestId('indexContextMenu');
+};
+
+export const openMenuAndClickOption = async (rowIndex: number, optionTestSubj: string) => {
+  const menu = await openMenu(rowIndex);
   const option = within(menu).getByTestId(optionTestSubj);
   fireEvent.click(option);
 };
@@ -148,13 +152,7 @@ export const getRowIndicesByStatus = (statusText: string) => {
 };
 
 export const openMenuAndGetButtonText = async (rowIndex: number) => {
-  const checkboxes = screen.getAllByTestId('indexTableRowCheckbox');
-  fireEvent.click(checkboxes[rowIndex]);
-
-  const manageButton = await screen.findByTestId('indexActionsContextMenuButton');
-  fireEvent.click(manageButton);
-
-  const menu = await screen.findByTestId('indexContextMenu');
+  const menu = await openMenu(rowIndex);
   return within(menu)
     .getAllByRole('button')
     .map((btn) => (btn.textContent || '').trim())

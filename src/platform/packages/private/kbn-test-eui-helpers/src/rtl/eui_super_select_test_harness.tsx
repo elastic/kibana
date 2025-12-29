@@ -148,9 +148,13 @@ export class EuiSuperSelectTestHarness {
     fireEvent.click(this.#buttonEl);
     const listbox = await screen.findByRole('listbox');
 
-    const option = document.getElementById(optionId);
+    // Scope the id lookup to the open listbox to avoid accidentally targeting unrelated elements
+    // elsewhere in the document.
+    const option = listbox.querySelector<HTMLElement>(`#${CSS.escape(optionId)}`);
     if (!option) {
-      throw new Error(`EuiSuperSelectTestHarness: option element not found with id="${optionId}".`);
+      throw new Error(
+        `EuiSuperSelectTestHarness: option element not found with id="${optionId}" inside the listbox.`
+      );
     }
 
     fireEvent.click(option);
