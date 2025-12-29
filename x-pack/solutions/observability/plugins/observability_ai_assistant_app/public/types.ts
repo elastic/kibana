@@ -31,7 +31,7 @@ import type {
   AIAssistantManagementSelectionPluginPublicStart,
   AIAssistantManagementSelectionPluginPublicSetup,
 } from '@kbn/ai-assistant-management-plugin/public';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
 
@@ -56,7 +56,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   data: DataPublicPluginStart;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
   spaces: SpacesPluginStart;
-  onechat?: OnechatPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {

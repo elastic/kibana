@@ -58,6 +58,16 @@ const listItems = [
       defaultMessage: 'Open quick search',
     }),
   },
+  {
+    title: (
+      <>
+        <kbd>{COMMAND_KEY}</kbd> <kbd>I</kbd>
+      </>
+    ),
+    description: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsLabel', {
+      defaultMessage: 'Prettify query',
+    }),
+  },
 ];
 
 export function KeyboardShortcuts() {

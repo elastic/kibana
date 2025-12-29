@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiButtonIcon, EuiSwitch } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
-import type { ParsedGroupingAggregation } from '@kbn/grouping/src';
+import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
@@ -36,8 +36,10 @@ import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_sett
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
+import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
+export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 
 export interface TableSectionProps {
   /**
@@ -86,6 +88,7 @@ export const TableSection = React.memo(
     const showAnonymizedSwitch = useMemo(() => {
       return (
         <EuiSwitch
+          key="show-anonymized-switch"
           checked={showAnonymized}
           compressed={true}
           data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
@@ -96,9 +99,11 @@ export const TableSection = React.memo(
     }, [onToggleShowAnonymized, showAnonymized]);
 
     const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
+    const { getAttack, isLoading: isAttacksLoading } = useAttackGroupHandler({ attackIds });
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
-      attackIds,
+      getAttack,
       showAnonymized,
+      isLoading: isAttacksLoading,
     });
 
     const onAggregationsChange = useCallback(
@@ -165,6 +170,35 @@ export const TableSection = React.memo(
       return dataView.toSpec(true);
     }, [dataView]);
 
+    const openAttackDetailsFlyout = useCallback(
+      (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
+        const attack = getAttack(selectedGroup, bucket);
+        if (attack) {
+          // TODO: open attack details flyout logic
+        }
+      },
+      [getAttack]
+    );
+
+    const getAdditionalActionButtons = useCallback(
+      (selectedGroup: string, fieldBucket: RawBucket<AlertsGroupingAggregation>) => {
+        return !isGroupingBucket(fieldBucket) || fieldBucket.isNullGroup
+          ? []
+          : [
+              <EuiButtonIcon
+                key="expand-attack-button"
+                aria-label={i18n.EXPAND_BUTTON_ARIAL_LABEL}
+                data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
+                iconType="expand"
+                onClick={() => openAttackDetailsFlyout(selectedGroup, fieldBucket)}
+                size="s"
+                color="text"
+              />,
+            ];
+      },
+      [openAttackDetailsFlyout]
+    );
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -186,6 +220,7 @@ export const TableSection = React.memo(
           additionalToolbarControls={[showAnonymizedSwitch]}
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
+          getAdditionalActionButtons={getAdditionalActionButtons}
         />
       </div>
     );
