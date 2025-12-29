@@ -7,11 +7,7 @@
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
-  ALERT_FLAPPING,
-  ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_STATUS,
   ALERT_UUID,
@@ -20,10 +16,10 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
+import { get } from 'lodash';
 import type { Alert as LegacyAlert } from '../../alert/alert';
 import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import { AlertRule } from '../types';
-import { get } from 'lodash';
+import type { AlertRule } from '../types';
 
 interface BuildDelayedAlertOpts<
   LegacyState extends AlertInstanceState,
