@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ESQLAstCommand } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import type { ESQLAstCommand } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
