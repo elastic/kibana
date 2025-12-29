@@ -80,54 +80,56 @@ export const useBulkAttackWorkflowStatusItems = ({
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
     useBulkAlertClosingReasonItems({ onSubmitCloseReason });
 
-  const workflowStatusItems: BulkActionsConfig[] = useMemo(
-    () =>
-      hasIndexWrite && hasAttackIndexWrite && !loading
-        ? [
-            ...(currentStatus !== FILTER_OPEN
-              ? [
-                  {
-                    label: i18n.BULK_ACTION_OPEN_SELECTED,
-                    key: 'open-attack-status',
-                    'data-test-subj': 'open-attack-status',
-                    onClick: handleStatusUpdate(FILTER_OPEN as AlertWorkflowStatus),
-                    disableOnQuery: true,
-                  },
-                ]
-              : []),
-            ...(currentStatus !== FILTER_ACKNOWLEDGED
-              ? [
-                  {
-                    label: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
-                    key: 'acknowledge-attack-status',
-                    'data-test-subj': 'acknowledged-attack-status',
-                    onClick: handleStatusUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus),
-                    disableOnQuery: true,
-                  },
-                ]
-              : []),
-            ...(currentStatus !== FILTER_CLOSED
-              ? [
-                  {
-                    label: alertClosingReasonItem?.label ?? i18n.BULK_ACTION_CLOSE_SELECTED,
-                    key: alertClosingReasonItem?.key ?? 'closed-attack-status',
-                    'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
-                    panel: alertClosingReasonItem?.panel,
-                    disableOnQuery: true,
-                  },
-                ]
-              : []),
-          ]
-        : [],
-    [
-      alertClosingReasonItem,
-      currentStatus,
-      hasIndexWrite,
-      hasAttackIndexWrite,
-      loading,
-      handleStatusUpdate,
-    ]
-  );
+  const workflowStatusItems: BulkActionsConfig[] = useMemo(() => {
+    // Return empty array if user doesn't have required permissions or data is still loading
+    if (loading || !hasIndexWrite || !hasAttackIndexWrite) {
+      return [];
+    }
+
+    const items: BulkActionsConfig[] = [];
+
+    // Add "Open" action if current status is not already open
+    if (currentStatus !== FILTER_OPEN) {
+      items.push({
+        label: i18n.BULK_ACTION_OPEN_SELECTED,
+        key: 'open-attack-status',
+        'data-test-subj': 'open-attack-status',
+        onClick: handleStatusUpdate(FILTER_OPEN as AlertWorkflowStatus),
+        disableOnQuery: true,
+      });
+    }
+
+    // Add "Acknowledged" action if current status is not already acknowledged
+    if (currentStatus !== FILTER_ACKNOWLEDGED) {
+      items.push({
+        label: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
+        key: 'acknowledge-attack-status',
+        'data-test-subj': 'acknowledged-attack-status',
+        onClick: handleStatusUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus),
+        disableOnQuery: true,
+      });
+    }
+
+    // Add "Close" action if current status is not already closed
+    if (currentStatus !== FILTER_CLOSED) {
+      items.push({
+        label: alertClosingReasonItem?.label ?? i18n.BULK_ACTION_CLOSE_SELECTED,
+        key: alertClosingReasonItem?.key ?? 'closed-attack-status',
+        'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
+        panel: alertClosingReasonItem?.panel,
+        disableOnQuery: true,
+      });
+    }
+
+    return items;
+  }, [
+    alertClosingReasonItem,
+    currentStatus,
+    hasIndexWrite,
+    hasAttackIndexWrite,
+    loading,
+    handleStatusUpdate,
+  ]);
 
   const workflowStatusPanels: AttackContentPanelConfig[] = useMemo(
     () => [...alertClosingReasonPanels],

@@ -40,22 +40,23 @@ export const useBulkAttackTagsItems = ({
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
   const { applyTags } = useApplyAttackTags();
 
-  const attackTagsItems: BulkActionsConfig[] = useMemo(
-    () =>
-      hasIndexWrite && hasAttackIndexWrite && !loading
-        ? [
-            {
-              key: 'manage-attack-tags',
-              'data-test-subj': 'attack-tags-context-menu-item',
-              name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-              panel: 1,
-              label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-              disableOnQuery: true,
-            },
-          ]
-        : [],
-    [hasIndexWrite, hasAttackIndexWrite, loading]
-  );
+  const attackTagsItems: BulkActionsConfig[] = useMemo(() => {
+    // Return empty array if user doesn't have required permissions or data is still loading
+    if (loading || !hasIndexWrite || !hasAttackIndexWrite) {
+      return [];
+    }
+
+    return [
+      {
+        key: 'manage-attack-tags',
+        'data-test-subj': 'attack-tags-context-menu-item',
+        name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+        panel: 1,
+        label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+        disableOnQuery: true,
+      },
+    ];
+  }, [hasIndexWrite, hasAttackIndexWrite, loading]);
 
   const TitleContent = useMemo(
     () => (

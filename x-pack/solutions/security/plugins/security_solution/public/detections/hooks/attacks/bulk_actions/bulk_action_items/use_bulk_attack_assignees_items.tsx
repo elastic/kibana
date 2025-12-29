@@ -82,39 +82,40 @@ export const useBulkAttackAssigneesItems = ({
     [applyAssignees, onAssigneesUpdate]
   );
 
-  const attackAssigneesItems: BulkActionsConfig[] = useMemo(
-    () =>
-      hasIndexWrite && hasAttackIndexWrite && isPlatinumPlus && !loading
-        ? [
-            {
-              key: 'manage-attack-assignees',
-              'data-test-subj': 'attack-assignees-context-menu-item',
-              name: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
-              panel: 2,
-              label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
-              disableOnQuery: true,
-              disable: false,
-            },
-            {
-              key: 'remove-all-attack-assignees',
-              'data-test-subj': 'remove-attack-assignees-menu-item',
-              name: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
-              label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
-              disableOnQuery: true,
-              onClick: onRemoveAllAssignees,
-              disable: alertAssignments ? isEmpty(alertAssignments) : false,
-            },
-          ]
-        : [],
-    [
-      alertAssignments,
-      hasIndexWrite,
-      hasAttackIndexWrite,
-      isPlatinumPlus,
-      loading,
-      onRemoveAllAssignees,
-    ]
-  );
+  const attackAssigneesItems: BulkActionsConfig[] = useMemo(() => {
+    // Return empty array if user doesn't have required permissions or data is still loading
+    if (loading || !hasIndexWrite || !hasAttackIndexWrite || !isPlatinumPlus) {
+      return [];
+    }
+
+    return [
+      {
+        key: 'manage-attack-assignees',
+        'data-test-subj': 'attack-assignees-context-menu-item',
+        name: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+        panel: 2,
+        label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+        disableOnQuery: true,
+        disable: false,
+      },
+      {
+        key: 'remove-all-attack-assignees',
+        'data-test-subj': 'remove-attack-assignees-menu-item',
+        name: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
+        label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
+        disableOnQuery: true,
+        onClick: onRemoveAllAssignees,
+        disable: alertAssignments ? isEmpty(alertAssignments) : false,
+      },
+    ];
+  }, [
+    alertAssignments,
+    hasIndexWrite,
+    hasAttackIndexWrite,
+    isPlatinumPlus,
+    loading,
+    onRemoveAllAssignees,
+  ]);
 
   const TitleContent = useMemo(
     () => (
