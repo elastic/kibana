@@ -305,6 +305,7 @@ export const DiscoverTopNav = ({
         onDraftChange={tabsEnabled ? onSearchDraftChange : undefined}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
+        enableIndicesBrowser={isEsqlMode}
         esqlVariablesConfig={
           isEsqlMode
             ? {

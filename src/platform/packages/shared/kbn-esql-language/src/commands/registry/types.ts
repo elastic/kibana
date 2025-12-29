@@ -35,7 +35,8 @@ export type ItemKind =
   | 'Text'
   | 'Reference'
   | 'Snippet'
-  | 'Issue';
+  | 'Issue'
+  | 'Folder';
 
 export interface ISuggestionItem {
   /* The label to show on the suggestion UI for the entry */

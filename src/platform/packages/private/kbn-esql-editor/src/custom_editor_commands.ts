@@ -23,6 +23,8 @@ export interface MonacoCommandDependencies {
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
   controlsContext: React.RefObject<ControlsContext | undefined>;
   openTimePickerPopover: () => void;
+  openIndicesBrowser?: () => void;
+  openFieldsBrowser?: () => void;
 }
 
 const triggerControl = async (
@@ -56,6 +58,8 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     esqlVariables,
     controlsContext,
     openTimePickerPopover,
+    openIndicesBrowser,
+    openFieldsBrowser,
   } = deps;
 
   const commandDisposables: monaco.IDisposable[] = [];
@@ -84,6 +88,24 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
       telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
     })
   );
+
+  // Open indices browser command
+  if (openIndicesBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.indicesBrowser.open', (...args) => {
+        openIndicesBrowser();
+      })
+    );
+  }
+
+  // Open fields browser command
+  if (openFieldsBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.fieldsBrowser.open', (...args) => {
+        openFieldsBrowser();
+      })
+    );
+  }
 
   // Execute multiple commands
   // The payload is expected to be of the form:

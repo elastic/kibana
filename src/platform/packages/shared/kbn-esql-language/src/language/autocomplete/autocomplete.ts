@@ -8,6 +8,7 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import { i18n } from '@kbn/i18n';
 import type {
   ESQLColumn,
   ESQLAstItem,
@@ -83,6 +84,25 @@ export async function suggest(
   const licenseInstance = await resourceRetriever?.getLicense?.();
   const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
 
+  // Helper to create resource browser suggestion
+  const createResourceBrowserSuggestion = (
+    label: string,
+    description: string,
+    commandId: string
+  ): ISuggestionItem => {
+    return {
+      label,
+      text: '',
+      kind: 'Folder',
+      detail: description,
+      command: {
+        title: label,
+        id: commandId,
+      },
+      sortText: '0', // Sort to top
+    };
+  };
+
   if (astContext.type === 'newCommand') {
     // propose main commands here
     // resolve particular commands suggestions after
@@ -151,6 +171,26 @@ export async function suggest(
 
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
+
+      // Add indices browser suggestion if enabled and we have source command suggestions
+      if (sourceCommandsSuggestions.length > 0 && resourceRetriever?.onOpenIndicesBrowser) {
+        const indicesBrowserSuggestion = createResourceBrowserSuggestion(
+          i18n.translate('esqlEditor.indicesBrowser.suggestionLabel', {
+            defaultMessage: 'Browse indices',
+          }),
+          i18n.translate('esqlEditor.indicesBrowser.suggestionDescription', {
+            defaultMessage: 'Open resource browser',
+          }),
+          'esql.indicesBrowser.open'
+        );
+        return [
+          indicesBrowserSuggestion,
+          ...headerCommandsSuggestions,
+          ...sourceCommandsSuggestions,
+          ...recommendedQueriesSuggestions,
+        ];
+      }
+
       return [
         ...headerCommandsSuggestions,
         ...sourceCommandsSuggestions,
@@ -195,6 +235,48 @@ export async function suggest(
       offset,
       hasMinimumLicenseRequired
     );
+
+    // Determine if we're suggesting indices or fields based on suggestion kinds
+    // Indices have kind 'Issue' or 'Class', fields have kind 'Variable'
+    const hasIndexSuggestions = commandsSpecificSuggestions.some(
+      (s) => s.kind === 'Issue' || s.kind === 'Class'
+    );
+    const hasFieldSuggestions = commandsSpecificSuggestions.some((s) => s.kind === 'Variable');
+
+    console.log('hasIndexSuggestions', hasIndexSuggestions);
+    console.log('hasFieldSuggestions', hasFieldSuggestions);
+    console.log('resourceRetriever', resourceRetriever);
+    // Add prepended resource browser suggestion if enabled
+    // Prioritize indices browser if we have index suggestions (typically in FROM/TS commands)
+    if (hasIndexSuggestions && resourceRetriever?.onOpenIndicesBrowser) {
+      console.log('opening indices browser');
+      const indicesBrowserSuggestion = createResourceBrowserSuggestion(
+        i18n.translate('esqlEditor.indicesBrowser.suggestionLabel', {
+          defaultMessage: 'Browse indices',
+        }),
+        i18n.translate('esqlEditor.indicesBrowser.suggestionDescription', {
+          defaultMessage: 'Open resource browser',
+        }),
+        'esql.indicesBrowser.open'
+      );
+      console.log('indicesBrowserSuggestion', indicesBrowserSuggestion);
+      return [indicesBrowserSuggestion, ...commandsSpecificSuggestions];
+    }
+
+    // Show fields browser if we have field suggestions and no index suggestions
+    if (hasFieldSuggestions && !hasIndexSuggestions && resourceRetriever?.onOpenFieldsBrowser) {
+      const fieldsBrowserSuggestion = createResourceBrowserSuggestion(
+        i18n.translate('esqlEditor.fieldsBrowser.suggestionLabel', {
+          defaultMessage: 'Browse fields',
+        }),
+        i18n.translate('esqlEditor.fieldsBrowser.suggestionDescription', {
+          defaultMessage: 'Open field browser',
+        }),
+        'esql.fieldsBrowser.open'
+      );
+      return [fieldsBrowserSuggestion, ...commandsSpecificSuggestions];
+    }
+
     return commandsSpecificSuggestions;
   }
   return [];

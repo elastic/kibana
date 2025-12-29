@@ -98,6 +98,8 @@ export interface ESQLEditorProps {
   formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
+  /** Enable indices browser suggestion (for Discover context) */
+  enableIndicesBrowser?: boolean;
 }
 
 interface ESQLVariableService {

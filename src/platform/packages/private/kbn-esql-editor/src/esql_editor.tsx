@@ -88,6 +88,8 @@ import {
   addEditorKeyBindings,
   addTabKeybindingRules,
 } from './custom_editor_commands';
+import { IndicesBrowserPopup } from './indices_browser/indices_browser_popup';
+import { FieldsBrowserPopup } from './fields_browser/fields_browser_popup';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -122,6 +124,7 @@ const ESQLEditorInternal = function ESQLEditor({
   formLabel,
   mergeExternalMessages,
   hideQuickSearch,
+  enableIndicesBrowser = false,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -188,6 +191,10 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const [isIndicesBrowserOpen, setIsIndicesBrowserOpen] = useState(false);
+  const indicesBrowserAnchorRef = useRef<HTMLElement | null>(null);
+  const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
+  const fieldsBrowserAnchorRef = useRef<HTMLElement | null>(null);
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
@@ -854,9 +861,145 @@ const ESQLEditorInternal = function ESQLEditor({
     [serverErrors, serverWarning, code, queryValidation]
   );
 
+  const openIndicesBrowser = useCallback(() => {
+    if (editorRef.current) {
+      const position = editorRef.current.getPosition();
+      if (position) {
+        const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
+        const editorPosition = editorRef.current.getScrolledVisiblePosition(position);
+        if (editorCoords && editorPosition) {
+          // Create a temporary anchor element at the cursor position
+          const anchor = document.createElement('div');
+          anchor.style.position = 'absolute';
+          anchor.style.left = `${editorCoords.left + editorPosition.left}px`;
+          anchor.style.top = `${editorCoords.top + editorPosition.top + 20}px`;
+          anchor.style.width = '1px';
+          anchor.style.height = '1px';
+          document.body.appendChild(anchor);
+          indicesBrowserAnchorRef.current = anchor;
+          setIsIndicesBrowserOpen(true);
+        }
+      }
+    }
+  }, []);
+
+  const closeIndicesBrowser = useCallback(() => {
+    setIsIndicesBrowserOpen(false);
+    if (indicesBrowserAnchorRef.current) {
+      document.body.removeChild(indicesBrowserAnchorRef.current);
+      indicesBrowserAnchorRef.current = null;
+    }
+  }, []);
+
+  const handleIndexSelect = useCallback(
+    (indexName: string) => {
+      if (editorRef.current && editorModel.current) {
+        const position = editorRef.current.getPosition();
+        if (position) {
+          const wordUntilPosition = editorModel.current.getWordUntilPosition(position);
+          const range = {
+            startLineNumber: position.lineNumber,
+            startColumn: wordUntilPosition.startColumn,
+            endLineNumber: position.lineNumber,
+            endColumn: wordUntilPosition.endColumn,
+          };
+          editorRef.current.executeEdits('indicesBrowser', [
+            {
+              range,
+              text: indexName,
+              forceMoveMarkers: true,
+            },
+          ]);
+          // Move cursor after the inserted text
+          editorRef.current.setPosition({
+            lineNumber: position.lineNumber,
+            column: wordUntilPosition.startColumn + indexName.length,
+          });
+          editorRef.current.focus();
+        }
+      }
+      closeIndicesBrowser();
+    },
+    [closeIndicesBrowser]
+  );
+
+  const openFieldsBrowser = useCallback(() => {
+    if (editorRef.current) {
+      const position = editorRef.current.getPosition();
+      if (position) {
+        const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
+        const editorPosition = editorRef.current.getScrolledVisiblePosition(position);
+        if (editorCoords && editorPosition) {
+          // Create a temporary anchor element at the cursor position
+          const anchor = document.createElement('div');
+          anchor.style.position = 'absolute';
+          anchor.style.left = `${editorCoords.left + editorPosition.left}px`;
+          anchor.style.top = `${editorCoords.top + editorPosition.top + 20}px`;
+          anchor.style.width = '1px';
+          anchor.style.height = '1px';
+          document.body.appendChild(anchor);
+          fieldsBrowserAnchorRef.current = anchor;
+          setIsFieldsBrowserOpen(true);
+        }
+      }
+    }
+  }, []);
+
+  const closeFieldsBrowser = useCallback(() => {
+    setIsFieldsBrowserOpen(false);
+    if (fieldsBrowserAnchorRef.current) {
+      document.body.removeChild(fieldsBrowserAnchorRef.current);
+      fieldsBrowserAnchorRef.current = null;
+    }
+  }, []);
+
+  const handleFieldSelect = useCallback(
+    (fieldName: string) => {
+      if (editorRef.current && editorModel.current) {
+        const position = editorRef.current.getPosition();
+        if (position) {
+          const wordUntilPosition = editorModel.current.getWordUntilPosition(position);
+          const range = {
+            startLineNumber: position.lineNumber,
+            startColumn: wordUntilPosition.startColumn,
+            endLineNumber: position.lineNumber,
+            endColumn: wordUntilPosition.endColumn,
+          };
+          editorRef.current.executeEdits('fieldsBrowser', [
+            {
+              range,
+              text: fieldName,
+              forceMoveMarkers: true,
+            },
+          ]);
+          // Move cursor after the inserted text
+          editorRef.current.setPosition({
+            lineNumber: position.lineNumber,
+            column: wordUntilPosition.startColumn + fieldName.length,
+          });
+          editorRef.current.focus();
+        }
+      }
+      closeFieldsBrowser();
+    },
+    [closeFieldsBrowser]
+  );
+
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.({ ...esqlCallbacks, telemetry: telemetryCallbacks }),
-    [esqlCallbacks, telemetryCallbacks]
+    () =>
+      ESQLLang.getSuggestionProvider?.({
+        ...esqlCallbacks,
+        telemetry: telemetryCallbacks,
+        onOpenIndicesBrowser: enableIndicesBrowser ? openIndicesBrowser : undefined,
+        onOpenFieldsBrowser: enableIndicesBrowser ? openFieldsBrowser : undefined,
+      }),
+    [
+      esqlCallbacks,
+      telemetryCallbacks,
+      enableIndicesBrowser,
+      openIndicesBrowser,
+      openFieldsBrowser,
+    ]
   );
 
   const hoverProvider = useMemo(
@@ -909,6 +1052,18 @@ const ESQLEditorInternal = function ESQLEditor({
       editorRef.current?.dispose();
       editorModel.current = undefined;
       editorRef.current = undefined;
+
+      // Cleanup indices browser anchor
+      if (indicesBrowserAnchorRef.current) {
+        document.body.removeChild(indicesBrowserAnchorRef.current);
+        indicesBrowserAnchorRef.current = null;
+      }
+
+      // Cleanup fields browser anchor
+      if (fieldsBrowserAnchorRef.current) {
+        document.body.removeChild(fieldsBrowserAnchorRef.current);
+        fieldsBrowserAnchorRef.current = null;
+      }
     };
   }, []);
 
@@ -1111,6 +1266,8 @@ const ESQLEditorInternal = function ESQLEditor({
                       esqlVariables: esqlVariablesRef,
                       controlsContext: controlsContextRef,
                       openTimePickerPopover,
+                      openIndicesBrowser: enableIndicesBrowser ? openIndicesBrowser : undefined,
+                      openFieldsBrowser: enableIndicesBrowser ? openFieldsBrowser : undefined,
                     });
 
                     // Add editor key bindings
@@ -1314,6 +1471,26 @@ const ESQLEditorInternal = function ESQLEditor({
           </div>
         ),
         document.body
+      )}
+      {enableIndicesBrowser && (
+        <>
+          <IndicesBrowserPopup
+            isOpen={isIndicesBrowserOpen}
+            onClose={closeIndicesBrowser}
+            onSelectIndex={handleIndexSelect}
+            core={core}
+            getLicense={kibana.services?.esql?.getLicense}
+            anchorElement={indicesBrowserAnchorRef.current || undefined}
+          />
+          <FieldsBrowserPopup
+            isOpen={isFieldsBrowserOpen}
+            onClose={closeFieldsBrowser}
+            onSelectField={handleFieldSelect}
+            getColumnsFor={esqlCallbacks.getColumnsFor}
+            query={code}
+            anchorElement={fieldsBrowserAnchorRef.current || undefined}
+          />
+        </>
       )}
     </>
   );

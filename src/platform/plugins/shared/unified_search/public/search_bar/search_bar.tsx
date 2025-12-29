@@ -168,6 +168,10 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 
   useBackgroundSearchButton?: boolean;
+  /**
+   * Enable indices browser suggestion in ESQL editor (for Discover context)
+   */
+  enableIndicesBrowser?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -729,10 +733,10 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           prepend={this.props.prependFilterBar}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
-      );
-    }
+        );
+      }
 
-    return (
+      return (
       <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
         {isBackgroundSearchEnabled && (
           <BackgroundSearchRestoredCallout isESQLQuery={isESQLQuery} state$={session.state$} />
@@ -799,6 +803,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          enableIndicesBrowser={this.props.enableIndicesBrowser}
         />
       </div>
     );
