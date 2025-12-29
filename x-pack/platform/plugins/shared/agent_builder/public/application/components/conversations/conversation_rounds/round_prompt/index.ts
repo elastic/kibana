@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-/**
- * Mutation keys for react-query
- */
-export const mutationKeys = {
-  sendMessage: ['sendMessage'] as const,
-  resumeRound: ['resumeRound'] as const,
-};
+export { ConfirmationPrompt, type ConfirmationPromptProps } from './confirmation_prompt';
