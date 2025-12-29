@@ -56,7 +56,7 @@ describe('AlertProcessingDonut', () => {
         applyGlobalQueriesAndFilters: false,
         height: 250,
         width: '100%',
-        id: 'open',
+        id: 'aiValueAlertProcessingDonut',
         isDonut: true,
         donutTitleLabel: 'Total alerts processed',
         donutTextWrapperClassName: 'donutText',

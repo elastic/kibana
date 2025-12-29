@@ -17,6 +17,7 @@ import { setupSavedObjects } from './saved_objects';
 import { initializeRuleExecutorTaskDefinition } from './rule_executor';
 import { CreateEsqlRuleRoute } from './routes/esql_rule/routes/create_esql_rule_route';
 import { UpdateEsqlRuleRoute } from './routes/esql_rule/routes/update_esql_rule_route';
+import { registerFeaturePrivileges } from './lib/security/privileges';
 
 export const config: PluginConfigDescriptor<AlertingV2Config> = {
   schema: configSchema,
@@ -33,6 +34,9 @@ export const module = new ContainerModule(({ bind }) => {
       PluginInitializer('config')
     ) as PluginInitializerContext['config'];
     const alertingConfig = pluginConfig.get<AlertingV2Config>();
+
+    // Register feature privileges
+    registerFeaturePrivileges(container.get(PluginSetup('features')));
 
     // Saved Objects + Encrypted Saved Objects registration
     setupSavedObjects({
