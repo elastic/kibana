@@ -262,6 +262,33 @@ export interface UserActionsStatsAggsResult {
       }>;
     };
   };
+  nonDeletedCommentUpdates: {
+    doc_count: number;
+    comments: {
+      doc_count: number;
+      byCommentId: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+          reverse: {
+            doc_count: number;
+            hasDelete: {
+              doc_count: number;
+            };
+            updates: {
+              doc_count: number;
+              byCommentType: {
+                buckets: Array<{
+                  key: string;
+                  doc_count: number;
+                }>;
+              };
+            };
+          };
+        }>;
+      };
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {

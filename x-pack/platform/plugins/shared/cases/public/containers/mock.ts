@@ -1042,6 +1042,7 @@ export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
   totalComments: 10,
   totalCommentCreations: 10,
   totalCommentDeletions: 0,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 10,
   totalOtherActionDeletions: 0,
 };

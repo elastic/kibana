@@ -23,6 +23,7 @@ describe('FilterActivity ', () => {
     totalComments: 11,
     totalCommentCreations: 2,
     totalCommentDeletions: 0,
+    totalHiddenCommentUpdates: 0,
     totalOtherActions: 9,
     totalOtherActionDeletions: 0,
   };
@@ -33,6 +34,7 @@ describe('FilterActivity ', () => {
     totalComments: 11,
     totalCommentDeletions: 3,
     totalCommentCreations: 5,
+    totalHiddenCommentUpdates: 1,
     totalOtherActions: 9,
     totalOtherActionDeletions: 4,
   };
@@ -57,7 +59,7 @@ describe('FilterActivity ', () => {
       />
     );
 
-    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('18');
+    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('17');
     expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toHaveTextContent(
       '2'
     );
