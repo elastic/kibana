@@ -193,7 +193,7 @@ function GenerationContext({
               'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
               {
                 defaultMessage:
-                  'Select the subset of data you want to generate the significant events for.',
+                  'Select the subset of data you want to generate the significant events for. Generation uses the last 24 hours of data.',
               }
             )}
           </EuiText>
@@ -272,7 +272,7 @@ function IdentifyFeatures({
               'xpack.streams.significantEvents.significantEventsGenerationPanel.indentifyFeaturesDescription',
               {
                 defaultMessage:
-                  'Features are logical subsets of the data and they provide the best context for the generation of significant events. Identify features first.',
+                  'Features are logical subsets of the data and they provide the best context for the generation of significant events. Identify features first. Generation uses the last 24 hours of data.',
               }
             )}
           </EuiText>

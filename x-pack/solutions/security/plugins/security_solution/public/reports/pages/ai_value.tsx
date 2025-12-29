@@ -7,7 +7,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
-import { pick } from 'lodash/fp';
 import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
@@ -51,9 +50,8 @@ const BaseComponent = () => {
   const exportContext = useAIValueExportContext();
   const isExportMode = exportContext?.isExportMode === true;
   const { loading: oldIsSourcererLoading } = useSourcererDataView();
-  const { from, to } = useDeepEqualSelector((state) =>
-    pick(['from', 'to'], inputsSelectors.valueReportTimeRangeSelector(state))
-  );
+  const timerange = useDeepEqualSelector(inputsSelectors.valueReportTimeRangeSelector);
+  const { from, to } = timerange;
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status } = useDataView();
@@ -75,11 +73,9 @@ const BaseComponent = () => {
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
 
-  const timeRange = useMemo(() => ({ to, from }), [to, from]);
-
   const { toggleContextMenu, isExportEnabled } = useDownloadAIValueReport({
     anchorElement: exportButtonElement,
-    timeRange,
+    timeRange: timerange,
   });
 
   const exportButton = useMemo(

@@ -96,4 +96,26 @@ describe('STATS', () => {
       { name: 'buckets', type: 'date', userDefined: true, location: { min: 30, max: 36 } },
     ]);
   });
+
+  it('keeps grouping column names unescaped when quoted', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'field2', type: 'double', userDefined: false },
+      { name: 'ss', type: 'keyword', userDefined: true, location: { min: 0, max: 0 } },
+    ];
+
+    const queryString = `FROM a | STATS AVG(field2) BY \`ss\``;
+
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+
+    const result = columnsAfter(command, previousCommandFields, queryString);
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 15, max: 25 } },
+      { name: 'ss', type: 'keyword', userDefined: true, location: { min: 30, max: 33 } },
+    ]);
+  });
 });
