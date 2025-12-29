@@ -14,7 +14,7 @@ import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
-import { useFetchSloGroupings } from '../../hooks/use_fetch_slo_instances';
+import { useFetchSloGroupingValues } from '../../hooks/use_fetch_slo_grouping_values';
 import { useGetQueryParams } from '../../hooks/use_get_query_params';
 
 interface Props {
@@ -40,7 +40,7 @@ export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>(undefined);
   useDebounce(() => setDebouncedSearch(search), 500, [search]);
 
-  const { isLoading, isError, data } = useFetchSloGroupings({
+  const { isLoading, isError, data } = useFetchSloGroupingValues({
     sloId: slo.id,
     groupingKey,
     instanceId: slo.instanceId,

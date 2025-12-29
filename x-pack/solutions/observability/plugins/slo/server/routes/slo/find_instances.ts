@@ -29,7 +29,7 @@ export const findSLOInstancesRoute = createSloServerRoute({
     return await findSLOInstances(
       {
         search: params.query?.search,
-        size: params.query?.size ? Number(params.query.size) : undefined,
+        size: params.query?.size,
         searchAfter: params.query?.searchAfter,
         sloId: params.path.id,
         spaceId,

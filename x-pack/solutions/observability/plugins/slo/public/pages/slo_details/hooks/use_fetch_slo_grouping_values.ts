@@ -5,55 +5,60 @@
  * 2.0.
  */
 
+import type { GetSLOGroupingsResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
-import type { FindSLOInstancesResponse } from '@kbn/slo-schema';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 interface Params {
   sloId: string;
+  groupingKey: string;
+  instanceId: string;
+  afterKey?: string;
   search?: string;
-  searchAfter?: string;
-  size?: number;
-  enabled: boolean;
+  remoteName?: string;
 }
 
 interface Response {
-  data: FindSLOInstancesResponse | undefined;
+  data: GetSLOGroupingsResponse | undefined;
   isLoading: boolean;
-  isInitialLoading: boolean;
   isError: boolean;
 }
 
-export function useFetchSloInstances({
+export function useFetchSloGroupingValues({
   sloId,
+  groupingKey,
+  instanceId,
+  afterKey,
   search,
-  searchAfter,
-  size = 100,
-  enabled = true,
+  remoteName,
 }: Params): Response {
   const { sloClient } = usePluginContext();
 
-  const { isLoading, isInitialLoading, isError, data } = useQuery({
-    queryKey: sloKeys.instances({ sloId, search, searchAfter, size }),
+  const { isLoading, isError, data } = useQuery({
+    queryKey: sloKeys.groupings({ sloId, groupingKey, instanceId, afterKey, search, remoteName }),
     queryFn: async ({ signal }) => {
-      return sloClient.fetch(`GET /internal/observability/slos/{id}/_instances`, {
+      return sloClient.fetch(`GET /internal/observability/slos/{id}/_groupings`, {
         params: {
           path: { id: sloId },
           query: {
             search,
-            size,
-            searchAfter,
+            instanceId,
+            groupingKey,
+            afterKey,
+            excludeStale: true,
+            remoteName,
           },
         },
         signal,
       });
     },
-    enabled: Boolean(!!sloId && enabled),
+    enabled: Boolean(!!sloId && !!groupingKey && instanceId !== ALL_VALUE),
     staleTime: 60 * 1000,
     retry: false,
     refetchOnWindowFocus: false,
   });
 
-  return { isLoading, isInitialLoading, isError, data };
+  return { isLoading, isError, data };
 }

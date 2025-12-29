@@ -90,7 +90,9 @@ export const sloKeys = {
     afterKey?: string;
     excludeStale?: boolean;
     remoteName?: string;
-  }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  }) => [...sloKeys.all, 'groupings', params] as const,
+  instances: (params: { sloId: string; search?: string; searchAfter?: string; size: number }) =>
+    [...sloKeys.all, 'instances', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
 };
 

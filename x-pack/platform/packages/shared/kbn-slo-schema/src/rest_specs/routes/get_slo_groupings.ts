@@ -24,14 +24,12 @@ const getSLOGroupingsParamsSchema = t.type({
   ]),
 });
 
-const getSLOGroupingsResponseSchema = t.type({
-  groupingKey: t.string,
-  values: t.array(t.string),
-  afterKey: t.union([t.string, t.undefined]),
-});
-
 type GetSLOGroupingsParams = t.TypeOf<typeof getSLOGroupingsParamsSchema.props.query>;
-type GetSLOGroupingsResponse = t.OutputOf<typeof getSLOGroupingsResponseSchema>;
+interface GetSLOGroupingsResponse {
+  groupingKey: string;
+  values: string[];
+  afterKey: string | undefined;
+}
 
-export { getSLOGroupingsParamsSchema, getSLOGroupingsResponseSchema };
+export { getSLOGroupingsParamsSchema };
 export type { GetSLOGroupingsResponse, GetSLOGroupingsParams };

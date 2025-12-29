@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 
 const findSLOInstancesParamsSchema = t.type({
@@ -12,7 +13,7 @@ const findSLOInstancesParamsSchema = t.type({
     t.undefined,
     t.partial({
       search: t.string,
-      size: t.string,
+      size: toNumberRt,
       searchAfter: t.string,
     }),
   ]),
