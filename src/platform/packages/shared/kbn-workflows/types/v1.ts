@@ -172,6 +172,8 @@ export interface WorkflowExecutionDto {
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export type WorkflowExecutionListItemDto = Omit<
