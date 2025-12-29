@@ -16,7 +16,9 @@
     "@kbn/content-management-utils",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/dashboard-plugin",
-    "@kbn/visualization-listing-components"
+    "@kbn/visualization-listing-components",
+    "@kbn/embeddable-plugin",
+    "@kbn/visualizations-common"
   ],
   "exclude": ["target/**/*"]
 }
