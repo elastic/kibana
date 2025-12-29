@@ -89,7 +89,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     // Calling `retrieve_elastic_doc` via the chat/complete endpoint
-    describe('POST /internal/observability_ai_assistant/chat/complete', function () {
+    //
+    // FLAKY: https://github.com/elastic/kibana/issues/246371
+    describe.skip('POST /internal/observability_ai_assistant/chat/complete', function () {
       let llmProxy: LlmProxy;
       let connectorId: string;
       let messageAddedEvents: MessageAddEvent[];
