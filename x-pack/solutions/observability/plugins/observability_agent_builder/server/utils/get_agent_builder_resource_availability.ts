@@ -7,7 +7,7 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolAvailabilityResult } from '@kbn/onechat-server';
+import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import { AI_AGENTS_FEATURE_FLAG, AI_AGENTS_FEATURE_FLAG_DEFAULT } from '@kbn/ai-assistant-common';
 import type {
   ObservabilityAgentBuilderPluginStart,

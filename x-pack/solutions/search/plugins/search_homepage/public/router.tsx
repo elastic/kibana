@@ -18,7 +18,7 @@ export const HomepageRouter = () => {
     services: { settings },
   } = useKibana();
 
-  const isNewDesignEnabled = settings?.client.get<boolean>(SEARCH_HOMEPAGE_V2_UI_FLAG, false);
+  const isNewDesignEnabled = settings?.client.get<boolean>(SEARCH_HOMEPAGE_V2_UI_FLAG, true);
 
   return (
     <Routes>
