@@ -93,10 +93,6 @@ async function validateAst(
         rootCommands
       )
     );
-
-    messages.push(
-      ...validateInlineCasts(sourceFields as Map<string, ESQLFieldWithMetadata>, rootCommands)
-    );
   }
 
   const license = await callbacks?.getLicense?.();
@@ -258,16 +254,4 @@ function validateUnsupportedTypeFields(
     }
   }
   return messages;
-}
-
-function validateInlineCasts(
-  fields: Map<string, ESQLFieldWithMetadata>,
-  commands: ESQLAstAllCommands[]
-): ESQLMessage[] {
-  walk(commands, {
-    visitInlineCast: (node) => {
-      // console.log('node', node);
-    },
-  });
-  return [];
 }

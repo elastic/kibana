@@ -23,6 +23,7 @@ import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
+import { inlineCastsMapping } from '../generated/inline_casts_mapping';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
@@ -486,3 +487,13 @@ export const buildColumnSuggestions = (
 
   return [...suggestions];
 };
+
+/**
+ * Given an inline cast data type, return the corresponding function that performs the cast.
+ * E.g., for 'integer' or 'int', it returns 'to_integer'.
+ *
+ * It returns undefined if the inline cast data type is not supported.
+ */
+export function getFunctionForInlineCast(dataType: string): string | undefined {
+  return inlineCastsMapping[dataType];
+}

@@ -522,7 +522,7 @@ export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
 async function generateInlineCastsMapping(pathToElasticsearch: string) {
   const inlineCastsFilePath = join(
     pathToElasticsearch,
-    '/docs/reference/query-languages/esql/kibana/definition/functions/inline_cast.json'
+    '/docs/reference/query-languages/esql/kibana/definition/inline_cast.json'
   );
   const inlineCastsDefinition = JSON.parse(readFileSync(inlineCastsFilePath, 'utf-8')) as Record<
     string,
