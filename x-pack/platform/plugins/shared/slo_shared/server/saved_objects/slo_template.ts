@@ -13,6 +13,7 @@ import type { storedSloTemplateSchema } from '@kbn/slo-schema';
 import type * as t from 'io-ts';
 import { pick } from 'lodash';
 import { SO_SLO_TEMPLATE_TYPE } from '../../common';
+import { paths } from '../../common/locators/paths';
 
 type StoredSLOTemplate = t.TypeOf<typeof storedSloTemplateSchema>;
 
@@ -63,6 +64,12 @@ export const sloTemplate: SavedObjectsType = {
   },
   management: {
     importableAndExportable: true,
+    getInAppUrl: (savedObject: SavedObject<StoredSLOTemplate>) => {
+      return {
+        path: paths.sloCreateFromTemplate(savedObject.id),
+        uiCapabilitiesPath: '',
+      };
+    },
     getTitle(template: SavedObject<StoredSLOTemplate>) {
       const templateName =
         'name' in template.attributes && typeof template.attributes.name === 'string'
