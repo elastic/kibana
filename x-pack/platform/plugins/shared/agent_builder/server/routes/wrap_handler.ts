@@ -44,7 +44,7 @@ export const getHandlerWrapper =
           return res.forbidden({
             body: {
               message:
-                'Invalid license level. Agent Builder APIs require an enterprise license or superior.',
+                'Invalid license level. Agent Builder APIs require an Enterprise license or higher.',
             },
           });
         }
