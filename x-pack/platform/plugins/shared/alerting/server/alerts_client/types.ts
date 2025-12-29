@@ -110,7 +110,6 @@ export interface IAlertsClient<
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
     rawActiveAlerts: Record<string, RawAlertInstance>;
     rawRecoveredAlerts: Record<string, RawAlertInstance>;
-    rawDelayedAlerts: Record<string, RawAlertInstance>;
   };
   factory(): PublicAlertFactory<
     State,

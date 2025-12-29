@@ -246,7 +246,6 @@ export class LegacyAlertsClient<
       this.maxAlerts,
       this.processedAlerts.trackedActiveAlerts,
       this.processedAlerts.trackedRecoveredAlerts,
-      this.processedAlerts.delayed,
       shouldOptimizeTaskState
     );
   }

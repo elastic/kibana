@@ -50,7 +50,6 @@ describe('toRawAlertInstances', () => {
         maxAlertLimit,
         {},
         recoveredAlerts,
-        {},
         true
       );
       expect(keys(rawRecoveredAlerts)).toEqual(['1']);
