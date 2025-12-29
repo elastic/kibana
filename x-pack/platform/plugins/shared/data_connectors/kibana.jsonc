@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "dataConnectors"],
-    "requiredPlugins": ["actions", "dataSourcesRegistry", "onechat", "workflowsManagement"],
+    "requiredPlugins": ["actions", "dataSourcesRegistry", "agent_builder", "workflowsManagement"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": [

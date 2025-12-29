@@ -152,7 +152,7 @@ describe('createConnectorAndRelatedResources', () => {
   const mockActions = {
     getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
   };
-  const mockOnechat = {
+  const mockAgentBuilder = {
     tools: {
       getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
     },
@@ -216,7 +216,7 @@ describe('createConnectorAndRelatedResources', () => {
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
       dataConnectorTypeDef: mockDataConnectorTypeDef as any,
-      onechat: mockOnechat as any,
+      agentBuilder: mockAgentBuilder as any,
     });
 
     expect(result).toBe('connector-1');
@@ -290,7 +290,7 @@ describe('createConnectorAndRelatedResources', () => {
       workflowManagement: mockWorkflowManagement as any,
       actions: mockActions as any,
       dataConnectorTypeDef: mockDataConnectorTypeDef as any,
-      onechat: mockOnechat as any,
+      agentBuilder: mockAgentBuilder as any,
     });
 
     expect(mockToolRegistry.create).not.toHaveBeenCalled();

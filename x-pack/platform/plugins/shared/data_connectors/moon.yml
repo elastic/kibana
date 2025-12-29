@@ -34,12 +34,12 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/onechat-common'
+  - '@kbn/agent-builder-common'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-http-server'
   - '@kbn/logging'
   - '@kbn/core-saved-objects-utils-server'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/workflows-management-plugin'
 tags:
   - plugin

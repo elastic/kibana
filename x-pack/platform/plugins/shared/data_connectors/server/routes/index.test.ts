@@ -58,7 +58,7 @@ describe('registerRoutes', () => {
         getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
       },
       dataSourcesRegistry: mockDataSourcesRegistry,
-      onechat: {
+      agentBuilder: {
         tools: {
           getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
         },

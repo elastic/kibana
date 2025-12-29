@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -75,7 +75,7 @@ interface CreateConnectorAndResourcesParams {
   workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
   actions: DataConnectorsServerStartDependencies['actions'];
   dataConnectorTypeDef: DataTypeDefinition;
-  onechat: DataConnectorsServerStartDependencies['onechat'];
+  agentBuilder: DataConnectorsServerStartDependencies['agentBuilder'];
 }
 
 /**
@@ -94,7 +94,7 @@ export async function createConnectorAndRelatedResources(
     workflowManagement,
     actions,
     dataConnectorTypeDef,
-    onechat,
+    agentBuilder,
   } = params;
 
   // Create stack connector - for now our spec only supports the case
@@ -116,7 +116,7 @@ export async function createConnectorAndRelatedResources(
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
   const workflowInfos = dataConnectorTypeDef.generateWorkflows(stackConnector.id);
-  const toolRegistry = await onechat.tools.getRegistry({ request });
+  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data connector '${name}'`);
   const workflowIds: string[] = [];
@@ -174,7 +174,7 @@ interface DeleteRelatedResourcesParams {
     ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
   >;
   toolRegistry: Awaited<
-    ReturnType<DataConnectorsServerStartDependencies['onechat']['tools']['getRegistry']>
+    ReturnType<DataConnectorsServerStartDependencies['agentBuilder']['tools']['getRegistry']>
   >;
 }
 
@@ -340,7 +340,7 @@ interface DeleteConnectorAndRelatedResourcesParams {
     ReturnType<DataConnectorsServerStartDependencies['actions']['getActionsClientWithRequest']>
   >;
   toolRegistry: Awaited<
-    ReturnType<DataConnectorsServerStartDependencies['onechat']['tools']['getRegistry']>
+    ReturnType<DataConnectorsServerStartDependencies['agentBuilder']['tools']['getRegistry']>
   >;
   workflowManagement: DataConnectorsServerSetupDependencies['workflowsManagement'];
   request: KibanaRequest;

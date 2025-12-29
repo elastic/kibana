@@ -147,7 +147,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const { name, type, token } = request.body;
-        const [, { actions, dataSourcesRegistry, onechat }] = await getStartServices();
+        const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
         const savedObjectsClient = coreContext.savedObjects.client;
 
         // Validate data connector type exists
@@ -172,7 +172,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           workflowManagement,
           actions,
           dataConnectorTypeDef,
-          onechat,
+          agentBuilder,
         });
 
         return response.ok({
@@ -226,9 +226,9 @@ export function registerRoutes(dependencies: RouteDependencies) {
         }
 
         // Delete all related resources and saved objects for each connector
-        const [, { actions, onechat }] = await getStartServices();
+        const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const toolRegistry = await onechat.tools.getRegistry({ request });
+        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
         let fullyDeletedCount = 0;
         let partiallyDeletedCount = 0;
@@ -290,9 +290,9 @@ export function registerRoutes(dependencies: RouteDependencies) {
         );
 
         // Delete the connector and all related resources
-        const [, { actions, onechat }] = await getStartServices();
+        const [, { actions, agentBuilder }] = await getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(request);
-        const toolRegistry = await onechat.tools.getRegistry({ request });
+        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
         const result = await deleteConnectorAndRelatedResources({
           connector: savedObject,
