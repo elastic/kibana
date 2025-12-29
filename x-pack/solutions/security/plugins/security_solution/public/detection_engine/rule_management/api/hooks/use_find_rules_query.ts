@@ -8,7 +8,7 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import type { RuleResponse, WarningSchema } from '../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import type { FilterOptions, PaginationOptions, SortingOptions } from '../../logic';
 import { fetchRules } from '../api';
@@ -29,6 +29,7 @@ const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];
 export interface RulesQueryResponse {
   rules: RuleResponse[];
   total: number;
+  warnings?: WarningSchema[];
 }
 
 /**
@@ -55,7 +56,7 @@ export const useFindRulesQuery = (
     async ({ signal }) => {
       const response = await fetchRules({ signal, ...queryArgs });
 
-      return { rules: response.data, total: response.total };
+      return { rules: response.data, total: response.total, warnings: response.warnings };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
@@ -113,6 +114,7 @@ export const useUpdateRulesCache = () => {
             ? {
                 rules: updateRules(currentData.rules, newRules),
                 total: currentData.total,
+                warnings: currentData.warnings,
               }
             : undefined
       );
