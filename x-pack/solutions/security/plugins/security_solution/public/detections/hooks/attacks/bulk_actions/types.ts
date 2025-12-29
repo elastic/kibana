@@ -30,12 +30,16 @@ export interface BaseApplyAttackProps {
  * These props are common to all hooks that provide context menu items for a single attack discovery and its related detection alerts.
  */
 export interface BaseAttackContextMenuItemsProps {
-  /** Callback to close the popover menu */
-  closePopover: () => void;
-  /** Optional callback to set loading state */
-  setIsLoading?: (loading: boolean) => void;
+  /** Optional callback to clear selection */
+  clearSelection?: () => void;
+  /** Optional callback to close the popover menu */
+  closePopover?: () => void;
   /** Optional callback when operation succeeds */
   onSuccess?: () => void;
+  /** Optional callback to refresh data */
+  refresh?: () => void;
+  /** Optional callback to set loading state */
+  setIsLoading?: (loading: boolean) => void;
 }
 
 /**

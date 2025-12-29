@@ -36,8 +36,10 @@ export interface UseAttackWorkflowStatusContextMenuItemsProps
 export const useAttackWorkflowStatusContextMenuItems = ({
   attacksWithWorkflowStatus,
   closePopover,
+  clearSelection,
   setIsLoading,
   onSuccess,
+  refresh,
 }: UseAttackWorkflowStatusContextMenuItemsProps): BulkAttackContextMenuItems => {
   // Use the workflow status of the first attack in the array
   const currentStatus = useMemo(() => {
@@ -59,12 +61,14 @@ export const useAttackWorkflowStatusContextMenuItems = ({
 
   return useMemo(
     () =>
-      transformBulkActionsToContextMenuItems(
+      transformBulkActionsToContextMenuItems({
         bulkActionItems,
         alertItems,
         closePopover,
-        setIsLoading
-      ),
-    [bulkActionItems, alertItems, closePopover, setIsLoading]
+        clearSelection,
+        setIsLoading,
+        refresh,
+      }),
+    [bulkActionItems, alertItems, closePopover, clearSelection, setIsLoading, refresh]
   );
 };

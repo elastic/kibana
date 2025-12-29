@@ -48,12 +48,12 @@ describe('transformBulkActionsToContextMenuItems', () => {
       panels: [],
     };
 
-    const result = transformBulkActionsToContextMenuItems(
+    const result = transformBulkActionsToContextMenuItems({
       bulkActionItems,
-      mockAlertItems,
-      mockClosePopover,
-      mockSetIsLoading
-    );
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0]).toEqual({
@@ -79,12 +79,12 @@ describe('transformBulkActionsToContextMenuItems', () => {
       panels: [],
     };
 
-    const result = transformBulkActionsToContextMenuItems(
+    const result = transformBulkActionsToContextMenuItems({
       bulkActionItems,
-      mockAlertItems,
-      mockClosePopover,
-      mockSetIsLoading
-    );
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
 
     expect(result.items[0].onClick).toBeUndefined();
   });
@@ -104,12 +104,12 @@ describe('transformBulkActionsToContextMenuItems', () => {
       ],
     };
 
-    const result = transformBulkActionsToContextMenuItems(
+    const result = transformBulkActionsToContextMenuItems({
       bulkActionItems,
-      mockAlertItems,
-      mockClosePopover,
-      mockSetIsLoading
-    );
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
 
     expect(result.panels).toHaveLength(1);
     expect(result.panels[0]).toEqual({
@@ -134,17 +134,19 @@ describe('transformBulkActionsToContextMenuItems', () => {
       ],
     };
 
-    transformBulkActionsToContextMenuItems(
+    transformBulkActionsToContextMenuItems({
       bulkActionItems,
-      mockAlertItems,
-      mockClosePopover,
-      mockSetIsLoading
-    );
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
 
     expect(mockRenderContent).toHaveBeenCalledWith({
-      closePopoverMenu: mockClosePopover,
+      closePopoverMenu: expect.any(Function),
       setIsBulkActionsLoading: expect.any(Function),
       alertItems: mockAlertItems,
+      clearSelection: undefined,
+      refresh: undefined,
     });
   });
 
@@ -164,12 +166,12 @@ describe('transformBulkActionsToContextMenuItems', () => {
       ],
     };
 
-    const result = transformBulkActionsToContextMenuItems(
+    const result = transformBulkActionsToContextMenuItems({
       bulkActionItems,
-      mockAlertItems,
-      mockClosePopover,
-      mockSetIsLoading
-    );
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
 
     expect(result.panels[0].width).toBe(400);
   });
@@ -180,12 +182,12 @@ describe('transformBulkActionsToContextMenuItems', () => {
       panels: [],
     };
 
-    const result = transformBulkActionsToContextMenuItems(
+    const result = transformBulkActionsToContextMenuItems({
       bulkActionItems,
-      mockAlertItems,
-      mockClosePopover,
-      mockSetIsLoading
-    );
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
 
     expect(result.items).toEqual([]);
     expect(result.panels).toEqual([]);

@@ -35,8 +35,10 @@ export interface UseAttackTagsContextMenuItemsProps extends BaseAttackContextMen
 export const useAttackTagsContextMenuItems = ({
   attacksWithTags,
   closePopover,
+  clearSelection,
   setIsLoading,
   onSuccess,
+  refresh,
 }: UseAttackTagsContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackTagsItems({
     onTagsUpdate: onSuccess,
@@ -55,12 +57,14 @@ export const useAttackTagsContextMenuItems = ({
 
   return useMemo(
     () =>
-      transformBulkActionsToContextMenuItems(
+      transformBulkActionsToContextMenuItems({
         bulkActionItems,
         alertItems,
         closePopover,
-        setIsLoading
-      ),
-    [bulkActionItems, alertItems, closePopover, setIsLoading]
+        clearSelection,
+        setIsLoading,
+        refresh,
+      }),
+    [bulkActionItems, alertItems, closePopover, clearSelection, setIsLoading, refresh]
   );
 };

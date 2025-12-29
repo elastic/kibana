@@ -113,7 +113,8 @@ describe('useAttackTagsContextMenuItems', () => {
 
     expect(mockRenderContent).toHaveBeenCalled();
     const callArgs = mockRenderContent.mock.calls[0][0];
-    expect(callArgs.closePopoverMenu).toBe(mockClosePopover);
+    callArgs.closePopoverMenu();
+    expect(mockClosePopover).toHaveBeenCalled();
     expect(callArgs.setIsBulkActionsLoading).toBeDefined();
     expect(callArgs.alertItems).toBeDefined();
     expect(callArgs.alertItems[0]._id).toBe('attack-1');

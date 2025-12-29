@@ -5,45 +5,70 @@
  * 2.0.
  */
 
-import { noop } from 'lodash';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 
 import type { BulkAttackActionItems, BulkAttackContextMenuItems } from '../types';
 
+/** Props for the {@link transformBulkActionsToContextMenuItems} utility. */
+interface TransformBulkActionsToContextMenuItemsProps {
+  /** Bulk action items and panels from bulk action hooks. */
+  bulkActionItems: BulkAttackActionItems;
+  /** Array of TimelineItem representing attack alerts. */
+  alertItems: TimelineItem[];
+  /** Optional callback to close the popover menu. */
+  closePopover?: () => void;
+  /** Optional callback to clear the current selection. */
+  clearSelection?: () => void;
+  /** Optional callback to refresh the data. */
+  refresh?: () => void;
+  /** Optional callback to set loading state. */
+  setIsLoading?: (loading: boolean) => void;
+}
+
 /**
  * Transforms bulk action items and panels into context menu items and panels.
  * This utility function is used by context menu hooks to convert bulk action configurations
  * into the format required by EuiContextMenu.
  *
- * @param bulkActionItems - Bulk action items and panels from bulk action hooks
- * @param alertItems - Array of TimelineItem representing attack alerts
- * @param closePopover - Callback to close the popover menu
- * @param setIsLoading - Optional callback to set loading state
+ * @param props - {@link TransformBulkActionsToContextMenuItemsProps}
  * @returns Transformed context menu items and panels
  */
-export const transformBulkActionsToContextMenuItems = (
-  bulkActionItems: BulkAttackActionItems,
-  alertItems: TimelineItem[],
-  closePopover: () => void,
-  setIsLoading?: (loading: boolean) => void
-): BulkAttackContextMenuItems => {
+export const transformBulkActionsToContextMenuItems = ({
+  bulkActionItems,
+  alertItems,
+  closePopover,
+  clearSelection,
+  refresh,
+  setIsLoading,
+}: TransformBulkActionsToContextMenuItemsProps): BulkAttackContextMenuItems => {
   const items: EuiContextMenuPanelItemDescriptorEntry[] = bulkActionItems.items.map((item) => {
     return {
       name: item.label,
       panel: item.panel,
       'data-test-subj': item['data-test-subj'],
       key: item.key,
-      onClick: item.onClick ? () => item.onClick?.(alertItems, true, noop, noop, noop) : undefined,
+      onClick: item.onClick
+        ? () =>
+            item.onClick?.(
+              alertItems,
+              false,
+              (loading) => setIsLoading?.(loading),
+              () => clearSelection?.(),
+              () => refresh?.()
+            )
+        : undefined,
     };
   });
 
   const panels: EuiContextMenuPanelDescriptor[] = bulkActionItems.panels.map((panel) => {
     const content = panel.renderContent({
-      closePopoverMenu: closePopover,
-      setIsBulkActionsLoading: (loading) => setIsLoading?.(loading),
       alertItems,
+      clearSelection,
+      closePopoverMenu: () => closePopover?.(),
+      setIsBulkActionsLoading: (loading) => setIsLoading?.(loading),
+      refresh,
     });
     return {
       title: panel.title,

@@ -35,8 +35,10 @@ export interface UseAttackAssigneesContextMenuItemsProps extends BaseAttackConte
 export const useAttackAssigneesContextMenuItems = ({
   attacksWithAssignees,
   closePopover,
+  clearSelection,
   setIsLoading,
   onSuccess,
+  refresh,
 }: UseAttackAssigneesContextMenuItemsProps): BulkAttackContextMenuItems => {
   // Get all unique assignees from all attacks for the bulk hook
   const allAssignees = useMemo(() => {
@@ -65,12 +67,14 @@ export const useAttackAssigneesContextMenuItems = ({
 
   return useMemo(
     () =>
-      transformBulkActionsToContextMenuItems(
+      transformBulkActionsToContextMenuItems({
         bulkActionItems,
         alertItems,
         closePopover,
-        setIsLoading
-      ),
-    [bulkActionItems, alertItems, closePopover, setIsLoading]
+        clearSelection,
+        setIsLoading,
+        refresh,
+      }),
+    [bulkActionItems, alertItems, closePopover, clearSelection, setIsLoading, refresh]
   );
 };
