@@ -212,7 +212,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
         const connectors = findResponse.saved_objects;
 
-        logger.info(`Found ${connectors.length} data connector(s) to delete`);
+        logger.debug(`Found ${connectors.length} data connector(s) to delete`);
 
         if (connectors.length === 0) {
           return response.ok({
