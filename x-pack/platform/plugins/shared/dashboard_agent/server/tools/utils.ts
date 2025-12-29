@@ -6,13 +6,6 @@
  */
 
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import {
-  isToolResultId,
-  type ToolAvailabilityContext,
-  type ToolAvailabilityResult,
-  type ToolResultStore,
-} from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import {
   LensConfigBuilder,
@@ -23,6 +16,13 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/common/page_bundle_constants';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 
+import type {
+  ToolAvailabilityContext,
+  ToolAvailabilityResult,
+  ToolResultStore,
+} from '@kbn/agent-builder-server';
+import { isToolResultId } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
