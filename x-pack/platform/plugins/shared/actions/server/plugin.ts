@@ -108,6 +108,7 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
@@ -391,6 +392,11 @@ export class ActionsPlugin
       actionsConfigUtils,
     });
 
+    // Initialize OAuth rate limiter
+    const oauthRateLimiter = new OAuthRateLimiter({
+      config: this.actionsConfig.oAuthRateLimit,
+    });
+
     // Routes
     defineRoutes({
       router: core.http.createRouter<ActionsRequestHandlerContext>(),
@@ -399,6 +405,7 @@ export class ActionsPlugin
       usageCounter: this.usageCounter,
       logger: this.logger,
       core,
+      oauthRateLimiter,
       getEncryptedSavedObjects: async () => {
         const [, { encryptedSavedObjects }] = await core.getStartServices();
         return encryptedSavedObjects;
