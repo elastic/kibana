@@ -8,11 +8,8 @@
 import { determineDelayedAlerts } from './determine_delayed_alerts';
 import { Alert } from '../alert';
 import { alertsWithAnyUUID } from '../test_utils';
-import { ruleRunMetricsStoreMock } from './rule_run_metrics_store.mock';
 
 describe('determineDelayedAlerts', () => {
-  const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
-
   test('should increment activeCount for all active alerts', () => {
     const alert1 = new Alert('1', {
       meta: { activeCount: 1, uuid: 'uuid-1' },
@@ -36,7 +33,6 @@ describe('determineDelayedAlerts', () => {
       delayedAlerts: {},
       alertDelay: 0,
       startedAt: null,
-      ruleRunMetricsStore,
     });
     expect(newAlerts).toMatchInlineSnapshot(`
       Object {
@@ -115,7 +111,6 @@ describe('determineDelayedAlerts', () => {
       delayedAlerts: {},
       alertDelay: 1,
       startedAt: null,
-      ruleRunMetricsStore,
     });
 
     expect(alertsWithAnyUUID(trackedRecoveredAlerts)).toMatchInlineSnapshot(`
@@ -182,7 +177,6 @@ describe('determineDelayedAlerts', () => {
       delayedAlerts: {},
       alertDelay: 5,
       startedAt: null,
-      ruleRunMetricsStore,
     });
     expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
     expect(activeAlerts).toMatchInlineSnapshot(`Object {}`);
@@ -232,7 +226,6 @@ describe('determineDelayedAlerts', () => {
       delayedAlerts: {},
       alertDelay: 5,
       startedAt: null,
-      ruleRunMetricsStore,
     });
     expect(recoveredAlerts).toMatchInlineSnapshot(`
       Object {
@@ -276,7 +269,6 @@ describe('determineDelayedAlerts', () => {
       delayedAlerts: {},
       alertDelay: 1,
       startedAt: null,
-      ruleRunMetricsStore,
     });
     expect(newAlerts['2'].getState().duration).toBe('0');
     expect(newAlerts['2'].getState().start).toBeTruthy();
