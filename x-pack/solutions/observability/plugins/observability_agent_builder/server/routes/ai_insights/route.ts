@@ -7,11 +7,19 @@
 
 import * as t from 'io-ts';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
 import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
+
+function getRequestAbortedSignal(request: KibanaRequest) {
+  const abortController = new AbortController();
+  request.events.aborted$.subscribe(() => abortController.abort());
+  return abortController.signal;
+}
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
@@ -128,7 +136,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         id: t.string,
       }),
     }),
-    handler: async ({ request, core, dataRegistry, params }) => {
+    handler: async ({ request, core, dataRegistry, params, response, logger }) => {
       const { index, id } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
@@ -138,7 +146,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const inferenceClient = inference.getClient({ request });
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
-      const { summary, context } = await getLogAiInsights({
+      const result = await getLogAiInsights({
         index,
         id,
         inferenceClient,
@@ -148,7 +156,12 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         dataRegistry,
       });
 
-      return { summary, context };
+      return response.ok({
+        body: observableIntoEventSourceStream(result.events$, {
+          logger,
+          signal: getRequestAbortedSignal(request),
+        }),
+      });
     },
   });
 

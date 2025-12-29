@@ -7,11 +7,6 @@
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  createRepositoryClient,
-  type DefaultClientOptions,
-} from '@kbn/server-route-repository-client';
-import type { ObservabilityAgentBuilderServerRouteRepository } from '../../../server';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
@@ -42,11 +37,6 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     services: { http },
   } = useKibana();
 
-  const apiClient = createRepositoryClient<
-    ObservabilityAgentBuilderServerRouteRepository,
-    DefaultClientOptions
-  >({ http });
-
   const { index, id } = useMemo(() => {
     return {
       index: doc?.fields.find((field) => field.field === '_index')?.value[0],
@@ -58,20 +48,19 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     return null;
   }
 
-  const fetchInsight = async () => {
-    const response = await apiClient.fetch(
-      'POST /internal/observability_agent_builder/ai_insights/log',
-      {
-        signal: null,
-        params: {
-          body: {
-            index,
-            id,
-          },
-        },
-      }
-    );
-    return response;
+  const fetchInsight = async (signal?: AbortSignal) => {
+    const response = await http.fetch('/internal/observability_agent_builder/ai_insights/log', {
+      method: 'POST',
+      body: JSON.stringify({
+        index,
+        id,
+      }),
+      asResponse: true,
+      rawResponse: true,
+      signal,
+    });
+
+    return response.response!;
   };
 
   const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
