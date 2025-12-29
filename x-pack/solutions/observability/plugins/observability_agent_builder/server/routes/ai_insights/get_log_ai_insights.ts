@@ -52,19 +52,59 @@ export async function getLogAiInsights({
 }: GetLogAiInsightsParams): Promise<{ summary: string; context: string }> {
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
-    Using the provided data produce a concise, action-oriented response.
-    If it is an issue, provide remediation steps for further investigation.
-    Check whether it is a problem with downstream services. Include when the issue started to appear.
+    Using the provided data, produce a response tailored to the log type and level.
+
+    ## Log Type Classification
+    First, determine the log type by examining the log entry:
+    - Check \`log.level\` field (error, warning, info, debug, trace, fatal, critical, alert, emergency)
+    - Check for error fields (\`error.message\`, \`error.stack_trace\`, \`error.exception\`, etc.)
+    - Check for exception fields (\`exception.message\`, \`exception.stacktrace\`, etc.)
+    - Check \`event_name\` or \`attributes.event.name\` fields that may indicate error events
+
+    ## Response Strategy Based on Log Type
+
+    ### For Issue Logs (Error, Fatal, Critical, Alert, Emergency, or logs with error/exception fields)
+    If the log entry indicates an issue:
+    - Provide a detailed analysis: explain what the problem is, where it originated, and the root cause if determinable
+    - Use all available context data (ServiceSummary, DownstreamDependencies, TraceDocuments, TraceServices) to investigate
+    - Check if downstream services are affected or causing the issue using DownstreamDependencies data
+    - Provide immediate actions and remediation steps for further investigation
+    - Do NOT include "when the issue started to appear" unless that information is explicitly available in the provided data
+
+    ### For Warning Logs
+    If the log level is warning:
+    - Explain what the warning means and whether it indicates a problem
+    - If it indicates a problem, treat it as an issue log (see above)
+    - If it's informational, treat it as an info log (see below)
+
+    ### For Informational Logs (Info, Debug, Trace, or other non-error logs)
+    If the log entry is informational:
+    - Provide a concise explanation of what the log message means
+    - Identify where the log is from (service, host, container, etc.)
+    - Keep the response brief and focused - no remediation steps or deep investigation needed
+    - Only mention issues if the log unexpectedly indicates a problem despite being at info/debug level
 
     ## Entity Linking
-    You must improve the SRE's navigation workflow by formatting specific Observability entities as Markdown links. When you identify the following entities in your context or data, you MUST format them using the specific relative URL paths defined below.
+    When you identify the following entities in your context or data, you MUST format them using the specific relative URL paths defined below.
 
+    ### Services
+      - Trigger: When mentioning a service by its \`service.name\`.
+      - Template: \`[<service.name>](/app/apm/services/<service.name>)\`
+      - Example:
+      - Text: "The billing-service is down."
+      - Output: "The [billing-service](/app/apm/services/billing-service) is down."
     ### Traces
       - Trigger: When mentioning a trace by its \`trace.id\`.
-      - Template: \`[<trace.id>](/app/apm/link-to/trace/\${trace.id})\`
+      - Template: \`[<trace.id>](/app/apm/link-to/trace/<trace.id>)\`
       - Example:
       - Text: "Investigate trace 8a3c42."
       - Output: "Investigate trace [8a3c42](/app/apm/link-to/trace/8a3c42)"
+    ### Errors
+      - Trigger: When mentioning an error that has an associated \`service.name\` and \`error.grouping_key\`.
+      - Template: \`[<error.grouping_key>](/app/apm/services/<service.name>/errors/<error.grouping_key>)\`
+      - Example:
+      - Text: "Found NullPointer in frontend."
+      - Output: "Found [abcde](/app/apm/services/frontend/errors/abcde) in [frontend](/app/apm/services/frontend)."
   `);
 
   const logEntry = await getLogDocumentById({
@@ -203,7 +243,9 @@ export async function getLogAiInsights({
       {
         role: MessageRole.User,
         content:
-          dedent(`Explain this log message: what it means, where it is from, whether it is expected, and if it is an issue.
+          dedent(`Explain this log message: what it means, where it is from, and whether it is expected behavior.
+          Determine if this log entry indicates an issue (error-level logs, warnings indicating problems, logs with error fields, service failures, exceptions, or operational problems).
+          If it is an issue, explain what the problem is and provide the reason(if you can provide it) and remediation steps for further investigation.
           ${context}
           `),
       },
