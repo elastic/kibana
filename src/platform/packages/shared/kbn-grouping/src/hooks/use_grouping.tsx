@@ -41,6 +41,7 @@ type StaticGroupingProps<T> = Pick<
   | 'groupsUnit'
   | 'multiValueFields'
   | 'emptyGroupingComponent'
+  | 'getAdditionalActionButtons'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
