@@ -13,7 +13,7 @@ const projectRouting = {
   type: 'keyword',
   serverlessOnly: true,
   preview: true,
-  snapshotOnly: true,
+  snapshotOnly: false,
   description:
     'A project routing expression, used to define which projects to route the query to. Only supported if Cross-Project Search is enabled.',
   ignoreAsSuggestion: false,
