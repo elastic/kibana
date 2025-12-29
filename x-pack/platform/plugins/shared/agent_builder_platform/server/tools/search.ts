@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 
 const searchSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
