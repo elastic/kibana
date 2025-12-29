@@ -14,6 +14,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { i18n } from '@kbn/i18n';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 
 const JINA_READER_TITLE = 'Jina Reader';
@@ -54,10 +55,12 @@ export const JinaReaderConnector: ConnectorSpec = {
   metadata: {
     id: JINA_READER_CONNECTOR_ID,
     displayName: JINA_READER_TITLE,
-    description: 'Any URL to markdown, web search for better LLM grounding',
+    description: i18n.translate('connectorSpecs.jinaReader.metadata.description', {
+      defaultMessage: 'Any URL to markdown, web search for better LLM grounding',
+    }),
     minimumLicense: 'gold',
     docsUrl: 'https://jina.ai/reader',
-    supportedFeatureIds: ['workflows', 'generativeAIForSearchPlayground'],
+    supportedFeatureIds: ['workflows'],
   },
 
   auth: {
