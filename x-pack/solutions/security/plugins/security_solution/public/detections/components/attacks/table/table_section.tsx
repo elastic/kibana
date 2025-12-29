@@ -12,6 +12,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
 import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
+import { isEmpty } from 'lodash';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
@@ -37,6 +38,7 @@ import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
+import { EmptyResultsContainer } from './empty_results/container';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
@@ -52,17 +54,23 @@ export interface TableSectionProps {
    * This is an array of Status values, such as ['open', 'acknowledged', 'closed', 'in-progress']
    */
   statusFilter: Status[];
+
   /**
    * The page filters retrieved from the FiltersSection component to filter the table
    */
   pageFilters: Filter[] | undefined;
+
+  /**
+   * Callback to open the schedules flyout
+   */
+  openSchedulesFlyout: () => void;
 }
 
 /**
  * Renders the alerts table with grouping functionality in the attacks page.
  */
 export const TableSection = React.memo(
-  ({ dataView, statusFilter, pageFilters }: TableSectionProps) => {
+  ({ dataView, statusFilter, pageFilters, openSchedulesFlyout }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -199,6 +207,14 @@ export const TableSection = React.memo(
       [openAttackDetailsFlyout]
     );
 
+    const emptyGroupingComponent = useMemo(() => {
+      const hasFilters =
+        !isEmpty(query.query.trim()) || !isEmpty(pageFilters) || !isEmpty(globalFilters);
+      return (
+        <EmptyResultsContainer hasFilters={hasFilters} openSchedulesFlyout={openSchedulesFlyout} />
+      );
+    }, [globalFilters, openSchedulesFlyout, pageFilters, query.query]);
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -221,6 +237,7 @@ export const TableSection = React.memo(
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
           getAdditionalActionButtons={getAdditionalActionButtons}
+          emptyGroupingComponent={emptyGroupingComponent}
         />
       </div>
     );

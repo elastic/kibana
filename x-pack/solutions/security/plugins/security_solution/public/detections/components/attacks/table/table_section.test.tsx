@@ -21,6 +21,7 @@ import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { groupingOptions, groupingSettings } from './grouping_configs';
+import { EmptyResultsContainer } from './empty_results/container';
 
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -30,6 +31,9 @@ jest.mock('../../alerts_table/alerts_grouping', () => ({
   ...jest.requireActual('../../alerts_table/alerts_grouping'),
   GroupedAlertsTable: jest.fn(),
 }));
+jest.mock('./empty_results/container', () => ({
+  EmptyResultsContainer: jest.fn(() => <div data-test-subj="mock-empty-results-container" />),
+}));
 
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 const dataView: DataView = createStubDataView({ spec: dataViewSpec });
@@ -37,8 +41,11 @@ const dataView: DataView = createStubDataView({ spec: dataViewSpec });
 const mockUseGetDefaultGroupTitleRenderers = useGetDefaultGroupTitleRenderers as jest.Mock;
 const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
+const mockEmptyResultsContainer = EmptyResultsContainer as unknown as jest.Mock;
 
 describe('<TableSection />', () => {
+  const openSchedulesFlyout = jest.fn();
+
   beforeEach(() => {
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
@@ -52,6 +59,7 @@ describe('<TableSection />', () => {
         {props.additionalToolbarControls?.map((control: React.ReactNode, index: number) => (
           <React.Fragment key={index}>{control}</React.Fragment>
         ))}
+        {props.emptyGroupingComponent}
       </div>
     ));
     (useUserData as jest.Mock).mockReturnValue([
@@ -71,7 +79,12 @@ describe('<TableSection />', () => {
   it('should render correctly', async () => {
     const { getByTestId } = render(
       <TestProviders>
-        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
+        <TableSection
+          statusFilter={[]}
+          pageFilters={[]}
+          dataView={dataView}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
       </TestProviders>
     );
 
@@ -89,7 +102,12 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        <TableSection
+          dataView={dataView}
+          statusFilter={[]}
+          pageFilters={[]}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
       </TestProviders>
     );
 
@@ -105,7 +123,12 @@ describe('<TableSection />', () => {
   it('should pass groupingOptions and groupingSettings to GroupedAlertsTable', async () => {
     render(
       <TestProviders>
-        <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+        <TableSection
+          dataView={dataView}
+          statusFilter={[]}
+          pageFilters={[]}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
       </TestProviders>
     );
 
@@ -115,6 +138,31 @@ describe('<TableSection />', () => {
       expect(props.defaultGroupingOptions).toEqual(groupingOptions);
       expect(props.settings).toEqual(groupingSettings);
     });
+  });
+
+  it('should pass EmptyResultsContainer to GroupedAlertsTable', async () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <TableSection
+          dataView={dataView}
+          statusFilter={[]}
+          pageFilters={[]}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('mock-empty-results-container')).toBeInTheDocument();
+    });
+
+    expect(mockEmptyResultsContainer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        openSchedulesFlyout,
+        hasFilters: false,
+      }),
+      expect.anything()
+    );
   });
 
   it('should call useGetDefaultGroupTitleRenderers with attackIds from onAggregationsChange when groupingLevel is 0', async () => {
@@ -129,7 +177,12 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
+        <TableSection
+          pageFilters={[]}
+          statusFilter={[]}
+          dataView={dataView}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
       </TestProviders>
     );
 
@@ -170,7 +223,12 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection pageFilters={[]} statusFilter={[]} dataView={dataView} />
+        <TableSection
+          pageFilters={[]}
+          statusFilter={[]}
+          dataView={dataView}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
       </TestProviders>
     );
 
@@ -211,7 +269,12 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
+        <TableSection
+          statusFilter={[]}
+          pageFilters={[]}
+          dataView={dataView}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
       </TestProviders>
     );
 
@@ -233,7 +296,12 @@ describe('<TableSection />', () => {
 
     render(
       <TestProviders>
-        <TableSection statusFilter={[]} pageFilters={[]} dataView={dataView} />
+        <TableSection
+          statusFilter={[]}
+          pageFilters={[]}
+          dataView={dataView}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
       </TestProviders>
     );
 
@@ -258,7 +326,12 @@ describe('<TableSection />', () => {
     it('should render the show anonymized switch', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -270,7 +343,12 @@ describe('<TableSection />', () => {
     it('should render the switch as unchecked by default', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -285,7 +363,12 @@ describe('<TableSection />', () => {
     it('should toggle the switch state when clicked', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -312,7 +395,12 @@ describe('<TableSection />', () => {
     it('should pass the switch in additionalToolbarControls to GroupedAlertsTable', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -330,7 +418,12 @@ describe('<TableSection />', () => {
     it('should pass showAnonymized=false to useGetDefaultGroupTitleRenderers by default', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -346,7 +439,12 @@ describe('<TableSection />', () => {
     it('should pass showAnonymized=true to useGetDefaultGroupTitleRenderers when switch is toggled on', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -378,7 +476,12 @@ describe('<TableSection />', () => {
     it('should update showAnonymized back to false when switch is toggled off', async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -418,7 +521,12 @@ describe('<TableSection />', () => {
     it('should pass all grouping settings including enforcedGroups', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -439,7 +547,12 @@ describe('<TableSection />', () => {
     it('should return an empty array for null group buckets', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -464,7 +577,12 @@ describe('<TableSection />', () => {
     it('should return an expand button for non-null grouping buckets', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -491,7 +609,12 @@ describe('<TableSection />', () => {
     it('should return an empty array for non-grouping buckets', async () => {
       render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
@@ -517,7 +640,12 @@ describe('<TableSection />', () => {
 
       render(
         <TestProviders>
-          <TableSection dataView={dataView} statusFilter={[]} pageFilters={[]} />
+          <TableSection
+            dataView={dataView}
+            statusFilter={[]}
+            pageFilters={[]}
+            openSchedulesFlyout={openSchedulesFlyout}
+          />
         </TestProviders>
       );
 
