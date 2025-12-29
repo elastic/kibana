@@ -61,7 +61,7 @@ export async function registerObservabilityAgent({
         `  - Output: "The [billing-service](/app/apm/services/billing-service) is down."\n` +
         `\n### Traces\n` +
         `- Trigger: When mentioning a trace by its \`trace.id\`.\n` +
-        `- Template: \`[<trace.id>](/app/apm/link-to/trace/da065ee69bae3d76e0f8a3152ca435c3)\`\n` +
+        `- Template: \`[<trace.id>](/app/apm/link-to/trace/<trace.id>)\`\n` +
         `- Example:\n` +
         `  - Text: "Investigate trace 8a3c42."\n` +
         `  - Output: "Investigate trace [8a3c42](/app/apm/link-to/trace/8a3c42)."\n` +
