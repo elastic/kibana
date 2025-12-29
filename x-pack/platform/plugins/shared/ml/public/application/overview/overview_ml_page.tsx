@@ -11,8 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCardProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -23,6 +21,7 @@ import {
   EuiText,
   EuiTitle,
   EuiHorizontalRule,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -54,17 +53,14 @@ export const MLOverviewCard = ({
   buttonLabel,
   cardDataTestSubj,
   buttonDataTestSubj,
-  buttonType = 'empty',
 }: {
   path: string;
   iconType: string;
   buttonLabel: string;
   cardDataTestSubj: string;
   buttonDataTestSubj: string;
-  buttonType: string | undefined;
 } & EuiCardProps) => {
   const navigateToPath = useNavigateToPath();
-  const ButtonComponent = buttonType === 'empty' ? EuiButtonEmpty : EuiButton;
 
   return (
     <EuiFlexItem data-test-subj={cardDataTestSubj}>
@@ -72,34 +68,23 @@ export const MLOverviewCard = ({
         layout={layout}
         data-test-subj={cardDataTestSubj}
         hasBorder
-        icon={
-          <EuiButtonIcon
-            display="base"
-            size="s"
-            iconType={iconType}
-            onClick={() => navigateToPath(path)}
-            aria-labelledby="mlOverviewCardTitle"
-          />
-        }
         title={title}
         titleSize="s"
         titleElement="h3"
         id="mlOverviewCardTitle"
       >
-        <EuiFlexItem grow={true}>
-          <EuiSpacer size="m" />
-          <EuiText size="s">{description}</EuiText>
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-        <ButtonComponent
-          flush="left"
+        <EuiText size="s">{description}</EuiText>
+        <EuiSpacer size="s" />
+        <EuiButton
+          color="text"
           target="_self"
           onClick={() => navigateToPath(path)}
           data-test-subj={buttonDataTestSubj}
           aria-label={buttonLabel}
         >
+          {iconType ? <EuiIcon type={iconType} /> : null}
           {buttonLabel}
-        </ButtonComponent>
+        </EuiButton>
       </EuiCard>
     </EuiFlexItem>
   );
@@ -188,76 +173,17 @@ export const OverviewPage: FC = () => {
                 <EuiTitle size="s">
                   <h2>
                     {i18n.translate('xpack.ml.overview.aiopsLabsTitle', {
-                      defaultMessage: 'AIOps Labs',
+                      defaultMessage: 'Surface insights',
                     })}
                   </h2>
                 </EuiTitle>
                 <EuiFlexGrid gutterSize="m" columns={3}>
                   <EuiFlexItem>
                     <EuiCard
+                      display="subdued"
                       textAlign="left"
                       layout="vertical"
                       hasBorder
-                      icon={
-                        <EuiButtonIcon
-                          display="base"
-                          size="s"
-                          onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
-                          iconType="logRateAnalysis"
-                          aria-label={i18n.translate('xpack.ml.overview.logRateAnalysis.title', {
-                            defaultMessage: 'Log Rate Analysis',
-                          })}
-                        />
-                      }
-                      title={
-                        <FormattedMessage
-                          id="xpack.ml.overview.logRateAnalysis.title"
-                          defaultMessage="Log Rate Analysis"
-                        />
-                      }
-                      titleElement="h3"
-                      titleSize="s"
-                      description={
-                        <>
-                          <FormattedMessage
-                            id="xpack.ml.overview.logRateAnalysis.description"
-                            defaultMessage="Advanced statistical methods to identify reasons for increases or decreases in log rates and displays the statistically significant data in a tabular format."
-                          />
-                        </>
-                      }
-                      footer={
-                        <EuiButton
-                          color="primary"
-                          target="_self"
-                          onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
-                          data-test-subj="mlOverviewCardLogRateAnalysisButton"
-                        >
-                          <FormattedMessage
-                            id="xpack.ml.overview.logRateAnalysis.startAnalysisButton"
-                            defaultMessage="Start analysis"
-                          />
-                        </EuiButton>
-                      }
-                      data-test-subj="mlOverviewCardLogRateAnalysis"
-                    />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiCard
-                      textAlign="left"
-                      layout="vertical"
-                      hasBorder
-                      icon={
-                        <EuiButtonIcon
-                          display="base"
-                          size="s"
-                          iconType="logPatternAnalysis"
-                          onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
-                          aria-label={i18n.translate('xpack.ml.overview.logPatternAnalysisTitle', {
-                            defaultMessage: 'Log Pattern Analysis',
-                          })}
-                        />
-                      }
                       title={
                         <FormattedMessage
                           id="xpack.ml.overview.logPatternAnalysisTitle"
@@ -270,20 +196,20 @@ export const OverviewPage: FC = () => {
                         <>
                           <FormattedMessage
                             id="xpack.ml.overview.logPatternAnalysisDescription"
-                            defaultMessage="Find patterns in unstructured log messages and make it easier to examine your data."
+                            defaultMessage="Quickly spot unusual patterns and changes in normal log behavior in high-volume, noisy logs to accelerate root cause analysis."
                           />
                         </>
                       }
                       footer={
                         <EuiButton
-                          color="primary"
+                          color="text"
                           target="_self"
                           onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
                           data-test-subj="mlOverviewCardLogPatternAnalysisButton"
                         >
                           <FormattedMessage
-                            id="xpack.ml.overview.logPatternAnalysis.startAnalysisButton"
-                            defaultMessage="Start analysis"
+                            id="xpack.ml.overview.logPatternAnalysis.findPatternsButton"
+                            defaultMessage="Find patterns"
                           />
                         </EuiButton>
                       }
@@ -292,25 +218,48 @@ export const OverviewPage: FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiCard
+                      display="subdued"
                       textAlign="left"
                       layout="vertical"
                       hasBorder
-                      icon={
-                        <EuiButtonIcon
-                          display="base"
-                          size="s"
-                          iconType="changePointDetection"
-                          onClick={() =>
-                            navigateToPath('/aiops/change_point_detection_index_select')
-                          }
-                          aria-label={i18n.translate(
-                            'xpack.ml.overview.changePointDetection.title',
-                            {
-                              defaultMessage: 'Change Point Detection',
-                            }
-                          )}
+                      title={
+                        <FormattedMessage
+                          id="xpack.ml.overview.logRateAnalysis.title"
+                          defaultMessage="Log Rate Analysis"
                         />
                       }
+                      titleElement="h3"
+                      titleSize="s"
+                      description={
+                        <>
+                          <FormattedMessage
+                            id="xpack.ml.overview.logRateAnalysis.description"
+                            defaultMessage="Detect log volume changes and uncover their causes easily by surfacing the log fields that dominate and explain the shift."
+                          />
+                        </>
+                      }
+                      footer={
+                        <EuiButton
+                          color="text"
+                          target="_self"
+                          onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
+                          data-test-subj="mlOverviewCardLogRateAnalysisButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.ml.overview.logRateAnalysis.explainChangesButton"
+                            defaultMessage="Explain changes"
+                          />
+                        </EuiButton>
+                      }
+                      data-test-subj="mlOverviewCardLogRateAnalysis"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiCard
+                      display="subdued"
+                      textAlign="left"
+                      layout="vertical"
+                      hasBorder
                       title={
                         <FormattedMessage
                           id="xpack.ml.overview.changePointDetection.title"
@@ -323,28 +272,28 @@ export const OverviewPage: FC = () => {
                         <>
                           <FormattedMessage
                             id="xpack.ml.overview.changePointDetection.description"
-                            defaultMessage="Change point detection uses the change point aggregation to detect distribution changes, trend changes, and other statistically significant change points in a metric of your time series data."
+                            defaultMessage="Reveal significant changes in time series data, making it easier to correlate events without manually analyzing charts."
                           />
                         </>
                       }
                       footer={
                         <EuiButton
-                          color="primary"
+                          color="text"
                           target="_self"
                           onClick={() =>
                             navigateToPath('/aiops/change_point_detection_index_select')
                           }
                           data-test-subj="mlOverviewCardChangePointDetectionButton"
                           aria-label={i18n.translate(
-                            'xpack.ml.overview.changePointDetection.startDetectionButton',
+                            'xpack.ml.overview.changePointDetection.findChangesButton',
                             {
-                              defaultMessage: 'Start detection',
+                              defaultMessage: 'Find changes',
                             }
                           )}
                         >
                           <FormattedMessage
-                            id="xpack.ml.overview.changePointDetection.startDetectionButton"
-                            defaultMessage="Start detection"
+                            id="xpack.ml.overview.changePointDetection.findChangesButton"
+                            defaultMessage="Find changes"
                           />
                         </EuiButton>
                       }
@@ -374,7 +323,6 @@ export const OverviewPage: FC = () => {
         {isADEnabled || isNLPEnabled || isDFAEnabled ? (
           <EuiFlexItem>
             <OverviewFooterItem
-              icon="dashboardApp"
               title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
                 defaultMessage: 'Manage ML Assets',
               })}
@@ -385,7 +333,7 @@ export const OverviewPage: FC = () => {
               callToAction={
                 <EuiLink onClick={navigateToStackManagementMLOverview}>
                   {i18n.translate('xpack.ml.overview.goToManagmentLink', {
-                    defaultMessage: 'Go to Management',
+                    defaultMessage: 'Go to management',
                   })}
                 </EuiLink>
               }
@@ -395,7 +343,6 @@ export const OverviewPage: FC = () => {
         {isNLPEnabled || isDFAEnabled ? (
           <EuiFlexItem>
             <OverviewFooterItem
-              icon="machineLearningApp"
               title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
                 defaultMessage: 'Trained Models',
               })}
@@ -416,7 +363,6 @@ export const OverviewPage: FC = () => {
         ) : null}
         <EuiFlexItem>
           <OverviewFooterItem
-            icon="documentation"
             title={i18n.translate('xpack.ml.overview.browseDocumentationTitle', {
               defaultMessage: 'Browse documentation',
             })}
@@ -427,7 +373,7 @@ export const OverviewPage: FC = () => {
             callToAction={
               <EuiLink href={helpLink} external target="_blank">
                 {i18n.translate('xpack.ml.overview.startReadingDocsLink', {
-                  defaultMessage: 'Start Reading',
+                  defaultMessage: 'Start reading',
                 })}
               </EuiLink>
             }
