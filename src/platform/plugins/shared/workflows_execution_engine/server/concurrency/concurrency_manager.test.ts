@@ -459,5 +459,136 @@ describe('ConcurrencyManager', () => {
       expect(result).toBe(true);
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
+
+    describe('error handling', () => {
+      it('should throw error when getRunningExecutionsByConcurrencyGroup fails', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'cancel-in-progress',
+          max: 2,
+        };
+        const repositoryError = new Error('Elasticsearch connection failed');
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockRejectedValue(
+          repositoryError
+        );
+
+        await expect(
+          concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-1', 'default')
+        ).rejects.toThrow('Elasticsearch connection failed');
+
+        expect(
+          mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup
+        ).toHaveBeenCalledWith('server-1', 'default', 'exec-1');
+        expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
+        expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+      });
+
+      it('should throw error when bulkUpdateWorkflowExecutions fails', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'cancel-in-progress',
+          max: 2,
+        };
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+          'exec-1',
+          'exec-2',
+        ]);
+        const bulkUpdateError = new Error('Bulk update failed: index read-only');
+        mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions.mockRejectedValue(
+          bulkUpdateError
+        );
+
+        await expect(
+          concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-3', 'default')
+        ).rejects.toThrow('Bulk update failed: index read-only');
+
+        expect(
+          mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup
+        ).toHaveBeenCalledWith('server-1', 'default', 'exec-3');
+        expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledTimes(
+          1
+        );
+        // forceRunIdleTasks should not be called if bulk update fails
+        expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+      });
+
+      it('should throw error when forceRunIdleTasks fails for some executions', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'cancel-in-progress',
+          max: 1,
+        };
+        // Set up scenario where we need to cancel one execution
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+          'exec-1',
+        ]);
+        mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions.mockResolvedValue(undefined);
+        // When cancelling exec-1, forceRunIdleTasks fails
+        const taskManagerError = new Error('Task manager unavailable');
+        mockWorkflowTaskManager.forceRunIdleTasks.mockRejectedValue(taskManagerError);
+
+        await expect(
+          concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-2', 'default')
+        ).rejects.toThrow('Task manager unavailable');
+
+        expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledTimes(
+          1
+        );
+        // Verify that forceRunIdleTasks was called and the error is propagated
+        expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-1');
+      });
+
+      it('should throw error when forceRunIdleTasks fails for all executions', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'cancel-in-progress',
+          max: 2,
+        };
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+          'exec-1',
+          'exec-2',
+        ]);
+        mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions.mockResolvedValue(undefined);
+        const taskManagerError = new Error('Task manager service down');
+        // Promise.all will reject when any promise rejects
+        // The map function creates promises for all executions
+        mockWorkflowTaskManager.forceRunIdleTasks.mockImplementation(() => {
+          return new Promise((_, reject) => {
+            // Make the promise async to ensure map completes
+            process.nextTick(() => {
+              reject(taskManagerError);
+            });
+          });
+        });
+
+        await expect(
+          concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-3', 'default')
+        ).rejects.toThrow('Task manager service down');
+
+        expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledTimes(
+          1
+        );
+        // Verify that forceRunIdleTasks was called
+        // The exact number may vary in test environment due to Promise.all rejection timing
+        // but the key behavior is that errors are properly propagated
+        expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalled();
+      });
+
+      it('should handle non-Error exceptions from getRunningExecutionsByConcurrencyGroup', async () => {
+        const settings: ConcurrencySettings = {
+          key: 'server-1',
+          strategy: 'cancel-in-progress',
+          max: 2,
+        };
+        // Simulate a non-Error exception (e.g., string thrown)
+        mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockRejectedValue(
+          'Unexpected string error'
+        );
+
+        await expect(
+          concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-1', 'default')
+        ).rejects.toBe('Unexpected string error');
+      });
+    });
   });
 });
