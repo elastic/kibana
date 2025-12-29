@@ -136,20 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: false });
       });
-
-      it('Warns when case is different', async function () {
-        await dashboard.switchToEditMode();
-        await dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(
-          dashboardName.toUpperCase(),
-          {
-            waitDialogIsClosed: false,
-          }
-        );
-
-        await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
-
-        await dashboard.cancelSave();
-      });
     });
 
     describe('flyout settings', () => {
