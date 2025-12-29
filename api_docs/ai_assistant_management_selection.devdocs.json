@@ -11,7 +11,7 @@
         "label": "AIAgentConfirmationModal",
         "description": [],
         "signature": [
-          "({ onConfirm, onCancel, }: ",
+          "({ onConfirm, onCancel, docLinks, }: ",
           {
             "pluginId": "@kbn/ai-agent-confirmation-modal",
             "scope": "public",
@@ -30,7 +30,7 @@
             "id": "def-public.AIAgentConfirmationModal.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onConfirm,\n  onCancel,\n}",
+            "label": "{\n  onConfirm,\n  onCancel,\n  docLinks,\n}",
             "description": [],
             "signature": [
               {

@@ -22,5 +22,7 @@ export type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
 
+export type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ObservabilityAgentBuilderPlugin(initializerContext);
