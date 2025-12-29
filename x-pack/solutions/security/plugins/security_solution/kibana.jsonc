@@ -80,7 +80,7 @@
       "savedObjectsTaggingOss",
       "automaticImport",
       "serverless",
-      "onechat",
+      "agentBuilder",
       "llmTasks"
     ],
     "requiredBundles": [
@@ -93,7 +93,7 @@
       "ml",
       "unifiedSearch",
       "esql",
-      "onechat"
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"
