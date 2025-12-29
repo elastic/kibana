@@ -446,6 +446,148 @@ describe('JinaReaderConnector', () => {
     });
   });
 
+  describe('listTools action', () => {
+    it('should return list of available tools', async () => {
+      const result = await JinaReaderConnector.actions.listTools.handler(mockContext, {});
+
+      expect(result).toEqual({
+        tools: [
+          expect.objectContaining({
+            name: 'browse',
+            description: 'Turn any URL to markdown/image for LLM consumption',
+          }),
+          expect.objectContaining({
+            name: 'web-search',
+            description: 'Web search to find relevant context for LLMs',
+          }),
+        ],
+      });
+      expect((result as { tools: unknown[] }).tools).toHaveLength(2);
+    });
+  });
+
+  describe('callTool action', () => {
+    it('should call browse tool', async () => {
+      const mockResponse = {
+        data: {
+          data: {
+            title: 'Test Page',
+            content: 'Test Content',
+            markdown: 'Test Content',
+            metadata: { url: 'https://example.com' },
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'browse',
+        arguments: {
+          url: 'https://example.com',
+        },
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://r.jina.ai',
+        {
+          url: 'https://example.com',
+          respondWith: 'content',
+        },
+        {
+          headers: { Accept: 'application/json' },
+        }
+      );
+      expect((result as { isError: boolean; content: Array<{ type: string }> }).isError).toBe(
+        false
+      );
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string }> }).content
+      ).toHaveLength(1);
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string }> }).content[0].type
+      ).toBe('text');
+    });
+
+    it('should call web-search tool', async () => {
+      const mockResponse = {
+        data: 'Search results text',
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'web-search',
+        arguments: {
+          query: 'test query',
+        },
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://r.jina.ai',
+        {
+          q: 'test query',
+          respondWith: 'no-content',
+        },
+        {
+          headers: { Accept: 'text/plain' },
+        }
+      );
+      expect((result as { isError: boolean; content: Array<{ type: string }> }).isError).toBe(
+        false
+      );
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string }> }).content
+      ).toHaveLength(1);
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string }> }).content[0].type
+      ).toBe('text');
+    });
+
+    it('should throw error for unknown tool', async () => {
+      await expect(
+        JinaReaderConnector.actions.callTool.handler(mockContext, {
+          name: 'unknown-tool',
+          arguments: {},
+        })
+      ).rejects.toThrow('Unknown tool: unknown-tool');
+    });
+
+    it('should handle browse tool error', async () => {
+      const mockResponse = {
+        data: {
+          readableMessage: 'Invalid URL',
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await expect(
+        JinaReaderConnector.actions.callTool.handler(mockContext, {
+          name: 'browse',
+          arguments: {
+            url: 'invalid-url',
+          },
+        })
+      ).rejects.toThrow('Invalid URL');
+    });
+
+    it('should handle search tool error when response is not string', async () => {
+      const mockResponse = {
+        data: {
+          readableMessage: 'Invalid query',
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await expect(
+        JinaReaderConnector.actions.callTool.handler(mockContext, {
+          name: 'web-search',
+          arguments: {
+            query: '',
+          },
+        })
+      ).rejects.toThrow();
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {

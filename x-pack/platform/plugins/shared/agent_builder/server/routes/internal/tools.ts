@@ -34,6 +34,7 @@ import type {
   McpToolHealthStatus,
   ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
+import { isMcpConnectorItem } from '../../../common/http_api/tools';
 import { validateConnector } from '../../services/tools/tool_types/mcp/validate_configuration';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
@@ -505,9 +506,17 @@ export function registerInternalToolsRoutes({
       const allConnectors = await actionsClient.getAll();
 
       const { type } = request.query;
-
       const connectors: ConnectorItem[] = allConnectors
-        .filter((connector) => (type ? connector.actionTypeId === type : true))
+        .filter((connector) => {
+          if (type === MCP_CONNECTOR_ID) {
+            return isMcpConnectorItem(connector);
+          }
+          if (type) {
+            return connector.actionTypeId === type;
+          }
+
+          return true;
+        })
         .map(toConnectorItem);
 
       return response.ok<ListConnectorsResponse>({
@@ -569,7 +578,7 @@ export function registerInternalToolsRoutes({
 
       const connector = await actionsClient.get({ id: connectorId });
 
-      if (connector.actionTypeId !== MCP_CONNECTOR_ID) {
+      if (!isMcpConnectorItem(connector)) {
         response.badRequest({
           body: {
             message: `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_ID}', got '${connector.actionTypeId}'`,

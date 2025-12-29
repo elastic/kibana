@@ -97,6 +97,16 @@ export const JinaReaderConnector: ConnectorSpec = {
         label: 'Search URL',
         placeholder: JINA_READER_SEARCH_URL,
       }),
+    MCP: z
+      .enum(['Enabled', 'Disabled'])
+      .optional()
+      .default('Disabled')
+      .describe('Enable MCP tools for Jina Reader')
+      .meta({
+        widget: 'select',
+        label: 'MCP Integration',
+        placeholder: 'Enable MCP tools for Jina Reader',
+      }),
   }),
 
   actions: {
@@ -243,6 +253,166 @@ export const JinaReaderConnector: ConnectorSpec = {
         return response.data?.data
           ? { ok: true, ...response.data.data }
           : { ok: false, ...response.data };
+      },
+    },
+
+    listTools: {
+      isTool: false,
+      description: 'Lists available Jina Reader tools (MCP)',
+      input: z.object().optional(),
+      handler: async () => {
+        return {
+          tools: [
+            {
+              name: 'browse',
+              description: 'Turn any URL to markdown/image for LLM consumption',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  url: {
+                    type: 'string',
+                    description: 'URL to browse',
+                  },
+                  returnFormat: {
+                    type: 'string',
+                    description: 'Desired return format',
+                    enum: [
+                      RETURN_FORMAT.MARKDOWN,
+                      RETURN_FORMAT.FULL_MARKDOWN,
+                      RETURN_FORMAT.PLAIN_TEXT,
+                      RETURN_FORMAT.SCREENSHOT,
+                      RETURN_FORMAT.FULL_SCREENSHOT,
+                      RETURN_FORMAT.HTML,
+                    ],
+                    default: RETURN_FORMAT.MARKDOWN,
+                  },
+                  options: {
+                    type: 'object',
+                    description:
+                      'Additional advanced options. Refer to https://r.jina.ai/openapi.json for details.',
+                    additionalProperties: true,
+                  },
+                },
+                required: ['url'],
+              },
+            },
+            {
+              name: 'web-search',
+              description: 'Web search to find relevant context for LLMs',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  query: {
+                    type: 'string',
+                    description: 'Search query',
+                  },
+                },
+                required: ['query'],
+              },
+            },
+          ],
+        };
+      },
+    },
+
+    callTool: {
+      isTool: false,
+      description: 'Call Jina Reader tools (MCP)',
+      input: z.object({
+        name: z.string().describe('Name of the tool to call'),
+        arguments: z.record(z.string(), z.any()).optional().describe('Arguments for the tool call'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          name: string;
+          arguments?: Record<string, unknown>;
+        };
+
+        if (typedInput.name.includes('browse')) {
+          const innerTypedInput = typedInput.arguments as {
+            url: string;
+            returnFormat?: RETURN_FORMAT;
+            options?: Record<string, unknown>;
+          };
+          const response = await ctx.client.post(
+            (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
+            {
+              url: innerTypedInput.url,
+              respondWith: mapPluginReturnFormatToReaderReturnFormat(innerTypedInput.returnFormat),
+              ...innerTypedInput.options,
+            },
+            {
+              headers: { Accept: 'application/json' },
+            }
+          );
+
+          const effectiveData = response.data?.data;
+          if (!effectiveData) {
+            throw new Error(response.data?.readableMessage || JSON.stringify(response.data));
+          }
+
+          // const urlLike = effectiveData.pageshotUrl || effectiveData.screenshotUrl;
+          // if (urlLike) {
+          //   const imageResponse = await ctx.client.get(urlLike, {
+          //     responseType: 'arraybuffer',
+          //     maxContentLength: 10 * 1024 * 1024,
+          //   });
+          //   const base64Image = Buffer.from(imageResponse.data).toString('base64');
+          //   return {
+          //     content: [
+          //       {
+          //         type: 'image',
+          //         data: base64Image,
+          //         mimeType: imageResponse.headers['content-type'],
+          //       },
+          //     ],
+          //     structuredContent: effectiveData,
+          //     isError: false,
+          //   };
+          // }
+
+          const chunks = [
+            `Title: ${effectiveData.title || 'N/A'}`,
+            `Metadata: ${JSON.stringify(effectiveData.metadata || {})}`,
+            effectiveData.content || effectiveData.text || effectiveData.markdown || '',
+          ];
+
+          const effectiveContent = chunks.join('\n\n');
+
+          return {
+            content: [{ type: 'text', text: effectiveContent }],
+            structuredContent: effectiveData,
+            isError: false,
+          };
+        }
+        if (typedInput.name.includes('search')) {
+          const innerTypedInput = typedInput.arguments as {
+            query: string;
+            returnFormat?: RETURN_FORMAT;
+            options?: Record<string, unknown>;
+          };
+          const response = await ctx.client.post(
+            (ctx.config?.overrideSearchUrl as string | undefined) || JINA_READER_BROWSE_URL,
+            {
+              q: innerTypedInput.query,
+              respondWith: 'no-content',
+              ...innerTypedInput.options,
+            },
+            {
+              headers: { Accept: 'text/plain' },
+            }
+          );
+          const effectiveData = response.data;
+          if (typeof effectiveData !== 'string') {
+            throw new Error(response.data?.readableMessage || JSON.stringify(response.data));
+          }
+          return {
+            content: [{ type: 'text', text: effectiveData.toString() }],
+            isError: false,
+          };
+        }
+
+        throw new Error(`Unknown tool: ${typedInput.name}`);
       },
     },
   },
