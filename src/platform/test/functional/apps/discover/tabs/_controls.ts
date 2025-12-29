@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.only('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
       await discover.selectTextBaseLang();
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
       await discover.waitUntilTabIsLoaded();
@@ -50,8 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add an ES|QL multi - value control', async () => {
       await discover.selectTextBaseLang();
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await esql.openEsqlControlFlyout('FROM logstash-* | WHERE MV_CONTAINS( ');
 
@@ -105,16 +105,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should keep the ES|QL control after a browser refresh', async () => {
       await discover.selectTextBaseLang();
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
       await discover.waitUntilTabIsLoaded();
 
       // Refresh the page
       await browser.refresh();
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await retry.try(async () => {
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
         expect(controlGroupVisible).to.be(true);
@@ -123,8 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should save the ES|QL control', async () => {
       await discover.selectTextBaseLang();
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
       await discover.waitUntilTabIsLoaded();
@@ -140,8 +140,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open a saved session with a control group', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await retry.try(async () => {
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
@@ -152,8 +152,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reset successfully a saved session with a control group', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Make a change in the controls
       const controlId = (await dashboardControls.getAllControlIds())[0];
@@ -170,8 +170,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open the histogram in a dashboard', async () => {
       // load saved search
       await discover.loadSavedSearch(savedSession);
-      await new Promise((resolve) => setTimeout(resolve, 500));
       await discover.waitUntilTabIsLoaded();
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Save the histogram
       await testSubjects.click('unifiedHistogramSaveVisualization');
