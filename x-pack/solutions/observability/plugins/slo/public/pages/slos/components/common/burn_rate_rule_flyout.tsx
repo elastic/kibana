@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import { useQueryClient } from '@kbn/react-query';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { useQueryClient } from '@kbn/react-query';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import React from 'react';
+import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { paths } from '../../../../../common/locators/paths';
-import { sloKeys } from '../../../../hooks/query_key_factory';
 
 export function BurnRateRuleFlyout({
   slo,
