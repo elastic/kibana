@@ -151,10 +151,11 @@ describe('Custom Editor Commands', () => {
     it('should call toggleVisor function when command is executed', () => {
       const mockOnQuerySubmit = jest.fn();
       const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
 
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor);
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
 
-      expect(mockEditor.addCommand).toHaveBeenCalledTimes(2);
+      expect(mockEditor.addCommand).toHaveBeenCalledTimes(3);
 
       const cmdKCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
         // eslint-disable-next-line no-bitwise
@@ -172,8 +173,9 @@ describe('Custom Editor Commands', () => {
     it('should call onQuerySubmit when CMD+Enter is pressed', () => {
       const mockOnQuerySubmit = jest.fn();
       const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
 
-      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor);
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
 
       const cmdEnterCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
         // eslint-disable-next-line no-bitwise
@@ -186,6 +188,26 @@ describe('Custom Editor Commands', () => {
       cmdEnterHandler();
 
       expect(mockOnQuerySubmit).toHaveBeenCalledWith('manual');
+    });
+
+    it('should call onPrettifyQuery when CMD+I is pressed', () => {
+      const mockOnQuerySubmit = jest.fn();
+      const mockToggleVisor = jest.fn();
+      const mockOnPrettifyQuery = jest.fn();
+
+      addEditorKeyBindings(mockEditor, mockOnQuerySubmit, mockToggleVisor, mockOnPrettifyQuery);
+
+      const cmdICall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
+        // eslint-disable-next-line no-bitwise
+        ([keyMod]) => keyMod === (monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI)
+      );
+      expect(cmdICall).toBeDefined();
+
+      const cmdIHandler = cmdICall[1];
+
+      cmdIHandler();
+
+      expect(mockOnPrettifyQuery).toHaveBeenCalledTimes(1);
     });
   });
 });

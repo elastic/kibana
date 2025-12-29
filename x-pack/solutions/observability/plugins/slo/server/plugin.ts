@@ -30,7 +30,6 @@ import type { SLORoutesDependencies } from './routes/types';
 import {
   slo,
   sloSettings,
-  sloTemplate,
   SO_SLO_SETTINGS_TYPE,
   SO_SLO_TEMPLATE_TYPE,
   SO_SLO_TYPE,
@@ -39,7 +38,7 @@ import {
   DefaultResourceInstaller,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
+  DefaultSLODefinitionRepository,
 } from './services';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -54,6 +53,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -143,7 +143,6 @@ export class SLOPlugin
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
-    core.savedObjects.registerType(sloTemplate);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,
@@ -191,8 +190,9 @@ export class SLOPlugin
             pluginsStart.ruleRegistry.getRacClientWithRequest(request),
           ]);
 
-          const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+          const repository = new DefaultSLODefinitionRepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
+          const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless),
@@ -214,6 +214,7 @@ export class SLOPlugin
             spaceId,
             repository,
             settingsRepository,
+            templateRepository,
             transformManager,
             summaryTransformManager,
             racClient,

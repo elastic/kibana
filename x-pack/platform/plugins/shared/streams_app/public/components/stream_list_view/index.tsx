@@ -5,38 +5,39 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexGroup,
-  useEuiTheme,
   EuiButton,
-  EuiFlexItem,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingElastic,
   EuiSpacer,
-  EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Streams } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { StreamsTreeTable } from './tree_table';
-import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
-import { GroupStreamsCards } from './group_streams_cards';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { StreamsAppContextProvider } from '../streams_app_context_provider';
-import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { useTimefilter } from '../../hooks/use_timefilter';
 import { FeedbackButton } from '../feedback_button';
+import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
+import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
 import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
+import { GroupStreamsCards } from './group_streams_cards';
+import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
+import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { StreamsTreeTable } from './tree_table';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -50,6 +51,7 @@ export function StreamListView() {
     core,
   } = context;
   const { onPageReady } = usePerformanceContext();
+  const router = useStreamsAppRouter();
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -65,7 +67,7 @@ export function StreamListView() {
   );
 
   const {
-    features: { groupStreams },
+    features: { groupStreams, significantEventsDiscovery },
   } = useStreamsPrivileges();
 
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
@@ -156,11 +158,20 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
                     defaultMessage: 'Create Group stream',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
+              <EuiFlexItem grow={false}>
+                <EuiButton href={router.link('/_discovery')} iconType="crosshairs">
+                  {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
+                    defaultMessage: 'SigEvents Discovery',
                   })}
                 </EuiButton>
               </EuiFlexItem>
@@ -215,7 +226,7 @@ export function StreamListView() {
               streams={streamsListFetch.value?.streams}
               canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
             />
-            {groupStreams?.enabled && (
+            {groupStreams.enabled && (
               <>
                 <EuiSpacer size="l" />
                 <GroupStreamsCards streams={streamsListFetch.value?.streams} />
