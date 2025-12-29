@@ -244,7 +244,7 @@ describe('MigrationDataInputFlyout', () => {
     // Start migration
     fireEvent.click(getByTestId('testModalStartMigrationButton'));
 
-    expect(mockStartMigration).toHaveBeenCalledWith('test-id-retry', undefined, {
+    expect(mockStartMigration).toHaveBeenCalledWith(migrationStats, undefined, {
       connectorId: 'Test Connector 1',
       skipPrebuiltRulesMatching: false,
     });
@@ -266,7 +266,7 @@ describe('MigrationDataInputFlyout', () => {
     // Start migration
     fireEvent.click(getByTestId('testModalStartMigrationButton'));
 
-    expect(mockStartMigration).toHaveBeenCalledWith('test-id-retry', 'not_fully_translated', {
+    expect(mockStartMigration).toHaveBeenCalledWith(migrationStats, 'not_fully_translated', {
       connectorId: 'Test Connector 1',
       skipPrebuiltRulesMatching: false,
     });

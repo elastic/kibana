@@ -38,14 +38,14 @@ export const useCreateMigration = (onSuccess?: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const createMigration = useCallback<CreateMigration>(
-    (migrationName, dashboards, migrationSource = MigrationSource.SPLUNK) => {
+    (migrationName, dashboards, vendor = MigrationSource.SPLUNK) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
           const migrationId = await siemMigrations.dashboards.createDashboardMigration(
             dashboards,
             migrationName,
-            migrationSource
+            vendor
           );
           const stats = await siemMigrations.dashboards.api.getDashboardMigrationStats({
             migrationId,

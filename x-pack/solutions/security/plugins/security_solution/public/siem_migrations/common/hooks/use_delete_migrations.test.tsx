@@ -57,7 +57,10 @@ describe('useDeleteMigration', () => {
     });
 
     await waitFor(() => {
-      expect(mockDeleteRuleMigration).toHaveBeenCalledWith(defaultMigrationStats);
+      expect(mockDeleteRuleMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockDeleteDashboardMigration).not.toHaveBeenCalled();
     });
   });
@@ -71,7 +74,10 @@ describe('useDeleteMigration', () => {
     });
 
     await waitFor(() => {
-      expect(mockDeleteDashboardMigration).toHaveBeenCalledWith(defaultMigrationStats);
+      expect(mockDeleteDashboardMigration).toHaveBeenCalledWith({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockDeleteRuleMigration).not.toHaveBeenCalled();
     });
   });

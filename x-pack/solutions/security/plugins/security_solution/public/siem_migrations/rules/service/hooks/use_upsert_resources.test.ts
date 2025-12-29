@@ -50,7 +50,11 @@ describe('useUpsertResources', () => {
       result.current.upsertResources({ migrationId, vendor: MigrationSource.SPLUNK, data });
     });
 
-    expect(upsertMigrationResources).toHaveBeenCalledWith(migrationId, data);
+    expect(upsertMigrationResources).toHaveBeenCalledWith({
+      migrationId,
+      vendor: MigrationSource.SPLUNK,
+      body: data,
+    });
     expect(onSuccess).toHaveBeenCalledWith(data);
     expect(result.current.isLoading).toBe(false);
   });

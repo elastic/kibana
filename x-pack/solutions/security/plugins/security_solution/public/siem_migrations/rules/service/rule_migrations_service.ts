@@ -175,7 +175,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     vendor,
   }: {
     migrationId: string;
-    vendor: SiemMigrationVendor;
+    vendor?: SiemMigrationVendor;
   }): Promise<string> {
     try {
       await api.deleteMigration({ migrationId });

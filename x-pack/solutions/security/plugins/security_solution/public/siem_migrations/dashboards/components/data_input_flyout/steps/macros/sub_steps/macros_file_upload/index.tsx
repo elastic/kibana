@@ -14,11 +14,11 @@ import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_r
 import type { OnResourcesCreated } from '../../../../types';
 import { MacrosFileUpload } from './macros_file_upload';
 import * as i18n from './translations';
-import type { DashboardMigrationStats } from '../../../../../../types';
+import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 export interface DashboardsFileUploadStepProps {
   status: EuiStepStatus;
-  migrationStats: DashboardMigrationStats;
+  migrationStats: DashboardMigrationTaskStats;
   missingMacros: string[];
   onMacrosCreated: OnResourcesCreated;
 }

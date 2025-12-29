@@ -120,7 +120,7 @@ export interface ReportSetupMigrationCreatedActionParams extends BaseResultActio
 export interface ReportSetupMigrationDeletedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
-  vendor: SiemMigrationVendor;
+  vendor?: SiemMigrationVendor;
 }
 export interface ReportSetupMacrosQueryCopiedActionParams {
   eventName: string;

@@ -95,8 +95,8 @@ describe('useInstallMigrationRules', () => {
       result.current.mutate({ ids: ['1', '2'], enabled: true });
 
       await waitFor(() => {
-        expect(invalidateRules).toHaveBeenCalledWith('1');
-        expect(invalidateStats).toHaveBeenCalledWith('1');
+        expect(invalidateRules).toHaveBeenCalledWith(defaultMigrationStats.id);
+        expect(invalidateStats).toHaveBeenCalledWith(defaultMigrationStats.id);
       });
     });
   });
@@ -126,8 +126,8 @@ describe('useInstallMigrationRules', () => {
       result.current.mutate({ ids: ['1', '2'], enabled: true });
 
       await waitFor(() => {
-        expect(invalidateRules).toHaveBeenCalledWith('1');
-        expect(invalidateStats).toHaveBeenCalledWith('1');
+        expect(invalidateRules).toHaveBeenCalledWith(defaultMigrationStats.id);
+        expect(invalidateStats).toHaveBeenCalledWith(defaultMigrationStats.id);
       });
     });
   });

@@ -97,6 +97,6 @@ describe('StartTranslationButton', () => {
       />
     );
     fireEvent.click(getByTestId('startMigrationButton'));
-    expect(startMigration).toHaveBeenCalledWith('1');
+    expect(startMigration).toHaveBeenCalledWith(defaultMigrationStats);
   });
 });

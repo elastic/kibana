@@ -75,6 +75,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
           siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationOpenResources],
         migrationId: 'abc',
         missingResourcesCount: 5,
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
@@ -92,6 +93,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
         migrationId: 'def',
         count: 10,
         result: 'success',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });

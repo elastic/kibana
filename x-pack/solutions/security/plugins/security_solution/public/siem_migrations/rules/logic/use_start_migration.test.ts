@@ -63,7 +63,12 @@ describe('useStartMigration', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(mockStartRuleMigration).toHaveBeenCalledWith(migrationStats, undefined, undefined);
+    expect(mockStartRuleMigration).toHaveBeenCalledWith({
+      migrationId: migrationStats.id,
+      vendor: migrationStats.vendor,
+      retry: undefined,
+      settings: undefined,
+    });
     expect(mockAddSuccess).toHaveBeenCalledWith('Migration started successfully.');
     expect(onSuccess).toHaveBeenCalled();
   });

@@ -52,7 +52,11 @@ describe('useUpsertResources', () => {
         });
       });
 
-      expect(mockUpsertMigrationResources).toHaveBeenCalledWith('migration-id', mockResources);
+      expect(mockUpsertMigrationResources).toHaveBeenCalledWith({
+        migrationId: 'migration-id',
+        vendor: MigrationSource.SPLUNK,
+        body: mockResources,
+      });
       expect(mockOnSuccess).toHaveBeenCalledWith(mockResources);
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBe(null);

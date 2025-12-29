@@ -313,7 +313,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     vendor,
   }: {
     migrationId: string;
-    vendor: SiemMigrationVendor;
+    vendor?: SiemMigrationVendor;
   }): Promise<string> {
     try {
       await api.deleteDashboardMigration({ migrationId });

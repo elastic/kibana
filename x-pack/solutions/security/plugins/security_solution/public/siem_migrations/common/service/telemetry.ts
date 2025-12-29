@@ -92,7 +92,7 @@ export class SiemBaseMigrationsTelemetry {
 
   reportSetupMigrationDeleted = (params: {
     migrationId: string;
-    vendor: SiemMigrationVendor;
+    vendor?: SiemMigrationVendor;
     error?: Error;
   }) => {
     const { migrationId, vendor, error } = params;

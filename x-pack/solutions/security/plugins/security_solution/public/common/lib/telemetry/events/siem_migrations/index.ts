@@ -84,7 +84,7 @@ const vendorSchema: RootSchema<{ vendor: string }> = {
   vendor: {
     type: 'keyword',
     _meta: {
-      description: 'Migration source/vendor',
+      description: 'splunk | qradar',
       optional: false,
     },
   },
@@ -140,9 +140,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -165,14 +165,20 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...baseResultActionSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      ...vendorSchema.vendor,
+      _meta: {
+        ...vendorSchema.vendor._meta,
+        optional: true,
+      },
+    },
   },
   [SiemMigrationsRuleEventTypes.SetupQueryCopied]: {
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -188,9 +194,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -199,9 +205,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -211,9 +217,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -271,9 +277,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -286,9 +292,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -304,9 +310,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -359,9 +365,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -426,9 +432,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -451,14 +457,20 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...baseResultActionSchema,
     ...eventNameSchema,
-    ...vendorSchema,
+    vendor: {
+      ...vendorSchema.vendor,
+      _meta: {
+        ...vendorSchema.vendor._meta,
+        optional: true,
+      },
+    },
   },
   [SiemMigrationsDashboardEventTypes.SetupQueryCopied]: {
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -474,9 +486,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -485,9 +497,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -497,9 +509,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -557,9 +569,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -570,9 +582,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...migrationIdSchema,
     ...eventNameSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -588,9 +600,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
@@ -643,9 +655,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     vendor: {
-      type: 'keyword',
+      ...vendorSchema.vendor,
       _meta: {
-        description: 'Migration source/vendor',
+        ...vendorSchema.vendor._meta,
         optional: true,
       },
     },
