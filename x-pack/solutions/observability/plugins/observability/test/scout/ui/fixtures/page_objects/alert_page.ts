@@ -13,7 +13,7 @@ export class AlertPage {
   /**
    * Navigates to the Alert Details page
    */
-  async goto(alertId: string) {
+  async goto(alertId: string = '') {
     await this.page.gotoApp(`observability/alerts/${alertId}`);
   }
 }

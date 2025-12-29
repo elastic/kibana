@@ -7,16 +7,57 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
-import { generateAlertsData } from '../fixtures/generators';
+import { generateMetricsData } from '../fixtures/generators';
 
 test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
-  const alertId = '4c87bd11-ff31-4a05-8a04-833e2da94858';
-  test.beforeAll(async ({ esClient }) => {
-    await generateAlertsData({
-      esClient,
-      alertId,
-      ruleName: 'Test Rule Name',
+  let ruleId: string;
+  const alertName = `Write bytes test rule ${Date.now()}`;
+  const metricName = 'system.diskio.write.bytes';
+
+  test.beforeAll(async ({ infraSynthtraceEsClient, apiServices }) => {
+    await generateMetricsData({
+      client: infraSynthtraceEsClient,
+      from: Date.now() - 3 * 60 * 1000,
+      to: Date.now(),
+      metricName,
     });
+    const createdRule = (await apiServices.alerting.rules.create({
+      tags: [],
+      params: {
+        criteria: [
+          {
+            comparator: '>',
+            metrics: [
+              {
+                name: 'A',
+                field: metricName,
+                aggType: 'max',
+              },
+            ],
+            threshold: [100],
+            timeSize: 1,
+            timeUnit: 'd',
+          },
+        ],
+        alertOnNoData: false,
+        alertOnGroupDisappear: false,
+        searchConfiguration: {
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+          index: 'metrics-*',
+        },
+      },
+      schedule: {
+        interval: '1m',
+      },
+      consumer: 'alerts',
+      name: alertName,
+      ruleTypeId: 'observability.rules.custom_threshold',
+      actions: [],
+    })) as { data: { id: string } };
+    ruleId = createdRule.data.id;
   });
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
@@ -28,8 +69,23 @@ test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('should show tabbed view', async ({ page, pageObjects }) => {
-    await pageObjects.alertPage.goto(alertId);
-    await expect(page.testSubj.locator('overviewTab')).toBeVisible();
-    await expect(page.testSubj.locator('metadataTab')).toBeVisible();
+    await expect(async () => {
+      await pageObjects.rulesPage.goto(ruleId);
+
+      await expect(page.testSubj.locator('ruleName')).toBeVisible();
+
+      await page.testSubj.waitForSelector('expand-event');
+      const expandAlertButtons = await page.testSubj.locator('expand-event').all();
+      expect(expandAlertButtons.length).toBeGreaterThan(0);
+
+      await expandAlertButtons[0].click();
+
+      const alertDetailsLink = page.testSubj.locator('alertsFlyoutAlertDetailsButton');
+      await expect(alertDetailsLink).toBeVisible();
+      await alertDetailsLink.click();
+
+      await expect(page.testSubj.locator('overviewTab')).toBeVisible();
+      await expect(page.testSubj.locator('metadataTab')).toBeVisible();
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
   });
 });
