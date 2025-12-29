@@ -205,37 +205,48 @@ export class ESQLService extends FtrService {
       const textarea = await editor.findByCssSelector('textarea');
       await textarea.type([Key.CONTROL, Key.SPACE]);
       const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
-      await suggestionWidget.isDisplayed();
+      expect(await suggestionWidget.isDisplayed()).to.be(true);
     });
   }
 
   public async selectEsqlSuggestionByLabel(label: string, editorSubjId = 'ESQLEditor') {
-    await this.retry.try(async () => {
-      await this.triggerSuggestions(editorSubjId);
+    await this.retry.try(
+      async () => {
+        await this.triggerSuggestions(editorSubjId);
 
-      const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
-      const suggestions = await suggestionWidget.findAllByCssSelector('.monaco-list-row');
+        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+        const suggestions = await suggestionWidget.findAllByCssSelector('.monaco-list-row');
 
-      if (!suggestions.length) {
-        throw new Error('No suggestions found');
-      }
-
-      let suggestionToSelect;
-      for (const suggestion of suggestions) {
-        if ((await suggestion.getVisibleText()).includes(label)) {
-          suggestionToSelect = suggestion;
-          break;
+        if (!suggestions.length) {
+          throw new Error('No suggestions found');
         }
+
+        let suggestionToSelect;
+        for (const suggestion of suggestions) {
+          if ((await suggestion.getVisibleText()).includes(label)) {
+            suggestionToSelect = suggestion;
+            break;
+          }
+        }
+
+        if (!suggestionToSelect) {
+          throw new Error(`Suggestion with label "${label}" not found.`);
+        }
+
+        await suggestionToSelect.click();
+
+        await this.testSubjects.waitForDeleted(suggestionToSelect);
+      },
+      // -- On failure -- In very weird ocations the suggestion list is rendered outside of the viewport,
+      // we need to hit escape to close the widget before we try again.
+      async () => {
+        const editor = await this.testSubjects.find(editorSubjId);
+        const textarea = await editor.findByCssSelector('textarea');
+        await textarea.type([Key.ESCAPE]);
+        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+        expect(await suggestionWidget.isDisplayed()).to.be(false);
       }
-
-      if (!suggestionToSelect) {
-        throw new Error(`Suggestion with label "${label}" not found.`);
-      }
-
-      await suggestionToSelect.click();
-
-      await this.testSubjects.waitForDeleted(suggestionToSelect);
-    });
+    );
   }
 
   public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
