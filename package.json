@@ -155,7 +155,7 @@
     "@formatjs/intl-utils": "^3.8.4",
     "@formatjs/ts-transformer": "^3.13.14",
     "@google/generative-ai": "^0.24.1",
-    "@grpc/grpc-js": "^1.14.2",
+    "@grpc/grpc-js": "^1.14.3",
     "@hapi/accept": "^6.0.3",
     "@hapi/boom": "^10.0.1",
     "@hapi/cookie": "^12.0.1",
