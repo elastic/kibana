@@ -310,8 +310,9 @@ export const chatCompleteSuite = (
         expect(tokenEvent.type).to.eql('chatCompletionTokenCount');
         expect(tokenEvent.tokens.prompt).to.be.greaterThan(0);
         expect(tokenEvent.tokens.completion).to.be.greaterThan(0);
-        expect(tokenEvent.tokens.total).to.be(
-          tokenEvent.tokens.prompt + tokenEvent.tokens.completion
+        // can include thinking token depending on the model
+        expect(tokenEvent.tokens.total).to.greaterThan(
+          tokenEvent.tokens.prompt + tokenEvent.tokens.completion - 1
         );
         // Model field is optional and may be present if provided by the connector
         if (tokenEvent.model !== undefined) {
