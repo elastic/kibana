@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { ONECHAT_FEATURE_ID } from '@kbn/onechat-plugin/public';
+import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
 
 interface UseAgentBuilderAvailability {
@@ -29,7 +29,7 @@ export const useAgentBuilderAvailability = (): UseAgentBuilderAvailability => {
   const { capabilities } = useKibana().services.application;
 
   return useMemo(() => {
-    const agentBuilderCapabilities = capabilities[ONECHAT_FEATURE_ID];
+    const agentBuilderCapabilities = capabilities[AGENTBUILDER_FEATURE_ID];
     const hasAgentBuilderPrivilege = agentBuilderCapabilities?.show === true;
     const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
