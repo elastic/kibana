@@ -19,7 +19,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EisPromotionalCallout, EisUpdateCallout } from '@kbn/search-api-panels';
+import {
+  EisCloudConnectPromoCallout,
+  EisPromotionalCallout,
+  EisUpdateCallout,
+} from '@kbn/search-api-panels';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import { documentationService } from '../../../../../services';
 import { useAppContext } from '../../../../../app_context';
@@ -43,18 +48,24 @@ export const MappingsInformationPanels = ({
 }: MappingsInformationPanelsProps) => {
   const {
     plugins: { cloud },
+    core: { application },
+    canUseEis,
   } = useAppContext();
   const state = useMappingsState();
+
+  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const showAboutMappingsStyles = css`
     ${useEuiBreakpoint(['xl'])} {
       max-width: 480px;
     }
   `;
+
   const hasSemanticText = hasSemanticTextField(state.mappingViewFields);
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
+  const shouldShowEisUpdateCallout =
+    (cloud?.isCloudEnabled && (canUseEis || cloud?.isServerlessEnabled)) ?? false;
 
-  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
   return (
     <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -64,7 +75,7 @@ export const MappingsInformationPanels = ({
               <EisUpdateCallout
                 ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
                 promoId="indexDetailsMappings"
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
+                shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
                 handleOnClick={() => setIsUpdatingElserMappings(true)}
                 direction="column"
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
@@ -83,10 +94,19 @@ export const MappingsInformationPanels = ({
                 refetchMapping={refetchMapping}
                 setIsModalOpen={setIsUpdatingElserMappings}
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
+                modalId="indexDetailsMappings"
               />
             )}
           </>
         )}
+        <EisCloudConnectPromoCallout
+          promoId="indexDetailsMappings"
+          isSelfManaged={!cloud?.isCloudEnabled}
+          direction="column"
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
+        />
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>

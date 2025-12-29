@@ -59,14 +59,9 @@ export interface UseAgentBuilderOptInResult {
 export const useAgentBuilderOptIn = ({
   navigateFromConversationApp = false,
 }: UseAgentBuilderOptInParams = {}): UseAgentBuilderOptInResult => {
-  const {
-    application,
-    notifications,
-    settings,
-    plugins: {
-      start: { onechat },
-    },
-  } = useKibana().services;
+  const { application, notifications, settings, plugins } = useKibana().services;
+
+  const agentBuilder = plugins?.start?.agentBuilder;
 
   const { hasAgentBuilderAccess, isAgentChatExperienceEnabled } = useIsAgentBuilderEnabled();
 
@@ -76,11 +71,16 @@ export const useAgentBuilderOptIn = ({
 
   const showAgentBuilderOptInCta = useMemo(
     () =>
-      Boolean(onechat?.openConversationFlyout) &&
+      Boolean(agentBuilder?.openConversationFlyout) &&
       hasAdvancedSettingsEditPrivilege &&
       hasAgentBuilderAccess &&
       !isAgentChatExperienceEnabled,
-    [onechat, hasAdvancedSettingsEditPrivilege, hasAgentBuilderAccess, isAgentChatExperienceEnabled]
+    [
+      agentBuilder,
+      hasAdvancedSettingsEditPrivilege,
+      hasAgentBuilderAccess,
+      isAgentChatExperienceEnabled,
+    ]
   );
 
   const [isAgentBuilderConfirmationModalOpen, setIsAgentBuilderConfirmationModalOpen] =
@@ -97,7 +97,7 @@ export const useAgentBuilderOptIn = ({
   const confirmAgentBuilderOptIn = useCallback(async () => {
     setIsAgentBuilderConfirmationModalOpen(false);
 
-    if (!onechat) {
+    if (!agentBuilder) {
       return;
     }
 
@@ -108,7 +108,7 @@ export const useAgentBuilderOptIn = ({
         await application.navigateToApp('observability', { path: '/' });
       }
 
-      onechat.openConversationFlyout({ newConversation: true });
+      agentBuilder.openConversationFlyout({ newConversation: true });
     } catch (error) {
       const toastError = error?.body?.message ? new Error(error.body.message) : error;
 
@@ -119,7 +119,13 @@ export const useAgentBuilderOptIn = ({
         toastMessage: error?.message,
       });
     }
-  }, [application, navigateFromConversationApp, notifications?.toasts, onechat, settings.client]);
+  }, [
+    application,
+    navigateFromConversationApp,
+    notifications?.toasts,
+    agentBuilder,
+    settings.client,
+  ]);
 
   return {
     showAgentBuilderOptInCta,
