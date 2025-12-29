@@ -56,9 +56,11 @@ describe('getMenuSections', () => {
 
     // Verify Filter overview by instance action exists
     const filterByInstanceAction = allActions.find((action) => action.key === 'filterByInstance');
-    expect(filterByInstanceAction).toBeDefined();
     expect(filterByInstanceAction?.label).toBe('Filter overview by instance');
-    expect(filterByInstanceAction?.onClick).toBe(mockOnFilterByInstanceClick);
+
+    // Verify onClick function is called when action is triggered
+    filterByInstanceAction?.onClick?.({} as any);
+    expect(mockOnFilterByInstanceClick).toHaveBeenCalledTimes(1);
 
     // Verify Metrics action exists
     const metricsAction = allActions.find((action) => action.key === 'analyzeRuntimeMetric');

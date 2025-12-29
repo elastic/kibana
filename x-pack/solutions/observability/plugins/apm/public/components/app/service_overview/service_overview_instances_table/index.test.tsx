@@ -69,12 +69,19 @@ describe('ServiceOverviewInstancesTable', () => {
     });
   });
 
-  it('renders table with correct structure', () => {
+  it('renders table with correct structure and column headers', () => {
     render(<ServiceOverviewInstancesTable {...defaultProps} />, { wrapper: Wrapper });
 
     expect(screen.getByTestId('serviceOverviewInstancesTable')).toBeInTheDocument();
     expect(screen.getByTestId('serviceInstancesTableContainer')).toBeInTheDocument();
     expect(screen.getByRole('table')).toBeInTheDocument();
+
+    expect(screen.getByText('Node name')).toBeInTheDocument();
+    expect(screen.getByText('Latency (avg.)')).toBeInTheDocument();
+    expect(screen.getByText('Throughput')).toBeInTheDocument();
+    expect(screen.getByText('Failed transaction rate')).toBeInTheDocument();
+    expect(screen.getByText('CPU usage (avg.)')).toBeInTheDocument();
+    expect(screen.getByText('Memory usage (avg.)')).toBeInTheDocument();
   });
 
   it('displays title with correct instance count', () => {
@@ -161,17 +168,6 @@ describe('ServiceOverviewInstancesTable', () => {
     expect(screen.getByText('instance-2')).toBeInTheDocument();
   });
 
-  it('renders column headers correctly', () => {
-    render(<ServiceOverviewInstancesTable {...defaultProps} />, { wrapper: Wrapper });
-
-    expect(screen.getByText('Node name')).toBeInTheDocument();
-    expect(screen.getByText('Latency (avg.)')).toBeInTheDocument();
-    expect(screen.getByText('Throughput')).toBeInTheDocument();
-    expect(screen.getByText('Failed transaction rate')).toBeInTheDocument();
-    expect(screen.getByText('CPU usage (avg.)')).toBeInTheDocument();
-    expect(screen.getByText('Memory usage (avg.)')).toBeInTheDocument();
-  });
-
   it('calls onChangeTableOptions when sorting is changed', () => {
     const onChangeTableOptions = jest.fn();
     const mockItems = [
@@ -251,7 +247,7 @@ describe('ServiceOverviewInstancesTable', () => {
   });
 
   it('renders pagination when there are multiple pages', () => {
-    const mockItems = Array.from({ length: 5 }, (_, i) => ({
+    const mockItems = Array.from({ length: 15 }, (_, i) => ({
       serviceNodeName: `instance-${i}`,
       latency: 1000 * (i + 1),
       throughput: 100 * (i + 1),
@@ -260,17 +256,18 @@ describe('ServiceOverviewInstancesTable', () => {
       memoryUsage: 0.6,
     }));
 
-    render(
+    const { container } = render(
       <ServiceOverviewInstancesTable
         {...defaultProps}
         mainStatsItems={mockItems}
-        mainStatsItemCount={11}
+        mainStatsItemCount={9}
       />,
       { wrapper: Wrapper }
     );
 
-    // EuiBasicTable should render pagination when totalItemCount > pageSize
+    // Table should be in the document and pagination should be in the document
     expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(container.querySelector('.euiPagination')).toHaveTextContent('Page 1 of 2');
   });
 
   it('hides spark plots when screen is XL breakpoint', () => {
