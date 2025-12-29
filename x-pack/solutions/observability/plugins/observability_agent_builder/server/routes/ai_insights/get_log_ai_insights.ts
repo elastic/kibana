@@ -69,7 +69,7 @@ export async function getLogAiInsights({
     - Use all available context data (ServiceSummary, DownstreamDependencies, TraceDocuments, TraceServices) to investigate
     - Check if downstream services are affected or causing the issue using DownstreamDependencies data
     - Provide immediate actions and remediation steps for further investigation
-    - Do NOT include "when the issue started to appear" unless that information is explicitly available in the provided data
+    - Provide "when the issue started to appear" ONLY if that information is available in the provided data
 
     ### For Warning Logs
     If the log level is warning:
