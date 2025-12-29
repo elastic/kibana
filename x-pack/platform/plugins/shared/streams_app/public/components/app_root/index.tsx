@@ -19,10 +19,6 @@ import { streamsAppRouter } from '../../routes/config';
 import type { StreamsAppStartDependencies } from '../../types';
 import type { StreamsAppServices } from '../../services/types';
 import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
-import {
-  useGlobalQueryStateSync,
-  useResetTimefilterOnSameAppNavigation,
-} from '../../hooks/use_global_query_state';
 
 export function AppRoot({
   coreStart,
@@ -37,19 +33,6 @@ export function AppRoot({
   isServerless: boolean;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
-
-  // Sync time range with URL - preserves time on refresh and navigation
-  useGlobalQueryStateSync({
-    history,
-    data: pluginsStart.data,
-    uiSettings: coreStart.uiSettings,
-  });
-
-  // Reset time to default when clicking Streams nav from within Streams
-  useResetTimefilterOnSameAppNavigation({
-    history,
-    timefilter: pluginsStart.data.query.timefilter.timefilter,
-  });
 
   const context = {
     appParams: appMountParameters,
