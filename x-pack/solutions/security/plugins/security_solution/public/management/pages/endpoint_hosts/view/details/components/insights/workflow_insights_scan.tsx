@@ -20,8 +20,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { SetupKnowledgeBaseButton } from '@kbn/elastic-assistant/impl/knowledge_base/setup_knowledge_base_button';
 import {
   DEFEND_INSIGHTS_STORAGE_KEY,
@@ -163,20 +161,11 @@ export const WorkflowInsightsScanSection = ({
               <EuiFlexItem grow={false}>
                 {spaceId && (
                   <AssistantSpaceIdProvider spaceId={spaceId}>
-                    <ElasticLLMCostAwarenessTour
-                      isDisabled={!inferenceEnabled}
+                    <ConnectorSelectorInline
+                      onConnectorSelected={noop}
+                      onConnectorIdSelected={onConnectorIdSelected}
                       selectedConnectorId={connectorId}
-                      zIndex={1000}
-                      storageKey={
-                        NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_AUTOMATIC_TROUBLESHOOTING
-                      }
-                    >
-                      <ConnectorSelectorInline
-                        onConnectorSelected={noop}
-                        onConnectorIdSelected={onConnectorIdSelected}
-                        selectedConnectorId={connectorId}
-                      />
-                    </ElasticLLMCostAwarenessTour>
+                    />
                   </AssistantSpaceIdProvider>
                 )}
               </EuiFlexItem>

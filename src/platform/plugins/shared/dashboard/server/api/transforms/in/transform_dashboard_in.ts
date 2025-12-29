@@ -40,11 +40,8 @@ export const transformDashboardIn = (
       query,
       references: incomingReferences,
       tags,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       time_range,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       refresh_interval,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       project_routing,
       ...rest
     } = dashboardState;

@@ -46,7 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  describe('Index editor', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/246944
+  describe.skip('Index editor', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['superuser']);
@@ -87,8 +88,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Import a file
       await indexEditor.uploadFile(IMPORT_FILE_PATH);
-      await testSubjects.isDisplayed('indexEditorPreviewFile');
-      await testSubjects.click('indexEditorImportButton');
+      await testSubjects.isDisplayed('fileUploadLiteLookupSteps');
+      await testSubjects.click('fileUploadLiteLookupReviewButton', 6000);
+
+      await testSubjects.click('fileUploadLiteLookupImportButton', 6000);
+
+      // Wait for finish button to be enabled and click it
+      // wait for file upload component to disappear
+      await retry.tryForTime(20000, async () => {
+        await testSubjects.waitForEnabled('fileUploadLiteLookupFinishButton', 6000);
+        await testSubjects.click('fileUploadLiteLookupFinishButton', 6000);
+        await testSubjects.missingOrFail('fileUploadLiteLookupSteps');
+      });
 
       // Check data grid has been populated correctly
       await retry.tryForTime(6000, async () => {

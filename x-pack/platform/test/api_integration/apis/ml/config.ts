@@ -17,5 +17,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'X-Pack API Integration Tests - ml',
     },
     indexRefreshInterval: '1s',
+    kbnTestServer: {
+      ...baseIntegrationTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+          integrationKnowledge: false,
+        })}`,
+      ],
+    },
   };
 }

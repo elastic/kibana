@@ -16,7 +16,11 @@ import type { PolicyData } from '../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import { login, ROLE } from '../tasks/login';
 
-describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/207529
+// Failing: See https://github.com/elastic/kibana/issues/207529
+// Failing: See https://github.com/elastic/kibana/issues/207529
+// Failing: See https://github.com/elastic/kibana/issues/207529
+describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;

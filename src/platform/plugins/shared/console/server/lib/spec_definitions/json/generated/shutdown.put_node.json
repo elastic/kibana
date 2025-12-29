@@ -6,22 +6,14 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "master_timeout": [
-        "nanos",
-        "micros",
-        "ms",
-        "s",
-        "m",
-        "h",
-        "d"
+        "30s",
+        "-1",
+        "0"
       ],
       "timeout": [
-        "nanos",
-        "micros",
-        "ms",
-        "s",
-        "m",
-        "h",
-        "d"
+        "30s",
+        "-1",
+        "0"
       ]
     },
     "methods": [
@@ -32,7 +24,7 @@
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-shutdown-put-node",
     "availability": {
-      "stack": true,
+      "stack": false,
       "serverless": false
     }
   }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ActorRef, Snapshot } from 'xstate5';
+import type { AnyActorRef } from 'xstate5';
 import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 
 export type StepToParentEvent =
@@ -27,7 +27,9 @@ export interface StepInput {
   isUpdated?: boolean;
 }
 
-export type StepParentActor = ActorRef<Snapshot<unknown>, StepToParentEvent>;
+export type StepParentActor = Omit<AnyActorRef, 'send'> & {
+  send: (event: StepToParentEvent) => void;
+};
 
 export interface GrokProcessorResources {
   grokExpressions: DraftGrokExpression[];
@@ -54,7 +56,7 @@ export type StepEvent =
     }
   | {
       type: 'step.changeCondition';
-      step: StreamlangWhereBlockWithUIAttributes;
+      step: StreamlangConditionBlockWithUIAttributes;
     }
   | {
       type: 'step.changeDescription';

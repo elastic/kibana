@@ -240,10 +240,16 @@ export class LlmProxy {
   interceptScoreToolChoice(log: ToolingLog) {
     function extractDocumentsToScore(source: string): KnowledgeBaseDocument[] {
       const [, raw] = source.match(/<DocumentsToScore>\s*(\[[\s\S]*?\])\s*<\/DocumentsToScore>/i)!;
-      const jsonString = raw.trim().replace(/\\"/g, '"');
-      const documentsToScore = JSON.parse(jsonString);
-      log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
-      return documentsToScore;
+      const jsonString = raw.trim().replace(/\\"/g, '"').replace(/\n/g, ' ');
+      try {
+        const documentsToScore = JSON.parse(jsonString);
+        log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
+        return documentsToScore;
+      } catch (error) {
+        log.error(`Failed to extract documents to score: ${error}`);
+        log.debug(`Raw string: ${jsonString}`);
+      }
+      return [];
     }
 
     let documentsToScore: KnowledgeBaseDocument[] = [];

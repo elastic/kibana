@@ -5,73 +5,81 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { isArray } from 'lodash/fp';
+import React, { useCallback } from 'react';
+import { EuiSkeletonLoading, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
-import { useAssistantContext } from '@kbn/elastic-assistant';
 
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { ALERT_ATTACK_IDS } from '../../../../common/field_maps/field_names';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { AlertsGroupingAggregation } from '../../components/alerts_table/grouping_settings/types';
 import { AttackGroupContent } from '../../components/attacks/table/attack_group_content';
+import type { AttackForGroup } from './use_attack_group_handler';
 
-const EMPTY_ARRAY: AttackDiscoveryAlert[] = [];
+export const ATTACK_GROUP_LOADING_SPINNER_TEST_ID = 'attack-group-loading-spinner';
 
 /**
  * Props for the useGetDefaultGroupTitleRenderers hook
  */
 export interface UseGetDefaultGroupTitleRenderersProps {
-  /** Optional array of attack IDs to pre-fetch and cache for rendering */
-  attackIds?: string[];
+  /** When true, displays anonymized values in attack titles and summaries. When false, replaces anonymized values with their original values. Defaults to false. */
+  showAnonymized?: boolean;
+
+  /** Helper function to retrieve attack details for a specific grouping bucket */
+  getAttack: AttackForGroup;
+
+  /** Indicates if the attack data is currently loading */
+  isLoading?: boolean;
 }
 
 /**
- * Pre-caches attack discovery documents using the provided attack IDs and returns
- * a renderer function that uses these cached documents for individual group component rendering.
- * This hook optimizes performance by fetching all required attack data upfront rather than
- * on-demand during rendering.
+ * Returns a renderer function for individual group component rendering.
+ * This hook handles the loading state and uses the provided `getAttack` helper
+ * to retrieve the attack data for rendering the group title content.
  *
  * @param props - The hook props
- * @param props.attackIds - Optional array of attack IDs to pre-fetch and cache
+ * @param props.getAttack - Helper function to retrieve attack details
+ * @param props.showAnonymized - When true, displays anonymized values; when false, displays original values
+ * @param props.isLoading - Indicates if the attack data is currently loading
  * @returns An object containing the defaultGroupTitleRenderers function for rendering group titles
  */
 export const useGetDefaultGroupTitleRenderers = ({
-  attackIds,
+  getAttack,
+  showAnonymized,
+  isLoading = false,
 }: UseGetDefaultGroupTitleRenderersProps) => {
-  const { assistantAvailability, http } = useAssistantContext();
-
-  const { data: attacksData, isLoading: isLoadingAttacks } = useFindAttackDiscoveries({
-    ids: attackIds,
-    http,
-    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
-    perPage: Math.max(attackIds?.length ?? 1, 1),
-  });
-
-  const attacks = useMemo(() => {
-    if (isLoadingAttacks || !attacksData?.data.length) {
-      return EMPTY_ARRAY;
-    }
-    return attacksData.data;
-  }, [attacksData?.data, isLoadingAttacks]);
-
   const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> = useCallback(
     (selectedGroup, bucket) => {
-      switch (selectedGroup) {
-        case ALERT_ATTACK_IDS: {
-          if (isArray(bucket.key) && bucket.key.length !== 1) {
-            return undefined;
-          }
-          const attackId = isArray(bucket.key) ? bucket.key[0] : bucket.key;
-          const attack = attacks.find(({ id }) => id === attackId);
-          if (!attack) {
-            return undefined;
-          }
-          return <AttackGroupContent attack={attack} dataTestSubj="attack" />;
-        }
+      const attack = getAttack(selectedGroup, bucket);
+
+      // Fall back to the internal Grouping renderer if attacks data has been loaded
+      // and there is no attack for the selected group
+      if (!isLoading && !attack) {
+        return undefined;
       }
+
+      return (
+        <EuiSkeletonLoading
+          isLoading={isLoading}
+          loadingContent={
+            <div data-test-subj={ATTACK_GROUP_LOADING_SPINNER_TEST_ID}>
+              <EuiSkeletonRectangle height={16} width="50%" />
+              <EuiSpacer size="s" />
+              <EuiSkeletonRectangle height={16} width="100%" />
+            </div>
+          }
+          loadedContent={
+            <>
+              {attack && (
+                <AttackGroupContent
+                  attack={attack}
+                  dataTestSubj="attack"
+                  showAnonymized={showAnonymized}
+                />
+              )}
+            </>
+          }
+        />
+      );
     },
-    [attacks]
+    [getAttack, showAnonymized, isLoading]
   );
 
   return { defaultGroupTitleRenderers };
