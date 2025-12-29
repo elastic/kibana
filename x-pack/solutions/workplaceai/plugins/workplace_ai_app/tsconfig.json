@@ -33,7 +33,7 @@
     "@kbn/deeplinks-data-connectors",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-workflows",
-    "@kbn/onechat-common",
+    "@kbn/agent-builder-common",
     "@kbn/cloud",
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",

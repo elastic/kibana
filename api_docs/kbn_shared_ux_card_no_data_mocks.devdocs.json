@@ -708,7 +708,7 @@
           "\nStorybook parameters provided from the controls addon."
         ],
         "signature": [
-          "{ \"data-test-subj\": any; title: any; description: any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
+          "{ href: any; \"data-test-subj\": any; title: any; description: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
         "deprecated": false,
