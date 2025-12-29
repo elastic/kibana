@@ -246,6 +246,12 @@ const streamsProcessingSavedSchema: RootSchema<StreamsProcessingSavedProps> = {
       description: 'The type of the stream: wired or classic',
     },
   },
+  configuration_mode: {
+    type: 'keyword',
+    _meta: {
+      description: 'The mode used to configure the processors: interactive or yaml',
+    },
+  },
 };
 
 const streamsRetentionChangedSchema: RootSchema<StreamsRetentionChangedProps> = {
