@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { AppPluginSetupDependencies } from './types';
-// import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 export class EntityStorePlugin implements Plugin {
   public setup(core: CoreSetup, deps: AppPluginSetupDependencies) {
