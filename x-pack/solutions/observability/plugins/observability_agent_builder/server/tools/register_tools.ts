@@ -89,7 +89,7 @@ export async function registerTools({
     createGetAnomalyDetectionJobsTool({ core, plugins, logger }),
     createGetAlertsTool({ core, logger }),
     createGetLogCategoriesTool({ core, logger }),
-    createGetServicesTool({ core, dataRegistry, logger }),
+    createGetServicesTool({ core, plugins, dataRegistry, logger }),
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),

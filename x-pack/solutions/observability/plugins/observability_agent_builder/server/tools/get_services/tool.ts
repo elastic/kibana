@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
+  ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
@@ -31,11 +32,14 @@ const getServicesSchema = z.object({
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
-    .describe('Optionally filter the services by their health status.'),
+    .describe(
+      'Optionally filter the services by their health status. Note: Only APM services have health status. When filtering by health status, services only found in logs or metrics will be excluded.'
+    ),
 });
 
 export function createGetServicesTool({
   core,
+  plugins,
   dataRegistry,
   logger,
 }: {
@@ -43,14 +47,26 @@ export function createGetServicesTool({
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }): StaticToolRegistration<typeof getServicesSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Retrieves a list of monitored APM services, including their health status, active alert counts, and key performance metrics: latency, transaction error rate, and throughput. Useful for high-level system overview, identifying unhealthy services, and quantifying performance issues.',
+    description: `Retrieves a list of services from APM, logs, and metrics data sources.
+
+For APM services, includes health status, active alert counts, and key performance metrics (latency, transaction error rate, throughput).
+
+For services found only in logs or metrics, basic information like service name and environment is returned.
+
+Each service includes a 'sources' array indicating where it was found: 'apm', 'logs', and/or 'metrics'.
+
+Useful for:
+- Getting a high-level system overview of all services
+- Identifying unhealthy APM services
+- Discovering services that may not be instrumented with APM but appear in logs or metrics
+- Understanding which observability signals are available for each service`,
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {
@@ -60,12 +76,16 @@ export function createGetServicesTool({
       },
     },
     handler: async ({ start, end, environment, healthStatus }, context) => {
-      const { request } = context;
+      const { request, esClient } = context;
 
       try {
         const { services, maxCountExceeded, serviceOverflowCount } = await getToolHandler({
+          core,
+          plugins,
           request,
+          esClient,
           dataRegistry,
+          logger,
           start,
           end,
           environment,
