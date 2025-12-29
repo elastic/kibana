@@ -114,7 +114,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('switch to k8s pods', async () => {
       await inventoryPage.goToTime(DATE_WITH_POD_DATA);
-      await inventoryPage.goToPods();
+      await inventoryPage.showPods();
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
       const nodeValues = await inventoryPage.getWaffleNodes();
       expect(nodeValues.length).toBeGreaterThan(0);
@@ -127,7 +127,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('switch to containers', async () => {
       await inventoryPage.goToTime(DATE_WITH_DOCKER_DATA);
-      await inventoryPage.goToContainers();
+      await inventoryPage.showContainers();
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Docker Containers');
       const nodeValues = await inventoryPage.getWaffleNodes();
       expect(nodeValues.length).toBeGreaterThan(0);

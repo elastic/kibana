@@ -137,7 +137,7 @@ export class InventoryPage {
     }));
   }
 
-  public async goToHosts() {
+  public async showHosts() {
     await expect(this.inventorySwitcherButton).toBeVisible();
     await this.inventorySwitcherButton.click();
     await expect(this.inventorySwitcherHostsButton).toBeVisible();
@@ -146,7 +146,7 @@ export class InventoryPage {
     await this.waitForNodesToLoad(requestPromise);
   }
 
-  public async goToPods() {
+  public async showPods() {
     await expect(this.inventorySwitcherButton).toBeVisible();
     await this.inventorySwitcherButton.click();
     await expect(this.inventorySwitcherPodsButton).toBeVisible();
@@ -155,7 +155,7 @@ export class InventoryPage {
     await this.waitForNodesToLoad(requestPromise);
   }
 
-  public async goToContainers() {
+  public async showContainers() {
     await expect(this.inventorySwitcherButton).toBeVisible();
     await this.inventorySwitcherButton.click();
     await expect(this.inventorySwitcherContainersButton).toBeVisible();
