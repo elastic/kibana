@@ -35,7 +35,7 @@
     "@kbn/ai-agent-confirmation-modal",
     "@kbn/product-doc-common",
     "@kbn/react-kibana-mount",
-    "@kbn/onechat-common"
+    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }
