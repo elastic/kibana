@@ -110,13 +110,13 @@ describe('UpdateAttacksModal', () => {
   });
 
   it('should render correct title for assignees action type', () => {
-    render(<UpdateAttacksModal {...defaultProps} actionType="assignees" />);
+    render(<UpdateAttacksModal {...defaultProps} />);
 
     expect(screen.getByText(/update alerts\?/i)).toBeInTheDocument();
   });
 
   it('should render correct title for tags action type', () => {
-    render(<UpdateAttacksModal {...defaultProps} actionType="tags" />);
+    render(<UpdateAttacksModal {...defaultProps} />);
 
     expect(screen.getByText(/update alerts\?/i)).toBeInTheDocument();
   });
