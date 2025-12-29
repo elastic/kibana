@@ -9,70 +9,83 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
+  buildSecretsFromConnectorSpec,
   createConnectorAndRelatedResources,
   deleteConnectorAndRelatedResources,
 } from './connectors_helpers';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
+import * as connectorSpecsModule from '@kbn/connector-specs';
 
-describe('buildSecretsFromConnectorSpec', () => {
-  let buildSecretsFromConnectorSpec: typeof import('./connectors_helpers').buildSecretsFromConnectorSpec;
-
-  beforeAll(() => {
-    jest.isolateModules(() => {
-      jest.doMock('@kbn/connector-specs', () => ({
-        connectorsSpecs: {
-          customConnectorWithBearerType: {
-            metadata: { id: '.bearer_connector' },
-            auth: {
-              types: [
-                {
-                  type: 'bearer',
-                },
-              ],
-            },
-          },
-          customConnectorWithBearerString: {
-            metadata: { id: '.bearer_string_connector' },
-            auth: {
-              types: ['bearer'],
-            },
-          },
-          customConnectorWithApiKeyHeaderTypeAndCustomHeader: {
-            metadata: { id: '.apikey_custom_header_connector' },
-            auth: {
-              types: [
-                {
-                  type: 'api_key_header',
-                  defaults: {
-                    headerField: 'Key',
-                  },
-                },
-              ],
-            },
-          },
-          customConnectorWithApiKeyHeaderType: {
-            metadata: { id: '.apikey_header_connector' },
-            auth: {
-              types: [
-                {
-                  type: 'api_key_header',
-                },
-              ],
-            },
-          },
-          customConnectorWithApiKeyHeaderString: {
-            metadata: { id: '.apikey_header_string_connector' },
-            auth: {
-              types: ['api_key_header'],
-            },
+const mockConnectorSpecs = {
+  customConnectorWithBearerType: {
+    metadata: {
+      id: '.bearer_connector',
+    },
+    auth: {
+      types: [
+        {
+          type: 'bearer',
+        },
+      ],
+    },
+    actions: {},
+  },
+  customConnectorWithBearerString: {
+    metadata: {
+      id: '.bearer_string_connector',
+    },
+    auth: {
+      types: ['bearer'],
+    },
+    actions: {},
+  },
+  customConnectorWithApiKeyHeaderTypeAndCustomHeader: {
+    metadata: {
+      id: '.apikey_custom_header_connector',
+    },
+    auth: {
+      types: [
+        {
+          type: 'api_key_header',
+          defaults: {
+            headerField: 'Key',
           },
         },
-      }));
+      ],
+    },
+    actions: {},
+  },
+  customConnectorWithApiKeyHeaderType: {
+    metadata: {
+      id: '.apikey_header_connector',
+    },
+    auth: {
+      types: [
+        {
+          type: 'api_key_header',
+        },
+      ],
+    },
+    actions: {},
+  },
+  customConnectorWithApiKeyHeaderString: {
+    metadata: {
+      id: '.apikey_header_string_connector',
+    },
+    auth: {
+      types: ['api_key_header'],
+    },
+    actions: {},
+  },
+};
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const helpers = require('./connectors_helpers');
-      buildSecretsFromConnectorSpec = helpers.buildSecretsFromConnectorSpec;
-    });
+describe('buildSecretsFromConnectorSpec', () => {
+  beforeAll(() => {
+    jest.replaceProperty(connectorSpecsModule, 'connectorsSpecs', mockConnectorSpecs as any);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
   describe('bearer auth', () => {
