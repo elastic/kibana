@@ -23,11 +23,11 @@ interface BaseConverseParams {
   connectorId?: string;
   conversationId?: string;
   browserApiTools?: BrowserApiToolMetadata[];
+  capabilities?: AgentCapabilities;
 }
 
 export type ChatParams = BaseConverseParams & {
   input: string;
-  capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
 };
 
@@ -63,6 +63,7 @@ export class ChatService {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       confirm: params.confirm,
       browser_api_tools: params.browserApiTools ?? [],
     });
