@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -18,6 +17,7 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
+import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
 const querySchema = schema.object({
   code: schema.maybe(schema.string()),
@@ -26,8 +26,6 @@ const querySchema = schema.object({
   error_description: schema.maybe(schema.string()),
   session_state: schema.maybe(schema.string()), // Microsoft OAuth includes this
 });
-
-export type OAuthCallbackQuery = TypeOf<typeof querySchema>;
 
 interface OAuthConnectorSecrets {
   clientId?: string;
@@ -169,7 +167,8 @@ export const oauthCallbackRoute = (
   licenseState: ILicenseState,
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  getEncryptedSavedObjects?: () => Promise<EncryptedSavedObjectsPluginStart>
+  getEncryptedSavedObjects: (() => Promise<EncryptedSavedObjectsPluginStart>) | undefined,
+  oauthRateLimiter: OAuthRateLimiter
 ) => {
   router.get(
     {
@@ -187,6 +186,30 @@ export const oauthCallbackRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const { code, state: stateParam, error, error_description: errorDescription } = req.query;
+
+        const core = await context.core;
+        const routeLogger = logger.get('oauth_callback');
+
+        // Check rate limit
+        const currentUser = core.security.authc.getCurrentUser();
+        const username = currentUser?.username || 'anonymous';
+
+        if (oauthRateLimiter.isRateLimited(username, 'callback')) {
+          routeLogger.warn(`OAuth callback rate limit exceeded for user: ${username}`);
+          return res.ok({
+            headers: { 'content-type': 'text/html' },
+            body: generateOAuthCallbackPage({
+              title: 'OAuth Authorization Failed',
+              heading: 'Too Many Requests',
+              message: 'You have made too many authorization attempts.',
+              details: 'Please wait before trying again.',
+              isSuccess: false,
+            }),
+          });
+        }
+
+        // Log the request
+        oauthRateLimiter.log(username, 'callback');
 
         // Handle OAuth errors or missing parameters
         if (error || !code || !stateParam) {
@@ -208,9 +231,6 @@ export const oauthCallbackRoute = (
         }
 
         try {
-          const core = await context.core;
-          const routeLogger = logger.get('oauth_callback');
-
           // Get encrypted saved objects client
           if (!getEncryptedSavedObjects) {
             throw new Error('EncryptedSavedObjects plugin not available');
@@ -349,7 +369,6 @@ export const oauthCallbackRoute = (
             }),
           });
         } catch (err) {
-          const routeLogger = logger.get('oauth_callback');
           const errorMessage = err instanceof Error ? err.message : String(err);
           routeLogger.error(`OAuth callback failed: ${errorMessage}`);
           if (err instanceof Error && err.stack) {

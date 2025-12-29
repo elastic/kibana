@@ -73,6 +73,17 @@ const rateLimiterSchema = schema.recordOf(
   })
 );
 
+const oAuthRateLimitSchema = schema.object({
+  authorize: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 10, min: 1, max: 1000 }),
+  }),
+  callback: schema.object({
+    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
+    limit: schema.number({ defaultValue: 50, min: 1, max: 1000 }),
+  }),
+});
+
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
@@ -200,11 +211,13 @@ export const configSchema = schema.object({
     })
   ),
   rateLimiter: schema.maybe(rateLimiterSchema),
+  oAuthRateLimit: oAuthRateLimitSchema,
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
 export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
 export type ConnectorRateLimiterConfig = TypeOf<typeof rateLimiterSchema>;
+export type OAuthRateLimiterConfig = TypeOf<typeof oAuthRateLimitSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express

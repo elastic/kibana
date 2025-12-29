@@ -13,11 +13,11 @@ import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import type { ActionsPluginsStart } from '../plugin';
+import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
 const paramsSchema = schema.object({
   connectorId: schema.string(),
@@ -32,10 +32,10 @@ export type OAuthAuthorizeParams = TypeOf<typeof paramsSchema>;
 export const oauthAuthorizeRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
-  configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   coreSetup: CoreSetup<ActionsPluginsStart>,
-  getEncryptedSavedObjects?: () => Promise<EncryptedSavedObjectsPluginStart>
+  getEncryptedSavedObjects: (() => Promise<EncryptedSavedObjectsPluginStart>) | undefined,
+  oauthRateLimiter: OAuthRateLimiter
 ) => {
   router.post(
     {
@@ -54,8 +54,28 @@ export const oauthAuthorizeRoute = (
 
         try {
           const core = await context.core;
-          const actionsClient = (await context.actions).getActionsClient();
           const routeLogger = logger.get('oauth_authorize');
+
+          // Check rate limit
+          const currentUser = core.security.authc.getCurrentUser();
+          const username = currentUser?.username || 'anonymous';
+
+          if (oauthRateLimiter.isRateLimited(username, 'authorize')) {
+            routeLogger.warn(
+              `OAuth authorize rate limit exceeded for user: ${username}, connector: ${connectorId}`
+            );
+            return res.customError({
+              statusCode: 429,
+              body: {
+                message: 'Too many authorization attempts. Please try again later.',
+              },
+            });
+          }
+
+          // Log the request
+          oauthRateLimiter.log(username, 'authorize');
+
+          const actionsClient = (await context.actions).getActionsClient();
 
           // Get encrypted saved objects client
           if (!getEncryptedSavedObjects) {

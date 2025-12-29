@@ -28,6 +28,7 @@ import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 
 import type { ActionsPluginsStart } from '../plugin';
+import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -37,10 +38,19 @@ export interface RouteOptions {
   getEncryptedSavedObjects?: () => Promise<EncryptedSavedObjectsPluginStart>;
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
+  oauthRateLimiter: OAuthRateLimiter;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, actionsConfigUtils, getEncryptedSavedObjects, logger, core } = opts;
+  const {
+    router,
+    licenseState,
+    actionsConfigUtils,
+    getEncryptedSavedObjects,
+    logger,
+    core,
+    oauthRateLimiter,
+  } = opts;
 
   createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);
@@ -56,12 +66,19 @@ export function defineRoutes(opts: RouteOptions) {
   oauthAuthorizeRoute(
     router,
     licenseState,
-    actionsConfigUtils,
     logger,
     core,
-    getEncryptedSavedObjects
+    getEncryptedSavedObjects,
+    oauthRateLimiter
   );
-  oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, getEncryptedSavedObjects);
+  oauthCallbackRoute(
+    router,
+    licenseState,
+    actionsConfigUtils,
+    logger,
+    getEncryptedSavedObjects,
+    oauthRateLimiter
+  );
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 }
