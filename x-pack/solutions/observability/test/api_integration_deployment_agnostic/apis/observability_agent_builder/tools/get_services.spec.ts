@@ -250,7 +250,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            healthStatus: ['healthy', 'warning', 'critical', 'unknown'],
+            healthStatus: ['unknown'],
           },
         });
 
