@@ -49,17 +49,57 @@ export const VirusTotalConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({
         hash: z.string().min(32).describe('File hash (MD5, SHA-1, or SHA-256)'),
+        failOnError: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            'If true, throw error on API failures. If false (default), return error details'
+          ),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { hash: string };
-        const response = await ctx.client.get(
-          `https://www.virustotal.com/api/v3/files/${typedInput.hash}`
-        );
-        return {
-          id: response.data.data.id,
-          attributes: response.data.data.attributes,
-          stats: response.data.data.attributes.last_analysis_stats,
-        };
+        const typedInput = input as { hash: string; failOnError?: boolean };
+        try {
+          const response = await ctx.client.get(
+            `https://www.virustotal.com/api/v3/files/${typedInput.hash}`
+          );
+          return {
+            id: response.data.data.id,
+            attributes: response.data.data.attributes,
+            stats: response.data.data.attributes.last_analysis_stats,
+          };
+        } catch (error: unknown) {
+          // Handle axios errors with response
+          if (
+            error &&
+            typeof error === 'object' &&
+            'response' in error &&
+            error.response &&
+            typeof error.response === 'object'
+          ) {
+            const response = error.response as { status?: number; data?: { error?: unknown } };
+            // If failOnError is true, preserve current behavior by re-throwing
+            if (typedInput.failOnError) {
+              throw error;
+            }
+            // Return error information instead of throwing
+            return {
+              id: null,
+              attributes: null,
+              stats: null,
+              error: {
+                status: response.status,
+                message:
+                  response.status === 404
+                    ? 'Hash not found in VirusTotal database'
+                    : 'API request failed',
+                details: response.data?.error,
+              },
+            };
+          }
+          // For non-axios errors, always throw
+          throw error;
+        }
       },
     },
 

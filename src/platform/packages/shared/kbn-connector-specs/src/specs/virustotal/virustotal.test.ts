@@ -10,6 +10,15 @@
 import type { ActionContext } from '../../connector_spec';
 import { VirusTotalConnector } from './virustotal';
 
+interface HttpError extends Error {
+  response?: {
+    status: number;
+    data?: {
+      error?: unknown;
+    };
+  };
+}
+
 describe('VirusTotalConnector', () => {
   const mockClient = {
     get: jest.fn(),
@@ -93,6 +102,161 @@ describe('VirusTotalConnector', () => {
 
       expect(result.stats.malicious).toBe(0);
       expect(result.id).toBe('275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f');
+    });
+
+    it('should return error details for 404 response when failOnError is false (default)', async () => {
+      const error: HttpError = new Error('Not found');
+      error.response = {
+        status: 404,
+        data: {
+          error: {
+            code: 'NotFoundError',
+            message: 'File not found',
+          },
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      const result = (await VirusTotalConnector.actions.scanFileHash.handler(mockContext, {
+        hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
+      })) as {
+        id: null;
+        attributes: null;
+        stats: null;
+        error: { status: number; message: string; details: unknown };
+      };
+
+      expect(result).toEqual({
+        id: null,
+        attributes: null,
+        stats: null,
+        error: {
+          status: 404,
+          message: 'Hash not found in VirusTotal database',
+          details: {
+            code: 'NotFoundError',
+            message: 'File not found',
+          },
+        },
+      });
+    });
+
+    it('should return error details for 404 response when failOnError is explicitly false', async () => {
+      const error: HttpError = new Error('Not found');
+      error.response = {
+        status: 404,
+        data: {
+          error: {
+            code: 'NotFoundError',
+            message: 'File not found',
+          },
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      const result = (await VirusTotalConnector.actions.scanFileHash.handler(mockContext, {
+        hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
+        failOnError: false,
+      })) as {
+        id: null;
+        attributes: null;
+        stats: null;
+        error: { status: number; message: string; details: unknown };
+      };
+
+      expect(result.error.status).toBe(404);
+      expect(result.error.message).toBe('Hash not found in VirusTotal database');
+    });
+
+    it('should throw error for 404 response when failOnError is true', async () => {
+      const error: HttpError = new Error('Not found');
+      error.response = {
+        status: 404,
+        data: {
+          error: {
+            code: 'NotFoundError',
+            message: 'File not found',
+          },
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        VirusTotalConnector.actions.scanFileHash.handler(mockContext, {
+          hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
+          failOnError: true,
+        })
+      ).rejects.toThrow('Not found');
+    });
+
+    it('should return error details for other HTTP errors when failOnError is false', async () => {
+      const error: HttpError = new Error('Rate limit exceeded');
+      error.response = {
+        status: 429,
+        data: {
+          error: {
+            code: 'QuotaExceededError',
+            message: 'You have exceeded your API quota',
+          },
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      const result = (await VirusTotalConnector.actions.scanFileHash.handler(mockContext, {
+        hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
+      })) as {
+        id: null;
+        attributes: null;
+        stats: null;
+        error: { status: number; message: string; details: unknown };
+      };
+
+      expect(result).toEqual({
+        id: null,
+        attributes: null,
+        stats: null,
+        error: {
+          status: 429,
+          message: 'API request failed',
+          details: {
+            code: 'QuotaExceededError',
+            message: 'You have exceeded your API quota',
+          },
+        },
+      });
+    });
+
+    it('should throw error for other HTTP errors when failOnError is true', async () => {
+      const error: HttpError = new Error('Rate limit exceeded');
+      error.response = {
+        status: 429,
+        data: {
+          error: {
+            code: 'QuotaExceededError',
+            message: 'You have exceeded your API quota',
+          },
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        VirusTotalConnector.actions.scanFileHash.handler(mockContext, {
+          hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
+          failOnError: true,
+        })
+      ).rejects.toThrow('Rate limit exceeded');
+    });
+
+    it('should throw non-axios errors regardless of failOnError setting', async () => {
+      const error = new Error('Network error');
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        VirusTotalConnector.actions.scanFileHash.handler(mockContext, {
+          hash: 'c34c444b4c345faea68984b75b7743271646c8008afbd036a9d3ec3838ee6fd2',
+          failOnError: false,
+        })
+      ).rejects.toThrow('Network error');
     });
   });
 
