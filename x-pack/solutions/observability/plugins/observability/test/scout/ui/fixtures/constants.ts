@@ -74,4 +74,8 @@ export const RULE_DETAILS_TEST_SUBJECTS = {
   ALERT_SUMMARY_WIDGET_COMPACT: 'alertSummaryWidgetCompact',
   ACTIVE_ALERT_COUNT: 'activeAlertCount',
   TOTAL_ALERT_COUNT: 'totalAlertCount',
+
+  // Rule Edit Form
+  RULE_DETAILS_NAME_INPUT: 'ruleDetailsNameInput',
+  DASHBOARDS_SELECTOR: 'dashboardsSelector',
 } as const;

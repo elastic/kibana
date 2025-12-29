@@ -122,4 +122,74 @@ test.describe('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => 
     await expect(pageObjects.ruleDetailsPage.editRuleButton).toBeVisible();
     await expect(pageObjects.ruleDetailsPage.deleteRuleButton).toBeVisible();
   });
+
+  test('should close actions popover when clicking actions button again', async ({
+    pageObjects,
+  }) => {
+    // Navigate to rule details
+    await pageObjects.ruleDetailsPage.gotoById(ruleId);
+    await pageObjects.ruleDetailsPage.expectRuleDetailsPageLoaded();
+
+    // Open actions menu
+    await pageObjects.ruleDetailsPage.openActionsMenu();
+
+    // Verify edit button is visible (popover is open)
+    await expect(pageObjects.ruleDetailsPage.editRuleButton).toBeVisible();
+
+    // Close actions menu
+    await pageObjects.ruleDetailsPage.closeActionsMenu();
+
+    // Verify edit button is no longer visible (popover is closed)
+    await expect(pageObjects.ruleDetailsPage.editRuleButton).toBeHidden();
+  });
+
+  test('should display dashboard options in related dashboards dropdown when editing rule', async ({
+    kbnClient,
+    pageObjects,
+  }) => {
+    const testDashboardTitle = `Scout Test Dashboard for Rule Details ${Date.now()}`;
+
+    // Create a test dashboard
+    const dashboard = await kbnClient.savedObjects.create({
+      type: 'dashboard',
+      overwrite: false,
+      attributes: {
+        title: testDashboardTitle,
+        description: 'Test dashboard for rule details Scout test',
+        panelsJSON: '[]',
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+    const testDashboardId = dashboard.id;
+
+    try {
+      // Navigate to rule details
+      await pageObjects.ruleDetailsPage.gotoById(ruleId);
+      await pageObjects.ruleDetailsPage.expectRuleDetailsPageLoaded();
+
+      // Open rule edit form
+      await pageObjects.ruleDetailsPage.openRuleEditForm();
+
+      // Verify dashboard selector is visible
+      await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
+
+      // Get all dashboard options from the dropdown
+      const optionsText = await pageObjects.ruleDetailsPage.getDashboardsOptionsList();
+
+      // Verify options list is not empty
+      expect(optionsText.length).toBeGreaterThan(0);
+
+      // Verify our test dashboard appears in the options
+      const optionsString = optionsText.join(' ');
+      expect(optionsString).toContain(testDashboardTitle);
+    } finally {
+      // Clean up: delete the test dashboard
+      await kbnClient.savedObjects.delete({
+        type: 'dashboard',
+        id: testDashboardId,
+      });
+    }
+  });
 });

@@ -140,4 +140,72 @@ export class RuleDetailsPage {
     await this.actionsButton.click();
     await expect(this.editRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
   }
+
+  /**
+   * Closes the actions menu by clicking the actions button again
+   */
+  async closeActionsMenu() {
+    await this.actionsButton.click();
+    await expect(this.editRuleButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Gets the rule name input field (on edit form) locator
+   */
+  public get ruleNameInput() {
+    return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.RULE_DETAILS_NAME_INPUT);
+  }
+
+  /**
+   * Gets the dashboards selector (combobox on edit form) locator
+   */
+  public get dashboardsSelector() {
+    return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.DASHBOARDS_SELECTOR);
+  }
+
+  /**
+   * Gets the combobox options list locator
+   */
+  public get comboboxOptionsList() {
+    return this.page.locator('[data-test-subj*="comboBoxOptionsList"]');
+  }
+
+  /**
+   * Opens the dashboards combobox and returns all available option texts
+   */
+  async getDashboardsOptionsList(): Promise<string[]> {
+    // Click the dashboard selector to open the dropdown
+    await this.dashboardsSelector.click();
+
+    // Wait for the loading spinner to disappear
+    await this.dashboardsSelector
+      .locator('.euiLoadingSpinner')
+      .waitFor({
+        state: 'hidden',
+        timeout: SHORTER_TIMEOUT,
+      })
+      .catch(() => {
+        // Loading spinner might not appear for cached results, ignore error
+      });
+
+    // Find the combobox options list using test subject contains matcher
+    await expect(this.comboboxOptionsList).toBeVisible({ timeout: BIGGER_TIMEOUT });
+
+    // Get the visible text from all options
+    const optionsText = await this.comboboxOptionsList.allTextContents();
+
+    // Close the dropdown
+    await this.page.keyboard.press('Escape');
+
+    return optionsText;
+  }
+
+  /**
+   * Opens the rule edit form
+   */
+  async openRuleEditForm() {
+    await this.openActionsMenu();
+    await this.editRuleButton.click();
+    await expect(this.ruleNameInput).toBeVisible({ timeout: BIGGER_TIMEOUT });
+  }
 }
