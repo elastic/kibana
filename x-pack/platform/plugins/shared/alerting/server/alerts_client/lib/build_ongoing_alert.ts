@@ -28,8 +28,6 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_STATE_NAMESPACE,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
@@ -117,7 +115,6 @@ export const buildOngoingAlert = <
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'active',
     [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
-    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
     // Because we're building this alert after the action execution handler has been
     // run, the scheduledExecutionOptions for the alert has been cleared and
     // the lastScheduledActions has been set. If we ever change the order of operations
