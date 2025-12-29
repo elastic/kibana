@@ -20,7 +20,6 @@ import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn().mockReturnValue({ services: {} }),
 }));
 
 jest.mock('react-router-dom', () => ({
