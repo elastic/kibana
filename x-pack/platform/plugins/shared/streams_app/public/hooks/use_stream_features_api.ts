@@ -11,7 +11,6 @@ import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import type { FeatureIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/features/route';
 import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
-import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface StreamFeaturesApi {
   getFeatureIdentificationTask: () => Promise<FeatureIdentificationTaskResult>;
