@@ -251,9 +251,6 @@ export class AlertsClient<
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
             this.trackedAlerts.recovered[alertUuid] = alertHit;
           }
-          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
-            this.trackedAlerts.recovered[alertUuid] = alertHit;
-          }
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_DELAYED) {
             this.trackedAlerts.delayed[alertUuid] = alertHit;
           }
