@@ -12,8 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
-import { useOnechatServices } from '../../hooks/use_onechat_service';
-import { useReportConverseError } from '../../hooks/use_report_error';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { mutationKeys } from '../../mutation_keys';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
@@ -23,9 +22,8 @@ interface UseResumeRoundMutationProps {
 }
 
 export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationProps = {}) => {
-  const { chatService } = useOnechatServices();
+  const { chatService } = useAgentBuilderServices();
   const { services } = useKibana();
-  const { reportConverseError } = useReportConverseError();
   const { conversationActions, browserApiTools } = useConversationContext();
   const [isResuming, setIsResuming] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
@@ -86,9 +84,7 @@ export const useResumeRoundMutation = ({ connectorId }: UseResumeRoundMutationPr
       setAgentReasoning(null);
       setIsResuming(false);
     },
-    onError: (err) => {
-      reportConverseError(err, { connectorId });
-    },
+    onError: (err) => {},
   });
 
   return {
