@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -55,7 +55,7 @@ export function createGetLogChangePointsTool({
     type: ToolType.builtin,
     description: `Analyzes logs to detect statistically significant changes, in specific log patterns.
     How it works:
-    It uses the "categorize_text" aggregation to group similar unstructured messages into categories and then detects change points (spikes/dips) within each category.``,
+    It uses the "categorize_text" aggregation to group similar unstructured messages into categories and then detects change points (spikes/dips) within each category.`,
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
     handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {
