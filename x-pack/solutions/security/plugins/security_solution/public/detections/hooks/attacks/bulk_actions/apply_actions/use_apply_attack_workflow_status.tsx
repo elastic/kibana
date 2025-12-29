@@ -30,18 +30,6 @@ interface ApplyAttackWorkflowStatusProps extends BaseApplyAttackProps {
  * Shows a confirmation modal to let users choose whether to update only attack discoveries or both attack discoveries and related detection alerts.
  *
  * @returns Object containing the applyWorkflowStatus function
- *
- * @example
- * ```tsx
- * const { applyWorkflowStatus } = useApplyAttackWorkflowStatus();
- * await applyWorkflowStatus({
- *   status: 'open',
- *   attackIds: ['attack-1', 'attack-2'],
- *   relatedAlertIds: ['alert-1', 'alert-2'],
- *   setIsLoading: (loading) => setLoading(loading),
- *   onSuccess: () => console.log('Success'),
- * });
- * ```
  */
 export const useApplyAttackWorkflowStatus = () => {
   const { mutateAsync: setUnifiedAlertsWorkflowStatus } = useSetUnifiedAlertsWorkflowStatus();

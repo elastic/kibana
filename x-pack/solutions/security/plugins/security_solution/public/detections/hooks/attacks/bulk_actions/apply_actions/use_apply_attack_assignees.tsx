@@ -26,18 +26,6 @@ interface ApplyAttackAssigneesProps extends BaseApplyAttackProps {
  * Shows a confirmation modal to let users choose whether to update only attack discoveries or both attack discoveries and related detection alerts.
  *
  * @returns Object containing the applyAssignees function
- *
- * @example
- * ```tsx
- * const { applyAssignees } = useApplyAttackAssignees();
- * await applyAssignees({
- *   assignees: { add: ['user1'], remove: [] },
- *   attackIds: ['attack-1', 'attack-2'],
- *   relatedAlertIds: ['alert-1', 'alert-2'],
- *   setIsLoading: (loading) => setLoading(loading),
- *   onSuccess: () => console.log('Success'),
- * });
- * ```
  */
 export const useApplyAttackAssignees = () => {
   const { mutateAsync: setUnifiedAlertsAssignees } = useSetUnifiedAlertsAssignees();

@@ -25,18 +25,6 @@ interface ApplyAttackTagsProps extends BaseApplyAttackProps {
  * Shows a confirmation modal to let users choose whether to update only attack discoveries or both attack discoveries and related detection alerts.
  *
  * @returns Object containing the applyTags function
- *
- * @example
- * ```tsx
- * const { applyTags } = useApplyAttackTags();
- * await applyTags({
- *   tags: { tags_to_add: ['tag1'], tags_to_remove: [] },
- *   attackIds: ['attack-1', 'attack-2'],
- *   relatedAlertIds: ['alert-1', 'alert-2'],
- *   setIsLoading: (loading) => setLoading(loading),
- *   onSuccess: () => console.log('Success'),
- * });
- * ```
  */
 export const useApplyAttackTags = () => {
   const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();

@@ -30,20 +30,6 @@ export interface ShowUpdateAttacksModalProps {
  *   - `{ updateAlerts: boolean }` if the user confirms or if EASE is enabled:
  *     - `{ updateAlerts: false }` when user chooses to update only attack alerts, or when EASE is enabled
  *     - `{ updateAlerts: true }` when user chooses to update both attack alerts and related detection alerts
- *
- * @example
- * ```tsx
- * const showModalIfNeeded = useUpdateAttacksModal('workflow_status');
- * const result = await showModalIfNeeded({
- *   alertsCount: 5,
- *   attackDiscoveriesCount: 3
- * });
- * if (result === null) {
- *   // User cancelled, don't proceed
- *   return;
- * }
- * // Proceed with update using result.updateAlerts
- * ```
  */
 export const useUpdateAttacksModal = () => {
   const { overlays, services } = useKibana();
