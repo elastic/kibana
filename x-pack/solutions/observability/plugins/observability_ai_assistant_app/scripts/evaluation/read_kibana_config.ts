@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { identity, pickBy } from 'lodash';
-import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
+import { unflattenObject } from '@kbn/object-utils';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
