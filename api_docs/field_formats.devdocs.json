@@ -378,7 +378,7 @@
           "section": "def-common.FieldFormatsRegistry",
           "text": "FieldFormatsRegistry"
         },
-        ", \"init\" | \"register\"> & { deserialize: ",
+        ", \"register\" | \"init\"> & { deserialize: ",
         {
           "pluginId": "fieldFormats",
           "scope": "common",
@@ -6062,7 +6062,15 @@
         "label": "IFieldFormatsRegistry",
         "description": [],
         "signature": [
-          "{ init: (getConfig: ",
+          "{ register: (fieldFormats: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatInstanceType",
+            "text": "FieldFormatInstanceType"
+          },
+          "[]) => void; init: (getConfig: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -6087,14 +6095,6 @@
             "text": "FieldFormatMetaParams"
           },
           ", defaultFieldConverters?: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
-          "[]) => void; register: (fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",

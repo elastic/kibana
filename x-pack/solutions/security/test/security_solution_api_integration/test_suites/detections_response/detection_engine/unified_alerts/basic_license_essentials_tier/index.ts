@@ -19,5 +19,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./search_alerts'));
+    loadTestFile(require.resolve('./set_workflow_status'));
+    loadTestFile(require.resolve('./set_alert_tags'));
+    loadTestFile(require.resolve('./set_alert_assignees'));
   });
 }
