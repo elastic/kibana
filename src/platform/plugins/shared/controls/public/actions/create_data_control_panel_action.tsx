@@ -12,7 +12,7 @@ import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAddNewPanel,
-  apiCanPinPanel,
+  apiCanPinPanels,
   apiIsPresentationContainer,
 } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -97,7 +97,7 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
   if (controlId) {
     // the control exists but changed type - so, replace the old control
     embeddable.replacePanel(controlId, newControl);
-  } else if (isPinned && apiCanPinPanel(embeddable)) {
+  } else if (isPinned && apiCanPinPanels(embeddable)) {
     // otherwise, add a new control as either pinned or not depending on provided context
     embeddable.addPinnedPanel(newControl);
   } else {

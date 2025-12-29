@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { apiCanPinPanel } from '@kbn/presentation-containers';
+import { apiCanPinPanels } from '@kbn/presentation-containers';
 import {
   apiHasParentApi,
   getInheritedViewMode,
@@ -58,7 +58,7 @@ export class EditControlDisplaySettingsAction
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiHasParentApi(embeddable) && apiCanPinPanel(embeddable.parentApi);
+    return apiHasParentApi(embeddable) && apiCanPinPanels(embeddable.parentApi);
   }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {

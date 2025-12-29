@@ -38,9 +38,11 @@ export interface CanPinPanel {
   ) => Promise<ApiType | undefined>;
 }
 
-export const apiCanPinPanel = (api: unknown): api is CanPinPanel => {
+export const apiCanPinPanels = (api: unknown): api is CanPinPanel => {
   return (
     typeof (api as CanPinPanel)?.pinPanel === 'function' &&
-    typeof (api as CanPinPanel)?.unpinPanel === 'function'
+    typeof (api as CanPinPanel)?.unpinPanel === 'function' &&
+    typeof (api as CanPinPanel)?.panelIsPinned === 'function' &&
+    typeof (api as CanPinPanel)?.addPinnedPanel === 'function'
   );
 };

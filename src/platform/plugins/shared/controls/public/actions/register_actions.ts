@@ -10,6 +10,7 @@
 import {
   ACTION_CREATE_CONTROL,
   ACTION_CREATE_ESQL_CONTROL,
+  ACTION_CREATE_TIME_SLIDER,
   CONTROL_HOVER_TRIGGER_ID,
   CONTROL_MENU_TRIGGER,
 } from '@kbn/controls-constants';
@@ -18,7 +19,6 @@ import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-
 import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_CLEAR_CONTROL,
-  ACTION_CREATE_TIME_SLIDER,
   ACTION_EDIT_CONTROL_DISPLAY_SETTINGS,
   ACTION_PIN_CONTROL,
   OPTIONS_LIST_ACTION,

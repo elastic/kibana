@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel, apiCanPinPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-containers';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -54,7 +54,7 @@ export const createESQLControlAction = (): ActionDefinition<
           };
 
           // add a new control as either pinned or not depending on provided context
-          (isPinned && apiCanPinPanel(embeddable)
+          (isPinned && apiCanPinPanels(embeddable)
             ? embeddable.addPinnedPanel
             : embeddable.addNewPanel)(newControl, { displaySuccessMessage: true });
         },

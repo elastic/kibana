@@ -12,7 +12,7 @@ import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanBePinned,
-  apiCanPinPanel,
+  apiCanPinPanels,
   type CanPinPanel,
   type IsPinnable,
   type PresentationContainer,
@@ -45,7 +45,7 @@ const compatibilityCheck = (api: unknown | null): api is PinnableControlApi =>
       apiCanBePinned(api) &&
       apiCanAccessViewMode(api) &&
       apiHasParentApi(api) &&
-      apiCanPinPanel(api.parentApi)
+      apiCanPinPanels(api.parentApi)
   );
 
 export class PinControlAction
@@ -74,7 +74,7 @@ export class PinControlAction
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiHasParentApi(embeddable) && apiCanPinPanel(embeddable.parentApi);
+    return apiHasParentApi(embeddable) && apiCanPinPanels(embeddable.parentApi);
   }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {

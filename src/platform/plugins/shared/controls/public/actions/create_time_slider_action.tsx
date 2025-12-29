@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanPinPanel } from '@kbn/presentation-containers';
+import { apiCanPinPanels } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -18,7 +18,7 @@ import { map } from 'rxjs';
 import { apiPublishesControlsLayout } from './types';
 
 const compatibilityCheck = (api: unknown | null) =>
-  apiCanPinPanel(api) &&
+  apiCanPinPanels(api) &&
   apiPublishesControlsLayout(api) &&
   !Object.values(api.layout$.getValue().controls).find(
     (control) => control.type === TIME_SLIDER_CONTROL
@@ -28,14 +28,14 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
   id: ACTION_CREATE_TIME_SLIDER,
   order: 0,
   getIconType: () => 'controlsHorizontal',
-  couldBecomeCompatible: ({ embeddable }) => apiCanPinPanel(embeddable),
+  couldBecomeCompatible: ({ embeddable }) => apiCanPinPanels(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
     apiPublishesControlsLayout(embeddable)
       ? embeddable.layout$.pipe(map(() => undefined))
       : undefined,
   isCompatible: async ({ embeddable }) => compatibilityCheck(embeddable),
   execute: async ({ embeddable }) => {
-    if (!apiCanPinPanel(embeddable)) throw new IncompatibleActionError();
+    if (!apiCanPinPanels(embeddable)) throw new IncompatibleActionError();
     await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {

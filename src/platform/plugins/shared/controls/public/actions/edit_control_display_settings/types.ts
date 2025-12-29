@@ -12,7 +12,7 @@ import {
   type PresentationContainer,
   type CanPinPanel,
   apiCanBePinned,
-  apiCanPinPanel,
+  apiCanPinPanels,
 } from '@kbn/presentation-containers';
 import {
   apiHasParentApi,
@@ -38,7 +38,7 @@ export type PinnableControlParentApi = PresentationContainer &
 const apiIsPinnableControlParentApi = (
   parentApi: unknown | null
 ): parentApi is PinnableControlParentApi =>
-  Boolean(apiPublishesControlsLayout(parentApi) && apiCanPinPanel(parentApi));
+  Boolean(apiPublishesControlsLayout(parentApi) && apiCanPinPanels(parentApi));
 
 export const apiIsPinnableControlApi = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
