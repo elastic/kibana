@@ -34,13 +34,13 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/agent-builder-common'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-http-server'
   - '@kbn/logging'
   - '@kbn/core-saved-objects-utils-server'
-  - '@kbn/agent-builder-plugin'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
