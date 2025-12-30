@@ -51,11 +51,6 @@ const ButtonSection = ({
   </>
 );
 
-export interface AiInsightResponse {
-  summary: string;
-  context: string;
-}
-
 export interface AiInsightAttachment {
   type: string;
   data: Record<string, unknown>;
@@ -64,7 +59,7 @@ export interface AiInsightAttachment {
 
 export interface AiInsightProps {
   title: string;
-  fetchInsight: (signal?: AbortSignal) => Promise<Response | AiInsightResponse>;
+  fetchInsight: (signal?: AbortSignal) => Promise<Response>;
   buildAttachments: (summary: string, context: string) => AiInsightAttachment[];
 }
 
@@ -112,72 +107,63 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
         return;
       }
 
-      if (result instanceof Response) {
-        // streaming response-parse sse stream
-        const observable$ = of({ response: result }).pipe(
-          httpResponseIntoObservable(),
-          filter(
-            (event: { type: string }): boolean =>
-              event.type === 'context' ||
-              event.type === 'chatCompletionChunk' ||
-              event.type === 'chatCompletionMessage'
-          ),
-          map((event: { type: string; [key: string]: unknown }) => {
-            if (event.type === 'context') {
-              return { type: 'context' as const, context: (event.context as string) || '' };
-            }
-            if (event.type === 'chatCompletionChunk') {
-              return { type: 'chunk' as const, content: (event.content as string) || '' };
-            }
-            return { type: 'message' as const, content: (event.content as string) || '' };
-          })
-        );
+      const observable$ = of({ response: result }).pipe(
+        httpResponseIntoObservable(),
+        filter(
+          (event: { type: string }): boolean =>
+            event.type === 'context' ||
+            event.type === 'chatCompletionChunk' ||
+            event.type === 'chatCompletionMessage'
+        ),
+        map((event: { type: string; [key: string]: unknown }) => {
+          if (event.type === 'context') {
+            return { type: 'context' as const, context: (event.context as string) || '' };
+          }
+          if (event.type === 'chatCompletionChunk') {
+            return { type: 'chunk' as const, content: (event.content as string) || '' };
+          }
+          return { type: 'message' as const, content: (event.content as string) || '' };
+        })
+      );
 
-        let accumulatedContent = '';
-        let contextValue = '';
+      let accumulatedContent = '';
+      let contextValue = '';
 
-        const subscription = observable$.subscribe({
-          next: (event: { type: string; context?: string; content?: string } | null) => {
-            if (abortController.signal.aborted) {
-              subscription.unsubscribe();
-              return;
-            }
+      const subscription = observable$.subscribe({
+        next: (event: { type: string; context?: string; content?: string } | null) => {
+          if (abortController.signal.aborted) {
+            subscription.unsubscribe();
+            return;
+          }
 
-            if (event?.type === 'context') {
-              contextValue = event.context || '';
-              setContext(contextValue);
-            } else if (event?.type === 'chunk') {
-              accumulatedContent += event.content || '';
-              setSummary(accumulatedContent);
-            } else if (event?.type === 'message') {
-              accumulatedContent = event.content || '';
-              setSummary(accumulatedContent);
-              setIsLoading(false);
-            }
-          },
-          error: (err: unknown) => {
-            if (!abortController.signal.aborted) {
-              setError(err instanceof Error ? err.message : 'Failed to load AI insight');
-              setIsLoading(false);
-            }
-          },
-          complete: () => {
-            if (!abortController.signal.aborted) {
-              setIsLoading(false);
-            }
-          },
-        });
+          if (event?.type === 'context') {
+            contextValue = event.context || '';
+            setContext(contextValue);
+          } else if (event?.type === 'chunk') {
+            accumulatedContent += event.content || '';
+            setSummary(accumulatedContent);
+          } else if (event?.type === 'message') {
+            accumulatedContent = event.content || '';
+            setSummary(accumulatedContent);
+            setIsLoading(false);
+          }
+        },
+        error: (err: unknown) => {
+          if (!abortController.signal.aborted) {
+            setError(err instanceof Error ? err.message : 'Failed to load AI insight');
+            setIsLoading(false);
+          }
+        },
+        complete: () => {
+          if (!abortController.signal.aborted) {
+            setIsLoading(false);
+          }
+        },
+      });
 
-        abortController.signal.addEventListener('abort', () => {
-          subscription.unsubscribe();
-        });
-      } else {
-        // Non-streaming response
-        const insightResponse = result as AiInsightResponse;
-        setSummary(insightResponse.summary || '');
-        setContext(insightResponse.context || '');
-        setIsLoading(false);
-      }
+      abortController.signal.addEventListener('abort', () => {
+        subscription.unsubscribe();
+      });
     } catch (e) {
       if (!abortController.signal.aborted) {
         setError(e instanceof Error ? e.message : 'Failed to load AI insight');
