@@ -13,6 +13,7 @@ import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
 import type { NavigationService } from './navigation';
+import type { EventsService } from './events';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -23,4 +24,5 @@ export interface AgentBuilderInternalService {
   toolsService: ToolsService;
   startDependencies: AgentBuilderStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
+  eventsService: EventsService;
 }

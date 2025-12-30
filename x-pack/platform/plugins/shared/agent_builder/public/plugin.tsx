@@ -26,12 +26,14 @@ import {
   ConversationsService,
   NavigationService,
   ToolsService,
+  EventsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
-import { registerWorkflowSteps } from './step_types';
 import { createPublicAgentsContract } from './services/agents';
+import { createPublicEventsContract } from './services/events';
+import { registerWorkflowSteps } from './step_types';
 import type {
   ConfigSchema,
   AgentBuilderPluginSetup,
@@ -104,7 +106,8 @@ export class AgentBuilderPlugin
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService();
-    const chatService = new ChatService({ http });
+    const eventsService = new EventsService();
+    const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
@@ -124,6 +127,7 @@ export class AgentBuilderPlugin
       toolsService,
       startDependencies,
       accessChecker,
+      eventsService,
     };
 
     this.internalServices = internalServices;
@@ -161,6 +165,7 @@ export class AgentBuilderPlugin
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
+      events: createPublicEventsContract({ eventsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // set config until flyout is next opened
         this.conversationFlyoutActiveConfig = config;
