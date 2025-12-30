@@ -17,8 +17,7 @@ import {
 import { transparentize } from 'polished';
 import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
-import type { ListChildComponentProps } from 'react-window';
-import { areEqual, VariableSizeList as List } from 'react-window';
+import { List, type RowComponentProps } from 'react-window';
 import { css } from '@emotion/react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
@@ -114,17 +113,14 @@ function Waterfall(props: WaterfallProps) {
               data-test-subj="waterfall"
               ref={registerChild as unknown as React.Ref<HTMLDivElement>}
             >
-              <List
-                ref={listRef}
-                style={{ height: '100%' }}
-                itemCount={visibleTraceList.length}
-                itemSize={getRowSize}
-                height={window.innerHeight}
-                width={width}
-                itemData={{ ...props, traceList: visibleTraceList, onLoad: onRowLoad }}
-              >
-                {VirtualRow}
-              </List>
+              <List<VirtualRowProps>
+                listRef={listRef}
+                style={{ height: '100%', width }}
+                rowCount={visibleTraceList.length}
+                rowHeight={getRowSize}
+                rowProps={{ ...props, traceList: visibleTraceList, onLoad: onRowLoad }}
+                rowComponent={VirtualRow}
+              />
             </div>
           )}
         </AutoSizer>
@@ -133,32 +129,29 @@ function Waterfall(props: WaterfallProps) {
   );
 }
 
-const VirtualRow = React.memo(
-  ({
-    index,
-    style,
-    data,
-  }: ListChildComponentProps<
-    Omit<WaterfallNodeProps, 'node'> & {
-      traceList: IWaterfallNodeFlatten[];
-      onLoad: (index: number, size: number) => void;
-    }
-  >) => {
-    const { onLoad, traceList, ...props } = data;
+interface VirtualRowProps extends Omit<WaterfallNodeProps, 'node'> {
+  traceList: IWaterfallNodeFlatten[];
+  onLoad: (index: number, size: number) => void;
+}
 
-    const ref = React.useRef<HTMLDivElement | null>(null);
-    useEffect(() => {
-      onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
-    }, [index, onLoad]);
+function VirtualRow({
+  index,
+  style,
+  traceList,
+  onLoad,
+  ...props
+}: RowComponentProps<VirtualRowProps>) {
+  const ref = React.useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
+  }, [index, onLoad]);
 
-    return (
-      <div style={style} ref={ref}>
-        <WaterfallNode {...props} node={traceList[index]} />
-      </div>
-    );
-  },
-  areEqual
-);
+  return (
+    <div style={style} ref={ref}>
+      <WaterfallNode {...props} node={traceList[index]} />
+    </div>
+  );
+}
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const { euiTheme } = useEuiTheme();

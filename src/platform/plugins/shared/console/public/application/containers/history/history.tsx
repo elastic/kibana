@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { FixedSizeList } from 'react-window';
+import { List as VirtualList, type RowComponentProps } from 'react-window';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
@@ -83,9 +83,9 @@ interface HistoryProps {
 }
 
 interface RowProps {
-  index: number;
-  style: React.CSSProperties;
-  data: HistoryProps[];
+  requests: HistoryProps[];
+  viewingReq: HistoryProps | null;
+  setViewingReq: (req: HistoryProps) => void;
 }
 
 const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => {
@@ -113,6 +113,28 @@ const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => 
     </EuiFlexGroup>
   );
 };
+
+const RowComponent = ({
+  index,
+  style,
+  requests,
+  viewingReq,
+  setViewingReq,
+}: RowComponentProps<RowProps>) => (
+  <EuiFormFieldset key={index} data-test-subj="historyItemFieldset" style={style}>
+    <EuiCheckableCard
+      id={`${CHILD_ELEMENT_PREFIX}${index}`}
+      label={<CheckeableCardLabel historyItem={requests[index]} />}
+      data-test-subj={`historyItem-${index}`}
+      checkableType="radio"
+      checked={viewingReq === requests[index]}
+      onChange={() => {
+        setViewingReq(requests[index]);
+      }}
+    />
+    <EuiSpacer size="s" />
+  </EuiFormFieldset>
+);
 
 export function History() {
   const styles = useStyles();
@@ -164,25 +186,6 @@ export function History() {
   useEffect(() => {
     initialize();
   }, [initialize]);
-
-  const Row = useCallback(
-    ({ data, index, style }: RowProps) => (
-      <EuiFormFieldset key={index} data-test-subj="historyItemFieldset" style={style}>
-        <EuiCheckableCard
-          id={`${CHILD_ELEMENT_PREFIX}${index}`}
-          label={<CheckeableCardLabel historyItem={data[index]} />}
-          data-test-subj={`historyItem-${index}`}
-          checkableType="radio"
-          checked={viewingReq === data[index]}
-          onChange={() => {
-            setViewingReq(data[index]);
-          }}
-        />
-        <EuiSpacer size="s" />
-      </EuiFormFieldset>
-    ),
-    [viewingReq, setViewingReq]
-  );
 
   return (
     <EuiPanel
@@ -243,15 +246,15 @@ export function History() {
                       {requests.length > 0 && (
                         <EuiAutoSizer>
                           {({ height, width }) => (
-                            <FixedSizeList
-                              height={height}
-                              itemCount={requests.length}
-                              itemSize={62}
-                              itemData={requests}
-                              width={width}
-                            >
-                              {Row}
-                            </FixedSizeList>
+                            <div style={{ height, width }}>
+                              <VirtualList<RowProps>
+                                rowComponent={RowComponent}
+                                rowCount={requests.length}
+                                rowHeight={62}
+                                rowProps={{ requests, viewingReq, setViewingReq }}
+                                style={{ height: '100%', width: '100%' }}
+                              />
+                            </div>
                           )}
                         </EuiAutoSizer>
                       )}
