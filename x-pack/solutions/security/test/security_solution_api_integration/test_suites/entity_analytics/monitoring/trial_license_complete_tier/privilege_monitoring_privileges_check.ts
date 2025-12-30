@@ -23,9 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
   const authHelper = privMonRolesUtils.createUnifiedAuthHelper(getService);
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/243722
-  // Failing: See https://github.com/elastic/kibana/issues/243721
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     describe('privileges checks', () => {
       before(async () => {
         await enablePrivmonSetting(kibanaServer);
@@ -75,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
               '.entity_analytics.monitoring.users-default': {
                 read: false,
               },
-              '.ml-anomalies-shared': {
+              '.ml-anomalies-shared*': {
                 read: false,
               },
               'risk-score.risk-score-*': {
@@ -99,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
               '.entity_analytics.monitoring.users-default': {
                 read: true,
               },
-              '.ml-anomalies-shared': {
+              '.ml-anomalies-shared*': {
                 read: false,
               },
               'risk-score.risk-score-*': {

@@ -8,8 +8,11 @@
  */
 
 import { AiPromptStepDefinition } from './ai/ai_prompt_step';
+import { dataDedupeStepDefinition, dataMapStepDefinition } from './data';
 import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
+  stepRegistry.register(dataMapStepDefinition);
+  stepRegistry.register(dataDedupeStepDefinition);
   stepRegistry.register(AiPromptStepDefinition);
 };
