@@ -119,4 +119,15 @@ test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(page.testSubj.locator('relatedAlertsTable')).toBeVisible();
     }).toPass({ timeout: 60_000, intervals: [2_000] });
   });
+
+  test('should show a Related Dashboard component when Related Dashboards tab is clicked', async ({
+    page,
+    pageObjects,
+  }) => {
+    await expect(async () => {
+      await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+      await page.testSubj.locator('relatedDashboardsTab').click();
+      await expect(page.testSubj.locator('alertRelatedDashboards')).toBeVisible();
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
+  });
 });
