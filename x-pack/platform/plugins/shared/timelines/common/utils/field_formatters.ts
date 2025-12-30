@@ -103,7 +103,7 @@ const processNestedFields = (
   );
 };
 
-type DisjointFieldNames = 'ecs.version' | 'event.action' | 'event.kind' | 'event.original';
+type DisjointFieldNames = 'ecs.version' | 'event.action' | 'event.kind' | 'event.original' | 'tags';
 
 // Memoized field maps
 const fieldMaps: EcsFieldMap &
