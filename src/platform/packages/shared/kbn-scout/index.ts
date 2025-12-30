@@ -55,6 +55,7 @@ export type {
 export type {
   ApiServicesFixture,
   BrowserAuthFixture,
+  RequestAuthFixture,
   SamlAuth,
   SynthtraceFixture,
 } from './src/playwright';
