@@ -674,15 +674,6 @@ export class WorkflowsExecutionEnginePlugin
   private async checkConcurrencyIfNeeded(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<boolean> {
-    if (
-      !workflowExecution.workflowDefinition?.settings?.concurrency ||
-      !workflowExecution.concurrencyGroupKey ||
-      !workflowExecution.id ||
-      !workflowExecution.spaceId
-    ) {
-      return true; // No concurrency settings, allow execution
-    }
-
     // Guard check: ConcurrencyManager not initialized if task executes before start().
     // This should not occur in normal operation.
     // Execution will proceed without concurrency enforcement.
@@ -690,7 +681,16 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.warn(
         `ConcurrencyManager not initialized, skipping concurrency check for execution ${workflowExecution.id}.`
       );
-      return;
+      return true;
+    }
+
+    if (
+      !workflowExecution.workflowDefinition?.settings?.concurrency ||
+      !workflowExecution.concurrencyGroupKey ||
+      !workflowExecution.id ||
+      !workflowExecution.spaceId
+    ) {
+      return true; // No concurrency settings, allow execution
     }
 
     try {
