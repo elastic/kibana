@@ -50,6 +50,14 @@ export interface StackConnectorConfig {
 }
 
 /**
+ * Configuration for automatically imported tools for MCP connectors
+ */
+export interface ImportedTool {
+  name: string;
+  description?: string;
+}
+
+/**
  * Abstraction defining a federated data source ("fetcher").
  * This defines:
  * - Connectivity (OAuth) configuration
@@ -79,4 +87,7 @@ export interface DataTypeDefinition {
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;
+
+  /** Automatically imported tools for MCP connectors */
+  importedTools?: string[];
 }

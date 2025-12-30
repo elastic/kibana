@@ -36,6 +36,25 @@ export const githubDataSource: DataTypeDefinition = {
     },
   },
 
+  importedTools: [
+    'get_commit',
+    'get_file_contents',
+    'get_label',
+    'get_latest_release',
+    'get_me',
+    'get_tag',
+    'get_team_members',
+    'get_teams',
+    'list_branches',
+    'list_commits',
+    'list_issue_types',
+    'list_issues',
+    'list_pull_requests',
+    'list_releases',
+    'list_tags',
+    'pull_request_read',
+  ],
+
   generateWorkflows(stackConnectorId: string) {
     return [
       { content: generateGithubSearchIssuesWorkflow(stackConnectorId), shouldGenerateABTool: true },

@@ -70,6 +70,37 @@ async function getMcpToolInputSchema({
 }
 
 /**
+ * Retrieves a specific MCP tool by name by calling listTools on the connector.
+ * Returns undefined if the connector or tool is not found.
+ */
+
+/**
+ * Retrieves a specific MCP tool by name by calling listTools on the connector.
+ * Returns undefined if the connector or tool is not found.
+ */
+export async function getMcpTools({
+  actions,
+  request,
+  connectorId,
+  toolNames,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+  toolNames: string[];
+}): Promise<Array<{ name: string; description?: string }>> {
+  try {
+    const { tools } = await listMcpTools({ actions, request, connectorId });
+    return tools
+      .filter((t) => toolNames.includes(t.name))
+      .map((tool) => ({ name: tool.name, description: tool.description }));
+  } catch (error) {
+    // Connector not found or other error - return empty array
+    return [];
+  }
+}
+
+/**
  * Discriminated union for MCP tool execution results
  */
 interface McpToolExecutionResultSuccess {

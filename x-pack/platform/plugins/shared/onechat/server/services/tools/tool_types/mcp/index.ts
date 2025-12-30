@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getMcpToolType, listMcpTools } from './tool_type';
+export { getMcpToolType, listMcpTools, getMcpTools } from './tool_type';

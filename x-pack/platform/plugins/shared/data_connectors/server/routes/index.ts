@@ -13,11 +13,13 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { ActionResult } from '@kbn/actions-plugin/server';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type { DataConnectorAttributes } from '../saved_objects';
 import { DATA_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataConnectorsServerStartDependencies } from '../types';
 import { convertSOtoAPIResponse, createDataConnectorRequestSchema } from './schema';
+import { createMcpConnector } from '../utils/create_mcp_connector';
 
 /**
  * Builds the secrets object for a connector based on its spec
@@ -172,7 +174,7 @@ export function registerRoutes(
 
       try {
         const { name, type, token } = request.body;
-        const [, { actions, dataSourcesRegistry }] = await getStartServices();
+        const [, { actions, dataSourcesRegistry, onechat }] = await getStartServices();
 
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
@@ -187,27 +189,36 @@ export function registerRoutes(
 
         const connectorType = dataConnectorTypeDef.stackConnector.type;
         const connectorConfig = dataConnectorTypeDef.stackConnector.config;
-        const actionsClient = await actions.getActionsClientWithRequest(request);
 
+        logger.info(`Connector config: ${JSON.stringify(connectorConfig)}`);
+
+        let stackConnector: ActionResult;
         let secrets: Record<string, string> = {};
-        // secrets are apart of unencrypted config right now for MCP connector testing purposes
         if (connectorType === '.mcp') {
-          connectorConfig.headers = {
-            Authorization: token,
-          };
+          const registry = await onechat.tools.getRegistry({ request });
+          stackConnector = await createMcpConnector(
+            registry,
+            actions,
+            request,
+            dataConnectorTypeDef,
+            name,
+            token,
+            logger
+          );
         } else {
+          const actionsClient = await actions.getActionsClientWithRequest(request);
           secrets = buildSecretsFromConnectorSpec(connectorType, token);
+          stackConnector = await actionsClient.create({
+            action: {
+              name: `${type} stack connector for data connector '${name}'`,
+              actionTypeId: connectorType,
+              config: connectorConfig as any,
+              secrets,
+            },
+          });
         }
 
         logger.info(`Creating stack connector with config: ${JSON.stringify(connectorConfig)}`);
-        const stackConnector = await actionsClient.create({
-          action: {
-            name: `${type} stack connector for data connector '${name}'`,
-            actionTypeId: connectorType,
-            config: connectorConfig as any,
-            secrets,
-          },
-        });
 
         const savedObjectsClient = coreContext.savedObjects.client;
         const now = new Date().toISOString();
