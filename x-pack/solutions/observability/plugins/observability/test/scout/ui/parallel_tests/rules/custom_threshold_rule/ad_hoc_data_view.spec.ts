@@ -10,17 +10,35 @@ import { test } from '../../../fixtures';
 
 test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlOblt'] }, () => {
   const AD_HOC_DATA_VIEW_PATTERN = '.alerts-*';
-  const CUSTOM_THRESHOLD_RULE_NAME = '!!! - Scout - Custom threshold with ad-hoc data view';
 
+  let testRuleName: string;
   let createdRuleId: string | undefined;
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    // Generate unique rule name for each test run to avoid conflicts
+    testRuleName = `!!! - Scout - Custom threshold ad-hoc - ${Date.now()}`;
     await browserAuth.loginAsAdmin();
     await pageObjects.rulesPage.goto();
   });
 
   test.afterEach(async ({ apiServices }) => {
-    // Clean up the rule created during the test
+    // Clean up by rule name first (in case ID wasn't captured)
+    try {
+      const rulesResponse = await apiServices.alerting.rules.find({
+        search: testRuleName,
+      });
+      if (rulesResponse.data?.data && rulesResponse.data.data.length > 0) {
+        for (const rule of rulesResponse.data.data) {
+          if (rule.name === testRuleName) {
+            await apiServices.alerting.rules.delete(rule.id).catch(() => {});
+          }
+        }
+      }
+    } catch {
+      // Ignore errors if rule doesn't exist
+    }
+
+    // Also try cleaning up by ID if we have it
     if (createdRuleId) {
       try {
         await apiServices.alerting.rules.delete(createdRuleId);
@@ -42,7 +60,7 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
     await pageObjects.rulesPage.clickCustomThresholdRuleType();
 
     // Set rule name
-    await pageObjects.rulesPage.setRuleName(CUSTOM_THRESHOLD_RULE_NAME);
+    await pageObjects.rulesPage.setRuleName(testRuleName);
 
     // Type the pattern to trigger "Explore matching indices" button
     await pageObjects.rulesPage.setIndexPatternAndWaitForButton(AD_HOC_DATA_VIEW_PATTERN);
@@ -62,7 +80,7 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
 
     // Fetch the rule via API to verify it was created correctly
     const rulesResponse = await apiServices.alerting.rules.find({
-      search: CUSTOM_THRESHOLD_RULE_NAME,
+      search: testRuleName,
     });
 
     expect(rulesResponse.data?.data).toBeDefined();
@@ -70,7 +88,7 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
 
     const createdRule = rulesResponse.data?.data?.[0];
     expect(createdRule).toBeDefined();
-    expect(createdRule.name).toBe(CUSTOM_THRESHOLD_RULE_NAME);
+    expect(createdRule.name).toBe(testRuleName);
 
     // Store the rule ID for cleanup
     createdRuleId = createdRule.id;
