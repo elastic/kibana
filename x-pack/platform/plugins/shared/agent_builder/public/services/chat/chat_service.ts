@@ -17,16 +17,24 @@ import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 
-export interface ChatParams {
+interface BaseConverseParams {
   signal?: AbortSignal;
   agentId?: string;
   connectorId?: string;
   conversationId?: string;
+  browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
+}
+
+export type ChatParams = BaseConverseParams & {
   input: string;
   attachments?: AttachmentInput[];
-  browserApiTools?: BrowserApiToolMetadata[];
-}
+};
+
+export type ResumeRoundParams = BaseConverseParams & {
+  conversationId: string;
+  confirm: boolean;
+};
 
 export class ChatService {
   private readonly http: HttpSetup;
@@ -36,7 +44,7 @@ export class ChatService {
   }
 
   chat(params: ChatParams): Observable<ChatEvent> {
-    const payload: ChatRequestBodyPayload = {
+    return this.converse(params.signal, {
       input: params.input,
       agent_id: params.agentId,
       conversation_id: params.conversationId,
@@ -44,11 +52,27 @@ export class ChatService {
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
-    };
+    });
+  }
 
+  /**
+   * Resume a round that is awaiting a prompt response (e.g., confirmation).
+   */
+  resume(params: ResumeRoundParams): Observable<ChatEvent> {
+    return this.converse(params.signal, {
+      agent_id: params.agentId,
+      conversation_id: params.conversationId,
+      connector_id: params.connectorId,
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      confirm: params.confirm,
+      browser_api_tools: params.browserApiTools ?? [],
+    });
+  }
+
+  private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
-        signal: params.signal,
+        signal,
         asResponse: true,
         rawResponse: true,
         body: JSON.stringify(payload),
