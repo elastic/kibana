@@ -11,8 +11,8 @@ import { cloneDeep } from 'lodash';
 import { upMigration } from './migration';
 
 describe('upMigration', () => {
-  it('should preserve existing v1 state and add empty access_mode field', () => {
-    const v1State = {
+  it('should omit deprecated props from controls telemetry', () => {
+    const v2State = {
       runs: 5,
       telemetry: {
         panels: {
@@ -38,54 +38,21 @@ describe('upMigration', () => {
         sections: {
           total: 1,
         },
-      },
-    };
-
-    const result = upMigration(cloneDeep(v1State));
-
-    expect(result).toEqual({
-      ...v1State,
-      telemetry: {
-        ...v1State.telemetry,
         access_mode: {},
       },
-    });
-  });
-
-  it('should preserve existing access mode value if already present', () => {
-    const stateWithWriteRestricted = {
-      runs: 3,
-      telemetry: {
-        panels: {
-          total: 5,
-          by_reference: 3,
-          by_value: 2,
-          by_type: {},
-        },
-        controls: {
-          total: 0,
-          chaining_system: {},
-          label_position: {},
-          ignore_settings: {},
-          by_type: {},
-        },
-        sections: {
-          total: 0,
-        },
-        access_mode: {
-          write_restricted: {
-            total: 7,
-          },
-          default: {
-            total: 15,
-          },
-        },
-      },
     };
 
-    const result = upMigration(cloneDeep(stateWithWriteRestricted));
+    const result = upMigration(cloneDeep(v2State));
 
-    expect(result.telemetry.access_mode.write_restricted.total).toBe(7);
-    expect(result.telemetry.access_mode.default.total).toBe(15);
+    expect(result).toEqual({
+      ...v2State,
+      telemetry: {
+        ...v2State.telemetry,
+        controls: {
+          total: 2,
+          by_type: { optionsListControl: 2 },
+        },
+      },
+    });
   });
 });

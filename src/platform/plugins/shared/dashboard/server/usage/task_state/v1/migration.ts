@@ -23,6 +23,9 @@ export const upMigration = (state: Record<string, any>): VersionSchema => ({
     },
     controls: {
       total: state.telemetry?.controls?.total || 0,
+      chaining_system: state.telemetry?.controls?.chaining_system || {},
+      label_position: state.telemetry?.controls?.label_position || {},
+      ignore_settings: state.telemetry?.controls?.ignore_settings || {},
       by_type: state.telemetry?.controls?.by_type || {},
     },
     sections: {
