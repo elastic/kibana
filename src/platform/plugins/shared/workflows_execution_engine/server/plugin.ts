@@ -622,6 +622,13 @@ export class WorkflowsExecutionEnginePlugin
       return null;
     }
 
+    // Guard check: ConcurrencyManager may not be initialized if task executes before start().
+    // This should not occur in normal operation.
+    if (!this.concurrencyManager) {
+      this.logger.warn('ConcurrencyManager not initialized, skipping concurrency key evaluation.');
+      return null;
+    }
+
     const normalizedWorkflowExecution: EsWorkflowExecution = {
       scopeStack: [],
       error: null,
@@ -653,6 +660,16 @@ export class WorkflowsExecutionEnginePlugin
       !workflowExecution.id ||
       !workflowExecution.spaceId
     ) {
+      return;
+    }
+
+    // Guard check: ConcurrencyManager not initialized if task executes before start().
+    // This should not occur in normal operation.
+    // Execution will proceed without concurrency enforcement.
+    if (!this.concurrencyManager) {
+      this.logger.warn(
+        `ConcurrencyManager not initialized, skipping concurrency check for execution ${workflowExecution.id}.`
+      );
       return;
     }
 
