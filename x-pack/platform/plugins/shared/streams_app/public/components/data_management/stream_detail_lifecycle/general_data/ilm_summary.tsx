@@ -85,7 +85,7 @@ export function IlmSummary({
                 key={`${phase.name}-timeline`}
                 grow={phase.grow as false | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}
               >
-                <IlmPhase phase={phase} minAge={phasesWithGrow[index - 1]?.min_age} />
+                <IlmPhase phase={phase} minAge={phasesWithGrow[index + 1]?.min_age} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -105,15 +105,15 @@ function IlmPhase({
   const borderRadius =
     phase.name === 'delete'
       ? minAge
-        ? '4px 4px 4px 4px'
-        : '4px 0px 0px 4px'
+        ? '0px'
+        : '0px 4px 4px 0px'
       : phase.name === 'hot'
       ? minAge
-        ? '0px 4px 4px 0px'
-        : '0px'
+        ? '4px 0px 0px 4px'
+        : '4px 4px 4px 4px'
       : minAge
       ? '0px'
-      : '4px 0px 0px 4px';
+      : '0px 4px 4px 0px';
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const { euiTheme } = useEuiTheme();
 
@@ -157,7 +157,6 @@ function IlmPhase({
               <EuiText
                 size="xs"
                 color={euiTheme.colors.plainDark}
-                textAlign="right"
                 data-test-subj={`ilmPhase-${phase.name}-name`}
               >
                 <b>{capitalize(phase.name)}</b>
@@ -166,7 +165,6 @@ function IlmPhase({
                 <EuiText
                   size="xs"
                   color={euiTheme.colors.plainDark}
-                  textAlign="right"
                   data-test-subj={`ilmPhase-${phase.name}-size`}
                 >
                   {formatBytes(phase.size_in_bytes)}
@@ -184,18 +182,18 @@ function IlmPhase({
           css={{
             paddingBottom: '5px',
             ...(phase.name !== 'delete' && {
-              borderLeft: `1px solid ${ilmPhases.delete.color}`,
+              borderRight: `1px solid ${ilmPhases.delete.color}`,
             }),
           }}
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup justifyContent="flexStart">
+      <EuiFlexGroup justifyContent="flexEnd">
         {phase.name !== 'delete' ? (
           <EuiPanel
             paddingSize="xs"
             css={{
-              marginLeft: minAge ? '-40px' : '-10px',
+              marginRight: minAge ? '-40px' : '-10px',
               width: minAge ? '80px' : '20px',
             }}
             grow={false}
