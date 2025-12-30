@@ -14,7 +14,18 @@ import {
 
 export const installIntegration = () => {
   cy.get(ADD_INTEGRATION_BTN).click();
-  cy.get(SKIP_AGENT_INSTALLATION_BTN).click();
-  cy.get(SAVE_AND_CONTINUE_BTN).click();
-  cy.get(MODAL_CONFIRMATION_TITLE).should('exist');
+  cy.url({ timeout: 60000 }).should('include', '/add-integration');
+  cy.url().then((url) => {
+    const isMultiPageLayout = url.includes('useMultiPageLayout');
+    if (isMultiPageLayout) {
+      cy.get(SKIP_AGENT_INSTALLATION_BTN, { timeout: 30000 }).click();
+    }
+  });
+
+  cy.get(SAVE_AND_CONTINUE_BTN, { timeout: 30000 })
+    .should('be.visible')
+    .should('be.enabled')
+    .click();
+
+  cy.get(MODAL_CONFIRMATION_TITLE, { timeout: 60000 }).should('be.visible');
 };

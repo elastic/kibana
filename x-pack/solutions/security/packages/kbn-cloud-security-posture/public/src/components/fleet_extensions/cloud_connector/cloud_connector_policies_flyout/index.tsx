@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import type { CloudConnectorVars } from '@kbn/fleet-plugin/common/types';
+import type { CloudConnectorVars, AccountType } from '@kbn/fleet-plugin/common/types';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
@@ -40,11 +40,13 @@ import {
   isCloudConnectorNameValid,
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+import { AccountBadge } from '../components/account_badge';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
   cloudConnectorName: string;
   cloudConnectorVars: CloudConnectorVars;
+  accountType?: AccountType;
   provider: CloudProviders;
   onClose: () => void;
 }
@@ -53,6 +55,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   cloudConnectorId,
   cloudConnectorName: initialName,
   cloudConnectorVars,
+  accountType,
   provider,
   onClose,
 }) => {
@@ -228,14 +231,21 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FLYOUT}
     >
       <EuiFlyoutHeader hasBorder={false}>
-        <EuiTitle size="s">
-          <h2
-            id={flyoutTitleId}
-            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.TITLE}
-          >
-            {cloudConnectorName}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h2
+                id={flyoutTitleId}
+                data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.TITLE}
+              >
+                {cloudConnectorName}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AccountBadge accountType={accountType} variant="flyout" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>

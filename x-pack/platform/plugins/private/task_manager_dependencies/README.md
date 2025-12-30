@@ -1,7 +1,7 @@
 # Task Manager Dependencies
 
 This plugin is used as a temporary sidecar plugin to enable the task manager plugin access to 
-the encrypted saved objects client as there is a circular dependency if the task manager were to
+the encrypted saved objects client and the security plugin start contract as there is a circular dependency if the task manager were to
 require the encrypted saved objects plugin directly.
 
 This is because the encrypted saved objects plugin has a dependency on the security plugin, which

@@ -12,22 +12,26 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
-  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
+import { isRight } from '@kbn/core-saved-objects-api-server';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import type { PreflightCheckForBulkDeleteParams } from '../internals/repository_bulk_delete_internal_types';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import {
   getSavedObjectNamespaces,
-  isRight,
   rawDocExistsInNamespaces,
   isFoundGetResponse,
   type GetResponseFound,
 } from '../utils';
-import type { PreflightCheckForCreateObject } from '../internals/preflight_check_for_create';
-import { preflightCheckForCreate } from '../internals/preflight_check_for_create';
+import {
+  preflightCheckForCreate,
+  type PreflightCheckForCreateObject,
+} from '../internals/preflight_check_for_create';
 
 export type IPreflightCheckHelper = PublicMethodsOf<PreflightCheckHelper>;
 
@@ -83,7 +87,7 @@ export class PreflightCheckHelper {
       .map(({ value: { type, id, fields } }) => ({
         _id: this.serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces', ...(fields ?? [])],
+        _source: ['type', 'namespaces', 'accessControl', ...(fields ?? [])],
       }));
 
     const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length

@@ -111,6 +111,7 @@ describe('createAutoFillSchedulerRoute', () => {
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockCreateRequest });
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(licenseState.ensureLicenseForGapAutoFillScheduler).toHaveBeenCalled();
   });
 
   test('ensures the license check prevents creating gap fill auto scheduler when appropriate', async () => {

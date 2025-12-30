@@ -58,8 +58,9 @@ export function AttributesOverview({
   const flattened = hit.flattened;
 
   const shouldShowFieldHandler = useMemo(
-    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
-    [flattened, dataView, showMultiFields]
+    () =>
+      getShouldShowFieldHandler(Object.keys(flattened), dataView, isEsqlMode || showMultiFields),
+    [flattened, dataView, isEsqlMode, showMultiFields]
   );
 
   const attributesTitle = getAttributesTitle(hit);

@@ -9,11 +9,12 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { TakeActionButton } from './components/take_action_button';
 import { useEaseDetailsContext } from './context';
 import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useAssistant } from '../document_details/right/hooks/use_assistant';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../assistant/helpers';
@@ -41,35 +42,40 @@ export const PanelFooter = memo(() => {
     isAlert,
   });
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
-  const alertData = useMemo(() => {
+  const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
-    return stringifyEssentialAlertData(rawData);
+    return {
+      attachmentType: SecurityAgentBuilderAttachments.alert,
+      attachmentData: {
+        alert: stringifyEssentialAlertData(rawData),
+        attachmentLabel: rawData[ALERT_RULE_NAME]?.[0],
+      },
+      attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
+    };
   }, [dataFormattedForFieldBrowser]);
 
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.alert,
-    attachmentData: { alert: alertData },
-    attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {showAssistant && (
-            <EuiFlexItem grow={false}>
-              {isAgentBuilderEnabled ? (
-                <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
-              ) : (
-                <NewChatByTitle
-                  showAssistantOverlay={showAssistantOverlay}
-                  text={ASK_AI_ASSISTANT}
-                />
-              )}
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            {isAgentChatExperienceEnabled && (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'alerts_flyout',
+                  attachments: ['alert'],
+                }}
+              />
+            )}
+            {showAssistant && !isAgentChatExperienceEnabled && (
+              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
+            )}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeActionButton />
           </EuiFlexItem>

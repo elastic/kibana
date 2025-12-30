@@ -315,7 +315,6 @@ export class ApiService {
         nodeId: string;
         nodeName: string;
         available: string;
-        lowDiskWatermarkSetting: string;
       }>
     >({
       path: `${API_BASE_PATH}/node_disk_space`,

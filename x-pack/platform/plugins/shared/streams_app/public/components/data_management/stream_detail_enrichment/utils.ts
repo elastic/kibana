@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { htmlIdGenerator } from '@elastic/eui';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   GrokProcessor,
+  MathProcessor,
   ProcessorType,
   ReplaceProcessor,
+  StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
-  StreamlangWhereBlockWithUIAttributes,
+  StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   conditionSchema,
   convertStepToUIDefinition,
-  convertUIStepsToDSL,
   streamlangProcessorSchema,
+  stripCustomIdentifiers,
 } from '@kbn/streamlang';
-import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
@@ -47,10 +47,11 @@ import type {
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
   ManualIngestPipelineFormState,
+  MathFormState,
   ProcessorFormState,
   ReplaceFormState,
   SetFormState,
-  WhereBlockFormState,
+  ConditionBlockFormState,
 } from './types';
 
 /**
@@ -61,6 +62,7 @@ export const SPECIALISED_TYPES = [
   'date',
   'dissect',
   'grok',
+  'math',
   'set',
   'replace',
   'drop_document',
@@ -213,6 +215,15 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultMathProcessorFormState = (): MathFormState => ({
+  action: 'math' as const,
+  expression: '',
+  to: '',
+  ignore_failure: true,
+  ignore_missing: false,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -230,6 +241,7 @@ const defaultProcessorFormStateByType: Record<
   drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
@@ -270,7 +282,8 @@ export const getFormStateFromActionStep = (
     step.action === 'drop_document' ||
     step.action === 'set' ||
     step.action === 'convert' ||
-    step.action === 'replace'
+    step.action === 'replace' ||
+    step.action === 'math'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -288,21 +301,21 @@ export const getFormStateFromActionStep = (
   throw new Error(`Form state for processor type "${step.action}" is not implemented.`);
 };
 
-export const getFormStateFromWhereStep = (
-  step: StreamlangWhereBlockWithUIAttributes
-): WhereBlockFormState => {
+export const getFormStateFromConditionStep = (
+  step: StreamlangConditionBlockWithUIAttributes
+): ConditionBlockFormState => {
   return structuredClone({
     ...step,
   });
 };
 
-export const convertWhereBlockFormStateToConfiguration = (
-  formState: WhereBlockFormState
+export const convertConditionBlockFormStateToConfiguration = (
+  formState: ConditionBlockFormState
 ): {
-  whereDefinition: StreamlangWhereBlockWithUIAttributes;
+  conditionBlockDefinition: StreamlangConditionBlockWithUIAttributes;
 } => {
   return {
-    whereDefinition: {
+    conditionBlockDefinition: {
       ...formState,
     },
   };
@@ -461,6 +474,22 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'math') {
+      const { expression, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'math',
+          expression,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as MathProcessor,
+      };
+    }
+
     if (configDrivenProcessors[formState.action]) {
       return {
         processorDefinition: {
@@ -557,9 +586,9 @@ export const getValidSteps = (
 
   // Helper to recursively skip invalid where blocks and their children
   function processStep(step: StreamlangStepWithUIAttributes): boolean {
-    if (isWhereBlock(step)) {
+    if (isConditionBlock(step)) {
       // If the where block is invalid, skip it and all its children
-      if (!isSchema(conditionSchema, step.where)) {
+      if (!isSchema(conditionSchema, step.condition)) {
         return false;
       }
 
@@ -595,7 +624,7 @@ export const getValidSteps = (
     const isValid = processStep(step);
 
     // If this is an invalid where block, add its id to skipParentIds
-    if (isWhereBlock(step) && !isValid) {
+    if (isConditionBlock(step) && !isValid) {
       skipParentIds.add(step.customIdentifier);
     }
   }
@@ -609,16 +638,16 @@ export const getStepPanelColour = (stepIndex: number) => {
 
 export const buildUpsertStreamRequestPayload = (
   definition: Streams.ingest.all.GetResponse,
-  steps: StreamlangStepWithUIAttributes[],
+  dsl: StreamlangDSL,
   fields?: FieldDefinition
 ): { ingest: IngestUpsertRequest } => {
-  const processing = convertUIStepsToDSL(steps);
+  const dslWithStrippedIds = stripCustomIdentifiers(dsl);
 
   return Streams.WiredStream.GetResponse.is(definition)
     ? {
         ingest: {
           ...definition.stream.ingest,
-          processing,
+          processing: dslWithStrippedIds,
           ...(fields && {
             wired: {
               ...definition.stream.ingest.wired,
@@ -630,7 +659,7 @@ export const buildUpsertStreamRequestPayload = (
     : {
         ingest: {
           ...definition.stream.ingest,
-          processing,
+          processing: dslWithStrippedIds,
           ...(fields && {
             classic: {
               ...definition.stream.ingest.classic,

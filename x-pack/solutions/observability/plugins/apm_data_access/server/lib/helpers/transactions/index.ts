@@ -12,7 +12,9 @@ import {
   METRICSET_NAME,
   TRANSACTION_DURATION_SUMMARY,
 } from '@kbn/apm-types/es_fields';
-import { existsQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
+import { termsQuery } from '@kbn/observability-utils-common/es/queries/terms_query';
+import { existsQuery } from '@kbn/observability-utils-common/es/queries/exists_query';
 import { RollupInterval } from '../../../../common/rollup';
 
 // The function returns Document type filter for 1m Transaction Metrics

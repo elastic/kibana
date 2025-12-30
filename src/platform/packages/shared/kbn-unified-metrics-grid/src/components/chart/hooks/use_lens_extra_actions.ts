@@ -9,17 +9,20 @@
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useMemo } from 'react';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_VIEW_DETAILS,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+} from '../../../common/constants';
 
-interface CopyToDashboardActionConfig {
-  onClick: () => void;
-}
-interface ViewDetailsActionConfig {
+interface ActionEventHandler {
   onClick: () => void;
 }
 
 interface UseLensExtraActions {
-  copyToDashboard?: CopyToDashboardActionConfig;
-  viewDetails?: ViewDetailsActionConfig;
+  copyToDashboard?: ActionEventHandler;
+  viewDetails?: ActionEventHandler;
+  exploreInDiscoverTab?: ActionEventHandler;
 }
 export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
   const extraActions = useMemo(() => {
@@ -33,15 +36,23 @@ export const useLensExtraActions = (config: UseLensExtraActions): Action[] => {
       actions.push(getViewDetailsAction(config.viewDetails.onClick));
     }
 
+    if (config.exploreInDiscoverTab?.onClick) {
+      actions.push(getExploreInDiscoverTabAction(config.exploreInDiscoverTab.onClick));
+    }
+
     return actions;
-  }, [config.copyToDashboard?.onClick, config.viewDetails?.onClick]);
+  }, [
+    config.copyToDashboard?.onClick,
+    config.viewDetails?.onClick,
+    config.exploreInDiscoverTab?.onClick,
+  ]);
 
   return extraActions;
 };
 
 const getViewDetailsAction = (onExecute: () => void): Action => {
   return {
-    id: 'viewDetails',
+    id: ACTION_VIEW_DETAILS,
     order: 2,
     type: 'actionButton',
     getDisplayName() {
@@ -61,9 +72,33 @@ const getViewDetailsAction = (onExecute: () => void): Action => {
   };
 };
 
+// This action is rendered in context menu
+// ACTION_EXPLORE_CHART_DISCOVER_TAB is included in QUICK_ACTIONS_IDS
+const getExploreInDiscoverTabAction = (onExecute: () => void): Action => {
+  return {
+    id: ACTION_EXPLORE_IN_DISCOVER_TAB,
+    order: 20, // same position as ACTION_OPEN_IN_DISCOVER action
+    type: 'actionButton',
+    getDisplayName() {
+      return i18n.translate('metricsExperience.lens.actions.exploreInDiscoverTab', {
+        defaultMessage: 'Explore',
+      });
+    },
+    getIconType() {
+      return 'discoverApp';
+    },
+    async isCompatible() {
+      return true;
+    },
+    async execute() {
+      onExecute();
+    },
+  };
+};
+
 const getCopyToDashboardAction = (onExecute: () => void): Action => {
   return {
-    id: 'copyToDashboard',
+    id: ACTION_COPY_TO_DASHBOARD,
     order: 1,
     type: 'actionButton',
     getDisplayName() {

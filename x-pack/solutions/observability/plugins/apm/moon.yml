@@ -151,9 +151,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/zod'
-  - '@kbn/onechat-server'
-  - '@kbn/onechat-common'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/observability-agent-builder-plugin'
 tags:
   - plugin

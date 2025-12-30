@@ -69,8 +69,6 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       rulesClient: this.data,
     });
 
-    const modelWithTools = model.bindTools(Object.values(toolMap));
-
     const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new RuleMigrationTelemetryClient(
@@ -89,7 +87,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
     const agent = getRuleMigrationAgent({
       esqlKnowledgeBase,
-      model: modelWithTools,
+      model,
       ruleMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,

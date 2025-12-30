@@ -10,6 +10,7 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
+import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -140,7 +141,7 @@ export const performBulkActionRoute = (
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [{ anyRequired: [RULES_API_READ, RULES_API_ALL] }],
         },
       },
       options: {

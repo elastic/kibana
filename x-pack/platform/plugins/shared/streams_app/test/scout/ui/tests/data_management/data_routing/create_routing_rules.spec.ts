@@ -8,6 +8,8 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
+const MAX_STREAM_NAME_LENGTH = 200;
+
 test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
@@ -80,11 +82,47 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeEnabled();
   });
 
-  test('should show validation errors for invalid stream names', async ({ page, pageObjects }) => {
+  interface ClientSideInvalidNameTestCases {
+    streamName: string;
+    expectedError: string;
+  }
+
+  test('should show validation errors for invalid stream names verified on the client', async ({
+    page,
+    pageObjects,
+  }) => {
     await pageObjects.streams.clickCreateRoutingRule();
 
     // Try invalid stream names
-    const invalidNames = ['invalid name with spaces', 'UPPERCASE', 'special@chars'];
+    const invalidNames: ClientSideInvalidNameTestCases[] = [
+      {
+        streamName: '',
+        expectedError: 'Stream name is required.',
+      },
+      {
+        streamName: 'a'.repeat(MAX_STREAM_NAME_LENGTH + 1),
+        expectedError: 'Stream name cannot be longer than 200 characters.',
+      },
+      {
+        streamName: 'UppercaseName',
+        expectedError: 'Stream name cannot contain uppercase characters.',
+      },
+    ];
+
+    for (const invalidName of invalidNames) {
+      await pageObjects.streams.fillRoutingRuleName(invalidName.streamName);
+      await expect(page.getByText(invalidName.expectedError)).toBeVisible();
+    }
+  });
+
+  test('should show validation errors for invalid stream names verified on the server', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+
+    // Try invalid stream names
+    const invalidNames = ['invalid name with spaces', 'special>chars'];
 
     for (const invalidName of invalidNames) {
       await pageObjects.streams.fillRoutingRuleName(invalidName);
@@ -95,6 +133,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
       // Should stay in creating state due to validation error
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+      await pageObjects.toasts.closeAll();
     }
   });
 
@@ -201,10 +240,9 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
       operator: 'equals',
       value: 'different',
     });
-    await pageObjects.streams.saveRoutingRule();
 
-    // Should show error toast
-    await pageObjects.toasts.waitFor();
+    await expect(pageObjects.streams.saveRoutingRuleButton).toBeDisabled();
+    await expect(page.getByText('A stream with this name already exists')).toBeVisible();
 
     // Should stay in creating state due to error
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();

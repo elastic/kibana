@@ -44,6 +44,17 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
       docsPerMinute: INGESTION_RATE,
     });
 
+    // Set up basic processing to update the stream's updated_at timestamp to current time
+    await apiServices.streams.updateStreamProcessors(NEW_DOCUMENTS_STREAM, {
+      steps: [
+        {
+          action: 'set',
+          to: 'test_field',
+          value: 'test_value',
+        },
+      ],
+    });
+
     const oldDocsTime = moment().utc().subtract(1, 'day').toDate().getTime();
     oldDocumentsDateRange.from = moment(oldDocsTime)
       .utc()
@@ -58,6 +69,17 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
       startTime: new Date(oldDocsTime - INGESTION_DURATION_MINUTES * 60 * 1000).toISOString(),
       endTime: new Date(oldDocsTime).toISOString(),
       docsPerMinute: INGESTION_RATE,
+    });
+
+    // Set up basic processing to update the stream's updated_at timestamp to current time
+    await apiServices.streams.updateStreamProcessors(OLD_DOCUMENTS_STREAM, {
+      steps: [
+        {
+          action: 'set',
+          to: 'test_field',
+          value: 'test_value',
+        },
+      ],
     });
 
     await apiServices.streams.forkStream('logs', EMPTY_STREAM, { always: {} });

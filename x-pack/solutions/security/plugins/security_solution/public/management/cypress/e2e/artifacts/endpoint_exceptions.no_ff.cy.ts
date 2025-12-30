@@ -9,6 +9,7 @@ import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack-security/secu
 import {
   APP_ENDPOINT_EXCEPTIONS_PATH,
   APP_PATH,
+  RULES_FEATURE_ID,
   SECURITY_FEATURE_ID,
 } from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
@@ -18,6 +19,7 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
     const loginWithReadAccess = () => {
       login.withCustomKibanaPrivileges({
         [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_read'],
+        [RULES_FEATURE_ID]: ['read'],
       });
     };
 
