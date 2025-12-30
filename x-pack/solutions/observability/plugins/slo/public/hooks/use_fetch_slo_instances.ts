@@ -15,7 +15,7 @@ interface Params {
   search?: string;
   searchAfter?: string;
   size?: number;
-  enabled: boolean;
+  enabled?: boolean;
   remoteName?: string;
 }
 

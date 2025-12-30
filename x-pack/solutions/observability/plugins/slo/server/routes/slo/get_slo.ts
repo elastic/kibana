@@ -7,7 +7,7 @@
 
 import { getSLOParamsSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient, DefaultSummaryClient, GetSLO } from '../../services';
-import { SloDefinitionClient } from '../../services/slo_definition_client';
+import { SLODefinitionClient } from '../../services/slo_definition_client';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
@@ -32,7 +32,7 @@ export const getSLORoute = createSloServerRoute({
       scopedClusterClient.asCurrentUser,
       burnRatesClient
     );
-    const definitionClient = new SloDefinitionClient(
+    const definitionClient = new SLODefinitionClient(
       repository,
       scopedClusterClient.asCurrentUser,
       logger

@@ -9,6 +9,7 @@ import { findSLOInstancesParamsSchema } from '@kbn/slo-schema';
 import { findSLOInstances } from '../../services/find_slo_instances';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
+import { SLODefinitionClient } from '../../services/slo_definition_client';
 
 export const findSLOInstancesRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/{id}/_instances',
@@ -21,10 +22,16 @@ export const findSLOInstancesRoute = createSloServerRoute({
   params: findSLOInstancesParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, spaceId } = await getScopedClients({
+    const { scopedClusterClient, spaceId, repository } = await getScopedClients({
       request,
       logger,
     });
+
+    const definitionClient = new SLODefinitionClient(
+      repository,
+      scopedClusterClient.asCurrentUser,
+      logger
+    );
 
     return await findSLOInstances(
       {
@@ -35,7 +42,7 @@ export const findSLOInstancesRoute = createSloServerRoute({
         spaceId,
         remoteName: params.query?.remoteName,
       },
-      { scopedClusterClient }
+      { scopedClusterClient, definitionClient }
     );
   },
 });

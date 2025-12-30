@@ -21,7 +21,7 @@ const findSLOInstancesParamsSchema = t.type({
 });
 
 interface FindSLOInstancesResponse {
-  results: Array<{ instanceId: string }>;
+  results: Array<{ instanceId: string; groupings: Record<string, string | number> }>;
   searchAfter?: string;
 }
 

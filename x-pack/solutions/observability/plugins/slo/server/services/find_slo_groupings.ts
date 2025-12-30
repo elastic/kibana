@@ -12,13 +12,13 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition, SLOSettings } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
-import type { SloDefinitionClient } from './slo_definition_client';
+import type { SLODefinitionClient } from './slo_definition_client';
 
 const DEFAULT_SIZE = 100;
 
 export class FindSLOGroupings {
   constructor(
-    private definitionClient: SloDefinitionClient,
+    private definitionClient: SLODefinitionClient,
     private esClient: ElasticsearchClient,
     private sloSettings: SLOSettings,
     private spaceId: string
