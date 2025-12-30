@@ -35,7 +35,8 @@ export async function requestOAuthRefreshToken(
   tokenUrl: string,
   logger: Logger,
   params: RefreshTokenOAuthRequestParams,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  useBasicAuth: boolean = true // Default to true (OAuth 2.0 recommended practice)
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<RefreshTokenOAuthRequestParams>(
     tokenUrl,
@@ -43,6 +44,6 @@ export async function requestOAuthRefreshToken(
     configurationUtilities,
     logger,
     rewriteBodyRequest(params),
-    true // Use HTTP Basic Auth for client credentials (required by some providers like Notion)
+    useBasicAuth
   );
 }

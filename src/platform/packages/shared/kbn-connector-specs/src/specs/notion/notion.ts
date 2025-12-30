@@ -28,6 +28,7 @@ export const NotionConnector: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
           tokenUrl: 'https://api.notion.com/v1/oauth/token',
+          useBasicAuth: true, // Notion requires HTTP Basic Auth for client credentials
         },
       },
     ],

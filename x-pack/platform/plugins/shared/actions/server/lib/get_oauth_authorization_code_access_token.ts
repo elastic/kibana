@@ -15,6 +15,7 @@ export interface GetOAuthAuthorizationCodeConfig {
   clientId: string;
   tokenUrl: string;
   additionalFields?: Record<string, unknown>;
+  useBasicAuth?: boolean;
 }
 
 export interface GetOAuthAuthorizationCodeSecrets {
@@ -45,13 +46,16 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   connectorTokenClient,
   scope,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
-  const { clientId, tokenUrl, additionalFields } = credentials.config;
+  const { clientId, tokenUrl, additionalFields, useBasicAuth } = credentials.config;
   const { clientSecret } = credentials.secrets;
 
   if (!clientId || !clientSecret) {
     logger.warn(`Missing required fields for requesting OAuth Authorization Code access token`);
     return null;
   }
+
+  // Default to true (OAuth 2.0 recommended practice)
+  const shouldUseBasicAuth = useBasicAuth ?? true;
 
   // Get stored token
   const { connectorToken, hasErrors } = await connectorTokenClient.get({
@@ -114,7 +118,8 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
         scope,
         ...additionalFields,
       },
-      configurationUtilities
+      configurationUtilities,
+      shouldUseBasicAuth
     );
 
     // Some providers return "bearer" instead of "Bearer", but expect "Bearer" in the header,
