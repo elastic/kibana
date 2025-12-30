@@ -6,7 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -20,14 +20,6 @@ interface AgentOptionProps {
   agent?: AgentDefinition;
 }
 
-const usePaddingStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const paddingStyles = css`
-    padding-top: ${euiTheme.size.xs};
-  `;
-  return paddingStyles;
-};
-
 const readonlyAgentTooltip = i18n.translate(
   'xpack.agentBuilder.agentSelector.readonlyAgentTooltip',
   {
@@ -36,9 +28,8 @@ const readonlyAgentTooltip = i18n.translate(
 );
 
 const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
-  const prependStyles = usePaddingStyles();
   return (
-    <EuiFlexGroup direction="column" justifyContent="flexStart" css={prependStyles}>
+    <EuiFlexGroup direction="column" justifyContent="flexStart">
       <EuiFlexItem grow={false}>
         <AgentAvatar agent={agent} size="m" color="subdued" shape="square" />
       </EuiFlexItem>
@@ -47,13 +38,12 @@ const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => 
 };
 
 const AgentOption: React.FC<AgentOptionProps> = ({ agent }) => {
-  const optionStyles = usePaddingStyles();
   if (!agent) {
     return null;
   }
 
   return (
-    <OptionText css={optionStyles}>
+    <OptionText>
       <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
         <EuiFlexItem component="span" grow={false}>
           {agent.name}
