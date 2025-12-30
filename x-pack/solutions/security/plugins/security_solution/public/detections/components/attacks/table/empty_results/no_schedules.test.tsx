@@ -7,22 +7,49 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { NoSchedules, NO_SCHEDULES_DATA_TEST_ID } from './no_schedules';
+import {
+  NoSchedules,
+  NO_SCHEDULES_DATA_TEST_ID,
+  NO_SCHEDULES_ACTION_BUTTON_DATA_TEST_ID,
+} from './no_schedules';
 
 describe('NoSchedules', () => {
-  test('renders correctly and handles click', () => {
-    const openSchedulesFlyout = jest.fn();
-    const { getByTestId, getByText } = render(
-      <NoSchedules openSchedulesFlyout={openSchedulesFlyout} />
-    );
-    expect(getByTestId(NO_SCHEDULES_DATA_TEST_ID)).toBeInTheDocument();
+  const openSchedulesFlyout = jest.fn();
 
-    const button = getByText('Schedule'); // Assuming the button text is 'Schedule' or I should use the translation key if I mocked i18n, but here it seems I can just check for button presence or text.
-    // Actually, the text comes from i18n.NO_SCHEDULES_ACTION. Since I am not mocking i18n here (it's imported from translations), it should be the actual text.
-    // Let's check translations.ts content again.
-    // NO_SCHEDULES_ACTION defaultMessage is 'Schedule'.
+  afterEach(() => {
+    openSchedulesFlyout.mockClear();
+  });
+
+  test('renders correctly', () => {
+    const { getByTestId } = render(<NoSchedules openSchedulesFlyout={openSchedulesFlyout} />);
+    expect(getByTestId(NO_SCHEDULES_DATA_TEST_ID)).toBeInTheDocument();
+  });
+
+  test('renders the correct title', () => {
+    const { getByTestId } = render(<NoSchedules openSchedulesFlyout={openSchedulesFlyout} />);
+    expect(getByTestId(NO_SCHEDULES_DATA_TEST_ID)).toHaveTextContent(
+      'Automate attack discoveries for your alerts'
+    );
+  });
+
+  test('renders the correct body', () => {
+    const { getByTestId } = render(<NoSchedules openSchedulesFlyout={openSchedulesFlyout} />);
+    expect(getByTestId(NO_SCHEDULES_DATA_TEST_ID)).toHaveTextContent(
+      'Schedule recurring scans to find attacks without manual effort.'
+    );
+  });
+
+  test('renders the correct action button text', () => {
+    const { getByTestId } = render(<NoSchedules openSchedulesFlyout={openSchedulesFlyout} />);
+    expect(getByTestId(NO_SCHEDULES_ACTION_BUTTON_DATA_TEST_ID)).toHaveTextContent('Schedule');
+  });
+
+  test('calls openSchedulesFlyout when action button is clicked', () => {
+    const { getByTestId } = render(<NoSchedules openSchedulesFlyout={openSchedulesFlyout} />);
+    const button = getByTestId(NO_SCHEDULES_ACTION_BUTTON_DATA_TEST_ID);
 
     fireEvent.click(button);
+
     expect(openSchedulesFlyout).toHaveBeenCalledTimes(1);
   });
 });

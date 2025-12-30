@@ -77,7 +77,7 @@ describe('AttacksPageContent', () => {
     });
   });
 
-  it('should pass openSchedulesFlyout to TableSection', async () => {
+  it('should pass openSchedulesFlyout and clearPageFilters to TableSection', async () => {
     render(
       <TestProviders>
         <AttacksPageContent dataView={dataView} />
@@ -88,6 +88,7 @@ describe('AttacksPageContent', () => {
       expect(mockTableSection).toHaveBeenCalledWith(
         expect.objectContaining({
           openSchedulesFlyout: expect.any(Function),
+          clearPageFilters: expect.any(Function),
         }),
         expect.anything()
       );

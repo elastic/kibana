@@ -13,6 +13,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
 import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { isEmpty } from 'lodash';
+import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { setFilterQuery } from '../../../../common/store/inputs/actions';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
@@ -61,6 +65,11 @@ export interface TableSectionProps {
   pageFilters: Filter[] | undefined;
 
   /**
+   * Callback to clear page filters
+   */
+  clearPageFilters: () => void;
+
+  /**
    * Callback to open the schedules flyout
    */
   openSchedulesFlyout: () => void;
@@ -70,7 +79,20 @@ export interface TableSectionProps {
  * Renders the alerts table with grouping functionality in the attacks page.
  */
 export const TableSection = React.memo(
-  ({ dataView, statusFilter, pageFilters, openSchedulesFlyout }: TableSectionProps) => {
+  ({
+    dataView,
+    statusFilter,
+    pageFilters,
+    clearPageFilters,
+    openSchedulesFlyout,
+  }: TableSectionProps) => {
+    const {
+      data: {
+        query: { filterManager },
+      },
+    } = useKibana().services;
+
+    const dispatch = useDispatch();
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -89,6 +111,12 @@ export const TableSection = React.memo(
     const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
       TableId.alertsOnAttacksPage
     );
+
+    const clearFilters = useCallback(() => {
+      clearPageFilters();
+      filterManager.removeAll();
+      dispatch(setFilterQuery({ id: InputsModelId.global, query: '', language: 'kuery' }));
+    }, [clearPageFilters, dispatch, filterManager]);
 
     // for showing / hiding anonymized data:
     const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
@@ -211,9 +239,13 @@ export const TableSection = React.memo(
       const hasFilters =
         !isEmpty(query.query.trim()) || !isEmpty(pageFilters) || !isEmpty(globalFilters);
       return (
-        <EmptyResultsContainer hasFilters={hasFilters} openSchedulesFlyout={openSchedulesFlyout} />
+        <EmptyResultsContainer
+          hasFilters={hasFilters}
+          openSchedulesFlyout={openSchedulesFlyout}
+          clearFilters={clearFilters}
+        />
       );
-    }, [globalFilters, openSchedulesFlyout, pageFilters, query.query]);
+    }, [clearFilters, globalFilters, openSchedulesFlyout, pageFilters, query.query]);
 
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>

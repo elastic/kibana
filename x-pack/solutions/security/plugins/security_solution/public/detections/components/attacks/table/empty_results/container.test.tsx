@@ -33,6 +33,7 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('EmptyResultsContainer', () => {
   const openSchedulesFlyout = jest.fn();
+  const clearFilters = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,7 +46,11 @@ describe('EmptyResultsContainer', () => {
     });
 
     const { getByTestId } = renderWithIntl(
-      <EmptyResultsContainer hasFilters={false} openSchedulesFlyout={openSchedulesFlyout} />
+      <EmptyResultsContainer
+        hasFilters={false}
+        openSchedulesFlyout={openSchedulesFlyout}
+        clearFilters={clearFilters}
+      />
     );
     expect(getByTestId(EMPTY_RESULTS_LOADING_SPINNER_TEST_ID)).toBeInTheDocument();
   });
@@ -57,7 +62,11 @@ describe('EmptyResultsContainer', () => {
     });
 
     const { getByTestId } = renderWithIntl(
-      <EmptyResultsContainer hasFilters={true} openSchedulesFlyout={openSchedulesFlyout} />
+      <EmptyResultsContainer
+        hasFilters={true}
+        openSchedulesFlyout={openSchedulesFlyout}
+        clearFilters={clearFilters}
+      />
     );
     expect(getByTestId(EMPTY_RESULTS_CONTAINER_DATA_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(EMPTY_RESULTS_MESSAGE_DATA_TEST_ID)).toBeInTheDocument();
@@ -73,7 +82,11 @@ describe('EmptyResultsContainer', () => {
     });
 
     const { getByTestId } = renderWithIntl(
-      <EmptyResultsContainer hasFilters={false} openSchedulesFlyout={openSchedulesFlyout} />
+      <EmptyResultsContainer
+        hasFilters={false}
+        openSchedulesFlyout={openSchedulesFlyout}
+        clearFilters={clearFilters}
+      />
     );
     expect(getByTestId(NO_SCHEDULES_DATA_TEST_ID)).toBeInTheDocument();
   });
@@ -85,7 +98,11 @@ describe('EmptyResultsContainer', () => {
     });
 
     const { getByTestId } = renderWithIntl(
-      <EmptyResultsContainer hasFilters={false} openSchedulesFlyout={openSchedulesFlyout} />
+      <EmptyResultsContainer
+        hasFilters={false}
+        openSchedulesFlyout={openSchedulesFlyout}
+        clearFilters={clearFilters}
+      />
     );
     expect(getByTestId(WITH_SCHEDULES_DATA_TEST_ID)).toBeInTheDocument();
   });

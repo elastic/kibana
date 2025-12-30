@@ -11,6 +11,7 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
 import * as i18n from './translations';
 
 export const WITH_SCHEDULES_DATA_TEST_ID = 'emptyResultsWithSchedules';
+export const WITH_SCHEDULES_ACTION_BUTTON_DATA_TEST_ID = 'emptyResultsWithSchedulesActionButton';
 
 interface WithSchedulesProps {
   /** Callback to open the schedules flyout */
@@ -28,7 +29,13 @@ export const WithSchedules: React.FC<WithSchedulesProps> = React.memo(({ openSch
       title={<h2>{i18n.WITH_SCHEDULES_TITLE}</h2>}
       body={<p>{i18n.WITH_SCHEDULES_BODY}</p>}
       actions={
-        <EuiButtonEmpty color="primary" size="m" iconType="calendar" onClick={openSchedulesFlyout}>
+        <EuiButtonEmpty
+          color="primary"
+          size="m"
+          iconType="calendar"
+          onClick={openSchedulesFlyout}
+          data-test-subj={WITH_SCHEDULES_ACTION_BUTTON_DATA_TEST_ID}
+        >
           {i18n.WITH_SCHEDULES_ACTION}
         </EuiButtonEmpty>
       }

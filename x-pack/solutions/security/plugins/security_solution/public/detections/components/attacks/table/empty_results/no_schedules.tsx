@@ -12,6 +12,7 @@ import { IconSparkles } from '../../../../../common/icons/sparkles';
 import * as i18n from './translations';
 
 export const NO_SCHEDULES_DATA_TEST_ID = 'emptyResultsNoSchedules';
+export const NO_SCHEDULES_ACTION_BUTTON_DATA_TEST_ID = 'emptyResultsNoSchedulesActionButton';
 
 interface NoSchedulesProps {
   /** Callback to open the schedules flyout */
@@ -29,7 +30,13 @@ export const NoSchedules: React.FC<NoSchedulesProps> = React.memo(({ openSchedul
       title={<h2>{i18n.NO_SCHEDULES_TITLE}</h2>}
       body={<p>{i18n.NO_SCHEDULES_BODY}</p>}
       actions={
-        <EuiButtonEmpty color="primary" size="m" iconType="calendar" onClick={openSchedulesFlyout}>
+        <EuiButtonEmpty
+          color="primary"
+          size="m"
+          iconType="calendar"
+          onClick={openSchedulesFlyout}
+          data-test-subj={NO_SCHEDULES_ACTION_BUTTON_DATA_TEST_ID}
+        >
           {i18n.NO_SCHEDULES_ACTION}
         </EuiButtonEmpty>
       }

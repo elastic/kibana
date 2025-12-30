@@ -34,6 +34,8 @@ interface EmptyResultsContainerProps {
   hasFilters: boolean;
   /** Callback to open the schedules flyout */
   openSchedulesFlyout: () => void;
+  /** Callback to clear filters */
+  clearFilters: () => void;
 }
 
 /**
@@ -41,19 +43,19 @@ interface EmptyResultsContainerProps {
  * It displays different messages based on whether there are filters applied or if there are any schedules configured.
  */
 export const EmptyResultsContainer: React.FC<EmptyResultsContainerProps> = React.memo(
-  ({ hasFilters, openSchedulesFlyout }) => {
+  ({ hasFilters, openSchedulesFlyout, clearFilters }) => {
     // TODO: add separate endpoint/hook to fetch schedules stats/count
     const { data: { total } = { schedules: [], total: 0 }, isLoading: isSchedulesDataLoading } =
       useFindAttackDiscoverySchedules({ disableToast: true });
 
     const promptComponent = useMemo(() => {
       if (hasFilters) {
-        return <ResetFilters />;
+        return <ResetFilters clearFilters={clearFilters} />;
       } else if (total > 0) {
         return <WithSchedules openSchedulesFlyout={openSchedulesFlyout} />;
       }
       return <NoSchedules openSchedulesFlyout={openSchedulesFlyout} />;
-    }, [hasFilters, openSchedulesFlyout, total]);
+    }, [clearFilters, hasFilters, openSchedulesFlyout, total]);
 
     const content = useMemo(() => {
       return (
