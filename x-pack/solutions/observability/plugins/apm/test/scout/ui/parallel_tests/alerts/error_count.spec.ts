@@ -6,7 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT, test } from '../../fixtures';
+import { test } from '../../fixtures';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 const SERVICE_NAME = 'unstable-java';
 const START_DATE = 'now-15m';
