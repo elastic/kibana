@@ -28,6 +28,11 @@ export const getMaxListHeight = ({
   return height;
 };
 
+const SELECTOR_POPOVER_WIDTH = 275;
+export const selectorPopoverPanelStyles = css`
+  inline-size: ${SELECTOR_POPOVER_WIDTH}px;
+`;
+
 export const useSelectorListStyles = ({ listId }: { listId: string }) => {
   const { euiTheme } = useEuiTheme();
   const listItemStyles = css`
