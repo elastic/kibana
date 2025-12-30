@@ -40,4 +40,12 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'data.map',
     handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
   },
+  {
+    id: 'data.regex_extract',
+    handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
+  },
+  {
+    id: 'data.regex_replace',
+    handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
+  },
 ];
