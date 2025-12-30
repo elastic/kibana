@@ -112,6 +112,10 @@ export class StreamsApp {
     await this.page.getByTestId('dataQualityTab').click();
   }
 
+  async clickRetentionTab() {
+    await this.page.getByTestId('retentionTab').click();
+  }
+
   async clickRootBreadcrumb() {
     await this.page.getByTestId('breadcrumb first').click();
   }
@@ -122,12 +126,13 @@ export class StreamsApp {
   }
 
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    // Use .first() because some pages (like Retention) may have multiple date pickers
     await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
       `Date picker 'start date' is incorrect`
     ).toHaveText(expectedRange.from);
     await expect(
-      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
     ).toHaveText(expectedRange.to);
   }

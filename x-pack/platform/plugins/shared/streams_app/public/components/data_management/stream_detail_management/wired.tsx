@@ -114,7 +114,7 @@ export function WiredStreamDetailManagement({
               'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
           })}
         >
-          <span tabIndex={0}>
+          <span data-test-subj="retentionTab" tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
             })}

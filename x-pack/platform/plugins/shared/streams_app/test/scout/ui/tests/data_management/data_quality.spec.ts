@@ -124,6 +124,68 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
   });
 
+  test('time range should persist after page refresh on Data Quality tab', async ({
+    page,
+    pageObjects,
+  }) => {
+    const timeRange = {
+      from: 'Sep 20, 2023 @ 00:00:00.000',
+      to: 'Sep 20, 2023 @ 00:30:00.000',
+    };
+    // Set time range
+    await pageObjects.datePicker.setAbsoluteRange(timeRange);
+
+    // Refresh the page
+    await page.reload();
+
+    // Verify time range persisted after refresh
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+  });
+
+  test('time range should persist after page refresh on Retention tab', async ({
+    page,
+    pageObjects,
+  }) => {
+    const timeRange = {
+      from: 'Sep 20, 2023 @ 00:00:00.000',
+      to: 'Sep 20, 2023 @ 00:30:00.000',
+    };
+    // Go to Retention tab
+    await pageObjects.streams.clickRetentionTab();
+
+    // Set time range
+    await pageObjects.datePicker.setAbsoluteRange(timeRange);
+
+    // Refresh the page
+    await page.reload();
+
+    // Verify time range persisted after refresh
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+  });
+
+  test('time range should be globally synced across all tabs', async ({ pageObjects }) => {
+    const timeRange = {
+      from: 'Sep 20, 2023 @ 00:00:00.000',
+      to: 'Sep 20, 2023 @ 00:30:00.000',
+    };
+
+    // Set time on Data Quality tab
+    await pageObjects.datePicker.setAbsoluteRange(timeRange);
+
+    // Verify on Retention tab
+    await pageObjects.streams.clickRetentionTab();
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+
+    // Verify on Main page
+    await pageObjects.streams.clickRootBreadcrumb();
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+
+    // Navigate to a different stream and verify time persists
+    await pageObjects.streams.clickStreamNameLink('logs');
+    await pageObjects.streams.clickDataQualityTab();
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+  });
+
   test('should toggle between degraded and failed docs quality issues charts', async ({ page }) => {
     // Default chart should be for degraded docs
     await expect(page.getByTestId('datasetQualityDetailsLinkToDiscover')).toBeVisible();
