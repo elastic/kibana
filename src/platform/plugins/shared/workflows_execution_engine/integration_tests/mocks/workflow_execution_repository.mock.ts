@@ -147,14 +147,42 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   public async bulkUpdateWorkflowExecutions(
     updates: Array<Partial<EsWorkflowExecution>>
   ): Promise<void> {
+    if (updates.length === 0) {
+      return;
+    }
+
+    // Validate all IDs are present
     for (const update of updates) {
       if (!update.id) {
         throw new Error('Workflow execution ID is required for bulk update');
       }
+    }
 
-      const existing = this.workflowExecutions.get(update.id);
-      this.workflowExecutions.set(update.id, {
-        ...(existing || {}),
+    // Validate all executions exist (matching Elasticsearch document_missing_exception behavior)
+    const missingIds: string[] = [];
+    for (const update of updates) {
+      if (!this.workflowExecutions.has(update.id!)) {
+        missingIds.push(update.id!);
+      }
+    }
+
+    if (missingIds.length > 0) {
+      throw new Error(
+        `Failed to update ${missingIds.length} workflow executions: ${JSON.stringify(
+          missingIds.map((id) => ({
+            id,
+            error: { type: 'document_missing_exception', reason: 'document missing' },
+            status: 404,
+          }))
+        )}`
+      );
+    }
+
+    // Perform updates
+    for (const update of updates) {
+      const existing = this.workflowExecutions.get(update.id!);
+      this.workflowExecutions.set(update.id!, {
+        ...existing!,
         ...update,
       } as EsWorkflowExecution);
     }
