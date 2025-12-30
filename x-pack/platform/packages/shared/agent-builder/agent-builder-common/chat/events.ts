@@ -93,9 +93,13 @@ export type ToolCustomEvent<
 > = ChatEventBase<ChatEventType.toolCustom, ToolCustomEventData<TEvent, TData>>;
 
 export const isToolCustomEvent = <TEvent extends string = string, TData extends object = object>(
-  event: AgentBuilderEvent<string, any>
+  event: AgentBuilderEvent<string, any>,
+  customType?: TEvent
 ): event is ToolCustomEvent<TEvent, TData> => {
-  return event.type === ChatEventType.toolCustom;
+  if (event.type !== ChatEventType.toolCustom) {
+    return false;
+  }
+  return customType ? event.data.custom_event === customType : true;
 };
 
 // Tool result
