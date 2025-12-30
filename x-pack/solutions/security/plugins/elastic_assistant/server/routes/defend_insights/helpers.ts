@@ -332,11 +332,11 @@ export async function updateDefendInsights({
       ...(!eventsContextCount || !insights
         ? {}
         : {
-            generationIntervals: addGenerationInterval(currentInsight.generationIntervals, {
-              durationMs,
-              date: new Date().toISOString(),
-            }),
+          generationIntervals: addGenerationInterval(currentInsight.generationIntervals, {
+            durationMs,
+            date: new Date().toISOString(),
           }),
+        }),
       id: defendInsightId,
       replacements: latestReplacements,
       backingIndex: currentInsight.backingIndex,
@@ -527,7 +527,7 @@ export const invokeDefendInsightsGraph = async ({
       runName: DEFEND_INSIGHTS_GRAPH_RUN_NAME,
       tags,
     }
-  )) as DefendInsightsGraphState;
+  )) as unknown as DefendInsightsGraphState;
   const {
     insights,
     anonymizedDocuments: anonymizedEvents,

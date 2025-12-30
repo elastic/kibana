@@ -610,7 +610,7 @@ describe('InferenceChatModel', () => {
         concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
       }
 
-      expect(allChunks.length).toBe(5);
+      expect(allChunks.length).toBe(4);
       expect(concatChunk!.tool_calls).toEqual([
         {
           id: 'my-tool-call-id',

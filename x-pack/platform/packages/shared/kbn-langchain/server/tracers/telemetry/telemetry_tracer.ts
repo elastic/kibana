@@ -66,37 +66,37 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
       const toolsInvoked =
         run?.outputs && run?.outputs.messages.length
           ? run.outputs.messages.reduce((acc: { [k: string]: number }, message: BaseMessage) => {
-              if (containsToolCalls(message)) {
-                // Calculate counts for each tool call for the message
-                const toolCountForMessage = message.tool_calls.reduce(
-                  (messageToolUseCount, toolCall) => {
-                    const toolName = this.elasticTools.includes(toolCall.name)
-                      ? toolCall.name
-                      : 'CustomTool';
+            if (containsToolCalls(message)) {
+              // Calculate counts for each tool call for the message
+              const toolCountForMessage = message.tool_calls.reduce(
+                (messageToolUseCount, toolCall) => {
+                  const toolName = this.elasticTools.includes(toolCall.name)
+                    ? toolCall.name
+                    : 'CustomTool';
 
-                    if (!(toolName in messageToolUseCount)) {
-                      messageToolUseCount[toolName] = 0;
-                    }
-                    messageToolUseCount[toolName] += 1;
-                    return messageToolUseCount;
-                  },
-                  {} as Record<string, number>
-                );
-
-                // Merge the counts into the accumulator
-                Object.entries(toolCountForMessage).forEach(([toolName, count]) => {
-                  if (!(toolName in acc)) {
-                    acc[toolName] = 0;
+                  if (!(toolName in messageToolUseCount)) {
+                    messageToolUseCount[toolName] = 0;
                   }
-                  acc[toolName] += count;
-                });
-              }
-              return acc;
-            }, {})
+                  messageToolUseCount[toolName] += 1;
+                  return messageToolUseCount;
+                },
+                {} as Record<string, number>
+              );
+
+              // Merge the counts into the accumulator
+              Object.entries(toolCountForMessage).forEach(([toolName, count]) => {
+                if (!(toolName in acc)) {
+                  acc[toolName] = 0;
+                }
+                acc[toolName] += count;
+              });
+            }
+            return acc;
+          }, {})
           : {};
       const telemetryValue = {
         ...telemetryParams,
-        durationMs: (run.end_time ?? 0) - (run.start_time ?? 0),
+        durationMs: (Number(run.end_time) || 0) - (Number(run.start_time) || 0),
         toolsInvoked,
         ...(telemetryParams.actionTypeId === '.gen-ai'
           ? { isOssModel: run.inputs.isOssModel }
@@ -110,5 +110,5 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
   }
 
   // everything below is required for type only
-  protected async persistRun(_run: Run): Promise<void> {}
+  protected async persistRun(_run: Run): Promise<void> { }
 }
