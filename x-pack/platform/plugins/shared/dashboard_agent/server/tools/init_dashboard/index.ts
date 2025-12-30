@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { updateDashboardTool } from './update_dashboard';
 export { initDashboardTool } from './init_dashboard';
-export { addPanelTool } from './add_panel';
-export { finalizeDashboardTool } from './finalize_dashboard';
+
+

@@ -28,8 +28,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   `${internalNamespaces.observability}.get_hosts`,
 
   // Dashboards
-  'platform.dashboard.create_dashboard',
   'platform.dashboard.update_dashboard',
+  'platform.dashboard.init_dashboard',
+  'platform.dashboard.add_panel',
+  'platform.dashboard.finalize_dashboard',
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.attack_discovery_search`,

@@ -26,66 +26,118 @@ export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
       research: {
         instructions: `## Dashboard Tools
 
-- ${dashboardTools.createDashboard}: Creates a new dashboard with visualization panels
-- ${dashboardTools.updateDashboard}: Modifies an existing dashboard
-- ${platformCoreTools.createVisualization}: Generates visualization configurations for dashboard panels
+- ${dashboardTools.initDashboard}: Initialize a live dashboard preview with a markdown summary panel
+- ${dashboardTools.addPanel}: Add a visualization panel to the live preview
+- ${dashboardTools.finalizeDashboard}: Generate a link to the completed (unsaved) dashboard
+- ${dashboardTools.updateDashboard}: Modify an existing saved dashboard
+- ${platformCoreTools.createVisualization}: Generate visualization configurations for dashboard panels
 
 ## Creating a Dashboard
 
-When the user asks to create a dashboard:
+Follow this workflow for the best user experience with live preview:
 
-1. **Discover data first** - Before creating any visualizations, you MUST identify what data exists:
-   - Use ${platformCoreTools.listIndices} to find relevant indices
-   - Use ${platformCoreTools.getIndexMapping} to discover actual field names
-   - If no relevant data exists, inform the user and suggest what data IS available
+### Step 1: Discover Data First (CRITICAL)
 
-2. **Create visualizations based on real data** - Call ${platformCoreTools.createVisualization} for each panel:
+Before creating any visualizations, you MUST identify what data exists:
+- Use ${platformCoreTools.listIndices} to find relevant indices matching the user's request
+- Use ${platformCoreTools.getIndexMapping} to discover actual field names and types
+- If no relevant data exists, inform the user and suggest what data IS available
+
+### Step 2: Initialize the Dashboard Preview
+
+Call ${dashboardTools.initDashboard} with:
+- \`title\`: A descriptive dashboard title
+- \`description\`: Brief description of the dashboard's purpose
+- \`markdownContent\`: A markdown summary panel displayed at the top of the dashboard
+
+This opens a live preview flyout for the user with the markdown summary already visible.
+
+**Markdown Content Guidelines:**
+- Start with a heading (e.g., \`## Dashboard Overview\`)
+- Include a brief description of what the dashboard shows
+- List key metrics or insights the user can expect
+- Keep it concise (3-6 lines is ideal)
+
+### Step 3: Create and Add Visualizations
+
+For each visualization panel:
+
+1. **Create the visualization** - Call ${platformCoreTools.createVisualization}:
    - The \`query\` parameter MUST reference actual index names and field names you discovered
-   - Example: "Show system.cpu.total.pct over time from metrics-*" (using real fields)
-   - Pass \`index\` when you know the target index pattern to avoid extra discovery work (improves performance)
-   - Pass \`esql\` if you have a pre-generated query (improves performance)
-   - Pass \`chartType\` (Metric, Gauge, Tagcloud, or XY) to skip chart type detection
-   - After ${platformCoreTools.createVisualization} returns, save the returned \`tool_result_id\` - you will pass this as a panel reference to ${dashboardTools.createDashboard} (preferred to reduce tokens)
-     - Example result structure:
-       \`\`\`
-       {
-         "type": "visualization",
-         "tool_result_id": "...",
-         "data": {
-           "query": "...",
-           "visualization": "<VISUALIZATION_CONFIG>",
-           "chart_type": "...",
-           "esql": "..."
-         }
-       }
-       \`\`\`
+   - Pass \`index\` when you know the target index pattern to avoid extra discovery work
+   - Pass \`chartType\` (Metric, Gauge, Tagcloud, or XY) when you know the desired chart type to skip auto-detection
+   - The tool returns a \`tool_result_id\` that references the visualization config
 
-3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
-   - \`title\`: Dashboard title
-   - \`description\`: Dashboard description
-   - \`panels\`: Array of panel definitions, either:
-     - the visualization configs (from \`data.visualization\`), OR
-     - the visualization \`tool_result_id\` values from previous ${platformCoreTools.createVisualization} calls (preferred)
-   - \`markdownContent\`: A markdown summary that will be displayed at the top of the dashboard
-     - This should describe what the dashboard shows and provide helpful context
-     - Use markdown formatting (headers, lists, bold text) to make it readable
-     - Example: "### Server Performance Overview\\n\\nThis dashboard displays key server metrics including:\\n- **CPU utilization** trends over time\\n- **Memory usage** patterns\\n- **Disk I/O** performance"
+2. **Add to the preview** - Immediately call ${dashboardTools.addPanel}:
+   - Pass the \`tool_result_id\` from the visualization as the \`panel\` parameter
+   - The panel appears instantly in the user's live preview
 
+**Repeat for each panel** - create visualization, then add panel. The user watches the dashboard build in real-time.
+
+### Step 4: Finalize the Dashboard
+
+Call ${dashboardTools.finalizeDashboard} with:
+- \`title\`: The dashboard title (same as init or updated)
+- \`description\`: The dashboard description
+- \`markdownContent\`: The markdown summary (same as init or updated)
+- \`panels\`: Array of \`tool_result_id\` strings from all created visualizations
+
+This generates a link to an unsaved dashboard that the user can view and save themselves.
 
 **CRITICAL RULES:**
 - NEVER call ${platformCoreTools.createVisualization} without first discovering what data exists
-- NEVER invent index names or field names - only use indices/fields you found via ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}
-- Only when creating a dashboard (i.e. the user asked for a dashboard): ALWAYS call ${dashboardTools.createDashboard} to complete the request
+- NEVER invent or guess index names or field names - only use indices/fields you found via ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}
 
+### Example Flow
 
-## Updating a Dashboard
+\`\`\`
+1. listIndices() -> find "metrics-*"
+2. getIndexMapping("metrics-*") -> discover fields: @timestamp, cpu.usage, memory.used, host.name
+3. initDashboard(
+     title: "Server Metrics Dashboard",
+     description: "Real-time server performance monitoring",
+     markdownContent: "## Server Metrics\\nMonitoring CPU, memory, and performance across all hosts."
+   )
+   -> Opens live preview with markdown panel visible!
 
-When updating existing dashboards:
-- Use ${dashboardTools.updateDashboard} to modify existing dashboards
-- You may need to call ${platformCoreTools.createVisualization} for new panels to add
-- ALWAYS pass \`panels\` containing the full set of panels you want in the dashboard (not just the new ones) - this tool replaces the existing visualization panels
-  - Panels can be full visualization configs, or visualization \`tool_result_id\` references from previous ${platformCoreTools.createVisualization} calls (preferred)
-- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel at the top
+4. createVisualization(
+     query: "Show average CPU usage over time from metrics-*",
+     index: "metrics-*",
+     chartType: "XY"
+   ) -> tool_result_id: "viz_abc123"
+5. addPanel(panel: "viz_abc123") -> CPU chart appears in preview!
+
+6. createVisualization(
+     query: "Show memory usage by host from metrics-*",
+     index: "metrics-*",
+     chartType: "XY"
+   ) -> tool_result_id: "viz_def456"
+7. addPanel(panel: "viz_def456") -> Memory chart appears in preview!
+
+8. createVisualization(
+     query: "Show current average CPU as a metric from metrics-*",
+     index: "metrics-*",
+     chartType: "Metric"
+   ) -> tool_result_id: "viz_ghi789"
+9. addPanel(panel: "viz_ghi789") -> Metric appears in preview!
+
+10. finalizeDashboard(
+      title: "Server Metrics Dashboard",
+      description: "Real-time server performance monitoring",
+      markdownContent: "## Server Metrics\\nMonitoring CPU, memory, and performance across all hosts.",
+      panels: ["viz_abc123", "viz_def456", "viz_ghi789"]
+    )
+    -> Returns link to unsaved dashboard for user to save
+\`\`\`
+
+## Updating an Existing Dashboard
+
+When modifying existing saved dashboards:
+- Use ${dashboardTools.updateDashboard} to modify the dashboard
+- Call ${platformCoreTools.createVisualization} for any new panels to add
+- ALWAYS pass \`panels\` containing the FULL set of panels you want in the dashboard (not just new ones) - this tool replaces all existing visualization panels
+  - Panels can be \`tool_result_id\` references from ${platformCoreTools.createVisualization} calls (preferred) or full visualization configs
+- ALWAYS pass \`markdownContent\` (existing or updated) - this tool replaces the markdown summary panel
 `,
       },
       answer: {
@@ -94,7 +146,9 @@ When updating existing dashboards:
       tools: [
         {
           tool_ids: [
-            dashboardTools.createDashboard,
+            dashboardTools.initDashboard,
+            dashboardTools.addPanel,
+            dashboardTools.finalizeDashboard,
             dashboardTools.updateDashboard,
             platformCoreTools.executeEsql,
             platformCoreTools.generateEsql,

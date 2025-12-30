@@ -14,8 +14,6 @@ import {
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/common/page_bundle_constants';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
-
 import type {
   ToolAvailabilityContext,
   ToolAvailabilityResult,
@@ -24,6 +22,7 @@ import type {
 import { isToolResultId } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import {
+  MARKDOWN_EMBEDDABLE_TYPE,
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
   LARGE_PANEL_WIDTH,
@@ -31,7 +30,7 @@ import {
   MARKDOWN_MIN_HEIGHT,
   MARKDOWN_MAX_HEIGHT,
   SMALL_CHART_TYPES,
-} from './constants';
+} from '../../common';
 
 const getPanelWidth = (chartType: string): number => {
   return SMALL_CHART_TYPES.has(chartType) ? SMALL_PANEL_WIDTH : LARGE_PANEL_WIDTH;
@@ -149,20 +148,25 @@ const resolveLensConfig = (panel: unknown, resultStore?: ToolResultStore): LensA
   return panel as LensApiSchemaType;
 };
 
+/**
+ * Builds a normalized Lens panel config from the API schema.
+ * Returns the serialized config suitable for DashboardApi.addNewPanel().
+ */
+export const buildLensConfig = (config: LensApiSchemaType): LensSerializedAPIConfig => {
+  const lensAttributes: LensAttributes = new LensConfigBuilder().fromAPIFormat(config);
+  return {
+    title: lensAttributes.title ?? config.title ?? 'Generated panel',
+    attributes: lensAttributes,
+  };
+};
+
 const buildLensPanelFromApi = (
   config: LensApiSchemaType,
   grid: DashboardPanel['grid']
 ): DashboardPanel => {
-  const lensAttributes: LensAttributes = new LensConfigBuilder().fromAPIFormat(config);
-
-  const lensConfig: LensSerializedAPIConfig = {
-    title: lensAttributes.title ?? config.title ?? 'Generated panel',
-    attributes: lensAttributes,
-  };
-
   return {
     type: 'lens',
     grid,
-    config: lensConfig,
+    config: buildLensConfig(config),
   };
 };
