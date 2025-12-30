@@ -126,7 +126,7 @@ export function createRuleExecutorTaskRunner({
           `alerting_v2:esql run: ruleId=${params.ruleId} spaceId=${params.spaceId} alertsDataStream=${targetDataStream}`
         );
 
-        return { state: taskInstance.state };
+        return { state: {} };
       },
     };
   };
