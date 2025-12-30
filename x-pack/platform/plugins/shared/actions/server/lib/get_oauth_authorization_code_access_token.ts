@@ -120,9 +120,9 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     const newRefreshToken = tokenResult.refreshToken || connectorToken.refreshToken;
 
     // Calculate expiration times
-    const accessTokenExpiresAt = new Date(
-      requestTokenStart + tokenResult.expiresIn * 1000
-    ).toISOString();
+    const accessTokenExpiresAt = tokenResult.expiresIn
+      ? new Date(requestTokenStart + tokenResult.expiresIn * 1000).toISOString()
+      : undefined;
 
     const refreshTokenExpiresAt = tokenResult.refreshTokenExpiresIn
       ? new Date(requestTokenStart + tokenResult.refreshTokenExpiresIn * 1000).toISOString()

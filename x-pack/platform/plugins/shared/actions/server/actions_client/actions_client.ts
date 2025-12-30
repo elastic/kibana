@@ -58,6 +58,7 @@ import type { ActionsAuthorization } from '../authorization/actions_authorizatio
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
+  OAuthAuthorizationCodeParams,
   OAuthClientCredentialsParams,
   OAuthJwtParams,
   OAuthParams,
@@ -419,7 +420,7 @@ export class ActionsClient {
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
     } else if (type === 'authorization_code') {
-      const tokenOpts = options as any; // Will add proper typing in route schema
+      const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
         accessToken = await getOAuthAuthorizationCodeAccessToken({
           connectorId: tokenOpts.connectorId,
@@ -429,7 +430,7 @@ export class ActionsClient {
             config: tokenOpts.config as GetOAuthAuthorizationCodeConfig,
             secrets: tokenOpts.secrets as GetOAuthAuthorizationCodeSecrets,
           },
-          connectorTokenClient: this.connectorTokenClient,
+          connectorTokenClient: this.context.connectorTokenClient,
           scope: tokenOpts.scope,
         });
 
