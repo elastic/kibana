@@ -6514,6 +6514,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entity-store@link:x-pack/solutions/security/plugins/entity_store":
+  version "0.0.0"
+  uid ""
+
 "@kbn/entityManager-plugin@link:x-pack/platform/plugins/shared/entity_manager":
   version "0.0.0"
   uid ""
