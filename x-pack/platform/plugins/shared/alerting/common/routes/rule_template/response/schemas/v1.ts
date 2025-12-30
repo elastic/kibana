@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { ruleResponseSchemaV1 } from '../../../rule/response';
-import { rule } from '../../../../../server/alerts_client/lib/test_fixtures';
 
 export const ruleTemplateResponseSchema = schema.object({
   id: schema.string({
