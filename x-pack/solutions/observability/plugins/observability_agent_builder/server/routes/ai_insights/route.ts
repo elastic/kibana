@@ -37,13 +37,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         alertId: t.string,
       }),
     }),
-    handler: async ({
-      core,
-      dataRegistry,
-      logger,
-      request,
-      params,
-    }): Promise<{ summary: string; context: string }> => {
+    handler: async ({ core, dataRegistry, logger, request, params, response }) => {
       const { alertId } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
@@ -55,7 +49,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
 
-      const { summary, context } = await getAlertAiInsight({
+      const result = await getAlertAiInsight({
         alertDoc,
         inferenceClient,
         connectorId,
@@ -64,10 +58,12 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         logger,
       });
 
-      return {
-        summary,
-        context,
-      };
+      return response.ok({
+        body: observableIntoEventSourceStream(result.events$, {
+          logger,
+          signal: getRequestAbortedSignal(request),
+        }),
+      });
     },
   });
 
