@@ -86,4 +86,37 @@ test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(page.testSubj.locator('AlertDetails')).toBeVisible();
     }).toPass({ timeout: 60_000, intervals: [2_000] });
   });
+
+  test('should show Metadata tab panel when Metadata tab is clicked', async ({
+    page,
+    pageObjects,
+  }) => {
+    await expect(async () => {
+      await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+      await page.testSubj.locator('metadataTab').click();
+      await expect(page.testSubj.locator('metadataTabPanel')).toBeVisible();
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
+  });
+
+  test('should show an empty prompt in the Investigation Guide tab when no guide is set', async ({
+    page,
+    pageObjects,
+  }) => {
+    await expect(async () => {
+      await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+      await page.testSubj.locator('investigationGuideTab').click();
+      await expect(page.testSubj.locator('alertInvestigationGuideEmptyPrompt')).toBeVisible();
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
+  });
+
+  test('should show a Related Alerts table when Related Alerts tab is clicked', async ({
+    page,
+    pageObjects,
+  }) => {
+    await expect(async () => {
+      await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+      await page.testSubj.locator('relatedAlertsTab').click();
+      await expect(page.testSubj.locator('relatedAlertsTable')).toBeVisible();
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
+  });
 });
