@@ -8,218 +8,237 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonIcon,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiImage,
-  EuiPanel,
+  EuiSplitPanel,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { ApplicationStart } from '@kbn/core/public';
+import { WORKFLOWS_UI_SETTING_ENABLED_ID } from '../../../common';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useKibana } from '../../hooks/use_kibana';
 
-interface MetricPanelProps {
-  title: string;
-  onClick?: () => void;
-  metric: {
-    value: number;
-    detail: string;
-  };
-  addButtonAriaLabel: string;
+const PANEL_TYPES = [
+  'discover',
+  'dashboards',
+  'agentBuilder',
+  'workflows',
+  'machineLearning',
+  'dataManagement',
+] as const;
+
+export type MetricPanelType = (typeof PANEL_TYPES)[number];
+
+export interface ComplexMetricPanel {
+  getImageUrl: (assetBasePath: string) => string;
+  metricDescription: string;
+  metricTitle: string;
+  type: MetricPanelType;
   dataTestSubj: string;
+  onPanelClick?: ({
+    share,
+    application,
+  }: {
+    share: SharePublicStart;
+    application: ApplicationStart;
+  }) => void;
 }
 
-export type MetricPanelType = 'indices' | 'agents' | 'dashboards';
+export const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
+  {
+    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_lake.svg`,
+    metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.discover.desc', {
+      defaultMessage:
+        'Search and filter documents, analyze fields, visualize patterns, and save findings for later.',
+    }),
 
-const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
+    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.discover.title', {
+      defaultMessage: 'Discover',
+    }),
+    type: 'discover',
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('discover');
+    },
+    dataTestSubj: 'searchHomepageNavLinks-discover',
+  },
+  {
+    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_data_vis.svg`,
+    metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.desc', {
+      defaultMessage:
+        'Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.',
+    }),
+
+    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.title', {
+      defaultMessage: 'Dashboards',
+    }),
+    type: 'dashboards',
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('dashboards');
+    },
+    dataTestSubj: 'searchHomepageNavLinks-dashboards',
+  },
+  {
+    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_agents.svg`,
+    metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.desc', {
+      defaultMessage:
+        'Utilize AI-powered capabilities to build and interact with agents alongside your Elasticsearch data.',
+    }),
+
+    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.title', {
+      defaultMessage: 'Agent Builder',
+    }),
+    type: 'agentBuilder',
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('agent_builder');
+    },
+    dataTestSubj: 'searchHomepageNavLinks-agentBuilder',
+  },
+
+  {
+    type: 'workflows' as const,
+    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_relevance.svg`,
+    metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.workflows.desc', {
+      defaultMessage:
+        'Create intelligent workflows that turn Elastic insights into automated actions across your entire tech stack.',
+    }),
+    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.workflow.title', {
+      defaultMessage: 'Workflows',
+    }),
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('workflows');
+    },
+    dataTestSubj: 'searchHomepageNavLinks-workflows',
+  },
+  {
+    type: 'machineLearning',
+    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_machinelearning.svg`,
+
+    metricDescription: i18n.translate(
+      'xpack.searchHomepage.metricPanels.empty.machineLearning.desc',
+      {
+        defaultMessage:
+          'Analyze and visualize your data to generate models for determining patterns of behavior.',
+      }
+    ),
+    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.machineLearning.title', {
+      defaultMessage: 'Machine Learning',
+    }),
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('ml', {
+        path: 'overview',
+      });
+    },
+    dataTestSubj: 'searchHomepageNavLinks-machineLearning',
+  },
+  {
+    type: 'dataManagement',
+    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_indexing_folder.svg`,
+    metricDescription: i18n.translate(
+      'xpack.searchHomepage.metricPanels.empty.dataManagement.desc',
+      {
+        defaultMessage:
+          'Manage your Elasticsearch indices, ingest pipelines and search relevance tooling.',
+      }
+    ),
+
+    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataManagement.title', {
+      defaultMessage: 'Data Management',
+    }),
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('management', {
+        path: 'data/index_management',
+      });
+    },
+    dataTestSubj: 'searchHomepageNavLinks-dataManagement',
+  },
+];
+
+interface MetricPanelEmptyProps {
+  panel: ComplexMetricPanel;
+}
+
+const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
+  const {
+    services: { share, application },
+  } = useKibana();
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
 
-  const METRIC_PANEL_ITEMS: Record<
-    MetricPanelType,
-    {
-      imageUrl: string;
-      metricDescription: string;
-      createText: string;
-      metricTitle: string;
-      createAction: () => void;
-    }
-  > = {
-    indices: {
-      imageUrl: `${assetBasePath}/search_indexing_folder.svg`,
-      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.indices.desc', {
-        defaultMessage:
-          'An index is a fundamental unit of storage in Elasticsearch with documents and metadata.',
-      }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.indices.create', {
-        defaultMessage: 'Create an index',
-      }),
-      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.indices.title', {
-        defaultMessage: 'Indices',
-      }),
-      createAction: () => {},
-    },
-    dashboards: {
-      imageUrl: `${assetBasePath}/search_analytics.svg`,
-      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.desc', {
-        defaultMessage:
-          'Dashboards are the best way to visualize and share insights from your Elasticsearch data.',
-      }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.create', {
-        defaultMessage: 'Create a dashboard',
-      }),
-      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.title', {
-        defaultMessage: 'Dashboards',
-      }),
-      createAction: () => {},
-    },
-    agents: {
-      imageUrl: `${assetBasePath}/search_relevance.svg`,
-      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.desc', {
-        defaultMessage:
-          'An AI layer in Elasticsearch, agents provide a framework for building agentic workflows.',
-      }),
-      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.create', {
-        defaultMessage: 'Create an agent',
-      }),
-      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.title', {
-        defaultMessage: 'Agents',
-      }),
-      createAction: () => {},
-    },
-  };
-
-  const { imageUrl, metricTitle, metricDescription, createText, createAction } =
-    METRIC_PANEL_ITEMS[type];
+  const { getImageUrl, metricTitle, metricDescription, onPanelClick, dataTestSubj } = panel;
   return (
-    <EuiPanel
-      color="subdued"
+    <EuiSplitPanel.Outer
       hasBorder
-      css={css({
-        padding: `${euiTheme.size.xl} ${euiTheme.base}px`,
-      })}
+      onClick={() => onPanelClick && onPanelClick({ share, application })}
+      data-test-subj={dataTestSubj}
     >
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <div>
-            <EuiImage size={68} src={imageUrl} alt="" />
-          </div>
-        </EuiFlexItem>
+      <EuiSplitPanel.Inner
+        grow
+        css={css({
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          minHeight: `${euiTheme.base * 7}px`,
+        })}
+      >
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          gutterSize="s"
+          css={css({ height: '100%' })}
+        >
+          <EuiFlexItem grow={false}>
+            <div>
+              <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner
+        css={css({
+          minHeight: `${euiTheme.base * 8}px`,
+        })}
+      >
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h4>{metricTitle}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h5>{metricTitle}</h5>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiText color="subdued" textAlign="center" size="s">
-            <p>{metricDescription}</p>
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false} css={css({ padding: euiTheme.size.s })}>
-          <EuiButton
-            data-test-subj="searchHomepageMetricPanelEmptyButton"
-            iconType="plusInCircle"
-            onClick={createAction}
-            color="text"
-          >
-            {createText}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
-export const MetricPanel = ({
-  title,
-  onClick,
-  metric,
-  addButtonAriaLabel,
-  dataTestSubj,
-}: MetricPanelProps) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiPanel hasBorder paddingSize="m">
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>{title}</h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="info" size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {onClick && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="plusInCircle"
-                  aria-label={addButtonAriaLabel}
-                  data-test-subj={dataTestSubj}
-                  onClick={onClick}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="xs"
-            css={css({ padding: `${euiTheme.size.base} 0` })}
-          >
-            <EuiFlexItem>
-              <EuiTitle size="l">
-                <h1>{metric.value}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                {metric.detail}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s">
+              <p>{metricDescription}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };
 
 export const MetricPanels = () => {
-  const panels: Array<{ id: string; type: MetricPanelType }> = [
-    {
-      id: 'indices',
-      type: 'indices',
-    },
-    {
-      id: 'dashboards',
-      type: 'dashboards',
-    },
-    {
-      id: 'agents',
-      type: 'agents',
-    },
-  ];
+  const { services } = useKibana();
+  const isWorkflowsUiEnabled = services.uiSettings.get<boolean>(
+    WORKFLOWS_UI_SETTING_ENABLED_ID,
+    false
+  );
+
+  const panels = isWorkflowsUiEnabled
+    ? METRIC_PANEL_ITEMS
+    : METRIC_PANEL_ITEMS.filter((p) => p.type !== 'workflows');
 
   return (
-    <EuiFlexGroup gutterSize="m">
-      {panels.map((panel) => (
-        <EuiFlexItem key={panel.id}>
-          <MetricPanelEmpty type={panel.type} />
+    <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
+      {panels.map((panel, index) => (
+        <EuiFlexItem key={panel.type + '-' + index}>
+          <MetricPanelEmpty panel={panel} />
         </EuiFlexItem>
       ))}
-    </EuiFlexGroup>
+    </EuiFlexGrid>
   );
 };

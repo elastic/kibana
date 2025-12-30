@@ -13,10 +13,32 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 
 export const GroupStreamDetailView = ({ stream }: { stream: Streams.GroupStream.GetResponse }) => {
+  const { onPageReady } = usePerformanceContext();
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (stream) {
+      onPageReady({
+        meta: {
+          description: '[ttfmp_streams] streamType: group',
+        },
+        customMetrics: {
+          key1: 'member_count',
+          value1: stream.stream.group.members.length,
+          key2: 'tag_count',
+          value2: stream.stream.group.tags.length,
+          key3: 'metadata_count',
+          value3: Object.keys(stream.stream.group.metadata).length,
+        },
+      });
+    }
+  }, [stream, onPageReady]);
+
   const meta = [
     {
       title: i18n.translate('xpack.streams.groupStreamDetailView.descriptionLabel', {

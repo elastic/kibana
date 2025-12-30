@@ -343,9 +343,9 @@
           },
           ") => ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLSingleAstItem",
             "text": "ESQLSingleAstItem"
           }
@@ -727,6 +727,45 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.extractFieldsFromMathExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "extractFieldsFromMathExpression",
+        "description": [
+          "\nExtracts all field references from a TinyMath expression string.\n\nThis is used for:\n1. Generating `ignore_missing` null checks (IS NOT NULL for each field)\n2. Validating that referenced fields exist (optional pre-check)\n3. Providing autocomplete/documentation for field usage\n"
+        ],
+        "signature": [
+          "(expression: string) => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/field_extractor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.extractFieldsFromMathExpression.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [
+              "The TinyMath expression string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/field_extractor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Array of unique field names referenced in the expression"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1176,6 +1215,118 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.getMathExpressionLanguageDocSections",
+        "type": "Function",
+        "tags": [],
+        "label": "getMathExpressionLanguageDocSections",
+        "description": [
+          "\nGet documentation sections formatted for LanguageDocumentationPopover.\n\nIMPORTANT: The LanguageDocumentationPopover expects the first group to be a navigation\nentry for the initialSection (intro). The content pane renders groups.slice(1), so the\nfirst group's items are never displayed - only its label is used for sidebar navigation\nto scroll to the intro section."
+        ],
+        "signature": [
+          "() => ",
+          "MathLanguageDocumentationSections"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_docs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.getMathFunctionDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "getMathFunctionDefinition",
+        "description": [
+          "\nGet function definition by name"
+        ],
+        "signature": [
+          "(name: string) => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.MathFunctionDefinition",
+            "text": "MathFunctionDefinition"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.getMathFunctionDefinition.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.getMathParameterNames",
+        "type": "Function",
+        "tags": [],
+        "label": "getMathParameterNames",
+        "description": [
+          "\nGet parameter names from function args (for signature help)\nOptional args are suffixed with '?'"
+        ],
+        "signature": [
+          "(func: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.MathFunctionDefinition",
+            "text": "MathFunctionDefinition"
+          },
+          ") => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.getMathParameterNames.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "func",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.MathFunctionDefinition",
+                "text": "MathFunctionDefinition"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.getProcessorsCount",
         "type": "Function",
         "tags": [],
@@ -1237,7 +1388,7 @@
           "\nGet the processor type (action) from a processor definition"
         ],
         "signature": [
-          "(processor: TProcessorDefinition) => \"replace\" | \"date\" | \"append\" | \"set\" | \"remove\" | \"rename\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
+          "(processor: TProcessorDefinition) => \"replace\" | \"date\" | \"math\" | \"append\" | \"set\" | \"remove\" | \"rename\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -2267,12 +2418,52 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.validateMathExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "validateMathExpression",
+        "description": [
+          "\nValidates a TinyMath expression string against the allowed function registry.\n\nThis function:\n1. Parses the expression into a TinyMath AST\n2. Recursively walks the AST to validate all function calls\n3. Returns validation result with any errors found\n"
+        ],
+        "signature": [
+          "(expression: string) => ",
+          "ValidationResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/ast_validator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validateMathExpression.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [
+              "The TinyMath expression string to validate"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/ast_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "ValidationResult with valid flag and any error messages"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.validateStreamlang",
         "type": "Function",
         "tags": [],
         "label": "validateStreamlang",
         "description": [
-          "\nValidates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.\n\nThis validates that:\n- All generated fields are properly namespaced (contain at least one dot)\n- Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes\n- Processors don't modify reserved/system fields\n- Fields are used with compatible types\n"
+          "\nValidates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.\n\nThis validates that:\n- All generated fields are properly namespaced (contain at least one dot)\n- Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes\n- Processors don't modify reserved/system fields\n- Fields are used with compatible types\n- Processor-specific values are valid (expressions, patterns, date formats etc.)\n"
         ],
         "signature": [
           "(streamlangDSL: ",
@@ -3311,6 +3502,204 @@
             "description": [],
             "signature": [
               "Record<string, unknown>[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.MathFunctionDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "MathFunctionDefinition",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathFunctionDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Function name (e.g., 'log', 'eq')"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathFunctionDefinition.signature",
+            "type": "string",
+            "tags": [],
+            "label": "signature",
+            "description": [
+              "Function signature for display (e.g., 'log(value)')"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathFunctionDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "i18n description for documentation and autocomplete"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathFunctionDefinition.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [
+              "Typed arguments - used for docs and to derive parameter names for signature help"
+            ],
+            "signature": [
+              "MathFunctionArg",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathFunctionDefinition.category",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "category",
+            "description": [
+              "Category for grouping"
+            ],
+            "signature": [
+              "\"comparison\" | \"logarithmic\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathFunctionDefinition.returnsBoolean",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "returnsBoolean",
+            "description": [
+              "Whether this function returns a boolean"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathFunctionDefinition.example",
+            "type": "string",
+            "tags": [],
+            "label": "example",
+            "description": [
+              "Example usage for documentation"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.MathProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "MathProcessor",
+        "description": [
+          "\nMath processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.MathProcessor",
+            "text": "MathProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBaseWithWhere",
+            "text": "ProcessorBaseWithWhere"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"math\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathProcessor.expression",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathProcessor.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.MathProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "deprecated": false,
@@ -4478,7 +4867,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"non_namespaced_field\" | \"reserved_field\" | \"type_mismatch\" | \"mixed_type\""
+              "\"non_namespaced_field\" | \"reserved_field\" | \"type_mismatch\" | \"mixed_type\" | \"invalid_value\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
             "deprecated": false,
@@ -4736,6 +5125,30 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.ALL_MATH_FUNCTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "ALL_MATH_FUNCTIONS",
+        "description": [
+          "\nAll math functions - the complete list"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.MathFunctionDefinition",
+            "text": "MathFunctionDefinition"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/streamlang",
         "id": "def-common.appendProcessorSchema",
@@ -5020,6 +5433,21 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.mathProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "mathProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.OperatorKeys",
         "type": "Type",
         "tags": [],
@@ -5058,7 +5486,7 @@
           "\nProcessorType is the union of all possible 'action' values"
         ],
         "signature": [
-          "\"replace\" | \"date\" | \"append\" | \"set\" | \"remove\" | \"rename\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
+          "\"replace\" | \"date\" | \"math\" | \"append\" | \"set\" | \"remove\" | \"rename\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -5075,7 +5503,7 @@
           "\nGet all processor types as a string array (derived from the Zod schema)"
         ],
         "signature": [
-          "(\"replace\" | \"date\" | \"append\" | \"set\" | \"remove\" | \"rename\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\")[]"
+          "(\"replace\" | \"date\" | \"math\" | \"append\" | \"set\" | \"remove\" | \"rename\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -5263,6 +5691,14 @@
             "docId": "kibKbnStreamlangPluginApi",
             "section": "def-common.GrokProcessor",
             "text": "GrokProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.MathProcessor",
+            "text": "MathProcessor"
           },
           " | ",
           {
@@ -6259,6 +6695,80 @@
           },
           {
             "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ACTION_METADATA_MAP.math",
+            "type": "Object",
+            "tags": [],
+            "label": "math",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.math.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.math.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.math.usage",
+                "type": "string",
+                "tags": [],
+                "label": "usage",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.math.examples",
+                "type": "Array",
+                "tags": [],
+                "label": "examples",
+                "description": [],
+                "signature": [
+                  "{ description: string; yaml: string; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.math.tips",
+                "type": "Array",
+                "tags": [],
+                "label": "tips",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
             "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline",
             "type": "Object",
             "tags": [],
@@ -6429,6 +6939,23 @@
           "[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.BOOLEAN_RETURNING_MATH_FUNCTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "BOOLEAN_RETURNING_MATH_FUNCTIONS",
+        "description": [
+          "\nSet of function names that return boolean values."
+        ],
+        "signature": [
+          "Set<string>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/math/language_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7324,6 +7851,17 @@
             "type": "string",
             "tags": [],
             "label": "mixed_type",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.validationErrorTypeLabels.invalid_value",
+            "type": "string",
+            "tags": [],
+            "label": "invalid_value",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
             "deprecated": false,

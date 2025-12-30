@@ -11,9 +11,9 @@
         "label": "AiInsight",
         "description": [],
         "signature": [
-          "({\n  title,\n  description,\n  content,\n  onStartConversation,\n  onOpen,\n  startButtonLabel,\n  isLoading,\n  error,\n  'data-test-subj': dataTestSubj,\n}: ",
+          "({\n  title,\n  description,\n  content,\n  license,\n  onStartConversation,\n  onOpen,\n  isLoading,\n  error,\n}: ",
           "AiInsightProps",
-          ") => React.JSX.Element"
+          ") => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/ai-insights/src/components/ai_insight.tsx",
         "deprecated": false,
@@ -24,7 +24,7 @@
             "id": "def-public.AiInsight.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  description,\n  content,\n  onStartConversation,\n  onOpen,\n  startButtonLabel,\n  isLoading,\n  error,\n  'data-test-subj': dataTestSubj,\n}",
+            "label": "{\n  title,\n  description,\n  content,\n  license,\n  onStartConversation,\n  onOpen,\n  isLoading,\n  error,\n}",
             "description": [],
             "signature": [
               "AiInsightProps"
