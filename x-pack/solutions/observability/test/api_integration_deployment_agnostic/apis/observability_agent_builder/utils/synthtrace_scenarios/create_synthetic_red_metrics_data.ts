@@ -14,7 +14,10 @@ export interface ServiceConfig {
   name: string;
   environment: string;
   hostName: string;
+  containerId?: string;
   transactions: TransactionConfig[];
+  /** Custom labels to add to all transactions for this service */
+  labels?: Record<string, string>;
 }
 
 export interface TransactionConfig {
@@ -22,6 +25,8 @@ export interface TransactionConfig {
   type: string;
   duration: number;
   failureRate: number;
+  /** Custom labels to add to this specific transaction */
+  labels?: Record<string, string>;
 }
 
 export const createSyntheticRedMetricsData = async ({
@@ -45,6 +50,22 @@ export const createSyntheticRedMetricsData = async ({
       .rate(10)
       .generator((timestamp) =>
         services.flatMap((serviceConfig) => {
+          // Build overrides object with host.name and optional container.id
+          const overrides: Record<string, string | undefined> = {
+            'host.name': serviceConfig.hostName,
+          };
+
+          if (serviceConfig.containerId) {
+            overrides['container.id'] = serviceConfig.containerId;
+          }
+
+          // Add service-level labels
+          if (serviceConfig.labels) {
+            for (const [key, value] of Object.entries(serviceConfig.labels)) {
+              overrides[`labels.${key}`] = value;
+            }
+          }
+
           const instance = apm
             .service({
               name: serviceConfig.name,
@@ -52,33 +73,49 @@ export const createSyntheticRedMetricsData = async ({
               agentName: 'nodejs',
             })
             .instance(`${serviceConfig.name}-instance`)
-            .overrides({ 'host.name': serviceConfig.hostName });
+            .overrides(overrides);
 
           return serviceConfig.transactions.flatMap((txConfig) => {
             const transactions: Array<Serializable<ApmFields>> = [];
 
+            // Build transaction-level overrides for labels
+            const txOverrides: Record<string, string> = {};
+            if (txConfig.labels) {
+              for (const [key, value] of Object.entries(txConfig.labels)) {
+                txOverrides[`labels.${key}`] = value;
+              }
+            }
+
             // Create successful transactions
             const successCount = Math.round(10 * (1 - txConfig.failureRate));
             for (let i = 0; i < successCount; i++) {
-              transactions.push(
-                instance
-                  .transaction({ transactionName: txConfig.name, transactionType: txConfig.type })
-                  .timestamp(timestamp)
-                  .duration(txConfig.duration)
-                  .success()
-              );
+              let tx = instance
+                .transaction({ transactionName: txConfig.name, transactionType: txConfig.type })
+                .timestamp(timestamp)
+                .duration(txConfig.duration)
+                .success();
+
+              if (Object.keys(txOverrides).length > 0) {
+                tx = tx.overrides(txOverrides);
+              }
+
+              transactions.push(tx);
             }
 
             // Create failed transactions
             const failureCount = Math.round(10 * txConfig.failureRate);
             for (let i = 0; i < failureCount; i++) {
-              transactions.push(
-                instance
-                  .transaction({ transactionName: txConfig.name, transactionType: txConfig.type })
-                  .timestamp(timestamp)
-                  .duration(txConfig.duration * 1.5)
-                  .failure()
-              );
+              let tx = instance
+                .transaction({ transactionName: txConfig.name, transactionType: txConfig.type })
+                .timestamp(timestamp)
+                .duration(txConfig.duration * 1.5)
+                .failure();
+
+              if (Object.keys(txOverrides).length > 0) {
+                tx = tx.overrides(txOverrides);
+              }
+
+              transactions.push(tx);
             }
 
             return transactions;

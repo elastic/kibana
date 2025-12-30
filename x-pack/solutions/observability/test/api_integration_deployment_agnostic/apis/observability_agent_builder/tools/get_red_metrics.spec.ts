@@ -37,31 +37,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
     const testServices: ServiceConfig[] = [
-      // Service 1: payment-service in production on host-01
+      // Service 1: payment-service in production on host-01 with container and labels
       {
         name: 'payment-service',
         environment: 'production',
         hostName: 'host-01',
+        containerId: 'container-payment-001',
+        labels: { team: 'payments', tier: 'critical' },
         transactions: [
           {
             name: 'POST /api/payment',
             type: 'request',
             duration: 200,
             failureRate: 0.1, // 10% failure rate
+            labels: { endpoint: 'payment-create' },
           },
           {
             name: 'GET /api/payment/status',
             type: 'request',
             duration: 50,
             failureRate: 0.0, // No failures
+            labels: { endpoint: 'payment-status' },
           },
         ],
       },
-      // Service 2: user-service in production on host-01
+      // Service 2: user-service in production on host-01 with labels
       {
         name: 'user-service',
         environment: 'production',
         hostName: 'host-01',
+        containerId: 'container-user-001',
+        labels: { team: 'identity', tier: 'critical' },
         transactions: [
           {
             name: 'GET /api/user',
@@ -77,11 +83,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ],
       },
-      // Service 3: order-service in staging on host-02
+      // Service 3: order-service in staging on host-02 with container and labels
       {
         name: 'order-service',
         environment: 'staging',
         hostName: 'host-02',
+        containerId: 'container-order-001',
+        labels: { team: 'orders', tier: 'standard' },
         transactions: [
           {
             name: 'POST /api/order',
@@ -97,11 +105,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ],
       },
-      // Service 4: notification-service in staging on host-02
+      // Service 4: notification-service in staging on host-02 with labels
       {
         name: 'notification-service',
         environment: 'staging',
         hostName: 'host-02',
+        containerId: 'container-notify-001',
+        labels: { team: 'notifications', tier: 'standard' },
         transactions: [
           {
             name: 'send-notification',
@@ -677,6 +687,300 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(items).to.be.an('array');
         expect(items).to.have.length(0);
+      });
+    });
+
+    describe('when grouping by container.id', () => {
+      it('returns metrics grouped by container', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            groupBy: 'container.id',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(4);
+        const containerIds = items.map((item) => item.group);
+        expect(containerIds).to.contain('container-payment-001');
+        expect(containerIds).to.contain('container-user-001');
+        expect(containerIds).to.contain('container-order-001');
+        expect(containerIds).to.contain('container-notify-001');
+      });
+
+      it('returns correct metrics for a specific container', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            groupBy: 'container.id',
+          },
+        });
+
+        const { items } = results[0].data;
+        const paymentContainer = items.find((item) => item.group === 'container-payment-001');
+
+        expect(paymentContainer).to.be.ok();
+        expect(paymentContainer!.throughput).to.be.greaterThan(0);
+        expect(paymentContainer!.latency).to.be.greaterThan(0);
+      });
+    });
+
+    describe('when filtering by high-cardinality fields (labels)', () => {
+      it('returns metrics when filtering by service-level label (team)', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.team: "payments"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(1);
+        expect(items[0].group).to.be('payment-service');
+      });
+
+      it('returns metrics when filtering by tier label', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.tier: "critical"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(2);
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('payment-service');
+        expect(groups).to.contain('user-service');
+      });
+
+      it('returns metrics when filtering by standard tier label', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.tier: "standard"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(2);
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('order-service');
+        expect(groups).to.contain('notification-service');
+      });
+
+      it('returns metrics when filtering by transaction-level label', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.endpoint: "payment-create"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(1);
+        expect(items[0].group).to.be('payment-service');
+        // POST /api/payment has 10% failure rate
+        expect(items[0].failureRate).to.be(0.1);
+      });
+
+      it('returns empty results when filtering by non-existent label value', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.team: "non-existent-team"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.be.an('array');
+        expect(items).to.have.length(0);
+      });
+
+      it('combines label filter with other filters', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.tier: "critical" AND service.environment: "production"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(2);
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('payment-service');
+        expect(groups).to.contain('user-service');
+      });
+
+      it('filters by label and groups by transaction name', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.team: "payments"',
+            groupBy: 'transaction.name',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+
+        expect(items).to.have.length(2);
+        const transactionNames = items.map((item) => item.group);
+        expect(transactionNames).to.contain('POST /api/payment');
+        expect(transactionNames).to.contain('GET /api/payment/status');
+      });
+    });
+
+    describe('when using various groupBy and filter combinations', () => {
+      it('returns all services with default groupBy (service.name)', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+        expect(items.length).to.be(4);
+
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('payment-service');
+        expect(groups).to.contain('user-service');
+        expect(groups).to.contain('order-service');
+        expect(groups).to.contain('notification-service');
+      });
+
+      it('returns all transaction names when grouping by transaction.name', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            groupBy: 'transaction.name',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+        expect(items.length).to.be(7);
+
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('POST /api/payment');
+        expect(groups).to.contain('GET /api/payment/status');
+        expect(groups).to.contain('GET /api/user');
+        expect(groups).to.contain('page-load');
+        expect(groups).to.contain('POST /api/order');
+        expect(groups).to.contain('worker-process');
+        expect(groups).to.contain('send-notification');
+      });
+
+      it('returns all hosts when grouping by host.name', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            groupBy: 'host.name',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+        expect(items.length).to.be(2);
+
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('host-01');
+        expect(groups).to.contain('host-02');
+      });
+
+      it('returns all containers when grouping by container.id', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            groupBy: 'container.id',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+        expect(items.length).to.be(4);
+
+        const groups = items.map((item) => item.group);
+        expect(groups).to.contain('container-payment-001');
+        expect(groups).to.contain('container-user-001');
+        expect(groups).to.contain('container-order-001');
+        expect(groups).to.contain('container-notify-001');
+      });
+
+      it('returns correct service when filtering by transaction.name', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'transaction.name: "POST /api/payment"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+        expect(items.length).to.be(1);
+        expect(items[0].group).to.be('payment-service');
+        expect(items[0].failureRate).to.be(0.1);
+      });
+
+      it('returns correct service when filtering by high-cardinality label', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+          id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+          params: {
+            start: 'now-1h',
+            end: 'now',
+            filter: 'labels.team: "payments"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        const { items } = results[0].data;
+        expect(items.length).to.be(1);
+        expect(items[0].group).to.be('payment-service');
+        expect(items[0].throughput).to.be.greaterThan(0);
+        expect(items[0].latency).to.be.greaterThan(0);
       });
     });
   });
