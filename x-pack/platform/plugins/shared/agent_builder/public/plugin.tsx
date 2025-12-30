@@ -24,6 +24,7 @@ import {
   AttachmentsService,
   ChatService,
   ConversationsService,
+  DocLinksService,
   NavigationService,
   ToolsService,
   type AgentBuilderInternalService,
@@ -106,6 +107,7 @@ export class AgentBuilderPlugin
     const attachmentsService = new AttachmentsService();
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
+    const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
@@ -120,6 +122,7 @@ export class AgentBuilderPlugin
       attachmentsService,
       chatService,
       conversationsService,
+      docLinksService,
       navigationService,
       toolsService,
       startDependencies,
