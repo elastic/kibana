@@ -72,4 +72,5 @@ export interface AlertParams {
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
   shouldDropPartialBuckets?: boolean;
+  noDataBehavior?: 'recover' | 'remainActive' | 'alertOnNoData';
 }

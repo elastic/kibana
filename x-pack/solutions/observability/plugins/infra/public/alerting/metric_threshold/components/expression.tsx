@@ -7,13 +7,12 @@
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiFieldSearch,
   EuiFormRow,
   EuiIconTip,
   EuiPanel,
+  EuiRadioGroup,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -63,12 +62,66 @@ const defaultExpression = {
 } as MetricExpression;
 export { defaultExpression };
 
+const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
+  {
+    id: 'recover',
+    label: i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehavior.recover', {
+      defaultMessage: "Recover if there's no data",
+    }),
+  },
+  {
+    id: 'remainActive',
+    label: i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehavior.remainActive', {
+      defaultMessage: "Remain active if there's no data",
+    }),
+  },
+  {
+    id: 'alertOnNoData',
+    label: (
+      <>
+        {i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehavior.alertOnNoData', {
+          defaultMessage: "Alert me if there's no data",
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={
+            hasGroupBy
+              ? i18n.translate(
+                  'xpack.infra.customThreshold.rule.alertFlyout.groupDisappearHelpText',
+                  {
+                    defaultMessage:
+                      'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                  }
+                )
+              : i18n.translate('xpack.infra.customThreshold.rule.alertFlyout.noDataHelpText', {
+                  defaultMessage:
+                    'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                })
+          }
+        />
+      </>
+    ),
+  },
+];
+
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source } = useSourceContext();
   const { metricsView } = useMetricsDataViewContext();
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
+
+  const hasGroupBy = useMemo(
+    () => Boolean(ruleParams.groupBy && ruleParams.groupBy.length > 0),
+    [ruleParams.groupBy]
+  );
+
+  const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
+    (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
+      (!hasGroupBy && !!ruleParams.alertOnNoData)
+  );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -130,9 +183,12 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
+      const hasGroup = !!group && group.length > 0;
       setRuleParams('groupBy', group && group.length ? group : '');
+      setRuleParams('alertOnGroupDisappear', hasGroup && isNoDataChecked);
+      setRuleParams('alertOnNoData', !hasGroup && isNoDataChecked);
     },
-    [setRuleParams]
+    [setRuleParams, isNoDataChecked]
   );
 
   const emptyError = useMemo(() => {
@@ -240,27 +296,23 @@ export const Expressions: React.FC<Props> = (props) => {
     }
 
     if (typeof ruleParams.alertOnNoData === 'undefined') {
-      setRuleParams('alertOnNoData', true);
+      setRuleParams('alertOnNoData', false);
     }
+
     if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
       setRuleParams('alertOnGroupDisappear', false);
     }
+
+    setIsNoDataChecked(
+      (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
+        (!hasGroupBy && !!ruleParams.alertOnNoData)
+    );
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) =>
       onFilterChange({ query: { query: e.target.value, language: 'kuery' } }),
     [onFilterChange]
-  );
-
-  const hasGroupBy = useMemo(
-    () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
-    [ruleParams.groupBy]
-  );
-
-  const disableNoData = useMemo(
-    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.COUNT),
-    [ruleParams.criteria]
   );
 
   return (
@@ -359,41 +411,6 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         </EuiButtonEmpty>
       </div>
-
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        id="advanced-options-accordion"
-        buttonContent={i18n.translate('xpack.infra.metrics.alertFlyout.advancedOptions', {
-          defaultMessage: 'Advanced options',
-        })}
-      >
-        <EuiPanel color="subdued">
-          <EuiCheckbox
-            disabled={disableNoData}
-            id="metrics-alert-no-data-toggle"
-            label={
-              <>
-                {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
-                  defaultMessage: "Alert me if there's no data",
-                })}{' '}
-                <EuiIconTip
-                  type="question"
-                  color="subdued"
-                  content={
-                    (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                    i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
-                      defaultMessage:
-                        'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                    })
-                  }
-                />
-              </>
-            }
-            checked={ruleParams.alertOnNoData}
-            onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
-          />
-        </EuiPanel>
-      </EuiAccordion>
       <EuiSpacer size="m" />
 
       <EuiFormRow
@@ -442,42 +459,48 @@ export const Expressions: React.FC<Props> = (props) => {
           }}
         />
       </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiCheckbox
-        id="metrics-alert-group-disappear-toggle"
-        label={
-          <>
-            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnGroupDisappear', {
-              defaultMessage: 'Alert me if a group stops reporting data',
-            })}{' '}
-            <EuiIconTip
-              type="question"
-              color="subdued"
-              content={
-                (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
-                  defaultMessage:
-                    'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                })
-              }
-            />
-          </>
-        }
-        disabled={!hasGroupBy}
-        checked={Boolean(ruleParams.alertOnGroupDisappear)}
-        onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
-      />
       <EuiSpacer size="m" />
+      <EuiPanel color="subdued">
+        <EuiFormRow
+          label={
+            <>
+              {i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehaviorLabel', {
+                defaultMessage: 'If there is no data',
+              })}
+            </>
+          }
+        >
+          <EuiRadioGroup
+            options={getNoDataBehaviorOptions(hasGroupBy)}
+            idSelected={
+              ruleParams.noDataBehavior ||
+              (ruleParams.alertOnNoData || ruleParams.alertOnGroupDisappear
+                ? 'alertOnNoData'
+                : 'recover')
+            }
+            onChange={(id) => {
+              setRuleParams('noDataBehavior', id as 'recover' | 'remainActive' | 'alertOnNoData');
+              setIsNoDataChecked(id === 'alertOnNoData');
+              if (id === 'alertOnNoData') {
+                if (hasGroupBy) {
+                  setRuleParams('alertOnGroupDisappear', true);
+                  setRuleParams('alertOnNoData', false);
+                } else {
+                  setRuleParams('alertOnGroupDisappear', false);
+                  setRuleParams('alertOnNoData', true);
+                }
+              } else {
+                setRuleParams('alertOnGroupDisappear', false);
+                setRuleParams('alertOnNoData', false);
+              }
+            }}
+            data-test-subj="metrics-alert-no-data-behavior"
+          />
+        </EuiFormRow>
+      </EuiPanel>
     </>
   );
 };
-
-const docCountNoDataDisabledHelpText = i18n.translate(
-  'xpack.infra.metrics.alertFlyout.docCountNoDataDisabledHelpText',
-  {
-    defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
-  }
-);
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export

@@ -246,7 +246,8 @@ export const createMetricThresholdExecutor =
     }
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
+    const alertOnGroupDisappear =
+      _alertOnGroupDisappear !== false || params.noDataBehavior === 'remainActive';
 
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
@@ -307,13 +308,21 @@ export const createMetricThresholdExecutor =
         nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
-      const nextState = isNoData
-        ? AlertStates.NO_DATA
-        : shouldAlertFire
-        ? AlertStates.ALERT
-        : shouldAlertWarn
-        ? AlertStates.WARNING
-        : AlertStates.OK;
+      const nextState =
+        isNoData &&
+        (params.noDataBehavior
+          ? params.noDataBehavior === 'alertOnNoData'
+          : alertOnNoData || alertOnGroupDisappear)
+          ? AlertStates.NO_DATA
+          : isNoData &&
+            params.noDataBehavior === 'remainActive' &&
+            alertsClient.isTrackedAlert(group)
+          ? AlertStates.ALERT
+          : shouldAlertFire
+          ? AlertStates.ALERT
+          : shouldAlertWarn
+          ? AlertStates.WARNING
+          : AlertStates.OK;
 
       let reason;
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
@@ -352,10 +361,19 @@ export const createMetricThresholdExecutor =
        * If `alertOnNoData` is true but `alertOnGroupDisappear` is false, we don't need to worry about the {a, b, c} possibility.
        * At this point in the function, a false `alertOnGroupDisappear` would already have prevented group 'a' from being evaluated at all.
        */
-      if (alertOnNoData || (alertOnGroupDisappear && hasGroups)) {
+      if (
+        alertOnNoData ||
+        (alertOnGroupDisappear && hasGroups) ||
+        params.noDataBehavior === 'remainActive'
+      ) {
         // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
         // check to see if a No Data state has occurred
-        if (nextState === AlertStates.NO_DATA) {
+        if (
+          nextState === AlertStates.NO_DATA ||
+          (isNoData &&
+            params.noDataBehavior === 'remainActive' &&
+            alertsClient.isTrackedAlert(group))
+        ) {
           reason = alertResults
             .filter((result) => result[group]?.isNoData)
             .map((result) => buildNoDataAlertReason({ ...result[group], group }))
