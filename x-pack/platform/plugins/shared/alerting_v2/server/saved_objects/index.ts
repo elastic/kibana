@@ -26,7 +26,6 @@ export function setupSavedObjects({
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
     mappings: esqlRuleMappings,
     management: {
       importableAndExportable: false,
