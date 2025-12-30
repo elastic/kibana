@@ -436,6 +436,58 @@ describe('es_query utils', () => {
             "searchPath": "cloud.availability_zone",
           },
           Object {
+            "label": "cloud.entity.attributes",
+            "searchPath": "cloud.entity.attributes",
+          },
+          Object {
+            "label": "cloud.entity.behavior",
+            "searchPath": "cloud.entity.behavior",
+          },
+          Object {
+            "label": "cloud.entity.display_name",
+            "searchPath": "cloud.entity.display_name",
+          },
+          Object {
+            "label": "cloud.entity.id",
+            "searchPath": "cloud.entity.id",
+          },
+          Object {
+            "label": "cloud.entity.last_seen_timestamp",
+            "searchPath": "cloud.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "cloud.entity.lifecycle",
+            "searchPath": "cloud.entity.lifecycle",
+          },
+          Object {
+            "label": "cloud.entity.metrics",
+            "searchPath": "cloud.entity.metrics",
+          },
+          Object {
+            "label": "cloud.entity.name",
+            "searchPath": "cloud.entity.name",
+          },
+          Object {
+            "label": "cloud.entity.raw",
+            "searchPath": "cloud.entity.raw",
+          },
+          Object {
+            "label": "cloud.entity.reference",
+            "searchPath": "cloud.entity.reference",
+          },
+          Object {
+            "label": "cloud.entity.source",
+            "searchPath": "cloud.entity.source",
+          },
+          Object {
+            "label": "cloud.entity.sub_type",
+            "searchPath": "cloud.entity.sub_type",
+          },
+          Object {
+            "label": "cloud.entity.type",
+            "searchPath": "cloud.entity.type",
+          },
+          Object {
             "label": "cloud.instance.id",
             "searchPath": "cloud.instance.id",
           },
@@ -458,6 +510,58 @@ describe('es_query utils', () => {
           Object {
             "label": "cloud.origin.availability_zone",
             "searchPath": "cloud.origin.availability_zone",
+          },
+          Object {
+            "label": "cloud.origin.entity.attributes",
+            "searchPath": "cloud.origin.entity.attributes",
+          },
+          Object {
+            "label": "cloud.origin.entity.behavior",
+            "searchPath": "cloud.origin.entity.behavior",
+          },
+          Object {
+            "label": "cloud.origin.entity.display_name",
+            "searchPath": "cloud.origin.entity.display_name",
+          },
+          Object {
+            "label": "cloud.origin.entity.id",
+            "searchPath": "cloud.origin.entity.id",
+          },
+          Object {
+            "label": "cloud.origin.entity.last_seen_timestamp",
+            "searchPath": "cloud.origin.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "cloud.origin.entity.lifecycle",
+            "searchPath": "cloud.origin.entity.lifecycle",
+          },
+          Object {
+            "label": "cloud.origin.entity.metrics",
+            "searchPath": "cloud.origin.entity.metrics",
+          },
+          Object {
+            "label": "cloud.origin.entity.name",
+            "searchPath": "cloud.origin.entity.name",
+          },
+          Object {
+            "label": "cloud.origin.entity.raw",
+            "searchPath": "cloud.origin.entity.raw",
+          },
+          Object {
+            "label": "cloud.origin.entity.reference",
+            "searchPath": "cloud.origin.entity.reference",
+          },
+          Object {
+            "label": "cloud.origin.entity.source",
+            "searchPath": "cloud.origin.entity.source",
+          },
+          Object {
+            "label": "cloud.origin.entity.sub_type",
+            "searchPath": "cloud.origin.entity.sub_type",
+          },
+          Object {
+            "label": "cloud.origin.entity.type",
+            "searchPath": "cloud.origin.entity.type",
           },
           Object {
             "label": "cloud.origin.instance.id",
@@ -522,6 +626,58 @@ describe('es_query utils', () => {
           Object {
             "label": "cloud.target.availability_zone",
             "searchPath": "cloud.target.availability_zone",
+          },
+          Object {
+            "label": "cloud.target.entity.attributes",
+            "searchPath": "cloud.target.entity.attributes",
+          },
+          Object {
+            "label": "cloud.target.entity.behavior",
+            "searchPath": "cloud.target.entity.behavior",
+          },
+          Object {
+            "label": "cloud.target.entity.display_name",
+            "searchPath": "cloud.target.entity.display_name",
+          },
+          Object {
+            "label": "cloud.target.entity.id",
+            "searchPath": "cloud.target.entity.id",
+          },
+          Object {
+            "label": "cloud.target.entity.last_seen_timestamp",
+            "searchPath": "cloud.target.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "cloud.target.entity.lifecycle",
+            "searchPath": "cloud.target.entity.lifecycle",
+          },
+          Object {
+            "label": "cloud.target.entity.metrics",
+            "searchPath": "cloud.target.entity.metrics",
+          },
+          Object {
+            "label": "cloud.target.entity.name",
+            "searchPath": "cloud.target.entity.name",
+          },
+          Object {
+            "label": "cloud.target.entity.raw",
+            "searchPath": "cloud.target.entity.raw",
+          },
+          Object {
+            "label": "cloud.target.entity.reference",
+            "searchPath": "cloud.target.entity.reference",
+          },
+          Object {
+            "label": "cloud.target.entity.source",
+            "searchPath": "cloud.target.entity.source",
+          },
+          Object {
+            "label": "cloud.target.entity.sub_type",
+            "searchPath": "cloud.target.entity.sub_type",
+          },
+          Object {
+            "label": "cloud.target.entity.type",
+            "searchPath": "cloud.target.entity.type",
           },
           Object {
             "label": "cloud.target.instance.id",
@@ -768,8 +924,28 @@ describe('es_query utils', () => {
             "searchPath": "device.model.name",
           },
           Object {
+            "label": "device.product.id",
+            "searchPath": "device.product.id",
+          },
+          Object {
+            "label": "device.product.name",
+            "searchPath": "device.product.name",
+          },
+          Object {
             "label": "device.serial_number",
             "searchPath": "device.serial_number",
+          },
+          Object {
+            "label": "device.type",
+            "searchPath": "device.type",
+          },
+          Object {
+            "label": "device.vendor.id",
+            "searchPath": "device.vendor.id",
+          },
+          Object {
+            "label": "device.vendor.name",
+            "searchPath": "device.vendor.name",
           },
           Object {
             "label": "dll.code_signature.digest_algorithm",
@@ -798,6 +974,10 @@ describe('es_query utils', () => {
           Object {
             "label": "dll.code_signature.team_id",
             "searchPath": "dll.code_signature.team_id",
+          },
+          Object {
+            "label": "dll.code_signature.thumbprint_sha256",
+            "searchPath": "dll.code_signature.thumbprint_sha256",
           },
           Object {
             "label": "dll.code_signature.timestamp",
@@ -1302,6 +1482,10 @@ describe('es_query utils', () => {
           Object {
             "label": "file.code_signature.team_id",
             "searchPath": "file.code_signature.team_id",
+          },
+          Object {
+            "label": "file.code_signature.thumbprint_sha256",
+            "searchPath": "file.code_signature.thumbprint_sha256",
           },
           Object {
             "label": "file.code_signature.timestamp",
@@ -1840,6 +2024,110 @@ describe('es_query utils', () => {
             "searchPath": "file.x509.version_number",
           },
           Object {
+            "label": "gen_ai.agent.description",
+            "searchPath": "gen_ai.agent.description",
+          },
+          Object {
+            "label": "gen_ai.agent.id",
+            "searchPath": "gen_ai.agent.id",
+          },
+          Object {
+            "label": "gen_ai.agent.name",
+            "searchPath": "gen_ai.agent.name",
+          },
+          Object {
+            "label": "gen_ai.operation.name",
+            "searchPath": "gen_ai.operation.name",
+          },
+          Object {
+            "label": "gen_ai.output.type",
+            "searchPath": "gen_ai.output.type",
+          },
+          Object {
+            "label": "gen_ai.request.choice.count",
+            "searchPath": "gen_ai.request.choice.count",
+          },
+          Object {
+            "label": "gen_ai.request.encoding_formats",
+            "searchPath": "gen_ai.request.encoding_formats",
+          },
+          Object {
+            "label": "gen_ai.request.frequency_penalty",
+            "searchPath": "gen_ai.request.frequency_penalty",
+          },
+          Object {
+            "label": "gen_ai.request.max_tokens",
+            "searchPath": "gen_ai.request.max_tokens",
+          },
+          Object {
+            "label": "gen_ai.request.model",
+            "searchPath": "gen_ai.request.model",
+          },
+          Object {
+            "label": "gen_ai.request.presence_penalty",
+            "searchPath": "gen_ai.request.presence_penalty",
+          },
+          Object {
+            "label": "gen_ai.request.seed",
+            "searchPath": "gen_ai.request.seed",
+          },
+          Object {
+            "label": "gen_ai.request.stop_sequences",
+            "searchPath": "gen_ai.request.stop_sequences",
+          },
+          Object {
+            "label": "gen_ai.request.temperature",
+            "searchPath": "gen_ai.request.temperature",
+          },
+          Object {
+            "label": "gen_ai.request.top_k",
+            "searchPath": "gen_ai.request.top_k",
+          },
+          Object {
+            "label": "gen_ai.request.top_p",
+            "searchPath": "gen_ai.request.top_p",
+          },
+          Object {
+            "label": "gen_ai.response.finish_reasons",
+            "searchPath": "gen_ai.response.finish_reasons",
+          },
+          Object {
+            "label": "gen_ai.response.id",
+            "searchPath": "gen_ai.response.id",
+          },
+          Object {
+            "label": "gen_ai.response.model",
+            "searchPath": "gen_ai.response.model",
+          },
+          Object {
+            "label": "gen_ai.system",
+            "searchPath": "gen_ai.system",
+          },
+          Object {
+            "label": "gen_ai.token.type",
+            "searchPath": "gen_ai.token.type",
+          },
+          Object {
+            "label": "gen_ai.tool.call.id",
+            "searchPath": "gen_ai.tool.call.id",
+          },
+          Object {
+            "label": "gen_ai.tool.name",
+            "searchPath": "gen_ai.tool.name",
+          },
+          Object {
+            "label": "gen_ai.tool.type",
+            "searchPath": "gen_ai.tool.type",
+          },
+          Object {
+            "label": "gen_ai.usage.input_tokens",
+            "searchPath": "gen_ai.usage.input_tokens",
+          },
+          Object {
+            "label": "gen_ai.usage.output_tokens",
+            "searchPath": "gen_ai.usage.output_tokens",
+          },
+          Object {
             "label": "group.domain",
             "searchPath": "group.domain",
           },
@@ -1874,6 +2162,58 @@ describe('es_query utils', () => {
           Object {
             "label": "host.domain",
             "searchPath": "host.domain",
+          },
+          Object {
+            "label": "host.entity.attributes",
+            "searchPath": "host.entity.attributes",
+          },
+          Object {
+            "label": "host.entity.behavior",
+            "searchPath": "host.entity.behavior",
+          },
+          Object {
+            "label": "host.entity.display_name",
+            "searchPath": "host.entity.display_name",
+          },
+          Object {
+            "label": "host.entity.id",
+            "searchPath": "host.entity.id",
+          },
+          Object {
+            "label": "host.entity.last_seen_timestamp",
+            "searchPath": "host.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "host.entity.lifecycle",
+            "searchPath": "host.entity.lifecycle",
+          },
+          Object {
+            "label": "host.entity.metrics",
+            "searchPath": "host.entity.metrics",
+          },
+          Object {
+            "label": "host.entity.name",
+            "searchPath": "host.entity.name",
+          },
+          Object {
+            "label": "host.entity.raw",
+            "searchPath": "host.entity.raw",
+          },
+          Object {
+            "label": "host.entity.reference",
+            "searchPath": "host.entity.reference",
+          },
+          Object {
+            "label": "host.entity.source",
+            "searchPath": "host.entity.source",
+          },
+          Object {
+            "label": "host.entity.sub_type",
+            "searchPath": "host.entity.sub_type",
+          },
+          Object {
+            "label": "host.entity.type",
+            "searchPath": "host.entity.type",
           },
           Object {
             "label": "host.geo.city_name",
@@ -2400,6 +2740,58 @@ describe('es_query utils', () => {
             "searchPath": "orchestrator.cluster.version",
           },
           Object {
+            "label": "orchestrator.entity.attributes",
+            "searchPath": "orchestrator.entity.attributes",
+          },
+          Object {
+            "label": "orchestrator.entity.behavior",
+            "searchPath": "orchestrator.entity.behavior",
+          },
+          Object {
+            "label": "orchestrator.entity.display_name",
+            "searchPath": "orchestrator.entity.display_name",
+          },
+          Object {
+            "label": "orchestrator.entity.id",
+            "searchPath": "orchestrator.entity.id",
+          },
+          Object {
+            "label": "orchestrator.entity.last_seen_timestamp",
+            "searchPath": "orchestrator.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "orchestrator.entity.lifecycle",
+            "searchPath": "orchestrator.entity.lifecycle",
+          },
+          Object {
+            "label": "orchestrator.entity.metrics",
+            "searchPath": "orchestrator.entity.metrics",
+          },
+          Object {
+            "label": "orchestrator.entity.name",
+            "searchPath": "orchestrator.entity.name",
+          },
+          Object {
+            "label": "orchestrator.entity.raw",
+            "searchPath": "orchestrator.entity.raw",
+          },
+          Object {
+            "label": "orchestrator.entity.reference",
+            "searchPath": "orchestrator.entity.reference",
+          },
+          Object {
+            "label": "orchestrator.entity.source",
+            "searchPath": "orchestrator.entity.source",
+          },
+          Object {
+            "label": "orchestrator.entity.sub_type",
+            "searchPath": "orchestrator.entity.sub_type",
+          },
+          Object {
+            "label": "orchestrator.entity.type",
+            "searchPath": "orchestrator.entity.type",
+          },
+          Object {
             "label": "orchestrator.namespace",
             "searchPath": "orchestrator.namespace",
           },
@@ -2534,6 +2926,10 @@ describe('es_query utils', () => {
           Object {
             "label": "process.code_signature.team_id",
             "searchPath": "process.code_signature.team_id",
+          },
+          Object {
+            "label": "process.code_signature.thumbprint_sha256",
+            "searchPath": "process.code_signature.thumbprint_sha256",
           },
           Object {
             "label": "process.code_signature.timestamp",
@@ -3190,6 +3586,10 @@ describe('es_query utils', () => {
           Object {
             "label": "process.parent.code_signature.team_id",
             "searchPath": "process.parent.code_signature.team_id",
+          },
+          Object {
+            "label": "process.parent.code_signature.thumbprint_sha256",
+            "searchPath": "process.parent.code_signature.thumbprint_sha256",
           },
           Object {
             "label": "process.parent.code_signature.timestamp",
@@ -4284,6 +4684,58 @@ describe('es_query utils', () => {
             "searchPath": "service.address",
           },
           Object {
+            "label": "service.entity.attributes",
+            "searchPath": "service.entity.attributes",
+          },
+          Object {
+            "label": "service.entity.behavior",
+            "searchPath": "service.entity.behavior",
+          },
+          Object {
+            "label": "service.entity.display_name",
+            "searchPath": "service.entity.display_name",
+          },
+          Object {
+            "label": "service.entity.id",
+            "searchPath": "service.entity.id",
+          },
+          Object {
+            "label": "service.entity.last_seen_timestamp",
+            "searchPath": "service.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "service.entity.lifecycle",
+            "searchPath": "service.entity.lifecycle",
+          },
+          Object {
+            "label": "service.entity.metrics",
+            "searchPath": "service.entity.metrics",
+          },
+          Object {
+            "label": "service.entity.name",
+            "searchPath": "service.entity.name",
+          },
+          Object {
+            "label": "service.entity.raw",
+            "searchPath": "service.entity.raw",
+          },
+          Object {
+            "label": "service.entity.reference",
+            "searchPath": "service.entity.reference",
+          },
+          Object {
+            "label": "service.entity.source",
+            "searchPath": "service.entity.source",
+          },
+          Object {
+            "label": "service.entity.sub_type",
+            "searchPath": "service.entity.sub_type",
+          },
+          Object {
+            "label": "service.entity.type",
+            "searchPath": "service.entity.type",
+          },
+          Object {
             "label": "service.environment",
             "searchPath": "service.environment",
           },
@@ -4314,6 +4766,58 @@ describe('es_query utils', () => {
           Object {
             "label": "service.origin.address",
             "searchPath": "service.origin.address",
+          },
+          Object {
+            "label": "service.origin.entity.attributes",
+            "searchPath": "service.origin.entity.attributes",
+          },
+          Object {
+            "label": "service.origin.entity.behavior",
+            "searchPath": "service.origin.entity.behavior",
+          },
+          Object {
+            "label": "service.origin.entity.display_name",
+            "searchPath": "service.origin.entity.display_name",
+          },
+          Object {
+            "label": "service.origin.entity.id",
+            "searchPath": "service.origin.entity.id",
+          },
+          Object {
+            "label": "service.origin.entity.last_seen_timestamp",
+            "searchPath": "service.origin.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "service.origin.entity.lifecycle",
+            "searchPath": "service.origin.entity.lifecycle",
+          },
+          Object {
+            "label": "service.origin.entity.metrics",
+            "searchPath": "service.origin.entity.metrics",
+          },
+          Object {
+            "label": "service.origin.entity.name",
+            "searchPath": "service.origin.entity.name",
+          },
+          Object {
+            "label": "service.origin.entity.raw",
+            "searchPath": "service.origin.entity.raw",
+          },
+          Object {
+            "label": "service.origin.entity.reference",
+            "searchPath": "service.origin.entity.reference",
+          },
+          Object {
+            "label": "service.origin.entity.source",
+            "searchPath": "service.origin.entity.source",
+          },
+          Object {
+            "label": "service.origin.entity.sub_type",
+            "searchPath": "service.origin.entity.sub_type",
+          },
+          Object {
+            "label": "service.origin.entity.type",
+            "searchPath": "service.origin.entity.type",
           },
           Object {
             "label": "service.origin.environment",
@@ -4362,6 +4866,58 @@ describe('es_query utils', () => {
           Object {
             "label": "service.target.address",
             "searchPath": "service.target.address",
+          },
+          Object {
+            "label": "service.target.entity.attributes",
+            "searchPath": "service.target.entity.attributes",
+          },
+          Object {
+            "label": "service.target.entity.behavior",
+            "searchPath": "service.target.entity.behavior",
+          },
+          Object {
+            "label": "service.target.entity.display_name",
+            "searchPath": "service.target.entity.display_name",
+          },
+          Object {
+            "label": "service.target.entity.id",
+            "searchPath": "service.target.entity.id",
+          },
+          Object {
+            "label": "service.target.entity.last_seen_timestamp",
+            "searchPath": "service.target.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "service.target.entity.lifecycle",
+            "searchPath": "service.target.entity.lifecycle",
+          },
+          Object {
+            "label": "service.target.entity.metrics",
+            "searchPath": "service.target.entity.metrics",
+          },
+          Object {
+            "label": "service.target.entity.name",
+            "searchPath": "service.target.entity.name",
+          },
+          Object {
+            "label": "service.target.entity.raw",
+            "searchPath": "service.target.entity.raw",
+          },
+          Object {
+            "label": "service.target.entity.reference",
+            "searchPath": "service.target.entity.reference",
+          },
+          Object {
+            "label": "service.target.entity.source",
+            "searchPath": "service.target.entity.source",
+          },
+          Object {
+            "label": "service.target.entity.sub_type",
+            "searchPath": "service.target.entity.sub_type",
+          },
+          Object {
+            "label": "service.target.entity.type",
+            "searchPath": "service.target.entity.type",
           },
           Object {
             "label": "service.target.environment",
@@ -4618,6 +5174,10 @@ describe('es_query utils', () => {
           Object {
             "label": "threat.enrichments.indicator.file.code_signature.team_id",
             "searchPath": "threat.enrichments.indicator.file.code_signature.team_id",
+          },
+          Object {
+            "label": "threat.enrichments.indicator.file.code_signature.thumbprint_sha256",
+            "searchPath": "threat.enrichments.indicator.file.code_signature.thumbprint_sha256",
           },
           Object {
             "label": "threat.enrichments.indicator.file.code_signature.timestamp",
@@ -5482,6 +6042,10 @@ describe('es_query utils', () => {
           Object {
             "label": "threat.indicator.file.code_signature.team_id",
             "searchPath": "threat.indicator.file.code_signature.team_id",
+          },
+          Object {
+            "label": "threat.indicator.file.code_signature.thumbprint_sha256",
+            "searchPath": "threat.indicator.file.code_signature.thumbprint_sha256",
           },
           Object {
             "label": "threat.indicator.file.code_signature.timestamp",
@@ -6676,6 +7240,58 @@ describe('es_query utils', () => {
             "searchPath": "user.changes.email",
           },
           Object {
+            "label": "user.changes.entity.attributes",
+            "searchPath": "user.changes.entity.attributes",
+          },
+          Object {
+            "label": "user.changes.entity.behavior",
+            "searchPath": "user.changes.entity.behavior",
+          },
+          Object {
+            "label": "user.changes.entity.display_name",
+            "searchPath": "user.changes.entity.display_name",
+          },
+          Object {
+            "label": "user.changes.entity.id",
+            "searchPath": "user.changes.entity.id",
+          },
+          Object {
+            "label": "user.changes.entity.last_seen_timestamp",
+            "searchPath": "user.changes.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "user.changes.entity.lifecycle",
+            "searchPath": "user.changes.entity.lifecycle",
+          },
+          Object {
+            "label": "user.changes.entity.metrics",
+            "searchPath": "user.changes.entity.metrics",
+          },
+          Object {
+            "label": "user.changes.entity.name",
+            "searchPath": "user.changes.entity.name",
+          },
+          Object {
+            "label": "user.changes.entity.raw",
+            "searchPath": "user.changes.entity.raw",
+          },
+          Object {
+            "label": "user.changes.entity.reference",
+            "searchPath": "user.changes.entity.reference",
+          },
+          Object {
+            "label": "user.changes.entity.source",
+            "searchPath": "user.changes.entity.source",
+          },
+          Object {
+            "label": "user.changes.entity.sub_type",
+            "searchPath": "user.changes.entity.sub_type",
+          },
+          Object {
+            "label": "user.changes.entity.type",
+            "searchPath": "user.changes.entity.type",
+          },
+          Object {
             "label": "user.changes.full_name",
             "searchPath": "user.changes.full_name",
           },
@@ -6704,6 +7320,30 @@ describe('es_query utils', () => {
             "searchPath": "user.changes.name",
           },
           Object {
+            "label": "user.changes.risk.calculated_level",
+            "searchPath": "user.changes.risk.calculated_level",
+          },
+          Object {
+            "label": "user.changes.risk.calculated_score",
+            "searchPath": "user.changes.risk.calculated_score",
+          },
+          Object {
+            "label": "user.changes.risk.calculated_score_norm",
+            "searchPath": "user.changes.risk.calculated_score_norm",
+          },
+          Object {
+            "label": "user.changes.risk.static_level",
+            "searchPath": "user.changes.risk.static_level",
+          },
+          Object {
+            "label": "user.changes.risk.static_score",
+            "searchPath": "user.changes.risk.static_score",
+          },
+          Object {
+            "label": "user.changes.risk.static_score_norm",
+            "searchPath": "user.changes.risk.static_score_norm",
+          },
+          Object {
             "label": "user.changes.roles",
             "searchPath": "user.changes.roles",
           },
@@ -6718,6 +7358,58 @@ describe('es_query utils', () => {
           Object {
             "label": "user.effective.email",
             "searchPath": "user.effective.email",
+          },
+          Object {
+            "label": "user.effective.entity.attributes",
+            "searchPath": "user.effective.entity.attributes",
+          },
+          Object {
+            "label": "user.effective.entity.behavior",
+            "searchPath": "user.effective.entity.behavior",
+          },
+          Object {
+            "label": "user.effective.entity.display_name",
+            "searchPath": "user.effective.entity.display_name",
+          },
+          Object {
+            "label": "user.effective.entity.id",
+            "searchPath": "user.effective.entity.id",
+          },
+          Object {
+            "label": "user.effective.entity.last_seen_timestamp",
+            "searchPath": "user.effective.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "user.effective.entity.lifecycle",
+            "searchPath": "user.effective.entity.lifecycle",
+          },
+          Object {
+            "label": "user.effective.entity.metrics",
+            "searchPath": "user.effective.entity.metrics",
+          },
+          Object {
+            "label": "user.effective.entity.name",
+            "searchPath": "user.effective.entity.name",
+          },
+          Object {
+            "label": "user.effective.entity.raw",
+            "searchPath": "user.effective.entity.raw",
+          },
+          Object {
+            "label": "user.effective.entity.reference",
+            "searchPath": "user.effective.entity.reference",
+          },
+          Object {
+            "label": "user.effective.entity.source",
+            "searchPath": "user.effective.entity.source",
+          },
+          Object {
+            "label": "user.effective.entity.sub_type",
+            "searchPath": "user.effective.entity.sub_type",
+          },
+          Object {
+            "label": "user.effective.entity.type",
+            "searchPath": "user.effective.entity.type",
           },
           Object {
             "label": "user.effective.full_name",
@@ -6748,12 +7440,88 @@ describe('es_query utils', () => {
             "searchPath": "user.effective.name",
           },
           Object {
+            "label": "user.effective.risk.calculated_level",
+            "searchPath": "user.effective.risk.calculated_level",
+          },
+          Object {
+            "label": "user.effective.risk.calculated_score",
+            "searchPath": "user.effective.risk.calculated_score",
+          },
+          Object {
+            "label": "user.effective.risk.calculated_score_norm",
+            "searchPath": "user.effective.risk.calculated_score_norm",
+          },
+          Object {
+            "label": "user.effective.risk.static_level",
+            "searchPath": "user.effective.risk.static_level",
+          },
+          Object {
+            "label": "user.effective.risk.static_score",
+            "searchPath": "user.effective.risk.static_score",
+          },
+          Object {
+            "label": "user.effective.risk.static_score_norm",
+            "searchPath": "user.effective.risk.static_score_norm",
+          },
+          Object {
             "label": "user.effective.roles",
             "searchPath": "user.effective.roles",
           },
           Object {
             "label": "user.email",
             "searchPath": "user.email",
+          },
+          Object {
+            "label": "user.entity.attributes",
+            "searchPath": "user.entity.attributes",
+          },
+          Object {
+            "label": "user.entity.behavior",
+            "searchPath": "user.entity.behavior",
+          },
+          Object {
+            "label": "user.entity.display_name",
+            "searchPath": "user.entity.display_name",
+          },
+          Object {
+            "label": "user.entity.id",
+            "searchPath": "user.entity.id",
+          },
+          Object {
+            "label": "user.entity.last_seen_timestamp",
+            "searchPath": "user.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "user.entity.lifecycle",
+            "searchPath": "user.entity.lifecycle",
+          },
+          Object {
+            "label": "user.entity.metrics",
+            "searchPath": "user.entity.metrics",
+          },
+          Object {
+            "label": "user.entity.name",
+            "searchPath": "user.entity.name",
+          },
+          Object {
+            "label": "user.entity.raw",
+            "searchPath": "user.entity.raw",
+          },
+          Object {
+            "label": "user.entity.reference",
+            "searchPath": "user.entity.reference",
+          },
+          Object {
+            "label": "user.entity.source",
+            "searchPath": "user.entity.source",
+          },
+          Object {
+            "label": "user.entity.sub_type",
+            "searchPath": "user.entity.sub_type",
+          },
+          Object {
+            "label": "user.entity.type",
+            "searchPath": "user.entity.type",
           },
           Object {
             "label": "user.full_name",
@@ -6820,6 +7588,58 @@ describe('es_query utils', () => {
             "searchPath": "user.target.email",
           },
           Object {
+            "label": "user.target.entity.attributes",
+            "searchPath": "user.target.entity.attributes",
+          },
+          Object {
+            "label": "user.target.entity.behavior",
+            "searchPath": "user.target.entity.behavior",
+          },
+          Object {
+            "label": "user.target.entity.display_name",
+            "searchPath": "user.target.entity.display_name",
+          },
+          Object {
+            "label": "user.target.entity.id",
+            "searchPath": "user.target.entity.id",
+          },
+          Object {
+            "label": "user.target.entity.last_seen_timestamp",
+            "searchPath": "user.target.entity.last_seen_timestamp",
+          },
+          Object {
+            "label": "user.target.entity.lifecycle",
+            "searchPath": "user.target.entity.lifecycle",
+          },
+          Object {
+            "label": "user.target.entity.metrics",
+            "searchPath": "user.target.entity.metrics",
+          },
+          Object {
+            "label": "user.target.entity.name",
+            "searchPath": "user.target.entity.name",
+          },
+          Object {
+            "label": "user.target.entity.raw",
+            "searchPath": "user.target.entity.raw",
+          },
+          Object {
+            "label": "user.target.entity.reference",
+            "searchPath": "user.target.entity.reference",
+          },
+          Object {
+            "label": "user.target.entity.source",
+            "searchPath": "user.target.entity.source",
+          },
+          Object {
+            "label": "user.target.entity.sub_type",
+            "searchPath": "user.target.entity.sub_type",
+          },
+          Object {
+            "label": "user.target.entity.type",
+            "searchPath": "user.target.entity.type",
+          },
+          Object {
             "label": "user.target.full_name",
             "searchPath": "user.target.full_name",
           },
@@ -6846,6 +7666,30 @@ describe('es_query utils', () => {
           Object {
             "label": "user.target.name",
             "searchPath": "user.target.name",
+          },
+          Object {
+            "label": "user.target.risk.calculated_level",
+            "searchPath": "user.target.risk.calculated_level",
+          },
+          Object {
+            "label": "user.target.risk.calculated_score",
+            "searchPath": "user.target.risk.calculated_score",
+          },
+          Object {
+            "label": "user.target.risk.calculated_score_norm",
+            "searchPath": "user.target.risk.calculated_score_norm",
+          },
+          Object {
+            "label": "user.target.risk.static_level",
+            "searchPath": "user.target.risk.static_level",
+          },
+          Object {
+            "label": "user.target.risk.static_score",
+            "searchPath": "user.target.risk.static_score",
+          },
+          Object {
+            "label": "user.target.risk.static_score_norm",
+            "searchPath": "user.target.risk.static_score_norm",
           },
           Object {
             "label": "user.target.roles",
