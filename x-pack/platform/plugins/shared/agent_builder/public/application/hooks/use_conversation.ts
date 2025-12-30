@@ -8,7 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { queryKeys } from '../query_keys';
 import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -134,4 +134,10 @@ export const useHasActiveConversation = () => {
 export const useHasPersistedConversation = () => {
   const conversationId = useConversationId();
   return Boolean(conversationId);
+};
+
+export const useIsAwaitingPrompt = () => {
+  const conversationRounds = useConversationRounds();
+  const lastRound = conversationRounds.at(-1);
+  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
 };
