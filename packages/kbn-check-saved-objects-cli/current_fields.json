@@ -90,10 +90,15 @@
     "updatedBy"
   ],
   "alerting_rule_template": [
+    "artifacts",
+    "artifacts.dashboards",
+    "artifacts.dashboards.id",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
+    "description",
     "name",
     "ruleTypeId",
-    "tags",
-    "description"
+    "tags"
   ],
   "api_key_pending_invalidation": [
     "apiKeyId",
