@@ -29,7 +29,7 @@ export interface TransactionConfig {
   labels?: Record<string, string>;
 }
 
-export const createSyntheticRedMetricsData = async ({
+export const createSyntheticTraceMetricsData = async ({
   getService,
   services,
 }: {

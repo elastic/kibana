@@ -141,14 +141,14 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
-export interface RedMetricsItem {
+export interface TraceMetricsItem {
   group: string;
   latency: number | null;
   throughput: number;
   failureRate: number;
 }
 
-type RedMetricsResponse = RedMetricsItem[];
+type TraceMetricsResponse = TraceMetricsItem[];
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
@@ -222,11 +222,11 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
 
-  redMetrics: (params: {
+  traceMetrics: (params: {
     request: KibanaRequest;
     start: string;
     end: string;
     filter?: string;
     groupBy?: string;
-  }) => Promise<RedMetricsResponse>;
+  }) => Promise<TraceMetricsResponse>;
 }

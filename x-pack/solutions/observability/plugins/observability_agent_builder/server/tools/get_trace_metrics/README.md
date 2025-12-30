@@ -1,8 +1,8 @@
-# get_red_metrics
+# get_trace_metrics
 
-Retrieves RED metrics (Rate, Errors, Duration) for APM data with flexible filtering and grouping. This tool is designed for drilling down into performance issues after identifying an unhealthy service.
+Retrieves trace metrics (Rate, Errors, Duration) for APM data with flexible filtering and grouping. This tool is designed for drilling down into performance issues after identifying an unhealthy service.
 
-## RED Metrics
+## Trace Metrics
 
 - **Rate (throughput)**: requests per minute
 - **Errors (failure rate)**: percentage of failed transactions (0-1)
@@ -12,17 +12,17 @@ Retrieves RED metrics (Rate, Errors, Duration) for APM data with flexible filter
 
 - After identifying an unhealthy service with `get_services`, use this tool to drill down and find the root cause
 - Analyze which specific transactions, hosts, or containers are causing performance issues
-- Compare RED metrics across different dimensions (e.g.: by transaction name, host, region)
+- Compare trace metrics across different dimensions (e.g.: by transaction name, host, region)
 - Investigate performance by service version during deployments
 
 ## Examples
 
-### Get RED metrics grouped by service (default)
+### Get trace metrics grouped by service (default)
 
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_red_metrics",
+  "tool_id": "observability.get_trace_metrics",
   "tool_params": {
     "start": "now-1h",
     "end": "now"
@@ -35,7 +35,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_red_metrics",
+  "tool_id": "observability.get_trace_metrics",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -50,7 +50,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_red_metrics",
+  "tool_id": "observability.get_trace_metrics",
   "tool_params": {
     "start": "now-30m",
     "end": "now",
@@ -65,7 +65,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_red_metrics",
+  "tool_id": "observability.get_trace_metrics",
   "tool_params": {
     "start": "now-2h",
     "end": "now",
@@ -80,7 +80,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_red_metrics",
+  "tool_id": "observability.get_trace_metrics",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -95,7 +95,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_red_metrics",
+  "tool_id": "observability.get_trace_metrics",
   "tool_params": {
     "start": "now-15m",
     "end": "now",
@@ -110,7 +110,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_red_metrics",
+  "tool_id": "observability.get_trace_metrics",
   "tool_params": {
     "start": "now-1h",
     "end": "now",

@@ -20,9 +20,9 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 import { getToolHandler } from './handler';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, OBSERVABILITY_GET_SERVICES_TOOL_ID } from '..';
 
-export const OBSERVABILITY_GET_RED_METRICS_TOOL_ID = 'observability.get_red_metrics';
+export const OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID = 'observability.get_trace_metrics';
 
-const getRedMetricsSchema = z.object({
+const getTraceMetricsSchema = z.object({
   ...timeRangeSchemaRequired,
   filter: z
     .string()
@@ -38,7 +38,7 @@ const getRedMetricsSchema = z.object({
     ),
 });
 
-export function createGetRedMetricsTool({
+export function createGetTraceMetricsTool({
   core,
   dataRegistry,
   logger,
@@ -49,16 +49,16 @@ export function createGetRedMetricsTool({
   >;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
-}): StaticToolRegistration<typeof getRedMetricsSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof getRedMetricsSchema> = {
-    id: OBSERVABILITY_GET_RED_METRICS_TOOL_ID,
+}): StaticToolRegistration<typeof getTraceMetricsSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getTraceMetricsSchema> = {
+    id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves RED metrics (Rate, Errors, Duration) for APM data with flexible filtering and grouping. 
+    description: `Retrieves trace metrics (throughput, failure rate, latency) for APM data with flexible filtering and grouping. 
         
-RED metrics are:
-- Rate (throughput): requests per minute
-- Errors (failure rate): percentage of failed transactions (0-1)
-- Duration (latency): average response time in milliseconds
+Trace metrics are:
+- Throughput: requests per minute
+- Failure rate: percentage of failed transactions (0-1)
+- Latency: average response time in milliseconds
 
 Transaction types:
 This tool includes ALL transaction types by default, unlike ${OBSERVABILITY_GET_SERVICES_TOOL_ID} which only shows the primary transaction type per service.
@@ -68,7 +68,7 @@ To filter by transaction type, use the filter parameter: filter='transaction.typ
 When to use this tool:
 - After identifying an unhealthy service with the ${OBSERVABILITY_GET_SERVICES_TOOL_ID} tool, use this tool to drill down and find the root cause
 - Analyze which specific transactions, hosts, or containers are causing performance issues
-- Compare RED metrics across different dimensions (e.g., by transaction name, host, region)
+- Compare trace metrics across different dimensions (e.g., by transaction name, host, region)
 
 When NOT to use this tool:
 - For a high-level overview of all services, use the ${OBSERVABILITY_GET_SERVICES_TOOL_ID} tool instead
@@ -76,12 +76,12 @@ When NOT to use this tool:
 
 Example workflow:
 1. Call the ${OBSERVABILITY_GET_SERVICES_TOOL_ID} tool to identify a service with high latency
-2. Call get_red_metrics(filter='service.name: "frontend"', groupBy='transaction.name') to find which transaction is slow
-3. Call get_red_metrics(filter='service.name: "frontend" AND transaction.name: "POST /api/cart"', groupBy='host.name') to identify if specific hosts are affected
+2. Call get_trace_metrics(filter='service.name: "frontend"', groupBy='transaction.name') to find which transaction is slow
+3. Call get_trace_metrics(filter='service.name: "frontend" AND transaction.name: "POST /api/cart"', groupBy='host.name') to identify if specific hosts are affected
 
 Returns an array of items with: group (the groupBy field value), latency (ms), throughput (rpm), failureRate (0-1).`,
-    schema: getRedMetricsSchema,
-    tags: ['observability', 'services', 'metrics'],
+    schema: getTraceMetricsSchema,
+    tags: ['observability', 'services', 'trace', 'metrics'],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
@@ -112,7 +112,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           ],
         };
       } catch (error) {
-        logger.error(`Error getting RED metrics: ${error.message}`);
+        logger.error(`Error getting trace metrics: ${error.message}`);
         logger.debug(error);
 
         return {
@@ -120,7 +120,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to fetch RED metrics: ${error.message}`,
+                message: `Failed to fetch trace metrics: ${error.message}`,
                 stack: error.stack,
               },
             },

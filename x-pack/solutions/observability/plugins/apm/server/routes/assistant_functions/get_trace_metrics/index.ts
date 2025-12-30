@@ -80,7 +80,7 @@ async function getDocumentType({
     : ApmDocumentType.ServiceTransactionMetric;
 }
 
-export async function getRedMetrics({
+export async function getTraceMetrics({
   apmEventClient,
   start,
   end,

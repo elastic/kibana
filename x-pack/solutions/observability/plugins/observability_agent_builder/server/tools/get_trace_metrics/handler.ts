@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type { RedMetricsItem } from '../../data_registry/data_registry_types';
+import type { TraceMetricsItem } from '../../data_registry/data_registry_types';
 
 export async function getToolHandler({
   request,
@@ -24,9 +24,9 @@ export async function getToolHandler({
   filter?: string;
   groupBy?: string;
 }): Promise<{
-  items: RedMetricsItem[];
+  items: TraceMetricsItem[];
 }> {
-  const items = await dataRegistry.getData('redMetrics', {
+  const items = await dataRegistry.getData('traceMetrics', {
     request,
     start,
     end,

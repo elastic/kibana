@@ -19,7 +19,7 @@ import {
   getExitSpanChangePoints,
   getServiceChangePoints,
 } from '../../routes/assistant_functions/get_changepoints';
-import { getRedMetrics } from '../../routes/assistant_functions/get_red_metrics';
+import { getTraceMetrics } from '../../routes/assistant_functions/get_trace_metrics';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
@@ -186,7 +186,7 @@ export function registerDataProviders({
   );
 
   observabilityAgentBuilder.registerDataProvider(
-    'redMetrics',
+    'traceMetrics',
     async ({ request, start, end, filter, groupBy }) => {
       const { apmEventClient } = await buildApmToolResources({
         core,
@@ -198,7 +198,7 @@ export function registerDataProviders({
       const startMs = parseDatemath(start);
       const endMs = parseDatemath(end);
 
-      return getRedMetrics({
+      return getTraceMetrics({
         apmEventClient,
         start: startMs,
         end: endMs,

@@ -12,4 +12,4 @@ export * from './create_synthetic_logs_with_categories';
 export * from './create_synthetic_logs_with_errors_and_correlation_ids';
 export * from './create_distributed_trace_with_errors';
 export * from './create_synthetic_infra_data';
-export * from './create_synthetic_red_metrics_data';
+export * from './create_synthetic_trace_metrics_data';
