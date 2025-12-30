@@ -446,4 +446,12 @@ export class RulesPage {
     // Wait for navigation to rule details page
     await expect(this.ruleDetails).toBeVisible({ timeout: BIGGER_TIMEOUT });
   }
+
+  public get observabilityCategory() {
+    return this.ruleTypeModal.locator('.euiFacetButton[title="Observability"]');
+  }
+
+  public get customThresholdRuleType() {
+    return this.page.testSubj.locator(RULE_TYPE_MODAL_TEST_SUBJECTS.CUSTOM_THRESHOLD_RULE_TYPE);
+  }
 }
