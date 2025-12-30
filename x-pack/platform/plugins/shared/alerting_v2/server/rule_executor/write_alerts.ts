@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type { RawEsqlRule } from '../saved_objects';
@@ -16,10 +16,7 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-function rowToDocument(
-  columns: Array<{ name: string }>,
-  row: Array<string | number | boolean | null>
-): Record<string, unknown> {
+function rowToDocument(columns: Array<{ name: string }>, row: ESQLRow): Record<string, unknown> {
   const doc: Record<string, unknown> = {};
   for (let i = 0; i < columns.length; i++) {
     doc[columns[i].name] = row[i];
@@ -27,7 +24,7 @@ function rowToDocument(
   return doc;
 }
 
-function buildGroupingKey({
+function buildGrouping({
   rowDoc,
   groupKeyFields,
   fallbackSeed,
@@ -37,12 +34,19 @@ function buildGroupingKey({
   fallbackSeed: string;
 }) {
   if (!groupKeyFields || groupKeyFields.length === 0) {
-    return sha256(fallbackSeed);
+    return {
+      key: 'default',
+      value: sha256(fallbackSeed),
+    };
   }
 
-  const parts = groupKeyFields.map((f) => `${f}=${String(rowDoc[f] ?? '')}`);
-  const key = parts.join('|');
-  return key.length > 0 ? key : sha256(fallbackSeed);
+  const key = groupKeyFields.join('|');
+  const value = groupKeyFields.map((f) => String(rowDoc[f] ?? '')).join('|');
+
+  return {
+    key: key.length > 0 ? key : 'default',
+    value: value.length > 0 ? value : sha256(fallbackSeed),
+  };
 }
 
 export interface WriteEsqlAlertsOpts {
@@ -78,33 +82,35 @@ export async function writeEsqlAlerts({
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
   const executionUuid = sha256(`${ruleId}|${spaceId}|${taskRunKey}`);
 
-  const now = new Date().toISOString();
+  // Timestamp when the alert event is written to the index.
+  const wroteAt = new Date().toISOString();
+  // Timestamp when the rule was scheduled to run (stable for a given scheduled execution).
+  const scheduledTimestamp = taskRunKey;
   const operations: Array<Record<string, unknown>> = values.flatMap((valueRow, i) => {
-    const row = valueRow as Array<string | number | boolean | null>;
+    const row = valueRow;
     const rowDoc = rowToDocument(columns, row);
-    const groupingKey = buildGroupingKey({
+    const grouping = buildGrouping({
       rowDoc,
       groupKeyFields: rawRule.groupKey ?? [],
       fallbackSeed: `${executionUuid}|row:${i}|${JSON.stringify(rowDoc)}`,
     });
 
-    const alertUuid = sha256(`${executionUuid}|${groupingKey}|row:${i}`);
+    const alertSeriesId = sha256(`${ruleId}|${spaceId}|${grouping.key}|${grouping.value}`);
+    // Deterministic document id: hash(@timestamp + alert_series_id)
+    const alertUuid = sha256(`${wroteAt}|${alertSeriesId}`);
 
     const doc = {
-      '@timestamp': now,
-      alert: {
-        producer: 'framework',
-        uuid: alertUuid,
-        grouping: { key: groupingKey },
-        rule: {
-          uuid: ruleId,
-          execution: { uuid: executionUuid },
-        },
-        attributes: rowDoc,
+      '@timestamp': wroteAt,
+      scheduled_timestamp: scheduledTimestamp,
+      rule: {
+        id: ruleId,
+        ...(rawRule.tags?.length ? { tags: rawRule.tags } : {}),
       },
-      labels: {
-        kibana_space_id: spaceId,
-      },
+      grouping,
+      data: rowDoc,
+      status: 'breach',
+      alert_series_id: alertSeriesId,
+      source: 'internal',
       ...(rawRule.tags?.length ? { tags: rawRule.tags } : {}),
     };
 

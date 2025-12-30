@@ -52,7 +52,7 @@ describe('writeEsqlAlerts', () => {
             ['host-b', 5],
           ],
         } as any,
-        taskRunKey: '2025-01-01T00:00:00.000Z',
+        taskRunKey: '2024-12-31T23:59:00.000Z',
       },
     });
 
@@ -69,12 +69,16 @@ describe('writeEsqlAlerts', () => {
     expect(op2.create._index).toBe('.alerts-events');
 
     expect(doc1['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
+    expect(doc1.scheduled_timestamp).toBe('2024-12-31T23:59:00.000Z');
     expect(doc1.tags).toEqual(['esql', 'test']);
-    expect(doc1.labels).toEqual({ kibana_space_id: 'default' });
-    expect(doc1.alert.grouping.key).toBe('host.name=host-a');
-    expect(doc1.alert.attributes).toEqual({ 'host.name': 'host-a', count: 10 });
+    expect(doc1.rule).toEqual({ id: 'rule-123', tags: ['esql', 'test'] });
+    expect(doc1.grouping).toEqual({ key: 'host.name', value: 'host-a' });
+    expect(doc1.data).toEqual({ 'host.name': 'host-a', count: 10 });
+    expect(doc1.status).toBe('breach');
+    expect(doc1.source).toBe('internal');
+    expect(doc1.alert_series_id).toEqual(expect.any(String));
 
-    expect(doc2.alert.grouping.key).toBe('host.name=host-b');
-    expect(doc2.alert.attributes).toEqual({ 'host.name': 'host-b', count: 5 });
+    expect(doc2.grouping).toEqual({ key: 'host.name', value: 'host-b' });
+    expect(doc2.data).toEqual({ 'host.name': 'host-b', count: 5 });
   });
 });

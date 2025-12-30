@@ -35,6 +35,12 @@ export function createRuleExecutorTaskRunner({
           return { state: taskInstance.state };
         }
 
+        if (!fakeRequest) {
+          throw new Error(
+            `Cannot execute rule executor task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
+          );
+        }
+
         const params = taskInstance.params as RuleExecutorTaskParams;
         const [coreStart, pluginsStart] = await coreStartServices;
 
@@ -45,12 +51,6 @@ export function createRuleExecutorTaskRunner({
 
         let rawRule: RawEsqlRule;
         try {
-          if (!fakeRequest) {
-            throw new Error(
-              `Cannot execute rule executor task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
-            );
-          }
-
           const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
             includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
           });
@@ -68,14 +68,6 @@ export function createRuleExecutorTaskRunner({
 
         if (!rawRule.enabled) {
           return { state: taskInstance.state };
-        }
-
-        // Task Manager will provide `fakeRequest` if the task has an apiKey + userScope.
-        // We intentionally do not construct fake requests here; scheduling must pass a real request.
-        if (!fakeRequest) {
-          throw new Error(
-            `Cannot execute rule executor task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
-          );
         }
 
         const searchClient = pluginsStart.data.search.asScoped(fakeRequest);
