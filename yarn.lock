@@ -10608,10 +10608,10 @@
   dependencies:
     playwright "1.56.1"
 
-"@pmmmwh/react-refresh-webpack-plugin@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.6.1.tgz#7bb69e155a66f2fa526a7fac1913dc0e5597919f"
-  integrity sha512-95DXXJxNkpYu+sqmpDp7vbw9JCyiNpHuCsvuMuOgVFrKQlwEIn9Y1+NNIQJq+zFL+eWyxw6htthB5CtdwJupNA==
+"@pmmmwh/react-refresh-webpack-plugin@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.6.2.tgz#c17661001ef4d7ad5c6e7dd714c142962b00b5dc"
+  integrity sha512-IhIAD5n4XvGHuL9nAgWfsBR0TdxtjrUWETYKCBHxauYXEv+b+ctEbs9neEgPC7Ecgzv4bpZTBwesAoGDeFymzA==
   dependencies:
     anser "^2.1.1"
     core-js-pure "^3.23.3"
@@ -11739,10 +11739,10 @@
     "@storybook/global" "^5.0.0"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-styling-webpack@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-styling-webpack/-/addon-styling-webpack-2.0.0.tgz#3e854c82a835a6df439a69e307f337b39b4a4cab"
-  integrity sha512-N8jWhWnk3/nbL4P9zl0OEV/47P0Cxn/kPzSHjdAClyDYnqj9jI6upeLsraZgIV9Ro3QSeqeIloeXb1zMasWpOw==
+"@storybook/addon-styling-webpack@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-styling-webpack/-/addon-styling-webpack-3.0.0.tgz#eb0fc23cebc223a36c3c92b79b44cdd362aa078f"
+  integrity sha512-6iI7wGf/tEt5awB8NYAWU+I/hI7PwOdoaNb5V8Z+GkhEko4nZFpXfp8jz2nMblAnx9Jsl95LfIaH9Spa0JksuQ==
 
 "@storybook/addon-toolbars@8.6.15":
   version "8.6.15"
@@ -11756,13 +11756,13 @@
   dependencies:
     memoizerific "^1.11.3"
 
-"@storybook/addon-webpack5-compiler-babel@^3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-webpack5-compiler-babel/-/addon-webpack5-compiler-babel-3.0.6.tgz#8fe3a3dac8ec33e532a7e9af207b99676fbb132e"
-  integrity sha512-J4uVxEfkd2iAxPxcT90iebt5wuLSd0EYuMJa94t1jVUGlvZZAvnmqXAqscRITNU37nOr0c9yZ2YVS/sFOZyOVw==
+"@storybook/addon-webpack5-compiler-babel@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-webpack5-compiler-babel/-/addon-webpack5-compiler-babel-4.0.0.tgz#0ca740c13e1063ac9599345c0dd96c970ec406f1"
+  integrity sha512-dNcFCBPX1FO2TvUrAoDim8vekVVTivIAi5lo3lFF3BwDK29dNi0TF805XXWu+7LMauPq8sf51DQVSE3lrwCcnw==
   dependencies:
     "@babel/core" "^7.26.0"
-    babel-loader "^9.2.1"
+    babel-loader "^10.0.0"
 
 "@storybook/blocks@8.6.15", "@storybook/blocks@^8.6.15":
   version "8.6.15"
@@ -15213,7 +15213,14 @@ babel-jest@^29.7.0:
     graceful-fs "^4.2.9"
     slash "^3.0.0"
 
-babel-loader@^9.1.3, babel-loader@^9.2.1:
+babel-loader@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-10.0.0.tgz#b9743714c0e1e084b3e4adef3cd5faee33089977"
+  integrity sha512-z8jt+EdS61AMw22nSfoNJAZ0vrtmhPRVi6ghL3rCeRZI8cdNYFiV5xeV3HbE7rlZZNmGH8BVccwWt8/ED0QOHA==
+  dependencies:
+    find-up "^5.0.0"
+
+babel-loader@^9.1.3:
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-9.2.1.tgz#04c7835db16c246dd19ba0914418f3937797587b"
   integrity sha512-fqe8naHt46e0yIdkjUZYqddSXfej3AHajX+CSO5X7oy0EmPc6o5Xh+RClNoHjnieWz9AW4kZxW9yyFMhVB1QLA==
