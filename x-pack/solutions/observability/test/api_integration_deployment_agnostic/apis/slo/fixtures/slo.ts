@@ -121,7 +121,6 @@ export function createDummySummaryDoc(
 
 export function createGroupedSummaryDoc(
   sloId: string,
-  revision: number,
   groupBy: string[],
   groupingValues: Record<string, string>,
   summaryUpdatedAt: string,
@@ -132,7 +131,7 @@ export function createGroupedSummaryDoc(
     slo: {
       id: sloId,
       instanceId,
-      revision,
+      revision: 1,
       name: `Test SLO ${sloId}`,
       description: 'Test description',
       indicator: {

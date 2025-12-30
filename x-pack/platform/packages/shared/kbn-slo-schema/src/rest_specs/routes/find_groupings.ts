@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 
 const findSLOGroupingsParamsSchema = t.type({
   path: t.type({ id: t.string }),
@@ -17,7 +17,7 @@ const findSLOGroupingsParamsSchema = t.type({
     t.partial({
       search: t.string,
       afterKey: t.string,
-      size: t.string,
+      size: toNumberRt,
       excludeStale: toBooleanRt,
       remoteName: t.string,
     }),

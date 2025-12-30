@@ -263,8 +263,8 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         groupingKey: string;
         search?: string;
         afterKey?: string;
-        size?: string;
-        excludeStale?: string;
+        size?: number;
+        excludeStale?: boolean;
       },
       roleAuthc: RoleCredentials,
       expectedStatus: number = 200

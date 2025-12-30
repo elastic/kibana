@@ -28,6 +28,11 @@ export class FindSLOGroupings {
     sloId: string,
     params: FindSLOGroupingsParams
   ): Promise<FindSLOGroupingsResponse> {
+    const size = params.size ?? DEFAULT_SIZE;
+    if (size <= 0 || size > 1000) {
+      throw new IllegalArgumentError('Size must be between 1 and 1000');
+    }
+
     const { slo } = await this.definitionClient.execute(sloId, this.spaceId, params.remoteName);
 
     const groupingKeys = [slo.groupBy].flat();
@@ -65,7 +70,7 @@ export class FindSLOGroupings {
       groupingKey: params.groupingKey,
       values: response.aggregations?.groupingValues.buckets.map((bucket) => bucket.key.value) ?? [],
       afterKey:
-        response.aggregations?.groupingValues.buckets.length === Number(params.size ?? DEFAULT_SIZE)
+        response.aggregations?.groupingValues.buckets.length === size
           ? response.aggregations?.groupingValues.after_key.value
           : undefined,
     };
@@ -149,7 +154,7 @@ function generateAggs(params: FindSLOGroupingsParams): {
   return {
     groupingValues: {
       composite: {
-        size: Number(params.size ?? DEFAULT_SIZE),
+        size: params.size ?? DEFAULT_SIZE,
         sources: [
           {
             value: {
