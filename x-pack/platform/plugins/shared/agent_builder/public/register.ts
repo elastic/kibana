@@ -34,6 +34,7 @@ export const registerApp = ({
     title: AGENT_BUILDER_SHORT_TITLE,
     euiIconType: 'logoElasticsearch',
     visibleIn: ['sideNav', 'globalSearch'],
+    keywords: ['agent builder', 'agent', 'builder', 'ai agents'],
     deepLinks: [
       {
         id: 'conversations',
