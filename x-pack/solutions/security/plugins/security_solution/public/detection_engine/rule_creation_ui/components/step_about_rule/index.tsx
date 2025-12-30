@@ -53,6 +53,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   form: FormHook<AboutStepRule>;
   esqlQuery?: string | undefined;
   ruleSource?: RuleSource;
+  aiAssistedUserQuery?: string;
 }
 
 interface StepAboutRuleReadOnlyProps {

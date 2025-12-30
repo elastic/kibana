@@ -44,6 +44,10 @@ export const createRulesNavigationTree = (): NodeDefinition => ({
           link: securityLink(SecurityPageName.cloudSecurityPostureBenchmarks),
         },
         {
+          id: SecurityPageName.aiAssistedRuleCreate,
+          link: securityLink(SecurityPageName.aiAssistedRuleCreate),
+        },
+        {
           id: SecurityPageName.exceptions,
           link: securityLink(SecurityPageName.exceptions),
         },

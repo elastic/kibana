@@ -17,6 +17,7 @@ import {
   RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
+  AI_ASSISTED_RULE_CREATE_PATH,
   RULES_PATH,
   SECURITY_FEATURE_ID,
 } from '../../common/constants';
@@ -70,6 +71,13 @@ export const links: LinkItem = {
           id: SecurityPageName.rulesCreate,
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
+          skipUrlState: true,
+          hideTimeline: false,
+        },
+        {
+          id: SecurityPageName.aiAssistedRuleCreate,
+          title: CREATE_NEW_RULE,
+          path: AI_ASSISTED_RULE_CREATE_PATH,
           skipUrlState: true,
           hideTimeline: false,
         },
