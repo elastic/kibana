@@ -22,6 +22,7 @@ import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type {
+  GetAdditionalActionButtons,
   GetGroupStats,
   GroupingArgs,
   GroupPanelRenderer,
@@ -110,6 +111,12 @@ export interface AlertsTableComponentProps {
 
   /** Optional array of custom controls to display in the toolbar alongside the group selector */
   additionalToolbarControls?: JSX.Element[];
+
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
+
+  /** Optional function to get additional action buttons to display in group stats before the Take actions button */
+  getAdditionalActionButtons?: GetAdditionalActionButtons<AlertsGroupingAggregation>;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -263,6 +270,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       onGroupToggle,
       unit: defaultUnit,
       multiValueFields: multiValueFieldsToFlatten,
+      emptyGroupingComponent: props.emptyGroupingComponent,
+      getAdditionalActionButtons: props.getAdditionalActionButtons,
     },
     defaultGroupingOptions: groupingOptions,
     fields,
@@ -408,6 +417,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
           onAggregationsChange={props.onAggregationsChange}
           additionalToolbarControls={props.additionalToolbarControls}
+          emptyGroupingComponent={props.emptyGroupingComponent}
         />
       );
     },

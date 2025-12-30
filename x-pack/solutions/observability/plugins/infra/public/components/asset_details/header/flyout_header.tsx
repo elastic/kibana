@@ -21,12 +21,14 @@ import {
 import { css } from '@emotion/react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { HostHeaderTitle } from './host_header_title';
 
 type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'> & {
   entityType: InventoryItemType;
   loading: boolean;
   schema?: DataSchemaFormat | null;
+  headingId?: string;
 };
 
 export const FlyoutHeader = ({
@@ -36,6 +38,7 @@ export const FlyoutHeader = ({
   entityType,
   loading,
   schema,
+  headingId,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
@@ -58,7 +61,13 @@ export const FlyoutHeader = ({
             {loading ? (
               <EuiLoadingSpinner size="m" />
             ) : (
-              <h4>
+              <h4
+                id={headingId}
+                aria-label={i18n.translate('xpack.infra.assetDetails.flyout.ariaLabel', {
+                  defaultMessage: '{entityType} {title} details',
+                  values: { entityType, title },
+                })}
+              >
                 {entityType === 'host' ? <HostHeaderTitle title={title} schema={schema} /> : title}
               </h4>
             )}
