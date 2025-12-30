@@ -36,6 +36,7 @@ import {
 import { suggest } from './autocomplete';
 import { editorExtensions } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
+import { getCastingTypesSuggestions } from '../../commands/definitions/utils/functions';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -1092,6 +1093,11 @@ describe('autocomplete', () => {
         undefined,
         [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
+    });
+
+    describe('inline casting', () => {
+      testSuggestions('FROM index_a | WHERE keywordField::/', getCastingTypesSuggestions());
+      testSuggestions('FROM a | EVAL TRIM(5::/', getCastingTypesSuggestions());
     });
   });
 });
