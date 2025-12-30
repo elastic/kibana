@@ -17,6 +17,7 @@ export {
   type TabStateGlobalState,
   type DiscoverAppState,
   type InternalStateDataRequestParams,
+  TabInitializationStatus,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
@@ -51,6 +52,7 @@ export {
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
@@ -69,6 +71,7 @@ export {
   type TabActionInjector,
   createTabActionInjector,
   createTabItem,
+  getSerializedSearchSourceDataViewDetails,
   parseControlGroupJson,
   extractEsqlVariables,
 } from './utils';

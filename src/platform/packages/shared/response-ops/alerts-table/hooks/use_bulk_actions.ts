@@ -14,6 +14,9 @@ import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import { ALERT_RULE_UUID, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { useBulkMuteAlerts } from '@kbn/response-ops-alerts-apis/hooks/use_bulk_mute_alerts';
+import { useBulkUnmuteAlerts } from '@kbn/response-ops-alerts-apis/hooks/use_bulk_unmute_alerts';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type {
   BulkActionsConfig,
@@ -36,6 +39,7 @@ import {
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 import { useTagsAction } from '../components/tags/use_tags_action';
+import { MUTE_SELECTED, UNMUTE_SELECTED } from '../translations';
 
 interface BulkActionsProps {
   ruleTypeIds?: string[];
@@ -77,6 +81,9 @@ type UseBulkUntrackActionsProps = Pick<
 
 type UseBulkTagsActionsProps = Pick<BulkActionsProps, 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
+
+type UseBulkMuteActionsProps = Pick<BulkActionsProps, 'refresh' | 'http' | 'notifications'> &
+  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'>;
 
 const noCapabilitiesForAction = (capabilities: ApplicationStart['capabilities']) => {
   const hasApmPermission = capabilities?.apm?.['alerting:show'];
@@ -313,6 +320,96 @@ export const useBulkTagsActions = ({ refresh, clearSelection }: UseBulkTagsActio
   return { tagsAction };
 };
 
+const groupAlertsByRule = (alerts: TimelineItem[]) => {
+  const ruleMap = new Map<string, string[]>();
+
+  for (const alert of alerts) {
+    const ruleId = alert.data.find((d) => d.field === ALERT_RULE_UUID)?.value?.[0];
+    const alertInstanceId = alert.data.find((d) => d.field === ALERT_INSTANCE_ID)?.value?.[0];
+
+    if (ruleId && alertInstanceId) {
+      const existing = ruleMap.get(ruleId) || [];
+      existing.push(alertInstanceId);
+      ruleMap.set(ruleId, existing);
+    }
+  }
+
+  return Array.from(ruleMap.entries()).map(([ruleId, alertInstanceIds]) => ({
+    rule_id: ruleId,
+    alert_instance_ids: alertInstanceIds,
+  }));
+};
+
+export const useBulkMuteActions = ({
+  setIsBulkActionsLoading,
+  refresh,
+  clearSelection,
+  http,
+  notifications,
+}: UseBulkMuteActionsProps) => {
+  const onSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const { mutateAsync: bulkMute } = useBulkMuteAlerts({ http, notifications, onSuccess });
+  const { mutateAsync: bulkUnmute } = useBulkUnmuteAlerts({ http, notifications, onSuccess });
+
+  const onMuteClick = useCallback(
+    async (selectedAlerts?: TimelineItem[]) => {
+      if (!selectedAlerts) return;
+      const rules = groupAlertsByRule(selectedAlerts);
+      if (rules.length === 0) return;
+
+      try {
+        setIsBulkActionsLoading(true);
+        await bulkMute({ rules });
+      } finally {
+        setIsBulkActionsLoading(false);
+      }
+    },
+    [bulkMute, setIsBulkActionsLoading]
+  );
+
+  const onUnmuteClick = useCallback(
+    async (selectedAlerts?: TimelineItem[]) => {
+      if (!selectedAlerts) return;
+      const rules = groupAlertsByRule(selectedAlerts);
+      if (rules.length === 0) return;
+
+      try {
+        setIsBulkActionsLoading(true);
+        await bulkUnmute({ rules });
+      } finally {
+        setIsBulkActionsLoading(false);
+      }
+    },
+    [bulkUnmute, setIsBulkActionsLoading]
+  );
+
+  return useMemo(
+    () => [
+      {
+        label: MUTE_SELECTED,
+        key: 'bulk-mute',
+        disableOnQuery: true,
+        disabledLabel: MUTE_SELECTED,
+        'data-test-subj': 'bulk-mute',
+        onClick: onMuteClick,
+      },
+      {
+        label: UNMUTE_SELECTED,
+        key: 'bulk-unmute',
+        disableOnQuery: true,
+        disabledLabel: UNMUTE_SELECTED,
+        'data-test-subj': 'bulk-unmute',
+        onClick: onUnmuteClick,
+      },
+    ],
+    [onMuteClick, onUnmuteClick]
+  );
+};
+
 const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
 
 export function useBulkActions({
@@ -364,6 +461,13 @@ export function useBulkActions({
     refresh,
     clearSelection,
   });
+  const muteBulkActions = useBulkMuteActions({
+    setIsBulkActionsLoading,
+    refresh,
+    clearSelection,
+    http,
+    notifications,
+  });
 
   const tagsBulkActions = useMemo(() => {
     return noCapabilitiesForAction(application?.capabilities)
@@ -391,12 +495,14 @@ export function useBulkActions({
   }, [tagsAction, application?.capabilities]);
 
   const initialItems = useMemo(() => {
+    const isSiem = ruleTypeIds?.some(isSiemRuleType);
     return [
       ...caseBulkActions,
-      ...(ruleTypeIds?.some(isSiemRuleType) ? [] : untrackBulkActions),
-      ...(ruleTypeIds?.some(isSiemRuleType) ? [] : tagsBulkActions),
+      ...(isSiem ? [] : untrackBulkActions),
+      ...(isSiem ? [] : tagsBulkActions),
+      ...(isSiem ? [] : muteBulkActions),
     ];
-  }, [caseBulkActions, ruleTypeIds, untrackBulkActions, tagsBulkActions]);
+  }, [caseBulkActions, ruleTypeIds, untrackBulkActions, tagsBulkActions, muteBulkActions]);
 
   const bulkActions = useMemo(() => {
     if (hideBulkActions) {

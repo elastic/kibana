@@ -7,6 +7,7 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 import { merge } from 'lodash';
+import systemPromptDefault from '../significant_events/system_prompt.text';
 import systemPromptTemplate from './system_prompt.text';
 import userPromptTemplate from './user_prompt.text';
 
@@ -59,38 +60,48 @@ export interface FinalizeSystemsResponse {
   }>;
 }
 
-export const IdentifySystemsPrompt = createPrompt({
-  name: 'identify_systems',
-  input: z.object({
-    stream: z.object({
-      name: z.string(),
-      description: z.string(),
+export function createIdentifySystemsPrompt({
+  systemPromptOverride,
+}: {
+  systemPromptOverride?: string;
+} = {}) {
+  const systemPrompt = systemPromptOverride ?? systemPromptDefault;
+
+  return createPrompt({
+    name: 'identify_systems',
+    input: z.object({
+      stream: z.object({
+        name: z.string(),
+        description: z.string(),
+      }),
+      dataset_analysis: z.string(),
+      initial_clustering: z.string(),
+      condition_schema: z.string(),
     }),
-    dataset_analysis: z.string(),
-    initial_clustering: z.string(),
-    condition_schema: z.string(),
-  }),
-})
-  .version({
-    system: {
-      mustache: {
-        template: systemPromptTemplate,
-      },
-    },
-    template: {
-      mustache: {
-        template: userPromptTemplate,
-      },
-    },
-    tools: {
-      validate_systems: {
-        description: `Validate systems before finalizing`,
-        schema: systemsSchema,
-      },
-      finalize_systems: {
-        description: 'Finalize system identification',
-        schema: finalSystemsSchema,
-      },
-    },
   })
-  .get();
+    .version({
+      system: {
+        mustache: {
+          template: systemPrompt,
+        },
+      },
+      template: {
+        mustache: {
+          template: userPromptTemplate,
+        },
+      },
+      tools: {
+        validate_systems: {
+          description: `Validate systems before finalizing`,
+          schema: systemsSchema,
+        },
+        finalize_systems: {
+          description: 'Finalize system identification',
+          schema: finalSystemsSchema,
+        },
+      },
+    })
+    .get();
+}
+
+export { systemPromptTemplate as featuresSystemPromptTemplate };

@@ -5,7 +5,7 @@
     "index": ".internal.alerts-security.alerts-default-000001",
     "source": {
       "@timestamp": "2024-09-01T12:44:02.109Z",
-      "actor": {
+      "user": {
         "entity": {
           "id": "admin@example.com"
         }
@@ -339,8 +339,8 @@
         "_geoip_database_unavailable_GeoLite2-City.mmdb",
         "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
       ],
-      "target": {
-        "entity": {
+      "entity": {
+        "target": {
           "id": "projects/your-project-id/roles/customRole"
         }
       },
@@ -362,7 +362,7 @@
     "index": ".internal.alerts-security.alerts-default-000001",
     "source": {
       "@timestamp": "2024-09-01T12:45:02.109Z",
-      "actor": {
+      "user": {
         "entity": {
           "id": "admin6@example.com"
         }
@@ -699,8 +699,8 @@
         "_geoip_database_unavailable_GeoLite2-City.mmdb",
         "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
       ],
-      "target": {
-        "entity": {
+      "entity": {
+        "target": {
           "id": "projects/your-project-id/roles/customRole"
         }
       },
@@ -722,7 +722,7 @@
     "index": ".internal.alerts-security.alerts-default-000001",
     "source": {
       "@timestamp": "2024-09-01T12:39:03.646Z",
-      "actor": {
+      "user": {
         "entity": {
           "id": "admin@example.com"
         }

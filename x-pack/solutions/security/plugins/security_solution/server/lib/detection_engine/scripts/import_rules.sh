@@ -21,6 +21,7 @@ OVERWRITE=${2:-true}
 # ./import_rules.sh ./rules/import/multiple_ruleid_queries.ndjson false
 curl -s -k \
   -H 'kbn-xsrf: 123' \
+  -H 'elastic-api-version: 2023-10-31' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_import?overwrite=${OVERWRITE}" \
   --form file=@${RULES} \

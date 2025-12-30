@@ -15,7 +15,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
-import { getTimeFieldFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
+import { getTimeFieldFromESQLQuery, getStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
@@ -71,7 +71,7 @@ export class CsvESQLGenerator {
     let reportingError: undefined | ReportingError;
     const warnings: string[] = [];
 
-    const { maxSizeBytes, bom, escapeFormulaValues } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
     // it will return undefined if there are no _tstart, _tend named params in the query
@@ -94,9 +94,13 @@ export class CsvESQLGenerator {
         getEsQueryConfig(this.clients.uiSettings as Parameters<typeof getEsQueryConfig>[0])
       );
 
+    let query = this.job.query.esql;
+    if (query && maxRows) {
+      query = appendLimitToQuery(this.job.query.esql, maxRows);
+    }
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
       params: {
-        query: this.job.query.esql,
+        query,
         filter,
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),

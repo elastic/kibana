@@ -22,6 +22,7 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import type { FeatureCollection } from 'geojson';
+import type { ProjectRoutingOverrides } from '@kbn/presentation-publishing';
 import { DataRequest } from '../util/data_request';
 import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import type { LAYER_TYPE } from '../../../common/constants';
@@ -114,6 +115,10 @@ export interface ILayer {
    * ILayer.getIndexPatternIds returns data view ids used to populate layer data.
    */
   getIndexPatternIds(): string[];
+  /*
+   * ILayer.getProjectRoutingOverrides returns project routing overrides used to populate layer data.
+   */
+  getProjectRoutingOverrides?: () => Promise<ProjectRoutingOverrides>;
   /*
    * ILayer.getQueryableIndexPatternIds returns ILayer.getIndexPatternIds or a subset of ILayer.getIndexPatternIds.
    * Data view ids are excluded when the global query is not applied to layer data.

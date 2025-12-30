@@ -144,8 +144,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
     ];
     const agentBuilderPaths = [
-      /^x-pack\/platform\/plugins\/shared\/onechat/,
-      /^x-pack\/platform\/packages\/shared\/onechat/,
+      /^x-pack\/platform\/plugins\/shared\/agent_builder/,
+      /^x-pack\/platform\/packages\/shared\/agent_builder/,
     ];
 
     if (
@@ -465,6 +465,21 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         getPipeline(
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
         )
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
+        /^x-pack\/packages\/kbn-cloud-security-posture/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/custom\/cspm_agentless/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:cloud-security-posture-scout')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml')
       );
     }
 

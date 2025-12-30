@@ -185,7 +185,8 @@ describe('TaskManagerService Integration Tests', () => {
         mockAuthenticatedUser
       );
 
-      expect(dataStreamSavedObject.id).toBe('test-ds-456');
+      const expectedCompositeId = 'test-int-123-test-ds-456';
+      expect(dataStreamSavedObject.id).toBe(expectedCompositeId);
       expect(dataStreamSavedObject.attributes?.job_info?.job_id).toBe(scheduledTask.taskId);
       expect(dataStreamSavedObject.attributes?.job_info?.status).toBe(TASK_STATUSES.pending);
       expect(dataStreamSavedObject.attributes?.metadata?.version).toBe('0.0.0');
@@ -194,50 +195,20 @@ describe('TaskManagerService Integration Tests', () => {
 
       expect(task.task_status).toBe(TASK_STATUSES.pending);
 
-      const currentVersion = dataStreamSavedObject.attributes.metadata?.version || '0.0.0';
-      const completedDataStreamData = {
-        integration_id: dataStreamSavedObject.attributes.integration_id,
-        data_stream_id: dataStreamSavedObject.attributes.data_stream_id,
-        title: dataStreamSavedObject.attributes.title,
-        description: dataStreamSavedObject.attributes.description,
-        created_by: dataStreamSavedObject.attributes.created_by,
-        input_types: dataStreamSavedObject.attributes.input_types,
-        job_info: {
-          job_id: scheduledTask.taskId,
-          job_type: 'ai-workflow',
-          status: TASK_STATUSES.completed,
-        },
-        metadata: {
-          ...dataStreamSavedObject.attributes.metadata,
-          sample_count: 3, // mock value
-        },
-        result: {
-          ingest_pipeline: 'test-pipeline',
-          field_mapping: { message: 'log.message' },
-        },
-      };
-
-      const completedDataStream = await savedObjectService.updateDataStream(
-        completedDataStreamData,
-        currentVersion
-      );
-
-      expect(completedDataStream.attributes?.job_info?.status).toBe(TASK_STATUSES.completed);
-      expect(completedDataStream.attributes?.metadata?.version).toBe('0.0.1'); // Version bumped once (from 0.0.0 to 0.0.1)
-
-      // Verify we can retrieve both saved objects with their final state
+      // Verify we can retrieve both saved objects
       const finalIntegration = await savedObjectService.getIntegration(integrationSavedObject.id);
-      const finalDataStream = await savedObjectService.getDataStream(dataStreamSavedObject.id);
+      const finalDataStream = await savedObjectService.getDataStream('test-ds-456', 'test-int-123');
 
       expect(finalIntegration.integration_id).toBe(integrationSavedObject.id);
-      expect(finalDataStream.attributes.job_info.status).toBe(TASK_STATUSES.completed);
       expect(finalDataStream.attributes.job_info.job_id).toBe(scheduledTask.taskId);
-      expect(finalDataStream.attributes.result?.ingest_pipeline).toBe('test-pipeline');
+      expect(finalDataStream.attributes.job_info.status).toBe(TASK_STATUSES.pending);
 
       // Step 7: Clean up - delete in reverse order
-      await savedObjectService.deleteDataStream(dataStreamSavedObject.id);
+      await savedObjectService.deleteDataStream('test-int-123', 'test-ds-456');
       await savedObjectService.deleteIntegration(integrationSavedObject.id);
-      await expect(savedObjectService.getDataStream(dataStreamSavedObject.id)).rejects.toThrow();
+      await expect(
+        savedObjectService.getDataStream('test-ds-456', 'test-int-123')
+      ).rejects.toThrow();
     }, 60000);
 
     it('should schedule and track 5 concurrent unique AI workflow tasks', async () => {
@@ -387,7 +358,12 @@ describe('TaskManagerService Integration Tests', () => {
 
         // Verify all datastreams and integrations were created correctly
         for (const obj of createdObjects) {
-          const retrievedDataStream = await savedObjectService.getDataStream(obj.dataStream.id);
+          const dataStreamId = obj.dataStream.attributes.data_stream_id;
+          const integrationId = obj.dataStream.attributes.integration_id;
+          const retrievedDataStream = await savedObjectService.getDataStream(
+            dataStreamId,
+            integrationId
+          );
           expect(retrievedDataStream.attributes.job_info.job_id).toBe(obj.taskId);
           expect(retrievedDataStream.attributes.integration_id).toBe(obj.integration.id);
         }
@@ -400,7 +376,9 @@ describe('TaskManagerService Integration Tests', () => {
       } finally {
         // Clean up all created objects (data streams first, then integrations)
         for (const obj of createdObjects) {
-          await savedObjectService.deleteDataStream(obj.dataStream.id).catch(() => {});
+          const dataStreamId = obj.dataStream.attributes.data_stream_id;
+          const integrationId = obj.dataStream.attributes.integration_id;
+          await savedObjectService.deleteDataStream(integrationId, dataStreamId).catch(() => {});
           await savedObjectService.deleteIntegration(obj.integration.id).catch(() => {});
         }
       }

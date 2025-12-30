@@ -12,22 +12,23 @@ import type { FormattedChangePoint } from './change_point';
 import { ChangePointSummary } from '../change_point_summary';
 
 export function getAnnotationFromFormattedChangePoint({
-  query: { id },
   theme,
-  change,
+  time,
+  changes,
   xFormatter,
 }: {
   theme: EuiThemeComputed;
-  change: FormattedChangePoint;
-  query: { id: string };
+  time: number;
+  changes: FormattedChangePoint[];
   xFormatter: TickFormatter;
 }) {
-  const color = theme.colors[change?.color];
+  const change = changes[0];
+  const color = theme.colors[change.color];
   return {
     color,
     icon: <EuiIcon type="dot" color={color} />,
-    id: `change_point_${id}`,
-    label: <ChangePointSummary xFormatter={xFormatter} change={change} />,
-    x: change.time,
+    id: `change_point_${time}`,
+    label: <ChangePointSummary xFormatter={xFormatter} changes={changes} />,
+    x: time,
   };
 }

@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import { ToolResultType, type TabularDataResult, type ErrorResult } from '@kbn/onechat-common';
-import { executeEsql } from '@kbn/onechat-genai-utils';
+import {
+  ToolResultType,
+  type TabularDataResult,
+  type ErrorResult,
+} from '@kbn/agent-builder-common';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 
-jest.mock('@kbn/onechat-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
   executeEsql: jest.fn(),
 }));
 
 describe('attackDiscoverySearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = attackDiscoverySearchTool(mockCore);
+  const tool = attackDiscoverySearchTool(mockCore, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -99,10 +104,10 @@ describe('attackDiscoverySearchTool', () => {
       };
       (executeEsql as jest.Mock).mockResolvedValue(mockEsqlResponse);
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { alertIds: ['alert-1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(2);
       expect(result.results[0].type).toBe(ToolResultType.query);
@@ -132,10 +137,10 @@ describe('attackDiscoverySearchTool', () => {
       const error = new Error('ES|QL query failed');
       (executeEsql as jest.Mock).mockRejectedValue(error);
 
-      const result = await tool.handler(
+      const result = (await tool.handler(
         { alertIds: ['alert-1'] },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-      );
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       const errorResult = result.results[0] as ErrorResult;
