@@ -301,7 +301,22 @@ export const getESQLQueryVariables = (esql: string): string[] => {
 };
 
 export const getESQLQuerySyntaxErrors = (esql: string): EditorError[] => {
-  return Parser.parseErrors(esql);
+  try {
+    return Parser.parseErrors(esql);
+  } catch (e) {
+    // Parser.parseErrors can throw for severely malformed queries
+    return [
+      {
+        startLineNumber: 1,
+        endLineNumber: 1,
+        startColumn: 1,
+        endColumn: 1,
+        message: e instanceof Error ? e.message : 'Failed to parse query',
+        severity: 'error',
+        code: 'parserError',
+      },
+    ];
+  }
 };
 
 /**

@@ -1102,8 +1102,8 @@ describe('esql query helpers', () => {
     it('should return false if the last STATS BY command does use a date column', () => {
       expect(
         hasDateBreakdown(
-          `TS index 
-            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
+          `TS index
+            | STATS count=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)
             | STATS sample = SAMPLE(count, 10) BY category`,
           [
             {
@@ -1204,6 +1204,20 @@ describe('esql query helpers', () => {
     it('should return errors for a query with syntax errors', () => {
       const errors = getESQLQuerySyntaxErrors('LIMIT 10');
       expect(errors.length).toBeGreaterThan(0);
+    });
+
+    it('should return errors when parser throws for severely malformed queries', () => {
+      // Parser.parseErrors throws for some malformed queries like unbalanced parentheses
+      // The function should catch this and return an error instead of throwing
+      const errors = getESQLQuerySyntaxErrors('FROM logs* | LIMIT 100)');
+      expect(errors.length).toBeGreaterThan(0);
+    });
+
+    it('validates the query with backtick in index name', () => {
+      // This test highlights the difference that @kbn/esql-editor flags this with errors
+      // while the Parser.parse from @kbn/esql-parser does not throw an error for this case
+      const errors = getESQLQuerySyntaxErrors('FROM logs*`'); // invalid backtick usage
+      expect(errors).toHaveLength(0);
     });
   });
 });
