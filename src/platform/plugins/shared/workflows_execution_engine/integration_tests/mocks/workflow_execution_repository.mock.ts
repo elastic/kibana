@@ -124,7 +124,8 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   public async getRunningExecutionsByConcurrencyGroup(
     concurrencyGroupKey: string,
     spaceId: string,
-    excludeExecutionId?: string
+    excludeExecutionId?: string,
+    size: number = 5000
   ): Promise<string[]> {
     const results = Array.from(this.workflowExecutions.values())
       .filter(
@@ -139,7 +140,8 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         const bTime = new Date(b.createdAt).getTime();
         return aTime - bTime; // Oldest first
       })
-      .map((exec) => exec.id);
+      .map((exec) => exec.id)
+      .slice(0, Math.min(size, 10000)); // Cap at ES default max_result_window
 
     return results;
   }
