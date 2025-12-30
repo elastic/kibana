@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
+import { CONTAINER, HOST, SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { getRollupIntervalForTimeRange } from '../../../agent_builder/utils/get_rollup_interval_for_time_range';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -18,6 +18,7 @@ import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_thr
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 
 const MAX_NUMBER_OF_GROUPS = 100;
+const TRANSACTION_METRIC_ONLY_FIELDS = [TRANSACTION_NAME, `${HOST}.`, `${CONTAINER}.`];
 
 export interface RedMetricsItem {
   group: string;
@@ -30,17 +31,18 @@ export type GetRedMetricsResponse = RedMetricsItem[];
 
 /**
  * Determines the appropriate document type based on groupBy and filter parameters.
- * ServiceTransactionMetric is more efficient but doesn't have 'transaction.name'.
- * Use TransactionMetric when filtering or grouping by transaction.name.
+ * ServiceTransactionMetric is more efficient but only has service.name, service.environment, and transaction.type dimensions.
+ * Use TransactionMetric when filtering or grouping by transaction.name, host.*, or container.*.
  */
 function getDocumentType(
   groupBy: string,
   filter?: string
 ): ApmDocumentType.TransactionMetric | ApmDocumentType.ServiceTransactionMetric {
-  const requiresTransactionName =
-    groupBy === TRANSACTION_NAME || (filter && filter.includes(TRANSACTION_NAME));
+  const requiresTransactionMetric = TRANSACTION_METRIC_ONLY_FIELDS.some(
+    (field) => groupBy.startsWith(field) || (filter && filter.includes(field))
+  );
 
-  return requiresTransactionName
+  return requiresTransactionMetric
     ? ApmDocumentType.TransactionMetric
     : ApmDocumentType.ServiceTransactionMetric;
 }
