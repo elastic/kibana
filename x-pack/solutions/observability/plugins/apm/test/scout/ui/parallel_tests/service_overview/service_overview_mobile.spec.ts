@@ -6,7 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT, test, testData } from '../../fixtures';
+import { test, testData } from '../../fixtures';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -18,8 +19,8 @@ test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] 
     pageObjects: { serviceInventoryPage, serviceDetailsPage },
   }) => {
     await serviceInventoryPage.gotoServiceInventory({
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click on android mobile service', async () => {
@@ -40,8 +41,8 @@ test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] 
     pageObjects: { serviceInventoryPage, serviceDetailsPage },
   }) => {
     await serviceInventoryPage.gotoServiceInventory({
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click on iOS mobile service', async () => {
@@ -61,8 +62,8 @@ test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] 
     pageObjects: { serviceDetailsPage },
   }) => {
     await serviceDetailsPage.goToMobileServiceOverview(testData.SERVICE_MOBILE_ANDROID, {
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify service name is displayed', async () => {
@@ -87,8 +88,8 @@ test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] 
     // Navigate directly to APM service route for a mobile service
     await page.goto(
       `${kbnUrl.app('apm')}/services/${testData.SERVICE_MOBILE_ANDROID}/overview?rangeFrom=${
-        testData.OPBEANS_START_DATE
-      }&rangeTo=${testData.OPBEANS_END_DATE}`
+        testData.START_DATE
+      }&rangeTo=${testData.END_DATE}`
     );
 
     await test.step('Verify redirected to mobile-services route', async () => {

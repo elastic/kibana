@@ -8,8 +8,8 @@
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/generate_id';
 
-export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
-export const OPBEANS_END_DATE = '2021-10-10T00:15:00.000Z';
+export const START_DATE = '2021-10-10T00:00:00.000Z';
+export const END_DATE = '2021-10-10T00:15:00.000Z';
 export const BIGGER_TIMEOUT = 45000;
 
 export const SERVICE_OPBEANS_NODE = 'opbeans-node';

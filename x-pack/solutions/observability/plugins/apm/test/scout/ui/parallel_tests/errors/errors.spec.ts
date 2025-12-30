@@ -20,8 +20,8 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     await errorsPage.gotoServiceErrorsPage(
       testData.SERVICE_OPBEANS_NODE,
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
 
     await test.step('shows empty message when service has no errors', async () => {
@@ -38,8 +38,8 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     await errorsPage.gotoServiceErrorsPage(
       testData.SERVICE_OPBEANS_JAVA,
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
 
     await test.step('shows failed transaction rate and error occurrences charts', async () => {
@@ -94,8 +94,8 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     await errorsPage.gotoErrorDetailsPage(
       testData.SERVICE_OPBEANS_JAVA,
       testData.ERROR_GROUPING_KEY,
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
 
     await test.step('shows error group header', async () => {
@@ -142,8 +142,8 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     await errorsPage.gotoErrorDetailsPage(
       testData.SERVICE_OPBEANS_JAVA,
       nonExistentErrorKey,
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
 
     await test.step('shows zero occurrences badge', async () => {
@@ -157,8 +157,8 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     await errorsPage.gotoServiceErrorsPage(
       testData.SERVICE_OPBEANS_JAVA,
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
 
     await test.step('clicking on an error in the list navigates to error detail page', async () => {
@@ -178,8 +178,8 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     await errorsPage.gotoServiceErrorsPage(
       testData.SERVICE_OPBEANS_JAVA,
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
 
     await test.step('table search input is visible', async () => {

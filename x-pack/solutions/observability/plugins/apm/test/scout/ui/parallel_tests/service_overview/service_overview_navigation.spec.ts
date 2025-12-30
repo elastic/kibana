@@ -18,8 +18,8 @@ test.describe('Service Overview - Navigation', { tag: ['@ess', '@svlOblt'] }, ()
     pageObjects: { serviceInventoryPage, serviceDetailsPage },
   }) => {
     await serviceInventoryPage.gotoServiceInventory({
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify services table is visible', async () => {
@@ -44,8 +44,8 @@ test.describe('Service Overview - Navigation', { tag: ['@ess', '@svlOblt'] }, ()
     pageObjects: { serviceInventoryPage, serviceDetailsPage },
   }) => {
     await serviceInventoryPage.gotoServiceInventory({
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click on service-go service', async () => {
@@ -65,8 +65,8 @@ test.describe('Service Overview - Navigation', { tag: ['@ess', '@svlOblt'] }, ()
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_JAVA,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify transactions table is visible', async () => {
@@ -90,8 +90,8 @@ test.describe('Service Overview - Navigation', { tag: ['@ess', '@svlOblt'] }, ()
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_JAVA,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify errors table is visible', async () => {

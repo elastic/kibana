@@ -28,8 +28,8 @@ globalSetupHook(
       log.info('Fleet agents setup completed');
     }
     const opbeansDataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
-      from: new Date(testData.OPBEANS_START_DATE).getTime(),
-      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
     });
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
@@ -47,24 +47,24 @@ globalSetupHook(
 
     // Generate OTEL service data for OTEL service overview tests
     const otelData = otelSendotlp({
-      from: new Date(testData.OPBEANS_START_DATE).getTime(),
-      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
     });
     await apmSynthtraceEsClient.index(otelData);
     log.info('OTEL service data indexed');
 
     // Generate eDot service data for eDot service overview tests
     const edotData = adserviceEdot({
-      from: new Date(testData.OPBEANS_START_DATE).getTime(),
-      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
     });
     await apmSynthtraceEsClient.index(edotData);
     log.info('eDot service data indexed');
 
     // Generate mobile services data for mobile service overview tests
     const mobileData = mobileServices({
-      from: new Date(testData.OPBEANS_START_DATE).getTime(),
-      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
     });
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');

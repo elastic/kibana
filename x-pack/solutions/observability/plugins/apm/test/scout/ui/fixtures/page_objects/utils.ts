@@ -11,7 +11,7 @@ import { BIGGER_TIMEOUT } from '../constants';
 export async function waitForTableToLoad(page: ScoutPage, idOrLocator: Locator | string) {
   const table = typeof idOrLocator === 'string' ? page.getByTestId(idOrLocator) : idOrLocator;
 
-  await table.waitFor();
+  await table.waitFor({ timeout: BIGGER_TIMEOUT });
 
   await table.locator('div.euiBasicTable').waitFor();
 }

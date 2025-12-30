@@ -6,7 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, testData, BIGGER_TIMEOUT } from '../../fixtures';
+import { test, testData } from '../../fixtures';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -19,8 +20,8 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click View errors link and wait for navigation', async () => {
@@ -41,8 +42,8 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify error is visible in errors table', async () => {
@@ -69,8 +70,8 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click on error link to go to detail page', async () => {
@@ -91,8 +92,8 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click View errors link and wait for navigation', async () => {
@@ -113,8 +114,8 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify error is visible in errors table', async () => {
@@ -141,8 +142,8 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click on error link to go to detail page', async () => {

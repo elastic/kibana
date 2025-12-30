@@ -120,4 +120,3 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
 });
 
 export * as testData from './constants';
-export { BIGGER_TIMEOUT } from './constants';

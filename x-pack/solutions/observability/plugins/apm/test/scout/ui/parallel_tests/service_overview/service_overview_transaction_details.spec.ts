@@ -6,7 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, testData, BIGGER_TIMEOUT } from '../../fixtures';
+import { test, testData } from '../../fixtures';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -19,8 +20,8 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click Transactions tab', async () => {
@@ -48,8 +49,8 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     await transactionDetailsPage.goToTransactionDetails({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       transactionName: testData.OTEL_TRANSACTION_NAME,
-      start: testData.OPBEANS_START_DATE,
-      end: testData.OPBEANS_END_DATE,
+      start: testData.START_DATE,
+      end: testData.END_DATE,
     });
 
     await test.step('Verify waterfall button is visible', async () => {
@@ -66,8 +67,8 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     await transactionDetailsPage.goToTransactionDetails({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
       transactionName: testData.OTEL_TRANSACTION_NAME,
-      start: testData.OPBEANS_START_DATE,
-      end: testData.OPBEANS_END_DATE,
+      start: testData.START_DATE,
+      end: testData.END_DATE,
     });
 
     await test.step('Click on waterfall accordion', async () => {
@@ -93,8 +94,8 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click Transactions tab', async () => {
@@ -122,8 +123,8 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     await transactionDetailsPage.goToTransactionDetails({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       transactionName: testData.EDOT_TRANSACTION_NAME,
-      start: testData.OPBEANS_START_DATE,
-      end: testData.OPBEANS_END_DATE,
+      start: testData.START_DATE,
+      end: testData.END_DATE,
     });
 
     await test.step('Verify waterfall button is visible', async () => {
@@ -144,8 +145,8 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
     await transactionDetailsPage.goToTransactionDetails({
       serviceName: testData.SERVICE_EDOT_ADSERVICE,
       transactionName: testData.EDOT_TRANSACTION_NAME,
-      start: testData.OPBEANS_START_DATE,
-      end: testData.OPBEANS_END_DATE,
+      start: testData.START_DATE,
+      end: testData.END_DATE,
     });
 
     await test.step('Click on waterfall accordion', async () => {

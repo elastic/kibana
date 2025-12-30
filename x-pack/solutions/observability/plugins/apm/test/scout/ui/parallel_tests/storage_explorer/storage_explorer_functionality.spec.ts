@@ -10,8 +10,8 @@ import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
 const timeRange = {
-  rangeFrom: testData.OPBEANS_START_DATE,
-  rangeTo: testData.OPBEANS_END_DATE,
+  rangeFrom: testData.START_DATE,
+  rangeTo: testData.END_DATE,
 };
 
 test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {

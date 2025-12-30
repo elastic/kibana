@@ -11,8 +11,8 @@ test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
     await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
   });
 

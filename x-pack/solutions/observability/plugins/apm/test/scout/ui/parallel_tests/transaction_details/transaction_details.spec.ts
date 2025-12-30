@@ -14,8 +14,8 @@ test.describe('Transaction details', { tag: ['@ess', '@svlOblt'] }, () => {
     await transactionDetailsPage.goToTransactionDetails({
       serviceName: testData.SERVICE_OPBEANS_JAVA,
       transactionName: testData.PRODUCT_TRANSACTION_NAME,
-      start: testData.OPBEANS_START_DATE,
-      end: testData.OPBEANS_END_DATE,
+      start: testData.START_DATE,
+      end: testData.END_DATE,
     });
   });
 

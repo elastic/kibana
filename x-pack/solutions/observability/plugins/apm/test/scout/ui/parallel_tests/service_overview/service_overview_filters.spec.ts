@@ -6,7 +6,8 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, testData, BIGGER_TIMEOUT } from '../../fixtures';
+import { test, testData } from '../../fixtures';
+import { BIGGER_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -18,8 +19,8 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify initial transaction type is request', async () => {
@@ -44,8 +45,8 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Select Worker transaction type', async () => {
@@ -62,8 +63,8 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   test('filters by environment', async ({ page, pageObjects: { serviceDetailsPage } }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify environment filter is visible', async () => {
@@ -83,8 +84,8 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   test('changes comparison window', async ({ pageObjects: { serviceDetailsPage } }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify default comparison is 1 day', async () => {
@@ -103,8 +104,8 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   test('refresh button refreshes data', async ({ pageObjects: { serviceDetailsPage } }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify refresh button is visible', async () => {
@@ -123,8 +124,8 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Open date picker and select new time range', async () => {

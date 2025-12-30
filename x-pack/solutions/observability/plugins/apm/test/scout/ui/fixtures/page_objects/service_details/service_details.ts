@@ -6,12 +6,13 @@
  */
 
 import { createLazyPageObject, type KibanaUrl, type ScoutPage } from '@kbn/scout-oblt';
-import { testData, BIGGER_TIMEOUT } from '../..';
+import { testData } from '../..';
 import { DependenciesTab } from './dependencies_tab';
 import { AlertsTab } from './alerts_tab';
 import { OverviewTab } from './overview_tab';
 import { TransactionsTab } from './transactions_tab';
 import { ErrorsTab } from './errors_tab';
+import { BIGGER_TIMEOUT } from '../../constants';
 
 export class ServiceDetailsPage {
   public readonly SERVICE_NAME = testData.SERVICE_OPBEANS_JAVA;
@@ -47,8 +48,8 @@ export class ServiceDetailsPage {
 
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services/${urlServiceName}?${new URLSearchParams({
-        rangeFrom: overrides.rangeFrom ?? testData.OPBEANS_START_DATE,
-        rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
+        rangeFrom: overrides.rangeFrom ?? testData.START_DATE,
+        rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
     await this.page
@@ -65,8 +66,8 @@ export class ServiceDetailsPage {
 
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/mobile-services/${urlServiceName}/overview?${new URLSearchParams({
-        rangeFrom: overrides.rangeFrom ?? testData.OPBEANS_START_DATE,
-        rangeTo: overrides.rangeTo ?? testData.OPBEANS_END_DATE,
+        rangeFrom: overrides.rangeFrom ?? testData.START_DATE,
+        rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
     await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });

@@ -19,8 +19,8 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_NODE,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Renders service name', async () => {
@@ -69,8 +69,8 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OPBEANS_RUM,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify standard tabs are visible', async () => {

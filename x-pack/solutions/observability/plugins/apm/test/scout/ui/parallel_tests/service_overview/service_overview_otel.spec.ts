@@ -19,8 +19,8 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify service name is displayed', async () => {
@@ -56,8 +56,8 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify instances table has data', async () => {
@@ -73,8 +73,8 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Wait for page to load', async () => {
@@ -103,8 +103,8 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Verify errors table is visible', async () => {
@@ -123,8 +123,8 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click errors tab', async () => {
@@ -142,8 +142,8 @@ test.describe('Service Overview - OTEL Services', { tag: ['@ess', '@svlOblt'] },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
       serviceName: testData.SERVICE_OTEL_SENDOTLP,
-      rangeFrom: testData.OPBEANS_START_DATE,
-      rangeTo: testData.OPBEANS_END_DATE,
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
     });
 
     await test.step('Click service icon and verify metadata popup shows framework name', async () => {
