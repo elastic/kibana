@@ -21,7 +21,7 @@ interface DetermineDelayedAlertsOpts<
   trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-  delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   alertDelay: number;
   startedAt?: string | null;
 }
@@ -41,8 +41,6 @@ export function determineDelayedAlerts<
   alertDelay,
   startedAt,
 }: DetermineDelayedAlertsOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
-  let delayedAlertsCount = 0;
-
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     alert.incrementActiveCount();
@@ -50,11 +48,10 @@ export function determineDelayedAlerts<
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {
       // remove from new alerts and active alerts
-      delete newAlerts[id];
-      delete activeAlerts[id];
       alert.setStatus(ALERT_STATUS_DELAYED);
       delayedAlerts[id] = alert;
-      delayedAlertsCount += 1;
+      delete newAlerts[id];
+      delete activeAlerts[id];
     } else {
       // if the active count is equal to the alertDelay it is considered a new alert
       if (alert.getActiveCount() === alertDelay) {
@@ -73,6 +70,8 @@ export function determineDelayedAlerts<
     const activeCount = alert.getActiveCount();
     if (activeCount > 0 && activeCount < alertDelay) {
       // remove from recovered alerts
+      alert.setStatus(ALERT_STATUS_DELAYED);
+      delayedAlerts[id] = alert;
       delete recoveredAlerts[id];
       delete trackedRecoveredAlerts[id];
     }

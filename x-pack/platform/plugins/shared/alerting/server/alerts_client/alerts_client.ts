@@ -22,8 +22,9 @@ import {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   ALERT_STATUS_DELAYED,
+  ALERT_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, isEmpty, keys } from 'lodash';
+import { flatMap, get, isEmpty, keys, values } from 'lodash';
 import type {
   MsearchRequestItem,
   MsearchResponseItem,
@@ -493,30 +494,35 @@ export class AlertsClient<
     const delayedAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_DELAYED);
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
 
+    const delayedAlertsToIndex: Array<Alert & AlertData> = [];
+    for (const delayedAlert of values(delayedAlerts)) {
+      delayedAlertsToIndex.push(
+        buildDelayedAlert<
+          AlertData,
+          LegacyState,
+          LegacyContext,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >({
+          legacyAlert: delayedAlert,
+          timestamp: currentTime,
+          rule: this.rule,
+        })
+      );
+    }
+
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
-
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawActiveAlerts)) {
-      const delayedAlert = delayedAlerts[id];
       const activeAlert = activeAlerts[id];
-
+      const delayedAlert = delayedAlerts[id];
+      // we keep the delayed alerts in trackedActiveAlerts but we don't index them here
       if (delayedAlert) {
-        activeAlertsToIndex.push(
-          buildDelayedAlert<
-            AlertData,
-            LegacyState,
-            LegacyContext,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >({
-            legacyAlert: delayedAlert,
-            timestamp: currentTime,
-            rule: this.rule,
-          })
-        );
-      } else if (activeAlert) {
+        continue;
+      }
+      if (activeAlert) {
         const trackedAlert = this.trackedAlerts.get(activeAlert.getUuid());
         if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
           const isImproving = isAlertImproving<
@@ -611,37 +617,37 @@ export class AlertsClient<
       }
     }
 
-    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
-      (alert: Alert & AlertData) => {
-        const alertUuid = get(alert, ALERT_UUID);
-        const alertIndex = this.trackedAlerts.indices[alertUuid];
-        if (!alertIndex) {
-          return true;
-        } else if (!isValidAlertIndexName(alertIndex)) {
-          this.options.logger.warn(
-            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported ${this.ruleInfoMessage}.`,
-            this.logTags
-          );
-          return false;
-        }
+    const alertsToIndex = [
+      ...activeAlertsToIndex,
+      ...recoveredAlertsToIndex,
+      ...delayedAlertsToIndex,
+    ].filter((alert: Alert & AlertData) => {
+      const alertUuid = get(alert, ALERT_UUID);
+      const alertIndex = this.trackedAlerts.indices[alertUuid];
+      if (!alertIndex) {
         return true;
+      } else if (!isValidAlertIndexName(alertIndex)) {
+        this.options.logger.warn(
+          `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported ${this.ruleInfoMessage}.`,
+          this.logTags
+        );
+        return false;
       }
-    );
+      return true;
+    });
 
     if (alertsToIndex.length > 0) {
       const bulkBody = flatMap(
         alertsToIndex.map((alert: Alert & AlertData) => {
           const alertUuid = get(alert, ALERT_UUID);
-          return [
-            getBulkMeta(
-              alertUuid,
-              this.trackedAlerts.indices[alertUuid],
-              this.trackedAlerts.seqNo[alertUuid],
-              this.trackedAlerts.primaryTerm[alertUuid],
-              this.isUsingDataStreams()
-            ),
-            alert,
-          ];
+          return getBulkMeta(
+            alertUuid,
+            this.trackedAlerts.indices[alertUuid],
+            this.trackedAlerts.seqNo[alertUuid],
+            this.trackedAlerts.primaryTerm[alertUuid],
+            this.isUsingDataStreams(),
+            alert
+          );
         })
       );
 
@@ -688,26 +694,53 @@ export class AlertsClient<
       index: string | undefined,
       seqNo: number | undefined,
       primaryTerm: number | undefined,
-      isUsingDataStreams: boolean
+      isUsingDataStreams: boolean,
+      alert: Alert & AlertData
     ) {
-      if (index && seqNo != null && primaryTerm != null) {
-        return {
-          index: {
-            _id: uuid,
-            _index: index,
-            if_seq_no: seqNo,
-            if_primary_term: primaryTerm,
-            require_alias: false,
+      const shouldDelete = isRecoveredDelayedAlert(alert);
+      if (shouldDelete) {
+        // recovered delayed alerts should always create a new document
+        return [
+          {
+            delete: {
+              _id: uuid,
+              _index: index,
+            },
           },
-        };
+        ];
       }
 
-      return {
-        create: {
-          _id: uuid,
-          ...(isUsingDataStreams ? {} : { require_alias: true }),
+      if (index && seqNo != null && primaryTerm != null) {
+        return [
+          {
+            index: {
+              _id: uuid,
+              _index: index,
+              if_seq_no: seqNo,
+              if_primary_term: primaryTerm,
+              require_alias: false,
+            },
+          },
+          alert,
+        ];
+      }
+
+      return [
+        {
+          create: {
+            _id: uuid,
+            ...(isUsingDataStreams ? {} : { require_alias: true }),
+          },
         },
-      };
+        alert,
+      ];
+    }
+
+    function isRecoveredDelayedAlert(alert: Alert & AlertData) {
+      return (
+        get(alert, ALERT_STATUS) === ALERT_STATUS_DELAYED &&
+        get(alert, ALERT_ACTION_GROUP) === undefined
+      );
     }
   }
 
