@@ -27,7 +27,7 @@ export function validateInlineCasts(
     visitInlineCast: (node) => {
       const castFunction = getFunctionForInlineCast(node.castType);
       if (!castFunction) {
-        messages.push(errors.unknownInlineCastType(node.castType, node.location));
+        messages.push(errors.unknownCastingType(node.castType, node.location));
         return;
       }
 

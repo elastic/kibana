@@ -51,9 +51,9 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
-    case 'unknownInlineCastType':
+    case 'unknownCastingType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownInlineCastType', {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownCastingType', {
           defaultMessage: 'Unknown inline cast type "::{castType}"',
           values: { castType: out.castType },
         }),
@@ -487,8 +487,8 @@ export const errors = {
   unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
 
-  unknownInlineCastType: (castType: string, location: ESQLLocation): ESQLMessage =>
-    errors.byId('unknownInlineCastType', location, { castType }),
+  unknownCastingType: (castType: string, location: ESQLLocation): ESQLMessage =>
+    errors.byId('unknownCastingType', location, { castType }),
 
   invalidInlineCast: (castType: string, valueType: string, location: ESQLLocation): ESQLMessage =>
     errors.byId('invalidInlineCast', location, { castType, valueType }),

@@ -28,7 +28,7 @@ import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
-import type { ESQLAstItem, ESQLFunction } from '../../../types';
+import type { ESQLAstItem, ESQLFunction, InlineCastingType } from '../../../types';
 import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
@@ -494,6 +494,6 @@ export const buildColumnSuggestions = (
  *
  * It returns undefined if the inline cast data type is not supported.
  */
-export function getFunctionForInlineCast(dataType: string): string | undefined {
-  return inlineCastsMapping[dataType];
+export function getFunctionForInlineCast(castingType: InlineCastingType): string | undefined {
+  return inlineCastsMapping[castingType];
 }

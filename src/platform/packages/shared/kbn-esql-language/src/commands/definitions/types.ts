@@ -252,7 +252,7 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
-  unknownInlineCastType: {
+  unknownCastingType: {
     message: string;
     type: { castType: string };
   };
