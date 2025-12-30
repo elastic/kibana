@@ -98,7 +98,7 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
   for (const token of query.tokens) {
     switch (token.type) {
       // PIPE
-      case 30: {
+      case 51: {
         const pos = token.start;
 
         annotations.push([
@@ -109,8 +109,8 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
 
         break;
       }
-      case 34: // BY
-      case 78: {
+      case 58: // BY
+      case 106: {
         // METADATA
         const pos = token.start;
 
