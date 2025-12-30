@@ -54,7 +54,7 @@ export const Status = memo(() => {
       hasBorder
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.header.statusTitle"
+          id="xpack.securitySolution.attackDetailsFlyout.header.statusTitle"
           defaultMessage="Status"
         />
       }

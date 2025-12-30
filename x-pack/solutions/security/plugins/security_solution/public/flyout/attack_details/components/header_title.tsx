@@ -50,11 +50,15 @@ export const HeaderTitle = memo(() => {
         {ATTACK_HEADER_BADGE}
       </EuiBadge>
       <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
-      <EuiSpacer size="xs" />
+      {timestamp && (
+        <>
+          <PreferenceFormattedDate value={new Date(timestamp)} />
+          <EuiSpacer size="xs" />
+        </>
+      )}
       <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'bolt'} />
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap data-test-subj={''}>
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem css={blockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
