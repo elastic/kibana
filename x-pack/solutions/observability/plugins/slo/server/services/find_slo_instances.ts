@@ -48,7 +48,7 @@ export async function findSLOInstances(
                 {
                   wildcard: {
                     'slo.instanceId': {
-                      value: `*${search}*`,
+                      value: `*${search.replace(/^\*/, '').replace(/\*$/, '')}*`,
                       case_insensitive: true,
                     },
                   },
