@@ -16,15 +16,13 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFieldNumber,
-  EuiCallOut,
-  EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import type { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
 import type { IErrorObject } from '../../types';
+import RecommendedTimeSizeWarning from './components/recommended_time_size_warning';
 
 export interface ForLastExpressionProps {
   description?: string;
@@ -158,33 +156,3 @@ export const ForLastExpression = ({
 
 // eslint-disable-next-line import/no-default-export
 export { ForLastExpression as default };
-
-function RecommendedTimeSizeWarning() {
-  const description = i18n.translate(
-    'xpack.triggersActionsUI.observability.rules.customThreshold.recommendedTimeSizeWarning.description',
-    {
-      defaultMessage:
-        'Recommended minimum value is 5 minutes. This is to ensure, that the alert has enough data to evaluate. If you choose a lower values, the alert may not work as expected.',
-    }
-  );
-
-  return (
-    <>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.triggersActionsUI.observability.rules.customThreshold.recommendedTimeSizeWarning.title',
-          { defaultMessage: `Value is too low, possible alerting noise` }
-        )}
-        color="warning"
-        iconType="warning"
-        size="s"
-        css={css`
-          max-width: 400px;
-        `}
-      >
-        <p>{description}</p>
-      </EuiCallOut>
-    </>
-  );
-}
