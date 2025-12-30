@@ -7,23 +7,25 @@
 
 import { of, Observable } from 'rxjs';
 import { z } from '@kbn/zod';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
-  AIMessageChunk,
   HumanMessage,
   isAIMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages';
-import {
+import type {
   ChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
   ChatCompletionChunkEvent,
   ChatCompletionEvent,
-  ChatCompletionEventType,
   ChatCompletionTokenCount,
   InferenceConnector,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
   InferenceConnectorType,
   MessageRole,
   createInferenceRequestError,
@@ -36,6 +38,7 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     connectorId: 'connector-id',
     name: 'My connector',
     config: {},
+    capabilities: {},
     ...parts,
   };
 };
@@ -582,11 +585,8 @@ describe('InferenceChatModel', () => {
           ],
         },
         {
-          tool_calls: [{ toolCallId: '', index: 0, function: { name: 'myfun', arguments: '' } }],
-        },
-        {
           tool_calls: [
-            { toolCallId: '', index: 0, function: { name: 'ction', arguments: ' { "' } },
+            { toolCallId: '', index: 0, function: { name: 'myfunction', arguments: ' { "' } },
           ],
         },
         {
@@ -607,7 +607,8 @@ describe('InferenceChatModel', () => {
         concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
       }
 
-      expect(allChunks.length).toBe(5);
+      expect(allChunks.length).toBe(4);
+
       expect(concatChunk!.tool_calls).toEqual([
         {
           id: 'my-tool-call-id',

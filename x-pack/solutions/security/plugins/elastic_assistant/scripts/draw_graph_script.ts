@@ -12,7 +12,6 @@ import path from 'path';
 import {
   ActionsClientChatOpenAI,
   type ActionsClientLlm,
-  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
@@ -49,7 +48,7 @@ const testPrompt = ChatPromptTemplate.fromMessages([
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as ActionsClientChatOpenAI;
 
 const createLlmInstance = () => {
   return Promise.resolve(mockLlm);
