@@ -32,11 +32,13 @@ interface OAuthConnectorSecrets {
   clientId?: string;
   clientSecret?: string;
   tokenUrl?: string;
+  useBasicAuth?: boolean;
 }
 
 interface OAuthConnectorConfig {
   clientId?: string;
   tokenUrl?: string;
+  useBasicAuth?: boolean;
 }
 
 /**
@@ -289,6 +291,7 @@ export const oauthCallbackRoute = (
           const clientId = secrets.clientId || config?.clientId;
           const clientSecret = secrets.clientSecret;
           const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
+          const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true; // Default to true (OAuth 2.0 recommended practice)
 
           if (!clientId || !clientSecret || !tokenUrl) {
             throw new Error(
@@ -309,7 +312,8 @@ export const oauthCallbackRoute = (
               clientId,
               clientSecret,
             },
-            configurationUtilities
+            configurationUtilities,
+            useBasicAuth
           );
 
           // Store tokens

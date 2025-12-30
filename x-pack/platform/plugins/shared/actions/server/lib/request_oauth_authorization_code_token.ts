@@ -38,7 +38,8 @@ export async function requestOAuthAuthorizationCodeToken(
   tokenUrl: string,
   logger: Logger,
   params: AuthorizationCodeOAuthRequestParams,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  useBasicAuth: boolean = true // Default to true (OAuth 2.0 recommended practice)
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<AuthorizationCodeOAuthRequestParams>(
     tokenUrl,
@@ -46,6 +47,6 @@ export async function requestOAuthAuthorizationCodeToken(
     configurationUtilities,
     logger,
     rewriteBodyRequest(params),
-    true // Use HTTP Basic Auth for client credentials (required by Notion and recommended by OAuth 2.0 spec)
+    useBasicAuth
   );
 }

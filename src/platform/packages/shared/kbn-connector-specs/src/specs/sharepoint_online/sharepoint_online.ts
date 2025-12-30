@@ -33,6 +33,7 @@ export const SharepointOnline: ConnectorSpec = {
           authorizationUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
           tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
           scope: 'https://graph.microsoft.com/.default offline_access',
+          useBasicAuth: true, // Microsoft supports both methods, but Basic Auth is recommended
         },
       },
     ],
