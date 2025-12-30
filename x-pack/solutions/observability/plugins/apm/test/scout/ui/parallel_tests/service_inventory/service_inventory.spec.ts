@@ -10,10 +10,10 @@ import { test, testData } from '../../fixtures';
 test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
-    await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(
-      testData.START_DATE,
-      testData.END_DATE
-    );
+    await serviceInventoryPage.gotoServiceInventory({
+      rangeFrom: testData.START_DATE,
+      rangeTo: testData.END_DATE,
+    });
   });
 
   test('renders page with selected date range', async ({ page }) => {

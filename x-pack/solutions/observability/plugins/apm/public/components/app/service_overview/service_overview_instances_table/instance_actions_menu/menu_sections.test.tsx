@@ -154,14 +154,15 @@ describe('getMenuSections', () => {
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
+    const actionKeys = new Set(allActions.map((action) => action.key));
 
     // Should have pod logs, pod metrics, container logs, container metrics, filter by instance, and metrics
-    expect(allActions.find((action) => action.key === 'podLogs')).toBeDefined();
-    expect(allActions.find((action) => action.key === 'podMetrics')).toBeDefined();
-    expect(allActions.find((action) => action.key === 'containerLogs')).toBeDefined();
-    expect(allActions.find((action) => action.key === 'containerMetrics')).toBeDefined();
-    expect(allActions.find((action) => action.key === 'filterByInstance')).toBeDefined();
-    expect(allActions.find((action) => action.key === 'analyzeRuntimeMetric')).toBeDefined();
+    expect(actionKeys.has('podLogs')).toBe(true);
+    expect(actionKeys.has('podMetrics')).toBe(true);
+    expect(actionKeys.has('containerLogs')).toBe(true);
+    expect(actionKeys.has('containerMetrics')).toBe(true);
+    expect(actionKeys.has('filterByInstance')).toBe(true);
+    expect(actionKeys.has('analyzeRuntimeMetric')).toBe(true);
   });
 
   it('does not return pod metrics action when assetDetailsLocator is not provided', () => {

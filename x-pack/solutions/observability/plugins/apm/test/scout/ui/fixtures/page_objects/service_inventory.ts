@@ -16,11 +16,6 @@ export class ServiceInventoryPage {
     this.servicesTable = this.page.locator('.euiBasicTable');
   }
 
-  async gotoDetailedServiceInventoryWithDateSelected(start: string, end: string) {
-    await this.page.goto(`${this.kbnUrl.app('apm')}/services?&rangeFrom=${start}&rangeTo=${end}`);
-    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: BIGGER_TIMEOUT });
-  }
-
   async gotoServiceInventory(overrides: { rangeFrom?: string; rangeTo?: string } = {}) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/services?${new URLSearchParams({
@@ -28,6 +23,7 @@ export class ServiceInventoryPage {
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
+    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: BIGGER_TIMEOUT });
     await this.waitForServicesTableToLoad();
   }
 

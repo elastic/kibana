@@ -64,7 +64,6 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
   });
 
   test('hides dependencies tab and instances table for RUM service', async ({
-    page,
     pageObjects: { serviceDetailsPage },
   }) => {
     await serviceDetailsPage.overviewTab.goToTab({
@@ -74,16 +73,14 @@ test.describe('Service Overview - Components', { tag: ['@ess', '@svlOblt'] }, ()
     });
 
     await test.step('Verify standard tabs are visible', async () => {
-      await expect(serviceDetailsPage.getOverviewTab()).toBeVisible();
-      await expect(serviceDetailsPage.getTransactionsTab()).toBeVisible();
-      await expect(serviceDetailsPage.getErrorsTab()).toBeVisible();
+      await expect(serviceDetailsPage.overviewTab.tab).toBeVisible();
+      await expect(serviceDetailsPage.transactionsTab.tab).toBeVisible();
+      await expect(serviceDetailsPage.errorsTab.tab).toBeVisible();
       await expect(serviceDetailsPage.getServiceMapTab()).toBeVisible();
     });
 
     await test.step('Verify dependencies tab is NOT visible', async () => {
-      const tabs = page.locator('.euiTabs .euiTab__content');
-      const tabTexts = await tabs.allTextContents();
-      expect(tabTexts).not.toContain('Dependencies');
+      await expect(serviceDetailsPage.dependenciesTab.tab).toBeHidden();
     });
 
     await test.step('Verify instances table is hidden', async () => {

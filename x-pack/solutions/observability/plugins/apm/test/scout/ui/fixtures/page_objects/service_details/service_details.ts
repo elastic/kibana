@@ -80,19 +80,7 @@ export class ServiceDetailsPage {
   }
   // #endregion
 
-  // #region Tab Getters
-  getOverviewTab() {
-    return this.page.getByRole('tab', { name: 'Overview' });
-  }
-
-  getTransactionsTab() {
-    return this.page.getByRole('tab', { name: 'Transactions' });
-  }
-
-  getErrorsTab() {
-    return this.page.getByRole('tab', { name: 'Errors' });
-  }
-
+  // #region Tabs
   getServiceMapTab() {
     return this.page.getByRole('tab', { name: 'Service map' });
   }

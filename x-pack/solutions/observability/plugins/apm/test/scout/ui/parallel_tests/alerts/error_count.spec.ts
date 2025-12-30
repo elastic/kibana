@@ -28,7 +28,7 @@ test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
     apiServices,
   }) => {
     await test.step('land on service inventory and opens alerts context menu', async () => {
-      await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(START_DATE, END_DATE);
+      await serviceInventoryPage.gotoServiceInventory({ rangeFrom: START_DATE, rangeTo: END_DATE });
       await alertsControls.openContextMenu();
     });
 
