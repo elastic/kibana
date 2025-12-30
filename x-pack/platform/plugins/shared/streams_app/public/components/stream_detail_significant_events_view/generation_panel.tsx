@@ -21,8 +21,9 @@ import { i18n } from '@kbn/i18n';
 import type { FeatureSelectorProps } from './feature_selector';
 import { FeaturesSelector } from './feature_selector';
 import { AssetImage } from '../asset_image';
-import { ConnectorListButton } from '../connector_list_button/connector_list_button';
+import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import type { Flow } from './add_significant_event_flyout/types';
+import type { AIFeatures } from '../../hooks/use_ai_features';
 
 export function SignificantEventsGenerationPanel({
   features,
@@ -34,6 +35,7 @@ export function SignificantEventsGenerationPanel({
   isGeneratingQueries,
   isSavingManualEntry,
   selectedFlow,
+  aiFeatures,
 }: FeatureSelectorProps & {
   onFeatureIdentificationClick: () => void;
   onManualEntryClick: () => void;
@@ -41,6 +43,7 @@ export function SignificantEventsGenerationPanel({
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
   selectedFlow?: Flow;
+  aiFeatures: AIFeatures | null;
 }) {
   const [generatingFrom, setGeneratingFrom] = useState<'all_data' | 'features'>(
     selectedFeatures.length === 0 ? 'all_data' : 'features'
@@ -55,6 +58,7 @@ export function SignificantEventsGenerationPanel({
               identifyFeatures={onFeatureIdentificationClick}
               isGeneratingQueries={isGeneratingQueries}
               isSavingManualEntry={isSavingManualEntry}
+              aiFeatures={aiFeatures}
             />
           ) : (
             <GenerationContext
@@ -68,6 +72,7 @@ export function SignificantEventsGenerationPanel({
               }}
               generatingFrom={generatingFrom}
               isSavingManualEntry={isSavingManualEntry}
+              aiFeatures={aiFeatures}
             />
           )}
         </EuiPanel>
@@ -105,7 +110,7 @@ export function SignificantEventsGenerationPanel({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <ConnectorListButton
+            <ConnectorListButtonBase
               buttonProps={{
                 iconType: 'sparkles',
                 onClick: () => {
@@ -123,6 +128,7 @@ export function SignificantEventsGenerationPanel({
                   }
                 ),
               }}
+              aiFeatures={aiFeatures}
             />
           </EuiFlexItem>
 
@@ -157,11 +163,13 @@ function GenerationContext({
   onGenerateSuggestionsClick,
   generatingFrom,
   isSavingManualEntry,
+  aiFeatures,
 }: FeatureSelectorProps & {
   isGeneratingQueries: boolean;
   onGenerateSuggestionsClick: () => void;
   generatingFrom: 'all_data' | 'features';
   isSavingManualEntry: boolean;
+  aiFeatures: AIFeatures | null;
 }) {
   return (
     <>
@@ -185,7 +193,7 @@ function GenerationContext({
               'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
               {
                 defaultMessage:
-                  'Select the subset of data you want to generate the significant events for.',
+                  'Select the subset of data you want to generate the significant events for. Generation uses the last 24 hours of data.',
               }
             )}
           </EuiText>
@@ -210,7 +218,7 @@ function GenerationContext({
       <EuiSpacer size="s" />
 
       <EuiFlexItem>
-        <ConnectorListButton
+        <ConnectorListButtonBase
           buttonProps={{
             iconType: 'sparkles',
             isLoading: isGeneratingQueries && generatingFrom === 'features',
@@ -224,6 +232,7 @@ function GenerationContext({
               }
             ),
           }}
+          aiFeatures={aiFeatures}
         />
       </EuiFlexItem>
     </>
@@ -234,10 +243,12 @@ function IdentifyFeatures({
   identifyFeatures,
   isGeneratingQueries,
   isSavingManualEntry,
+  aiFeatures,
 }: {
   identifyFeatures: () => void;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
+  aiFeatures: AIFeatures | null;
 }) {
   return (
     <>
@@ -261,7 +272,7 @@ function IdentifyFeatures({
               'xpack.streams.significantEvents.significantEventsGenerationPanel.indentifyFeaturesDescription',
               {
                 defaultMessage:
-                  'Features are logical subsets of the data and they provide the best context for the generation of significant events. Identify features first.',
+                  'Features are logical subsets of the data and they provide the best context for the generation of significant events. Identify features first. Generation uses the last 24 hours of data.',
               }
             )}
           </EuiText>
@@ -275,7 +286,7 @@ function IdentifyFeatures({
       <EuiSpacer size="s" />
 
       <EuiFlexItem>
-        <ConnectorListButton
+        <ConnectorListButtonBase
           buttonProps={{
             iconType: 'sparkles',
             onClick: () => identifyFeatures(),
@@ -288,6 +299,7 @@ function IdentifyFeatures({
               }
             ),
           }}
+          aiFeatures={aiFeatures}
         />
       </EuiFlexItem>
     </>

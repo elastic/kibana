@@ -222,7 +222,7 @@ export function getTextBasedDatasource({
     const context = state.initialContext;
     // on text based mode we offer suggestions for the query and not for a specific field
     if (fieldName) return [];
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.id && context.query) {
       const newLayerId = generateId();
       const textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
@@ -260,7 +260,7 @@ export function getTextBasedDatasource({
               indexPatternRefs: [
                 {
                   id: context.dataViewSpec.id,
-                  title: context.dataViewSpec.title,
+                  title: context.dataViewSpec.title ?? '',
                   timeField: context.dataViewSpec.timeFieldName,
                 },
               ],

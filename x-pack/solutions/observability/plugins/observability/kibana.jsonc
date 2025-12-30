@@ -44,7 +44,7 @@
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
-      "onechat",
+      "agentBuilder",
       "aiops",
       "cases",
       "discover",
@@ -67,7 +67,8 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]
   }
