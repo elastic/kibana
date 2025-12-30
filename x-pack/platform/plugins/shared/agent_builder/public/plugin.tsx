@@ -14,7 +14,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { docLinks } from '../common/doc_links';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -101,7 +100,6 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginStart {
     const { http } = core;
     const { licensing, inference } = startDependencies;
-    docLinks.setDocLinks(core.docLinks.links);
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService();
