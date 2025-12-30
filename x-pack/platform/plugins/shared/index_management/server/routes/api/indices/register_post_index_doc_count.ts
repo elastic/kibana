@@ -14,7 +14,7 @@ interface Bucket {
   doc_count: number;
 }
 
-export function registerGetIndexDocCountRoute({
+export function registerPostIndexDocCountRoute({
   router,
   lib: { handleEsError },
 }: RouteDependencies) {
@@ -29,7 +29,7 @@ export function registerGetIndexDocCountRoute({
       },
       validate: {
         body: schema.object({
-          indexNames: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
+          indexNames: schema.arrayOf(schema.string(), { minSize: 1 }),
         }),
       },
     },
@@ -38,26 +38,30 @@ export function registerGetIndexDocCountRoute({
       const { indexNames } = request.body;
 
       try {
-        const result = await client.search({
+        const result = await client.search<unknown, { by_index: { buckets: Bucket[] } }>({
           index: indexNames,
           size: 0,
           aggs: {
             by_index: {
               terms: {
                 field: '_index',
+                size: indexNames.length,
               },
             },
           },
         });
 
-        // @ts-expect-error incorrect types in package
-        const values = ((result.aggregations?.by_index.buckets as Bucket[]) || []).reduce(
-          (col, bucket) => {
-            col[bucket.key] = bucket.doc_count;
-            return col;
-          },
-          {} as Record<string, number>
-        );
+        const values = (result.aggregations?.by_index.buckets || []).reduce((col, bucket) => {
+          col[bucket.key] = bucket.doc_count;
+          return col;
+        }, {} as Record<string, number>);
+
+        // add zeros back in since they won't be present in the agg results
+        indexNames.forEach((indexName) => {
+          if (!(indexName in values)) {
+            values[indexName] = 0;
+          }
+        });
 
         return response.ok({ body: values });
       } catch (error) {
