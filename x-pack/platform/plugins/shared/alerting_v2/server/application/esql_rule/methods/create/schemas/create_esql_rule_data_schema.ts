@@ -10,14 +10,14 @@ import { validateDuration } from '../../../../../lib/duration';
 
 export const createEsqlRuleDataSchema = schema.object(
   {
-    name: schema.string({ minLength: 1 }),
-    tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    name: schema.string({ minLength: 1, maxLength: 64 }),
+    tags: schema.arrayOf(schema.string({ maxLength: 64 }), { defaultValue: [], maxSize: 100 }),
     schedule: schema.string({ validate: validateDuration }),
     enabled: schema.boolean({ defaultValue: true }),
-    esql: schema.string({ minLength: 1 }),
-    timeField: schema.string({ minLength: 1 }),
+    esql: schema.string({ minLength: 1, maxLength: 10000 }),
+    timeField: schema.string({ minLength: 1, maxLength: 128, defaultValue: '@timestamp' }),
     lookbackWindow: schema.string({ validate: validateDuration }),
-    groupKey: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    groupKey: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 16 }),
   },
   { unknowns: 'allow' }
 );

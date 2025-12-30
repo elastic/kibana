@@ -16,8 +16,6 @@ import type { RawEsqlRule } from '../../../../saved_objects';
 import { ensureRuleExecutorTaskScheduled } from '../../../../rule_executor/schedule';
 import { createEsqlRuleDataSchema } from './schemas';
 import type { CreateEsqlRuleParams, EsqlRuleResponse } from './types';
-import type { CreateAPIKeyResult } from '../../lib/api_key';
-import { apiKeyAsEsqlRuleDomainProperties, generateAPIKeyName } from '../../lib/api_key';
 
 export async function createEsqlRule(
   context: {
@@ -28,9 +26,6 @@ export async function createEsqlRule(
     spaceId: string;
     namespace?: string;
     getUserName: () => Promise<string | null>;
-    isAuthenticationTypeAPIKey: () => boolean;
-    getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
-    createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   },
   { data, options }: CreateEsqlRuleParams
 ): Promise<EsqlRuleResponse> {
@@ -43,20 +38,6 @@ export async function createEsqlRule(
   const id = options?.id ?? SavedObjectsUtils.generateId();
   const username = await context.getUserName();
   const nowIso = new Date().toISOString();
-
-  let createdAPIKey = null;
-  let isAuthTypeApiKey = false;
-  try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName('esql', data.name);
-    createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await context.createAPIKey(name)
-      : null;
-  } catch (error) {
-    throw Boom.badRequest(`Error creating ES|QL rule: could not create API key - ${error.message}`);
-  }
 
   const attributes: RawEsqlRule = {
     name: data.name,
@@ -72,7 +53,6 @@ export async function createEsqlRule(
     createdAt: nowIso,
     updatedBy: username,
     updatedAt: nowIso,
-    ...apiKeyAsEsqlRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
   };
 
   try {
@@ -109,6 +89,5 @@ export async function createEsqlRule(
     }
   }
 
-  const { apiKey, ...rest } = attributes;
-  return { id, ...rest, scheduledTaskId };
+  return { id, ...attributes, scheduledTaskId };
 }

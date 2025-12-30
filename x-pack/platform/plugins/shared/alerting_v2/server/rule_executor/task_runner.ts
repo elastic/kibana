@@ -43,19 +43,21 @@ export function createRuleExecutorTaskRunner({
           params.spaceId
         );
 
-        const encryptedSavedObjectsClient = pluginsStart.encryptedSavedObjects.getClient({
-          includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
-        });
-
         let rawRule: RawEsqlRule;
         try {
-          const decrypted =
-            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawEsqlRule>(
-              ESQL_RULE_SAVED_OBJECT_TYPE,
-              params.ruleId,
-              { namespace }
+          if (!fakeRequest) {
+            throw new Error(
+              `Cannot execute rule executor task without Task Manager fakeRequest. Ensure the task is scheduled with an API key (task id: ${taskInstance.id})`
             );
-          rawRule = decrypted.attributes;
+          }
+
+          const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
+            includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
+          });
+          const doc = await soClient.get<RawEsqlRule>(ESQL_RULE_SAVED_OBJECT_TYPE, params.ruleId, {
+            namespace,
+          });
+          rawRule = doc.attributes;
         } catch (e) {
           if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
             // Rule was deleted.

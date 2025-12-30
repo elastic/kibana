@@ -41,7 +41,6 @@ export const module = new ContainerModule(({ bind }) => {
     // Saved Objects + Encrypted Saved Objects registration
     setupSavedObjects({
       savedObjects: container.get(CoreSetup('savedObjects')),
-      encryptedSavedObjects: container.get(PluginSetup('encryptedSavedObjects')),
       logger,
     });
 

@@ -11,7 +11,6 @@ import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { HttpServiceStart } from '@kbn/core-http-server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -22,12 +21,6 @@ import { CoreStart, Request, Response } from '@kbn/core-di-server';
 import { DEFAULT_ALERTING_V2_ROUTE_SECURITY } from './constants';
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { updateEsqlRule, updateEsqlRuleDataSchema } from '../application/esql_rule/methods/update';
-
-import {
-  createAPIKey,
-  getAuthenticationAPIKey,
-  isAuthenticationTypeAPIKey,
-} from '../application/esql_rule/lib/api_key';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
 
@@ -56,8 +49,6 @@ export class UpdateEsqlRuleRoute {
     @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
     @inject(PluginStart('spaces')) private readonly spaces: SpacesPluginStart,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @inject(PluginStart('encryptedSavedObjects'))
-    private readonly encryptedSavedObjects: EncryptedSavedObjectsPluginStart,
     @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
   ) {}
 
@@ -71,25 +62,16 @@ export class UpdateEsqlRuleRoute {
       const savedObjectsClient = this.savedObjects.getScopedClient(this.request, {
         includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
       });
-      const encryptedSavedObjectsClient = this.encryptedSavedObjects.getClient({
-        includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
-      });
-
       const updated = await updateEsqlRule(
         {
           logger: this.logger as any,
           request: this.request,
           taskManager: this.taskManager,
           savedObjectsClient,
-          encryptedSavedObjectsClient,
           spaceId,
           namespace,
           getUserName: async () =>
             this.security?.authc.getCurrentUser(this.request)?.username ?? null,
-          isAuthenticationTypeAPIKey: () => isAuthenticationTypeAPIKey(this.security, this.request),
-          getAuthenticationAPIKey: (name: string) => getAuthenticationAPIKey(this.request, name),
-          createAPIKey: (name: string) =>
-            createAPIKey({ security: this.security, request: this.request, name }),
         },
         { id: (this.request.params as any).id, data: this.request.body as any }
       );

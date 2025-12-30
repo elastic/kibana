@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
  * Attributes for the ES|QL rule saved object.
  *
  * Shape mirrors the external API contract (string schedule, esql, etc) and
- * includes internal fields needed for task scheduling and credentials.
+ * includes internal fields needed for task scheduling.
  */
 export const rawEsqlRuleSchema = schema.object({
   name: schema.string(),
@@ -23,10 +23,6 @@ export const rawEsqlRuleSchema = schema.object({
   timeField: schema.string(),
   lookbackWindow: schema.string(),
   groupKey: schema.arrayOf(schema.string(), { defaultValue: [] }),
-
-  apiKey: schema.nullable(schema.string()),
-  apiKeyOwner: schema.nullable(schema.string()),
-  apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
 
   scheduledTaskId: schema.maybe(schema.nullable(schema.string())),
 

@@ -12,7 +12,6 @@
     "requiredPlugins": [
       "taskManager",
       "features",
-      "encryptedSavedObjects",
       "spaces",
       "data"
     ],

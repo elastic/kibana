@@ -11,10 +11,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
-} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -25,14 +21,12 @@ export type AlertingServerStart = void;
 export interface AlertingServerSetupDependencies {
   taskManager: TaskManagerSetupContract;
   features: FeaturesPluginSetup;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   spaces: SpacesPluginSetup;
 }
 
 export interface AlertingServerStartDependencies {
   taskManager: TaskManagerStartContract;
   features: FeaturesPluginStart;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   spaces: SpacesPluginStart;
   data: DataPluginStart;
   security?: SecurityPluginStart;

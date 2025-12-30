@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
@@ -20,8 +19,6 @@ import {
 import { updateEsqlRuleDataSchema } from './schemas';
 import type { UpdateEsqlRuleData } from './types';
 import type { EsqlRuleResponse } from '../create/types';
-import type { CreateAPIKeyResult } from '../../lib/api_key';
-import { apiKeyAsEsqlRuleDomainProperties, generateAPIKeyName } from '../../lib/api_key';
 
 export async function updateEsqlRule(
   context: {
@@ -29,13 +26,9 @@ export async function updateEsqlRule(
     request: KibanaRequest;
     taskManager: TaskManagerStartContract;
     savedObjectsClient: SavedObjectsClientContract;
-    encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     spaceId: string;
     namespace?: string;
     getUserName: () => Promise<string | null>;
-    isAuthenticationTypeAPIKey: () => boolean;
-    getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
-    createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   },
   { id, data }: { id: string; data: UpdateEsqlRuleData }
 ): Promise<EsqlRuleResponse> {
@@ -51,14 +44,9 @@ export async function updateEsqlRule(
   let existingAttrs: RawEsqlRule;
   let existingVersion: string | undefined;
   try {
-    const decrypted =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawEsqlRule>(
-        ESQL_RULE_SAVED_OBJECT_TYPE,
-        id,
-        { namespace: context.namespace }
-      );
-    existingAttrs = decrypted.attributes;
-    existingVersion = decrypted.version;
+    const doc = await context.savedObjectsClient.get<RawEsqlRule>(ESQL_RULE_SAVED_OBJECT_TYPE, id);
+    existingAttrs = doc.attributes;
+    existingVersion = doc.version;
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw Boom.notFound(`ES|QL rule with id "${id}" not found`);
@@ -75,28 +63,6 @@ export async function updateEsqlRule(
     updatedBy: username,
     updatedAt: nowIso,
   };
-
-  // Enable transition: ensure we have an API key.
-  if (!wasEnabled && willBeEnabled) {
-    let createdAPIKey = null;
-    let isAuthTypeApiKey = false;
-    try {
-      isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-      const name = generateAPIKeyName('esql', nextAttrs.name);
-      createdAPIKey = isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await context.createAPIKey(name);
-    } catch (error) {
-      throw Boom.badRequest(
-        `Error enabling ES|QL rule: could not create API key - ${error.message}`
-      );
-    }
-
-    nextAttrs = {
-      ...nextAttrs,
-      ...apiKeyAsEsqlRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
-    };
-  }
 
   // Disable transition: remove task and clear task id.
   if (wasEnabled && !willBeEnabled) {
@@ -134,6 +100,5 @@ export async function updateEsqlRule(
     throw e;
   }
 
-  const { apiKey, ...rest } = nextAttrs;
-  return { id, ...rest, scheduledTaskId: nextAttrs.scheduledTaskId ?? null };
+  return { id, ...nextAttrs, scheduledTaskId: nextAttrs.scheduledTaskId ?? null };
 }
