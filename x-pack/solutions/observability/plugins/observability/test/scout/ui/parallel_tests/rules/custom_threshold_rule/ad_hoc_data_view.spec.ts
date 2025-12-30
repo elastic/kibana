@@ -35,6 +35,9 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
     pageObjects,
     apiServices,
   }) => {
+    // Generate unique rule name per test run to avoid collisions
+    const uniqueRuleName = `${CUSTOM_THRESHOLD_RULE_NAME} - ${Date.now()}`;
+
     // Open rule type modal
     await pageObjects.rulesPage.openRuleTypeModal();
 
@@ -42,7 +45,7 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
     await pageObjects.rulesPage.clickCustomThresholdRuleType();
 
     // Set rule name
-    await pageObjects.rulesPage.setRuleName(CUSTOM_THRESHOLD_RULE_NAME);
+    await pageObjects.rulesPage.setRuleName(uniqueRuleName);
 
     // Type the pattern to trigger "Explore matching indices" button
     await pageObjects.rulesPage.setIndexPatternAndWaitForButton(AD_HOC_DATA_VIEW_PATTERN);
@@ -62,21 +65,21 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
 
     // Fetch the rule via API to verify it was created correctly
     const rulesResponse = await apiServices.alerting.rules.find({
-      search: CUSTOM_THRESHOLD_RULE_NAME,
+      search: uniqueRuleName,
     });
 
     expect(rulesResponse.data?.data).toBeDefined();
     expect(rulesResponse.data?.data?.length).toBeGreaterThan(0);
 
-    const createdRule = rulesResponse.data?.data?.[0];
+    const createdRule = rulesResponse.data?.data?.find((rule) => rule.name === uniqueRuleName);
     expect(createdRule).toBeDefined();
-    expect(createdRule.name).toBe(CUSTOM_THRESHOLD_RULE_NAME);
+    expect(createdRule!.name).toBe(uniqueRuleName);
 
     // Store the rule ID for cleanup
-    createdRuleId = createdRule.id;
+    createdRuleId = createdRule!.id;
 
     // Verify the ad-hoc data view was set correctly in the rule params
-    const searchConfig = createdRule.params.searchConfiguration;
+    const searchConfig = createdRule!.params.searchConfiguration;
     expect(searchConfig).toBeDefined();
     expect(searchConfig.index).toBeDefined();
 

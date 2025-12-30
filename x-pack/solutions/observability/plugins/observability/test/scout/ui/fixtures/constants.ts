@@ -43,7 +43,6 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
   RULE_TYPE_MODAL: 'ruleTypeModal',
   RULE_TYPE_MODAL_SEARCH: 'ruleTypeModalSearch',
   ALL_RULE_TYPES_BUTTON: 'allRuleTypesButton',
-  CUSTOM_THRESHOLD_RULE_TYPE: 'observability.rules.custom_threshold-SelectOption',
 } as const;
 
 /**
