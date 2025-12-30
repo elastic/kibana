@@ -12,30 +12,104 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableOption,
-  EuiText,
   EuiFilterButton,
   EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import type { ESQLFieldWithMetadata, ESQLCallbacks } from '@kbn/esql-types';
-import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { GetColumnMapFn } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
+import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/types';
+import { FieldIcon } from '@kbn/react-field';
 
 const POPOVER_WIDTH = 400;
 const POPOVER_HEIGHT = 500;
 
-const getFieldTypeIcon = (type: string): string => {
+// Map ESQL field types to FieldIcon types (matching typeToEuiIconMap keys)
+const getFieldIconType = (type: string): string => {
   const typeLower = type.toLowerCase();
-  if (typeLower.includes('date') || typeLower.includes('time')) return 'calendar';
-  if (typeLower.includes('number') || typeLower.includes('long') || typeLower.includes('double') || typeLower.includes('integer')) return 'number';
-  if (typeLower.includes('ip')) return 'globe';
-  if (typeLower.includes('geo')) return 'globe';
-  if (typeLower.includes('keyword') || typeLower.includes('text')) return 'string';
-  return 'document';
+  
+  // Date types
+  if (typeLower === 'date' || typeLower === 'date_nanos' || typeLower === 'date_range') {
+    return 'date';
+  }
+  
+  // Counter types (metric counters) - map to number since counter isn't in typeToEuiIconMap
+  if (typeLower === 'counter_integer' || typeLower === 'counter_long' || typeLower === 'counter_double') {
+    return 'number';
+  }
+  
+  // Histogram types
+  if (typeLower === 'histogram' || typeLower === 'exponential_histogram' || typeLower === 'tdigest') {
+    return 'histogram';
+  }
+  
+  // Numeric types
+  if (
+    typeLower === 'number' ||
+    typeLower === 'long' ||
+    typeLower === 'double' ||
+    typeLower === 'integer' ||
+    typeLower === 'float' ||
+    typeLower === 'byte' ||
+    typeLower === 'short' ||
+    typeLower === 'half_float' ||
+    typeLower === 'scaled_float' ||
+    typeLower === 'unsigned_long' ||
+    typeLower === 'aggregate_metric_double'
+  ) {
+    return 'number';
+  }
+  
+  // IP types
+  if (typeLower === 'ip' || typeLower === 'ip_range') {
+    return 'ip';
+  }
+  
+  // Geo types
+  if (typeLower === 'geo_point' || typeLower === 'geo_shape') {
+    return 'geo_point';
+  }
+  
+  // Cartesian types - map to shape
+  if (typeLower === 'cartesian_point' || typeLower === 'cartesian_shape') {
+    return 'shape';
+  }
+  
+  // Keyword types
+  if (typeLower === 'keyword' || typeLower === 'constant_keyword') {
+    return 'keyword';
+  }
+  
+  // Text types
+  if (
+    typeLower === 'text' ||
+    typeLower === 'string' ||
+    typeLower === 'match_only_text' ||
+    typeLower === 'wildcard' ||
+    typeLower === 'search_as_you_type' ||
+    typeLower === 'semantic_text'
+  ) {
+    return 'text';
+  }
+  
+  // Vector types
+  if (typeLower === 'dense_vector') {
+    return 'dense_vector';
+  }
+  
+  // Version
+  if (typeLower === 'version') {
+    return 'version';
+  }
+  
+  // Boolean
+  if (typeLower === 'boolean') {
+    return 'boolean';
+  }
+  
+  // Default to text for unknown types
+  return 'text';
 };
 
 const getFieldTypeLabel = (type: string): string => {
@@ -53,8 +127,7 @@ interface FieldsBrowserPopupProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectField: (fieldName: string) => void;
-  getColumnsFor?: ESQLCallbacks['getColumnsFor'];
-  query: string;
+  getColumnMap?: GetColumnMapFn;
   anchorElement?: HTMLElement;
 }
 
@@ -62,8 +135,7 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
   isOpen,
   onClose,
   onSelectField,
-  getColumnsFor,
-  query,
+  getColumnMap,
   anchorElement,
 }) => {
   const [fields, setFields] = useState<ESQLFieldWithMetadata[]>([]);
@@ -73,18 +145,36 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
 
   useEffect(() => {
-    if (isOpen && query && getColumnsFor) {
+    if (isOpen && getColumnMap) {
       setIsLoading(true);
-      getColumnsFor({ query })
-        .then((fetchedFields) => {
+      getColumnMap()
+        .then((columnMap: Map<string, ESQLColumnData>) => {
+          // Convert ESQLColumnData map to ESQLFieldWithMetadata array
+          // Filter out user-defined columns and only keep fields with metadata
+          const fetchedFields: ESQLFieldWithMetadata[] = Array.from(columnMap.values())
+            .filter((column: ESQLColumnData): column is ESQLFieldWithMetadata => {
+              // Only include fields that are not user-defined (i.e., ESQLFieldWithMetadata)
+              return column.userDefined === false;
+            })
+            .map((column: ESQLFieldWithMetadata) => ({
+              name: column.name,
+              type: column.type,
+              hasConflict: column.hasConflict || false,
+              userDefined: false as const,
+              metadata: column.metadata,
+            }));
           setFields(fetchedFields);
           setIsLoading(false);
         })
         .catch(() => {
+          setFields([]);
           setIsLoading(false);
         });
+    } else if (isOpen && !getColumnMap) {
+      setFields([]);
+      setIsLoading(false);
     }
-  }, [isOpen, query, getColumnsFor]);
+  }, [isOpen, getColumnMap]);
 
   // Get unique field types from fields
   const availableTypes = useMemo(() => {
@@ -109,18 +199,7 @@ export const FieldsBrowserPopup: React.FC<FieldsBrowserPopupProps> = ({
     return fields.map((field) => ({
       key: field.name,
       label: field.name,
-      append: (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={getFieldTypeIcon(field.type)} size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {getFieldTypeLabel(field.type)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      prepend: <FieldIcon type={getFieldIconType(field.type)} size="s" className="eui-alignMiddle" />,
       data: {
         type: field.type,
         typeLabel: getFieldTypeLabel(field.type),

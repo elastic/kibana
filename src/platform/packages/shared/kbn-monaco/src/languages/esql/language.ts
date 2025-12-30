@@ -161,9 +161,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
         }
 
-        const monacoSuggestions = wrapAsMonacoSuggestions(suggestions, fullText);
-        console.log('monacoSuggestions', monacoSuggestions);
-        return monacoSuggestions;
+        return wrapAsMonacoSuggestions(suggestions, fullText);
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
         if (!deps?.getFieldsMetadata) return item;

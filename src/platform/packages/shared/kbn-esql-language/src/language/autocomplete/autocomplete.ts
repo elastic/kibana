@@ -236,20 +236,17 @@ export async function suggest(
       hasMinimumLicenseRequired
     );
 
-    // Determine if we're suggesting indices or fields based on suggestion kinds
-    // Indices have kind 'Issue' or 'Class', fields have kind 'Variable'
-    const hasIndexSuggestions = commandsSpecificSuggestions.some(
-      (s) => s.kind === 'Issue' || s.kind === 'Class'
-    );
+    // Determine if we're suggesting indices or fields based on the command context
+    // Indices are suggested in FROM/TS commands, fields are suggested in other commands
+    const commandName = astContext.command.name.toLowerCase();
+    const isSourceCommand = commandName === 'from' || commandName === 'ts';
+    
+    // Check if we have field suggestions (kind 'Variable' indicates fields)
     const hasFieldSuggestions = commandsSpecificSuggestions.some((s) => s.kind === 'Variable');
 
-    console.log('hasIndexSuggestions', hasIndexSuggestions);
-    console.log('hasFieldSuggestions', hasFieldSuggestions);
-    console.log('resourceRetriever', resourceRetriever);
     // Add prepended resource browser suggestion if enabled
-    // Prioritize indices browser if we have index suggestions (typically in FROM/TS commands)
-    if (hasIndexSuggestions && resourceRetriever?.onOpenIndicesBrowser) {
-      console.log('opening indices browser');
+    // Show indices browser when in FROM/TS commands (where indices are suggested)
+    if (isSourceCommand && resourceRetriever?.onOpenIndicesBrowser) {
       const indicesBrowserSuggestion = createResourceBrowserSuggestion(
         i18n.translate('esqlEditor.indicesBrowser.suggestionLabel', {
           defaultMessage: 'Browse indices',
@@ -259,12 +256,11 @@ export async function suggest(
         }),
         'esql.indicesBrowser.open'
       );
-      console.log('indicesBrowserSuggestion', indicesBrowserSuggestion);
       return [indicesBrowserSuggestion, ...commandsSpecificSuggestions];
     }
 
-    // Show fields browser if we have field suggestions and no index suggestions
-    if (hasFieldSuggestions && !hasIndexSuggestions && resourceRetriever?.onOpenFieldsBrowser) {
+    // Show fields browser when we have field suggestions and we're not in a source command
+    if (!isSourceCommand && hasFieldSuggestions && resourceRetriever?.onOpenFieldsBrowser) {
       const fieldsBrowserSuggestion = createResourceBrowserSuggestion(
         i18n.translate('esqlEditor.fieldsBrowser.suggestionLabel', {
           defaultMessage: 'Browse fields',

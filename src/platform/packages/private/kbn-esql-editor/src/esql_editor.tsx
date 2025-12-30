@@ -195,6 +195,9 @@ const ESQLEditorInternal = function ESQLEditor({
   const indicesBrowserAnchorRef = useRef<HTMLElement | null>(null);
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
   const fieldsBrowserAnchorRef = useRef<HTMLElement | null>(null);
+  const fieldsBrowserGetColumnMapRef = useRef<(() => Promise<Map<string, any>>) | undefined>(
+    undefined
+  );
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
@@ -923,10 +926,44 @@ const ESQLEditorInternal = function ESQLEditor({
     [closeIndicesBrowser]
   );
 
-  const openFieldsBrowser = useCallback(() => {
-    if (editorRef.current) {
+  const openFieldsBrowser = useCallback(async () => {
+    if (editorRef.current && editorModel.current) {
       const position = editorRef.current.getPosition();
       if (position) {
+        // Use the same logic as autocomplete to get fields
+        const fullText = editorModel.current.getValue() || '';
+        const offset = editorModel.current.getOffsetAt(position) || 0;
+        const innerText = fullText.substring(0, offset);
+
+        // Import the necessary functions dynamically to avoid circular dependencies
+        const { correctQuerySyntax } = await import(
+          '@kbn/esql-language/src/commands/definitions/utils/ast'
+        );
+        const { parse } = await import('@kbn/esql-language/src/parser');
+        const { getCursorContext } = await import(
+          '@kbn/esql-language/src/language/shared/get_cursor_context'
+        );
+        const { getQueryForFields } = await import(
+          '@kbn/esql-language/src/language/shared/get_query_for_fields'
+        );
+        const { getColumnsByTypeRetriever } = await import(
+          '@kbn/esql-language/src/language/shared/columns_retrieval_helpers'
+        );
+
+        const correctedQuery = correctQuerySyntax(innerText);
+        const { root } = parse(correctedQuery, { withFormatting: true });
+        const astContext = getCursorContext(innerText, root, offset);
+        const astForFields = astContext.astForContext;
+
+        const { getColumnMap } = getColumnsByTypeRetriever(
+          getQueryForFields(correctedQuery, astForFields),
+          innerText,
+          esqlCallbacks
+        );
+
+        // Store the getColumnMap function in a ref so it can be used by the popup
+        fieldsBrowserGetColumnMapRef.current = getColumnMap;
+
         const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
         const editorPosition = editorRef.current.getScrolledVisiblePosition(position);
         if (editorCoords && editorPosition) {
@@ -943,7 +980,7 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
     }
-  }, []);
+  }, [esqlCallbacks]);
 
   const closeFieldsBrowser = useCallback(() => {
     setIsFieldsBrowserOpen(false);
@@ -1486,8 +1523,7 @@ const ESQLEditorInternal = function ESQLEditor({
             isOpen={isFieldsBrowserOpen}
             onClose={closeFieldsBrowser}
             onSelectField={handleFieldSelect}
-            getColumnsFor={esqlCallbacks.getColumnsFor}
-            query={code}
+            getColumnMap={fieldsBrowserGetColumnMapRef.current}
             anchorElement={fieldsBrowserAnchorRef.current || undefined}
           />
         </>
