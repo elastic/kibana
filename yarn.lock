@@ -2706,10 +2706,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.11":
-  version "3.1.11"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.11.tgz#b8f7f98d0e1ffaf0d90c2acc399e066b2eb8836f"
-  integrity sha512-r2HN6hUoKGuzf3y5Hjc9y+5jeI4JHCkAt6FXBYAQhlkwBtiMhbiJQ9nNjCTDPGrUfXz0yNTFDRtDhjPa0Dbh9A==
+"@elastic/monaco-esql@^3.1.12":
+  version "3.1.13"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.13.tgz#70ba489dcfb07edbf5b72fb46c0024ab876e4b67"
+  integrity sha512-T0+n6Rog+ACRXzb4ULZuznETvB4K9AZdbRT3t4hY0erVKonu7YlYkJ81PyOTzn+aD0hOr3jRvZdxsWxSVkA5yg==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -9527,10 +9527,10 @@
     "@aws-sdk/client-kendra" "^3.750.0"
     "@aws-sdk/credential-provider-node" "^3.750.0"
 
-"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@^0.3.78":
-  version "0.3.78"
-  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.3.78.tgz#40e69fba6688858edbcab4473358ec7affc685fd"
-  integrity sha512-Nn0x9erQlK3zgtRU1Z8NUjLuyW0gzdclMsvLQ6wwLeDqV91pE+YKl6uQb+L2NUDs4F0N7c2Zncgz46HxrvPzuA==
+"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@^0.3.80":
+  version "0.3.80"
+  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.3.80.tgz#c494a6944e53ab28bf32dc531e257b17cfc8f797"
+  integrity sha512-vcJDV2vk1AlCwSh3aBm/urQ1ZrlXFFBocv11bz/NBUfLWD5/UDNMzwPdaAd2dKvNmTWa9FM2lirLU3+JCf4cRA==
   dependencies:
     "@cfworker/json-schema" "^4.0.2"
     ansi-styles "^5.0.0"
