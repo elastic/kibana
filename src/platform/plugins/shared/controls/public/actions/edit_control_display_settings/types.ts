@@ -10,7 +10,7 @@ import { apiHasPrependWrapperRef, type HasPrependWrapperRef } from '@kbn/control
 import {
   type IsPinnable,
   type PresentationContainer,
-  type CanPinPanel,
+  type CanPinPanels,
   apiCanBePinned,
   apiCanPinPanels,
 } from '@kbn/presentation-containers';
@@ -31,7 +31,7 @@ export type PinnableControlApi = HasType &
 
 export type PinnableControlParentApi = PresentationContainer &
   HasType &
-  CanPinPanel &
+  CanPinPanels &
   PublishesControlsLayout;
 
 // This check needs to be a separate function in order for typescript to type the parentApi correctly
