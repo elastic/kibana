@@ -38,6 +38,7 @@ describe('securityLabsSearchTool', () => {
   };
   const mockEvents = {
     reportProgress: jest.fn(),
+    emitCustomEvent: jest.fn(),
   };
   const tool = securityLabsSearchTool(mockCore);
 
