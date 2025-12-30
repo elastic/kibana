@@ -423,11 +423,13 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
 
-      <ControlsRenderer
-        parentApi={
-          dashboardApi as unknown as ControlsRendererParentApi // casting allows `DashboardLayout` to satisfy the expected `ControlsLayout`
-        }
-      />
+      {viewMode !== 'print' ? (
+        <ControlsRenderer
+          parentApi={
+            dashboardApi as unknown as ControlsRendererParentApi // casting allows `DashboardLayout` to satisfy the expected `ControlsLayout`
+          }
+        />
+      ) : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
