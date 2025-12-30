@@ -79,7 +79,7 @@
   "resolutions": {
     "**/@babel/parser": "7.24.7",
     "**/@hello-pangea/dnd": "18.0.1",
-    "**/@langchain/core": "^0.3.78",
+    "**/@langchain/core": "^0.3.80",
     "**/@langchain/google-common": "^0.2.18",
     "**/@types/node": "22.19.1",
     "**/@types/prop-types": "15.7.5",
@@ -1179,7 +1179,7 @@
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
     "@langchain/aws": "^0.1.15",
-    "@langchain/core": "^0.3.78",
+    "@langchain/core": "^0.3.80",
     "@langchain/google-common": "^0.2.18",
     "@langchain/google-genai": "^0.2.18",
     "@langchain/google-vertexai": "^0.2.18",
