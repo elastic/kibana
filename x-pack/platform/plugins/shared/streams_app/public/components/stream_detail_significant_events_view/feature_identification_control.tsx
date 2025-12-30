@@ -194,6 +194,9 @@ export function FeatureIdentificationControl({
               })}
               color="primary"
               iconType="search"
+              onDismiss={() => {
+                acknowledgeFeatureIdentificationTask().then(getTask);
+              }}
             >
               {i18n.translate('xpack.streams.streamDetailView.noFeaturesIdentifiedDescription', {
                 defaultMessage:
