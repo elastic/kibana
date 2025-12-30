@@ -9,7 +9,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
