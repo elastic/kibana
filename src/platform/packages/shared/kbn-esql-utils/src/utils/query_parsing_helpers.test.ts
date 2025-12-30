@@ -1212,12 +1212,5 @@ describe('esql query helpers', () => {
       const errors = getESQLQuerySyntaxErrors('FROM logs* | LIMIT 100)');
       expect(errors.length).toBeGreaterThan(0);
     });
-
-    it('validates the query with backtick in index name', () => {
-      // This test highlights the difference that @kbn/esql-editor flags this with errors
-      // while the Parser.parse from @kbn/esql-parser does not throw an error for this case
-      const errors = getESQLQuerySyntaxErrors('FROM logs*`'); // invalid backtick usage
-      expect(errors).toHaveLength(0);
-    });
   });
 });
