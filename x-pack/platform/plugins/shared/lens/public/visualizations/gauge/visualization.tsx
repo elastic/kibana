@@ -149,13 +149,11 @@ const toExpression = (
     goal: state.goalAccessor,
     shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
     colorMode: state?.colorMode ?? 'none',
-    // colorMode: state?.colorMode ?? 'palette',
     palette: state.palette?.params
       ? paletteService
           .get(CUSTOM_PALETTE)
           .toExpression(computePaletteParams(paletteService, state.palette))
       : undefined,
-    // : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,
     labelMajor: state.labelMajor,

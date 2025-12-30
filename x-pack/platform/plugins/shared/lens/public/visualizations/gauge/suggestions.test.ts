@@ -16,6 +16,7 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import type { GaugeVisualizationState } from './constants';
+import { DEFAULT_PALETTE } from './constants';
 
 const metricColumn = {
   columnId: 'metric-column',
@@ -155,6 +156,8 @@ describe('shows suggestions', () => {
     ).toEqual([
       {
         state: {
+          colorMode: 'palette',
+          palette: DEFAULT_PALETTE,
           layerId: 'first',
           layerType: LayerTypes.DATA,
           shape: GaugeShapes.HORIZONTAL_BULLET,
@@ -175,6 +178,8 @@ describe('shows suggestions', () => {
         title: 'Gauge',
         score: 0.5,
         state: {
+          colorMode: 'palette',
+          palette: DEFAULT_PALETTE,
           layerId: 'first',
           layerType: 'data',
           metricAccessor: 'metric-column',
@@ -206,6 +211,8 @@ describe('shows suggestions', () => {
     ).toEqual([
       {
         state: {
+          colorMode: 'palette',
+          palette: DEFAULT_PALETTE,
           layerType: LayerTypes.DATA,
           shape: GaugeShapes.VERTICAL_BULLET,
           metricAccessor: 'metric-column',
@@ -225,6 +232,8 @@ describe('shows suggestions', () => {
         previewIcon: IconChartGaugeSemiCircle,
         score: 0.1,
         state: {
+          colorMode: 'palette',
+          palette: DEFAULT_PALETTE,
           labelMajorMode: 'auto',
           layerId: 'first',
           layerType: 'data',
@@ -240,6 +249,8 @@ describe('shows suggestions', () => {
         previewIcon: IconChartGaugeArc,
         score: 0.5,
         state: {
+          colorMode: 'palette',
+          palette: DEFAULT_PALETTE,
           labelMajorMode: 'auto',
           layerId: 'first',
           layerType: 'data',
@@ -255,6 +266,8 @@ describe('shows suggestions', () => {
         previewIcon: IconChartGaugeCircle,
         score: 0.1,
         state: {
+          colorMode: 'palette',
+          palette: DEFAULT_PALETTE,
           labelMajorMode: 'auto',
           layerId: 'first',
           layerType: 'data',
