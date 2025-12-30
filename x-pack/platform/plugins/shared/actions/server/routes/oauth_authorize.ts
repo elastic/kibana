@@ -114,6 +114,9 @@ export const oauthAuthorizeRoute = (
           // Get redirect URI
           const redirectUri = oauthService.getRedirectUri();
 
+          // Build return URL for post-OAuth redirect
+          const kibanaReturnUrl = `${kibanaUrl}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`;
+
           // Create OAuth state with PKCE
           const oauthStateClient = new OAuthStateClient({
             encryptedSavedObjectsClient,
@@ -128,6 +131,7 @@ export const oauthAuthorizeRoute = (
             redirectUri,
             authorizationUrl: oauthConfig.authorizationUrl,
             scope: oauthConfig.scope,
+            kibanaReturnUrl,
           });
 
           // Build authorization URL

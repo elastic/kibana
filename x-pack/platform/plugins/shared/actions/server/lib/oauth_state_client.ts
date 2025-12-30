@@ -22,6 +22,7 @@ export interface OAuthState {
   redirectUri: string;
   authorizationUrl: string;
   scope?: string;
+  kibanaReturnUrl: string;
   createdAt: string;
   expiresAt: string;
   createdBy?: string;
@@ -38,6 +39,7 @@ interface CreateStateOptions {
   redirectUri: string;
   authorizationUrl: string;
   scope?: string;
+  kibanaReturnUrl: string;
   createdBy?: string;
 }
 
@@ -78,6 +80,7 @@ export class OAuthStateClient {
     redirectUri,
     authorizationUrl,
     scope,
+    kibanaReturnUrl,
     createdBy,
   }: CreateStateOptions): Promise<{
     state: OAuthState;
@@ -101,6 +104,7 @@ export class OAuthStateClient {
             redirectUri,
             authorizationUrl,
             scope,
+            kibanaReturnUrl,
             createdAt: now.toISOString(),
             expiresAt: expiresAt.toISOString(),
             createdBy,
