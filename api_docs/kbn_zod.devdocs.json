@@ -19384,7 +19384,7 @@
             "label": "validation",
             "description": [],
             "signature": [
-              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"time\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "deprecated": false,
@@ -22277,7 +22277,7 @@
         "label": "StringValidation",
         "description": [],
         "signature": [
-          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"time\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "deprecated": false,
@@ -22653,13 +22653,13 @@
           " | ",
           "ZodUnion",
           "<any> | ",
-          "ZodUndefined",
-          " | ",
           "ZodAny",
           " | ",
-          "ZodDate",
+          "ZodUndefined",
           " | ",
           "ZodNull",
+          " | ",
+          "ZodDate",
           " | ",
           "ZodBigInt",
           " | ",

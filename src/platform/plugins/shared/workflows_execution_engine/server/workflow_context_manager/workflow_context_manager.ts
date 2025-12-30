@@ -29,8 +29,8 @@ export interface ContextManagerInit {
   stackFrames: StackFrame[];
   // New properties for internal actions
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
-  fakeRequest?: KibanaRequest;
-  coreStart?: CoreStart; // For using Kibana's internal HTTP client
+  fakeRequest: KibanaRequest;
+  coreStart: CoreStart; // For using Kibana's internal HTTP client
   dependencies: ContextDependencies;
 }
 
@@ -39,8 +39,8 @@ export class WorkflowContextManager {
   private workflowExecutionState: WorkflowExecutionState;
   private esClient: ElasticsearchClient;
   private templateEngine: WorkflowTemplatingEngine;
-  private fakeRequest?: KibanaRequest;
-  private coreStart?: CoreStart;
+  private fakeRequest: KibanaRequest;
+  private coreStart: CoreStart;
   private dependencies: ContextDependencies;
 
   private stackFrames: StackFrame[];
@@ -68,6 +68,7 @@ export class WorkflowContextManager {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
+      variables: this.getVariables(),
     };
 
     const currentNode = this.node;
@@ -208,15 +209,40 @@ export class WorkflowContextManager {
   /**
    * Get the fake request from task manager for Kibana API authentication
    */
-  public getFakeRequest(): KibanaRequest | undefined {
+  public getFakeRequest(): KibanaRequest {
     return this.fakeRequest;
   }
 
   /**
    * Get CoreStart for accessing Kibana's internal services
    */
-  public getCoreStart(): CoreStart | undefined {
+  public getCoreStart(): CoreStart {
     return this.coreStart;
+  }
+
+  /**
+   * Get variables from all data.set steps that are predecessors of the current step.
+   * Variables are retrieved from step outputs, which are persisted in execution state.
+   * This ensures variables survive across wait steps and task resumptions.
+   */
+  public getVariables(): Record<string, unknown> {
+    const predecessors = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
+    const dataSetSteps = predecessors.filter((node) => node.stepType === 'data.set');
+
+    const variables: Record<string, unknown> = {};
+
+    for (const dataSetStep of dataSetSteps) {
+      const stepExecution = this.workflowExecutionState.getLatestStepExecution(dataSetStep.id);
+      if (
+        stepExecution?.output &&
+        typeof stepExecution.output === 'object' &&
+        !Array.isArray(stepExecution.output)
+      ) {
+        Object.assign(variables, stepExecution.output);
+      }
+    }
+
+    return variables;
   }
 
   /**

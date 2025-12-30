@@ -17,9 +17,10 @@ const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetRespo
   stream: {
     name,
     description: '',
+    updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { inherit: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       failure_store: { inherit: {} },
     } as any,

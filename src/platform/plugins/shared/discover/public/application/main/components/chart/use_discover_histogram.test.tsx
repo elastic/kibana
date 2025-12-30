@@ -453,9 +453,13 @@ describe('useDiscoverHistogram', () => {
   });
 
   describe('fetching', () => {
-    it('should call fetch when fetchChart$ is triggered', async () => {
+    const setup = async ({
+      customStateContainer,
+    }: {
+      customStateContainer?: DiscoverStateContainer;
+    }) => {
       const fetch$ = new Subject<DiscoverLatestFetchDetails>();
-      const stateContainer = getStateContainer();
+      const stateContainer = customStateContainer ?? getStateContainer();
       stateContainer.dataState.fetchChart$ = fetch$;
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const api = createMockUnifiedHistogramApi();
@@ -473,28 +477,21 @@ describe('useDiscoverHistogram', () => {
           abortController,
         })
       );
+      return { api, stateContainer };
+    };
+
+    it('should call fetch when fetchChart$ is triggered', async () => {
+      await setup({});
     });
 
     it('should call fetch when only visContext changes', async () => {
-      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
       const stateContainer = getStateContainer();
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
           appState: { query: { esql: 'from logs*' } },
         })
       );
-      stateContainer.dataState.fetchChart$ = fetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.fetch).not.toHaveBeenCalled();
-      const abortController = new AbortController();
-      act(() => {
-        fetch$.next({ abortController });
-      });
-      expect(api.fetch).toHaveBeenCalledTimes(1);
+      const { api } = await setup({ customStateContainer: stateContainer });
       const visContext = {
         attributes: {},
         requestData: {},
@@ -510,6 +507,46 @@ describe('useDiscoverHistogram', () => {
       expect(api.fetch).toHaveBeenLastCalledWith(
         expect.objectContaining({ externalVisContext: visContext })
       );
+    });
+
+    it('should call fetch when only breakdownField changes', async () => {
+      const stateContainer = getStateContainer();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { esql: 'from logs*' } },
+        })
+      );
+      const { api } = await setup({ customStateContainer: stateContainer });
+      const breakdownField = 'host.name';
+      act(() => {
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { breakdownField },
+          })
+        );
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ breakdownField }));
+    });
+
+    it('should call fetch when only timeInterval changes', async () => {
+      const stateContainer = getStateContainer();
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { language: 'kuery', query: 'test' } },
+        })
+      );
+      const { api } = await setup({ customStateContainer: stateContainer });
+      const timeInterval = 'm';
+      act(() => {
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+            appState: { interval: timeInterval },
+          })
+        );
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ timeInterval }));
     });
   });
 

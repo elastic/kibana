@@ -16,6 +16,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
@@ -24,6 +25,7 @@ import { EntityStoreManagementPage } from './pages/entity_store_management_page'
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
+import { EntityThreatHuntingPage } from './pages/entity_threat_hunting_page';
 
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
@@ -150,6 +152,27 @@ const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer';
 
+const EntityThreatHuntingWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityThreatHuntingPage />
+  </PluginTemplateWrapper>
+);
+
+const EntityThreatHuntingContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_THREAT_HUNTING_PATH}
+        exact
+        component={EntityThreatHuntingWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityThreatHuntingContainer.displayName = 'EntityThreatHuntingContainer';
+
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -188,6 +211,13 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsOverviewContainer,
       SecurityPageName.entityAnalyticsOverview
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityThreatHuntingContainer,
+      SecurityPageName.entityAnalyticsThreatHunting
     ),
   },
 ];

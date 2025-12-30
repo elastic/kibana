@@ -20,6 +20,9 @@ export type TopNavMenuBadgeProps = EuiBadgeProps & {
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
 };
 
+/**
+ * @deprecated Badges will be moved to use BreadcrumbsWithExtension API.
+ */
 export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | undefined }) => {
   const { euiTheme } = useEuiTheme();
   if (!badges || badges.length === 0) return null;

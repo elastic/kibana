@@ -9,13 +9,16 @@ import { isOtelStream } from './is_otel_stream';
 
 describe('isOtelStream', () => {
   it('returns true for a wired stream', () => {
+    const now = new Date().toISOString();
+
     const wired = {
       name: 'logs',
       description: '',
+      updated_at: now,
       ingest: {
         lifecycle: { inherit: {} },
         failure_store: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: now },
         settings: {},
         wired: { fields: {}, routing: [] },
       },
@@ -24,13 +27,16 @@ describe('isOtelStream', () => {
   });
 
   it('returns true for a non-wired classic stream matching otel pattern', () => {
+    const now = new Date().toISOString();
+
     const classicOtelPattern = {
       name: 'logs-foo.bar.otel-baz',
       description: '',
+      updated_at: now,
       ingest: {
         lifecycle: { inherit: {} },
         failure_store: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: now },
         settings: {},
         classic: {},
       },
@@ -39,13 +45,16 @@ describe('isOtelStream', () => {
   });
 
   it('returns false for a classic stream not matching otel pattern', () => {
+    const now = new Date().toISOString();
+
     const classicNonOtel = {
       name: 'logs-foo-bar-baz', // missing .otel- sequence
       description: '',
+      updated_at: now,
       ingest: {
         lifecycle: { inherit: {} },
         failure_store: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: now },
         settings: {},
         classic: {},
       },

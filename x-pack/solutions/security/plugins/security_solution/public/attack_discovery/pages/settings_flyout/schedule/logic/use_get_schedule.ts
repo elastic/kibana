@@ -18,12 +18,9 @@ import * as i18n from './translations';
 import { getAttackDiscoverySchedule } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
-import { toAttackDiscoverySchedule } from './schedule_type_guards';
 
 export const useGetAttackDiscoverySchedule = (params: { id: string }) => {
   const { addError } = useAppToasts();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const { id } = params;
   const SPECIFIC_PATH = replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id });
@@ -32,18 +29,14 @@ export const useGetAttackDiscoverySchedule = (params: { id: string }) => {
     ['GET', SPECIFIC_PATH, params],
     async ({ signal }) => {
       const response = await getAttackDiscoverySchedule({
-        attackDiscoveryPublicApiEnabled,
         signal,
         ...params,
       });
 
-      // Public API returns snake_case and needs transformation to camelCase
-      // Internal API returns camelCase
-      const normalizedSchedule: AttackDiscoverySchedule = attackDiscoveryPublicApiEnabled
-        ? transformAttackDiscoveryScheduleFromApi(response)
-        : toAttackDiscoverySchedule(response);
+      // Transform from API snake_case to frontend camelCase
+      const schedule: AttackDiscoverySchedule = transformAttackDiscoveryScheduleFromApi(response);
 
-      return { schedule: normalizedSchedule };
+      return { schedule };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

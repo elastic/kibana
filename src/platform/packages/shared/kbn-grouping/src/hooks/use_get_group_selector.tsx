@@ -13,9 +13,10 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { groupActions, groupByIdSelector } from './state';
-import type { GroupOption, Action, GroupMap } from './types';
+import type { GroupOption, Action, GroupMap, GroupSettings } from './types';
 import { defaultGroup } from './types';
 import { GroupSelector, isNoneGroup } from '..';
+import { validateEnforcedGroups, ensureEnforcedGroupsInFront } from '../helpers';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {
@@ -42,12 +43,13 @@ export interface UseGetGroupSelectorArgs {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  settings?: GroupSettings;
 }
 
 interface UseGetGroupSelectorStateless
   extends Pick<
     UseGetGroupSelectorArgs,
-    'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels'
+    'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels' | 'settings'
   > {
   onGroupChange: (selectedGroups: string[]) => void;
 }
@@ -63,6 +65,7 @@ export const useGetGroupSelectorStateless = ({
   fields,
   onGroupChange,
   maxGroupingLevels,
+  settings,
 }: UseGetGroupSelectorStateless) => {
   const onChange = useCallback(
     (groupSelection: string) => {
@@ -82,10 +85,11 @@ export const useGetGroupSelectorStateless = ({
           fields,
           maxGroupingLevels,
           options: defaultGroupingOptions,
+          settings,
         }}
       />
     );
-  }, [groupingId, fields, maxGroupingLevels, defaultGroupingOptions, onChange]);
+  }, [groupingId, fields, maxGroupingLevels, defaultGroupingOptions, onChange, settings]);
 };
 
 export const useGetGroupSelector = ({
@@ -100,9 +104,16 @@ export const useGetGroupSelector = ({
   tracker,
   title,
   onOpenTracker,
+  settings,
 }: UseGetGroupSelectorArgs) => {
-  const { activeGroups: selectedGroups, options } =
-    groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
+  // Validate enforced groups configuration
+  validateEnforcedGroups(settings, maxGroupingLevels);
+
+  const {
+    activeGroups: selectedGroups,
+    options,
+    settings: groupSettings,
+  } = groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
   const setSelectedGroups = useCallback(
     (activeGroups: string[]) => {
@@ -124,8 +135,22 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId, onOptionsChange]
   );
 
+  // Automatically add enforced groups to activeGroups if they're not already present
+  // Enforced groups should always be in front of the array
+  useEffect(() => {
+    const enforcedGroups = groupSettings?.enforcedGroups;
+    if (enforcedGroups && enforcedGroups.length > 0) {
+      const newGroups = ensureEnforcedGroupsInFront(selectedGroups, enforcedGroups);
+      // Only update if order changed
+      if (JSON.stringify(newGroups) !== JSON.stringify(selectedGroups)) {
+        setSelectedGroups(newGroups);
+      }
+    }
+  }, [groupSettings?.enforcedGroups, selectedGroups, setSelectedGroups]);
+
   const onChange = useCallback(
     (groupSelection: string) => {
+      const enforcedGroups = groupSettings?.enforcedGroups ?? [];
       let newSelectedGroups: string[] = [];
       let sendTelemetry = true;
       // Simulate a toggle behavior when maxGroupingLevels is 1
@@ -151,6 +176,8 @@ export const useGetGroupSelector = ({
         }
       }
 
+      // Ensure enforced groups are always included and placed in front
+      newSelectedGroups = ensureEnforcedGroupsInFront(newSelectedGroups, enforcedGroups);
       setSelectedGroups(newSelectedGroups);
 
       if (sendTelemetry) {
@@ -167,7 +194,15 @@ export const useGetGroupSelector = ({
         groupByFields: newSelectedGroups,
       });
     },
-    [groupingId, maxGroupingLevels, onGroupChange, selectedGroups, setSelectedGroups, tracker]
+    [
+      groupingId,
+      maxGroupingLevels,
+      onGroupChange,
+      selectedGroups,
+      setSelectedGroups,
+      tracker,
+      groupSettings?.enforcedGroups,
+    ]
   );
 
   useEffect(() => {
@@ -208,20 +243,28 @@ export const useGetGroupSelector = ({
     }
   }, [defaultGroupingOptions, options, selectedGroups, setOptions]);
 
+  useEffect(() => {
+    dispatch(
+      groupActions.updateGroupSettings({
+        id: groupingId,
+        settings,
+      })
+    );
+  }, [dispatch, groupingId, settings]);
+
   return useMemo(() => {
     return (
       <GroupSelector
-        {...{
-          groupingId,
-          groupsSelected: selectedGroups,
-          'data-test-subj': 'alerts-table-group-selector',
-          onGroupChange: onChange,
-          fields,
-          maxGroupingLevels,
-          options,
-          title,
-          onOpenTracker,
-        }}
+        groupingId={groupingId}
+        groupsSelected={selectedGroups}
+        data-test-subj="alerts-table-group-selector"
+        onGroupChange={onChange}
+        fields={fields}
+        maxGroupingLevels={maxGroupingLevels}
+        options={options}
+        title={title}
+        onOpenTracker={onOpenTracker}
+        settings={groupSettings}
       />
     );
   }, [
@@ -233,5 +276,6 @@ export const useGetGroupSelector = ({
     options,
     title,
     onOpenTracker,
+    groupSettings,
   ]);
 };

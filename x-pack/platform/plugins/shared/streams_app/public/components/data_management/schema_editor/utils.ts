@@ -7,7 +7,8 @@
 
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { MappedSchemaField, SchemaEditorField, SchemaField } from './types';
 
 export const getGeoPointSuggestion = ({
@@ -87,7 +88,7 @@ export function isFieldUncommitted(field: SchemaEditorField, storedFields: Schem
 export const buildSchemaSavePayload = (
   definition: Streams.ingest.all.GetResponse,
   fields: SchemaField[]
-): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
+): { ingest: IngestUpsertRequest } => {
   const mappedFields = fields
     .filter((field) => field.status === 'mapped')
     .reduce((acc, field) => {
@@ -98,6 +99,7 @@ export const buildSchemaSavePayload = (
   return {
     ingest: {
       ...definition.stream.ingest,
+      processing: omit(definition.stream.ingest.processing, 'updated_at'),
       ...(Streams.WiredStream.GetResponse.is(definition)
         ? {
             wired: {

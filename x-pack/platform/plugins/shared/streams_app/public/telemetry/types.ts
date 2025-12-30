@@ -6,20 +6,42 @@
  */
 
 import type { FeatureType } from '@kbn/streams-schema';
+import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
-interface StreamsAttachmentCountProps {
+type ConfigurationMode = 'interactive' | 'yaml';
+
+type StreamsAttachmentCountProps = {
   name: string;
-  dashboards: number;
-  slos?: number;
-  rules?: number;
-}
+} & Record<AttachmentType, number>;
 
 interface StreamsAttachmentClickEventProps {
   name: string;
-  attachment_type: 'dashboard' | 'slo' | 'rule';
+  attachment_type: AttachmentType;
   attachment_id: string;
+}
+
+interface StreamsAttachmentLinkChangedProps {
+  stream_name: string;
+  attachment_count: number;
+  count_by_type: Record<AttachmentType, number>;
+}
+
+interface StreamsAttachmentFlyoutOpenedProps {
+  stream_name: string;
+  attachment_type: AttachmentType;
+  attachment_id: string;
+}
+
+type AttachmentFlyoutAction = 'navigate_to_attachment' | 'unlink' | 'navigate_to_attached_stream';
+
+interface StreamsAttachmentFlyoutActionProps {
+  stream_name: string;
+  attachment_type: AttachmentType;
+  attachment_id: string;
+  action: AttachmentFlyoutAction;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
@@ -63,6 +85,7 @@ interface WiredStreamsStatusChangedProps {
 interface StreamsProcessingSavedProps {
   processors_count: number;
   stream_type: StreamType;
+  configuration_mode: ConfigurationMode;
 }
 
 interface StreamsRetentionChangedProps {
@@ -79,12 +102,14 @@ interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
+export type CountByFeatureType = Record<FeatureType, number>;
+
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
   input_tokens_used: number;
   output_tokens_used: number;
   count: number;
-  count_by_feature_type: Record<FeatureType, number>;
+  count_by_feature_type: CountByFeatureType;
   features_selected: number;
   features_total: number;
   stream_name: string;
@@ -93,14 +118,14 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
-  count_by_feature_type: Record<FeatureType, number>;
+  count_by_feature_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationIdentifiedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: CountByFeatureType;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
@@ -109,14 +134,14 @@ interface StreamsFeatureIdentificationIdentifiedProps {
 
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
-  count_by_type: Record<string, number>;
+  count_by_type: CountByFeatureType;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -128,9 +153,43 @@ interface StreamsDescriptionGeneratedProps {
   output_tokens_used: number;
 }
 
+interface StreamsProcessingSimulationSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
+  data_source_type: EnrichmentDataSource['type'];
+  duration_ms: number;
+}
+
+interface StreamsPartitioningSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
+  duration_ms: number;
+}
+
+interface StreamsTabVisitedProps {
+  stream_name: string;
+  stream_type: StreamType;
+  tab_name: string;
+  privileges: {
+    manage: boolean;
+    monitor: boolean;
+    view_index_metadata: boolean;
+    lifecycle: boolean;
+    simulate: boolean;
+    text_structure: boolean;
+    read_failure_store: boolean;
+    manage_failure_store: boolean;
+  };
+}
+
 export {
+  type ConfigurationMode,
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
+  type StreamsAttachmentLinkChangedProps,
+  type StreamsAttachmentFlyoutOpenedProps,
+  type StreamsAttachmentFlyoutActionProps,
+  type AttachmentFlyoutAction,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
   type StreamsAIDissectSuggestionLatencyProps,
@@ -146,4 +205,7 @@ export {
   type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsDescriptionGeneratedProps,
+  type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsPartitioningSamplesFetchLatencyProps,
+  type StreamsTabVisitedProps,
 };

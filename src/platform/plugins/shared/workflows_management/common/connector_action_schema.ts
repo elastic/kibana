@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -114,21 +115,17 @@ import {
 /**
  * Connector input schemas
  */
-
-// TODO: When migration to Zod V4 is complete:
-// import connectorsSpecs from "kbn-connector-specs" and use the following code instead of the empty map below
-export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSchema>>();
-// export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSchema>>(
-//   Object.values(connectorsSpecs).map((connectorSpec) => [
-//     connectorSpec.metadata.id,
-//     Object.fromEntries(
-//       Object.entries(connectorSpec.actions).map(([actionName, action]) => [
-//         actionName,
-//         action.input,
-//       ])
-//     ),
-//   ])
-// );
+export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSchema>>(
+  Object.values(connectorsSpecs).map((connectorSpec) => [
+    connectorSpec.metadata.id,
+    Object.fromEntries(
+      Object.entries(connectorSpec.actions).map(([actionName, action]) => [
+        actionName,
+        action.input,
+      ])
+    ),
+  ])
+);
 
 export const ConnectorInputSchemas = new Map<string, z.ZodSchema>([
   ['.slack', SlackParamsSchema],

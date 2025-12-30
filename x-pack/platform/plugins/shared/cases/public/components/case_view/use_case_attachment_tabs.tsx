@@ -18,6 +18,7 @@ import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { AttachmentType } from '../../../common/types/domain';
 
 const FilesBadge = ({
   activeTab,
@@ -192,23 +193,49 @@ export interface UseCaseAttachmentTabsReturnValue {
 export const useCaseAttachmentTabs = ({
   caseData,
   activeTab,
+  searchTerm,
 }: {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
+  searchTerm?: string;
 }): UseCaseAttachmentTabsReturnValue => {
   const { features } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
     caseId: caseData.id,
+    searchTerm,
   });
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
-
+  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
+  const stats = useMemo(() => {
+    if (!searchTerm) {
+      return {
+        totalAlerts: Number(caseData.totalAlerts),
+        totalEvents: Number(caseData.totalEvents),
+      };
+    }
+    return caseData.comments.reduce(
+      (acc, comment) => {
+        if (comment.type === AttachmentType.alert && features.alerts.enabled) {
+          acc.totalAlerts = Array.isArray(comment.alertId)
+            ? acc.totalAlerts + comment.alertId.length
+            : acc.totalAlerts + 1;
+        } else if (comment.type === AttachmentType.event && features.events.enabled) {
+          acc.totalEvents = Array.isArray(comment.eventId)
+            ? acc.totalEvents + comment.eventId.length
+            : acc.totalEvents + 1;
+        }
+        return acc;
+      },
+      { totalEvents: 0, totalAlerts: 0 }
+    );
+  }, [searchTerm, features, caseData]);
+
   const totalAttachments =
-    Number(features.alerts.enabled ? caseData.totalAlerts : 0) +
-    Number(features.events.enabled ? caseData.totalEvents : 0) +
+    stats.totalAlerts +
+    stats.totalEvents +
     Number(fileStatsData?.total) +
     (canShowObservableTabs && isObservablesFeatureEnabled ? observables.length : 0);
 
@@ -222,7 +249,7 @@ export const useCaseAttachmentTabs = ({
               badge: (
                 <AlertsBadge
                   isExperimental={features.alerts.isExperimental}
-                  totalAlerts={caseData.totalAlerts}
+                  totalAlerts={stats.totalAlerts}
                   activeTab={activeTab}
                   euiTheme={euiTheme}
                 />
@@ -237,7 +264,7 @@ export const useCaseAttachmentTabs = ({
               name: EVENTS_TAB,
               badge: (
                 <EventsBadge
-                  totalEvents={caseData.totalEvents}
+                  totalEvents={stats.totalEvents}
                   activeTab={activeTab}
                   euiTheme={euiTheme}
                 />
@@ -277,8 +304,8 @@ export const useCaseAttachmentTabs = ({
     [
       activeTab,
       canShowObservableTabs,
-      caseData.totalAlerts,
-      caseData.totalEvents,
+      stats.totalAlerts,
+      stats.totalEvents,
       euiTheme,
       features.alerts.enabled,
       features.alerts.isExperimental,

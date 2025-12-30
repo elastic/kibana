@@ -22,6 +22,7 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { setupApp } from './app/setup_app';
 import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
@@ -50,6 +51,7 @@ export interface StartDeps {
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -95,7 +97,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return createFieldListAction;
     });
 
-    registerFieldListPanelPlacementSetting(deps.dashboard);
+    registerFieldListPanelPlacementSetting(deps.presentationUtil);
     registerSearchPanelAction(deps.uiActions);
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
       const { createDataTableAction } = await import(

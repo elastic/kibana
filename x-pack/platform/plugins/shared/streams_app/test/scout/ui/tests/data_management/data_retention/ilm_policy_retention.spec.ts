@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
+import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
   closeToastsIfPresent,
@@ -24,6 +25,7 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
     await apiServices.streams.updateStream('logs', {
       ingest: {
         ...logsDefinition.stream.ingest,
+        processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
         lifecycle: { dsl: {} },
       },
     });

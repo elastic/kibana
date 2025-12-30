@@ -21,6 +21,7 @@ import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
 import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
+import { ElasticInferenceServiceCallout } from './elastic_inference_service_callout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -90,6 +91,14 @@ export function WelcomeMessage({
           <EuiFlexItem grow={false}>
             <ElasticLlmConversationCallout />
           </EuiFlexItem>
+        ) : null}
+        {!connectors.loading && !connectors.connectors?.length ? (
+          <>
+            <EuiFlexItem grow={false} style={{ alignSelf: 'stretch' }}>
+              <ElasticInferenceServiceCallout />
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+          </>
         ) : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />

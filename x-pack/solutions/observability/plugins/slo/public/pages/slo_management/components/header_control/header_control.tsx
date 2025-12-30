@@ -52,7 +52,7 @@ export function HeaderControl() {
         items={[
           <EuiContextMenuItem
             key="purgeStaleInstances"
-            icon="logstashOutput"
+            icon="broom"
             disabled={!permissions?.hasAllWriteRequested}
             onClick={handlePurgeInstances}
             data-test-subj="purgeStaleInstancesItem"

@@ -5,9 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { streamlangDSLSchema } from '@kbn/streamlang';
-import type { ModelValidation } from '../validation/model_validation';
+import type { ModelOfSchema, ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
@@ -18,6 +16,9 @@ import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
 import type { FailureStore } from './failure_store';
 import { failureStoreSchema } from './failure_store';
+import type { IngestStreamProcessing } from './processing';
+import { ingestStreamProcessingSchema } from './processing';
+import type { StrictOmit } from '../core';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -51,7 +52,7 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
-  processing: StreamlangDSL;
+  processing: IngestStreamProcessing;
   settings: IngestStreamSettings;
   failure_store: FailureStore;
 }
@@ -60,11 +61,57 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
   z.object({
     lifecycle: ingestStreamLifecycleSchema,
-    processing: streamlangDSLSchema,
+    processing: ingestStreamProcessingSchema,
     settings: ingestStreamSettingsSchema,
     failure_store: failureStoreSchema,
   })
 );
+
+type OmitIngestBaseUpsertProps<
+  T extends {
+    processing: Omit<IngestStreamProcessing, 'updated_at'> & { updated_at?: string };
+  }
+> = Omit<T, 'processing'> & {
+  processing: StrictOmit<IngestBase['processing'], 'updated_at'>;
+};
+
+export type IngestBaseUpsertRequest = OmitIngestBaseUpsertProps<IngestBase>;
+
+export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertRequest> = validation(
+  z.unknown(),
+  z.object({
+    lifecycle: ingestStreamLifecycleSchema,
+    processing: ingestStreamProcessingSchema.merge(
+      z.object({
+        updated_at: z.undefined().optional(),
+      })
+    ),
+    settings: ingestStreamSettingsSchema,
+    failure_store: failureStoreSchema,
+  })
+);
+
+type OmitIngestBaseStreamUpsertProps<
+  T extends {
+    ingest: Omit<IngestBase, 'processing'> & {
+      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<IngestBase, 'processing'> & {
+    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
+
+type IngestBaseStreamDefaults = {
+  Source: z.input<IIngestBaseStreamSchema['Definition']>;
+  GetResponse: {
+    stream: z.input<IIngestBaseStreamSchema['Definition']>;
+  };
+  UpsertRequest: {
+    stream: OmitIngestBaseStreamUpsertProps<{} & z.input<IIngestBaseStreamSchema['Definition']>>;
+  };
+} & ModelOfSchema<IIngestBaseStreamSchema>;
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestBaseStream {
@@ -83,7 +130,7 @@ export namespace IngestBaseStream {
   }
 
   export type UpsertRequest<
-    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+    TDefinition extends OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition> = OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition>
   > = BaseStream.UpsertRequest<TDefinition>;
 
   export interface Model {
@@ -94,14 +141,20 @@ export namespace IngestBaseStream {
   }
 }
 
+const IngestBaseStreamSchema = {
+  Source: z.object({}),
+  Definition: z.object({
+    ingest: IngestBase.right,
+  }),
+  GetResponse: z.object({
+    privileges: ingestStreamPrivilegesSchema,
+  }),
+  UpsertRequest: z.object({}),
+};
+type IIngestBaseStreamSchema = typeof IngestBaseStreamSchema;
+
 export const IngestBaseStream: ModelValidation<BaseStream.Model, IngestBaseStream.Model> =
-  modelValidation(BaseStream, {
-    Source: z.object({}),
-    Definition: z.object({
-      ingest: IngestBase.right,
-    }),
-    GetResponse: z.object({
-      privileges: ingestStreamPrivilegesSchema,
-    }),
-    UpsertRequest: z.object({}),
-  });
+  modelValidation<BaseStream.Model, IIngestBaseStreamSchema, IngestBaseStreamDefaults>(
+    BaseStream,
+    IngestBaseStreamSchema
+  );

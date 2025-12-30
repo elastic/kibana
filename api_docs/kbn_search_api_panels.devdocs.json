@@ -38,6 +38,100 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisCloudConnectPromoCallout",
+        "description": [],
+        "signature": [
+          "({ promoId, isSelfManaged, navigateToApp, direction, addSpacer, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisCloudConnectPromoCalloutProps",
+            "text": "EisCloudConnectPromoCalloutProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  promoId,\n  isSelfManaged,\n  navigateToApp,\n  direction,\n  addSpacer,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisCloudConnectPromoCalloutProps",
+                "text": "EisCloudConnectPromoCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoTour",
+        "type": "Function",
+        "tags": [],
+        "label": "EisCloudConnectPromoTour",
+        "description": [],
+        "signature": [
+          "({ anchorPosition, navigateToApp, promoId, isSelfManaged, isReady, children, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisCloudConnectPromoTourProps",
+            "text": "EisCloudConnectPromoTourProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  anchorPosition = 'downCenter',\n  navigateToApp,\n  promoId,\n  isSelfManaged,\n  isReady = true,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisCloudConnectPromoTourProps",
+                "text": "EisCloudConnectPromoTourProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-public.EisPromotionalCallout",
         "type": "Function",
         "tags": [],
@@ -122,6 +216,100 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisTokenCostTour",
+        "type": "Function",
+        "tags": [],
+        "label": "EisTokenCostTour",
+        "description": [],
+        "signature": [
+          "({ anchorPosition, ctaLink, promoId, isCloudEnabled, isReady, children, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisTokenCostTourProps",
+            "text": "EisTokenCostTourProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisTokenCostTour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  anchorPosition = 'downCenter',\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  isReady = true,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisTokenCostTourProps",
+                "text": "EisTokenCostTourProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisUpdateCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisUpdateCallout",
+        "description": [],
+        "signature": [
+          "({ ctaLink, promoId, shouldShowEisUpdateCallout, handleOnClick, direction, hasUpdatePrivileges, addSpacer, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisUpdateCalloutProps",
+            "text": "EisUpdateCalloutProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ctaLink,\n  promoId,\n  shouldShowEisUpdateCallout,\n  handleOnClick,\n  direction,\n  hasUpdatePrivileges,\n  addSpacer,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisUpdateCalloutProps",
+                "text": "EisUpdateCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -353,6 +541,189 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoCalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EisCloudConnectPromoCalloutProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.isSelfManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSelfManaged",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.navigateToApp",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToApp",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"row\" | \"column\""
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoCalloutProps.addSpacer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "addSpacer",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisCloudConnectPromoTourProps",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
+        "label": "EisCloudConnectPromoTourProps",
+        "description": [
+          "\nProps for the EisCloudConnectPromoTour component.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.anchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "anchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.navigateToApp",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToApp",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.isSelfManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSelfManaged",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.isReady",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReady",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisCloudConnectPromoTourProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-public.EisPromotionalCalloutProps",
         "type": "Interface",
         "tags": [],
@@ -484,6 +855,222 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisTokenCostTourProps",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
+        "label": "EisTokenCostTourProps",
+        "description": [
+          "\nProps for the EisTokenCostTour component.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisTokenCostTourProps.anchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "anchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisTokenCostTourProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisTokenCostTourProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisTokenCostTourProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisTokenCostTourProps.isReady",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReady",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisTokenCostTourProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_token_cost_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisUpdateCalloutProps",
+        "type": "Interface",
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
+        "label": "EisUpdateCalloutProps",
+        "description": [
+          "\nProps for the EisUpdateCallout component.\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.shouldShowEisUpdateCallout",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldShowEisUpdateCallout",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.handleOnClick",
+            "type": "Function",
+            "tags": [],
+            "label": "handleOnClick",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"row\" | \"column\""
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.hasUpdatePrivileges",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasUpdatePrivileges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisUpdateCalloutProps.addSpacer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "addSpacer",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -798,6 +1385,48 @@
             "description": [],
             "signature": [
               "Record<string, boolean> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.SearchApiPanelsServicesContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchApiPanelsServicesContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.SearchApiPanelsServicesContext.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.SearchApiPanelsServicesContext.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/types.ts",
             "deprecated": false,

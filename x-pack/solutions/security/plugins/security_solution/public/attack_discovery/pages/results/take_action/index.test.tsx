@@ -17,7 +17,13 @@ import { TakeAction } from '.';
 
 const mockMutateAsyncBulk = jest.fn().mockResolvedValue({});
 const mockMutateAsyncStatus = jest.fn().mockResolvedValue({});
-
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn().mockReturnValue({
+    isAgentBuilderEnabled: false,
+    hasAgentBuilderPrivilege: true,
+    isAgentChatExperienceEnabled: false,
+  }),
+}));
 jest.mock('../../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: jest.fn(),
 }));
@@ -51,13 +57,6 @@ jest.mock('./use_update_alerts_status', () => ({
 jest.mock('../../utils/is_attack_discovery_alert', () => ({
   isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
     ad?.alertWorkflowStatus !== undefined,
-}));
-
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
 }));
 
 /** helper function to open the popover */

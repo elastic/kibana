@@ -12,15 +12,10 @@ import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { updateAttackDiscoverySchedulesRoute } from './update';
 import { serverMock } from '../../../../../__mocks__/server';
 import { requestContextMock } from '../../../../../__mocks__/request_context';
-import { updateAttackDiscoverySchedulesPublicRequest } from '../../../../../__mocks__/request';
+import { updateAttackDiscoverySchedulesRequest } from '../../../../../__mocks__/request';
 import { getAttackDiscoveryScheduleMock } from '../../../../../__mocks__/attack_discovery_schedules.mock';
 import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
 import { performChecks } from '../../../../helpers';
-import { getKibanaFeatureFlags } from '../../../helpers/get_kibana_feature_flags';
-
-jest.mock('../../../helpers/get_kibana_feature_flags', () => ({
-  getKibanaFeatureFlags: jest.fn(),
-}));
 
 jest.mock('../../../../helpers', () => ({
   performChecks: jest.fn(),
@@ -68,10 +63,6 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    // Mock getKibanaFeatureFlags to be enabled by default
-    (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-      attackDiscoveryPublicApiEnabled: true,
-    });
     // Mock performChecks to return success by default
     (performChecks as jest.Mock).mockResolvedValue({
       isSuccess: true,
@@ -94,7 +85,7 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
 
   it('should handle successful request', async () => {
     const response = await server.inject(
-      updateAttackDiscoverySchedulesPublicRequest('schedule-1', mockRequestBody),
+      updateAttackDiscoverySchedulesRequest('schedule-1', mockRequestBody),
       requestContextMock.convertContext(context)
     );
     expect(response.status).toEqual(200);
@@ -104,7 +95,7 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
   it('should handle missing data client', async () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(null);
     const response = await server.inject(
-      updateAttackDiscoverySchedulesPublicRequest('schedule-2', mockRequestBody),
+      updateAttackDiscoverySchedulesRequest('schedule-2', mockRequestBody),
       requestContextMock.convertContext(context)
     );
 
@@ -118,7 +109,7 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
   it('should handle `dataClient.updateSchedule` error', async () => {
     (updateAttackDiscoverySchedule as jest.Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
-      updateAttackDiscoverySchedulesPublicRequest('schedule-3', mockRequestBody),
+      updateAttackDiscoverySchedulesRequest('schedule-3', mockRequestBody),
       requestContextMock.convertContext(context)
     );
     expect(response.status).toEqual(500);
@@ -128,47 +119,6 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
         success: false,
       },
       status_code: 500,
-    });
-  });
-
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: false,
-        });
-      });
-
-      it('returns a 403 response when the public API is disabled', async () => {
-        const response = await server.inject(
-          updateAttackDiscoverySchedulesPublicRequest('schedule-1', mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
-
-        expect(response.status).toEqual(403);
-        expect(response.body).toEqual({
-          message: { error: 'Attack discovery public API is disabled', success: false },
-          status_code: 403,
-        });
-      });
-    });
-
-    describe('when the public API is enabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: true,
-        });
-      });
-
-      it('proceeds with normal execution when the public API is enabled', async () => {
-        const response = await server.inject(
-          updateAttackDiscoverySchedulesPublicRequest('schedule-1', mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
-
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual(expect.objectContaining({ ...mockRequestBody }));
-      });
     });
   });
 });

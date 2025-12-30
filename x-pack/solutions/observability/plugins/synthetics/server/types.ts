@@ -36,6 +36,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server/plugin';
 import type {
   MaintenanceWindowClient,
   MaintenanceWindowsServerStart,
@@ -82,6 +83,7 @@ export interface SyntheticsPluginsSetupDependencies {
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
   share: SharePluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface SyntheticsPluginsStartDependencies {

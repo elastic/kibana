@@ -234,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
         riskScore: [
           {
             id_field: ['host.name'],
-            inputs: [
+            alert_inputs: [
               {
                 contribution_score: [expect.any(String)],
                 description: [expect.any(String)],
@@ -242,6 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timestamp: [expect.any(String)],
               },
             ],
+            asset_criticality_contribution_score: expect.any(String),
             score: [expect.any(Number)],
           },
         ],
@@ -277,7 +278,9 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       expect(body.replacements).toEqual(expect.any(Object));
-      expect(body.prompt).toContain('Generate markdown text with most important information');
+      expect(body.prompt).toContain(
+        'Generate structured information for entity so a Security analyst can act.'
+      );
 
       // check if anonymization fields are working
       expect(JSON.stringify(body.summary)).not.toContain(hostName);
@@ -309,7 +312,9 @@ export default function ({ getService }: FtrProviderContext) {
         anomalies: [],
       });
       expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
-      expect(body.prompt).toContain('Generate markdown text with most important information');
+      expect(body.prompt).toContain(
+        'Generate structured information for entity so a Security analyst can act.'
+      );
     });
 
     describe('anonymization fields handling', () => {

@@ -16,6 +16,7 @@ import type {
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
+  TriggerType,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -192,6 +193,29 @@ export class WorkflowsManagementApi {
       request
     );
     return executeResponse.workflowExecutionId;
+  }
+
+  public async scheduleWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    inputs: Record<string, any>,
+    triggeredBy: TriggerType,
+    request: KibanaRequest
+  ): Promise<string> {
+    const { event, ...manualInputs } = inputs;
+    const context = {
+      event,
+      spaceId,
+      inputs: manualInputs,
+      triggeredBy,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const scheduleResponse = await workflowsExecutionEngine.scheduleWorkflow(
+      workflow,
+      context,
+      request
+    );
+    return scheduleResponse.workflowExecutionId;
   }
 
   public async testWorkflow({

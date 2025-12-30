@@ -1,0 +1,1042 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
+      "user": {
+        "entity": {
+          "id": "admin@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "kabcd1234efgh5678",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin@example.com"
+        ],
+        "ip": [
+          "10.0.0.1"
+        ],
+        "user": [
+          "admin@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.1"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "2",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "admin2@example.com"
+        }
+      },
+      "user": {
+        "entity": {
+          "id": "admin2@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin2@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "failed-event",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "failed",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.2",
+          "projects/your-project-id/roles/customRole",
+          "admin2@example.com"
+        ],
+        "ip": [
+          "10.0.0.2"
+        ],
+        "user": [
+          "admin2@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.2"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "3",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin3@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "grouped-event1",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "failed",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.3",
+          "projects/your-project-id/roles/customRole",
+          "admin3@example.com"
+        ],
+        "ip": [
+          "10.0.0.3"
+        ],
+        "user": [
+          "admin3@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.3"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "4",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "user": {
+        "entity": {
+          "id": "admin3@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin3@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "grouped-event2",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin3@example.com"
+        ],
+        "ip": [
+          "10.0.0.1"
+        ],
+        "user": [
+          "admin3@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.1"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "5",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "admin4@example.com"
+        }
+      },
+      "user": {
+        "entity": {
+          "id": "admin4@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin4@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "host-event",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "host": {
+        "hostname": "host1.example.com",
+        "name": "host1.example.com",
+        "ip": "192.168.1.1",
+        "os": {
+          "name": "Linux",
+          "version": "5.4.0-42-generic"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin4@example.com"
+        ],
+        "ip": [
+          "10.0.0.1"
+        ],
+        "user": [
+          "admin4@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.1"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "6",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:34:56.789Z",
+      "actor": {
+        "entity": {
+          "id": "admin6@example.com"
+        }
+      },
+      "user": {
+        "entity": {
+          "id": "admin6@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin6@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole2",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "6",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-0987654321"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "A custom role with specific permissions",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": "projects/your-project-id/roles/customRole",
+              "title": "Custom Role"
+            },
+            "roleId": "customRole"
+          },
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "A custom role with specific permissions",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": "projects/your-project-id/roles/customRole",
+            "stage": "GA",
+            "title": "Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "host": {
+        "hostname": "host1.example.com",
+        "name": "host1.example.com",
+        "ip": "192.168.1.1",
+        "os": {
+          "name": "Linux",
+          "version": "5.4.0-42-generic"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.1",
+          "projects/your-project-id/roles/customRole",
+          "admin6@example.com"
+        ],
+        "ip": [
+          "10.0.0.1"
+        ],
+        "user": [
+          "admin6@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.1"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "multivalue-ui-test",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:40:00.000Z",
+      "actor": {
+        "entity": {
+          "id": [
+            "admin-user1@example.com",
+            "admin-user2@example.com"
+          ]
+        }
+      },
+      "user": {
+        "entity": {
+          "id": [
+            "admin-user1@example.com",
+            "admin-user2@example.com"
+          ]
+        }
+      },
+      "client": {
+        "user": {
+          "email": [
+            "admin-user1@example.com",
+            "admin-user2@example.com"
+          ]
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.CreateRole",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network",
+          "configuration"
+        ],
+        "id": "multivalue-ui-test",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "end",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.create",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-multivalue-test"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.CreateRoleRequest",
+            "parent": "projects/your-project-id",
+            "role": {
+              "description": "Multi-value test role",
+              "includedPermissions": [
+                "resourcemanager.projects.get",
+                "resourcemanager.projects.list"
+              ],
+              "name": [
+                "projects/your-project-id/roles/customRole1",
+                "projects/your-project-id/roles/customRole2",
+                "projects/your-project-id/roles/customRole3"
+              ],
+              "title": "Multi-Value Custom Role"
+            },
+            "roleId": [
+              "customRole1",
+              "customRole2",
+              "customRole3"
+            ]
+          },
+          "resource_name": [
+            "projects/your-project-id/roles/customRole1",
+            "projects/your-project-id/roles/customRole2",
+            "projects/your-project-id/roles/customRole3"
+          ],
+          "response": {
+            "@type": "type.googleapis.com/google.iam.admin.v1.Role",
+            "description": "Multi-value test role",
+            "includedPermissions": [
+              "resourcemanager.projects.get",
+              "resourcemanager.projects.list"
+            ],
+            "name": [
+              "projects/your-project-id/roles/customRole1",
+              "projects/your-project-id/roles/customRole2",
+              "projects/your-project-id/roles/customRole3"
+            ],
+            "stage": "GA",
+            "title": "Multi-Value Custom Role"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "host": {
+        "hostname": "multivalue-test-host",
+        "ip": "192.168.1.10",
+        "os": {
+          "name": "Linux",
+          "version": "5.4.0-42-generic"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.10",
+          "projects/your-project-id/roles/customRole1",
+          "projects/your-project-id/roles/customRole2",
+          "projects/your-project-id/roles/customRole3",
+          "admin-user1@example.com",
+          "admin-user2@example.com"
+        ],
+        "ip": [
+          "10.0.0.10"
+        ],
+        "user": [
+          "admin-user1@example.com",
+          "admin-user2@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.10"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "target": {
+        "entity": {
+          "id": [
+            "projects/your-project-id/roles/customRole1",
+            "projects/your-project-id/roles/customRole2",
+            "projects/your-project-id/roles/customRole3"
+          ]
+        }
+      },
+      "entity": {
+        "target": {
+          "id": [
+            "projects/your-project-id/roles/customRole1",
+            "projects/your-project-id/roles/customRole2",
+            "projects/your-project-id/roles/customRole3"
+          ]
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      }
+    }
+  }
+}

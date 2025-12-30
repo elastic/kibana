@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-server-utils'
   - '@kbn/react-query'
+  - '@kbn/security-solution-features'
 tags:
   - plugin
   - prod

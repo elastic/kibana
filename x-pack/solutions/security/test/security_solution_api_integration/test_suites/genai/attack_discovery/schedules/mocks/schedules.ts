@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryScheduleCreateProps } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryApiScheduleCreateProps } from '@kbn/elastic-assistant-common';
 
 export const getSimpleAttackDiscoverySchedule = (
-  overrides?: Partial<AttackDiscoveryScheduleCreateProps>
-): AttackDiscoveryScheduleCreateProps => {
+  overrides?: Partial<AttackDiscoveryApiScheduleCreateProps>
+): AttackDiscoveryApiScheduleCreateProps => {
   return {
     name: 'Simple Schedule 1',
     enabled: false,
     params: {
-      alertsIndexPattern: '.alerts-security.alerts-default',
-      apiConfig: {
+      alerts_index_pattern: '.alerts-security.alerts-default',
+      api_config: {
         connectorId: 'preconfigured-bedrock',
         actionTypeId: '.bedrock',
         name: 'preconfigured-bedrock',

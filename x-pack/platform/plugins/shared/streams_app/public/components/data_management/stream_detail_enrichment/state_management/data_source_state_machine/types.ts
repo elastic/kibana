@@ -9,11 +9,13 @@ import type { ActorRef, Snapshot } from 'xstate5';
 import type { IToasts } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SampleDocument } from '@kbn/streams-schema';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export interface DataSourceMachineDeps {
   data: DataPublicPluginStart;
   toasts: IToasts;
+  telemetryClient: StreamsTelemetryClient;
 }
 
 export type DataSourceToParentEvent =
@@ -24,6 +26,7 @@ export type DataSourceToParentEvent =
 export interface DataSourceInput {
   parentRef: DataSourceParentActor;
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
   dataSource: EnrichmentDataSourceWithUIAttributes;
 }
 
@@ -34,6 +37,7 @@ export type DataSourceSimulationMode = 'partial' | 'complete';
 export interface DataSourceContext {
   parentRef: DataSourceParentActor;
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
   simulationMode: DataSourceSimulationMode;

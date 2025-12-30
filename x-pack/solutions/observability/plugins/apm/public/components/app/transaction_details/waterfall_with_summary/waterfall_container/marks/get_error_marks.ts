@@ -6,16 +6,20 @@
  */
 
 import { isEmpty } from 'lodash';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallError } from '../waterfall/waterfall_helpers/waterfall_helpers';
 import type { Mark } from '.';
-import type { WaterfallError } from '../../../../../../../common/waterfall/typings';
 
 export interface ErrorMark extends Mark {
   type: 'errorMark';
-  error: WaterfallError;
+  error: Error;
   serviceColor: string;
+  onClick?: () => void;
 }
 
+/**
+ * @deprecated Remove it once we remove the apm waterfall
+ */
 export const getErrorMarks = (errorItems: IWaterfallError[]): ErrorMark[] => {
   if (isEmpty(errorItems)) {
     return [];
@@ -25,7 +29,7 @@ export const getErrorMarks = (errorItems: IWaterfallError[]): ErrorMark[] => {
     type: 'errorMark',
     offset: Math.max(error.offset + error.skew, 0),
     verticalLine: false,
-    id: error.doc.error.id,
+    id: error.id,
     error: error.doc,
     serviceColor: error.color,
   }));

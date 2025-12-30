@@ -8,7 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*",
+    "types/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -124,6 +124,8 @@
     "@kbn/react-query",
     "@kbn/deeplinks-analytics",
     "@kbn/esql-composer",
+    "@kbn/fleet-plugin",
+    "@kbn/observability-agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }

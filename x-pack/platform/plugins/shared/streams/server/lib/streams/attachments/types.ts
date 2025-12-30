@@ -22,8 +22,14 @@ export interface AttachmentLink {
   type: AttachmentType;
 }
 
-export interface Attachment extends AttachmentLink {
+export interface AttachmentData extends AttachmentLink {
+  /**
+   * The display title of the attachment.
+   */
   title: string;
+  /**
+   * List of tag IDs associated with the attachment.
+   */
   tags: string[];
   /**
    * The identifier used for navigation to the attachment's detail page.
@@ -33,6 +39,25 @@ export interface Attachment extends AttachmentLink {
    * own ID, which is required for proper navigation.
    */
   redirectId: string;
+  /**
+   * Optional description of the attachment.
+   */
+  description?: string;
+  /**
+   * The date and time the attachment was created.
+   */
+  createdAt?: string;
+  /**
+   * The date and time the attachment was last updated.
+   */
+  updatedAt?: string;
+}
+
+export interface Attachment extends AttachmentData {
+  /**
+   * The names of streams this attachment is linked to.
+   */
+  streamNames: string[];
 }
 
 export interface AttachmentDocument {
@@ -53,9 +78,11 @@ export type AttachmentBulkOperation = AttachmentBulkIndexOperation | AttachmentB
 
 export interface DashboardSOAttributes {
   title: string;
+  description?: string;
 }
 
 export interface SloSOAttributes {
   name: string;
   id: string;
+  description?: string;
 }

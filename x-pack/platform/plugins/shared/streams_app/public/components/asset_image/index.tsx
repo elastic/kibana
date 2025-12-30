@@ -92,11 +92,25 @@ const imageSets = {
       defaultMessage: 'Checklist',
     }),
   },
+  attachmentsEmpty: {
+    light: () => import('./attachments_empty_light.svg'),
+    dark: () => import('./attachments_empty_dark.svg'),
+    alt: i18n.translate('xpack.streams.attachments.emptyStateImage', {
+      defaultMessage: 'Attachments empty state image',
+    }),
+  },
   suggestPipeline: {
     light: () => import('./suggest_pipeline.svg'),
     dark: () => import('./suggest_pipeline_dark.svg'),
     alt: i18n.translate('xpack.streams.suggestPipelineImage', {
       defaultMessage: 'Suggest pipeline',
+    }),
+  },
+  routingSuggestionEmptyState: {
+    light: () => import('./routing_suggestion_empty_state.svg'),
+    dark: () => import('./routing_suggestion_empty_state.svg'),
+    alt: i18n.translate('xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.image', {
+      defaultMessage: 'Suggest AI partitioning image for the streams app',
     }),
   },
 };

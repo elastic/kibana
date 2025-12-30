@@ -55,11 +55,9 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = getCurrentTab().previousAppState;
-    const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
-    const prevQuery = savedSearch.searchSource.getField('query');
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
-    const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
+    const queryChanged = !isEqual(nextState.query, prevState.query);
 
     if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
       savedSearchState.update({ nextState });
@@ -89,11 +87,9 @@ export const buildStateSubscribe =
       }
     }
 
-    const { interval, breakdownField, sampleSize, sort, dataSource } = prevState;
+    const { sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
-    const chartIntervalChanged = nextState.interval !== interval && !isEsqlMode;
-    const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
@@ -145,24 +141,11 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (
-      chartIntervalChanged ||
-      breakdownFieldChanged ||
-      sampleSizeChanged ||
-      docTableSortChanged ||
-      dataSourceChanged ||
-      queryChanged
-    ) {
+    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged) {
       const logData = {
-        chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
-        breakdownFieldChanged: logEntry(
-          breakdownFieldChanged,
-          breakdownField,
-          nextState.breakdownField
-        ),
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
-        queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
+        queryChanged: logEntry(queryChanged, prevState.query, nextState.query),
       };
 
       if (dataState.disableNextFetchOnStateChange$.getValue()) {

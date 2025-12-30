@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { uniq } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import type { ServiceHealthStatusesResponse } from './get_health_statuses';
@@ -54,7 +53,7 @@ export function mergeServiceStats({
         ...a,
         ...b,
         ...{ agentName: agentNameA || agentNameB },
-        environments: uniq(aEnvs.concat(bEnvs)),
+        environments: [...new Set(aEnvs.concat(bEnvs))],
       };
     }
   );
