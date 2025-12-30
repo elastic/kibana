@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { getRollupIntervalForTimeRange } from '../../../agent_builder/utils/get_rollup_interval_for_time_range';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -28,6 +28,23 @@ export interface RedMetricsItem {
 
 export type GetRedMetricsResponse = RedMetricsItem[];
 
+/**
+ * Determines the appropriate document type based on groupBy and filter parameters.
+ * ServiceTransactionMetric is more efficient but doesn't have 'transaction.name'.
+ * Use TransactionMetric when filtering or grouping by transaction.name.
+ */
+function getDocumentType(
+  groupBy: string,
+  filter?: string
+): ApmDocumentType.TransactionMetric | ApmDocumentType.ServiceTransactionMetric {
+  const requiresTransactionName =
+    groupBy === TRANSACTION_NAME || (filter && filter.includes(TRANSACTION_NAME));
+
+  return requiresTransactionName
+    ? ApmDocumentType.TransactionMetric
+    : ApmDocumentType.ServiceTransactionMetric;
+}
+
 export async function getRedMetrics({
   apmEventClient,
   start,
@@ -41,7 +58,7 @@ export async function getRedMetrics({
   filter?: string;
   groupBy?: string;
 }): Promise<GetRedMetricsResponse> {
-  const documentType = ApmDocumentType.TransactionMetric;
+  const documentType = getDocumentType(groupBy, filter);
   const rollupInterval = getRollupIntervalForTimeRange(start, end);
   const durationField = getDurationFieldForTransactions(documentType, true);
 
