@@ -25,7 +25,7 @@ export function registerInstall(
 ) {
   router.versioned
     .post({
-      path: '/internal/entity-store/v2/install',
+      path: '/internal/entity-store/install',
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
