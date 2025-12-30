@@ -20,13 +20,16 @@ import {
   EuiText,
   EuiButtonIcon,
   EuiTitle,
+  EuiLoadingSpinner,
+  EuiIconTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { load as parseYaml } from 'js-yaml';
 import { Controller, FormProvider, useForm, useFormContext } from 'react-hook-form';
-import { noop } from 'lodash';
+import { camelCase, noop } from 'lodash';
 import {
   UseField,
   useFormData as useKibanaFormData,
@@ -39,6 +42,7 @@ import { CommonFlyout, CommonFlyoutFooter } from '../configure_cases/flyout';
 import { TitleExperimentalBadge } from '../header_page/title';
 import { KibanaServices } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
+import type { CaseUI } from '../../containers/types';
 
 const i18n = {
   TEMPLATE_TITLE: 'Templates V2',
@@ -55,15 +59,14 @@ const fetchTemplates = async () => {
   return KibanaServices.get().http.fetch<Template[]>(`${CASES_INTERNAL_URL}/templates`);
 };
 
-const fetchTemplate = async (templateId: string, version?: string): Promise<ParsedTemplate> => {
-  const template = await KibanaServices.get().http.fetch<Template>(
-    `${CASES_INTERNAL_URL}/templates/${templateId}`,
-    {
-      query: {
-        version,
-      },
-    }
-  );
+const fetchTemplate = async (templateId: string, version?: number): Promise<ParsedTemplate> => {
+  const template = await KibanaServices.get().http.fetch<
+    Template & { isLatest: boolean; latestVersion: number }
+  >(`${CASES_INTERNAL_URL}/templates/${templateId}`, {
+    query: {
+      version,
+    },
+  });
 
   return {
     ...template,
@@ -104,7 +107,7 @@ const useTemplates = () =>
     queryKey: ['templates'],
   });
 
-const useTemplate = (templateId: string, version?: string) =>
+const useTemplate = (templateId: string, version?: number) =>
   useQuery({
     queryFn: () => fetchTemplate(templateId, version),
     queryKey: ['templates', templateId, version],
@@ -302,7 +305,7 @@ fields:
 // on save, persist version timestamp as well
 // store each template as separate SO's with the same template_id (for reference)
 // so that we can do audit and rollbacks
-export const TemplateFormFields = () => {
+export const TemplateFormFields = ({ updating }: { updating?: boolean }) => {
   const { control } = useFormContext<{ name: string; definition: string }>();
 
   const euiTheme = useEuiTheme();
@@ -313,22 +316,26 @@ export const TemplateFormFields = () => {
 
   return (
     <div css={{ width: '100%', height: '100%', overflowY: 'scroll' }}>
-      <EuiFormRow fullWidth>
-        <Controller
-          control={control}
-          name="name"
-          render={({ field }) => {
-            return (
-              <EuiFieldText
-                placeholder="Template display name"
-                value={field.value}
-                onChange={(e) => field.onChange(e.currentTarget.value)}
-              />
-            );
-          }}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="xs" />
+      {!updating && (
+        <>
+          <EuiFormRow fullWidth>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => {
+                return (
+                  <EuiFieldText
+                    placeholder="Template display name"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.currentTarget.value)}
+                  />
+                );
+              }}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="xs" />
+        </>
+      )}
       <div css={styles.editorContainer(euiTheme)}>
         <Controller
           control={control}
@@ -426,7 +433,7 @@ const TemplateUpdateView = ({
           />
         }
       >
-        {() => <TemplateFormFields />}
+        {() => <TemplateFormFields updating />}
       </CommonFlyout>
     </FormProvider>
   );
@@ -494,6 +501,7 @@ export const CreateCaseTemplateFields = () => {
 
         return (
           <UseField
+            key={field.name}
             path={`templateFields.${field.name}_as_${field.type}`}
             component={SelectField}
             componentProps={{
@@ -520,6 +528,77 @@ export const CreateCaseTemplateFields = () => {
   );
 };
 CreateCaseTemplateFields.displayName = 'TemplateFields';
+
+const CaseViewTemplateFieldsInner = ({
+  template,
+  // TODO: needed for updates
+  caseId,
+  templateFields,
+}: {
+  template: {
+    id: string;
+    version: number;
+  };
+  caseId: string;
+  templateFields: unknown;
+}) => {
+  const templateQuery = useTemplate(template.id, template.version);
+
+  if (templateQuery.isFetching) {
+    return <EuiLoadingSpinner />;
+  }
+
+  const fields = templateQuery.data?.definition.fields;
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          {templateQuery.data?.name}{' '}
+          {!templateQuery.data?.isLatest && (
+            <EuiBadge>
+              {`Outdated`}{' '}
+              <EuiIconTip
+                type="info"
+                content={`Based on template "${templateQuery.data?.name}" (${
+                  templateQuery.data?.isLatest
+                    ? 'latest template version'
+                    : `v${template.version}, current version is ${templateQuery.data?.latestVersion}`
+                })`}
+              />
+            </EuiBadge>
+          )}
+        </h3>
+      </EuiTitle>
+      {fields?.map((field) => {
+        return (
+          <div key={field.name}>
+            <strong>{`${field.name}:`}</strong>{' '}
+            {(templateFields as any)[`${camelCase(`${field.name}_as_${field.type}`)}`]}
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
+CaseViewTemplateFieldsInner.displayName = 'CaseViewTemplateFieldsInner';
+
+export const CaseViewTemplateFields = ({ caseData }: { caseData: CaseUI }) => {
+  if (!caseData.template) {
+    return <pre>{`Debug: missing template data on the case`}</pre>;
+  }
+
+  return (
+    <CaseViewTemplateFieldsInner
+      template={caseData.template}
+      caseId={caseData.id}
+      templateFields={caseData.templateFields}
+    />
+  );
+};
+
+CaseViewTemplateFields.displayName = 'CaseViewTemplateFields';
 
 export const TemplateFlyout = ({
   onClose,

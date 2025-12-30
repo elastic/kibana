@@ -44,6 +44,8 @@ export interface ParsedTemplate extends Omit<Template, 'definition'> {
       metadata: Record<string, unknown>;
     }>;
   };
+  isLatest: boolean;
+  latestVersion: number;
 }
 
 export type CreateTemplateInput = Omit<

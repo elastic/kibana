@@ -15,6 +15,7 @@ import type {
 import { v4 } from 'uuid';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { load as parseYaml } from 'js-yaml';
 import type {
   CreateTemplateInput,
   ParsedTemplate,
@@ -25,7 +26,6 @@ import { CASE_TEMPLATE_SAVED_OBJECT, CASES_INTERNAL_URL } from '../../../../comm
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { load as parseYaml } from 'js-yaml';
 
 // TODO: split this into multiple files, add rbac, security, make this api internal etc etc
 
@@ -143,8 +143,6 @@ export class TemplatesService {
         },
       },
     };
-
-    console.log('update mappings', updatedMappings);
 
     await this.dependencies.internalEsClient.indices.putMapping(updatedMappings);
   }
@@ -295,14 +293,28 @@ export const getTemplateRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const template = await casesClient.templates.getTemplate(
+      const requestedTemplate = await casesClient.templates.getTemplate(
         request.params.template_id,
         (request.query as Record<string, string | undefined>).version
       );
 
-      return response.ok({
-        body: template,
-      });
+      if (requestedTemplate) {
+        const res: Template & { isLatest: boolean; latestVersion: number } = {
+          ...requestedTemplate,
+          isLatest: true,
+          latestVersion: requestedTemplate.templateVersion,
+        };
+
+        const latestTemplate = await casesClient.templates.getTemplate(request.params.template_id);
+        res.isLatest = latestTemplate?.templateVersion === requestedTemplate?.templateVersion;
+        res.latestVersion = latestTemplate?.templateVersion ?? requestedTemplate.templateVersion;
+
+        return response.ok({
+          body: res,
+        });
+      }
+
+      return response.notFound();
     } catch (error) {
       throw createCaseError({
         message: `Failed to get templates`,
