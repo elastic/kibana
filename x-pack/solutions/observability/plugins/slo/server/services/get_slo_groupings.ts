@@ -55,7 +55,7 @@ export class GetSLOGroupings {
       index: params.remoteName
         ? `${params.remoteName}:${SUMMARY_DESTINATION_INDEX_PATTERN}`
         : SUMMARY_DESTINATION_INDEX_PATTERN,
-      ...generateQuery(slo, params, this.sloSettings),
+      ...this.generateQuery(slo, params),
     });
 
     return {
@@ -67,72 +67,77 @@ export class GetSLOGroupings {
           : undefined,
     };
   }
-}
 
-function generateQuery(slo: SLODefinition, params: GetSLOGroupingsParams, settings: SLOSettings) {
-  const groupingKeys = [slo.groupBy].flat();
-  const groupingValues = params.instanceId.split(',') ?? [];
+  private generateQuery(slo: SLODefinition, params: GetSLOGroupingsParams) {
+    const groupingKeys = [slo.groupBy].flat();
+    const groupingValues = params.instanceId.split(',') ?? [];
 
-  const groupingKeyValuePairs = groupingKeys.map((groupingKey, index) => [
-    groupingKey,
-    groupingValues[index],
-  ]);
+    const groupingKeyValuePairs = groupingKeys.map((groupingKey, index) => [
+      groupingKey,
+      groupingValues[index],
+    ]);
 
-  const aggs = generateAggs(params);
+    const aggs = generateAggs(params);
 
-  const query = {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              'slo.id': slo.id,
+    const query = {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'slo.id': slo.id,
+              },
             },
-          },
-          {
-            term: {
-              'slo.revision': slo.revision,
+            {
+              term: {
+                'slo.revision': slo.revision,
+              },
             },
-          },
-          // exclude stale summary documents if specified
-          ...(!!params.excludeStale
-            ? [
-                {
-                  range: {
-                    summaryUpdatedAt: {
-                      gte: `now-${settings.staleThresholdInHours}h`,
+            {
+              term: {
+                spaceId: this.spaceId,
+              },
+            },
+            // exclude stale summary documents if specified
+            ...(!!params.excludeStale
+              ? [
+                  {
+                    range: {
+                      summaryUpdatedAt: {
+                        gte: `now-${this.sloSettings.staleThresholdInHours}h`,
+                      },
                     },
                   },
+                ]
+              : []),
+            // Set other groupings as term filters
+            ...groupingKeyValuePairs
+              .filter(([groupingKey]) => groupingKey !== params.groupingKey)
+              .map(([groupingKey, groupingValue]) => ({
+                term: {
+                  [`slo.groupings.${groupingKey}`]: groupingValue,
                 },
-              ]
-            : []),
-          // Set other groupings as term filters
-          ...groupingKeyValuePairs
-            .filter(([groupingKey]) => groupingKey !== params.groupingKey)
-            .map(([groupingKey, groupingValue]) => ({
-              term: {
-                [`slo.groupings.${groupingKey}`]: groupingValue,
-              },
-            })),
-          // search on the specified groupingKey
-          ...(params.search
-            ? [
-                {
-                  query_string: {
-                    default_field: `slo.groupings.${params.groupingKey}`,
-                    query: `*${params.search.replace(/^\*/, '').replace(/\*$/, '')}*`,
+              })),
+            // search on the specified groupingKey
+            ...(params.search
+              ? [
+                  {
+                    query_string: {
+                      default_field: `slo.groupings.${params.groupingKey}`,
+                      query: `*${params.search.replace(/^\*/, '').replace(/\*$/, '')}*`,
+                    },
                   },
-                },
-              ]
-            : []),
-        ],
+                ]
+              : []),
+          ],
+        },
       },
-    },
-    aggs,
-  };
+      aggs,
+    };
 
-  return query;
+    return query;
+  }
 }
 
 function generateAggs(params: GetSLOGroupingsParams): {
