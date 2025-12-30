@@ -11,6 +11,7 @@ import type {
   BulkDeleteInput,
   CreateSLOInput,
   FindSLODefinitionsResponse,
+  FindSLOGroupingsResponse,
   FindSLOInstancesResponse,
   FindSLOTemplatesResponse,
   GetSLOTemplateResponse,
@@ -251,6 +252,30 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
+
+      return body;
+    },
+
+    async findGroupings(
+      sloId: string,
+      params: {
+        instanceId: string;
+        groupingKey: string;
+        search?: string;
+        afterKey?: string;
+        size?: string;
+        excludeStale?: string;
+      },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
+    ): Promise<FindSLOGroupingsResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/${sloId}/_groupings`)
+        .query(params)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
 
       return body;
     },

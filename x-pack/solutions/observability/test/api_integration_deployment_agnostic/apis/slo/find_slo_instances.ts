@@ -39,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  describe('Find Instances', function () {
+  describe('Find SLO Instances', function () {
     const SLO_ID = 'test-slo-find-instances';
 
     before(async () => {
