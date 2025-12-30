@@ -11,7 +11,7 @@ import type { Filter, FilterMeta } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
 import type { DashboardFilter } from '../server';
 
-const removeUndefinedProperty = <T extends Record<string, any>>(obj: T, key: string): void => {
+const removeUndefinedProperty = (obj: Record<string, any>, key: string): void => {
   if (obj[key] === undefined) {
     delete obj[key];
   }
@@ -30,8 +30,8 @@ export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] 
       delete cleanedFilter.meta.value;
     }
 
-    removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'key');
-    removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'alias');
+    removeUndefinedProperty(cleanedFilter.meta, 'key');
+    removeUndefinedProperty(cleanedFilter.meta, 'alias');
 
     if (isCombinedFilter(filter) && filter.meta?.params) {
       // Recursively clean filters in combined filters
