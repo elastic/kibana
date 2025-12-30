@@ -89,6 +89,7 @@ export function getDashboardApi({
   };
 
   const layoutManager = initializeLayoutManager(
+    viewModeManager,
     incomingEmbeddables,
     initialState.panels,
     initialState.controlGroupInput,

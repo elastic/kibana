@@ -51,9 +51,16 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/const
 import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import {
+  getPanelSettings,
+  placeClonePanel,
+  runPanelPlacementStrategy,
+} from '../../panel_placement';
+import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
 import { coreServices, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
+import type { initializeViewModeManager } from '../view_mode_manager';
 import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
@@ -64,14 +71,9 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnableControl,
 } from './types';
-import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
-import {
-  getPanelSettings,
-  placeClonePanel,
-  runPanelPlacementStrategy,
-} from '../../panel_placement';
 
 export function initializeLayoutManager(
+  viewModeManager: ReturnType<typeof initializeViewModeManager>,
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialControls: DashboardState['controlGroupInput'] | undefined,
@@ -116,13 +118,13 @@ export function initializeLayoutManager(
   );
 
   /** Observable that publishes `true` when all children APIs are available */
-  const childrenLoading$ = combineLatest([children$, layout$]).pipe(
-    map(([children, layout]) => {
+  const childrenLoading$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
+    map(([children, layout, viewMode]) => {
       // filter out panels that are in collapsed sections, since the APIs will never be available
       const expectedChildCount =
         Object.values(layout.panels).filter((panel) => {
           return panel.grid.sectionId ? !isSectionCollapsed(panel.grid.sectionId) : true;
-        }).length + Object.values(layout.controls).length;
+        }).length + (viewMode === 'print' ? 0 : Object.values(layout.controls).length); // pinned controls are not rendered in print mode
 
       const currentChildCount = Object.keys(children).length;
       return expectedChildCount !== currentChildCount;
