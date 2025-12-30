@@ -16,7 +16,10 @@ interface AgentBuilderBreadcrumb {
   path?: string;
 }
 
-export const useBreadcrumb = (breadcrumbs: AgentBuilderBreadcrumb[]) => {
+export const useBreadcrumb = (
+  breadcrumbs: AgentBuilderBreadcrumb[],
+  { homeLink = true }: { homeLink?: boolean } = {}
+) => {
   const {
     services: { chrome, application },
   } = useKibana();
@@ -38,10 +41,10 @@ export const useBreadcrumb = (breadcrumbs: AgentBuilderBreadcrumb[]) => {
         text: i18n.translate('xpack.agentBuilder.breadcrumb.agentBuilder', {
           defaultMessage: 'Agent Builder',
         }),
-        href: appUrl,
+        ...(homeLink ? { href: appUrl } : {}),
       },
     ];
-  }, [appUrl]);
+  }, [appUrl, homeLink]);
 
   useEffect(() => {
     const additionalCrumbs = breadcrumbs.map<ChromeBreadcrumb>((crumb) => {
@@ -52,7 +55,7 @@ export const useBreadcrumb = (breadcrumbs: AgentBuilderBreadcrumb[]) => {
     });
 
     chrome.setBreadcrumbs([...baseCrumbs, ...additionalCrumbs], {
-      project: { value: additionalCrumbs.length ? additionalCrumbs : baseCrumbs, absolute: true },
+      project: { value: [...baseCrumbs, ...additionalCrumbs], absolute: true },
     });
     return () => {
       chrome.setBreadcrumbs([]);
