@@ -6,16 +6,18 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { KUBERNETES_TOUR_STORAGE_KEY } from '../../../../../public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { test } from '../../fixtures';
 import {
   CONTAINER_NAMES,
   DATE_WITH_DOCKER_DATA,
+  DATE_WITH_HOSTS_DATA,
   DATE_WITH_POD_DATA,
   DATE_WITHOUT_DATA,
   HOSTS,
   POD_NAMES,
 } from '../../fixtures/constants';
+
+const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 
 test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
@@ -24,6 +26,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     // Dismiss k8s tour if it's present to avoid interference with other test assertions
     // The k8s tour specific test will take care of adding it back during its own execution
     await inventoryPage.dismissK8sTour();
+    await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
   });
 
   test('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
