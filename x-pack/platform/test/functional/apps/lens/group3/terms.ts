@@ -292,7 +292,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'terms',
           field: 'a',
+          keepOpen: true,
         });
+        // Set to 2 to ensure Other bucket appears with test data (6 unique values)
+        await lens.setTermsNumberOfValues(2);
+        await lens.closeDimensionEditor();
 
         await lens.waitForVisualization('xyVisChart');
         const data = await lens.getCurrentChartDebugState('xyVisChart');

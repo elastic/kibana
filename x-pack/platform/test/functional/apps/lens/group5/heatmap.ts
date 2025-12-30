@@ -24,7 +24,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5);
+      await lens.closeDimensionEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
