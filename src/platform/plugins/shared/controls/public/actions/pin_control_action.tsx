@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   apiCanBePinned,
   apiCanPinPanels,
-  type CanPinPanel,
+  type CanPinPanels,
   type IsPinnable,
   type PresentationContainer,
 } from '@kbn/presentation-containers';
@@ -36,7 +36,7 @@ import { ACTION_PIN_CONTROL } from './constants';
 type PinnableControlApi = HasType &
   HasUniqueId &
   IsPinnable &
-  HasParentApi<PresentationContainer & HasType & CanPinPanel>;
+  HasParentApi<PresentationContainer & HasType & CanPinPanels>;
 
 const compatibilityCheck = (api: unknown | null): api is PinnableControlApi =>
   Boolean(

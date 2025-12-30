@@ -29,7 +29,7 @@ export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is Ca
   return Boolean((unknownApi as CanExpandPanels)?.expandPanel !== undefined);
 };
 
-export interface CanPinPanel {
+export interface CanPinPanels {
   pinPanel: (panelId: string) => void;
   unpinPanel: (panelId: string) => void;
   panelIsPinned: (panelId: string) => boolean;
@@ -38,11 +38,11 @@ export interface CanPinPanel {
   ) => Promise<ApiType | undefined>;
 }
 
-export const apiCanPinPanels = (api: unknown): api is CanPinPanel => {
+export const apiCanPinPanels = (api: unknown): api is CanPinPanels => {
   return (
-    typeof (api as CanPinPanel)?.pinPanel === 'function' &&
-    typeof (api as CanPinPanel)?.unpinPanel === 'function' &&
-    typeof (api as CanPinPanel)?.panelIsPinned === 'function' &&
-    typeof (api as CanPinPanel)?.addPinnedPanel === 'function'
+    typeof (api as CanPinPanels)?.pinPanel === 'function' &&
+    typeof (api as CanPinPanels)?.unpinPanel === 'function' &&
+    typeof (api as CanPinPanels)?.panelIsPinned === 'function' &&
+    typeof (api as CanPinPanels)?.addPinnedPanel === 'function'
   );
 };

@@ -17,7 +17,7 @@ export {
   apiCanPinPanels,
   type CanDuplicatePanels,
   type CanExpandPanels,
-  type CanPinPanel,
+  type CanPinPanels,
 } from './interfaces/panel_management';
 export {
   apiCanBeDuplicated,
