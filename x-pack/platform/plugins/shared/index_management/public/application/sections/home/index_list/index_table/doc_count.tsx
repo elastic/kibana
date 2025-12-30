@@ -7,50 +7,23 @@
 
 import React, { useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { INTERNAL_API_BASE_PATH } from '../../../../../../common/constants';
-
+import useObservable from 'react-use/lib/useObservable';
+import type { docCountApi } from './get_doc_count';
 interface DocCountCellProps {
   indexName: string;
-  httpSetup: HttpSetup;
+  docCountApi: ReturnType<typeof docCountApi>;
 }
 
-export const DocCountCell = ({ indexName, httpSetup }: DocCountCellProps) => {
-  const [count, setCount] = React.useState<number>();
-  const [countError, setCountError] = React.useState<boolean>(false);
+export const DocCountCell = ({ indexName, docCountApi }: DocCountCellProps) => {
+  const docCountResponse = useObservable<Record<string, number>>(docCountApi.getObservable());
+  const count = docCountResponse ? docCountResponse[indexName] : undefined;
 
+  // todo account for error state
   useEffect(() => {
-    const abortController = new AbortController();
-
-    httpSetup
-      .get<{ count: number }>(
-        `${INTERNAL_API_BASE_PATH}/index_doc_count/${encodeURIComponent(indexName)}`,
-        { signal: abortController.signal }
-      )
-      .then((response) => {
-        if (!abortController.signal.aborted) {
-          setCount(response.count);
-        }
-      })
-      .catch(() => {
-        if (!abortController.signal.aborted) {
-          setCountError(true);
-        }
-      });
-
-    return () => {
-      abortController.abort();
-    };
-  }, [httpSetup, indexName]);
-
-  if (countError) {
-    return (
-      <span data-test-subj="docCountError">
-        <FormattedMessage defaultMessage="Error" id="xpack.idxMgmt.indexTable.docCountError" />
-      </span>
-    );
-  }
+    docCountApi.getByName(indexName);
+    // todo this errors and breaks reloading indices button
+    // return () => docCountApi.abort();
+  }, [docCountApi, indexName]);
 
   if (count === undefined) {
     return <EuiLoadingSpinner size="m" />;

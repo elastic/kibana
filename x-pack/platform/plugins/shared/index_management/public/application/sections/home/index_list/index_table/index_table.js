@@ -50,6 +50,7 @@ import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
 import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
 import { DocCountCell } from './doc_count';
+import { docCountApi } from './get_doc_count';
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -60,6 +61,7 @@ const getColumnConfigs = ({
   location,
   application,
   http,
+  docCountApi,
 }) => {
   const columns = [
     {
@@ -124,8 +126,9 @@ const getColumnConfigs = ({
         }),
         order: 60,
         render: (index) => {
-          return <DocCountCell indexName={index.name} httpSetup={http} />;
+          return <DocCountCell indexName={index.name} httpSetup={http} docCountApi={docCountApi} />;
         },
+        readOnly: true,
       },
       {
         fieldName: 'size',
@@ -197,6 +200,7 @@ export class IndexTable extends Component {
   constructor(props) {
     super(props);
 
+    this.docCountApi = docCountApi(props.http);
     this.state = {
       selectedIndicesMap: {},
     };
@@ -238,6 +242,7 @@ export class IndexTable extends Component {
     // navigating back to this tab would just show an empty list because the backing indices
     // would be hidden.
     this.props.filterChanged('');
+    this.docCountApi.abort();
   }
 
   readURLParams() {
@@ -358,7 +363,7 @@ export class IndexTable extends Component {
 
   buildHeader(columnConfigs) {
     const { sortField, isSortAscending } = this.props;
-    return columnConfigs.map(({ fieldName, label }) => {
+    return columnConfigs.map(({ fieldName, label, readOnly }) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
       const widthStyle = fieldName === 'name' && columnConfigs.length > 2 ? { width: '25%' } : {};
@@ -370,6 +375,7 @@ export class IndexTable extends Component {
           isSortAscending={isSortAscending}
           style={widthStyle}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
+          readOnly={readOnly}
         >
           {label}
         </EuiTableHeaderCell>
@@ -582,6 +588,7 @@ export class IndexTable extends Component {
             location,
             application,
             http,
+            docCountApi: this.docCountApi,
           });
           const columnsCount = columnConfigs.length + 1;
           return (

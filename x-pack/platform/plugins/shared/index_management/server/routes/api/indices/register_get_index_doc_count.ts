@@ -9,13 +9,18 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
+interface Bucket {
+  key: string;
+  doc_count: number;
+}
+
 export function registerGetIndexDocCountRoute({
   router,
   lib: { handleEsError },
 }: RouteDependencies) {
-  router.get(
+  router.post(
     {
-      path: addInternalBasePath('/index_doc_count/{indexName}'),
+      path: addInternalBasePath('/index_doc_count'),
       security: {
         authz: {
           enabled: false,
@@ -23,18 +28,38 @@ export function registerGetIndexDocCountRoute({
         },
       },
       validate: {
-        params: schema.object({
-          indexName: schema.string(),
+        body: schema.object({
+          indexNames: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
         }),
       },
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { indexName } = request.params;
+      const { indexNames } = request.body;
 
       try {
-        const { count } = await client.count({ index: indexName });
-        return response.ok({ body: { count } });
+        const result = await client.search({
+          index: indexNames,
+          size: 0,
+          aggs: {
+            by_index: {
+              terms: {
+                field: '_index',
+              },
+            },
+          },
+        });
+
+        // @ts-expect-error incorrect types in package
+        const values = ((result.aggregations?.by_index.buckets as Bucket[]) || []).reduce(
+          (col, bucket) => {
+            col[bucket.key] = bucket.doc_count;
+            return col;
+          },
+          {} as Record<string, number>
+        );
+
+        return response.ok({ body: values });
       } catch (error) {
         return handleEsError({ error, response });
       }
