@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import { RetryService } from './retry_service';
 import type { BackoffFactory } from './types';
