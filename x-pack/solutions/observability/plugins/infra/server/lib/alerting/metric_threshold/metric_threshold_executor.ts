@@ -302,21 +302,25 @@ export const createMetricThresholdExecutor =
       const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group]?.isNoData);
+      const isNoDataFound = alertResults.some((result) => result[group]?.isNoData);
 
-      if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
+      if (isNoDataFound && group !== UNGROUPED_FACTORY_KEY) {
         nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
+      const isIndeterminateState =
+        isNoDataFound &&
+        params.noDataBehavior === 'remainActive' &&
+        alertsClient.isTrackedAlert(group);
+
+      const isAlertOnNoDataEnabled = params.noDataBehavior
+        ? params.noDataBehavior === 'alertOnNoData'
+        : alertOnNoData || alertOnGroupDisappear;
+
       const nextState =
-        isNoData &&
-        (params.noDataBehavior
-          ? params.noDataBehavior === 'alertOnNoData'
-          : alertOnNoData || alertOnGroupDisappear)
+        isNoDataFound && isAlertOnNoDataEnabled
           ? AlertStates.NO_DATA
-          : isNoData &&
-            params.noDataBehavior === 'remainActive' &&
-            alertsClient.isTrackedAlert(group)
+          : isIndeterminateState
           ? AlertStates.ALERT
           : shouldAlertFire
           ? AlertStates.ALERT
@@ -325,7 +329,10 @@ export const createMetricThresholdExecutor =
           : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
+      if (
+        (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) &&
+        !isIndeterminateState
+      ) {
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
@@ -368,12 +375,7 @@ export const createMetricThresholdExecutor =
       ) {
         // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
         // check to see if a No Data state has occurred
-        if (
-          nextState === AlertStates.NO_DATA ||
-          (isNoData &&
-            params.noDataBehavior === 'remainActive' &&
-            alertsClient.isTrackedAlert(group))
-        ) {
+        if (nextState === AlertStates.NO_DATA || isIndeterminateState) {
           reason = alertResults
             .filter((result) => result[group]?.isNoData)
             .map((result) => buildNoDataAlertReason({ ...result[group], group }))
