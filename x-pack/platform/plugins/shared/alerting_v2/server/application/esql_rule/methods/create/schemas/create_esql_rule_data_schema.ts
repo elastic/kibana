@@ -19,5 +19,5 @@ export const createEsqlRuleDataSchema = schema.object(
     lookbackWindow: schema.string({ validate: validateDuration }),
     groupKey: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 16 }),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'ignore' }
 );
