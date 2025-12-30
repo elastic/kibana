@@ -6,10 +6,13 @@
  */
 
 import type { ToggleReducerAction, UseAccordionStateValue } from './use_accordion_state';
-import { useAccordionState, toggleReducer } from './use_accordion_state';
+import {
+  useAccordionState,
+  toggleReducer,
+  EXPANDABLE_SECTION_STORAGE_KEY,
+} from './use_accordion_state';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const mockSet = jest.fn();
 
@@ -45,7 +48,7 @@ describe('toggleReducer', () => {
 
     const result = toggleReducer(mockState, mockAction);
     expect(result).toBe('open');
-    expect(mockSet).toHaveBeenCalledWith(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS, {
+    expect(mockSet).toHaveBeenCalledWith(EXPANDABLE_SECTION_STORAGE_KEY, {
       [mockLocalStorageKey]: true,
     });
   });
