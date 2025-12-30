@@ -16,7 +16,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  ConcurrencySettings,
+  EsWorkflowExecution,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
@@ -264,20 +268,14 @@ export class WorkflowsExecutionEnginePlugin
                 triggeredBy: 'scheduled',
               };
 
-              // Evaluate concurrency key if concurrency settings are present
-              if (workflow.definition?.settings?.concurrency?.key) {
-                const workflowExecutionContext = buildWorkflowContext(
-                  workflowExecution as EsWorkflowExecution,
-                  coreStart,
-                  dependencies
-                );
-                const concurrencyGroupKey = this.concurrencyManager.evaluateConcurrencyKey(
-                  workflow.definition.settings.concurrency,
-                  workflowExecutionContext
-                );
-                if (concurrencyGroupKey) {
-                  workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
-                }
+              const concurrencyGroupKey = this.getConcurrencyGroupKey(
+                workflowExecution,
+                workflow.definition?.settings?.concurrency,
+                coreStart,
+                dependencies
+              );
+              if (concurrencyGroupKey) {
+                workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -372,19 +370,14 @@ export class WorkflowsExecutionEnginePlugin
         triggeredBy,
       };
 
-      if (workflow.definition?.settings?.concurrency?.key) {
-        const workflowExecutionContext = buildWorkflowContext(
-          workflowExecution as EsWorkflowExecution,
-          coreStart,
-          dependencies
-        );
-        const concurrencyGroupKey = this.concurrencyManager.evaluateConcurrencyKey(
-          workflow.definition.settings.concurrency,
-          workflowExecutionContext
-        );
-        if (concurrencyGroupKey) {
-          workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
-        }
+      const concurrencyGroupKey = this.getConcurrencyGroupKey(
+        workflowExecution,
+        workflow.definition?.settings?.concurrency,
+        coreStart,
+        dependencies
+      );
+      if (concurrencyGroupKey) {
+        workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -626,6 +619,49 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   /**
+   * Reused local wrapper for evaluating the concurrency group key for a workflow execution.
+   * Normalizes the partial workflowExecution to build the workflow context needed for template evaluation.
+   *
+   * @param workflowExecution - The partial workflow execution
+   * @param concurrencySettings - The concurrency settings from workflow definition
+   * @param coreStart - Core start services
+   * @param dependencies - Context dependencies for building workflow context
+   * @returns The evaluated concurrency group key, or null if not applicable
+   */
+  private getConcurrencyGroupKey(
+    workflowExecution: Partial<EsWorkflowExecution>,
+    concurrencySettings: ConcurrencySettings | undefined,
+    coreStart: CoreStart,
+    dependencies: ContextDependencies
+  ): string | null {
+    if (!concurrencySettings?.key) {
+      return null;
+    }
+
+    // Guard check: ConcurrencyManager may not be initialized if task executes before start().
+    // This should not occur in normal operation.
+    if (!this.concurrencyManager) {
+      this.logger.warn('ConcurrencyManager not initialized, skipping concurrency key evaluation.');
+      return null;
+    }
+
+    const normalizedWorkflowExecution: EsWorkflowExecution = {
+      scopeStack: [],
+      error: null,
+      startedAt: null,
+      finishedAt: '',
+      cancelRequested: false,
+      duration: 0,
+      ...workflowExecution,
+    } as EsWorkflowExecution;
+
+    return this.concurrencyManager.evaluateConcurrencyKey(
+      concurrencySettings,
+      buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
+    );
+  }
+
+  /**
    * Checks concurrency limits and applies collision strategy if needed.
    * This helper method consolidates the duplicated concurrency check logic.
    *
@@ -645,6 +681,16 @@ export class WorkflowsExecutionEnginePlugin
       !workflowExecution.spaceId
     ) {
       return true; // No concurrency settings, allow execution
+    }
+
+    // Guard check: ConcurrencyManager not initialized if task executes before start().
+    // This should not occur in normal operation.
+    // Execution will proceed without concurrency enforcement.
+    if (!this.concurrencyManager) {
+      this.logger.warn(
+        `ConcurrencyManager not initialized, skipping concurrency check for execution ${workflowExecution.id}.`
+      );
+      return;
     }
 
     try {

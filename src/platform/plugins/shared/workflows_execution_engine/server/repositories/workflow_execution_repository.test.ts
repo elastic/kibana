@@ -363,7 +363,7 @@ describe('WorkflowExecutionRepository', () => {
         },
         _source: ['id'],
         sort: [{ createdAt: { order: 'asc' } }],
-        size: 1000,
+        size: 5000,
       });
 
       expect(result).toHaveLength(2);
@@ -404,7 +404,7 @@ describe('WorkflowExecutionRepository', () => {
         },
         _source: ['id'],
         sort: [{ createdAt: { order: 'asc' } }],
-        size: 1000,
+        size: 5000,
       });
     });
 
@@ -451,6 +451,70 @@ describe('WorkflowExecutionRepository', () => {
       const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
 
       expect(result).toHaveLength(0);
+    });
+
+    it('should use default size of 5000 when not provided', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 5000,
+        })
+      );
+    });
+
+    it('should respect custom size parameter', async () => {
+      const mockExecutions = Array.from({ length: 5 }, (_, i) => ({
+        _id: `exec-${i + 1}`,
+        _source: { id: `exec-${i + 1}` },
+      }));
+
+      esClient.search.mockImplementation((params: any) => {
+        const size = params.size || 5000;
+        return Promise.resolve({
+          hits: {
+            hits: mockExecutions.slice(0, size),
+            total: { value: mockExecutions.length, relation: 'eq' as const },
+          },
+        });
+      });
+
+      const result = await repository.getRunningExecutionsByConcurrencyGroup(
+        'server-1',
+        'default',
+        undefined,
+        3
+      );
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 3,
+        })
+      );
+      expect(result).toHaveLength(3);
+    });
+
+    it('should cap size at 10000 (ES max_result_window)', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await repository.getRunningExecutionsByConcurrencyGroup(
+        'server-1',
+        'default',
+        undefined,
+        15000
+      );
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 10000, // Capped at ES max_result_window
+        })
+      );
     });
   });
 

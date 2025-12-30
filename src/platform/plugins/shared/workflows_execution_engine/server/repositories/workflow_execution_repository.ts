@@ -201,12 +201,14 @@ export class WorkflowExecutionRepository {
    * @param concurrencyGroupKey - The concurrency group key to filter by.
    * @param spaceId - The ID of the space associated with the workflow execution.
    * @param excludeExecutionId - Optional execution ID to exclude from results (e.g., current execution).
+   * @param size - Optional limit on the number of results to return. Defaults to 5000.
    * @returns A promise that resolves to an array of execution IDs sorted by createdAt (oldest first).
    */
   public async getRunningExecutionsByConcurrencyGroup(
     concurrencyGroupKey: string,
     spaceId: string,
-    excludeExecutionId?: string
+    excludeExecutionId?: string,
+    size: number = 5000
   ): Promise<string[]> {
     const mustClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
@@ -236,7 +238,7 @@ export class WorkflowExecutionRepository {
       },
       _source: ['id'], // Only fetch ID field for efficiency
       sort: [{ createdAt: { order: 'asc' } }], // Oldest first
-      size: 1000, // Reasonable limit for concurrency groups
+      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
     });
 
     return response.hits.hits
