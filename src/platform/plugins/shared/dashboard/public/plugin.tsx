@@ -62,8 +62,6 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import type { EventAnnotationService } from '@kbn/event-annotation-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
@@ -99,7 +97,6 @@ export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   embeddable: EmbeddableStart;
-  eventAnnotation?: EventAnnotationService;
   fieldFormats: FieldFormatsStart;
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
@@ -114,7 +111,6 @@ export interface DashboardStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
-  visualizations?: VisualizationsStart;
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
@@ -319,7 +315,10 @@ export class DashboardPlugin
     }
 
     if (deepLinks.length > 0) {
-      this.appStateUpdater.next(() => ({ deepLinks }));
+      this.appStateUpdater.next((app) => ({
+        ...this.appStateUpdater.getValue()(app),
+        deepLinks,
+      }));
     }
 
     return {

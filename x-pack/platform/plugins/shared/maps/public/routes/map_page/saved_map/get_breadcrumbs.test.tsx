@@ -47,7 +47,7 @@ test('should get breadcrumbs "Dashboard / mymap" with originatingApp and by valu
   expect(breadcrumbs[1].text).toBe('mymap');
 });
 
-test('should get breadcrumbs "Dashboard / Maps / mymap" with originatingApp and not by value', () => {
+test('should get breadcrumbs "Dashboard / mymap" with originatingApp and not by value', () => {
   const breadcrumbs = getBreadcrumbs({
     pageTitle: 'mymap',
     isByValue: false,
@@ -58,8 +58,7 @@ test('should get breadcrumbs "Dashboard / Maps / mymap" with originatingApp and 
     },
     history: mockHistory,
   });
-  expect(breadcrumbs.length).toBe(3);
+  expect(breadcrumbs.length).toBe(2);
   expect(breadcrumbs[0].text).toBe('Dashboard');
-  expect(breadcrumbs[1].text).toBe('Maps');
-  expect(breadcrumbs[2].text).toBe('mymap');
+  expect(breadcrumbs[1].text).toBe('mymap');
 });

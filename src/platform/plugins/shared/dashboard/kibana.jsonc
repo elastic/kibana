@@ -29,8 +29,6 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
-      "eventAnnotation",
-      "visualizations",
       "home",
       "spaces",
       "savedObjectsTaggingOss",
