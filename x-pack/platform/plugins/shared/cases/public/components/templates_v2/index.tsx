@@ -285,11 +285,12 @@ fields:
   - name: severity
     control: select
     type: keyword
-    options:
-      - low
-      - moderate
-      - high
-      - critical
+    metadata:
+      options:
+        - low
+        - moderate
+        - high
+        - critical
 `;
 
 // on save, persist version timestamp as well
