@@ -101,7 +101,7 @@ describe('<ComponentTemplateList />', () => {
 
     test('should delete a component template', async () => {
       const table = getTable();
-      const row = table.getRowByCellText(componentTemplates[0].name);
+      const row = table.getRowByCellText(componentTemplates[0].name) as HTMLElement;
       fireEvent.click(within(row).getByRole('checkbox'));
       const bulkDeleteButton = screen.getByTestId('deleteComponentTemplatexButton');
       fireEvent.click(bulkDeleteButton);
@@ -131,6 +131,11 @@ describe('<ComponentTemplateList />', () => {
       await waitFor(() => expect(table.getRows()).toHaveLength(1));
       const rows = table.getRows();
       const onlyRow = rows.length === 1 ? rows[0] : null;
+
+      if (!onlyRow) {
+        throw new Error('Expected to find only one row in the component templates table');
+      }
+
       expect(within(onlyRow).getByTestId('templateDetailsLink')).toHaveTextContent(
         'test_component_template_2'
       );

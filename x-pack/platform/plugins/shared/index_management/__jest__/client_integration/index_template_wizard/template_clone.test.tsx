@@ -33,7 +33,6 @@ describe('<TemplateClone />', () => {
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone.name, templateToClone);
   });
 
-  // RTL test - migrated
   describe('page title', () => {
     beforeEach(async () => {
       renderTemplateClone(httpSetup);

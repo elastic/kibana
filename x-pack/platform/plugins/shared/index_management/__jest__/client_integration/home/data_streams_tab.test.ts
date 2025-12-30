@@ -494,7 +494,7 @@ describe('Data Streams tab', () => {
 
         await screen.findByTestId('dataStreamTable');
         const table = new EuiTableTestHarness('dataStreamTable');
-        const dataRow = table.getRowByCellText('dataStream1');
+        const dataRow = table.getRowByCellText('dataStream1') as HTMLElement;
 
         const deleteButton = within(dataRow).getByTestId('deleteDataStream');
         expect(deleteButton).toBeInTheDocument();

@@ -64,7 +64,6 @@ describe('Mappings editor: core', () => {
     },
   } as unknown as Partial<AppDependencies>;
 
-  // RTL setup
   type MappingsEditorProps = ComponentProps<typeof MappingsEditor>;
 
   const setup = (props: Partial<MappingsEditorProps>, ctx: unknown = appDependencies) => {
@@ -76,7 +75,6 @@ describe('Mappings editor: core', () => {
     );
   };
 
-  // RTL helper functions
   const selectTab = async (tabName: string) => {
     const tabMap: Record<string, string> = {
       fields: 'Mapped fields',
