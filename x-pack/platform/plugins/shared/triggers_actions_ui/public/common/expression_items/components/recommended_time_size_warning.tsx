@@ -42,3 +42,10 @@ function RecommendedTimeSizeWarning() {
 
 // eslint-disable-next-line import/no-default-export
 export { RecommendedTimeSizeWarning as default };
+
+export const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.triggersActionsUI.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);

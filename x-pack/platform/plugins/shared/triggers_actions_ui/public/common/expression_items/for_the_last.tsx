@@ -22,7 +22,9 @@ import type { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
 import type { IErrorObject } from '../../types';
-import RecommendedTimeSizeWarning from './components/recommended_time_size_warning';
+import RecommendedTimeSizeWarning, {
+  RECOMMENDED_TIMESIZE_WARNING,
+} from './components/recommended_time_size_warning';
 
 export interface ForLastExpressionProps {
   description?: string;
@@ -55,12 +57,6 @@ const FOR_LAST_LABEL = i18n.translate(
   }
 );
 
-const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
-  'xpack.triggersActionsUI.common.expressionItems.forTheLast.recommendedTimeSizeError',
-  {
-    defaultMessage: 'Minimum 5 minutes recommended',
-  }
-);
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
