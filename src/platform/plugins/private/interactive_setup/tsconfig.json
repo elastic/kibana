@@ -26,6 +26,7 @@
     "@kbn/security-hardening",
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",

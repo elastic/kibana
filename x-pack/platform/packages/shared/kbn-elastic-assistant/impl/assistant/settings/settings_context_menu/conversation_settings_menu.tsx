@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { ConversationWithOwner } from '../../api';
 import { DeleteConversationModal } from '../../conversations/delete_conversation_modal';
 import { DELETE_CONVERSATION } from '../../conversations/conversation_sidepanel/translations';
@@ -51,8 +52,6 @@ interface Params {
   selectedConversation?: Conversation;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const ConditionalWrap = ({
   condition,
