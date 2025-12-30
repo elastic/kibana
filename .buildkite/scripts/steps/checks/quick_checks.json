@@ -66,5 +66,9 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
+    "mayChangeFiles": true
   }
 ]

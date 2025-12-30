@@ -59,6 +59,7 @@ export async function findMaintenanceWindows(
               ...(params.perPage ? { perPage: params.perPage } : {}),
               ...(params.search ? { search: params.search } : {}),
               ...(filter ? { filter } : {}),
+              ...(params.namespaces ? { namespaces: params.namespaces } : {}),
             },
           }
         : {}),

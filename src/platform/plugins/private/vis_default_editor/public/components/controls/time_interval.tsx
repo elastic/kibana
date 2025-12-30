@@ -138,6 +138,7 @@ function TimeIntervalParamEditor({
     ) : null;
 
   const helpText = (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {scaledHelpText}
       {get(editorConfig, 'interval.help') || selectOptionHelpText}

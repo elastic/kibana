@@ -52,12 +52,14 @@ export function extractPropertiesFromBucket(
     if (_.has(bucket[key], 'value')) {
       properties[key] = bucket[key].value;
     } else if (_.has(bucket[key], 'buckets')) {
+      // @ts-expect-error upgrade typescript v5.9.3
       if (bucket[key].buckets.length === 0) {
         // No top term
         continue;
       }
 
       properties[key] = _.get(bucket[key], 'buckets[0].key');
+      // @ts-expect-error upgrade typescript v5.9.3
       const topBucketCount = bucket[key].buckets[0].doc_count;
       const totalCount = bucket.doc_count;
       if (totalCount && topBucketCount) {
@@ -70,6 +72,7 @@ export function extractPropertiesFromBucket(
         key.startsWith(AGG_TYPE.PERCENTILE) ||
         key.startsWith(JOIN_FIELD_NAME_PREFIX + AGG_TYPE.PERCENTILE)
       ) {
+        // @ts-expect-error upgrade typescript v5.9.3
         const values = bucket[key].values;
         for (const k in values) {
           if (Object.hasOwn(values, k)) {

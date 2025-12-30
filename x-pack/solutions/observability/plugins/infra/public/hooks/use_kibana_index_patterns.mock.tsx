@@ -88,6 +88,7 @@ export const createIndexPatternMock = ({
     title,
     type,
     getTimeField: () => indexPatternFields.find(({ name }) => name === timeFieldName),
+    // @ts-expect-error upgrade typescript v5.9.3
     isTimeBased: () => timeFieldName != null,
     getFieldByName: (fieldName) => indexPatternFields.find(({ name }) => name === fieldName),
     getComputedFields: () => ({
