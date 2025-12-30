@@ -16,5 +16,8 @@
     "@kbn/core",
     "@kbn/core-plugins-server",
     "@kbn/developer-examples-plugin",
+    "@kbn/zod",
+    "@kbn/logging",
+    "@kbn/zod-helpers",
   ]
 }
