@@ -469,6 +469,21 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
+        /^x-pack\/packages\/kbn-cloud-security-posture/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/custom\/cspm_agentless/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:cloud-security-posture-scout')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml')
+      );
+    }
+
+    if (
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals') ||
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts')
     ) {
