@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-/**
- * Mutation keys for react-query
- */
-export const mutationKeys = {
-  sendMessage: ['sendMessage'] as const,
-  resumeRound: ['resumeRound'] as const,
-};
+export type { BrowserChatEvent } from './events';
+export type { EventsServiceStartContract } from './contract';

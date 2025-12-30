@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-/**
- * Mutation keys for react-query
- */
-export const mutationKeys = {
-  sendMessage: ['sendMessage'] as const,
-  resumeRound: ['resumeRound'] as const,
-};
+export { EventsService } from './events_service';
+export { createPublicEventsContract } from './create_public_contract';

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-/**
- * Mutation keys for react-query
- */
-export const mutationKeys = {
-  sendMessage: ['sendMessage'] as const,
-  resumeRound: ['resumeRound'] as const,
-};
+import type { ChatEvent } from '@kbn/agent-builder-common';
+
+// will have additional events later
+export type BrowserChatEvent = ChatEvent;
