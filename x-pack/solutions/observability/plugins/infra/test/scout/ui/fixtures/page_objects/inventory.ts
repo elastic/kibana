@@ -133,14 +133,14 @@ export class InventoryPage {
     await this.waitForNodesToLoad(requestPromise);
   }
 
-  public async getWaffleNodes() {
-    const containers = await this.waffleMap.getByTestId('nodeContainer').all();
+  public async getWaffleNode(nodeName: string) {
+    const container = this.waffleMap.getByTestId('nodeContainer').filter({ hasText: nodeName });
 
-    return containers.map((container) => ({
+    return {
       container,
       name: container.getByTestId('nodeName'),
       value: container.getByTestId('nodeValue'),
-    }));
+    };
   }
 
   public async showHosts() {

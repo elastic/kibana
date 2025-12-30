@@ -108,22 +108,22 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test('Inventory switcher changes node types', async ({ pageObjects: { inventoryPage } }) => {
     await test.step('show hosts by default', async () => {
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Hosts');
-      const nodeValues = await inventoryPage.getWaffleNodes();
-      expect(nodeValues.length).toBeGreaterThan(0);
-      const nodeName = await nodeValues[0].name.textContent();
-      expect(nodeName).toBeDefined();
-      expect(HOSTS.map((h) => h.hostName)).toContain(nodeName!.trim());
+
+      const hostName = HOSTS[Math.floor(Math.random() * HOSTS.length)].hostName;
+      const waffleNode = await inventoryPage.getWaffleNode(hostName);
+      await expect(waffleNode.container).toBeVisible();
+      await expect(waffleNode.name).toHaveText(hostName);
     });
 
     await test.step('switch to k8s pods', async () => {
       await inventoryPage.goToTime(DATE_WITH_POD_DATA);
       await inventoryPage.showPods();
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
-      const nodeValues = await inventoryPage.getWaffleNodes();
-      expect(nodeValues.length).toBeGreaterThan(0);
-      const nodeName = await nodeValues[0].name.textContent();
-      expect(nodeName).toBeDefined();
-      expect(POD_NAMES).toContain(nodeName!.trim());
+
+      const podName = POD_NAMES[Math.floor(Math.random() * POD_NAMES.length)];
+      const waffleNode = await inventoryPage.getWaffleNode(podName);
+      await expect(waffleNode.container).toBeVisible();
+      await expect(waffleNode.name).toHaveText(podName);
 
       await expect(inventoryPage.k8sFeedbackLink).toBeVisible();
     });
@@ -132,11 +132,11 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       await inventoryPage.goToTime(DATE_WITH_DOCKER_DATA);
       await inventoryPage.showContainers();
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Docker Containers');
-      const nodeValues = await inventoryPage.getWaffleNodes();
-      expect(nodeValues.length).toBeGreaterThan(0);
-      const nodeName = await nodeValues[0].name.textContent();
-      expect(nodeName).toBeDefined();
-      expect(CONTAINER_NAMES).toContain(nodeName!.trim());
+
+      const containerName = CONTAINER_NAMES[Math.floor(Math.random() * CONTAINER_NAMES.length)];
+      const waffleNode = await inventoryPage.getWaffleNode(containerName);
+      await expect(waffleNode.container).toBeVisible();
+      await expect(waffleNode.name).toHaveText(containerName);
     });
   });
 

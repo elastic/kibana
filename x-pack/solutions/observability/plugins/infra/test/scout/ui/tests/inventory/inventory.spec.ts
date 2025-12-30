@@ -25,8 +25,7 @@ test.describe('Infrastructure Inventory - Sequential', { tag: ['@ess', '@svlOblt
 
     await test.step('redirect to onboarding page when clicking on the add data button', async () => {
       await inventoryPage.clickNoDataPageAddDataButton();
-      const url = new URL(page.url());
-      expect(url.pathname).toContain('/app/observabilityOnboarding');
+      await expect(page.getByTestId('obltOnboardingHomeTitle')).toBeVisible();
     });
   });
 });
