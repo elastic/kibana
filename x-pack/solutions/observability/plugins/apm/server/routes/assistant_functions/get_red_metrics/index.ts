@@ -8,7 +8,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
+import { getRollupIntervalForTimeRange } from '../../../agent_builder/utils/get_rollup_interval_for_time_range';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   calculateFailedTransactionRate,
@@ -44,7 +44,7 @@ export async function getRedMetrics({
   groupBy?: string;
 }): Promise<GetRedMetricsResponse> {
   const documentType = ApmDocumentType.TransactionMetric;
-  const rollupInterval = RollupInterval.OneMinute;
+  const rollupInterval = getRollupIntervalForTimeRange(start, end);
   const durationField = getDurationFieldForTransactions(documentType, true);
 
   const outcomeAggs = getOutcomeAggregation(documentType);
