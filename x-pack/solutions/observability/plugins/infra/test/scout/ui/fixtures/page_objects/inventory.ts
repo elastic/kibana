@@ -38,6 +38,9 @@ export class InventoryPage {
 
   public readonly noDataPrompt: Locator;
 
+  public readonly noDataPage: Locator;
+  public readonly noDataPageActionButton: Locator;
+
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
     this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
@@ -62,6 +65,9 @@ export class InventoryPage {
     this.nodesOverviewTable = this.page.getByTestId('infraNodesOverviewTable');
 
     this.noDataPrompt = this.page.getByTestId('noMetricsDataPrompt');
+
+    this.noDataPage = this.page.getByTestId('kbnNoDataPage');
+    this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
   }
 
   private async startWaitingForSnapshotRequest() {
@@ -162,5 +168,10 @@ export class InventoryPage {
     const requestPromise = this.startWaitingForSnapshotRequest();
     await this.inventorySwitcherContainersButton.click();
     await this.waitForNodesToLoad(requestPromise);
+  }
+
+  public async clickNoDataPageAddDataButton() {
+    await expect(this.noDataPageActionButton).toBeVisible();
+    await this.noDataPageActionButton.click();
   }
 }
