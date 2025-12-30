@@ -20,6 +20,7 @@ import { initializeTitleManager } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '../../../common';
 import type { initializeTrackPanel } from '../track_panel';
+import type { initializeViewModeManager } from '../view_mode_manager';
 import { initializeLayoutManager } from './layout_manager';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
@@ -31,6 +32,10 @@ const trackPanelMock = {
   setScrollToPanelId: jest.fn(),
   setHighlightPanelId: jest.fn(),
 } as unknown as ReturnType<typeof initializeTrackPanel>;
+
+const viewModeManagerMock = { api: { viewMode$: new BehaviorSubject('view') } } as ReturnType<
+  typeof initializeViewModeManager
+>;
 
 describe('layout manager', () => {
   beforeEach(() => {
@@ -92,6 +97,7 @@ describe('layout manager', () => {
 
   test('can register child APIs', () => {
     const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
       undefined,
       [panel1],
       { controls: [] },
@@ -132,6 +138,7 @@ describe('layout manager', () => {
       },
     ];
     const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
       incomingEmbeddables,
       [panel1],
       { controls: [] },
@@ -174,6 +181,7 @@ describe('layout manager', () => {
   describe('duplicatePanel', () => {
     test('should add duplicated panel to layout', async () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [panel1],
         { controls: [] },
@@ -203,6 +211,7 @@ describe('layout manager', () => {
 
     test('should clone by reference embeddable as by value', async () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [panel1],
         { controls: [] },
@@ -234,6 +243,7 @@ describe('layout manager', () => {
 
     test('should give a correct title to the clone of a clone', async () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [panel1],
         { controls: [] },
@@ -261,6 +271,7 @@ describe('layout manager', () => {
   describe('canRemovePanels', () => {
     test('allows removing panels when there is no expanded panel', () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [panel1],
         { controls: [] },
@@ -275,6 +286,7 @@ describe('layout manager', () => {
 
     test('does not allow removing panels when there is an expanded panel', () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [panel1],
         { controls: [] },
@@ -291,6 +303,7 @@ describe('layout manager', () => {
   describe('getChildApi', () => {
     test('should return api when api is available', (done) => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [panel1],
         { controls: [] },
@@ -308,6 +321,7 @@ describe('layout manager', () => {
 
     test('should return api from panel in open section when api is available', (done) => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [
           {
@@ -330,6 +344,7 @@ describe('layout manager', () => {
 
     test('should return undefined from panel in closed section', (done) => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [
           {
@@ -355,6 +370,7 @@ describe('layout manager', () => {
   describe('pinned panels', () => {
     test('can pin panel', () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [
           panel1,
@@ -398,6 +414,7 @@ describe('layout manager', () => {
 
     test('can unpin panel', () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [panel1],
         pinnedControls,
@@ -439,6 +456,7 @@ describe('layout manager', () => {
 
     test('determines when a panel is pinned', () => {
       const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
         undefined,
         [
           panel1,
