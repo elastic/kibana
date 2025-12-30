@@ -9,41 +9,46 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useFetchSloGroupingValues } from '../../hooks/use_fetch_slo_grouping_values';
 import { useGetQueryParams } from '../../hooks/use_get_query_params';
 
 interface Props {
-  slo: SLOWithSummaryResponse;
+  id: string;
+  instanceId?: string;
   groupingKey: string;
-  value?: string;
+  groupingValue?: string | number;
+  onSelect: (newValue: string | number) => void;
 }
 
 interface Field {
   label: string;
-  value: string;
+  value: string | number;
 }
 
-export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
+export function SloGroupValueSelector({
+  id,
+  instanceId = ALL_VALUE,
+  groupingKey,
+  groupingValue,
+  onSelect,
+}: Props) {
   const isAvailable = window.location.pathname.includes(SLOS_BASE_PATH);
-  const { search: searchParams } = useLocation();
-  const history = useHistory();
+
   const { remoteName } = useGetQueryParams();
 
-  const [currentValue, setCurrentValue] = useState<string | undefined>(value);
   const [options, setOptions] = useState<Field[]>([]);
   const [search, setSearch] = useState<string | undefined>(undefined);
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>(undefined);
   useDebounce(() => setDebouncedSearch(search), 500, [search]);
 
   const { isLoading, isError, data } = useFetchSloGroupingValues({
-    sloId: slo.id,
+    sloId: id,
     groupingKey,
-    instanceId: slo.instanceId,
+    instanceId,
     search: debouncedSearch,
     remoteName,
   });
@@ -56,31 +61,23 @@ export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
     }
   }, [data]);
 
+  const onChange = (selected: Array<EuiComboBoxOptionOption<string | number>>) => {
+    const newValue = selected[0].value;
+    if (!newValue) return;
+    onSelect(newValue);
+  };
+
   const selectGroupValueLabel = i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
     defaultMessage: 'Select a group value',
   });
 
-  const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    const newValue = selected[0].value;
-    if (!newValue) return;
-    setCurrentValue(newValue);
-
-    const urlSearchParams = new URLSearchParams(searchParams);
-    const newGroupings = { ...slo.groupings, [groupingKey]: newValue };
-    urlSearchParams.set('instanceId', toInstanceId(newGroupings, slo.groupBy));
-    history.replace({
-      search: urlSearchParams.toString(),
-    });
-  };
-
-  const copySLOGroupingValueAriaLabel = i18n.translate(
-    'xpack.slo.sLOGroupingValueSelector.copyButton.label',
-    { defaultMessage: 'Copy SLO Grouping Value' }
-  );
+  const copyLabel = i18n.translate('xpack.slo.sLOGroupingValueSelector.copyButton.label', {
+    defaultMessage: 'Copy SLO Grouping Value',
+  });
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiComboBox<string>
+      <EuiComboBox<string | number>
         css={css`
           max-width: 500px;
         `}
@@ -88,15 +85,15 @@ export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
         compressed
         prepend={groupingKey}
         append={
-          currentValue ? (
-            <EuiCopy textToCopy={currentValue}>
+          groupingValue !== undefined ? (
+            <EuiCopy textToCopy={String(groupingValue)}>
               {(copy) => (
                 <EuiButtonIcon
                   data-test-subj="sloSLOGroupingValueSelectorButton"
                   color="text"
                   iconType="copyClipboard"
                   onClick={copy}
-                  aria-label={copySLOGroupingValueAriaLabel}
+                  aria-label={copyLabel}
                 />
               )}
             </EuiCopy>
@@ -104,9 +101,9 @@ export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
             <EuiButtonIcon
               data-test-subj="sloSLOGroupingValueSelectorButton"
               color="text"
-              disabled={true}
               iconType="copyClipboard"
-              aria-label={copySLOGroupingValueAriaLabel}
+              aria-label={copyLabel}
+              disabled
             />
           )
         }
@@ -116,7 +113,7 @@ export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
         isDisabled={isError || !isAvailable}
         aria-label={selectGroupValueLabel}
         placeholder={selectGroupValueLabel}
-        selectedOptions={currentValue ? [toField(currentValue)] : []}
+        selectedOptions={groupingValue !== undefined ? [toField(groupingValue)] : []}
         onChange={onChange}
         truncationProps={{
           truncation: 'end',
@@ -131,14 +128,6 @@ export function SloGroupingValueSelector({ slo, groupingKey, value }: Props) {
   );
 }
 
-function toField(value: string): Field {
-  return { label: value, value };
-}
-
-function toInstanceId(
-  groupings: Record<string, string | number>,
-  groupBy: string | string[]
-): string {
-  const groups = [groupBy].flat();
-  return groups.map((group) => groupings[group]).join(',');
+function toField(value: string | number): Field {
+  return { label: String(value), value };
 }
