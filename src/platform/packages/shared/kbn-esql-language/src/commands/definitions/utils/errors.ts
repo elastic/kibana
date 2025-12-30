@@ -54,8 +54,15 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownInlineCastType':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownInlineCastType', {
-          defaultMessage: 'Unknown inline cast type "::{name}"',
-          values: { name: out.name },
+          defaultMessage: 'Unknown inline cast type "::{castType}"',
+          values: { castType: out.castType },
+        }),
+      };
+    case 'invalidInlineCast':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidInlineCast', {
+          defaultMessage: 'Cannot cast value of type "{valueType}" to type "{castType}"',
+          values: { castType: out.castType, valueType: out.valueType },
         }),
       };
     case 'unknownFunction':
@@ -480,8 +487,11 @@ export const errors = {
   unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
 
-  unknownInlineCastType: (dataType: string, location: ESQLLocation): ESQLMessage =>
-    errors.byId('unknownInlineCastType', location, { name: dataType }),
+  unknownInlineCastType: (castType: string, location: ESQLLocation): ESQLMessage =>
+    errors.byId('unknownInlineCastType', location, { castType }),
+
+  invalidInlineCast: (castType: string, valueType: string, location: ESQLLocation): ESQLMessage =>
+    errors.byId('invalidInlineCast', location, { castType, valueType }),
 
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),

@@ -8,11 +8,12 @@
  */
 
 import type { WalkerAstNode } from '../../../../ast';
-import { walk } from '../../../../ast';
+import { isLiteral, walk } from '../../../../ast';
 import type { ESQLMessage } from '../../../../types';
 import type { ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
-import { getFunctionForInlineCast } from '../functions';
+import { getExpressionType, getMatchingSignatures } from '../expressions';
+import { getFunctionDefinition, getFunctionForInlineCast } from '../functions';
 
 /**
  * Validates inline casts within the given AST node.
@@ -24,11 +25,25 @@ export function validateInlineCasts(
   const messages: ESQLMessage[] = [];
   walk(astNode, {
     visitInlineCast: (node) => {
-      // console.log('node', node);
       const castFunction = getFunctionForInlineCast(node.castType);
       if (!castFunction) {
         messages.push(errors.unknownInlineCastType(node.castType, node.location));
         return;
+      }
+
+      const castFunctionDef = getFunctionDefinition(castFunction);
+      if (!castFunctionDef) {
+        return;
+      }
+      const valueTypeBeforeCast = getExpressionType(node.value, context.columns);
+      const matchingSignatures = getMatchingSignatures(
+        castFunctionDef.signatures,
+        [valueTypeBeforeCast],
+        [isLiteral(node.value)],
+        true // accepts unknown
+      );
+      if (matchingSignatures.length === 0) {
+        messages.push(errors.invalidInlineCast(node.castType, valueTypeBeforeCast, node.location));
       }
     },
   });
