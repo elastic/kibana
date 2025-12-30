@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -22,9 +21,6 @@ import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 const paramsSchema = schema.object({
   connectorId: schema.string(),
 });
-
-export type OAuthAuthorizeParams = TypeOf<typeof paramsSchema>;
-
 /**
  * Initiates OAuth2 Authorization Code flow
  * Returns authorization URL for user to visit
@@ -112,7 +108,7 @@ export const oauthAuthorizeRoute = (
           const oauthConfig = await oauthService.getOAuthConfig(connectorId);
 
           // Get redirect URI
-          const redirectUri = oauthService.getRedirectUri();
+          const redirectUri = oauthService.getRedirectUri(oauthConfig);
 
           // Build return URL for post-OAuth redirect
           const kibanaReturnUrl = `${kibanaUrl}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`;
