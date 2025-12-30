@@ -7,8 +7,8 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { FindSLOInstancesResponse } from '@kbn/slo-schema';
-import { sloKeys } from '../../../hooks/query_key_factory';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 interface Params {
   sloId: string;

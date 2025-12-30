@@ -11,7 +11,7 @@ import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { useFetchSloInstances } from '../../hooks/use_fetch_slo_instances';
+import { useFetchSloInstances } from '../../../../hooks/use_fetch_slo_instances';
 import { useGetQueryParams } from '../../hooks/use_get_query_params';
 import { SloGroupValueSelector } from './slo_group_value_selector';
 
