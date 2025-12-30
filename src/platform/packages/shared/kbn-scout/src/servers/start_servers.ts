@@ -17,6 +17,7 @@ import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
+
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout_start_servers');
