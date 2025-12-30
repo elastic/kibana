@@ -87,6 +87,8 @@ export function createRuleExecutorTaskRunner({
           },
         });
 
+        logger.debug(() => `ES|QL response: ${JSON.stringify(esqlResponse, null, 2)}`);
+
         const esClient = coreStart.elasticsearch.client.asInternalUser;
         await ensureAlertsResources({
           logger,

@@ -18,7 +18,7 @@ import { ALERT_EVENTS_INDEX } from './constants';
 const TOTAL_FIELDS_LIMIT = 2500;
 
 // TODO ILM for new rules should be managed by the user
-export const DEFAULT_ALERTS_ILM_POLICY_NAME = '.alerts-ilm-policy';
+export const DEFAULT_ALERTS_ILM_POLICY_NAME = '.alerts-v2-ilm-policy';
 export const DEFAULT_ALERTS_ILM_POLICY: IlmPolicy = {
   _meta: { managed: true },
   phases: {
