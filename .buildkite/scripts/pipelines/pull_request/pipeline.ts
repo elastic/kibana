@@ -555,7 +555,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^src\/platform\/packages\/shared\/kbn-test/,
         /^src\/setup_node_env/,
       ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-jest')
+      GITHUB_PR_LABELS.includes('ci:bench-ftr')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
     }
