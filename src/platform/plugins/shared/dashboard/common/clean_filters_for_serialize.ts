@@ -23,20 +23,21 @@ export function cleanFiltersForSerialize(filters?: Filter[]): DashboardFilter[] 
   if (!filters) return;
   return filters.map((filter) => {
     const cleanedFilter = { ...filter };
-    if ('value' in cleanedFilter.meta) {
-      // Create a new filter object with meta excluding 'value'
-      const { value, ...metaWithoutValue } = cleanedFilter.meta;
-      cleanedFilter.meta = metaWithoutValue;
-    }
+    if (cleanedFilter.meta) {
+      if (typeof cleanedFilter.meta.value !== 'undefined') {
+        // Create a new filter object with meta excluding 'value'
+        delete cleanedFilter.meta.value;
+      }
 
-    cleanedFilter.meta = removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'key');
-    cleanedFilter.meta = removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'alias');
+      cleanedFilter.meta = removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'key');
+      cleanedFilter.meta = removeUndefinedProperty<Filter['meta']>(cleanedFilter.meta, 'alias');
 
-    if (isCombinedFilter(filter) && filter.meta?.params) {
-      // Recursively clean filters in combined filters
-      cleanedFilter.meta.params = cleanFiltersForSerialize(
-        cleanedFilter.meta.params as Filter[]
-      ) as FilterMeta['params'];
+      if (isCombinedFilter(filter) && filter.meta?.params) {
+        // Recursively clean filters in combined filters
+        cleanedFilter.meta.params = cleanFiltersForSerialize(
+          cleanedFilter.meta.params as Filter[]
+        ) as FilterMeta['params'];
+      }
     }
 
     return cleanedFilter;
