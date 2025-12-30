@@ -90,7 +90,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         environment: t.union([t.string, t.undefined]),
       }),
     }),
-    handler: async ({ request, core, plugins, dataRegistry, params, logger }) => {
+    handler: async ({ request, core, plugins, dataRegistry, params, response, logger }) => {
       const { errorId, serviceName, start, end, environment = '' } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
@@ -99,7 +99,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
 
-      const { summary, context } = await generateErrorAiInsight({
+      const result = await generateErrorAiInsight({
         core,
         plugins,
         errorId,
@@ -113,10 +113,12 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         logger,
       });
 
-      return {
-        context,
-        summary,
-      };
+      return response.ok({
+        body: observableIntoEventSourceStream(result.events$, {
+          logger,
+          signal: getRequestAbortedSignal(request),
+        }),
+      });
     },
   });
 

@@ -8,9 +8,11 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { MessageRole } from '@kbn/inference-common';
+import { MessageRole, type ChatCompletionEvent } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import dedent from 'dedent';
+import type { Observable } from 'rxjs';
+import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -77,6 +79,11 @@ export interface GenerateErrorAiInsightParams {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
+export interface GenerateErrorAiInsightResult {
+  events$: Observable<ChatCompletionEvent | { type: 'context'; context: string }>;
+  context: string;
+}
+
 export async function generateErrorAiInsight({
   core,
   plugins,
@@ -89,7 +96,7 @@ export async function generateErrorAiInsight({
   request,
   inferenceClient,
   dataRegistry,
-}: GenerateErrorAiInsightParams): Promise<{ summary: string; context: string }> {
+}: GenerateErrorAiInsightParams): Promise<GenerateErrorAiInsightResult> {
   const errorContext = await fetchApmErrorContext({
     core,
     plugins,
@@ -105,7 +112,7 @@ export async function generateErrorAiInsight({
 
   const userPrompt = buildUserPrompt(errorContext);
 
-  const response = await inferenceClient.chatComplete({
+  const events$ = inferenceClient.chatComplete({
     system: ERROR_AI_INSIGHT_SYSTEM_PROMPT,
     messages: [
       {
@@ -113,7 +120,16 @@ export async function generateErrorAiInsight({
         content: userPrompt,
       },
     ],
+    stream: true,
   });
 
-  return { summary: response.content, context: errorContext };
+  const streamWithContext$ = concat(
+    of({ type: 'context' as const, context: errorContext }),
+    events$
+  );
+
+  return {
+    events$: streamWithContext$,
+    context: errorContext,
+  };
 }
