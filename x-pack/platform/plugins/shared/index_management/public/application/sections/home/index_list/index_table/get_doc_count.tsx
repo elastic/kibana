@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, bufferTime, concatMap, filter, share } from 'rxjs';
+import { Subject, bufferTime, concatMap, filter, share, scan } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { INTERNAL_API_BASE_PATH } from '../../../../../../common/constants';
 
@@ -23,6 +23,7 @@ export const docCountApi = (httpSetup: HttpSetup) => {
         signal: abortController.signal,
       })
     ),
+    scan((acc, response) => ({ ...acc, ...response }), {} as Record<string, number>),
     share()
   );
 
