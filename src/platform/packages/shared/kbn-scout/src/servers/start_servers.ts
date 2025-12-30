@@ -11,10 +11,11 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import { createSamlSessionManager, ScoutLogger, silence } from '../common';
+import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
+import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
@@ -52,15 +53,8 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // success message so that it doesn't get buried
     await silence(log, 5000);
 
-    /**
-     * Pre-create Elasticsearch Security indexes (.security-tokens, .security-profile)
-     * after server startup to prevent race conditions when parallel tests perform their first SAML authentication.
-     */
-    const session = createSamlSessionManager(
-      config.getScoutTestConfig(),
-      new ScoutLogger('start_servers', 'info')
-    );
-    await session.getInteractiveUserSessionCookieWithRoleScope('admin');
+    // Pre-create Elasticsearch Security indexes after server startup
+    await preCreateSecurityIndexesViaSamlAuth(config, log);
 
     log.success(
       '\n\n' +
