@@ -397,6 +397,12 @@ export function StreamsTreeTable({
                   <EuiLink
                     data-test-subj={`streamsNameLink-${item.stream.name}`}
                     href={router.link('/{key}', { path: { key: item.stream.name } })}
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      // Use router.push() to preserve current URL search params (including _g)
+                      // at click time, not render time
+                      router.push('/{key}', { path: { key: item.stream.name }, query: {} });
+                    }}
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>

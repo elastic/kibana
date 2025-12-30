@@ -34,6 +34,7 @@ export const useDatasetQualityController = (
     share: {
       url: { locators },
     },
+    data: { query: queryService },
   } = useKibana().dependencies.start;
   const {
     core: {
@@ -45,6 +46,10 @@ export const useDatasetQualityController = (
 
   const history = useHistory();
   const { timeState, setTime } = useTimefilter();
+
+  // Get timefilter directly from service for synchronous access to current time
+  // The hook's timeState may be stale on first render due to observable timing
+  const timefilter = queryService.timefilter.timefilter;
 
   const streamsUrls = useMemo(() => {
     const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
@@ -77,6 +82,13 @@ export const useDatasetQualityController = (
         return;
       }
 
+      // Always use the current global timefilter state to ensure consistency
+      // across tabs (Retention, Data Quality, etc.) within the Streams app.
+      // We read directly from the timefilter service (not the hook's reactive state)
+      // to get the most up-to-date time synchronously, avoiding race conditions
+      // where the hook's state might be stale on first render.
+      const currentTime = timefilter.getTime();
+
       // state initialized but empty
       if (initialState === null) {
         initialState = {
@@ -85,11 +97,22 @@ export const useDatasetQualityController = (
             ? 'wired'
             : 'classic') as DatasetQualityView,
           timeRange: {
-            from: timeState.timeRange.from,
-            to: timeState.timeRange.to,
+            from: currentTime.from,
+            to: currentTime.to,
             refresh: DEFAULT_DATEPICKER_REFRESH,
           },
           streamDefinition: definition,
+        };
+      } else {
+        // The pageState may have stale time values from a previous visit,
+        // so always override with the current global timefilter time.
+        initialState = {
+          ...initialState,
+          timeRange: {
+            from: currentTime.from,
+            to: currentTime.to,
+            refresh: initialState.timeRange?.refresh ?? DEFAULT_DATEPICKER_REFRESH,
+          },
         };
       }
 
@@ -140,6 +163,7 @@ export const useDatasetQualityController = (
     urlStateStorageContainer,
     definition,
     saveStateInUrl,
+    timefilter,
     timeState.timeRange.from,
     timeState.timeRange.to,
     setTime,
