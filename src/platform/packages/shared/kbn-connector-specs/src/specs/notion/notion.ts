@@ -22,7 +22,15 @@ export const NotionConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: ['bearer'],
+    types: [
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
+          tokenUrl: 'https://api.notion.com/v1/oauth/token',
+        },
+      },
+    ],
     headers: {
       'Notion-Version': '2025-09-03',
     },

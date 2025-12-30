@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import startCase from 'lodash/startCase';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
@@ -116,7 +117,10 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
       configurationUtilities
     );
 
-    const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
+    // Some providers return "bearer" instead of "Bearer", but expect "Bearer" in the header,
+    // so we normalize the token type, i.e., capitalize first letter (e.g., "bearer" -> "Bearer")
+    const normalizedTokenType = startCase(tokenResult.tokenType);
+    const newAccessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
     const newRefreshToken = tokenResult.refreshToken || connectorToken.refreshToken;
 
     // Calculate expiration times

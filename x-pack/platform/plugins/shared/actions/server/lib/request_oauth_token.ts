@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { request } from './axios_utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { AsApiContract } from '../../common';
+import { getBasicAuthHeader } from './get_basic_auth_header';
 
 export interface OAuthTokenResponse {
   tokenType: string;
@@ -26,22 +27,34 @@ export async function requestOAuthToken<T>(
   grantType: string,
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  bodyRequest: AsApiContract<T>
+  bodyRequest: AsApiContract<T>,
+  useBasicAuth: boolean = false
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
+
+  // Extract client credentials for Basic Auth if needed
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { client_id: clientId, client_secret: clientSecret, ...restBody } = bodyRequest as any;
+
+  const requestData = {
+    ...(useBasicAuth ? restBody : bodyRequest),
+    grant_type: grantType,
+  };
+
+  const requestHeaders = {
+    ...(useBasicAuth && clientId && clientSecret
+      ? getBasicAuthHeader({ username: clientId, password: clientSecret })
+      : {}),
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+  };
 
   const res = await request({
     axios: axiosInstance,
     url: tokenUrl,
     method: 'post',
     logger,
-    data: qs.stringify({
-      ...bodyRequest,
-      grant_type: grantType,
-    }),
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    },
+    data: qs.stringify(requestData),
+    headers: requestHeaders,
     configurationUtilities,
     validateStatus: () => true,
   });

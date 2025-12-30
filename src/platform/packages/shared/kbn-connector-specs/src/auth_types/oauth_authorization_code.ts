@@ -25,6 +25,8 @@ const authSchema = z
       .string()
       .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
       .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+    // when using z.url() it doesn't allow for empty urls even if it's an optional field
+    redirectUri: z.string().meta({ label: i18n.OAUTH_REDIRECT_URI_LABEL }).optional(),
   })
   .meta({ label: i18n.OAUTH_AUTHORIZATION_CODE_LABEL });
 

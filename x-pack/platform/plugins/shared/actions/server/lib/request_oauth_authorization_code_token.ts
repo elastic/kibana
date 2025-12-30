@@ -45,6 +45,7 @@ export async function requestOAuthAuthorizationCodeToken(
     OAUTH_AUTHORIZATION_CODE_GRANT_TYPE,
     configurationUtilities,
     logger,
-    rewriteBodyRequest(params)
+    rewriteBodyRequest(params),
+    true // Use HTTP Basic Auth for client credentials (required by Notion and recommended by OAuth 2.0 spec)
   );
 }

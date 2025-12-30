@@ -42,6 +42,7 @@ export async function requestOAuthRefreshToken(
     OAUTH_REFRESH_TOKEN_GRANT_TYPE,
     configurationUtilities,
     logger,
-    rewriteBodyRequest(params)
+    rewriteBodyRequest(params),
+    true // Use HTTP Basic Auth for client credentials (required by some providers like Notion)
   );
 }

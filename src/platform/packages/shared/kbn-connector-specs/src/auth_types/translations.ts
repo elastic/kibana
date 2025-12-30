@@ -131,6 +131,10 @@ export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
   }
 );
 
+export const OAUTH_REDIRECT_URI_LABEL = i18n.translate('connectorSpecs.oauthRedirectURI.label', {
+  defaultMessage: 'Redirect URI',
+});
+
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });

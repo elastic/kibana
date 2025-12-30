@@ -19,6 +19,7 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   scope?: string;
+  redirectUri?: string;
 }
 
 /**
@@ -33,6 +34,7 @@ interface OAuthConnectorConfig {
   clientId?: string;
   tokenUrl?: string;
   scope?: string;
+  redirectUri?: string;
 }
 
 /**
@@ -42,6 +44,7 @@ export interface OAuthConfig {
   authorizationUrl: string;
   clientId: string;
   scope?: string;
+  redirectUri?: string;
 }
 
 /**
@@ -121,6 +124,10 @@ export class OAuthAuthorizationService {
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
     const clientId = secrets.clientId || config?.clientId;
     const scope = secrets.scope || config?.scope;
+    // Filter out empty strings for redirectUri (treat as undefined)
+    const redirectUri =
+      (secrets.redirectUri && secrets.redirectUri !== '' ? secrets.redirectUri : undefined) ||
+      (config?.redirectUri && config.redirectUri !== '' ? config.redirectUri : undefined);
 
     if (!authorizationUrl || !clientId) {
       throw new Error(
@@ -134,6 +141,7 @@ export class OAuthAuthorizationService {
       authorizationUrl,
       clientId,
       scope,
+      redirectUri,
     };
   }
 
@@ -141,12 +149,21 @@ export class OAuthAuthorizationService {
    * Builds the redirect URI for OAuth callbacks
    *
    * The redirect URI is where the OAuth provider will send the user after authorization.
-   * It points to the oauth_callback route in this Kibana instance.
+   * If a custom redirectURI is provided, it will be used. Otherwise, it points to the
+   * oauth_callback route in this Kibana instance.
    *
    * @returns The complete redirect URI
-   * @throws Error if Kibana public base URL is not configured
+   * @throws Error if Kibana public base URL is not configured and no custom URI provided
+   * @param config
    */
-  getRedirectUri(): string {
+  getRedirectUri(config: OAuthConnectorConfig): string {
+    // If user configured a custom redirect URI, use that
+    if (config.redirectUri) {
+      this.logger.debug(`Using custom redirect URI: ${config.redirectUri}`);
+      return config.redirectUri;
+    }
+
+    // Otherwise, fallback to Kibana URL-based redirect URI
     if (!this.kibanaBaseUrl) {
       throw new Error(
         'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'
