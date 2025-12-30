@@ -33,7 +33,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { HiddenField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { CASES_INTERNAL_URL } from '../../../common/constants';
-import type { CreateTemplateInput, Template } from '../../../common/templates';
+import type { CreateTemplateInput, ParsedTemplate, Template } from '../../../common/templates';
 import { CommonFlyout, CommonFlyoutFooter } from '../configure_cases/flyout';
 import { TitleExperimentalBadge } from '../header_page/title';
 import { KibanaServices } from '../../common/lib/kibana';
@@ -54,8 +54,15 @@ const fetchTemplates = async () => {
   return KibanaServices.get().http.fetch<Template[]>(`${CASES_INTERNAL_URL}/templates`);
 };
 
-const fetchTemplate = async (templateId: string) => {
-  return KibanaServices.get().http.fetch<Template>(`${CASES_INTERNAL_URL}/templates/${templateId}`);
+const fetchTemplate = async (templateId: string): Promise<ParsedTemplate> => {
+  const template = await KibanaServices.get().http.fetch<Template>(
+    `${CASES_INTERNAL_URL}/templates/${templateId}`
+  );
+
+  return {
+    ...template,
+    definition: parseYaml(template.definition),
+  };
 };
 
 const createTemplate = async (templateInput: CreateTemplateInput) => {
@@ -276,7 +283,8 @@ const styles = {
 const sample = `# This is an example template
 fields:
   - name: severity
-    type: select
+    control: select
+    type: keyword
     options:
       - low
       - moderate

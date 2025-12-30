@@ -32,6 +32,13 @@ export interface Template {
   deletedAt: Date | null;
 }
 
+export interface ParsedTemplate extends Omit<Template, 'definition'> {
+  /**
+   * Parsed definition for the template. Needs to be validated programmatically.
+   */
+  definition: unknown;
+}
+
 export type CreateTemplateInput = Omit<
   Template,
   'id' | 'templateId' | 'templateVersion' | 'deletedAt'

@@ -176,8 +176,6 @@ export class TemplatesService {
 }
 
 // TODO:
-// 1. add crud methods for yaml persistence
-// 2. add yaml editor for persistence
 // 3. add new fields to a case - templateFields and templateId
 // 4. add validate method to check case fields against the template
 // 5. add case rendering based on the template

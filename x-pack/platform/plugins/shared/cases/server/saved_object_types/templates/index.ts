@@ -36,7 +36,7 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
       owner: {
         type: 'keyword',
       },
-      // yaml template definition
+      // json template definition
       definition: {
         type: 'text',
       },
