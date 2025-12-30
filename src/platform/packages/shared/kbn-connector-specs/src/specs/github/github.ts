@@ -72,6 +72,35 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    searchPullRequests: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        query: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          query?: string;
+        };
+        let searchQuery = `repo:${typedInput.owner}/${typedInput.repo} is:pr is:open`;
+        if (typedInput.query) {
+          searchQuery += ` ${typedInput.query}`;
+        }
+
+        const response = await ctx.client.get('https://api.github.com/search/issues', {
+          params: {
+            q: searchQuery,
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+        return response.data;
+      },
+    },
     getDocs: {
       isTool: false,
       input: z.object({

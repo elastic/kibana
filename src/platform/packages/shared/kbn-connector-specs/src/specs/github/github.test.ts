@@ -193,6 +193,110 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('searchPullRequests action', () => {
+    it('should search for pull requests without query', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 2,
+          items: [
+            { number: 1, title: 'PR 1', state: 'open', pull_request: {} },
+            { number: 2, title: 'PR 2', state: 'open', pull_request: {} },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.searchPullRequests.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
+        params: {
+          q: 'repo:owner/repo is:pr is:open',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should search for pull requests with query', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 1,
+          items: [{ number: 1, title: 'Bug fix PR', state: 'open', pull_request: {} }],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.searchPullRequests.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        query: 'bug',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/issues', {
+        params: {
+          q: 'repo:owner/repo is:pr is:open bug',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should handle invalid search query', async () => {
+      const error: HttpError = new Error('Validation failed');
+      error.response = {
+        status: 422,
+        data: {
+          message: 'Invalid query syntax',
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.searchPullRequests.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+          query: 'invalid query syntax',
+        })
+      ).rejects.toThrow('Validation failed');
+    });
+
+    it('should handle 422 error without message', async () => {
+      const error: HttpError = new Error('Validation failed');
+      error.response = {
+        status: 422,
+        data: {},
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.searchPullRequests.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+        })
+      ).rejects.toThrow('Validation failed');
+    });
+
+    it('should rethrow non-422 errors', async () => {
+      const error: HttpError = new Error('Server error');
+      error.response = { status: 500 };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.searchPullRequests.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+        })
+      ).rejects.toThrow('Server error');
+    });
+  });
+
   describe('getDocs action', () => {
     it('should get markdown files from repository', async () => {
       const commitResponse = {
