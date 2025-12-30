@@ -7,14 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import type {
+  ElasticsearchClient,
   ISavedObjectsSerializer,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { v4 } from 'uuid';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   CreateTemplateInput,
+  ParsedTemplate,
   Template,
   UpdateTemplateInput,
 } from '../../../../common/templates';
@@ -22,6 +25,7 @@ import { CASE_TEMPLATE_SAVED_OBJECT, CASES_INTERNAL_URL } from '../../../../comm
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { load as parseYaml } from 'js-yaml';
 
 // TODO: split this into multiple files, add rbac, security, make this api internal etc etc
 
@@ -32,10 +36,11 @@ export class TemplatesService {
     private readonly dependencies: {
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       savedObjectsSerializer: ISavedObjectsSerializer;
+      internalEsClient: ElasticsearchClient;
     }
   ) {}
 
-  async getAllTemplates(filterById?: string) {
+  async getAllTemplates(filterById?: string, version?: string) {
     interface SearchResult {
       aggregations: {
         by_template: {
@@ -48,6 +53,10 @@ export class TemplatesService {
           }>;
         };
       };
+    }
+
+    if (version) {
+      console.log('getAllTemplates, filtered by version', version);
     }
 
     const findResult = (await this.dependencies.unsecuredSavedObjectsClient.search({
@@ -63,6 +72,15 @@ export class TemplatesService {
               ? [
                   toElasticsearchQuery(
                     fromKueryExpression(`${CASE_TEMPLATE_SAVED_OBJECT}.templateId: "${filterById}"`)
+                  ),
+                ]
+              : []),
+            ...(version
+              ? [
+                  toElasticsearchQuery(
+                    fromKueryExpression(
+                      `${CASE_TEMPLATE_SAVED_OBJECT}.templateVersion: "${version}"`
+                    )
                   ),
                 ]
               : []),
@@ -100,8 +118,35 @@ export class TemplatesService {
     return latestTemplateVersions;
   }
 
-  async getTemplate(templateId: string): Promise<Template | undefined> {
-    return (await this.getAllTemplates(templateId))[0];
+  async getTemplate(templateId: string, version?: string): Promise<Template | undefined> {
+    return (await this.getAllTemplates(templateId, version))[0];
+  }
+
+  async updateMappings(definition: string) {
+    const parsedDefinition = parseYaml(definition) as ParsedTemplate['definition'];
+
+    const updatedMappings = {
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      properties: {
+        cases: {
+          properties: {
+            templateFields: {
+              properties: parsedDefinition.fields.reduce((acc, field) => {
+                acc[[field.name, field.type].join('_as_')] = {
+                  type: field.type,
+                };
+
+                return acc;
+              }, {} as Record<string, { type: string }>) as any,
+            },
+          },
+        },
+      },
+    };
+
+    console.log('update mappings', updatedMappings);
+
+    await this.dependencies.internalEsClient.indices.putMapping(updatedMappings);
   }
 
   async createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>> {
@@ -116,6 +161,8 @@ export class TemplatesService {
       } as Template,
       { refresh: true }
     );
+
+    await this.updateMappings(input.definition);
 
     return templateSavedObject;
   }
@@ -141,6 +188,8 @@ export class TemplatesService {
       }
     );
 
+    await this.updateMappings(input.definition);
+
     return templateSavedObject;
   }
 
@@ -157,9 +206,7 @@ export class TemplatesService {
 
     const ids = templateSnapshots.saved_objects.map((so) => so.id);
 
-    console.log('ids', ids);
-
-    const updatedTemplateSnapshots = await this.dependencies.unsecuredSavedObjectsClient.bulkUpdate(
+    await this.dependencies.unsecuredSavedObjectsClient.bulkUpdate(
       ids.map((id) => ({
         id,
         type: CASE_TEMPLATE_SAVED_OBJECT,
@@ -169,9 +216,6 @@ export class TemplatesService {
       })),
       { refresh: true }
     );
-
-    console.log('=============');
-    console.log(JSON.stringify(updatedTemplateSnapshots, null, 2));
   }
 }
 
@@ -251,9 +295,10 @@ export const getTemplateRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      console.log('templateVersion: ', (request.query as any).templateVersion);
-
-      const template = await casesClient.templates.getTemplate(request.params.template_id);
+      const template = await casesClient.templates.getTemplate(
+        request.params.template_id,
+        (request.query as Record<string, string | undefined>).version
+      );
 
       return response.ok({
         body: template,

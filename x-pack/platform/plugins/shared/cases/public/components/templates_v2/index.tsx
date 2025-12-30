@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiButtonIcon,
+  EuiTitle,
 } from '@elastic/eui';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { CodeEditor } from '@kbn/code-editor';
@@ -54,9 +55,14 @@ const fetchTemplates = async () => {
   return KibanaServices.get().http.fetch<Template[]>(`${CASES_INTERNAL_URL}/templates`);
 };
 
-const fetchTemplate = async (templateId: string): Promise<ParsedTemplate> => {
+const fetchTemplate = async (templateId: string, version?: string): Promise<ParsedTemplate> => {
   const template = await KibanaServices.get().http.fetch<Template>(
-    `${CASES_INTERNAL_URL}/templates/${templateId}`
+    `${CASES_INTERNAL_URL}/templates/${templateId}`,
+    {
+      query: {
+        version,
+      },
+    }
   );
 
   return {
@@ -98,10 +104,10 @@ const useTemplates = () =>
     queryKey: ['templates'],
   });
 
-const useTemplate = (templateId: string) =>
+const useTemplate = (templateId: string, version?: string) =>
   useQuery({
-    queryFn: () => fetchTemplate(templateId),
-    queryKey: ['templates', templateId],
+    queryFn: () => fetchTemplate(templateId, version),
+    queryKey: ['templates', templateId, version],
     enabled: !!templateId,
   });
 
@@ -470,18 +476,50 @@ export const TemplateSelectorV2 = () => {
 };
 TemplateSelectorV2.displayName = 'TemplateSelectorV2';
 
-export const TemplateFields = () => {
+export const CreateCaseTemplateFields = () => {
   const [fields] = useKibanaFormData();
   const template = useTemplate(fields?.template?.id);
 
-  // TODO when rendering values, get the case-specific template version from the server
-  console.log('template definition', template.data?.definition);
+  const fieldsFragment = useMemo(() => {
+    if (!template.data) {
+      return null;
+    }
+
+    return template.data.definition.fields.map((field) => {
+      if (field.control === 'select') {
+        const options = (field.metadata.options as string[]).map((value) => ({
+          text: value,
+          value,
+        }));
+
+        return (
+          <UseField
+            path={`templateFields.${field.name}_as_${field.type}`}
+            component={SelectField}
+            componentProps={{
+              euiFieldProps: {
+                options,
+              },
+            }}
+          />
+        );
+      }
+
+      return <>{'unknown field'}</>;
+    });
+  }, [template]);
 
   return (
-    <>{`TODO: Template Fields (Dynamic) for template ${fields?.template?.id} (${fields?.template?.version})`}</>
+    <>
+      <EuiSpacer />
+      <EuiTitle size="s">
+        <h4>{`Template Fields for template ${fields?.template?.id} (version ${fields?.template?.version})`}</h4>
+      </EuiTitle>
+      {fieldsFragment}
+    </>
   );
 };
-TemplateFields.displayName = 'TemplateFields';
+CreateCaseTemplateFields.displayName = 'TemplateFields';
 
 export const TemplateFlyout = ({
   onClose,

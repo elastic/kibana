@@ -283,6 +283,7 @@ export const createCaseSavedObjectType = (
         },
       },
       templateFields: {
+        dynamic: false,
         type: 'object',
         properties: {},
       },

@@ -36,7 +36,14 @@ export interface ParsedTemplate extends Omit<Template, 'definition'> {
   /**
    * Parsed definition for the template. Needs to be validated programmatically.
    */
-  definition: unknown;
+  definition: {
+    fields: Array<{
+      control: string;
+      name: string;
+      type: 'keyword';
+      metadata: Record<string, unknown>;
+    }>;
+  };
 }
 
 export type CreateTemplateInput = Omit<

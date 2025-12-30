@@ -107,11 +107,13 @@ export class CasesClientFactory {
   public async create({
     request,
     scopedClusterClient,
+    internalClusterClient,
     savedObjectsService,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    internalClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -140,6 +142,7 @@ export class CasesClientFactory {
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient: scopedClusterClient,
+      internalEsClient: internalClusterClient,
       request,
       auditLogger,
       alertsClient,
@@ -178,6 +181,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient,
     savedObjectsSerializer,
     esClient,
+    internalEsClient,
     request,
     auditLogger,
     alertsClient,
@@ -185,6 +189,7 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
+    internalEsClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
@@ -194,6 +199,7 @@ export class CasesClientFactory {
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
+      internalEsClient,
     });
 
     const attachmentService = new AttachmentService({
