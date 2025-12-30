@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getSLOGroupingsParamsSchema } from '@kbn/slo-schema';
-import { GetSLOGroupings } from '../../services/get_slo_groupings';
+import { findSLOGroupingsParamsSchema } from '@kbn/slo-schema';
+import { FindSLOGroupings } from '../../services/find_slo_groupings';
 import { SloDefinitionClient } from '../../services/slo_definition_client';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
-export const getSLOGroupingsRoute = createSloServerRoute({
+export const findSLOGroupingsRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/{id}/_groupings',
   options: { access: 'internal' },
   security: {
@@ -19,7 +19,7 @@ export const getSLOGroupingsRoute = createSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: getSLOGroupingsParamsSchema,
+  params: findSLOGroupingsParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
     const { scopedClusterClient, repository, spaceId, settingsRepository } = await getScopedClients(
@@ -34,13 +34,13 @@ export const getSLOGroupingsRoute = createSloServerRoute({
       logger
     );
 
-    const getSLOGroupings = new GetSLOGroupings(
+    const findSLOGroupings = new FindSLOGroupings(
       definitionClient,
       scopedClusterClient.asCurrentUser,
       settings,
       spaceId
     );
 
-    return await getSLOGroupings.execute(params.path.id, params.query);
+    return await findSLOGroupings.execute(params.path.id, params.query);
   },
 });

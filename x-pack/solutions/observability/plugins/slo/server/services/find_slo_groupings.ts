@@ -7,7 +7,7 @@
 
 import type { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { GetSLOGroupingsParams, GetSLOGroupingsResponse } from '@kbn/slo-schema';
+import type { FindSLOGroupingsParams, FindSLOGroupingsResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition, SLOSettings } from '../domain/models';
@@ -16,7 +16,7 @@ import type { SloDefinitionClient } from './slo_definition_client';
 
 const DEFAULT_SIZE = 100;
 
-export class GetSLOGroupings {
+export class FindSLOGroupings {
   constructor(
     private definitionClient: SloDefinitionClient,
     private esClient: ElasticsearchClient,
@@ -26,8 +26,8 @@ export class GetSLOGroupings {
 
   public async execute(
     sloId: string,
-    params: GetSLOGroupingsParams
-  ): Promise<GetSLOGroupingsResponse> {
+    params: FindSLOGroupingsParams
+  ): Promise<FindSLOGroupingsResponse> {
     const { slo } = await this.definitionClient.execute(sloId, this.spaceId, params.remoteName);
 
     const groupingKeys = [slo.groupBy].flat();
@@ -71,7 +71,7 @@ export class GetSLOGroupings {
     };
   }
 
-  private generateQuery(slo: SLODefinition, params: GetSLOGroupingsParams) {
+  private generateQuery(slo: SLODefinition, params: FindSLOGroupingsParams) {
     const groupingKeys = [slo.groupBy].flat();
     const groupingValues = params.instanceId.split(',') ?? [];
 
@@ -143,7 +143,7 @@ export class GetSLOGroupings {
   }
 }
 
-function generateAggs(params: GetSLOGroupingsParams): {
+function generateAggs(params: FindSLOGroupingsParams): {
   groupingValues: { composite: AggregationsCompositeAggregation };
 } {
   return {

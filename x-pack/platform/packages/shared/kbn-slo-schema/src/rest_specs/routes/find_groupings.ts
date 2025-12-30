@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 
-const getSLOGroupingsParamsSchema = t.type({
+const findSLOGroupingsParamsSchema = t.type({
   path: t.type({ id: t.string }),
   query: t.intersection([
     t.type({
@@ -24,12 +24,13 @@ const getSLOGroupingsParamsSchema = t.type({
   ]),
 });
 
-type GetSLOGroupingsParams = t.TypeOf<typeof getSLOGroupingsParamsSchema.props.query>;
-interface GetSLOGroupingsResponse {
+type FindSLOGroupingsParams = t.TypeOf<typeof findSLOGroupingsParamsSchema.props.query>;
+
+interface FindSLOGroupingsResponse {
   groupingKey: string;
   values: string[];
   afterKey: string | undefined;
 }
 
-export { getSLOGroupingsParamsSchema };
-export type { GetSLOGroupingsResponse, GetSLOGroupingsParams };
+export { findSLOGroupingsParamsSchema };
+export type { FindSLOGroupingsResponse, FindSLOGroupingsParams };

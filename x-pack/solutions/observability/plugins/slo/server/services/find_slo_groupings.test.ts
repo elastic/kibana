@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { SLODefinitionRepository } from '.';
-import { GetSLOGroupings } from '.';
+import { FindSLOGroupings } from './find_slo_groupings';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import { SloDefinitionClient } from './slo_definition_client';
@@ -21,7 +21,7 @@ const DEFAULT_SETTINGS = {
   useAllRemoteClusters: false,
 };
 
-describe('Get SLO Instances', () => {
+describe('Find SLO Groupings', () => {
   let repositoryMock: jest.Mocked<SLODefinitionRepository>;
   let esClientMock: ElasticsearchClientMock;
   let definitionClient: SloDefinitionClient;
@@ -40,7 +40,7 @@ describe('Get SLO Instances', () => {
     const slo = createSLO({ groupBy: ALL_VALUE });
     repositoryMock.findById.mockResolvedValue(slo);
 
-    const service = new GetSLOGroupings(
+    const service = new FindSLOGroupings(
       definitionClient,
       esClientMock,
       DEFAULT_SETTINGS,
@@ -59,7 +59,7 @@ describe('Get SLO Instances', () => {
     const slo = createSLO({ groupBy: ['abc.efg', 'host.name'] });
     repositoryMock.findById.mockResolvedValue(slo);
 
-    const service = new GetSLOGroupings(
+    const service = new FindSLOGroupings(
       definitionClient,
       esClientMock,
       DEFAULT_SETTINGS,
@@ -78,7 +78,7 @@ describe('Get SLO Instances', () => {
     const slo = createSLO({ groupBy: ['abc.efg', 'host.name'] });
     repositoryMock.findById.mockResolvedValue(slo);
 
-    const service = new GetSLOGroupings(
+    const service = new FindSLOGroupings(
       definitionClient,
       esClientMock,
       DEFAULT_SETTINGS,

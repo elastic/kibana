@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetSLOGroupingsResponse } from '@kbn/slo-schema';
+import type { FindSLOGroupingsResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
 import { sloKeys } from '../../../hooks/query_key_factory';
@@ -21,7 +21,7 @@ interface Params {
 }
 
 interface Response {
-  data: GetSLOGroupingsResponse | undefined;
+  data: FindSLOGroupingsResponse | undefined;
   isLoading: boolean;
   isError: boolean;
 }
