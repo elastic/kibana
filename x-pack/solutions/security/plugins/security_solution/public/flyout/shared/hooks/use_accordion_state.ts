@@ -7,11 +7,12 @@
 
 import { useReducer } from 'react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
+import { PREFIX } from '../test_ids';
 
 const CLOSED = 'closed' as const;
 const OPEN = 'open' as const;
+export const EXPANDABLE_SECTION_STORAGE_KEY = `${PREFIX}.expandableSection` as const;
 type ToggleReducerState = typeof CLOSED | typeof OPEN;
 
 export interface ToggleReducerAction {
@@ -33,8 +34,8 @@ export interface ToggleReducerAction {
 export const toggleReducer = (state: ToggleReducerState, action: ToggleReducerAction) => {
   const { storage, title } = action;
   if (storage && title) {
-    const localStorage = storage.get(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS);
-    storage.set(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS, {
+    const localStorage = storage.get(EXPANDABLE_SECTION_STORAGE_KEY);
+    storage.set(EXPANDABLE_SECTION_STORAGE_KEY, {
       ...localStorage,
       [title]: state !== OPEN,
     });

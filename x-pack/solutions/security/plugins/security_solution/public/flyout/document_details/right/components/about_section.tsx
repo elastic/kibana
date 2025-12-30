@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { ExpandableSection } from './expandable_section';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { ABOUT_SECTION_TEST_ID } from './test_ids';
 import { AlertDescription } from './alert_description';
 import { Reason } from './reason';

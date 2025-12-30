@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
+import { EXPANDABLE_SECTION_STORAGE_KEY } from './use_accordion_state';
 
 export interface UseExpandSectionParams {
   /**
@@ -25,7 +25,7 @@ export interface UseExpandSectionParams {
 export const useExpandSection = ({ title, defaultValue }: UseExpandSectionParams): boolean => {
   const { storage } = useKibana().services;
 
-  const localStorage = storage.get(FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS);
+  const localStorage = storage.get(EXPANDABLE_SECTION_STORAGE_KEY);
   const key = title.toLowerCase();
   const expanded =
     localStorage && localStorage[key] !== undefined ? localStorage[key] : defaultValue;
