@@ -6,12 +6,19 @@
  */
 
 import { screen, within, act } from '@testing-library/react';
+import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
+
 import './mocks';
 import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
-import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
+
+const getActionsCell = (testId, rowIndex = 0) => {
+  const table = new EuiTableTestHarness(testId);
+  const tableRows = table.getRows();
+  return within(tableRows[rowIndex]).getAllByRole('cell').pop();
+};
 
 describe('<AutoFollowPatternList />', () => {
   let httpRequestsMockHelpers;
@@ -217,9 +224,9 @@ describe('<AutoFollowPatternList />', () => {
 
     describe('table row actions', () => {
       test('should have a "pause", "delete" and "edit" action button on each row', async () => {
-        const table = new EuiTableTestHarness('autoFollowPatternListTable');
-        const actionsCell = within(table.rows[0]).getAllByRole('cell').pop();
-        const contextMenuButton = within(actionsCell).getByRole('button');
+        const contextMenuButton = within(getActionsCell('autoFollowPatternListTable')).getByRole(
+          'button'
+        );
 
         await user.click(contextMenuButton);
 
@@ -231,9 +238,9 @@ describe('<AutoFollowPatternList />', () => {
       test('should open a confirmation modal when clicking on "delete" button', async () => {
         expect(screen.queryByTestId('deleteAutoFollowPatternConfirmation')).not.toBeInTheDocument();
 
-        const table = new EuiTableTestHarness('autoFollowPatternListTable');
-        const actionsCell = within(table.rows[0]).getAllByRole('cell').pop();
-        const contextMenuButton = within(actionsCell).getByRole('button');
+        const contextMenuButton = within(getActionsCell('autoFollowPatternListTable')).getByRole(
+          'button'
+        );
         await user.click(contextMenuButton);
 
         const deleteButton = screen.getByTestId('contextMenuDeleteButton');
