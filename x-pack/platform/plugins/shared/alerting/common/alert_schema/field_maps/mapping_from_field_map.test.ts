@@ -208,7 +208,19 @@ describe('mappingFromFieldMap', () => {
             },
             original: {
               type: 'keyword',
-              ignore_above: 1024,
+            },
+          },
+        },
+        data_stream: {
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            dataset: {
+              type: 'keyword',
+            },
+            namespace: {
+              type: 'keyword',
             },
           },
         },
@@ -394,6 +406,7 @@ describe('mappingFromFieldMap', () => {
         },
         tags: {
           type: 'keyword',
+          ignore_above: 1024,
         },
       },
     });
@@ -445,7 +458,7 @@ describe('mappingFromFieldMap', () => {
             },
           },
         },
-        ecs: { properties: { version: { type: 'keyword' } } },
+        ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
       },
     });
   });

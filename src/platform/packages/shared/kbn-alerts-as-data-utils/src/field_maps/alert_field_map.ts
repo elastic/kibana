@@ -63,6 +63,10 @@ import {
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
+const DATA_STREAM_DATASET = 'data_stream.dataset' as const;
+const DATA_STREAM_NAMESPACE = 'data_stream.namespace' as const;
+const DATA_STREAM_TYPE = 'data_stream.type' as const;
+
 export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
     type: 'keyword',
@@ -300,7 +304,21 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
-    ignore_above: 1024,
+  },
+  [DATA_STREAM_TYPE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [DATA_STREAM_DATASET]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [DATA_STREAM_NAMESPACE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   [SPACE_IDS]: {
     type: 'keyword',
@@ -311,6 +329,7 @@ export const alertFieldMap = {
     type: 'keyword',
     array: true,
     required: false,
+    ignore_above: 1024,
   },
   [TIMESTAMP]: {
     type: 'date',
