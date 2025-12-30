@@ -8,12 +8,13 @@
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
-import { ConvertToEsqlModal, type Layer } from './convert_to_esql_modal';
+import type { ConvertibleLayer } from './convert_to_esql_modal';
+import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import userEvent from '@testing-library/user-event';
 import { IconChartBarAnnotations, IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { layerTypes } from '../../..';
 
-const mockLayers: Layer[] = [
+const mockLayers: ConvertibleLayer[] = [
   {
     id: '1',
     icon: 'layers',
