@@ -92,7 +92,9 @@ export async function writeEsqlAlerts({
     const grouping = buildGrouping({
       rowDoc,
       groupKeyFields: rawRule.groupKey ?? [],
-      fallbackSeed: `${executionUuid}|row:${i}|${JSON.stringify(rowDoc)}`,
+      get fallbackSeed(): string {
+        return `${executionUuid}|row:${i}|${JSON.stringify(rowDoc)}`;
+      },
     });
 
     const alertSeriesId = sha256(`${ruleId}|${spaceId}|${grouping.key}|${grouping.value}`);
