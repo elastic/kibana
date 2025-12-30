@@ -67,8 +67,6 @@ const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 TagsListMock.mockReturnValue(<div>Tags list</div>);
-const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
-HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
