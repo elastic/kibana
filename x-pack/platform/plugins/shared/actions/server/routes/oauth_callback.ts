@@ -355,18 +355,12 @@ export const oauthCallbackRoute = (
           // Clean up state
           await oauthStateClient.delete(oauthState.id!);
 
-          // Return success page
-          return res.ok({
-            // FIXME: redirect to a page instead! kibana url from state object
-            headers: { 'content-type': 'text/html' },
-            body: generateOAuthCallbackPage({
-              title: 'OAuth Authorization Successful',
-              heading: 'Authorization Successful',
-              message: 'You have successfully authorized the connector.',
-              details: 'You can now close this window and return to Kibana.',
-              isSuccess: true,
-              autoClose: true,
-            }),
+          // Redirect to Kibana
+          const returnUrl = new URL(oauthState.kibanaReturnUrl);
+          return res.redirected({
+            headers: {
+              location: returnUrl.toString(),
+            },
           });
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : String(err);
@@ -375,7 +369,6 @@ export const oauthCallbackRoute = (
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
           return res.ok({
-            // FIXME: redirect to a page instead?
             headers: { 'content-type': 'text/html' },
             body: generateOAuthCallbackPage({
               title: 'OAuth Authorization Failed',
