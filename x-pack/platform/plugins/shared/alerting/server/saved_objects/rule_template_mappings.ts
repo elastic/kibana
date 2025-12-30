@@ -25,5 +25,26 @@ export const ruleTemplateMappings: SavedObjectsTypeMappingDefinition = {
     tags: {
       type: 'keyword',
     },
+    description: {
+      type: 'text',
+    },
+    artifacts: {
+      properties: {
+        investigation_guide: {
+          properties: {
+            blob: {
+              type: 'text',
+            },
+          },
+        },
+        dashboards: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
   },
 };

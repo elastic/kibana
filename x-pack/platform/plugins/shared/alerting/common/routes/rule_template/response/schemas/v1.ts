@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ruleResponseSchemaV1 } from '../../../rule/response';
+import { rule } from '../../../../../server/alerts_client/lib/test_fixtures';
 
 export const ruleTemplateResponseSchema = schema.object({
   id: schema.string({
@@ -33,4 +34,6 @@ export const ruleTemplateResponseSchema = schema.object({
 
   alert_delay: ruleResponseSchemaV1.getPropSchemas().alert_delay,
   flapping: ruleResponseSchemaV1.getPropSchemas().flapping,
+  artifacts: ruleResponseSchemaV1.getPropSchemas().artifacts,
+  description: ruleResponseSchemaV1.getPropSchemas().description,
 });

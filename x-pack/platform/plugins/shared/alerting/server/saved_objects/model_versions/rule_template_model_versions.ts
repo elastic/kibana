@@ -28,7 +28,34 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '3': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          artifacts: {
+            properties: {
+              investigation_guide: {
+                properties: {
+                  blob: {
+                    type: 'text',
+                  },
+                },
+              },
+              dashboards: {
+                properties: {
+                  id: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          },
+          description: {
+            type: 'text',
+          },
+        },
+      },
+    ],
     schemas: {
       forwardCompatibility: rawRuleTemplateSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: rawRuleTemplateSchemaV3,
