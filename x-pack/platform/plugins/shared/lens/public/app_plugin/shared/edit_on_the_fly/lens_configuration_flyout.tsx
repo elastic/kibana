@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useRef, useState } from 'react';
-import { isEqual, partition } from 'lodash';
+import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -22,10 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { FormBasedLayer, TypedLensSerializedState } from '@kbn/lens-common';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { useIsDevMode } from '@kbn/react-env';
-import { operationDefinitionMap } from '../../../datasources/form_based/operations';
-import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
 import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
@@ -41,9 +39,8 @@ import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
-import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
-import { layerTypes } from '../../..';
+import { useEsqlConversion } from './use_esql_conversion';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -311,85 +308,14 @@ export function LensEditConfigurationFlyout({
     return isDevMode && !textBasedMode && isSingleLayerVisualization;
   }, [isDevMode, textBasedMode, isSingleLayerVisualization]);
 
-  // The button is disabled when the visualization cannot be converted to ES|QL
-  const {
-    isConvertToEsqlButtonDisabled,
-    convertibleLayers,
-  }: { isConvertToEsqlButtonDisabled: boolean; convertibleLayers: ConvertibleLayer[] } =
-    useMemo(() => {
-      const datasourceState = datasourceStates[datasourceId].state;
-
-      if (!isSingleLayerVisualization || textBasedMode || !datasourceState) {
-        return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
-      }
-
-      // Validate datasourceState structure
-      if (
-        typeof datasourceState !== 'object' ||
-        datasourceState === null ||
-        !('layers' in datasourceState) ||
-        !datasourceState.layers
-      ) {
-        return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
-      }
-
-      // Access the single layer safely
-      const layers = datasourceState.layers as Record<string, FormBasedLayer>;
-      const layerId = layerIds[0];
-
-      if (!layerId || !(layerId in layers)) {
-        return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
-      }
-
-      const singleLayer = layers[layerId];
-      if (!singleLayer || !singleLayer.columnOrder || !singleLayer.columns) {
-        return { isConvertToEsqlButtonDisabled: true, convertibleLayers: [] };
-      }
-
-      // Get the esAggEntries
-      const { columnOrder } = singleLayer;
-      const columns = { ...singleLayer.columns };
-      const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-      const [, esAggEntries] = partition(
-        columnEntries,
-        ([, col]) =>
-          operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
-          operationDefinitionMap[col.operationType]?.input === 'managedReference'
-      );
-
-      const esqlLayer = getESQLForLayer(
-        esAggEntries,
-        singleLayer,
-        framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
-        coreStart.uiSettings,
-        framePublicAPI.dateRange,
-        startDependencies.data.nowProvider.get()
-      );
-
-      const convertibleLayer: ConvertibleLayer = {
-        id: layerId,
-        icon: 'layers',
-        name: '',
-        type: layerTypes.DATA,
-        query: esqlLayer ? esqlLayer.esql : '',
-        isConvertibleToEsql: !!esqlLayer,
-      };
-
-      return {
-        isConvertToEsqlButtonDisabled: !esqlLayer,
-        convertibleLayers: [convertibleLayer],
-      };
-    }, [
-      coreStart.uiSettings,
-      datasourceId,
-      datasourceStates,
-      framePublicAPI.dataViews.indexPatterns,
-      framePublicAPI.dateRange,
-      isSingleLayerVisualization,
-      layerIds,
-      startDependencies.data.nowProvider,
-      textBasedMode,
-    ]);
+  const { isConvertToEsqlButtonDisabled, convertibleLayers } = useEsqlConversion(
+    datasourceId,
+    datasourceStates,
+    isSingleLayerVisualization,
+    layerIds,
+    textBasedMode,
+    { framePublicAPI, coreStart, startDependencies }
+  );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -434,7 +360,6 @@ export function LensEditConfigurationFlyout({
               })}
               isDisabled={isConvertToEsqlButtonDisabled}
               onClick={() => {
-                console.log('here');
                 showModal();
               }}
             />
