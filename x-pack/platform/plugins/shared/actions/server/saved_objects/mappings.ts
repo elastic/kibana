@@ -132,5 +132,8 @@ export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
     // createdBy: {
     //   type: 'keyword',
     // },
+    // kibanaReturnUrl: {
+    //   type: 'keyword',
+    // },
   },
 };
