@@ -9,7 +9,7 @@
 
 import type { WalkerAstNode } from '../../../../ast';
 import { isLiteral, walk } from '../../../../ast';
-import type { ESQLMessage } from '../../../../types';
+import type { ESQLInlineCast, ESQLMessage } from '../../../../types';
 import type { ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
@@ -25,27 +25,60 @@ export function validateInlineCasts(
   const messages: ESQLMessage[] = [];
   walk(astNode, {
     visitInlineCast: (node) => {
-      const castFunction = getFunctionForInlineCast(node.castType);
-      if (!castFunction) {
-        messages.push(errors.unknownCastingType(node.castType, node.location));
+      const unknownCastingTypeError = checkUnknownCastingType(node);
+      if (unknownCastingTypeError) {
+        messages.push(unknownCastingTypeError);
         return;
       }
 
-      const castFunctionDef = getFunctionDefinition(castFunction);
-      if (!castFunctionDef) {
-        return;
-      }
-      const valueTypeBeforeCast = getExpressionType(node.value, context.columns);
-      const matchingSignatures = getMatchingSignatures(
-        castFunctionDef.signatures,
-        [valueTypeBeforeCast],
-        [isLiteral(node.value)],
-        true // accepts unknown
-      );
-      if (matchingSignatures.length === 0) {
-        messages.push(errors.invalidInlineCast(node.castType, valueTypeBeforeCast, node.location));
+      const invalidCastValueError = checkInvalidCastValue(node, context);
+      if (invalidCastValueError) {
+        messages.push(invalidCastValueError);
       }
     },
   });
   return messages;
+}
+
+/**
+ * Checks if the inline cast type is valid.
+ * value:int -> OK
+ * value:intt -> Error
+ */
+function checkUnknownCastingType(node: ESQLInlineCast) {
+  const castFunction = getFunctionForInlineCast(node.castType);
+  if (!castFunction) {
+    return errors.unknownCastingType(node.castType, node.location);
+  }
+}
+
+/**
+ * Checks if the value being cast is compatible with the inline cast type.
+ * To do this, we look for the function signature corresponding to the inline cast type.
+ *
+ * "2012"::date -> Ok
+ * true::date -> Error
+ */
+function checkInvalidCastValue(node: ESQLInlineCast, context: ICommandContext) {
+  const castFunction = getFunctionForInlineCast(node.castType);
+  if (!castFunction) {
+    return;
+  }
+  const castFunctionDef = getFunctionDefinition(castFunction);
+  if (!castFunctionDef) {
+    return;
+  }
+
+  const valueTypeBeforeCast = getExpressionType(node.value, context.columns);
+
+  const matchingSignatures = getMatchingSignatures(
+    castFunctionDef.signatures,
+    [valueTypeBeforeCast],
+    [isLiteral(node.value)],
+    true // accepts unknown
+  );
+
+  if (matchingSignatures.length === 0) {
+    return errors.invalidInlineCast(node.castType, valueTypeBeforeCast, node.location);
+  }
 }
