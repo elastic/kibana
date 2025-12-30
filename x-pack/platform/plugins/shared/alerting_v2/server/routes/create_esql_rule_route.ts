@@ -67,7 +67,7 @@ export class CreateEsqlRuleRoute implements RouteHandler {
 
       const created = await createEsqlRule(
         {
-          logger: this.logger as any,
+          logger: this.logger,
           request: this.request,
           taskManager: this.taskManager,
           savedObjectsClient,

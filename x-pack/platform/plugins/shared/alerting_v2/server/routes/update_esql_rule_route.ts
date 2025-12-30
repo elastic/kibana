@@ -18,9 +18,14 @@ import type { Logger as KibanaLogger } from '@kbn/logging';
 import { inject, injectable, optional } from 'inversify';
 import { Logger, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, Response } from '@kbn/core-di-server';
+import type { TypeOf } from '@kbn/config-schema';
 import { DEFAULT_ALERTING_V2_ROUTE_SECURITY } from './constants';
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { updateEsqlRule, updateEsqlRuleDataSchema } from '../application/esql_rule/methods/update';
+import {
+  updateEsqlRule,
+  updateEsqlRuleDataSchema,
+  type UpdateEsqlRuleData,
+} from '../application/esql_rule/methods/update';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
 
@@ -43,7 +48,12 @@ export class UpdateEsqlRuleRoute {
 
   constructor(
     @inject(Logger) private readonly logger: KibanaLogger,
-    @inject(Request) private readonly request: KibanaRequest,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      TypeOf<typeof updateEsqlRuleParamsSchema>,
+      unknown,
+      UpdateEsqlRuleData
+    >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(CoreStart('http')) private readonly http: HttpServiceStart,
     @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
@@ -73,7 +83,7 @@ export class UpdateEsqlRuleRoute {
           getUserName: async () =>
             this.security?.authc.getCurrentUser(this.request)?.username ?? null,
         },
-        { id: (this.request.params as any).id, data: this.request.body as any }
+        { id: this.request.params.id, data: this.request.body }
       );
 
       return this.response.ok({ body: updated });

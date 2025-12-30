@@ -66,6 +66,8 @@ export function createRuleExecutorTaskRunner({
           throw e;
         }
 
+        logger.debug(() => `Raw rule: ${JSON.stringify(rawRule, null, 2)}`);
+
         if (!rawRule.enabled) {
           return { state: taskInstance.state };
         }
@@ -87,7 +89,9 @@ export function createRuleExecutorTaskRunner({
           },
         });
 
-        logger.debug(() => `ES|QL response: ${JSON.stringify(esqlResponse, null, 2)}`);
+        logger.debug(
+          () => `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`
+        );
 
         const esClient = coreStart.elasticsearch.client.asInternalUser;
         await ensureAlertsResources({
