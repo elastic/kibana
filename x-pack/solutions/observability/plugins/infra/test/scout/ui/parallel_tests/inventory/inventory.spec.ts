@@ -139,4 +139,9 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       expect(CONTAINER_NAMES).toContain(nodeName!.trim());
     });
   });
+
+  test('Has no detectable a11y violations on load', async ({ page }) => {
+    const { violations } = await page.checkA11y({ include: ['main'] });
+    expect(violations).toHaveLength(0);
+  });
 });
