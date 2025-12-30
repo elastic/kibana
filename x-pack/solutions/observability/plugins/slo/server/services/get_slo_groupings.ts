@@ -11,6 +11,7 @@ import type { GetSLOGroupingsParams, GetSLOGroupingsResponse } from '@kbn/slo-sc
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition, SLOSettings } from '../domain/models';
+import { IllegalArgumentError } from '../errors';
 import type { SloDefinitionClient } from './slo_definition_client';
 
 const DEFAULT_SIZE = 100;
@@ -31,16 +32,18 @@ export class GetSLOGroupings {
 
     const groupingKeys = [slo.groupBy].flat();
     if (groupingKeys.includes(ALL_VALUE) || params.instanceId === ALL_VALUE) {
-      throw new Error('Ungrouped SLO cannot be queried for available groupings');
+      throw new IllegalArgumentError('Ungrouped SLO cannot be queried for available groupings');
     }
 
     if (!groupingKeys.includes(params.groupingKey)) {
-      throw new Error("Provided groupingKey doesn't match the SLO's groupBy field");
+      throw new IllegalArgumentError("Provided groupingKey doesn't match the SLO's groupBy field");
     }
 
     const groupingValues = params.instanceId.split(',') ?? [];
     if (groupingKeys.length !== groupingValues.length) {
-      throw new Error('Provided instanceId does not match the number of grouping keys');
+      throw new IllegalArgumentError(
+        'Provided instanceId does not match the number of grouping keys'
+      );
     }
 
     const response = await this.esClient.search<
