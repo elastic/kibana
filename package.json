@@ -562,6 +562,7 @@
     "@kbn/enterprise-search-plugin": "link:x-pack/solutions/search/plugins/enterprise_search",
     "@kbn/entities-schema": "link:x-pack/platform/packages/shared/kbn-entities-schema",
     "@kbn/entity-manager-fixture-plugin": "link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin",
+    "@kbn/entity-store": "link:x-pack/solutions/security/plugins/entity_store",
     "@kbn/entityManager-plugin": "link:x-pack/platform/plugins/shared/entity_manager",
     "@kbn/error-boundary-example-plugin": "link:examples/error_boundary",
     "@kbn/es-errors": "link:src/platform/packages/shared/kbn-es-errors",
