@@ -370,12 +370,22 @@ describe('<IndexManagementHome />', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      httpRequestsMockHelpers.setLoadIndexDocCountsResponse({
+        counts: { [indexName]: 10000 },
+        errors: {},
+      });
 
       await act(async () => {
         testBed = await setup(httpSetup);
       });
 
       const { component } = testBed;
+
+      // Flush the doc-count effect + batcher microtask drain.
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
       component.update();
     });

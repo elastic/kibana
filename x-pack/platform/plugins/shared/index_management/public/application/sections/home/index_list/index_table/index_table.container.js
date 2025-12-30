@@ -14,6 +14,7 @@ import {
   getSortField,
   isSortAscending,
   getIndicesAsArray,
+  getFilteredIndices,
   indicesLoading,
   indicesError,
   getTableState,
@@ -22,17 +23,20 @@ import {
   filterChanged,
   pageChanged,
   pageSizeChanged,
-  sortChanged,
+  sortChanged as sortChangedAction,
   loadIndices,
   toggleChanged,
   performExtensionAction,
+  loadIndexDocCountsSuccess,
 } from '../../../../store/actions';
+import { loadIndexDocCounts } from '../../../../services';
 
 import { IndexTable as PresentationComponent } from './index_table';
 
 const mapStateToProps = (state, props) => {
   return {
     allIndices: getIndicesAsArray(state),
+    filteredIndices: getFilteredIndices(state),
     indices: getPageOfIndices(state, props),
     pager: getPager(state, props),
     filter: getFilter(state),
@@ -55,8 +59,15 @@ const mapDispatchToProps = (dispatch) => {
     pageSizeChanged: (pageSize) => {
       dispatch(pageSizeChanged({ pageSize }));
     },
-    sortChanged: (sortField, isSortAscending) => {
-      dispatch(sortChanged({ sortField, isSortAscending }));
+    sortChanged: async (sortField, isSortAscending, filteredIndices = []) => {
+      if (sortField === 'documents') {
+        const indexNames = filteredIndices.map((index) => index.name);
+        if (indexNames.length) {
+          const { counts } = await loadIndexDocCounts(indexNames);
+          dispatch(loadIndexDocCountsSuccess({ counts }));
+        }
+      }
+      dispatch(sortChangedAction({ sortField, isSortAscending }));
     },
     toggleChanged: (toggleName, toggleValue) => {
       dispatch(toggleChanged({ toggleName, toggleValue }));

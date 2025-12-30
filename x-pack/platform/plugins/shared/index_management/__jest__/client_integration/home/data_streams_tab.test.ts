@@ -146,6 +146,7 @@ describe('Data Streams tab', () => {
     beforeEach(async () => {
       const {
         setLoadIndicesResponse,
+        setLoadIndexDocCountsResponse,
         setLoadDataStreamsResponse,
         setLoadDataStreamResponse,
         setLoadTemplateResponse,
@@ -156,6 +157,12 @@ describe('Data Streams tab', () => {
         createDataStreamBackingIndex('data-stream-index', 'dataStream1'),
         createNonDataStreamIndex('non-data-stream-index'),
       ]);
+
+      // Doc count cells use the batch endpoint for backing indices.
+      setLoadIndexDocCountsResponse({
+        counts: { 'data-stream-index': 10000 },
+        errors: {},
+      });
 
       const dataStreamForDetailPanel = createDataStreamPayload({
         name: 'dataStream1',
@@ -409,7 +416,7 @@ describe('Data Streams tab', () => {
       const { table, actions } = testBed;
       await actions.clickIndicesAt(0);
       expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-        ['', 'data-stream-index', '', '', '', '', '0', '', 'dataStream1'],
+        ['', 'data-stream-index', '', '', '', '', '10,000', '', 'dataStream1'],
       ]);
     });
 
@@ -1014,13 +1021,23 @@ describe('Data Streams tab', () => {
 
   describe('when there are special characters', () => {
     beforeEach(async () => {
-      const { setLoadIndicesResponse, setLoadDataStreamsResponse, setLoadDataStreamResponse } =
-        httpRequestsMockHelpers;
+      const {
+        setLoadIndicesResponse,
+        setLoadIndexDocCountsResponse,
+        setLoadDataStreamsResponse,
+        setLoadDataStreamResponse,
+      } = httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
         createDataStreamBackingIndex('data-stream-index', '%dataStream'),
         createDataStreamBackingIndex('data-stream-index2', 'dataStream2'),
       ]);
+
+      // Doc count cells use the batch endpoint for backing indices.
+      setLoadIndexDocCountsResponse({
+        counts: { 'data-stream-index': 10000 },
+        errors: {},
+      });
 
       const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
       setLoadDataStreamsResponse([dataStreamPercentSign]);
@@ -1048,7 +1065,7 @@ describe('Data Streams tab', () => {
         const { table, actions } = testBed;
         await actions.clickIndicesAt(0);
         expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-          ['', 'data-stream-index', '', '', '', '', '0', '', '%dataStream'],
+          ['', 'data-stream-index', '', '', '', '', '10,000', '', '%dataStream'],
         ]);
       });
     });

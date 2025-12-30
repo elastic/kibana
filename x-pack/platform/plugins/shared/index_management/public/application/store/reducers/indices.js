@@ -13,6 +13,7 @@ import {
   reloadIndicesSuccess,
   loadIndicesStart,
   loadIndicesError,
+  loadIndexDocCountsSuccess,
 } from '../actions';
 
 const byId = handleActions(
@@ -50,6 +51,16 @@ const byId = handleActions(
         ...state,
         ...newState,
       };
+    },
+    [loadIndexDocCountsSuccess](state, action) {
+      const { counts } = action.payload;
+      const newState = { ...state };
+      for (const [indexName, count] of Object.entries(counts ?? {})) {
+        if (newState[indexName]) {
+          newState[indexName] = { ...newState[indexName], documents: count };
+        }
+      }
+      return newState;
     },
   },
   {}

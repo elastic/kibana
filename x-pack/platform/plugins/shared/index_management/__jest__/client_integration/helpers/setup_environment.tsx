@@ -75,6 +75,8 @@ applicationService.capabilities = {
   },
 };
 
+const http = httpServiceMock.createSetupContract();
+
 const appDependencies = {
   services,
   history,
@@ -82,7 +84,7 @@ const appDependencies = {
   core: {
     getUrlForApp: applicationService.getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),
-    http: httpServiceMock.createSetupContract(),
+    http,
     application: applicationService,
     chrome: chromeServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
@@ -145,6 +147,12 @@ export const WithAppDependencies =
         services: { httpService },
       },
       appDependencies,
+      {
+        core: {
+          // Ensure components use the same http mock that `httpRequestsMockHelpers` controls.
+          http: httpSetup,
+        },
+      },
       overridingDependencies
     );
     return (

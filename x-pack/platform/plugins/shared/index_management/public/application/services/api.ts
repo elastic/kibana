@@ -53,6 +53,19 @@ interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
 }
 
+interface IndexDocCountsResponse {
+  counts: Record<string, number>;
+  errors: Record<string, { message: string }>;
+}
+
+type MaybeDataWrappedResponse<T> = T | { data: T };
+
+const unwrapDataWrappedResponse = <T>(response: MaybeDataWrappedResponse<T>): T => {
+  return typeof response === 'object' && response !== null && 'data' in response
+    ? (response as { data: T }).data
+    : (response as T);
+};
+
 // Temporary hack to provide the uiMetricService and reindexService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
 let uiMetricService: UiMetricService;
@@ -140,8 +153,36 @@ export async function updateDSFailureStore(
 }
 
 export async function loadIndices() {
-  const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
-  return response.data ? response.data : response;
+  const response = await httpService.httpClient.get<MaybeDataWrappedResponse<Index[]>>(
+    `${API_BASE_PATH}/indices`
+  );
+  return unwrapDataWrappedResponse(response);
+}
+
+export async function loadIndexDocCounts(indexNames: string[]) {
+  // The server route validates `indexNames` with a max size of 1000 per request.
+  // Chunk on the client so sorting works for any filtered size while satisfying that validation.
+  const MAX_INDEX_NAMES_PER_REQUEST = 1000;
+
+  const chunkedIndexNames: string[][] = [];
+  for (let i = 0; i < indexNames.length; i += MAX_INDEX_NAMES_PER_REQUEST) {
+    chunkedIndexNames.push(indexNames.slice(i, i + MAX_INDEX_NAMES_PER_REQUEST));
+  }
+
+  const merged: IndexDocCountsResponse = { counts: {}, errors: {} };
+
+  for (const chunk of chunkedIndexNames) {
+    const body = JSON.stringify({ indexNames: chunk });
+    const response = await httpService.httpClient.post<
+      MaybeDataWrappedResponse<IndexDocCountsResponse>
+    >(`${INTERNAL_API_BASE_PATH}/index_doc_counts`, { body });
+    const data = unwrapDataWrappedResponse(response);
+
+    Object.assign(merged.counts, data.counts ?? {});
+    Object.assign(merged.errors, data.errors ?? {});
+  }
+
+  return merged;
 }
 
 export async function reloadIndices(
@@ -151,11 +192,14 @@ export async function reloadIndices(
   const body = JSON.stringify({
     indexNames,
   });
-  const response = await httpService.httpClient.post<any>(`${API_BASE_PATH}/indices/reload`, {
-    body,
-    asSystemRequest,
-  });
-  return response.data ? response.data : response;
+  const response = await httpService.httpClient.post<MaybeDataWrappedResponse<Index[]>>(
+    `${API_BASE_PATH}/indices/reload`,
+    {
+      body,
+      asSystemRequest,
+    }
+  );
+  return unwrapDataWrappedResponse(response);
 }
 
 export async function closeIndices(indices: string[]) {
