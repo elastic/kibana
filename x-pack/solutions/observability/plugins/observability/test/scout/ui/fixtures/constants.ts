@@ -54,3 +54,7 @@ export const LOGS_TAB_TEST_SUBJECTS = {
   EVENT_LOG_TABLE: 'ruleEventLogListTable',
   RULE_DETAILS: 'ruleDetails',
 } as const;
+
+export const GENERATED_METRICS = {
+  metricName: 'system.diskio.write.bytes',
+};

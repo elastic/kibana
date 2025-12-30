@@ -7,20 +7,13 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
-import { generateMetricsData } from '../fixtures/generators';
+import { GENERATED_METRICS } from '../fixtures/constants';
 
 test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
   let ruleId: string;
   const alertName = `Write bytes test rule ${Date.now()}`;
-  const metricName = 'system.diskio.write.bytes';
 
-  test.beforeAll(async ({ infraSynthtraceEsClient, apiServices }) => {
-    await generateMetricsData({
-      client: infraSynthtraceEsClient,
-      from: Date.now() - 3 * 60 * 1000,
-      to: Date.now(),
-      metricName,
-    });
+  test.beforeAll(async ({ apiServices }) => {
     const createdRule = (await apiServices.alerting.rules.create({
       tags: [],
       params: {
@@ -30,7 +23,7 @@ test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
             metrics: [
               {
                 name: 'A',
-                field: metricName,
+                field: GENERATED_METRICS.metricName,
                 aggType: 'max',
               },
             ],
