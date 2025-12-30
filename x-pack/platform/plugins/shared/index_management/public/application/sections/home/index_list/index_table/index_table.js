@@ -126,7 +126,7 @@ const getColumnConfigs = ({
         }),
         order: 60,
         render: (index) => {
-          return <DocCountCell indexName={index.name} httpSetup={http} docCountApi={docCountApi} />;
+          return <DocCountCell indexName={index.name} docCountApi={docCountApi} />;
         },
         readOnly: true,
       },
