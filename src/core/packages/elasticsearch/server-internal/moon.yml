@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/core-http-server-internal'
   - '@kbn/core-execution-context-server-internal'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-elasticsearch-client-server-internal'
   - '@kbn/core-test-helpers-deprecations-getters'
   - '@kbn/config'

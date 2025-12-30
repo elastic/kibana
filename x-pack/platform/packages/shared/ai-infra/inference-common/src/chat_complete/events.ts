@@ -33,6 +33,10 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       content: string;
       /**
+       * Optional refusal reason returned by the model when content is filtered.
+       */
+      refusal?: string;
+      /**
        * Optional deanonymized input messages metadata
        */
       deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
@@ -84,6 +88,10 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      * The content chunk
      */
     content: string;
+    /**
+     * Optional refusal reason chunk.
+     */
+    refusal?: string;
     /**
      * The tool call chunks
      */
