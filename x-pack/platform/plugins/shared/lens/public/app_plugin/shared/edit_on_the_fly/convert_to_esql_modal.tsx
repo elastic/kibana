@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ReactNode } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type {
   EuiBasicTableColumn,
@@ -102,86 +102,93 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
     [itemIdToExpandedRowMap]
   );
 
-  const columns: Array<EuiBasicTableColumn<ConvertibleLayer>> = [
-    {
-      field: 'icon',
-      name: '',
-      width: euiTheme.size.l,
-      render: (icon: string) => <EuiIcon type={icon} />,
-    },
-    {
-      field: 'name',
-      name: 'Layer',
-      width: '166px',
-      truncateText: true,
-    },
-    {
-      field: 'type',
-      name: 'Typology',
-      truncateText: true,
-      render: (type: LayerType) => typeLabels[type](1),
-    },
-    {
-      align: 'right',
-      width: euiTheme.size.xxl,
-      isExpander: true,
-      name: (
-        <EuiScreenReaderOnly>
-          <p>
-            {i18n.translate('xpack.lens.config.expandEsqlPreviewDescription', {
-              defaultMessage: 'Expand to view ES|QL query',
-            })}
-          </p>
-        </EuiScreenReaderOnly>
-      ),
-      render: (layer: ConvertibleLayer) => {
-        const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
-
-        return (
-          <EuiButtonIcon
-            onClick={() => toggleDetails(layer)}
-            aria-label={
-              isExpanded
-                ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
-                    defaultMessage: 'Collapse',
-                  })
-                : i18n.translate('xpack.lens.config.expandAriaLabel', {
-                    defaultMessage: 'Expand',
-                  })
-            }
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            disabled={!layer.isConvertibleToEsql}
-          />
-        );
+  const columns: Array<EuiBasicTableColumn<ConvertibleLayer>> = useMemo(
+    () => [
+      {
+        field: 'icon',
+        name: '',
+        width: euiTheme.size.l,
+        render: (icon: string) => <EuiIcon type={icon} />,
       },
-    },
-  ];
+      {
+        field: 'name',
+        name: 'Layer',
+        width: `${parseInt(euiTheme.size.xl, 10) * 5}px`,
+        truncateText: true,
+      },
+      {
+        field: 'type',
+        name: 'Typology',
+        truncateText: true,
+        render: (type: LayerType) => typeLabels[type](1),
+      },
+      {
+        align: 'right',
+        width: euiTheme.size.xxl,
+        isExpander: true,
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              {i18n.translate('xpack.lens.config.expandEsqlPreviewDescription', {
+                defaultMessage: 'Expand to view ES|QL query',
+              })}
+            </p>
+          </EuiScreenReaderOnly>
+        ),
+        render: (layer: ConvertibleLayer) => {
+          const isExpanded = Boolean(itemIdToExpandedRowMap[layer.id]);
+
+          return (
+            <EuiButtonIcon
+              onClick={() => toggleDetails(layer)}
+              aria-label={
+                isExpanded
+                  ? i18n.translate('xpack.lens.config.collapseAriaLabel', {
+                      defaultMessage: 'Collapse',
+                    })
+                  : i18n.translate('xpack.lens.config.expandAriaLabel', {
+                      defaultMessage: 'Expand',
+                    })
+              }
+              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              disabled={!layer.isConvertibleToEsql}
+            />
+          );
+        },
+      },
+    ],
+    [euiTheme.size.l, euiTheme.size.xl, euiTheme.size.xxl, itemIdToExpandedRowMap, toggleDetails]
+  );
 
   const selection: EuiTableSelectionType<ConvertibleLayer> = {
     selectable: (layer: ConvertibleLayer) => {
       return layer.type === layerTypes.DATA && layer.isConvertibleToEsql;
     },
     selectableMessage: (selectable: boolean, layer: ConvertibleLayer) => {
-      return !selectable
-        ? layer.type === layerTypes.DATA
-          ? i18n.translate('xpack.lens.config.cannotBeSwitchedAriaLabel', {
-              defaultMessage: '{layerName} cannot be switched to query mode',
-              values: {
-                layerName: layer.name,
-              },
-            })
-          : i18n.translate('xpack.lens.config.cannotBeSwitchedAriaLabel', {
-              defaultMessage: '{layerTypes} cannot be switched to query mode',
-              values: {
-                layerTypes: typeLabels[layer.type](2),
-              },
-            })
-        : i18n.translate('xpack.lens.config.selectLayerAriaLabel', {
-            defaultMessage: 'Select {layerName} for conversion to query mode',
-            values: {
-              layerName: layer.name,
-            },
-          });
+      if (selectable) {
+        return i18n.translate('xpack.lens.config.selectLayerAriaLabel', {
+          defaultMessage: 'Select {layerName} for conversion to query mode',
+          values: {
+            layerName: layer.name,
+          },
+        });
+      }
+
+      if (layer.type === layerTypes.DATA) {
+        return i18n.translate('xpack.lens.config.layerNameCannotBeSwitchedAriaLabel', {
+          defaultMessage: '{layerName} cannot be switched to query mode',
+          values: {
+            layerName: layer.name,
+          },
+        });
+      } else {
+        return i18n.translate('xpack.lens.config.layerTypesCannotBeSwitchedAriaLabel', {
+          defaultMessage: '{layerTypes} cannot be switched to query mode',
+          values: {
+            layerTypes: typeLabels[layer.type](2),
+          },
+        });
+      }
     },
     onSelectionChange,
     initialSelected: [],
