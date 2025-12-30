@@ -40,10 +40,11 @@ interface UpdateOrReplaceOptions {
   connectorId: string;
   token: ConnectorToken | null;
   newToken: string;
-  expiresInSec: number;
+  expiresInSec?: number;
   tokenRequestDate: number;
   deleteExisting: boolean;
 }
+
 export class ConnectorTokenClient {
   private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -423,18 +424,5 @@ export class ConnectorTokenClient {
       );
       throw err;
     }
-  }
-
-  /**
-   * Get refresh token for a connector
-   */
-  public async getRefreshToken({ connectorId }: { connectorId: string }): Promise<string | null> {
-    const { connectorToken } = await this.get({ connectorId, tokenType: 'access_token' });
-
-    if (!connectorToken?.refreshToken) {
-      return null;
-    }
-
-    return connectorToken.refreshToken;
   }
 }
