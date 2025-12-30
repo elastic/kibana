@@ -146,9 +146,11 @@ describe('<TemplateCreate />', () => {
         // Avoid repeatedly scanning the DOM for the same list items.
         // Keep the popover open and cache the items once for this interaction.
         const filterItems = screen.getAllByTestId('filterItem');
-        const getFilterItem = (label: string) => {
+        const getFilterItem = (label: string): HTMLElement => {
           const item = filterItems.find((el) => el.textContent?.includes(label));
-          if (!item) throw new Error(`Expected filter item "${label}" to exist`);
+          if (!item) {
+            throw new Error(`Expected filter item "${label}" to exist`);
+          }
           return item;
         };
 
@@ -211,7 +213,7 @@ describe('<TemplateCreate />', () => {
         );
 
         const availableTemplatesList = new EuiListTestHarness('componentTemplatesList');
-        availableTemplatesList.clickItemAction('test_component_template_1', 'action-plusInCircle');
+        availableTemplatesList.clickAction('test_component_template_1', 'action-plusInCircle');
 
         await waitFor(() => {
           expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
@@ -227,7 +229,7 @@ describe('<TemplateCreate />', () => {
 
         // Unselect the component
         const selectedTemplatesList = new EuiListTestHarness('componentTemplatesSelection');
-        selectedTemplatesList.clickItemAction('test_component_template_1', 'action-minusInCircle');
+        selectedTemplatesList.clickAction('test_component_template_1', 'action-minusInCircle');
 
         await waitFor(() => {
           expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
@@ -317,7 +319,9 @@ describe('<TemplateCreate />', () => {
         const field1Item = getFieldsListItems().find(
           (item) => within(item).queryByText('field_1') !== null
         );
-        if (!field1Item) throw new Error('Expected field_1 to exist in the mappings list');
+        if (!field1Item) {
+          throw new Error('Expected field_1 item to exist');
+        }
 
         fireEvent.click(within(field1Item).getByTestId('removeFieldButton'));
 

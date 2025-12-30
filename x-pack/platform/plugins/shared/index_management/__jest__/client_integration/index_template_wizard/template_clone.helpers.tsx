@@ -25,7 +25,7 @@ export const templateToClone = getComposableTemplate({
 });
 
 /**
- * Helper to render template clone component with routing (RTL).
+ * Helper to render template clone component with routing.
  */
 export const renderTemplateClone = (httpSetup: HttpSetup) => {
   const CloneWithRouter = () => (

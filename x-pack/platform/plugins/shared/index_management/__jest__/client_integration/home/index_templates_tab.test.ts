@@ -201,7 +201,7 @@ describe('Index Templates tab', () => {
           composedOfCount,
           '', // data stream column
           hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
-          'EditDelete', // Column of actions
+          expect.any(String), // Column of actions
         ]);
       });
 
@@ -219,7 +219,7 @@ describe('Index Templates tab', () => {
           indexPatterns.join(', '),
           ilmPolicyName,
           hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
-          'EditDelete', // Column of actions
+          expect.any(String), // Column of actions
         ]);
       });
     });

@@ -39,10 +39,6 @@ export class EuiListTestHarness {
   #testId: string;
   #options?: EuiListTestHarnessOptions;
 
-  get #containerEl() {
-    return screen.getByTestId(this.#testId);
-  }
-
   constructor(testId: string, options?: EuiListTestHarnessOptions) {
     this.#testId = testId;
     this.#options = options;
@@ -52,12 +48,14 @@ export class EuiListTestHarness {
     return this.#testId;
   }
 
-  public get self() {
+  /**
+   * Returns list container element if found, otherwise `null`.
+   */
+  public getElement(): HTMLElement | null {
     return screen.queryByTestId(this.#testId);
   }
 
-  #getRowRoot(labelEl: HTMLElement): HTMLElement | null {
-    const containerEl = this.#containerEl;
+  #getRowRoot(labelEl: HTMLElement, containerEl: HTMLElement): HTMLElement | null {
     const { getRow, rowSelector } = this.#options ?? {};
 
     const userRoot =
@@ -75,21 +73,33 @@ export class EuiListTestHarness {
    *
    * @example
    * const list = new EuiListTestHarness('componentTemplatesList');
-   * list.clickItemAction('test_component_template_1', 'action-plusInCircle');
+   * list.clickAction('test_component_template_1', 'action-plusInCircle');
    */
-  public clickItemAction(itemLabel: string, actionTestId: string) {
-    const labelEl = within(this.#containerEl).getByText(itemLabel);
-    const actionEl = this.getItemActionElement(labelEl as HTMLElement, actionTestId);
+  public clickAction(itemLabel: string, actionTestId: string) {
+    const containerEl = this.getElement();
+    if (!containerEl) {
+      throw new Error(`Expected list container "${this.#testId}" to exist`);
+    }
+    const labelEl = within(containerEl).queryByText(itemLabel);
+    if (!labelEl) {
+      throw new Error(`Expected list item "${itemLabel}" to exist`);
+    }
+    const actionEl = this.getActionElement(labelEl as HTMLElement, actionTestId);
+    if (!actionEl) {
+      throw new Error(`Expected action "${actionTestId}" for item "${itemLabel}" to exist`);
+    }
     fireEvent.click(actionEl);
   }
 
   /**
    * Return the action element for an item label (bounded ancestor walk).
    * Exposed to enable assertions before clicking if needed.
+   * Returns `null` if not found.
    */
-  public getItemActionElement(labelEl: HTMLElement, actionTestId: string) {
-    const containerEl = this.#containerEl;
-    const rowRoot = this.#getRowRoot(labelEl);
+  public getActionElement(labelEl: HTMLElement, actionTestId: string): HTMLElement | null {
+    const containerEl = this.getElement();
+    if (!containerEl) return null;
+    const rowRoot = this.#getRowRoot(labelEl, containerEl);
     let el: HTMLElement | null = rowRoot ?? labelEl;
 
     // Walk upwards but never beyond the harness container.
@@ -97,23 +107,14 @@ export class EuiListTestHarness {
       const matches = within(el).queryAllByTestId(actionTestId);
       if (matches.length === 1) return matches[0];
       if (matches.length > 1 && el === containerEl) {
-        throw new Error(
-          `Found multiple actions "${actionTestId}" for item "${
-            labelEl.textContent ?? ''
-          }" within "${this.#testId}". ` +
-            `Pass { rowSelector } or { getRow } to EuiListTestHarness to scope actions to a single row.`
-        );
+        // Multiple matches at container level - ambiguous, return null
+        return null;
       }
 
       if (el === containerEl) break;
       el = el.parentElement;
     }
 
-    throw new Error(
-      `Unable to find action "${actionTestId}" for item "${labelEl.textContent ?? ''}" within "${
-        this.#testId
-      }". ` +
-        `If the action is not a descendant of the label's row, pass { rowSelector } or { getRow } to EuiListTestHarness.`
-    );
+    return null;
   }
 }

@@ -120,7 +120,7 @@ describe('<FollowerIndicesList />', () => {
       });
 
       table = new EuiTableTestHarness('followerIndexListTable');
-      tableCellsValues = table.cellValues;
+      tableCellsValues = table.getCellValues();
     });
 
     test('should not display the empty prompt', () => {

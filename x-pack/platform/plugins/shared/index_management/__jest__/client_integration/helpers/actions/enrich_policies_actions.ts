@@ -22,7 +22,8 @@ export const createEnrichPoliciesActions = () => {
   };
 
   const clickDeletePolicyAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('enrichPoliciesTable').rowAt(index);
+    const rows = new EuiTableTestHarness('enrichPoliciesTable').getRows();
+    const dataRow = rows[index] ?? null;
     const deleteButton = within(dataRow).getByTestId('deletePolicyButton');
     fireEvent.click(deleteButton);
     await screen.findByTestId('deletePolicyModal');
@@ -39,7 +40,8 @@ export const createEnrichPoliciesActions = () => {
   };
 
   const clickExecutePolicyAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('enrichPoliciesTable').rowAt(index);
+    const rows = new EuiTableTestHarness('enrichPoliciesTable').getRows();
+    const dataRow = rows[index] ?? null;
     const executeButton = within(dataRow).getByTestId('executePolicyButton');
     fireEvent.click(executeButton);
     await screen.findByTestId('executePolicyModal');
@@ -56,7 +58,8 @@ export const createEnrichPoliciesActions = () => {
   };
 
   const clickEnrichPolicyAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('enrichPoliciesTable').rowAt(index);
+    const rows = new EuiTableTestHarness('enrichPoliciesTable').getRows();
+    const dataRow = rows[index] ?? null;
     const policyLink = within(dataRow).getByTestId('enrichPolicyDetailsLink');
     fireEvent.click(policyLink);
     await screen.findByTestId('policyDetailsFlyout');
@@ -152,7 +155,7 @@ export const createCreateEnrichPolicyActions = () => {
     // Handle comma-separated indices for multiple selection
     const indexNames = (indices ?? 'test-1').split(',').map((s) => s.trim());
     for (const indexName of indexNames) {
-      await indicesComboBox.selectOptionAsync(indexName);
+      await indicesComboBox.selectAsync(indexName);
     }
 
     // Close any open listbox/popover to avoid EuiPopover async updates after this step.
@@ -165,7 +168,7 @@ export const createCreateEnrichPolicyActions = () => {
     // The onChange handler is async, and field.setValue triggers RxJS subject updates
     // We need to wait for pills to appear AND for form validation to complete
     await waitFor(() => {
-      const selected = indicesComboBox.selectedOptions;
+      const selected = indicesComboBox.getSelected();
       expect(selected).toContain(indexNames[0]);
     });
 
@@ -183,7 +186,7 @@ export const createCreateEnrichPolicyActions = () => {
     const matchFieldComboBox = new EuiComboBoxTestHarness('matchField');
     // `matchField` uses EuiComboBox singleSelection { asPlainText: true }, so there are no pills.
     // Use the sync selection API and rely on downstream UI boundaries (Next enabled) for validation.
-    matchFieldComboBox.selectOption('first_name');
+    matchFieldComboBox.select('first_name');
     await user.keyboard('{Escape}');
     // Intentionally separate boundary: close the listbox portal first so it can't race with validation updates.
     await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
@@ -191,7 +194,7 @@ export const createCreateEnrichPolicyActions = () => {
     // Enrich fields using harness
     await screen.findByTestId('enrichFields');
     const enrichFieldsComboBox = new EuiComboBoxTestHarness('enrichFields');
-    enrichFieldsComboBox.selectOption('age');
+    enrichFieldsComboBox.select('age');
     await user.keyboard('{Escape}');
     // 1) Close listbox (portal) to avoid late popover updates.
     await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());

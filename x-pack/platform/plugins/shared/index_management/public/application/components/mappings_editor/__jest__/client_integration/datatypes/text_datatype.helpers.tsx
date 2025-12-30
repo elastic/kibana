@@ -55,9 +55,9 @@ export const selectSuperSelectOptionById = async (
   options?: { container?: HTMLElement }
 ) => {
   const harness = new EuiSuperSelectTestHarness(testSubj, { container: options?.container });
-  if (!harness.self) throw new Error(`${testSubj} harness not found`);
+  if (!harness.getElement()) throw new Error(`${testSubj} harness not found`);
 
-  await harness.selectOptionById(optionId);
+  await harness.selectById(optionId);
 };
 
 export const selectAnalyzer = async (flyout: HTMLElement, testSubj: string, optionId: string) => {

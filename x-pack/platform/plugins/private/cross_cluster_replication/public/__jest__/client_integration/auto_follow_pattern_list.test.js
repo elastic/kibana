@@ -93,18 +93,16 @@ describe('<AutoFollowPatternList />', () => {
       await actions.clickPaginationNextButton();
 
       const table = new EuiTableTestHarness('autoFollowPatternListTable');
-      const tableCellsValues = table.cellValues;
       // Pagination defaults to 20 auto-follow patterns per page. We loaded 30 auto-follow patterns,
       // so the second page should have 10.
-      expect(tableCellsValues.length).toBe(10);
+      expect(table.getCellValues().length).toBe(10);
     });
 
     test('search works', async () => {
       await actions.search('unique');
 
       const table = new EuiTableTestHarness('autoFollowPatternListTable');
-      const tableCellsValues = table.cellValues;
-      expect(tableCellsValues.length).toBe(1);
+      expect(table.getCellValues().length).toBe(1);
     });
   });
 
@@ -146,7 +144,7 @@ describe('<AutoFollowPatternList />', () => {
 
     test('should list the auto-follow patterns in the table', () => {
       const table = new EuiTableTestHarness('autoFollowPatternListTable');
-      const tableCellsValues = table.cellValues;
+      const tableCellsValues = table.getCellValues();
       expect(tableCellsValues.length).toEqual(autoFollowPatterns.length);
       // Check key columns (status includes non-breaking space from EUI component)
       expect(tableCellsValues.length).toBe(2);
@@ -196,8 +194,7 @@ describe('<AutoFollowPatternList />', () => {
       test('should remove the auto-follow pattern from the table after delete is complete', async () => {
         // Make sure that we have our 2 auto-follow patterns in the table
         const table = new EuiTableTestHarness('autoFollowPatternListTable');
-        let tableCellsValues = table.cellValues;
-        expect(tableCellsValues.length).toBe(2);
+        expect(table.getCellValues().length).toBe(2);
 
         // We will delete the *first* auto-follow pattern in the table
         httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse(autoFollowPattern1.name, {
@@ -212,7 +209,7 @@ describe('<AutoFollowPatternList />', () => {
         await actions.clickBulkDeleteButton();
         await actions.clickConfirmModalDeleteAutoFollowPattern();
 
-        tableCellsValues = table.cellValues;
+        const tableCellsValues = table.getCellValues();
         expect(tableCellsValues.length).toBe(1);
         expect(tableCellsValues[0][1]).toEqual(autoFollowPattern2.name);
       });

@@ -103,7 +103,7 @@ export const completeStep = {
         // Use EuiComboBoxTestHarness for field type selection
         await within(createFieldForm).findByTestId('fieldType');
         const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-        fieldTypeComboBox.selectOption(type);
+        fieldTypeComboBox.select(type);
 
         const addButton = within(createFieldForm).getByTestId('addButton');
 

@@ -65,7 +65,7 @@ describe('Mappings editor: scaled float datatype', () => {
     // Change the type to "scaled_float" using EuiComboBox harness
     // The label is "Scaled float" (from TYPE_DEFINITION)
     const fieldSubTypeComboBox = new EuiComboBoxTestHarness('fieldSubType');
-    fieldSubTypeComboBox.selectOption('Scaled float');
+    fieldSubTypeComboBox.select('Scaled float');
 
     await within(flyout).findByTestId('scalingFactor');
 

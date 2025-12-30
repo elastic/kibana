@@ -69,7 +69,7 @@ describe('<TemplateEdit />', () => {
       const createFieldForm = screen.getByTestId('createFieldForm');
       await within(createFieldForm).findByTestId('fieldType');
       const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-      fieldTypeComboBox.selectOption('text');
+      fieldTypeComboBox.select('text');
 
       fireEvent.click(screen.getByTestId('addButton'));
 

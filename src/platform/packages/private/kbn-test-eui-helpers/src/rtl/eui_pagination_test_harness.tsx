@@ -27,11 +27,11 @@ export class EuiPaginationTestHarness {
     return this.#root instanceof HTMLElement ? within(this.#root) : screen;
   }
 
-  public get buttons(): HTMLButtonElement[] {
+  public getButtons(): HTMLButtonElement[] {
     return this.#queries().queryAllByTestId(/^pagination-button-/) as HTMLButtonElement[];
   }
 
-  public getButtonByLabel(label: string): HTMLButtonElement {
+  public getButtonByLabel(label: string): HTMLButtonElement | null {
     const queries = this.#queries();
 
     // EUI uses `data-test-subj="pagination-button-${pageIndex}"` (0-based) for numeric buttons.
@@ -41,14 +41,14 @@ export class EuiPaginationTestHarness {
       ? `pagination-button-${pageNumber - 1}`
       : `pagination-button-${label}`;
 
-    const el = queries.queryByTestId(testId);
-    if (!el) {
-      throw new Error(`Expected pagination button "${label}" (${testId}) to exist`);
-    }
-    return el as HTMLButtonElement;
+    return queries.queryByTestId(testId) as HTMLButtonElement | null;
   }
 
-  public clickButton(label: string) {
-    fireEvent.click(this.getButtonByLabel(label));
+  public click(label: string) {
+    const button = this.getButtonByLabel(label);
+    if (!button) {
+      throw new Error(`Expected pagination button "${label}" to exist`);
+    }
+    fireEvent.click(button);
   }
 }

@@ -146,7 +146,7 @@ describe('Mappings editor: text datatype', () => {
 
       // indexAnalyzer should default to "Index default"
       const indexAnalyzerHarness = new EuiSuperSelectTestHarness('indexAnalyzer');
-      expect(indexAnalyzerHarness.selectedOption).toContain('Index default');
+      expect(indexAnalyzerHarness.getSelected()).toContain('Index default');
 
       // searchQuoteAnalyzer should show 'french' language
       const allSelects = within(flyoutReopened).getAllByTestId('select');
@@ -198,8 +198,8 @@ describe('Mappings editor: text datatype', () => {
       // Verify both analyzers are present with 'Index default' selected
       const indexAnalyzerHarness = new EuiSuperSelectTestHarness('indexAnalyzer');
       const searchAnalyzerHarness = new EuiSuperSelectTestHarness('searchAnalyzer');
-      expect(indexAnalyzerHarness.selectedOption).toContain('Index default');
-      expect(searchAnalyzerHarness.selectedOption).toContain('Index default');
+      expect(indexAnalyzerHarness.getSelected()).toContain('Index default');
+      expect(searchAnalyzerHarness.getSelected()).toContain('Index default');
 
       // Verify checkbox is now unchecked
       useSameAnalyzerCheckbox = within(flyout).getByRole('checkbox');
@@ -244,7 +244,7 @@ describe('Mappings editor: text datatype', () => {
       flyout = await openFieldEditor();
       await toggleAdvancedSettings(flyout);
       const indexAnalyzerHarnessFinal = new EuiSuperSelectTestHarness('indexAnalyzer');
-      expect(indexAnalyzerHarnessFinal.selectedOption).toContain('Standard');
+      expect(indexAnalyzerHarnessFinal.getSelected()).toContain('Standard');
     });
 
     test('should update and persist searchAnalyzer value', async () => {
@@ -292,7 +292,7 @@ describe('Mappings editor: text datatype', () => {
         expect(within(flyout).queryByTestId('searchAnalyzer')).toBeInTheDocument();
       });
       const searchAnalyzerHarnessFinal = new EuiSuperSelectTestHarness('searchAnalyzer');
-      expect(searchAnalyzerHarnessFinal.selectedOption).toContain('Simple');
+      expect(searchAnalyzerHarnessFinal.getSelected()).toContain('Simple');
     });
 
     test('should update and persist searchQuoteAnalyzer value', async () => {
@@ -337,10 +337,10 @@ describe('Mappings editor: text datatype', () => {
       // Wait for SuperSelect to appear (it should be in built-in mode since we saved 'whitespace')
       const searchQuoteAnalyzerHarnessFinal = await waitFor(() => {
         const harness = new EuiSuperSelectTestHarness('searchQuoteAnalyzer');
-        expect(harness.self).toBeInTheDocument();
+        expect(harness.getElement()).toBeInTheDocument();
         return harness;
       });
-      expect(searchQuoteAnalyzerHarnessFinal.selectedOption).toContain('Whitespace');
+      expect(searchQuoteAnalyzerHarnessFinal.getSelected()).toContain('Whitespace');
     }, 9000);
 
     test('analyzer parameter: custom analyzer (external plugin)', async () => {
@@ -446,9 +446,9 @@ describe('Mappings editor: text datatype', () => {
       // Allow SuperSelect to appear after toggle
 
       const searchQuoteHarness = new EuiSuperSelectTestHarness('searchQuoteAnalyzer');
-      expect(searchQuoteHarness.self).toBeInTheDocument();
+      expect(searchQuoteHarness.getElement()).toBeInTheDocument();
       // Should show "Index default" initially
-      expect(searchQuoteHarness.selectedOption).toContain('Index default');
+      expect(searchQuoteHarness.getSelected()).toContain('Index default');
 
       const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
       fireEvent.click(updateButton);

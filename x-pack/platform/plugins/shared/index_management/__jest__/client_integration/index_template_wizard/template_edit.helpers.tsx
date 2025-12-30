@@ -45,7 +45,7 @@ export const EXISTING_COMPONENT_TEMPLATE = {
 };
 
 /**
- * Helper to render TemplateEdit component with routing (RTL).
+ * Helper to render TemplateEdit component with routing.
  */
 export const renderTemplateEdit = (httpSetup: HttpSetup, templateName: string = TEMPLATE_NAME) => {
   const EditWithRouter = () => (

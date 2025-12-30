@@ -6,14 +6,18 @@
  */
 
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
+import {
+  EuiContextMenuTestHarness,
+  EuiPopoverPanelTestHarness,
+  EuiTableTestHarness,
+} from '@kbn/test-eui-helpers';
 
 // Convert non breaking spaces (&nbsp;) to ordinary space
 export const removeWhiteSpaceOnArrayValues = (array: string[]) =>
   array.map((value) => value.trim().replace(/\s/g, ' '));
 
 export const getTableCellsValues = (tableTestId: string): string[][] =>
-  new EuiTableTestHarness(tableTestId).normalizedCellValues;
+  new EuiTableTestHarness(tableTestId).getCellValues();
 
 /**
  * Helper to check if an element exists.
@@ -29,11 +33,21 @@ const getActionLabel = (action: 'edit' | 'clone' | 'delete') => {
   return labelMap[action];
 };
 
-const queryContextMenuItemButton = (label: string): HTMLButtonElement | null => {
-  // Avoid `findByText('Edit')` etc since EUI can render multiple "Edit" screen-reader-only spans.
-  const candidates = screen.queryAllByText(label);
-  const textEl = candidates.find((el) => el.classList.contains('euiContextMenuItem__text'));
-  return (textEl?.closest('button') as HTMLButtonElement | null) ?? null;
+const getTemplateRowByName = (templateName: string): HTMLElement => {
+  // Try both tables (composable and legacy)
+  const composableTable = new EuiTableTestHarness('templateTable');
+  if (composableTable.getElement()) {
+    const row = composableTable.getRowByCellText(templateName);
+    if (row) return row;
+  }
+
+  const legacyTable = new EuiTableTestHarness('legacyTemplateTable');
+  if (legacyTable.getElement()) {
+    const row = legacyTable.getRowByCellText(templateName);
+    if (row) return row;
+  }
+
+  throw new Error(`Expected template row to exist for "${templateName}"`);
 };
 
 /**
@@ -66,8 +80,8 @@ export const createIndexTemplatesTabActions = () => {
 
   const clickTemplateAt = async (index: number, isLegacy = false) => {
     const tableTestId = isLegacy ? 'legacyTemplateTable' : 'templateTable';
-    const dataRow = new EuiTableTestHarness(tableTestId).rows[index];
-    if (!dataRow) throw new Error(`Expected row ${index} to exist in table "${tableTestId}"`);
+    const rows = new EuiTableTestHarness(tableTestId).getRows();
+    const dataRow = rows[index] ?? null;
     const templateLink = within(dataRow).getByTestId('templateDetailsLink');
     fireEvent.click(templateLink);
     await screen.findByTestId('templateDetails');
@@ -87,34 +101,39 @@ export const createIndexTemplatesTabActions = () => {
   };
 
   const clickActionMenu = async (templateName: string) => {
-    // EUI uses overflow menu with id "<template_name>-actions" when > 2 actions
-    const actionsContainer = document.getElementById(`${templateName}-actions`);
-    if (!actionsContainer) return;
+    const row = getTemplateRowByName(templateName);
+    // EUI tables typically use an icon button with accessible name "Actions" (fallback: aria-haspopup)
+    const buttons = within(row).getAllByRole('button') as HTMLButtonElement[];
+    const actionsButton =
+      buttons.find((b) =>
+        /actions/i.test((b.getAttribute('aria-label') ?? b.textContent ?? '').trim())
+      ) ??
+      buttons.find((b) => {
+        const hasPopup = b.getAttribute('aria-haspopup');
+        return typeof hasPopup === 'string' && hasPopup.length > 0;
+      });
+    if (!actionsButton)
+      throw new Error('Expected an actions popover toggle button in the table row');
 
-    fireEvent.click(within(actionsContainer).getByRole('button'));
+    fireEvent.click(actionsButton);
 
-    // Wait for context menu items to appear
-    await waitFor(() => {
-      expect(queryContextMenuItemButton('Edit')).toBeTruthy();
-    });
+    // Wait until the expected menu item exists in an open popover panel
+    await new EuiPopoverPanelTestHarness().findContextMenuContainingItem('Edit');
   };
 
   const findActionButton = (action: 'edit' | 'clone' | 'delete'): HTMLElement | null => {
-    return queryContextMenuItemButton(getActionLabel(action));
+    const label = getActionLabel(action);
+    const panel = new EuiPopoverPanelTestHarness().getTopOpenPanel();
+    if (!panel) return null;
+    return new EuiContextMenuTestHarness(panel).getMenuItem(label);
   };
 
   const clickTemplateAction = async (templateName: string, action: 'edit' | 'clone' | 'delete') => {
-    await clickActionMenu(templateName);
     const label = getActionLabel(action);
-    const button = await waitFor(() => {
-      const el = queryContextMenuItemButton(label);
-      if (!el) throw new Error('Context menu item not ready');
-      return el;
-    });
-    fireEvent.click(button);
-    await waitFor(() => {
-      expect(queryContextMenuItemButton(label)).toBeNull();
-    });
+    await clickActionMenu(templateName);
+
+    const menu = await new EuiPopoverPanelTestHarness().findContextMenuContainingItem(label);
+    await menu.clickMenuItemAndWaitForClose(label);
   };
 
   const selectDetailsTab = async (

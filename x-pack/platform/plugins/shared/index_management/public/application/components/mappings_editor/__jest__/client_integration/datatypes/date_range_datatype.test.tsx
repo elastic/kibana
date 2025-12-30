@@ -60,7 +60,7 @@ describe('Mappings editor: date range datatype', () => {
     // Change the type to "date_range" using EuiComboBox harness
     // The label is "Date range" (from TYPE_DEFINITION)
     const fieldSubTypeComboBox = new EuiComboBoxTestHarness('fieldSubType');
-    fieldSubTypeComboBox.selectOption('Date range');
+    fieldSubTypeComboBox.select('Date range');
 
     const formatParameter = await within(flyout).findByTestId('formatParameter');
     expect(formatParameter).toBeInTheDocument();
@@ -80,7 +80,7 @@ describe('Mappings editor: date range datatype', () => {
 
     // Set custom format value using EuiComboBox harness
     const formatComboBox = new EuiComboBoxTestHarness('formatInput');
-    formatComboBox.selectOption('customDateFormat');
+    formatComboBox.select('customDateFormat');
 
     // Save the field and close the flyout
     const updateButton = within(flyout).getByTestId('editFieldUpdateButton');

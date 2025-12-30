@@ -15,7 +15,27 @@ import type { DataStream } from '../../../../common';
  * Returns a 2D array where each inner array represents a row of cell values.
  */
 export const getTableCellsValues = (tableTestId: string): string[][] => {
-  return new EuiTableTestHarness(tableTestId).getCellValues({ trim: true });
+  const table = new EuiTableTestHarness(tableTestId);
+  const tableRows = table.getRows();
+  // For Data Streams tables, we want the full visible cell text (e.g. name + badges like "Managed"/"Hidden").
+  // Use the cell's textContent directly and normalize later for specific icon-only controls.
+  const values = tableRows.map((rowEl) => {
+    const cells = Array.from(rowEl.querySelectorAll('td'));
+    return cells.map((cellEl) => (cellEl.textContent ?? '').trim());
+  });
+
+  // Some action buttons are icon-only (no accessible text) but do have stable `data-test-subj`.
+  // Normalize them to stable strings for table assertions.
+  tableRows.forEach((rowEl, rowIndex) => {
+    const cells = Array.from(rowEl.querySelectorAll('td'));
+    cells.forEach((cellEl, cellIndex) => {
+      if (within(cellEl).queryByTestId('deleteDataStream')) {
+        values[rowIndex][cellIndex] = 'Delete';
+      }
+    });
+  });
+
+  return values;
 };
 
 /**
@@ -51,20 +71,23 @@ export const createDataStreamTabActions = () => {
   };
 
   const clickNameAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('dataStreamTable').rowAt(index);
+    const rows = new EuiTableTestHarness('dataStreamTable').getRows();
+    const dataRow = rows[index] ?? null;
     const nameLink = within(dataRow).getByTestId('nameLink');
     fireEvent.click(nameLink);
     // Note: Timer flush happens in waitForDetailPanel() - don't flush here
   };
 
   const clickIndicesAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('dataStreamTable').rowAt(index);
+    const rows = new EuiTableTestHarness('dataStreamTable').getRows();
+    const dataRow = rows[index] ?? null;
     const indicesLink = within(dataRow).getByTestId('indicesLink');
     fireEvent.click(indicesLink);
   };
 
   const clickDeleteActionAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('dataStreamTable').rowAt(index);
+    const rows = new EuiTableTestHarness('dataStreamTable').getRows();
+    const dataRow = rows[index] ?? null;
     const deleteButton = within(dataRow).getByTestId('deleteDataStream');
     fireEvent.click(deleteButton);
     // Wait for the confirmation modal to appear

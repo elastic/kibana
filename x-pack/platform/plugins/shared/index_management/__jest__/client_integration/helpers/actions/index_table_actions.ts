@@ -22,19 +22,23 @@ export const createIndexTableActions = () => {
   };
 
   const clickIndexNameAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('indexTable').rowAt(index);
+    const rows = new EuiTableTestHarness('indexTable').getRows();
+    const dataRow = rows[index] ?? null;
     const indexNameLink = within(dataRow).getByTestId('indexTableIndexNameLink');
     fireEvent.click(indexNameLink);
   };
 
   const clickDataStreamAt = async (index: number) => {
-    const dataRow = new EuiTableTestHarness('indexTable').rowAt(index);
+    const rows = new EuiTableTestHarness('indexTable').getRows();
+    const dataRow = rows[index] ?? null;
     const dataStreamLink = within(dataRow).getByTestId('dataStreamLink');
     fireEvent.click(dataStreamLink);
   };
 
   const dataStreamLinkExistsAt = (index: number) => {
-    const dataRow = new EuiTableTestHarness('indexTable').rowAt(index);
+    const rows = new EuiTableTestHarness('indexTable').getRows();
+    const dataRow = rows[index] ?? null;
+    if (!dataRow) return false;
     return within(dataRow).queryByTestId('dataStreamLink') !== null;
   };
 
@@ -108,7 +112,7 @@ export const createCreateIndexActions = () => {
 
   const selectIndexMode = async (indexModeTestSubj: string) => {
     const indexModeSelect = new EuiSuperSelectTestHarness('indexModeField');
-    await indexModeSelect.selectOption(indexModeTestSubj);
+    await indexModeSelect.select(indexModeTestSubj);
   };
 
   return {

@@ -47,15 +47,15 @@ describe('index table', () => {
 
     // Page 1 first row
     const indexTable = new EuiTableTestHarness('indexTable');
-    expect(within(indexTable.firstRow).getByTestId('indexTableIndexNameLink')).toHaveTextContent(
-      'testy0'
-    );
+    const firstRow = indexTable.getRows()[0] ?? null;
+    expect(within(firstRow).getByTestId('indexTableIndexNameLink')).toHaveTextContent('testy0');
 
     const pagination = new EuiPaginationTestHarness();
-    pagination.clickButton('2');
+    pagination.click('2');
 
     await waitFor(() => {
-      expect(within(indexTable.firstRow).getByTestId('indexTableIndexNameLink')).toHaveTextContent(
+      const updatedFirstRow = indexTable.getRows()[0] ?? null;
+      expect(within(updatedFirstRow).getByTestId('indexTableIndexNameLink')).toHaveTextContent(
         'testy6'
       );
     });
@@ -152,16 +152,14 @@ describe('index table', () => {
 
     fireEvent.click(sortButton);
 
-    expect(within(indexTable.firstRow).getByTestId('indexTableIndexNameLink')).toHaveTextContent(
-      '.admin0'
-    );
+    const firstRowAsc = indexTable.getRows()[0] ?? null;
+    expect(within(firstRowAsc).getByTestId('indexTableIndexNameLink')).toHaveTextContent('.admin0');
 
     fireEvent.click(sortButton);
 
     // Descending lexical sort means `testy9` will come before `testy29` (`"9"` > `"2"`).
-    expect(within(indexTable.firstRow).getByTestId('indexTableIndexNameLink')).toHaveTextContent(
-      'testy9'
-    );
+    const firstRowDesc = indexTable.getRows()[0] ?? null;
+    expect(within(firstRowDesc).getByTestId('indexTableIndexNameLink')).toHaveTextContent('testy9');
   });
 
   test('should show the right context menu options when one index is selected and open', async () => {

@@ -53,18 +53,22 @@ export class EuiComboBoxTestHarness {
   }
 
   /**
-   * Returns combobox container if found, otherwise `null`
+   * Returns combobox container if found, otherwise `null`.
    */
-  public get self() {
+  public getElement(): HTMLElement | null {
     return screen.queryByTestId(this.#testId);
   }
 
   /**
-   * Returns selected values as array of strings
-   * Reads from pills with data-test-subj="euiComboBoxPill"
+   * Returns selected values as array of strings.
+   *
+   * Reads from pills with `data-test-subj="euiComboBoxPill"`.
+   * Returns empty array if combobox is not found.
    */
-  public get selectedOptions(): string[] {
-    const pills = within(this.#containerEl).queryAllByTestId('euiComboBoxPill');
+  public getSelected(): string[] {
+    const el = this.getElement();
+    if (!el) return [];
+    const pills = within(el).queryAllByTestId('euiComboBoxPill');
     return pills.map((pill) => pill.textContent || '');
   }
 
@@ -76,13 +80,13 @@ export class EuiComboBoxTestHarness {
    *
    * @param label - The display label of the option to select
    */
-  public selectOption(label: string) {
+  public select(label: string) {
     const input = this.#inputEl;
     fireEvent.change(input, { target: { value: label } });
     fireEvent.keyDown(input, { key: 'Enter' });
   }
 
-  public async selectOptionAsync(searchText: string) {
+  public async selectAsync(searchText: string) {
     const input = this.#inputEl;
 
     // Focus and click to open dropdown (or re-open if closed from previous selection)
@@ -122,7 +126,7 @@ export class EuiComboBoxTestHarness {
 
         // Wait for selection to propagate
         await waitFor(() => {
-          const selected = this.selectedOptions;
+          const selected = this.getSelected();
           if (!selected.includes(searchText)) {
             throw new Error(
               `Selection did not propagate for: "${searchText}". Current: ${JSON.stringify(
@@ -140,8 +144,10 @@ export class EuiComboBoxTestHarness {
   /**
    * Clear all selected options by clicking the clear button
    */
-  public clearSelection() {
-    const clearButton = within(this.#containerEl).queryByTestId('comboBoxClearButton');
+  public clear() {
+    const el = this.getElement();
+    if (!el) return;
+    const clearButton = within(el).queryByTestId('comboBoxClearButton');
     if (clearButton) {
       fireEvent.click(clearButton);
     }

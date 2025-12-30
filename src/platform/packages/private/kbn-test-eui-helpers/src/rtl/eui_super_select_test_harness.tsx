@@ -77,20 +77,28 @@ export class EuiSuperSelectTestHarness {
   }
 
   /**
-   * Returns super select container if found, otherwise `null`
+   * Returns super select element if found, otherwise `null`.
    */
-  public get self() {
+  public getElement(): HTMLElement | null {
     const matches = this.#query().queryAllByTestId(this.#testId) as HTMLElement[];
     if (matches.length === 0) return null;
-
     return this.#resolveElementFromMatches(matches);
   }
 
   /**
-   * Returns the currently selected option's display text
+   * Preferred alias for selected option.
+   * Returns empty string if super select is not found.
    */
-  public get selectedOption(): string {
-    return this.#buttonEl.textContent || '';
+  public getSelected(): string {
+    const el = this.getElement();
+    if (!el) return '';
+    // Check if element itself is a button
+    if (el.tagName === 'BUTTON' || el.getAttribute('role') === 'button') {
+      return el.textContent || '';
+    }
+    // Otherwise find button within
+    const button = within(el).queryByRole('button');
+    return button?.textContent || '';
   }
 
   /**
@@ -98,7 +106,7 @@ export class EuiSuperSelectTestHarness {
    *
    * @param optionTestSubj - The data-test-subj of the option to select
    */
-  public async selectOption(
+  public async select(
     optionTestSubj: string,
     options?: {
       /**
@@ -144,7 +152,7 @@ export class EuiSuperSelectTestHarness {
    *
    * Useful when options don't have stable/unique `data-test-subj`.
    */
-  public async selectOptionById(optionId: string) {
+  public async selectById(optionId: string) {
     fireEvent.click(this.#buttonEl);
     const listbox = await screen.findByRole('listbox');
 

@@ -53,8 +53,8 @@ describe('<ComponentTemplateList />', () => {
     test('should render the list view', async () => {
       const filtered = componentTemplates.filter(({ isDeprecated }) => !isDeprecated);
       const table = getTable();
-      await waitFor(() => expect(table.rows).toHaveLength(filtered.length));
-      const rows = table.rows;
+      await waitFor(() => expect(table.getRows()).toHaveLength(filtered.length));
+      const rows = table.getRows();
       const names = rows.map((row) => within(row).getByTestId('templateDetailsLink').textContent);
       expect(names).toEqual(filtered.map(({ name }) => name));
       expect(screen.queryByTestId('deprecatedComponentTemplateBadge')).not.toBeInTheDocument();
@@ -63,11 +63,11 @@ describe('<ComponentTemplateList />', () => {
     test('should sort "Usage count" column by number', async () => {
       const table = getTable();
       clickUsageCountHeader();
-      let rows = table.rows;
+      let rows = table.getRows();
       const usageNumbers = rows.map((row) => getUsageCount(row));
 
       clickUsageCountHeader();
-      rows = table.rows;
+      rows = table.getRows();
       const usageNumbers2 = rows.map((row) => getUsageCount(row));
 
       expect(usageNumbers.length).toBe(2); // deprecated row filtered out
@@ -128,8 +128,10 @@ describe('<ComponentTemplateList />', () => {
       await screen.findByTestId('componentTemplatesTable');
 
       const table = getTable();
-      await waitFor(() => expect(table.rows).toHaveLength(1));
-      expect(within(table.soleRow).getByTestId('templateDetailsLink')).toHaveTextContent(
+      await waitFor(() => expect(table.getRows()).toHaveLength(1));
+      const rows = table.getRows();
+      const onlyRow = rows.length === 1 ? rows[0] : null;
+      expect(within(onlyRow).getByTestId('templateDetailsLink')).toHaveTextContent(
         'test_component_template_2'
       );
     });

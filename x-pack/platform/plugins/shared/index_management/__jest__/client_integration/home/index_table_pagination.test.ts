@@ -61,7 +61,7 @@ describe('Index table pagination', () => {
     expect(screen.queryByText('index-010')).not.toBeInTheDocument();
 
     const pagination = new EuiPaginationTestHarness();
-    pagination.clickButton('2');
+    pagination.click('2');
 
     await waitFor(() => {
       expect(screen.getByText('index-010')).toBeInTheDocument();

@@ -10,7 +10,7 @@ import { render, screen, waitFor, fireEvent, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
-import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
+import { EuiButtonGroupTestHarness, EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import type { RouteComponentProps } from 'react-router-dom';
 
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
@@ -1159,10 +1159,7 @@ describe('<IndexDetailsPage />', () => {
     };
 
     const clickToggleView = async (label: 'List' | 'JSON') => {
-      const group = screen.getByTestId('indexDetailsMappingsToggleViewButton');
-      const labelEl = within(group).getByText(label);
-      const button = labelEl.closest('button') ?? labelEl;
-      await user.click(button);
+      new EuiButtonGroupTestHarness('indexDetailsMappingsToggleViewButton').select(label);
     };
 
     const openFilterPopover = async () => {
@@ -1422,7 +1419,7 @@ describe('<IndexDetailsPage />', () => {
 
         // Select type
         const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-        typeComboBox.selectOption(getTypeLabel('text'));
+        typeComboBox.select(getTypeLabel('text'));
 
         fireEvent.click(screen.getByTestId('addButton'));
 
@@ -1464,7 +1461,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.change(nameInput, { target: { value: 'test_field' } });
 
         const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-        typeComboBox.selectOption(getTypeLabel('boolean'));
+        typeComboBox.select(getTypeLabel('boolean'));
 
         fireEvent.click(screen.getByTestId('addButton'));
 
@@ -1542,7 +1539,7 @@ describe('<IndexDetailsPage />', () => {
         fireEvent.change(nameInput, { target: { value: 'semantic_text_name' } });
 
         const typeComboBox = new EuiComboBoxTestHarness('fieldType');
-        typeComboBox.selectOption(getTypeLabel('semantic_text'));
+        typeComboBox.select(getTypeLabel('semantic_text'));
 
         await screen.findByTestId('referenceFieldSelect');
 

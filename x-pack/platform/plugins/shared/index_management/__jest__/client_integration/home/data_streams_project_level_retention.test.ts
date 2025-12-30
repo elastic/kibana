@@ -90,11 +90,10 @@ describe('Data Streams - Project level max retention', () => {
 
     await screen.findByTestId('dataRetentionValue');
 
-    // EUI form error messages are in div.euiFormErrorText
     const form = screen.getByTestId('editDataRetentionModal');
-    const errorMessages = within(form).queryAllByText(
-      (_content, element) => element?.classList.contains('euiFormErrorText') ?? false
-    );
-    expect(errorMessages.length).toBeGreaterThan(0);
+    // Assert the specific validation message (do not rely on non-unique attributes like `aria-live`).
+    expect(
+      within(form).getByText(/Maximum data retention period on this project is 20 days\./)
+    ).toBeInTheDocument();
   });
 });
