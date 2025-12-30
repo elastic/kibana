@@ -29,11 +29,18 @@ import {
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
 import type { ControlsRendererParentApi, ControlsLayout } from './types';
 
-export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
+export const ControlsRenderer = ({
+  parentApi,
+  hideForPrint = false,
+}: {
+  parentApi: ControlsRendererParentApi;
+  hideForPrint?: boolean;
+}) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
   const setControlPanelRef = useCallback((id: string, ref: HTMLElement | null) => {
     controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
@@ -120,6 +127,14 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
           gutterSize="s"
           wrap={true}
           data-test-subj="controls-group-wrapper"
+          css={
+            /* In print mode, controls should still be programmatically rendererd so that they output filters, but not displayed */
+            hideForPrint
+              ? css`
+                  display: none;
+                `
+              : null
+          }
         >
           {controlsInOrder.map(({ id, type }) => (
             <ControlPanel

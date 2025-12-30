@@ -427,6 +427,7 @@ export function InternalDashboardTopNav({
         parentApi={
           dashboardApi as unknown as ControlsRendererParentApi // casting allows `DashboardLayout` to satisfy the expected `ControlsLayout`
         }
+        hideForPrint={viewMode === 'print'}
       />
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
