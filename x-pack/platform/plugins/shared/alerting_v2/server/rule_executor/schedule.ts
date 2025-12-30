@@ -26,20 +26,10 @@ export async function ensureRuleExecutorTaskScheduled({
     ruleId: string;
     spaceId: string;
     schedule: IntervalSchedule;
-    /**
-     * Must be provided so Task Manager can persist an apiKey + userScope on the task and
-     * provide a `fakeRequest` to the task runner.
-     */
     request: KibanaRequest;
   };
 }) {
   const id = getRuleExecutorTaskId({ ruleId, spaceId });
-
-  if (!request) {
-    throw new Error(
-      `Cannot schedule ES|QL task [${id}] without a KibanaRequest. A request is required so Task Manager can associate an API key and provide fakeRequest to the runner.`
-    );
-  }
 
   await taskManager.ensureScheduled(
     {

@@ -141,16 +141,17 @@ export async function ensureAlertsResources({
       );
     })(),
     (async () => {
+      logger.debug(`Installing component template ${componentTemplateName}`);
       await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(componentTemplate), {
         logger,
       });
     })(),
-    (async () => {
-      await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(indexTemplate), {
-        logger,
-      });
-    })(),
   ]);
+
+  logger.debug(`Installing index template ${indexTemplateName}`);
+  await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(indexTemplate), {
+    logger,
+  });
 }
 
 export async function ensureAlertsDataStream({
