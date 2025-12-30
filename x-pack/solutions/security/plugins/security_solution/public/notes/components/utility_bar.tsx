@@ -93,8 +93,7 @@ export const NotesUtilityBar = React.memo(() => {
       </EuiContextMenuItem>
     );
 
-    // Show tooltip only when disabled due to permissions (not when no items selected)
-    if (!canDeleteNotes) {
+    if (!canDeleteNotes && selectedItems.length > 0) {
       return (
         <EuiToolTip position="left" content={DELETE_NOTES_PERMISSION_ERROR}>
           {menuItem}
@@ -103,7 +102,7 @@ export const NotesUtilityBar = React.memo(() => {
     }
 
     return menuItem;
-  }, [deleteSelectedNotes, isDeleteDisabled, canDeleteNotes]);
+  }, [deleteSelectedNotes, isDeleteDisabled, canDeleteNotes, selectedItems.length]);
   const refresh = useCallback(() => {
     dispatch(
       fetchNotes({
