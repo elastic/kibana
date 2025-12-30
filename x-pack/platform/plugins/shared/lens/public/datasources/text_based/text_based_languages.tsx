@@ -502,14 +502,11 @@ export function getTextBasedDatasource({
         Object.values(state?.layers ?? {}).map((layer) => {
           if (isOfAggregateQueryType(layer.query)) {
             const language = getAggregateQueryMode(layer.query);
-
-            // it will eventually log render_lens_esql_chart
-            return [`${language}_chart`];
+            return [`render_lens_${language}_chart`];
           }
           return [];
         })
       );
-      console.log(counters);
       return counters;
     },
 
