@@ -301,6 +301,24 @@
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
+      "artifacts": {
+        "properties": {
+          "dashboards": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "description": {
         "type": "text"
       },

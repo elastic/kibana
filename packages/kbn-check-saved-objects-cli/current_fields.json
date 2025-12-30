@@ -90,6 +90,11 @@
     "updatedBy"
   ],
   "alerting_rule_template": [
+    "artifacts",
+    "artifacts.dashboards",
+    "artifacts.dashboards.id",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
     "description",
     "name",
     "ruleTypeId",
