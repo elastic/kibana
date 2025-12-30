@@ -35,7 +35,7 @@ export class CreateEsqlRuleRoute implements RouteHandler {
   static method = 'post' as const;
   static path = `${INTERNAL_ESQL_RULE_API_PATH}/{id?}`;
   static security = DEFAULT_ALERTING_V2_ROUTE_SECURITY;
-  static options = { access: 'internal', tags: ['access:alerting'] } as const;
+  static options = { access: 'internal' } as const;
   static validate = {
     request: {
       body: createEsqlRuleDataSchema,
