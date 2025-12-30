@@ -10,8 +10,11 @@ import { schema } from '@kbn/config-schema';
 export const rawConnectorTokenSchema = schema.object({
   createdAt: schema.string(),
   connectorId: schema.string(),
-  expiresAt: schema.string(),
+  expiresAt: schema.maybe(schema.string()), // turned into an optional field
   token: schema.string(),
   tokenType: schema.string(),
   updatedAt: schema.string(),
+  // added optional fields
+  refreshToken: schema.maybe(schema.string()),
+  refreshTokenExpiresAt: schema.maybe(schema.string()),
 });
