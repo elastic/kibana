@@ -26,7 +26,7 @@ export async function getToolHandler({
 }): Promise<{
   items: RedMetricsItem[];
 }> {
-  const response = await dataRegistry.getData('redMetrics', {
+  const items = await dataRegistry.getData('redMetrics', {
     request,
     start,
     end,
@@ -35,6 +35,6 @@ export async function getToolHandler({
   });
 
   return {
-    items: response?.items ?? [],
+    items: items ?? [],
   };
 }

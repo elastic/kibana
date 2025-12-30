@@ -26,9 +26,7 @@ export interface RedMetricsItem {
   failureRate: number;
 }
 
-export interface GetRedMetricsResponse {
-  items: RedMetricsItem[];
-}
+export type GetRedMetricsResponse = RedMetricsItem[];
 
 export async function getRedMetrics({
   apmEventClient,
@@ -65,7 +63,6 @@ export async function getRedMetrics({
         terms: {
           field: groupBy,
           size: MAX_NUMBER_OF_GROUPS,
-          order: { _count: 'desc' },
         },
         aggs: {
           avg_latency: {
@@ -104,5 +101,5 @@ export async function getRedMetrics({
     };
   });
 
-  return { items };
+  return items;
 }

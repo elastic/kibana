@@ -148,9 +148,7 @@ export interface RedMetricsItem {
   failureRate: number;
 }
 
-interface RedMetricsResponse {
-  items: RedMetricsItem[];
-}
+type RedMetricsResponse = RedMetricsItem[];
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
