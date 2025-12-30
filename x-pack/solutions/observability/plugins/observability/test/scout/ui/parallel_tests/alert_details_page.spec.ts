@@ -6,14 +6,12 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import type { ObltPageObjects, PageObjects, ScoutPage } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 import { GENERATED_METRICS } from '../fixtures/constants';
-import type { TriggersActionsPageObjects } from '../fixtures/page_objects';
 
 test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
   let ruleId: string;
-  let alertId: string;
+
   const alertName = `Write bytes test rule ${Date.now()}`;
 
   test.beforeAll(async ({ apiServices }) => {
@@ -59,51 +57,33 @@ test.describe('Alert Details Page', { tag: ['@ess', '@svlOblt'] }, () => {
     await browserAuth.loginAsAdmin();
   });
 
-  const goToAlertDetailsByRuleId = async ({
-    ruleId: _ruleId,
-    page,
-    pageObjects,
-  }: {
-    ruleId: string;
-    page: ScoutPage;
-    pageObjects: PageObjects & ObltPageObjects & TriggersActionsPageObjects;
-  }) => {
-    await pageObjects.rulesPage.goto(_ruleId);
-
-    await expect(page.testSubj.locator('ruleName')).toBeVisible();
-
-    await page.testSubj.waitForSelector('expand-event');
-    const expandAlertButtons = await page.testSubj.locator('expand-event').all();
-    expect(expandAlertButtons.length).toBeGreaterThan(0);
-
-    await expandAlertButtons[0].click();
-
-    const alertDetailsLink = page.testSubj.locator('alertsFlyoutAlertDetailsButton');
-    await expect(alertDetailsLink).toBeVisible();
-    await alertDetailsLink.click();
-
-    await page.testSubj.waitForSelector('observability.rules.custom_threshold');
-
-    const parsedAlertId = page.url().split('/').pop() || '';
-    return parsedAlertId;
-  };
-
-  test('should show error when the alert does not exist', async ({ page, pageObjects }) => {
+  test('should show an error when the alert does not exist', async ({ page, pageObjects }) => {
     await pageObjects.alertPage.goto('non-existent-alert-id');
     await expect(page.testSubj.locator('alertDetailsError')).toBeVisible();
   });
 
-  test('should show tabbed view', async ({ page, pageObjects }) => {
+  test('should show a tabbed view', async ({ page, pageObjects }) => {
     await expect(async () => {
       await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
       await expect(page.testSubj.locator('overviewTab')).toBeVisible();
       await expect(page.testSubj.locator('metadataTab')).toBeVisible();
+      await expect(page.testSubj.locator('investigationGuideTab')).toBeVisible();
+      await expect(page.testSubj.locator('relatedAlertsTab')).toBeVisible();
+      await expect(page.testSubj.locator('relatedDashboardsTab')).toBeVisible();
     }).toPass({ timeout: 60_000, intervals: [2_000] });
   });
 
   test('should show a Threshold Alert Overview section', async ({ page, pageObjects }) => {
-    await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+    await expect(async () => {
+      await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+      await expect(page.testSubj.locator('thresholdAlertOverviewSection')).toBeVisible();
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
+  });
 
-    await expect(page.testSubj.locator('thresholdAlertOverviewSection')).toBeVisible();
+  test('should show an Alerts History section', async ({ page, pageObjects }) => {
+    await expect(async () => {
+      await pageObjects.alertPage.gotoAlertByRuleId(pageObjects.rulesPage, ruleId);
+      await expect(page.testSubj.locator('AlertDetails')).toBeVisible();
+    }).toPass({ timeout: 60_000, intervals: [2_000] });
   });
 });
