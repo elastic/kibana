@@ -7,8 +7,8 @@
 
 import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import type { EntityStoreDependencies } from './dependencies';
-import { initDependencies } from './dependencies';
+import { initDependencies } from './init_dependencies';
+import type { EntityStoreDependencies } from './domain/dependencies';
 
 export class EntityStorePlugin implements Plugin {
   private readonly dependencies: EntityStoreDependencies;
