@@ -87,29 +87,22 @@ export class AIAssistantManagementSelectionPlugin
         [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
           ...chatExperienceSetting,
           getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
-            if (request) {
-              try {
-                const [, startServices] = await core.getStartServices();
-                // Avoid security exceptions before login - only check space when authenticated
-                if (startServices.spaces && request.auth.isAuthenticated) {
-                  const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
-                    request
-                  );
-                  if (activeSpace?.solution === 'es') {
-                    return AIChatExperience.Agent;
-                  }
+            try {
+              const [, startServices] = await core.getStartServices();
+              // Avoid security exceptions before login - only check space when authenticated
+              if (startServices.spaces && request?.auth.isAuthenticated) {
+                const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
+                  request
+                );
+                if (activeSpace?.solution === 'es') {
+                  return AIChatExperience.Agent;
                 }
-              } catch (e) {
-                this.logger.error('Error getting active space:');
-                this.logger.error(e);
               }
+            } catch (e) {
+              this.logger.error('Error getting active space:');
+              this.logger.error(e);
             }
-
-            if (this.config.preferredChatExperience) {
-              return this.config.preferredChatExperience;
-            }
-
-            return AIChatExperience.Classic;
+            return this.config.preferredChatExperience ?? AIChatExperience.Classic;
           },
         },
       });
