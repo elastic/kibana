@@ -43,7 +43,6 @@ export const RULE_TYPE_MODAL_TEST_SUBJECTS = {
   RULE_TYPE_MODAL: 'ruleTypeModal',
   RULE_TYPE_MODAL_SEARCH: 'ruleTypeModalSearch',
   ALL_RULE_TYPES_BUTTON: 'allRuleTypesButton',
-  CUSTOM_THRESHOLD_RULE_TYPE: 'observability.rules.custom_threshold-SelectOption',
 } as const;
 
 /**
@@ -59,18 +58,27 @@ export const LOGS_TAB_TEST_SUBJECTS = {
  * Constants for data-test-subj values used in custom threshold rule tests
  */
 export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
+  // Rule Type Selection
+  CUSTOM_THRESHOLD_RULE_TYPE_CARD: 'observability.rules.custom_threshold-SelectOption',
+
   // Rule Type Modal
   CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR: 'observability.rules.custom_threshold-SelectOption',
 
   // Rule Form
+  RULE_FORM: 'ruleForm',
   RULE_NAME_INPUT: 'ruleDetailsNameInput',
   RULE_TAGS_INPUT: 'ruleDetailsTagsInput',
   SAVE_BUTTON: 'rulePageFooterSaveButton',
   CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
 
-  // Data View
+  // Data View Selection
   DATA_VIEW_EXPRESSION: 'selectDataViewExpression',
-  DATA_VIEW_INPUT: 'indexPattern-switcher--input',
+  INDEX_PATTERN_INPUT: 'indexPattern-switcher--input',
+  EXPLORE_MATCHING_INDICES_BUTTON: 'explore-matching-indices-button',
+
+  // Rule Save
+  RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
+  CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
 
   // Aggregation
   AGGREGATION_NAME_A: 'aggregationNameA',
