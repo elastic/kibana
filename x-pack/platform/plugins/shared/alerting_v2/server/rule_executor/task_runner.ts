@@ -31,7 +31,7 @@ export function createRuleExecutorTaskRunner({
   return ({ taskInstance, abortController, fakeRequest }: RunContext) => {
     return {
       async run() {
-        if (!config.esqlRules.enabled) {
+        if (!config.enabled) {
           return { state: taskInstance.state };
         }
 

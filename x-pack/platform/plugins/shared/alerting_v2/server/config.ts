@@ -9,9 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  esqlRules: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type AlertingV2Config = TypeOf<typeof configSchema>;
