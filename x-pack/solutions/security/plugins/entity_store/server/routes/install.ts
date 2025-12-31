@@ -13,8 +13,7 @@ import { EntityType } from '../domain/definitions/entity_type';
 import type { ResourcesService } from '../domain/resources_service';
 import type { EntityStoreLogger } from '../infra/logging';
 
-type BodySchema = z.infer<typeof BodySchema>;
-const BodySchema = z.object({
+const bodySchema = z.object({
   entityType: z.array(EntityType).optional(),
 });
 
@@ -36,7 +35,7 @@ export const registerInstall = (
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(BodySchema),
+            body: buildRouteValidationWithZod(bodySchema),
           },
         },
       },
