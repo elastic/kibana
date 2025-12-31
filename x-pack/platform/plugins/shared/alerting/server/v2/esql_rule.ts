@@ -6,7 +6,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+
 import { ALERT_EVENTS_INDEX } from './create_indices';
+import { DATA_SIMULATOR_INDEX } from './data_simulator';
 
 export interface ESQLRuleOpts {
   esClient: ElasticsearchClient;
@@ -14,7 +16,7 @@ export interface ESQLRuleOpts {
 
 export const RULE_UUID = '599df5ec-4821-4565-8ae7-64afc13561bd';
 export const RULE_INTERVAL = 1000;
-export const ESQL_QUERY = `FROM .kibana-event-log* METADATA _id, _index`;
+export const ESQL_QUERY = `FROM ${DATA_SIMULATOR_INDEX} METADATA _id, _index`;
 export const RULE_LOOKBACK = '5m';
 
 export function esqlRule({ esClient }: ESQLRuleOpts) {

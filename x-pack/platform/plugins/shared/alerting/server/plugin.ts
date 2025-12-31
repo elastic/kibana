@@ -118,6 +118,7 @@ import { createIndices } from './v2/create_indices';
 import { esqlRule } from './v2/esql_rule';
 import { alertDirector } from './v2/alert_director';
 import { alertDispatcher } from './v2/alert_dispatcher';
+import { startDataSimulator } from './v2/data_simulator';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -756,6 +757,7 @@ export class AlertingPlugin {
       esqlRule({ esClient: core.elasticsearch.client.asInternalUser });
       alertDirector({ esClient: core.elasticsearch.client.asInternalUser });
       alertDispatcher({ esClient: core.elasticsearch.client.asInternalUser });
+      startDataSimulator({ esClient: core.elasticsearch.client.asInternalUser });
     }, 5000);
 
     return {

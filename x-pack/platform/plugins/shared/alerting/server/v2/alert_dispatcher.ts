@@ -13,19 +13,18 @@ export interface AlertDispatcherOpts {
 }
 
 export const DISPATCHER_EVENTS_QUERY = `FROM .kibana_alert_events
-  | RENAME alert_series_id AS event_alert_series_id
-  | RENAME @timestamp AS event_timestamp
+  | RENAME alert_series_id AS event_alert_series_id, @timestamp AS event_timestamp
   | LOOKUP JOIN .kibana_alert_actions
-        ON
-          rule.id == rule_id AND
-            alert_series_id == event_alert_series_id AND
-            action_type == "fire"
-  | STATS last_fire = MAX(@timestamp)
+      ON
+        rule.id == rule_id AND
+          alert_series_id == event_alert_series_id AND
+          action_type == "fire"
+  | INLINE STATS last_fire = MAX(@timestamp)
         BY rule.id, event_alert_series_id
-  | RENAME rule.id AS event_rule_id
-  | LOOKUP JOIN .kibana_alert_events
-        ON rule.id == event_rule_id AND alert_series_id == event_alert_series_id
-  | WHERE @timestamp > last_fire OR last_fire IS NULL`;
+  | WHERE event_timestamp > last_fire OR last_fire IS NULL
+  | KEEP event_timestamp, rule.id, event_alert_series_id
+  | RENAME event_alert_series_id AS alert_series_id
+  | STATS @timestamp = MAX(event_timestamp) BY rule.id, alert_series_id`;
 export const INTERVAL = 1000;
 
 export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
