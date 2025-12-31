@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { filter, firstValueFrom } from 'rxjs';
 import { DiscoverLayout } from './discover_layout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -54,7 +53,6 @@ const setup = async ({
   });
 
   await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
   toolkit.internalState.dispatch(
     internalStateActions.updateAppState({
@@ -66,16 +64,12 @@ const setup = async ({
     })
   );
 
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
   const stateContainer = selectTabRuntimeState(
     toolkit.runtimeStateManager,
     toolkit.getCurrentTab().id
   ).stateContainer$.getValue()!;
-
-  await firstValueFrom(
-    stateContainer.dataState.data$.main$.pipe(
-      filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE)
-    )
-  );
 
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({

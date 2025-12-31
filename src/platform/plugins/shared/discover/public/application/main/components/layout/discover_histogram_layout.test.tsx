@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
@@ -47,7 +47,6 @@ const setup = async ({
   });
 
   await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
   toolkit.internalState.dispatch(
     internalStateActions.updateAppState({
@@ -59,16 +58,12 @@ const setup = async ({
     })
   );
 
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
   const stateContainer = selectTabRuntimeState(
     toolkit.runtimeStateManager,
     toolkit.getCurrentTab().id
   ).stateContainer$.getValue()!;
-
-  await firstValueFrom(
-    stateContainer.dataState.data$.main$.pipe(
-      filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE)
-    )
-  );
 
   toolkit.internalState.dispatch(
     internalStateActions.setDataRequestParams({

@@ -20,7 +20,6 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverGrid } from '../../../../components/discover_grid';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
 import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
@@ -46,32 +45,6 @@ async function mountComponent({
   if (!toolkit) {
     ({ toolkit } = await setup());
   }
-
-  toolkit.internalState.dispatch(
-    internalStateActions.updateAppState({
-      tabId: toolkit.getCurrentTab().id,
-      appState: {
-        dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
-      },
-    })
-  );
-  toolkit.internalState.dispatch(
-    internalStateActions.setDataRequestParams({
-      tabId: toolkit.getCurrentTab().id,
-      dataRequestParams: {
-        timeRangeRelative: {
-          from: '2020-05-14T11:05:13.590',
-          to: '2020-05-14T11:20:13.590',
-        },
-        timeRangeAbsolute: {
-          from: '2020-05-14T11:05:13.590',
-          to: '2020-05-14T11:20:13.590',
-        },
-        searchSessionId: 'test',
-        isSearchSessionRestored: false,
-      },
-    })
-  );
 
   const stateContainer = selectTabRuntimeState(
     toolkit.runtimeStateManager,

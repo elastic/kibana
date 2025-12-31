@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -57,7 +57,6 @@ const mountComponent = async ({
   });
 
   await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
   const query: DiscoverAppState['query'] = isEsqlMode
     ? { esql: 'from *' }
@@ -76,16 +75,12 @@ const mountComponent = async ({
     })
   );
 
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
   const stateContainer = selectTabRuntimeState(
     toolkit.runtimeStateManager,
     toolkit.getCurrentTab().id
   ).stateContainer$.getValue()!;
-
-  await firstValueFrom(
-    stateContainer.dataState.data$.main$.pipe(
-      filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE)
-    )
-  );
 
   stateContainer.dataState.data$.documents$.next({
     fetchStatus: FetchStatus.COMPLETE,

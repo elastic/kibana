@@ -87,6 +87,7 @@ describe('useDiscoverHistogram', () => {
     const toolkit = getDiscoverInternalStateMock();
 
     await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
     toolkit.internalState.dispatch(
       internalStateActions.updateAppState({
@@ -97,8 +98,6 @@ describe('useDiscoverHistogram', () => {
         },
       })
     );
-
-    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
     const stateContainer = selectTabRuntimeState(
       toolkit.runtimeStateManager,
@@ -323,6 +322,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should update total hits when the total hits state changes', async () => {
       const { toolkit, stateContainer } = await setup();
+      mockCheckHitCount.mockClear();
       const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = stateContainer.getCurrentTab().appState;
       const state = {
@@ -365,6 +365,7 @@ describe('useDiscoverHistogram', () => {
 
       mockData.query.getState = () => mockQueryState;
       const { toolkit, stateContainer } = await setup();
+      mockCheckHitCount.mockClear();
       const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = stateContainer.getCurrentTab().appState;
       const error = new Error('test');
