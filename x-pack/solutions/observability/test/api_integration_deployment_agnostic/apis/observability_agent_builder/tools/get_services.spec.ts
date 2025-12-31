@@ -33,7 +33,6 @@ const END = 'now';
 interface ServiceResult {
   serviceName: string;
   environments?: string[];
-  sources: string[];
   healthStatus?: string;
   latency?: number;
   throughput?: number;
@@ -94,7 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(data).to.have.property('serviceOverflowCount');
       });
 
-      it('each service has required fields including sources', async () => {
+      it('each service has required fields', async () => {
         const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
           id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
           params: { start: START, end: END },
@@ -107,14 +106,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         for (const service of services) {
           expect(service).to.have.property('serviceName');
-          expect(service).to.have.property('sources');
-          expect(Array.isArray(service.sources)).to.be(true);
-          expect(service.sources.length).to.be.greaterThan(0);
         }
       });
     });
 
-    describe('service sources', () => {
+    describe('services from multiple data sources', () => {
       before(async () => {
         ({ apmSynthtraceEsClient } = await createSyntheticApmData({
           getService,
@@ -138,7 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await logsSynthtraceEsClient.clean();
       });
 
-      it('returns all services from all sources', async () => {
+      it('returns services from APM, logs, and shared services', async () => {
         const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
           id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
           params: { start: START, end: END },
@@ -148,66 +144,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const services = data.services;
         const serviceNames = services.map((s) => s.serviceName);
 
+        // APM services
         expect(serviceNames).to.contain(APM_SERVICE_1);
         expect(serviceNames).to.contain(APM_SERVICE_2);
+
+        // Log-only services
         expect(serviceNames).to.contain(LOG_SERVICE_1);
         expect(serviceNames).to.contain(LOG_SERVICE_2);
+
+        // Service that exists in both APM and logs
         expect(serviceNames).to.contain(SHARED_SERVICE);
       });
 
-      it('returns APM-only services with the source "apm"', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
-          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
-          params: { start: START, end: END },
-        });
-
-        expect(results.length).to.be(1);
-        const { data } = results[0];
-        const services = data.services;
-
-        const apmOnlyService = services.find((s) => s.serviceName === APM_SERVICE_1);
-        expect(apmOnlyService).to.be.ok();
-        expect(apmOnlyService!.sources).to.eql(['apm']);
-
-        const apmOnlyService2 = services.find((s) => s.serviceName === APM_SERVICE_2);
-        expect(apmOnlyService2).to.be.ok();
-        expect(apmOnlyService2!.sources).to.eql(['apm']);
-      });
-
-      it('returns log-only services with the source "logs"', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
-          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
-          params: { start: START, end: END },
-        });
-
-        const { data } = results[0];
-        const services = data.services;
-
-        const logOnlyService = services.find((s) => s.serviceName === LOG_SERVICE_1);
-        expect(logOnlyService).to.be.ok();
-        expect(logOnlyService!.sources).to.eql(['logs']);
-
-        const logOnlyService2 = services.find((s) => s.serviceName === LOG_SERVICE_2);
-        expect(logOnlyService2).to.be.ok();
-        expect(logOnlyService2!.sources).to.eql(['logs']);
-      });
-
-      it('returns services in both APM and logs with the sources "apm" and "logs"', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
-          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
-          params: { start: START, end: END },
-        });
-
-        const { data } = results[0];
-        const services = data.services;
-
-        const sharedService = services.find((s) => s.serviceName === SHARED_SERVICE);
-        expect(sharedService).to.be.ok();
-        expect(sharedService!.sources).to.contain('apm');
-        expect(sharedService!.sources).to.contain('logs');
-      });
-
-      it('returns APM services with health metrics', async () => {
+      it('returns APM services with performance metrics', async () => {
         const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
           id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
           params: { start: START, end: END },
@@ -221,6 +170,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(apmService).to.have.property('latency');
         expect(apmService).to.have.property('throughput');
         expect(apmService).to.have.property('transactionErrorRate');
+      });
+
+      it('returns log-only services with basic information', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
+          id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+          params: { start: START, end: END },
+        });
+
+        const { data } = results[0];
+        const services = data.services;
+
+        const logOnlyService = services.find((s) => s.serviceName === LOG_SERVICE_1);
+        expect(logOnlyService).to.be.ok();
+        expect(logOnlyService).to.have.property('serviceName');
+
+        // Log-only services don't have APM metrics
+        expect(logOnlyService).to.not.have.property('latency');
+        expect(logOnlyService).to.not.have.property('throughput');
       });
     });
 

@@ -140,7 +140,13 @@ export async function getTraceMetrics({
 
   const { documentType, rollupInterval, hasDurationSummaryField } = source;
 
-  const durationField = getDurationFieldForTransactions(documentType, hasDurationSummaryField);
+  const durationField = getDurationFieldForTransactions(
+    documentType as
+      | ApmDocumentType.ServiceTransactionMetric
+      | ApmDocumentType.TransactionMetric
+      | ApmDocumentType.TransactionEvent,
+    hasDurationSummaryField
+  );
   const outcomeAggs = getOutcomeAggregation(documentType);
 
   const response = await apmEventClient.search('get_trace_metrics', {

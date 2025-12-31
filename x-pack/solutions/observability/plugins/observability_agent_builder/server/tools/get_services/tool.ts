@@ -58,7 +58,6 @@ export function createGetServicesTool({
 
 For APM services, includes health status, active alert counts, and key performance metrics (latency, transaction error rate, throughput).
 For services found only in logs or metrics, basic information like service name and environment is returned.
-Each service includes a 'sources' array indicating where it was found: 'apm', 'logs', and/or 'metrics'.
 
 Useful for:
 - Getting a high-level system overview of all services
