@@ -82,3 +82,23 @@ export const aNum = 10;
  * I'm a type of string, but more specifically, a literal string type.
  */
 export const literalString = 'HI';
+
+// Expected issues:
+//   missing comments (2):
+//     line 32 - a
+//     line 45 - foo
+//   no references (14):
+//     line 18 - aPretendNamespaceObj
+//     line 19 - notAnArrowFn
+//     line 24 - aPropertyMisdirection
+//     line 29 - aPropertyInlineFn
+//     line 32 - a
+//     line 36 - aPropertyStr
+//     line 41 - nestedObj
+//     line 45 - foo
+//     line 59 - aUnionProperty
+//     line 64 - aStrArray
+//     line 69 - aNumArray
+//     line 74 - aStr
+//     line 79 - aNum
+//     line 84 - literalString

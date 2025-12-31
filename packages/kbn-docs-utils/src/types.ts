@@ -187,6 +187,16 @@ export interface ApiDeclaration {
   path: string;
 
   /**
+   * Source position for easier navigation to the declaration.
+   */
+  lineNumber?: number;
+
+  /**
+   * Source position for easier navigation to the declaration.
+   */
+  columnNumber?: number;
+
+  /**
    * Other plugins that reference this API item (along with SourceLink info for each reference).
    */
   references?: ApiReference[];
