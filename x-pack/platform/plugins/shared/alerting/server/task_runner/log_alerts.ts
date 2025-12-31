@@ -29,7 +29,6 @@ export interface LogAlertsParams<
   canSetRecoveryContext: boolean;
   shouldLogAlerts: boolean;
   shouldPersistAlerts: boolean;
-  delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
 }
 
 export function logAlerts<
@@ -48,12 +47,10 @@ export function logAlerts<
   canSetRecoveryContext,
   shouldLogAlerts,
   shouldPersistAlerts,
-  delayedAlerts,
 }: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
-  const delayedAlertIds = Object.keys(delayedAlerts);
 
   if (apm.currentTransaction) {
     apm.currentTransaction.addLabels({
@@ -95,7 +92,6 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfNewAlerts(newAlertIds.length);
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
-    ruleRunMetricsStore.setNumberOfDelayedAlerts(delayedAlertIds.length);
 
     if (shouldLogAlerts) {
       for (const id of recoveredAlertIds) {

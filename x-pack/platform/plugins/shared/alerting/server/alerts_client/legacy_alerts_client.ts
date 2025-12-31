@@ -220,7 +220,6 @@ export class LegacyAlertsClient<
       shouldLogAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
-      delayedAlerts: this.processedAlerts.delayed,
     });
   }
 
@@ -279,6 +278,7 @@ export class LegacyAlertsClient<
       delayedAlerts: this.processedAlerts.delayed,
       alertDelay: opts.alertDelay,
       startedAt: this.startedAtString,
+      ruleRunMetricsStore: opts.ruleRunMetricsStore,
     });
 
     this.processedAlerts.new = alerts.newAlerts;

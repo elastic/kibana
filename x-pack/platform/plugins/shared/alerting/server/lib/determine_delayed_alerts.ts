@@ -9,6 +9,7 @@ import { keys } from 'lodash';
 import { ALERT_STATUS_DELAYED } from '@kbn/rule-data-utils';
 import type { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../types';
+import type { RuleRunMetricsStore } from './rule_run_metrics_store';
 
 interface DetermineDelayedAlertsOpts<
   State extends AlertInstanceState,
@@ -24,6 +25,7 @@ interface DetermineDelayedAlertsOpts<
   delayedAlerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
   alertDelay: number;
   startedAt?: string | null;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export function determineDelayedAlerts<
@@ -40,16 +42,20 @@ export function determineDelayedAlerts<
   delayedAlerts,
   alertDelay,
   startedAt,
+  ruleRunMetricsStore,
 }: DetermineDelayedAlertsOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
+  let delayedAlertsCount = 0;
+
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     alert.incrementActiveCount();
     // do not trigger an action notification if the number of consecutive
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {
-      // remove from new alerts and active alerts
       alert.setStatus(ALERT_STATUS_DELAYED);
       delayedAlerts[id] = alert;
+      delayedAlertsCount += 1;
+      // remove from new alerts and active alerts
       delete newAlerts[id];
       delete activeAlerts[id];
     } else {
@@ -77,6 +83,8 @@ export function determineDelayedAlerts<
     }
     alert.resetActiveCount();
   }
+
+  ruleRunMetricsStore.setNumberOfDelayedAlerts(delayedAlertsCount);
 
   return {
     newAlerts,
