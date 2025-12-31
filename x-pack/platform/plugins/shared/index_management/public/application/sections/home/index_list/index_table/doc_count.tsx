@@ -6,28 +6,44 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import type { docCountApi } from './get_doc_count';
+import { type DocCountResult, type docCountApi, RequestResultType } from './get_doc_count';
 interface DocCountCellProps {
   indexName: string;
   docCountApi: ReturnType<typeof docCountApi>;
 }
 
 export const DocCountCell = ({ indexName, docCountApi }: DocCountCellProps) => {
-  const docCountResponse = useObservable<Record<string, number>>(docCountApi.getObservable());
-  const count = docCountResponse ? docCountResponse[indexName] : undefined;
+  const docCountResponse = useObservable<Record<string, DocCountResult>>(
+    docCountApi.getObservable()
+  );
+  const result = docCountResponse ? docCountResponse[indexName] : undefined;
 
-  // todo account for error state
   useEffect(() => {
     docCountApi.getByName(indexName);
-    // todo this errors and breaks reloading indices button
-    // return () => docCountApi.abort();
   }, [docCountApi, indexName]);
 
-  if (count === undefined) {
+  if (result === undefined) {
     return <EuiLoadingSpinner size="m" />;
   }
 
-  return Number(count).toLocaleString();
+  if (result.status === 'error') {
+    return (
+      <EuiToolTip
+        content={i18n.translate('xpack.idxMgmt.indexTable.docCountErrorTooltip', {
+          defaultMessage: 'Error loading document count',
+        })}
+      >
+        <EuiText size="s" color="danger" tabIndex={0}>
+          {i18n.translate('xpack.idxMgmt.indexTable.docCountErrorLabel', {
+            defaultMessage: 'Error',
+          })}
+        </EuiText>
+      </EuiToolTip>
+    );
+  }
+
+  return Number(result.count).toLocaleString();
 };
