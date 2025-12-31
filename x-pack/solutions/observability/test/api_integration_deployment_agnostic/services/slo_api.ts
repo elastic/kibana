@@ -11,7 +11,6 @@ import type {
   BulkDeleteInput,
   CreateSLOInput,
   FindSLODefinitionsResponse,
-  FindSLOGroupingsResponse,
   FindSLOInstancesResponse,
   FindSLOTemplatesResponse,
   GetSLOTemplateResponse,
