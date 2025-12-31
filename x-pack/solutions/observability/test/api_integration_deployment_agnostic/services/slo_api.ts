@@ -256,30 +256,6 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-    async findGroupings(
-      sloId: string,
-      params: {
-        instanceId: string;
-        groupingKey: string;
-        search?: string;
-        afterKey?: string;
-        size?: number;
-        excludeStale?: boolean;
-      },
-      roleAuthc: RoleCredentials,
-      expectedStatus: number = 200
-    ): Promise<FindSLOGroupingsResponse> {
-      const { body } = await supertestWithoutAuth
-        .get(`/internal/observability/slos/${sloId}/_groupings`)
-        .query(params)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send()
-        .expect(expectedStatus);
-
-      return body;
-    },
-
     async getSettings(roleAuthc: RoleCredentials) {
       const { body } = await supertestWithoutAuth
         .get(`/internal/slo/settings`)

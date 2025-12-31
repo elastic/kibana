@@ -82,15 +82,6 @@ export const sloKeys = {
     groupBy?: string[];
   }) => [...sloKeys.all, 'preview', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
-  groupings: (params: {
-    sloId: string;
-    instanceId: string;
-    groupingKey: string;
-    search?: string;
-    afterKey?: string;
-    excludeStale?: boolean;
-    remoteName?: string;
-  }) => [...sloKeys.all, 'groupings', params] as const,
   instances: (params: {
     sloId: string;
     search?: string;
