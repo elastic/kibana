@@ -21,6 +21,7 @@ const controlApi = {
     pinPanel: jest.fn(),
     unpinPanel: jest.fn(),
     panelIsPinned: jest.fn(),
+    addPinnedPanel: jest.fn(),
     viewMode$: new BehaviorSubject<ViewMode>('edit'),
   },
 };
