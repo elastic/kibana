@@ -117,8 +117,9 @@ export async function getLogAiInsights({
     throw new Error('Log entry not found');
   }
 
-  const resourceAttributes = (logEntry.resource as { attributes?: Record<string, unknown> } | undefined)
-    ?.attributes;
+  const resourceAttributes = (
+    logEntry.resource as { attributes?: Record<string, unknown> } | undefined
+  )?.attributes;
 
   const serviceName =
     ((logEntry.service as { name?: string } | undefined)?.name ||
@@ -165,7 +166,7 @@ export async function getLogAiInsights({
         end,
       }),
     ]);
- 
+
     if (serviceSummary.status === 'fulfilled' && serviceSummary.value) {
       context += dedent(`
         <ServiceSummary>
