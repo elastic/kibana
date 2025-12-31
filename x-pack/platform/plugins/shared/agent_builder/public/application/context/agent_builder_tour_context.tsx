@@ -67,11 +67,11 @@ const labels = {
   },
   llmSelector: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.title', {
-      defaultMessage: 'Select your model 🧠',
+      defaultMessage: 'Select your LLM 🧠',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.content', {
       defaultMessage:
-        'Your agent uses this LLM to generate responses. Switch models to prioritize faster responses, lower costs, or more complex reasoning.',
+        'Your agent uses this model to generate responses. Switch LLM to prioritize faster responses, lower costs, or more complex reasoning.',
     }),
   },
   // TODO: Add prompts step once we have prompts.
