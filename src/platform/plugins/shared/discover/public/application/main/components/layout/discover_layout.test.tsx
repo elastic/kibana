@@ -19,7 +19,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { act } from 'react-dom/test-utils';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
 import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { render, screen } from '@testing-library/react';
@@ -64,12 +64,9 @@ const setup = async ({
     })
   );
 
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
-
-  const stateContainer = selectTabRuntimeState(
-    toolkit.runtimeStateManager,
-    toolkit.getCurrentTab().id
-  ).stateContainer$.getValue()!;
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
 
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({

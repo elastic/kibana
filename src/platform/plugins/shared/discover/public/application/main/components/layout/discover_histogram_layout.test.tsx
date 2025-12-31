@@ -19,7 +19,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
 import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverMainContentProps } from './discover_main_content';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
@@ -58,12 +58,9 @@ const setup = async ({
     })
   );
 
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
-
-  const stateContainer = selectTabRuntimeState(
-    toolkit.runtimeStateManager,
-    toolkit.getCurrentTab().id
-  ).stateContainer$.getValue()!;
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
 
   toolkit.internalState.dispatch(
     internalStateActions.setDataRequestParams({

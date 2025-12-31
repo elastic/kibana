@@ -29,7 +29,7 @@ import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataSource } from '../../../../../common/data_sources';
 import { WrappedDiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverAppState } from '../../state_management/redux';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
@@ -75,12 +75,9 @@ const mountComponent = async ({
     })
   );
 
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
-
-  const stateContainer = selectTabRuntimeState(
-    toolkit.runtimeStateManager,
-    toolkit.getCurrentTab().id
-  ).stateContainer$.getValue()!;
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
 
   stateContainer.dataState.data$.documents$.next({
     fetchStatus: FetchStatus.COMPLETE,

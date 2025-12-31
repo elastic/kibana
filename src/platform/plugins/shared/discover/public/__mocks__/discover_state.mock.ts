@@ -249,6 +249,8 @@ export function getDiscoverInternalStateMock({
         if (!skipWaitForDataFetching) {
           await toolkit.waitForDataFetching({ tabId });
         }
+
+        return { stateContainer, customizationService };
       }
     ),
     waitForDataFetching: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {

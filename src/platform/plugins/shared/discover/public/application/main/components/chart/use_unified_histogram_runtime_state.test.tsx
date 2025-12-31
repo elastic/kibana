@@ -29,12 +29,10 @@ describe('useUnifiedHistogramRuntimeState', () => {
     const toolkit = getDiscoverInternalStateMock();
 
     await toolkit.initializeTabs();
-    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
-    const stateContainer = selectTabRuntimeState(
-      toolkit.runtimeStateManager,
-      toolkit.getCurrentTab().id
-    ).stateContainer$.getValue()!;
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
 
     return { toolkit, stateContainer };
   };

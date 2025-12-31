@@ -28,9 +28,11 @@ const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
 
   await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+  const { customizationService } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
 
-  return { toolkit };
+  return { toolkit, customizationService };
 };
 
 async function mountComponent({

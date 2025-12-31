@@ -87,7 +87,10 @@ describe('useDiscoverHistogram', () => {
     const toolkit = getDiscoverInternalStateMock();
 
     await toolkit.initializeTabs();
-    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
 
     toolkit.internalState.dispatch(
       internalStateActions.updateAppState({
@@ -98,11 +101,6 @@ describe('useDiscoverHistogram', () => {
         },
       })
     );
-
-    const stateContainer = selectTabRuntimeState(
-      toolkit.runtimeStateManager,
-      toolkit.getCurrentTab().id
-    ).stateContainer$.getValue()!;
 
     return { toolkit, stateContainer };
   };
