@@ -11,7 +11,13 @@
  *
  * @param type - The data source type (e.g., "notion", "github")
  * @returns The stack connector type with "." prefix (e.g., ".notion", ".github")
+ * @throws Error if type is empty or invalid
  */
 export function toStackConnectorType(type: string): string {
-  return `.${type}`;
+  if (!type || type.trim().length === 0) {
+    throw new Error('Connector type cannot be empty');
+  }
+
+  // If already prefixed with ".", return as-is
+  return type.startsWith('.') ? type : `.${type}`;
 }
