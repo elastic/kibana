@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type {
@@ -17,7 +15,7 @@ const BOLD_MD_TOKEN = '**';
 
 const strings = {
   getArgReferenceAliasesDetail: (aliases: string) =>
-    i18n.translate('presentationUtil.expressionInput.argReferenceAliasesDetail', {
+    i18n.translate('xpack.canvas.expressionInput.argReferenceAliasesDetail', {
       defaultMessage: '{BOLD_MD_TOKEN}Aliases{BOLD_MD_TOKEN}: {aliases}',
       values: {
         BOLD_MD_TOKEN,
@@ -25,7 +23,7 @@ const strings = {
       },
     }),
   getArgReferenceDefaultDetail: (defaultVal: string) =>
-    i18n.translate('presentationUtil.expressionInput.argReferenceDefaultDetail', {
+    i18n.translate('xpack.canvas.expressionInput.argReferenceDefaultDetail', {
       defaultMessage: '{BOLD_MD_TOKEN}Default{BOLD_MD_TOKEN}: {defaultVal}',
       values: {
         BOLD_MD_TOKEN,
@@ -33,7 +31,7 @@ const strings = {
       },
     }),
   getArgReferenceRequiredDetail: (required: string) =>
-    i18n.translate('presentationUtil.expressionInput.argReferenceRequiredDetail', {
+    i18n.translate('xpack.canvas.expressionInput.argReferenceRequiredDetail', {
       defaultMessage: '{BOLD_MD_TOKEN}Required{BOLD_MD_TOKEN}: {required}',
       values: {
         BOLD_MD_TOKEN,
@@ -41,7 +39,7 @@ const strings = {
       },
     }),
   getArgReferenceTypesDetail: (types: string) =>
-    i18n.translate('presentationUtil.expressionInput.argReferenceTypesDetail', {
+    i18n.translate('xpack.canvas.expressionInput.argReferenceTypesDetail', {
       defaultMessage: '{BOLD_MD_TOKEN}Types{BOLD_MD_TOKEN}: {types}',
       values: {
         BOLD_MD_TOKEN,
@@ -49,7 +47,7 @@ const strings = {
       },
     }),
   getFunctionReferenceAcceptsDetail: (acceptTypes: string) =>
-    i18n.translate('presentationUtil.expressionInput.functionReferenceAccepts', {
+    i18n.translate('xpack.canvas.expressionInput.functionReferenceAccepts', {
       defaultMessage: '{BOLD_MD_TOKEN}Accepts{BOLD_MD_TOKEN}: {acceptTypes}',
       values: {
         BOLD_MD_TOKEN,
@@ -57,7 +55,7 @@ const strings = {
       },
     }),
   getFunctionReferenceReturnsDetail: (returnType: string) =>
-    i18n.translate('presentationUtil.expressionInput.functionReferenceReturns', {
+    i18n.translate('xpack.canvas.expressionInput.functionReferenceReturns', {
       defaultMessage: '{BOLD_MD_TOKEN}Returns{BOLD_MD_TOKEN}: {returnType}',
       values: {
         BOLD_MD_TOKEN,
