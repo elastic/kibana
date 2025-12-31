@@ -62,7 +62,7 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.agentSelector.content', {
       defaultMessage:
-        'Your agent helps answer questions using its available tools. You can switch to a different agent or create a new one from here.',
+        "An agent's behavior is defined by its custom instructions and available tools. Switch agents when you need different capabilities for your tasks.",
     }),
   },
   llmSelector: {
@@ -71,7 +71,7 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.content', {
       defaultMessage:
-        'Your agent uses this LLM to generate responses. You can switch models here based on your needs.',
+        'Your agent uses this LLM to generate responses. Switch models to prioritize faster responses, lower costs, or more complex reasoning.',
     }),
   },
   // TODO: Add prompts step once we have prompts.
@@ -88,7 +88,7 @@ const labels = {
       defaultMessage: 'Browse your conversations 💬',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.content', {
-      defaultMessage: 'Jump back into previous conversations or start a new one from here.',
+      defaultMessage: 'Jump back into previous conversations from here.',
     }),
   },
   conversationActions: {
@@ -97,7 +97,7 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.content', {
       defaultMessage:
-        'This is your hub for key management actions. Use this menu to quickly jump to the agents, tools, and settings pages.',
+        'This menu is your hub for key management actions. Quickly jump to important pages from here.',
     }),
   },
   closeTour: i18n.translate('xpack.agentBuilder.agentBuilderTour.closeTour', {
