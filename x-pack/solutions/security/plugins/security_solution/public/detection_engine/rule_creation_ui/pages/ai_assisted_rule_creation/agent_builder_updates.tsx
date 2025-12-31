@@ -8,13 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCommentProps } from '@elastic/eui';
-import {
-  EuiCommentList,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiCommentList, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export interface ToolProgressUpdate {
   message: string;
@@ -30,10 +24,7 @@ interface AiAssistedRuleUpdatesProps {
  * Component that displays AI-assisted rule creation progress updates
  * from the agent builder API. Shows tool progress messages in a timeline format.
  */
-export const AiAssistedRuleUpdates: React.FC<AiAssistedRuleUpdatesProps> = ({
-  updates,
-}) => {
-
+export const AiAssistedRuleUpdates: React.FC<AiAssistedRuleUpdatesProps> = ({ updates }) => {
   const comments: EuiCommentProps[] = updates.map((update) => ({
     username: 'AI assistant',
     timelineAvatarAriaLabel: 'Tool progress',
@@ -68,4 +59,3 @@ export const AiAssistedRuleUpdates: React.FC<AiAssistedRuleUpdatesProps> = ({
     </>
   );
 };
-

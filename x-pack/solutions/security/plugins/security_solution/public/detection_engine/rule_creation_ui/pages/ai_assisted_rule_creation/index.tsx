@@ -84,7 +84,6 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   //   isCancelled: isAiRuleCreationCancelled,
   // } = useAiRuleCreationStream();
 
-
   const {
     rule,
     streamRuleCreation,
@@ -244,9 +243,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                       ) : null}
 
                       <EuiSpacer size="m" />
-                      <AiAssistedRuleUpdates
-                        updates={updates}
-                      />
+                      <AiAssistedRuleUpdates updates={updates} />
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>
                 </EuiResizablePanel>
