@@ -24,8 +24,8 @@ export class DependenciesInventoryPage {
   async goToPage(overrides?: { rangeFrom?: string; rangeTo?: string }) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies/inventory?${new URLSearchParams({
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
         ...overrides,
       })}`
     );
