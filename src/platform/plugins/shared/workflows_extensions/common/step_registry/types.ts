@@ -15,7 +15,8 @@ import type { z } from '@kbn/zod/v4';
  */
 export interface CommonStepDefinition<
   InputSchema extends z.ZodType = z.ZodType,
-  OutputSchema extends z.ZodType = z.ZodType
+  OutputSchema extends z.ZodType = z.ZodType,
+  ConfigSchema extends z.ZodObject = z.ZodObject
 > {
   /**
    * Unique identifier for this step type.
@@ -36,4 +37,11 @@ export interface CommonStepDefinition<
    * The output type is automatically inferred from this schema.
    */
   outputSchema: OutputSchema;
+
+  /**
+   * Zod schema for validating step config properties.
+   * Defines config properties that appear at the step level (outside the `with` block).
+   * Example: `agent-id` for agent.call step.
+   */
+  configSchema?: ConfigSchema;
 }
