@@ -6,11 +6,11 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/core/server';
-import type { LogMessageSource } from '@kbn/logging';
+import type { LogLevelId, LogMessageSource, LogRecord } from '@kbn/logging';
 
 const LOGGER_PREFIX = `[Entity Store v2]`;
 
-export class EntityStoreLogger {
+export class EntityStoreLogger implements Logger {
   readonly logger: Logger;
 
   constructor(logger: Logger) {
@@ -31,5 +31,25 @@ export class EntityStoreLogger {
 
   error(message: LogMessageSource | Error, meta?: LogMeta) {
     this.logger.error(`${LOGGER_PREFIX} ${message}`, meta);
+  }
+
+  trace(message: LogMessageSource, meta?: LogMeta): void {
+    this.logger.trace(`${LOGGER_PREFIX} ${message}`, meta);
+  }
+
+  fatal(message: LogMessageSource | Error, meta?: LogMeta): void {
+    this.logger.fatal(`${LOGGER_PREFIX} ${message}`, meta);
+  }
+
+  log(record: LogRecord): void {
+    this.logger.log({ ...record, message: `${LOGGER_PREFIX} ${record.message}` });
+  }
+
+  isLevelEnabled(level: LogLevelId): boolean {
+    return this.logger.isLevelEnabled(level);
+  }
+
+  get(...childContextPaths: string[]): Logger {
+    return this.logger.get(...childContextPaths);
   }
 }
