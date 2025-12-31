@@ -106,4 +106,3 @@ export const createMockPluginMetaInfo = (
   isPlugin: true,
   ...overrides,
 });
-
