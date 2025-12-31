@@ -1109,7 +1109,6 @@ export default function (providerContext: FtrProviderContext) {
             { space: customNamespaceId }
           );
 
-
           // initialize security-solution-default data-view
           dataView = dataViewRouteHelpersFactory(supertest);
           await dataView.create('security-solution');
