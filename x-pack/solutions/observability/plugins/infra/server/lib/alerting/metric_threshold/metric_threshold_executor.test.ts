@@ -2705,7 +2705,6 @@ describe('The metric threshold rule type', () => {
 
     describe("noDataBehavior: 'recover' with groupBy", () => {
       const alertIdA = 'a';
-      const alertIdB = 'b';
 
       const execute = () =>
         executor({
