@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
+import { test } from '../../../fixtures';
 
 test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
   const previewChartDataTestSubj = 'thresholdRulePreviewChart';
@@ -17,7 +17,7 @@ test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, (
 
     await pageObjects.rulesPage.createRuleButton.click();
     await pageObjects.rulesPage.observabilityCategory.click();
-    await pageObjects.rulesPage.customThresholdRuleType.click();
+    await pageObjects.rulesPage.customThresholdRuleTypeCard.click();
   });
 
   test('should render the empty chart only once at bootstrap', async ({ page }) => {
