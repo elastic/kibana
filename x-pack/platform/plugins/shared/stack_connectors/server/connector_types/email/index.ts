@@ -203,10 +203,15 @@ const AttachmentSchemaProps = {
 export const AttachmentSchema = schema.object(AttachmentSchemaProps);
 export type Attachment = TypeOf<typeof AttachmentSchema>;
 
+const emailSchema = schema.arrayOf(schema.string({ maxLength: 512 }), {
+  defaultValue: [],
+  maxSize: 100,
+});
+
 const ParamsSchemaProps = {
-  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  to: emailSchema,
+  cc: emailSchema,
+  bcc: emailSchema,
   subject: schema.string(),
   message: schema.string(),
   messageHTML: schema.nullable(schema.string()),
@@ -227,7 +232,6 @@ export const ParamsSchema = schema.object(ParamsSchemaProps);
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
-
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
@@ -236,6 +240,14 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
 
   if (addrs === 0) {
     throw new Error('no [to], [cc], or [bcc] entries');
+  }
+
+  try {
+    emailSchema.validate(to);
+    emailSchema.validate(cc);
+    emailSchema.validate(bcc);
+  } catch (error) {
+    throw new Error(`Invalid email addresses: ${error}`);
   }
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
