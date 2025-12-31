@@ -68,6 +68,36 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
   );
 
   apiTest(
+    'should be able to authenticate as UIAM user when the tokens are refreshed concurrently',
+    async ({ apiClient, log }) => {
+      const userSessionCookie = await userSessionCookieFactory({ lifetime: { accessToken: 2 } });
+      const response = await apiClient.get('internal/security/me', {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        responseType: 'json',
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
+
+      log.info('Waiting for the UIAM session to expire (+5s)…');
+      await setTimeoutAsync(5000);
+      log.info('Session expiration wait time is over, making the request again.');
+
+      const responses = await Promise.all(
+        Array.from({ length: 10 }, () =>
+          apiClient.get('internal/security/me', {
+            headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+            responseType: 'json',
+          })
+        )
+      );
+      for (const res of responses) {
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
+      }
+    }
+  );
+
+  apiTest(
     'should fail if both access and refresh tokens have expired',
     async ({ apiClient, log }) => {
       const userSessionCookie = await userSessionCookieFactory({

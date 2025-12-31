@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
 
 import {
@@ -61,35 +62,41 @@ apiTest.describe('[NON-MKI] Invalidate UIAM session', { tag: ['@svlSecurity'] },
     };
   });
 
-  apiTest('UIAM session tokens should not be usable after logging out', async ({ apiClient }) => {
-    // 1. Check that session is valid and UIAM accepts the tokens.
-    const [userSessionCookie, { accessToken, refreshToken }] = await userSessionCookieFactory();
-    let response = await apiClient.get('internal/security/me', {
-      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
-      responseType: 'json',
-    });
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
-    expect((await checkUiamAccessToken(accessToken)).status).toBe(200);
-    expect((await checkUiamRefreshToken(refreshToken)).status).toBe(200);
+  apiTest(
+    'UIAM session tokens should not be usable after logging out',
+    async ({ apiClient, log }) => {
+      // 1. Check that session is valid and UIAM accepts the tokens.
+      const [userSessionCookie, { accessToken, refreshToken }] = await userSessionCookieFactory();
+      let response = await apiClient.get('internal/security/me', {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        responseType: 'json',
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
+      // Check only access token here, refresh token will be checked after logout.
+      expect((await checkUiamAccessToken(accessToken)).status).toBe(200);
 
-    // 2. Logout to invalidate the session and tokens.
-    response = await apiClient.get('api/security/logout', {
-      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
-      responseType: 'json',
-    });
-    expect(response.statusCode).toBe(302);
+      // 2. Logout to invalidate the session and tokens.
+      response = await apiClient.get('api/security/logout', {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        responseType: 'json',
+      });
+      expect(response.statusCode).toBe(302);
 
-    // 3. Check that session is invalidated and UIAM no longer accepts the tokens.
-    response = await apiClient.get('internal/security/me', {
-      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
-      responseType: 'json',
-    });
-    expect(response.statusCode).toBe(401);
-    expect((await checkUiamAccessToken(accessToken)).status).toBe(401);
-    // WARN: UIAM currently does not invalidate refresh tokens upon logout.
-    // expect((await checkUiamRefreshToken(refreshToken)).status).toBe(401);
-  });
+      log.info('Waiting for the UIAM refresh 3s grace period to lapse (+5s)…');
+      await setTimeoutAsync(5000);
+      log.info('UIAM refresh grace period wait time is over, making the request again.');
+
+      // 3. Check that session is invalidated and UIAM no longer accepts the tokens.
+      response = await apiClient.get('internal/security/me', {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        responseType: 'json',
+      });
+      expect(response.statusCode).toBe(401);
+      expect((await checkUiamAccessToken(accessToken)).status).toBe(401);
+      expect((await checkUiamRefreshToken(refreshToken)).status).toBe(401);
+    }
+  );
 });
 
 const extractAttributeValue = (xmlDocument: string, attributeName: string) => {

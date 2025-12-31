@@ -165,6 +165,9 @@ export const UIAM_CONTAINERS = [
       '--env',
       'uiam.tokens.jwt.verify.clock.skew=PT2S',
 
+      '--env',
+      'uiam.tokens.refresh.grace_period=PT3S',
+
       '--health-cmd',
       'timeout 1 bash -c "</dev/tcp/localhost/8080"',
     ],

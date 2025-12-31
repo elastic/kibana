@@ -181,6 +181,8 @@ describe(`#runUiamContainer()`, () => {
             "uiam.tokens.jwt.signing.secret=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
             "--env",
             "uiam.tokens.jwt.verify.clock.skew=PT2S",
+            "--env",
+            "uiam.tokens.refresh.grace_period=PT3S",
             "--health-cmd",
             "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
             "--name",
