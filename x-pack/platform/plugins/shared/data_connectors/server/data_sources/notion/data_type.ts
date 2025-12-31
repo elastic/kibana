@@ -34,8 +34,6 @@ export const notionDataSource: DataTypeDefinition = {
     config: {},
   },
 
-  connectorSpecId: '.notion', // Links to @kbn/connector-specs icon
-
   generateWorkflows(stackConnectorId: string) {
     return [
       { content: generateQueryWorkflow(stackConnectorId), shouldGenerateABTool: true },

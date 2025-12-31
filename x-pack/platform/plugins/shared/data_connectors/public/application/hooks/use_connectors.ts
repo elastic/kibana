@@ -19,9 +19,8 @@ const transformDataSourceType = (dataTypeDefinition: DataTypeDefinition): Connec
   return {
     id: dataTypeDefinition.id,
     name: dataTypeDefinition.name,
-    type: dataTypeDefinition.stackConnector?.type,
+    type: dataTypeDefinition.stackConnector?.type, // Already has '.' prefix (e.g., '.notion')
     category: 'popular',
-    connectorSpecId: dataTypeDefinition.connectorSpecId,
   };
 };
 

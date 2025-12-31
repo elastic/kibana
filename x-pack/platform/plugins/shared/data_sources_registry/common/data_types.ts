@@ -79,10 +79,4 @@ export interface DataTypeDefinition {
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;
-
-  /**
-   * Connector spec ID for icon resolution (e.g., '.notion', '.github')
-   * Links to @kbn/connector-specs ConnectorIconsMap for lazy-loaded icons
-   */
-  connectorSpecId?: string;
 }

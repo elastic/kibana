@@ -24,9 +24,9 @@ export function getConnectorIcon(
   size: IconSize = 'l',
   fallbackIcon: string = 'application'
 ): JSX.Element {
-  // Try connector-specs lazy-loaded icon
-  if (connector.connectorSpecId) {
-    const LazyIcon = ConnectorIconsMap.get(connector.connectorSpecId);
+  // Try connector-specs lazy-loaded icon (type starts with '.')
+  if (connector.type?.startsWith('.')) {
+    const LazyIcon = ConnectorIconsMap.get(connector.type);
     if (LazyIcon) {
       // EuiLoadingSpinner doesn't support "original" size, so we use "m" as fallback
       const spinnerSize = size === 'original' ? 'm' : size;

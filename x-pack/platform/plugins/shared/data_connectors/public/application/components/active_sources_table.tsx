@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActiveSource } from '../../types/connector';
 import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
 import { AgentAvatarGroup } from './agent_avatar_group';
-import { getConnectorIcon, getConnectorSpecIdFromType } from '../../utils';
+import { getConnectorIcon, toStackConnectorType } from '../../utils';
 
 interface ActiveSourcesTableProps {
   sources: ActiveSource[];
@@ -39,9 +39,8 @@ const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
     const connector = {
       id: source.type,
       name: source.name,
-      type: source.type,
+      type: toStackConnectorType(source.type), // Convert 'notion' → '.notion'
       category: 'all' as const,
-      connectorSpecId: getConnectorSpecIdFromType(source.type),
     };
     return getConnectorIcon(connector, 'm', 'integration');
   }, [source.type, source.name]);

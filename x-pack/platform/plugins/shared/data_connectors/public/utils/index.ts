@@ -6,4 +6,4 @@
  */
 
 export { getConnectorIcon } from './get_connector_icon';
-export { getConnectorSpecIdFromType } from './get_connector_spec_id';
+export { toStackConnectorType } from './to_stack_connector_type';

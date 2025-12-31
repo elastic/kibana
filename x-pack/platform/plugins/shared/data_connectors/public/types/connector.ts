@@ -12,8 +12,7 @@ export interface Connector {
   name: string;
   type: string;
   category: ConnectorCategory;
-  connectorSpecId?: string; // lazy-loaded icons from connector-specs
-  icon?: string; // For dummy connectors - will be cleaned up
+  icon?: string; // For dummy connectors - EUI icon names
 }
 
 export interface Agent {
