@@ -121,7 +121,6 @@ const mountComponent = async ({
     isChartAvailable,
     panelsToggle: (
       <PanelsToggle
-        stateContainer={stateContainer}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
