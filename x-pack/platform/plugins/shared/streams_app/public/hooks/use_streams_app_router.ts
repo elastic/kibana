@@ -40,15 +40,19 @@ export function useStreamsAppRouter(): StatefulStreamsAppRouter {
       // Use history.push/replace to preserve search params (_g) during within-app navigation
       push: (...args) => {
         const path = getRouterPath(...args);
-        history.push({ pathname: path, search: history.location.search });
+        // history may be undefined in test environments without router context
+        const search = history?.location?.search || '';
+        history?.push({ pathname: path, search });
       },
       replace: (path, ...args) => {
         const nextPath = getRouterPath(path, ...args);
-        history.replace({ pathname: nextPath, search: history.location.search });
+        const search = history?.location?.search || '';
+        history?.replace({ pathname: nextPath, search });
       },
       link: (path, ...args) => {
         const routerPath = getRouterPath(path, ...args);
-        const search = history.location.search || '';
+        // history may be undefined in test environments without router context
+        const search = history?.location?.search || '';
         return http.basePath.prepend(`/app/streams${routerPath}${search}`);
       },
     }),
