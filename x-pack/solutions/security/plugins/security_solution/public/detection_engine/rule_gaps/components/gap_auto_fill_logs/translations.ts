@@ -139,3 +139,70 @@ export const GAP_AUTO_FILL_STATUS_NO_GAPS = i18n.translate(
     defaultMessage: 'No gaps',
   }
 );
+
+// Success tooltips
+export const GAP_AUTO_FILL_STATUS_SUCCESS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusSuccessTooltip',
+  {
+    defaultMessage: 'All rules successfully scheduled.',
+  }
+);
+
+// Error tooltips
+export const GAP_AUTO_FILL_STATUS_ERROR_ALL_FAILED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusErrorAllFailedTooltip',
+  {
+    defaultMessage: 'All rules failed to schedule.',
+  }
+);
+
+export const GAP_AUTO_FILL_STATUS_ERROR_SOME_FAILED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusErrorSomeFailedTooltip',
+  {
+    defaultMessage: 'At least 1 rule successfully scheduled, but other failed to schedule.',
+  }
+);
+
+export const GAP_AUTO_FILL_STATUS_ERROR_TASK_CRASH_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusErrorTaskCrashTooltip',
+  {
+    defaultMessage: 'An error occurred during task execution that caused the task to crash.',
+  }
+);
+
+export const GAP_AUTO_FILL_STATUS_ERROR_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusErrorTooltip',
+  {
+    defaultMessage: 'Some or all rules failed to schedule due to an error during task execution.',
+  }
+);
+
+// Skipped tooltips
+export const GAP_AUTO_FILL_STATUS_SKIPPED_NO_CAPACITY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusSkippedNoCapacityTooltip',
+  {
+    defaultMessage: 'No capacity to schedule more backfills.',
+  }
+);
+
+export const GAP_AUTO_FILL_STATUS_SKIPPED_RULES_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusSkippedRulesDisabledTooltip',
+  {
+    defaultMessage: 'There are unfilled gaps, but rules are disabled.',
+  }
+);
+
+export const GAP_AUTO_FILL_STATUS_SKIPPED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusSkippedTooltip',
+  {
+    defaultMessage: 'No capacity to schedule more backfills or some rules are disabled.',
+  }
+);
+
+// No gaps tooltip
+export const GAP_AUTO_FILL_STATUS_NO_GAPS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusNoGapsTooltip',
+  {
+    defaultMessage: 'No gaps with unfilled intervals present in the system.',
+  }
+);

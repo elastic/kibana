@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiFilterGroup,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
@@ -88,6 +89,51 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
     }
   };
 
+  const getStatusTooltip = (logEntry: SchedulerLog): string => {
+    const { status, message } = logEntry;
+
+    if (!status) {
+      return '';
+    }
+
+    const messageLower = message?.toLowerCase() || '';
+
+    switch (status) {
+      case GAP_AUTO_FILL_STATUS.NO_GAPS:
+        return i18n.GAP_AUTO_FILL_STATUS_NO_GAPS_TOOLTIP;
+
+      case GAP_AUTO_FILL_STATUS.SUCCESS:
+        return i18n.GAP_AUTO_FILL_STATUS_SUCCESS_TOOLTIP;
+
+      case GAP_AUTO_FILL_STATUS.ERROR:
+        if (messageLower.includes('error during execution')) {
+          return i18n.GAP_AUTO_FILL_STATUS_ERROR_TASK_CRASH_TOOLTIP;
+        }
+        if (messageLower.includes('all rules failed to schedule')) {
+          return i18n.GAP_AUTO_FILL_STATUS_ERROR_ALL_FAILED_TOOLTIP;
+        }
+        if (messageLower.includes('at least one rule successfully scheduled gap fills, but others failed to schedule')) {
+          return i18n.GAP_AUTO_FILL_STATUS_ERROR_SOME_FAILED_TOOLTIP;
+        }
+        return i18n.GAP_AUTO_FILL_STATUS_ERROR_TOOLTIP;
+
+      case GAP_AUTO_FILL_STATUS.SKIPPED:
+        if (messageLower.includes('capacity') || messageLower.includes('capacity limit reached')) {
+          return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_NO_CAPACITY_TOOLTIP;
+        }
+        if (
+          messageLower.includes('disabled') ||
+          messageLower.includes("can't schedule gap fills for any enabled rule")
+        ) {
+          return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_RULES_DISABLED_TOOLTIP;
+        }
+        return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_TOOLTIP;
+
+      default:
+        return '';
+    }
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -103,8 +149,8 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
         align: 'center',
         width: '150px',
         name: i18n.GAP_AUTO_FILL_LOGS_STATUS_COLUMN,
-        render: (status: SchedulerLog['status']) => {
-          let badgeColor: 'success' | 'hollow' | 'danger';
+        render: (status: SchedulerLog['status'], item: SchedulerLog) => {
+          let badgeColor: 'success' | 'hollow' | 'danger' | 'warning';
 
           switch (status) {
             case GAP_AUTO_FILL_STATUS.SUCCESS:
@@ -114,12 +160,21 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               badgeColor = 'danger';
               break;
             case GAP_AUTO_FILL_STATUS.SKIPPED:
+              badgeColor = 'warning';
+              break;
             case GAP_AUTO_FILL_STATUS.NO_GAPS:
             default:
               badgeColor = 'hollow';
           }
 
-          return <EuiBadge color={badgeColor}>{getStatusLabel(status)}</EuiBadge>;
+          const statusLabel = getStatusLabel(status);
+          const statusTooltip = getStatusTooltip(item);
+
+          return (
+            <EuiToolTip content={statusTooltip} position="top">
+              <EuiBadge color={badgeColor}>{statusLabel}</EuiBadge>
+            </EuiToolTip>
+          );
         },
       },
       {
