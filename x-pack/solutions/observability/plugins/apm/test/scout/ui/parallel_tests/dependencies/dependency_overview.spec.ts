@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../../fixtures';
-
-const SERVICE_NAME = 'opbeans-java';
+import { expect } from '@kbn/scout-oblt';
+import { test, testData } from '../../fixtures';
 
 test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -48,7 +46,9 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
         })
       ).toBeVisible();
       await expect(
-        dependencyDetailsPage.getServiceInUpstreamServicesTable(SERVICE_NAME)
+        dependencyDetailsPage.overviewTab.getServiceInUpstreamServicesTable(
+          testData.SERVICE_OPBEANS_JAVA
+        )
       ).toBeVisible();
     });
   });
@@ -61,13 +61,15 @@ test.describe('Dependency Overview Tab', { tag: ['@ess', '@svlOblt'] }, () => {
       await dependencyDetailsPage.goToOverviewTab();
     });
 
-    await test.step('Click on a service in upstream services table', async () => {
-      await dependencyDetailsPage.clickServiceInUpstreamServicesTable(SERVICE_NAME);
+    await test.step('click on a service in upstream services table', async () => {
+      await dependencyDetailsPage.overviewTab.clickServiceInUpstreamServicesTable(
+        testData.SERVICE_OPBEANS_JAVA
+      );
     });
 
     await test.step('Lands on the service overview page', async () => {
       const url = new URL(page.url());
-      expect(url.pathname).toContain(`/services/${SERVICE_NAME}/overview`);
+      expect(url.pathname).toContain(`/services/${testData.SERVICE_OPBEANS_JAVA}/overview`);
     });
   });
 

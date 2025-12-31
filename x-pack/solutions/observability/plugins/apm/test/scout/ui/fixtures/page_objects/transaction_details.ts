@@ -18,7 +18,6 @@ export class TransactionDetailsPage {
     end: string;
   }) {
     const { serviceName, transactionName, start, end } = params;
-
     const urlServiceName = encodeURIComponent(serviceName);
 
     await this.page.goto(
@@ -29,6 +28,30 @@ export class TransactionDetailsPage {
           rangeTo: end,
         }
       )}`
+    );
+    await waitForApmSettingsHeaderLink(this.page);
+  }
+
+  /**
+   * Navigate to service inventory page
+   */
+  async gotoServiceInventory(
+    serviceName: string,
+    timeRange: { rangeFrom: string; rangeTo: string }
+  ) {
+    const urlServiceName = encodeURIComponent(serviceName);
+
+    await this.page.goto(
+      `${this.kbnUrl.app('apm')}/services/${urlServiceName}?${new URLSearchParams({
+        rangeFrom: timeRange.rangeFrom,
+        rangeTo: timeRange.rangeTo,
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
+        serviceGroup: '',
+        transactionType: 'request',
+        comparisonEnabled: 'true',
+        offset: '1d',
+      })}`
     );
     await waitForApmSettingsHeaderLink(this.page);
   }
