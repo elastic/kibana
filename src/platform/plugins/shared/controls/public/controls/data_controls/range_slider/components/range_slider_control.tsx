@@ -191,6 +191,7 @@ export const RangeSliderControl: FC<Props> = ({
 
   return (
     <span
+      data-shared-item
       css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${uuid}`}

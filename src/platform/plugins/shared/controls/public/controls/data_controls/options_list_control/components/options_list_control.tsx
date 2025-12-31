@@ -246,6 +246,7 @@ export const OptionsListControl = ({
       compressed={isCompressed(componentApi)}
       css={optionListControlStyles.filterGroup}
       data-control-id={componentApi.uuid}
+      data-shared-item
     >
       <EuiInputPopover
         id={popoverId}
