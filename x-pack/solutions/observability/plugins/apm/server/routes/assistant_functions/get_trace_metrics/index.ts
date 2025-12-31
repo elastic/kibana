@@ -34,7 +34,7 @@ const MAX_NUMBER_OF_GROUPS = 100;
 
 /**
  * Fields that exist in TransactionMetric but NOT in ServiceTransactionMetric.
- * When grouping or filtering by these fields, we must use TransactionMetric (or TransactionEvent).
+ * When grouping or filtering by these fields, TransactionMetric (or TransactionEvent) is used.
  */
 const TRANSACTION_METRIC_ONLY_FIELDS = [
   TRANSACTION_NAME,

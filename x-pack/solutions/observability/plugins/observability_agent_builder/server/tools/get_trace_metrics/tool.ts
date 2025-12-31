@@ -34,7 +34,7 @@ const getTraceMetricsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id", "service.version", "cloud.region". If not specified, results are grouped by service.name.'
+      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields where possible for meaningful aggregations. If not specified, results are grouped by service.name.'
     ),
 });
 
