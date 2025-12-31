@@ -66,13 +66,13 @@ export { defaultExpression };
 const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
   {
     id: 'recover',
-    label: i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehavior.recover', {
+    label: i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.recover', {
       defaultMessage: "Recover if there's no data",
     }),
   },
   {
     id: 'remainActive',
-    label: i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehavior.remainActive', {
+    label: i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.remainActive', {
       defaultMessage: "Remain active if there's no data",
     }),
   },
@@ -80,7 +80,7 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
     id: 'alertOnNoData',
     label: (
       <>
-        {i18n.translate('xpack.infra.metrics.alertFlyout.noDataBehavior.alertOnNoData', {
+        {i18n.translate('xpack.infra.metricThreshold.rule.noDataBehavior.alertOnNoData', {
           defaultMessage: "Alert me if there's no data",
         })}{' '}
         <EuiIconTip
@@ -89,14 +89,11 @@ const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
           color="subdued"
           content={
             hasGroupBy
-              ? i18n.translate(
-                  'xpack.infra.customThreshold.rule.alertFlyout.groupDisappearHelpText',
-                  {
-                    defaultMessage:
-                      'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                  }
-                )
-              : i18n.translate('xpack.infra.customThreshold.rule.alertFlyout.noDataHelpText', {
+              ? i18n.translate('xpack.infra.metricThreshold.rule.groupDisappearHelpText', {
+                  defaultMessage:
+                    'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                })
+              : i18n.translate('xpack.infra.metricThreshold.rule.noDataHelpText', {
                   defaultMessage:
                     'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
                 })
