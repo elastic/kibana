@@ -557,6 +557,7 @@ describe('Legacy Alerts Client', () => {
       trackedRecoveredAlerts: {},
       alertDelay: 5,
       startedAt: null,
+      ruleRunMetricsStore,
     });
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({
