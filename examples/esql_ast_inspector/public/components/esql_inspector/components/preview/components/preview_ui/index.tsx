@@ -17,7 +17,7 @@ import { LimitCommand } from './components/limit_command';
 export const PreviewUi: React.FC = (props) => {
   const state = useEsqlInspector();
   const query = useBehaviorSubject(state.queryLastValid$);
-  const pipeStatements = useBehaviorSubject(state.pipeStatements$);
+  const [sourceStatement, ...statements] = useBehaviorSubject(state.pipeStatements$);
 
   if (!query) {
     return null;
@@ -38,8 +38,8 @@ export const PreviewUi: React.FC = (props) => {
         <EuiCodeBlock language="esql" isCopyable>
           import &#123; esql &#125; from &#39;@kbn/esql-language&#39;;
           <EuiSpacer />
-          const query = esql`{pipeStatements[0]}`;{'\n'}
-          {pipeStatements.map((statement) => {
+          const query = esql`{sourceStatement}`;{'\n'}
+          {statements.map((statement) => {
             return `query.pipe('${statement}');\n`;
           })}
         </EuiCodeBlock>
