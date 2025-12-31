@@ -90,5 +90,3 @@ export class CreateRuleRoute implements RouteHandler {
     }
   }
 }
-
-
