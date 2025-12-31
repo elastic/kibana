@@ -15,6 +15,7 @@ import { forkCommand } from './fork';
 import { renameCommand } from './rename';
 import { changePointCommand } from './change_point';
 import { completionCommand } from './completion';
+import { workflowCommand } from './workflow';
 import { dissectCommand } from './dissect';
 import { enrichCommand } from './enrich';
 import { evalCommand } from './eval';
@@ -44,6 +45,7 @@ const baseCommands = [
   renameCommand,
   changePointCommand,
   completionCommand,
+  workflowCommand,
   dissectCommand,
   enrichCommand,
   evalCommand,

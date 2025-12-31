@@ -10,6 +10,7 @@ lexer grammar Expression;
 // Expression - used by many commands
 //
 COMPLETION : 'completion'     -> pushMode(EXPRESSION_MODE);
+WORKFLOW : 'workflow'         -> pushMode(EXPRESSION_MODE);
 DISSECT : 'dissect'           -> pushMode(EXPRESSION_MODE);
 EVAL : 'eval'                 -> pushMode(EXPRESSION_MODE);
 GROK : 'grok'                 -> pushMode(EXPRESSION_MODE);
@@ -84,6 +85,7 @@ DECIMAL_LITERAL
 
 
 AND : 'and';
+AS : 'as';
 ASC : 'asc';
 ASSIGN : '=';
 BY : 'by';

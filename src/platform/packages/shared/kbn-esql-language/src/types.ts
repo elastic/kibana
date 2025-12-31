@@ -18,6 +18,7 @@ export type ESQLAstCommand =
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
   | ESQLAstCompletionCommand
+  | ESQLAstWorkflowCommand
   | ESQLAstFuseCommand
   | ESQLAstForkCommand;
 
@@ -131,6 +132,12 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
 export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   prompt: ESQLAstExpression;
   inferenceId: ESQLLiteral;
+  targetField?: ESQLColumn;
+}
+
+export interface ESQLAstWorkflowCommand extends ESQLCommand<'workflow'> {
+  workflowId: ESQLLiteral;
+  inputs: Array<{ name: string; value: ESQLAstExpression }>;
   targetField?: ESQLColumn;
 }
 
