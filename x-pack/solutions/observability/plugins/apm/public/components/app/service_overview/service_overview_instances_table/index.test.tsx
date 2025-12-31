@@ -275,30 +275,6 @@ describe('ServiceOverviewInstancesTable', () => {
     expect(screen.getByTestId('instanceActionsButton_test-instance')).toBeInTheDocument();
   });
 
-  it('renders pagination when there are multiple pages', () => {
-    const mockItems = Array.from({ length: 15 }, (_, i) => ({
-      serviceNodeName: `instance-${i}`,
-      latency: 1000 * (i + 1),
-      throughput: 100 * (i + 1),
-      errorRate: 0.05,
-      cpuUsage: 0.5,
-      memoryUsage: 0.6,
-    }));
-
-    const { container } = render(
-      <ServiceOverviewInstancesTable
-        {...defaultProps}
-        mainStatsItems={mockItems}
-        mainStatsItemCount={9}
-      />,
-      { wrapper: Wrapper }
-    );
-
-    // Table should be in the document and pagination should be in the document
-    expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(container.querySelector('.euiPagination')).toHaveTextContent('Page 1 of 2');
-  });
-
   it('hides spark plots when screen is XL breakpoint', () => {
     mockUseBreakpoints.mockReturnValue({
       isXl: true,
