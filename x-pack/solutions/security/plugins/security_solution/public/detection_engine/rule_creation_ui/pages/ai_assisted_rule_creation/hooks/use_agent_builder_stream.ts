@@ -39,7 +39,7 @@ export const useAgentBuilderStream = () => {
       try {
         const http = KibanaServices.get().http;
         const payload = {
-          input: message,
+          input: `Create detection rule based on the following query: ${message}`,
           connector_id: connectorId,
           capabilities: getKibanaDefaultAgentCapabilities(),
           attachments: [{ type: SecurityAgentBuilderAttachments.rule, data: { text: '' } }], // initial empty rule attachment
