@@ -7,7 +7,7 @@
 import url from 'url';
 import moment from 'moment/moment';
 import { synthtrace } from '../../../synthtrace';
-import { generateMobileData } from './generate_mobile.data';
+import { generateMobileData } from '../mobile/generate_data';
 
 const start = Date.now() - 1000;
 const end = Date.now();

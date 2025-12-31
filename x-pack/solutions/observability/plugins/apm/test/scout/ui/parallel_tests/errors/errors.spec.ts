@@ -10,13 +10,6 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-import {
-  ERROR_MESSAGE,
-  ERROR_GROUPING_KEY,
-  ERROR_GROUPING_KEY_SHORT,
-  PRODUCT_TRANSACTION_NAME,
-} from '../../fixtures/constants';
-
 test.describe(
   'Errors',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -30,14 +23,14 @@ test.describe(
       pageObjects: { errorsPage },
     }) => {
       await errorsPage.gotoServiceErrorsPage(
-        'opbeans-node',
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
+        testData.SERVICE_OPBEANS_NODE,
+        testData.START_DATE,
+        testData.END_DATE
       );
 
       await test.step('shows empty message when service has no errors', async () => {
         await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-          'opbeans-node'
+          testData.SERVICE_OPBEANS_NODE
         );
         await expect(page.getByText('No errors found')).toBeVisible();
       });
@@ -48,9 +41,9 @@ test.describe(
       pageObjects: { errorsPage },
     }) => {
       await errorsPage.gotoServiceErrorsPage(
-        'opbeans-java',
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
+        testData.SERVICE_OPBEANS_JAVA,
+        testData.START_DATE,
+        testData.END_DATE
       );
 
       await test.step('shows failed transaction rate and error occurrences charts', async () => {
@@ -63,7 +56,7 @@ test.describe(
 
       await test.step('errors table is populated', async () => {
         await errorsPage.waitForErrorsTableToLoad();
-        await expect(page.getByText(ERROR_MESSAGE)).toBeVisible();
+        await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible();
       });
 
       await test.step('clicking on type adds a filter in the searchbar', async () => {
@@ -91,24 +84,28 @@ test.describe(
       });
 
       await test.step('navigates to error detail page when clicking on an error in the list', async () => {
-        await page.getByRole('link', { name: ERROR_MESSAGE }).click();
-        await expect(page.getByText(`Error group ${ERROR_GROUPING_KEY_SHORT}`)).toBeVisible();
+        await page.getByRole('link', { name: testData.ERROR_MESSAGE }).click();
+        await expect(
+          page.getByText(`Error group ${testData.ERROR_GROUPING_KEY_SHORT}`)
+        ).toBeVisible();
         expect(page.url()).toContain(
-          'services/opbeans-java/errors/00000000000000000[MockError]%20Foo'
+          `services/${testData.SERVICE_OPBEANS_JAVA}/errors/00000000000000000[MockError]%20Foo`
         );
       });
     });
 
     test('shows error details page', async ({ page, pageObjects: { errorsPage } }) => {
       await errorsPage.gotoErrorDetailsPage(
-        'opbeans-java',
-        ERROR_GROUPING_KEY,
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
+        testData.SERVICE_OPBEANS_JAVA,
+        testData.ERROR_GROUPING_KEY,
+        testData.START_DATE,
+        testData.END_DATE
       );
 
       await test.step('shows error group header', async () => {
-        await expect(page.getByText(`Error group ${ERROR_GROUPING_KEY_SHORT}`)).toBeVisible();
+        await expect(
+          page.getByText(`Error group ${testData.ERROR_GROUPING_KEY_SHORT}`)
+        ).toBeVisible();
       });
 
       await test.step('shows errors distribution chart', async () => {
@@ -120,7 +117,9 @@ test.describe(
         await expect(page.getByText('Top 5 affected transactions')).toBeVisible();
         await expect(page.getByTestId('topErroneousTransactionsTable')).toBeVisible();
         await expect(
-          page.getByTestId('topErroneousTransactionsTable').getByText(PRODUCT_TRANSACTION_NAME)
+          page
+            .getByTestId('topErroneousTransactionsTable')
+            .getByText(testData.PRODUCT_TRANSACTION_NAME)
         ).toBeVisible();
       });
 
@@ -134,7 +133,7 @@ test.describe(
           .getByTestId('topErroneousTransactionsTable')
           .getByTestId('apmTransactionDetailLinkLink')
           .click();
-        expect(page.url()).toContain('opbeans-java/transactions/view');
+        expect(page.url()).toContain(`${testData.SERVICE_OPBEANS_JAVA}/transactions/view`);
       });
     });
 
@@ -145,10 +144,10 @@ test.describe(
       const nonExistentErrorKey = generateLongIdWithSeed('Error that does not exist');
 
       await errorsPage.gotoErrorDetailsPage(
-        'opbeans-java',
+        testData.SERVICE_OPBEANS_JAVA,
         nonExistentErrorKey,
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
+        testData.START_DATE,
+        testData.END_DATE
       );
 
       await test.step('shows zero occurrences badge', async () => {
@@ -161,17 +160,19 @@ test.describe(
       pageObjects: { errorsPage },
     }) => {
       await errorsPage.gotoServiceErrorsPage(
-        'opbeans-java',
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
+        testData.SERVICE_OPBEANS_JAVA,
+        testData.START_DATE,
+        testData.END_DATE
       );
 
       await test.step('clicking on an error in the list navigates to error detail page', async () => {
         await errorsPage.waitForErrorsTableToLoad();
-        await page.getByRole('link', { name: ERROR_MESSAGE }).click();
-        await expect(page.getByText(`Error group ${ERROR_GROUPING_KEY_SHORT}`)).toBeVisible();
+        await page.getByRole('link', { name: testData.ERROR_MESSAGE }).click();
+        await expect(
+          page.getByText(`Error group ${testData.ERROR_GROUPING_KEY_SHORT}`)
+        ).toBeVisible();
         expect(page.url()).toContain('/errors/');
-        expect(page.url()).toContain('opbeans-java');
+        expect(page.url()).toContain(testData.SERVICE_OPBEANS_JAVA);
       });
     });
 
@@ -180,9 +181,9 @@ test.describe(
       pageObjects: { errorsPage },
     }) => {
       await errorsPage.gotoServiceErrorsPage(
-        'opbeans-java',
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
+        testData.SERVICE_OPBEANS_JAVA,
+        testData.START_DATE,
+        testData.END_DATE
       );
 
       await test.step('table search input is visible', async () => {
@@ -191,20 +192,20 @@ test.describe(
       });
 
       await test.step('typing existing error message shows matching result', async () => {
-        await expect(page.getByText(ERROR_MESSAGE)).toBeVisible();
+        await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible();
         await errorsPage.tableSearchInput.fill('MockError');
-        await expect(page.getByText(ERROR_MESSAGE)).toBeVisible();
+        await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible();
       });
 
       await test.step('typing non-matching text hides results', async () => {
         await errorsPage.tableSearchInput.fill('nonexistent error message');
-        await expect(page.getByText(ERROR_MESSAGE)).toBeHidden();
+        await expect(page.getByText(testData.ERROR_MESSAGE)).toBeHidden();
         await expect(page.getByText('No errors found')).toBeVisible();
       });
 
       await test.step('clearing the search input shows all errors again', async () => {
         await errorsPage.tableSearchInput.clear();
-        await expect(page.getByText(ERROR_MESSAGE)).toBeVisible();
+        await expect(page.getByText(testData.ERROR_MESSAGE)).toBeVisible();
       });
     });
   }

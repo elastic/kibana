@@ -16,8 +16,8 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects: { serviceGroupsPage } }) => {
       await browserAuth.loginAsPrivilegedUser();
       await serviceGroupsPage.gotoServiceGroupsPageWithDateSelected(
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
+        testData.START_DATE,
+        testData.END_DATE
       );
     });
 
@@ -41,7 +41,10 @@ test.describe(
         await serviceGroupsPage.typeInTheSearchBar('agent.name:"go"');
 
         // verify expected synthetic services are listed and save
-        await serviceGroupsPage.expectByText(['synth-go-1', 'synth-go-2']);
+        await serviceGroupsPage.expectByText([
+          testData.SERVICE_SYNTH_GO,
+          testData.SERVICE_SYNTH_GO_2,
+        ]);
         await page.getByText('Save group').click();
 
         // Make sure the toast is visible and contains the correct text and then close it
@@ -64,7 +67,10 @@ test.describe(
       await test.step('opens service list when clicking on service group card', async () => {
         await page.getByTestId('serviceGroupCard').click();
         await expect(page.getByTestId('apmEditButtonEditGroupButton')).toBeVisible();
-        await serviceGroupsPage.expectByText(['synth-go-1', 'synth-go-2']);
+        await serviceGroupsPage.expectByText([
+          testData.SERVICE_SYNTH_GO,
+          testData.SERVICE_SYNTH_GO_2,
+        ]);
       });
 
       await test.step('deletes the service group', async () => {

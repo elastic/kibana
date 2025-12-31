@@ -22,11 +22,7 @@ test.describe(
       page,
       pageObjects: { transactionsOverviewPage },
     }) => {
-      await transactionsOverviewPage.goto(
-        'service-go',
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
-      );
+      await transactionsOverviewPage.goto('service-go', testData.START_DATE, testData.END_DATE);
 
       // Verify Transactions tab is selected (same as original Cypress check)
       await expect(page.getByTestId('transactionsTab')).toHaveAttribute('aria-selected', 'true');
@@ -40,11 +36,7 @@ test.describe(
       page,
       pageObjects: { transactionsOverviewPage },
     }) => {
-      await transactionsOverviewPage.goto(
-        'service-node',
-        testData.OPBEANS_START_DATE,
-        testData.OPBEANS_END_DATE
-      );
+      await transactionsOverviewPage.goto('service-node', testData.START_DATE, testData.END_DATE);
 
       // Verify default transaction type is 'request'
       const transactionTypeFilter = transactionsOverviewPage.getTransactionTypeFilter();

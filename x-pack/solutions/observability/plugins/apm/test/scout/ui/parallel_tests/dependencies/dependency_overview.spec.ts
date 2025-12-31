@@ -7,9 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
-
-const SERVICE_NAME = 'opbeans-java';
+import { test, testData } from '../../fixtures';
 
 test.describe(
   'Dependency Overview Tab',
@@ -55,7 +53,9 @@ test.describe(
           })
         ).toBeVisible();
         await expect(
-          dependencyDetailsPage.overviewTab.getServiceInUpstreamServicesTable(SERVICE_NAME)
+          dependencyDetailsPage.overviewTab.getServiceInUpstreamServicesTable(
+            testData.SERVICE_OPBEANS_JAVA
+          )
         ).toBeVisible();
       });
     });
@@ -69,12 +69,14 @@ test.describe(
       });
 
       await test.step('click on a service in upstream services table', async () => {
-        await dependencyDetailsPage.overviewTab.clickServiceInUpstreamServicesTable(SERVICE_NAME);
+        await dependencyDetailsPage.overviewTab.clickServiceInUpstreamServicesTable(
+          testData.SERVICE_OPBEANS_JAVA
+        );
       });
 
       await test.step('lands on the service overview page', async () => {
         const url = new URL(page.url());
-        expect(url.pathname).toContain(`/services/${SERVICE_NAME}/overview`);
+        expect(url.pathname).toContain(`/services/${testData.SERVICE_OPBEANS_JAVA}/overview`);
       });
     });
 
