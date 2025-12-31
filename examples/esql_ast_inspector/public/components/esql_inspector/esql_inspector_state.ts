@@ -31,6 +31,7 @@ export class EsqlInspectorState {
   public readonly from$ = new BehaviorSubject<ESQLCommand | null>(null);
   public readonly limit$ = new BehaviorSubject<ESQLCommand | null>(null);
   public readonly focusedNode$ = new BehaviorSubject<ESQLProperNode | null>(null);
+  public readonly pipeStatements$ = new BehaviorSubject<string[]>([]);
 
   constructor() {
     this.src$.subscribe((src) => {
@@ -69,6 +70,30 @@ export class EsqlInspectorState {
         } else {
           this.limit$.next(null);
         }
+
+        const queryTokens = query.tokens;
+        queryTokens.pop(); // Remove EOF token
+        const groupedTokens = queryTokens.reduce<Array<typeof query.tokens>>(
+          (acc, token) => {
+            if (token.type === 51) {
+              // PIPE
+              acc.push([]);
+            } else {
+              acc[acc.length - 1].push(token);
+            }
+            return acc;
+          },
+          [[]]
+        );
+
+        const concatenatedStatements = groupedTokens?.map((tokens) =>
+          tokens
+            .map((token) => token.text)
+            .join('')
+            .trim()
+        );
+
+        this.pipeStatements$.next(concatenatedStatements);
       }
     });
   }
