@@ -117,7 +117,7 @@ export async function getLogAiInsights({
     throw new Error('Log entry not found');
   }
 
-  const resourceAttrs = (logEntry.resource as { attributes?: Record<string, unknown> } | undefined)
+  const resourceAttributes = (logEntry.resource as { attributes?: Record<string, unknown> } | undefined)
     ?.attributes;
 
   const serviceName =
