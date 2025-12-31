@@ -12,7 +12,7 @@ import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-ob
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from './types';
-import { transformDashboardOut, transformReferencesOut } from './transforms';
+import { transformDashboardOut } from './transforms';
 
 export function getDashboardMeta(
   savedObject:
@@ -47,7 +47,7 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references
     ) as DashboardState;
-    references = transformReferencesOut(savedObject.references ?? []);
+    references = savedObject.references ?? [];
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }
