@@ -65,7 +65,6 @@ export async function getLogAiInsights({
     - **Root cause**: Analyze using ServiceSummary, DownstreamDependencies, TraceDocuments, and TraceServices if available
     - **Impact**: Note any affected downstream services or dependencies
     - **Next steps**: Suggest specific actions for investigation or remediation
-    - **Timeline**: Include when the issue started *only if this information exists in the data*
 
     ### Warning Logs
     - Assess whether the warning indicates an emerging problem or is purely informational
