@@ -14,6 +14,8 @@ import {
   InternalStateProvider,
   RuntimeStateProvider,
   CurrentTabProvider,
+  selectTabRuntimeState,
+  useRuntimeState,
 } from '../application/main/state_management/redux';
 import {
   DiscoverCustomizationProvider,
@@ -29,6 +31,55 @@ import { ChartPortalsRenderer } from '../application/main/components/chart';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ScopedDiscoverEBTManager } from '../ebt_manager';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
+import type { InternalStateMockToolkit } from './discover_state.mock';
+import { from } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+
+export const WrappedDiscoverTestProvider = ({
+  toolkit,
+  ...props
+}: Pick<DiscoverTestProviderProps, 'usePortalsRenderer' | 'children'> & {
+  toolkit: InternalStateMockToolkit;
+}) => {
+  const [internalState$] = useState(() => from(toolkit.internalState));
+  const internalState = useObservable(internalState$, toolkit.internalState.getState());
+  const currentTabId = internalState.tabs.unsafeCurrentId;
+  const currentTabRuntimeState = selectTabRuntimeState(toolkit.runtimeStateManager, currentTabId);
+  const stateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const customizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
+  const adHocDataViews = useRuntimeState(toolkit.runtimeStateManager.adHocDataViews$);
+  const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
+  const runtimeState = useMemo<CombinedRuntimeState | undefined>(
+    () => (currentDataView ? { adHocDataViews, currentDataView } : undefined),
+    [adHocDataViews, currentDataView]
+  );
+  const scopedProfilesManager = useRuntimeState(currentTabRuntimeState.scopedProfilesManager$);
+  const scopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
+
+  return (
+    <DiscoverTestProvider
+      services={toolkit.services}
+      stateContainer={stateContainer}
+      customizationService={customizationService}
+      scopedProfilesManager={scopedProfilesManager}
+      scopedEbtManager={scopedEbtManager}
+      runtimeState={runtimeState}
+      currentTabId={currentTabId}
+      {...props}
+    />
+  );
+};
+
+export type DiscoverTestProviderProps = PropsWithChildren<{
+  services?: DiscoverServices;
+  stateContainer?: DiscoverStateContainer;
+  customizationService?: DiscoverCustomizationService;
+  scopedProfilesManager?: ScopedProfilesManager;
+  scopedEbtManager?: ScopedDiscoverEBTManager;
+  runtimeState?: CombinedRuntimeState;
+  currentTabId?: string;
+  usePortalsRenderer?: boolean;
+}>;
 
 export const DiscoverTestProvider = ({
   services: originalServices,
@@ -40,16 +91,7 @@ export const DiscoverTestProvider = ({
   currentTabId: originalCurrentTabId,
   usePortalsRenderer,
   children,
-}: PropsWithChildren<{
-  services?: DiscoverServices;
-  stateContainer?: DiscoverStateContainer;
-  customizationService?: DiscoverCustomizationService;
-  scopedProfilesManager?: ScopedProfilesManager;
-  scopedEbtManager?: ScopedDiscoverEBTManager;
-  runtimeState?: CombinedRuntimeState;
-  currentTabId?: string;
-  usePortalsRenderer?: boolean;
-}>) => {
+}: DiscoverTestProviderProps) => {
   const [queryClient] = useState(() => new QueryClient());
   const services = useMemo(
     () => originalServices ?? createDiscoverServicesMock(),

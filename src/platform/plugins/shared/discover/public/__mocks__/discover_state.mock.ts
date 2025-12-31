@@ -177,6 +177,7 @@ export function getDiscoverInternalStateMock({
   const toolkit = {
     internalState,
     runtimeStateManager,
+    services,
     initializeTabs: async ({
       persistedDiscoverSession,
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
