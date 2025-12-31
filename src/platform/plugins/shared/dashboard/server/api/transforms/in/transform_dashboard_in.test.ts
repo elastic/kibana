@@ -117,7 +117,7 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should return error when passed non-control group reference', () => {
+  it('should return error when passed references', () => {
     const dashboardState: DashboardState = {
       title: 'title',
       references: [
@@ -133,7 +133,7 @@ describe('transformDashboardIn', () => {
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": null,
-        "error": [Error: References are only supported for controlGroupInput.],
+        "error": [Error: References are not supported.],
         "references": null,
       }
     `);

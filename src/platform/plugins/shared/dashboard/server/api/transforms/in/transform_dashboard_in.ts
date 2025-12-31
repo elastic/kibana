@@ -44,6 +44,9 @@ export const transformDashboardIn = (
       ...rest
     } = dashboardState;
 
+    if (incomingReferences) {
+      throw new Error(`References are not supported.`);
+    }
     const tagReferences = transformTagsIn(tags);
 
     const {
