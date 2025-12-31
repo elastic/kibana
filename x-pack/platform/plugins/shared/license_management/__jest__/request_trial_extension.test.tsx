@@ -19,7 +19,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    expect(rendered.isEmptyRender()).toBeTruthy();
+    expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
   test('should display when license is active and trial has been used', () => {
     const rendered = getComponent(
@@ -31,9 +31,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.render();
-    expect(html).not.toBeNull();
-    expect(html).toMatchSnapshot();
+    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
   test('should not display when license is not active and trial has not been used', () => {
     const rendered = getComponent(
@@ -45,7 +43,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    expect(rendered.isEmptyRender()).toBeTruthy();
+    expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
   test('should display when license is not active and trial has been used', () => {
     const rendered = getComponent(
@@ -57,9 +55,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.render();
-    expect(html).not.toBeNull();
-    expect(html).toMatchSnapshot();
+    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
   test('should display when platinum license is not active and trial has been used', () => {
     const rendered = getComponent(
@@ -71,9 +67,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.render();
-    expect(html).not.toBeNull();
-    expect(html).toMatchSnapshot();
+    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
   test('should display when enterprise license is not active and trial has been used', () => {
     const rendered = getComponent(
@@ -85,9 +79,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.render();
-    expect(html).not.toBeNull();
-    expect(html).toMatchSnapshot();
+    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
   test('should not display when platinum license is active and trial has been used', () => {
     const rendered = getComponent(
@@ -99,6 +91,6 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    expect(rendered.isEmptyRender()).toBeTruthy();
+    expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
 });

@@ -16,7 +16,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.render()).toMatchSnapshot();
+    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
   test('should display when license is expired', () => {
     const rendered = getComponent(
@@ -25,7 +25,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.render()).toMatchSnapshot();
+    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
   test('should display when license is about to expire', () => {
     // ten days from now
@@ -36,7 +36,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.render()).toMatchSnapshot();
+    expect(rendered.renderResult.asFragment()).toMatchSnapshot();
   });
   test('should not display for active basic license', () => {
     const rendered = getComponent(
@@ -45,7 +45,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.isEmptyRender()).toBeTruthy();
+    expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
   test('should not display for active gold license', () => {
     const rendered = getComponent(
@@ -54,7 +54,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.isEmptyRender()).toBeTruthy();
+    expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
   test('should not display for active platinum license', () => {
     const rendered = getComponent(
@@ -63,6 +63,6 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.isEmptyRender()).toBeTruthy();
+    expect(rendered.renderResult.container).toBeEmptyDOMElement();
   });
 });

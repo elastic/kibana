@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-/** @type {[number, Record<string, string>, string]} */
-export const UPLOAD_LICENSE_EXPIRED = [
+type MockResponse = [number, Record<string, string>, string];
+
+export const UPLOAD_LICENSE_EXPIRED: MockResponse = [
   200,
   { 'Content-Type': 'application/json' },
   '{"acknowledged": "true", "license_status": "expired"}',
 ];
 
-/** @type {[number, Record<string, string>, string]} */
-export const UPLOAD_LICENSE_REQUIRES_ACK = [
+export const UPLOAD_LICENSE_REQUIRES_ACK: MockResponse = [
   200,
   { 'Content-Type': 'application/json' },
   `{
@@ -27,22 +27,19 @@ export const UPLOAD_LICENSE_REQUIRES_ACK = [
     }`,
 ];
 
-/** @type {[number, Record<string, string>, string]} */
-export const UPLOAD_LICENSE_SUCCESS = [
+export const UPLOAD_LICENSE_SUCCESS: MockResponse = [
   200,
   { 'Content-Type': 'application/json' },
   '{"acknowledged": "true", "license_status": "valid"}',
 ];
 
-/** @type {[number, Record<string, string>, string]} */
-export const UPLOAD_LICENSE_INVALID = [
+export const UPLOAD_LICENSE_INVALID: MockResponse = [
   200,
   { 'Content-Type': 'application/json' },
   '{"acknowledged": "true", "license_status": "invalid"}',
 ];
 
-/** @type {[number, Record<string, string>, string]} */
-export const UPLOAD_LICENSE_TLS_NOT_ENABLED = [
+export const UPLOAD_LICENSE_TLS_NOT_ENABLED: MockResponse = [
   200,
   { 'Content-Type': 'application/json' },
   `{
