@@ -27,6 +27,17 @@ jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_for
   )),
 }));
 
+jest.mock(
+  '../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time',
+  () => ({
+    getFormattedDate: jest.fn(() => '2023-10-27 10:00:00'),
+  })
+);
+
+jest.mock('../../../common/lib/kibana', () => ({
+  useDateFormat: jest.fn(() => jest.fn()),
+}));
+
 const mockAttacks = getMockAttackDiscoveryAlerts();
 
 describe('useGetDefaultGroupTitleRenderers', () => {
