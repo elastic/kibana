@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ModalHost, type ModalHostHandles } from './modal_host';
 import { navigateToIndexDetailsPage } from '../../../../../services/routing';
 import { notificationService } from '../../../../../services/notification';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../services/routing', () => ({
   ...jest.requireActual('../../../../../services/routing'),
