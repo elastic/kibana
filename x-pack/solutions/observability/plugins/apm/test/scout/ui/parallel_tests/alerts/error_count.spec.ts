@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const SERVICE_NAME = 'unstable-java';
 const START_DATE = 'now-15m';
@@ -28,7 +29,7 @@ test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
     apiServices,
   }) => {
     await test.step('land on service inventory and opens alerts context menu', async () => {
-      await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(START_DATE, END_DATE);
+      await serviceInventoryPage.gotoServiceInventory({ rangeFrom: START_DATE, rangeTo: END_DATE });
       await alertsControls.openContextMenu();
     });
 
@@ -61,7 +62,11 @@ test.describe('Alerts', { tag: ['@ess', '@svlOblt'] }, () => {
       const alert = foundResponse.data.data.find((obj: any) => obj.name === RULE_NAME);
       expect(alert).toBeDefined();
       await apiServices.alerting.rules.runSoon(alert!.id);
-      await apiServices.alerting.waiting.waitForNextExecution(alert!.id);
+      await apiServices.alerting.waiting.waitForNextExecution(
+        alert!.id,
+        undefined,
+        EXTENDED_TIMEOUT
+      );
     });
 
     await test.step('see alert in service alerts tab', async () => {

@@ -4,51 +4,61 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
+import { SERVICE_MOBILE_ANDROID, SERVICE_MOBILE_IOS, SERVICE_SYNTH_GO } from '../constants';
 
-export function generateData({ from, to }: { from: number; to: number }) {
+export function mobileServices({
+  from,
+  to,
+}: {
+  from: number;
+  to: number;
+}): SynthtraceGenerator<ApmFields> {
   const range = timerange(from, to);
-  const synthGo1 = apm
+
+  const synthGo = apm
     .service({
-      name: 'synth-go-1',
+      name: SERVICE_SYNTH_GO,
       environment: 'production',
       agentName: 'go',
     })
-    .instance('my-instance');
+    .instance('synth-go-instance');
 
   const synthIOS = apm
     .service({
-      name: 'synth-ios',
+      name: SERVICE_MOBILE_IOS,
       environment: 'production',
       agentName: 'iOS/swift',
     })
-    .instance('my-instance');
+    .instance('synth-ios-instance');
 
   const synthAndroid = apm
     .service({
-      name: 'synth-android',
+      name: SERVICE_MOBILE_ANDROID,
       environment: 'production',
       agentName: 'android/java',
     })
-    .instance('my-instance');
+    .instance('synth-android-instance');
 
-  return range.interval('1m').generator((timestamp) => {
-    return [
-      synthGo1
-        .transaction({ transactionName: 'GET /apple 🍎' })
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => [
+      synthGo
+        .transaction({ transactionName: 'GET /apple' })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
       synthIOS
-        .transaction({ transactionName: 'GET /banana 🍌' })
+        .transaction({ transactionName: 'GET /banana' })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
       synthAndroid
-        .transaction({ transactionName: 'GET /apple 🍎' })
+        .transaction({ transactionName: 'GET /apple' })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
-    ];
-  });
+    ]);
 }
