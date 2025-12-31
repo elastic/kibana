@@ -120,6 +120,13 @@ export class StreamsApp {
     await this.page.getByTestId('breadcrumb first').click();
   }
 
+  async clickStreamsBreadcrumb() {
+    await this.page
+      .locator('[data-test-subj^="breadcrumb"]')
+      .filter({ hasText: 'Streams' })
+      .click();
+  }
+
   // Streams table utility methods
   async expectStreamsTableVisible() {
     await expect(this.page.getByTestId('streamsTable')).toBeVisible();
