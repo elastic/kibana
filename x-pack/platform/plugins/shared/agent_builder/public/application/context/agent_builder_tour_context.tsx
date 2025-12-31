@@ -88,7 +88,7 @@ const labels = {
       defaultMessage: 'Browse your conversations 💬',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.content', {
-      defaultMessage: 'Jump back into previous conversations from here.',
+      defaultMessage: 'Find all your previous conversations here.',
     }),
   },
   conversationActions: {
@@ -97,7 +97,7 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.content', {
       defaultMessage:
-        'This menu is your hub for key management actions. Quickly jump to important pages from here.',
+        'This menu is your hub for key management actions. You can quickly access key actions from here.',
     }),
   },
   closeTour: i18n.translate('xpack.agentBuilder.agentBuilderTour.closeTour', {
