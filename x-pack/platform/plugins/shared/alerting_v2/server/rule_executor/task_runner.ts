@@ -9,7 +9,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 
-import type { AlertingV2Config } from '../config';
+import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { RawEsqlRule } from '../saved_objects';
@@ -26,7 +26,7 @@ export function createRuleExecutorTaskRunner({
 }: {
   logger: Logger;
   coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>;
-  config: AlertingV2Config;
+  config: PluginConfig;
 }) {
   return ({ taskInstance, abortController, fakeRequest }: RunContext) => {
     return {

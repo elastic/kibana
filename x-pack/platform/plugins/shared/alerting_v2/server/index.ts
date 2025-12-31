@@ -11,7 +11,7 @@ import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup, PluginInitializer, Route } from '@kbn/core-di-server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
-import type { AlertingV2Config } from './config';
+import type { PluginConfig } from './config';
 import { configSchema } from './config';
 import { setupSavedObjects } from './saved_objects';
 import { initializeRuleExecutorTaskDefinition } from './rule_executor';
@@ -19,7 +19,7 @@ import { CreateEsqlRuleRoute } from './routes/create_esql_rule_route';
 import { UpdateEsqlRuleRoute } from './routes/update_esql_rule_route';
 import { registerFeaturePrivileges } from './lib/security/privileges';
 
-export const config: PluginConfigDescriptor<AlertingV2Config> = {
+export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
 };
 
@@ -33,7 +33,7 @@ export const module = new ContainerModule(({ bind }) => {
     const pluginConfig = container.get(
       PluginInitializer('config')
     ) as PluginInitializerContext['config'];
-    const alertingConfig = pluginConfig.get<AlertingV2Config>();
+    const alertingConfig = pluginConfig.get<PluginConfig>();
 
     // Register feature privileges
     registerFeaturePrivileges(container.get(PluginSetup('features')));
@@ -58,4 +58,4 @@ export const module = new ContainerModule(({ bind }) => {
   });
 });
 
-export type { AlertingV2Config } from './config';
+export type { PluginConfig as AlertingV2Config } from './config';

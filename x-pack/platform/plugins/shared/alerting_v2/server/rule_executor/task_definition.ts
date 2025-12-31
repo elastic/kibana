@@ -9,7 +9,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { schema } from '@kbn/config-schema';
 
-import type { AlertingV2Config } from '../config';
+import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { createRuleExecutorTaskRunner } from './task_runner';
 
@@ -19,7 +19,7 @@ export function initializeRuleExecutorTaskDefinition(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   coreStartServices: Promise<[CoreStart, AlertingServerStartDependencies, unknown]>,
-  config: AlertingV2Config
+  config: PluginConfig
 ) {
   taskManager.registerTaskDefinitions({
     [ALERTING_RULE_EXECUTOR_TASK_TYPE]: {

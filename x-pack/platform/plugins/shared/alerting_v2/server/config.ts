@@ -12,4 +12,4 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
-export type AlertingV2Config = TypeOf<typeof configSchema>;
+export type PluginConfig = TypeOf<typeof configSchema>;
