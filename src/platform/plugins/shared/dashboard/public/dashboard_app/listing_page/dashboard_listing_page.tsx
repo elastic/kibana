@@ -37,7 +37,7 @@ export const DashboardListingPage = ({
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingPageProps) => {
-  const { listingViewRegistry } = useDashboardMountContext();
+  const { getListingTabs } = useDashboardMountContext();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
     let isMounted = true;
@@ -112,7 +112,7 @@ export const DashboardListingPage = ({
           getDashboardUrl={(id, timeRestore) => {
             return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
           }}
-          listingViewRegistry={listingViewRegistry}
+          getTabs={getListingTabs}
         />
       )}
     </>

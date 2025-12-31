@@ -97,7 +97,7 @@ export class EventAnnotationListingPlugin
       },
     };
     dependencies.visualizations.listingViewRegistry.add(annotationGroupsTabConfig);
-    dependencies.dashboard.listingViewRegistry.add(annotationGroupsTabConfig);
+    dependencies.dashboard.registerListingPageTab(annotationGroupsTabConfig);
   }
 
   public start(core: CoreStart, plugins: object): void {

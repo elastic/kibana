@@ -14,11 +14,6 @@ import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { AppDeepLinkLocations } from '@kbn/core/public';
 
-/**
- * Registry for adding custom tabs to the Dashboard listing view.
- */
-export type DashboardListingViewRegistry = Pick<Set<TableListTab>, 'add'>;
-
 /** Tab interface with optional deep link support. */
 export type DashboardListingTab = TableListTab & {
   deepLink?: {
@@ -37,7 +32,7 @@ export type DashboardListingProps = PropsWithChildren<{
   getDashboardUrl: (dashboardId: string, usesTimeRestore: boolean) => string;
   urlStateEnabled?: boolean;
   showCreateDashboardButton?: boolean;
-  listingViewRegistry?: DashboardListingViewRegistry;
+  getTabs?: () => DashboardListingTab[];
 }>;
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {

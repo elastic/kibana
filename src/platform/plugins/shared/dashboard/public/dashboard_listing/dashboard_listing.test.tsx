@@ -20,14 +20,12 @@ import { render, waitFor, act } from '@testing-library/react';
 import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
 
 import { DashboardListing } from './dashboard_listing';
-import type { DashboardListingProps, DashboardListingViewRegistry } from './types';
+import type { DashboardListingProps, DashboardListingTab } from './types';
 
 jest.mock('@kbn/content-management-tabbed-table-list-view', () => ({
   __esModule: true,
   TabbedTableListView: jest.fn().mockReturnValue(null),
 }));
-
-const emptyRegistry: DashboardListingViewRegistry = new Set();
 
 const renderDashboardListing = (
   props: Partial<DashboardListingProps> = {},
@@ -40,7 +38,7 @@ const renderDashboardListing = (
           <DashboardListing
             goToDashboard={jest.fn()}
             getDashboardUrl={jest.fn()}
-            listingViewRegistry={emptyRegistry}
+            getTabs={() => []}
             {...props}
           />
         </Route>
@@ -67,7 +65,7 @@ test('renders TabbedTableListView with correct title and dashboards tab', () => 
   expect(props.tabs.length).toBe(1);
 });
 
-test('works without listingViewRegistry (for embedded use cases)', () => {
+test('works without getTabs (for embedded use cases)', () => {
   render(
     <I18nProvider>
       <MemoryRouter initialEntries={['/list']}>
@@ -84,16 +82,9 @@ test('works without listingViewRegistry (for embedded use cases)', () => {
   expect(props.tabs[0].id).toBe('dashboards');
 });
 
-test('reads activeTab from URL path param when tab exists in registry', () => {
-  const mockTab = {
-    id: 'custom-tab',
-    title: 'Custom Tab',
-    getTableList: jest.fn(),
-  };
-  const registry = new Set([mockTab]);
-
+test('reads activeTab from URL path param when tab exists', () => {
   renderDashboardListing(
-    { listingViewRegistry: registry },
+    { getTabs: () => [{ id: 'custom-tab', title: 'Custom Tab', getTableList: jest.fn() }] },
     { initialEntries: ['/list/custom-tab'] }
   );
 
@@ -102,16 +93,15 @@ test('reads activeTab from URL path param when tab exists in registry', () => {
   expect(props.activeTabId).toBe('custom-tab');
 });
 
-test('appends registry tabs after built-in tabs and preserves getTableList', () => {
+test('appends additional tabs after built-in tabs and preserves getTableList', () => {
   const mockGetTableList = jest.fn();
-  const mockRegistryTab = {
+  const mockAdditionalTab: DashboardListingTab = {
     id: 'annotations',
     title: 'Annotations',
     getTableList: mockGetTableList,
   };
-  const registry = new Set([mockRegistryTab]);
 
-  renderDashboardListing({ listingViewRegistry: registry });
+  renderDashboardListing({ getTabs: () => [mockAdditionalTab] });
 
   expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
   const props = mockTabbedTableListView.mock.calls[0][0];
@@ -121,14 +111,13 @@ test('appends registry tabs after built-in tabs and preserves getTableList', () 
 });
 
 test('changeActiveTab updates route to show new tab', async () => {
-  const mockTab = {
+  const mockTab: DashboardListingTab = {
     id: 'custom-tab',
     title: 'Custom Tab',
     getTableList: jest.fn(),
   };
-  const registry = new Set([mockTab]);
 
-  renderDashboardListing({ listingViewRegistry: registry });
+  renderDashboardListing({ getTabs: () => [mockTab] });
 
   expect(mockTabbedTableListView).toHaveBeenCalledTimes(1);
   const { changeActiveTab } = mockTabbedTableListView.mock.calls[0][0];

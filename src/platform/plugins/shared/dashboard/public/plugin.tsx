@@ -65,7 +65,7 @@ import type {
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
-import type { DashboardListingViewRegistry, DashboardListingTab } from './dashboard_listing/types';
+import type { DashboardListingTab } from './dashboard_listing/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
@@ -120,7 +120,7 @@ export interface DashboardStartDependencies {
 }
 
 export interface DashboardSetup {
-  listingViewRegistry: DashboardListingViewRegistry;
+  registerListingPageTab: (tab: DashboardListingTab) => void;
 }
 
 export interface DashboardStart {
@@ -138,7 +138,7 @@ export class DashboardPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
-  private listingViewRegistry: DashboardListingViewRegistry = new Set();
+  private listingViewRegistry: Set<DashboardListingTab> = new Set();
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -243,7 +243,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           onAppLeave: params.onAppLeave,
           setHeaderActionMenu: params.setHeaderActionMenu,
-          listingViewRegistry: this.listingViewRegistry,
+          getListingTabs: () => Array.from(this.listingViewRegistry as Set<DashboardListingTab>),
         };
 
         return mountApp({
@@ -283,7 +283,9 @@ export class DashboardPlugin
     }
 
     return {
-      listingViewRegistry: this.listingViewRegistry,
+      registerListingPageTab: (tab: DashboardListingTab) => {
+        this.listingViewRegistry.add(tab);
+      },
     };
   }
 
@@ -315,8 +317,9 @@ export class DashboardPlugin
     }
 
     if (deepLinks.length > 0) {
+      const currentUpdater = this.appStateUpdater.getValue();
       this.appStateUpdater.next((app) => ({
-        ...this.appStateUpdater.getValue()(app),
+        ...currentUpdater(app),
         deepLinks,
       }));
     }

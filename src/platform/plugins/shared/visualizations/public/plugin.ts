@@ -567,8 +567,9 @@ export class VisualizationsPlugin
       setSpaces(spaces);
       spaces.getActiveSpace$().subscribe((space) => {
         if (!space) return;
+        const currentUpdater = this.appStateUpdater.getValue();
         this.appStateUpdater.next((app) => ({
-          ...this.appStateUpdater.getValue()(app),
+          ...currentUpdater(app),
           visibleIn:
             space.solution && space.solution !== 'classic' ? [] : ['globalSearch', 'sideNav'],
         }));

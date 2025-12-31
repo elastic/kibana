@@ -11,7 +11,7 @@ import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
+import type { DashboardSetup, DashboardListingTab } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { i18n } from '@kbn/i18n';
@@ -46,7 +46,7 @@ export class VisualizationListingPlugin
     core: CoreSetup<VisualizationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
-    const visualizationsTabConfig = {
+    const visualizationsTabConfig: DashboardListingTab = {
       title: i18n.translate('visualizationListing.listingViewTitle', {
         defaultMessage: 'Visualizations',
       }),
@@ -74,7 +74,7 @@ export class VisualizationListingPlugin
     };
 
     if (dependencies.dashboard) {
-      dependencies.dashboard.listingViewRegistry.add(visualizationsTabConfig);
+      dependencies.dashboard.registerListingPageTab(visualizationsTabConfig);
     }
   }
 

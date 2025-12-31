@@ -27,7 +27,7 @@ export const DashboardListing = ({
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
-  listingViewRegistry,
+  getTabs,
 }: DashboardListingProps) => {
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
@@ -44,15 +44,9 @@ export const DashboardListing = ({
         getDashboardUrl,
         useSessionStorageIntegration,
         initialFilter,
-        listingViewRegistry,
+        getTabs,
       }),
-    [
-      goToDashboard,
-      getDashboardUrl,
-      useSessionStorageIntegration,
-      initialFilter,
-      listingViewRegistry,
-    ]
+    [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs]
   );
 
   const activeTabId = tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';

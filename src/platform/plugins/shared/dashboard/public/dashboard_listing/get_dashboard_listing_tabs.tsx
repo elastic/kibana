@@ -33,14 +33,10 @@ import { type DashboardListingProps, type DashboardSavedObjectUserContent } from
 
 type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
-  | 'goToDashboard'
-  | 'getDashboardUrl'
-  | 'useSessionStorageIntegration'
-  | 'initialFilter'
-  | 'listingViewRegistry'
+  'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
 >;
 
-type TabContentProps = Omit<GetDashboardListingTabsParams, 'listingViewRegistry'> & {
+type TabContentProps = Omit<GetDashboardListingTabsParams, 'getTabs'> & {
   parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>;
 };
 
@@ -103,7 +99,7 @@ export const getDashboardListingTabs = ({
   getDashboardUrl,
   useSessionStorageIntegration,
   initialFilter,
-  listingViewRegistry,
+  getTabs,
 }: GetDashboardListingTabsParams): TableListTab<DashboardSavedObjectUserContent>[] => {
   const commonProps = {
     goToDashboard,
@@ -122,10 +118,8 @@ export const getDashboardListingTabs = ({
     ),
   };
 
-  // Additional tabs from registry (e.g., visualizations and annotation groups)
-  const registryTabs = listingViewRegistry
-    ? Array.from(listingViewRegistry as Set<TableListTab>)
-    : [];
+  // Additional tabs (e.g., visualizations and annotation groups)
+  const additionalTabs = getTabs ? getTabs() : [];
 
-  return [dashboardsTab, ...registryTabs];
+  return [dashboardsTab, ...additionalTabs];
 };
