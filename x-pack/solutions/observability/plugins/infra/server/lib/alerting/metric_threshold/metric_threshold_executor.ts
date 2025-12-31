@@ -247,7 +247,7 @@ export const createMetricThresholdExecutor =
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear =
-      _alertOnGroupDisappear !== false || params.noDataBehavior === 'remainActive';
+      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
 
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
@@ -368,11 +368,11 @@ export const createMetricThresholdExecutor =
        * If `alertOnNoData` is true but `alertOnGroupDisappear` is false, we don't need to worry about the {a, b, c} possibility.
        * At this point in the function, a false `alertOnGroupDisappear` would already have prevented group 'a' from being evaluated at all.
        */
-      if (
-        alertOnNoData ||
-        (alertOnGroupDisappear && hasGroups) ||
-        params.noDataBehavior === 'remainActive'
-      ) {
+      const shouldBuildNoDataReason = params.noDataBehavior
+        ? params.noDataBehavior !== 'recover'
+        : alertOnNoData || (alertOnGroupDisappear && hasGroups);
+
+      if (shouldBuildNoDataReason) {
         // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
         // check to see if a No Data state has occurred
         if (nextState === AlertStates.NO_DATA || isIndeterminateState) {
