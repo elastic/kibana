@@ -13,8 +13,8 @@ import { EntityType } from '../domain/definitions/constants';
 import type { ResourcesService } from '../domain/resources_service';
 import type { EntityStoreLogger } from '../infra/logging';
 
-type QueryParametersSchema = z.infer<typeof QueryParametersSchema>;
-const QueryParametersSchema = z.object({
+type BodySchema = z.infer<typeof BodySchema>;
+const BodySchema = z.object({
   entityType: z.array(EntityType).optional(),
 });
 
@@ -36,13 +36,13 @@ export function registerInstall(
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(QueryParametersSchema),
+            body: buildRouteValidationWithZod(BodySchema),
           },
         },
       },
       async (ctx, req, res) => {
         logger.debug('Install api called');
-        resourceService.install(req.query.entityType);
+        resourceService.install(req.body.entityType);
 
         return res.ok({
           body: {
