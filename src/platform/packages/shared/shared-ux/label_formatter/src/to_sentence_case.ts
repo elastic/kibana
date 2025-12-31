@@ -50,6 +50,8 @@ const TITLE_CASE_GLOSSARY = [
   'API keys',
   'Detection rules (SIEM)',
   'SLOs',
+  'TLS certificates',
+  'Cloud Connect',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));
