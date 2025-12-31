@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Alert as LegacyAlert } from '../../alert/alert';
+import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildOngoingAlert } from './build_ongoing_alert';
-import type { AlertRuleData } from '../types';
+import type { AlertRuleData } from '../../types';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -35,7 +35,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
-import { alertRule, existingFlattenedNewAlert, existingExpandedNewAlert } from './test_fixtures';
+import { alertRule, existingFlattenedNewAlert, existingExpandedNewAlert } from '../test_fixtures';
 
 for (const flattened of [true, false]) {
   const existingAlert = flattened ? existingFlattenedNewAlert : existingExpandedNewAlert;

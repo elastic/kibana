@@ -954,10 +954,11 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(3);
+          expect(spy).toHaveBeenCalledTimes(4);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
           expect(spy).toHaveBeenNthCalledWith(2, 'delayed');
           expect(spy).toHaveBeenNthCalledWith(3, 'recovered');
+          expect(spy).toHaveBeenNthCalledWith(4, 'delayed');
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active or delayed alerts ${ruleInfo}.`,

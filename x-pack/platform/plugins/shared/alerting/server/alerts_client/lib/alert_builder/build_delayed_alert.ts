@@ -17,9 +17,9 @@ import {
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
-import type { Alert as LegacyAlert } from '../../alert/alert';
-import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import type { AlertRule } from '../types';
+import type { Alert as LegacyAlert } from '../../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../../types';
+import type { AlertRule } from '../../types';
 
 interface BuildDelayedAlertOpts<
   LegacyState extends AlertInstanceState,

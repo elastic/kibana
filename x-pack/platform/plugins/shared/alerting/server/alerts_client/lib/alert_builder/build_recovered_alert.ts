@@ -4,47 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
+  ALERT_RULE_TAGS,
+  SPACE_IDS,
   ALERT_ACTION_GROUP,
-  ALERT_CONSECUTIVE_MATCHES,
-  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
-  ALERT_PREVIOUS_ACTION_GROUP,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_RULE_TAGS,
-  ALERT_TIME_RANGE,
+  ALERT_STATUS,
   EVENT_ACTION,
-  SPACE_IDS,
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_END,
+  ALERT_TIME_RANGE,
+  ALERT_START,
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_SEVERITY_IMPROVING,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_STATUS_RECOVERED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
-import { get, omit } from 'lodash';
-import type { Alert as LegacyAlert } from '../../alert/alert';
-import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import type { AlertRule, AlertRuleData } from '../types';
-import { stripFrameworkFields } from './strip_framework_fields';
-import { nanosToMicros } from './nanos_to_micros';
-import {
-  removeUnflattenedFieldsFromAlert,
-  replaceRefreshableAlertFields,
-  replaceEmptyAlertFields,
-} from './format_alert';
-import { filterAlertState } from './filter_alert_state';
-import { getAlertMutedStatus } from './get_alert_muted_status';
+import { get } from 'lodash';
+import type { Alert as LegacyAlert } from '../../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../../types';
+import type { AlertRule, AlertRuleData } from '../../types';
+import { stripFrameworkFields } from '../strip_framework_fields';
+import { nanosToMicros } from '../nanos_to_micros';
+import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from '../format_alert';
+import { filterAlertState } from '../filter_alert_state';
 
-interface BuildOngoingAlertOpts<
+interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
@@ -55,20 +54,20 @@ interface BuildOngoingAlertOpts<
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
   ruleData?: AlertRuleData;
-  isImproving: boolean | null;
-  payload?: DeepPartial<AlertData>;
   runTimestamp?: string;
+  recoveryActionGroup: string;
+  payload?: DeepPartial<AlertData>;
   timestamp: string;
   kibanaVersion: string;
   dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
- * Updates an existing alert document with data from the LegacyAlert class
+ * Updates an active alert document to recovered
  * Currently only populates framework fields and not any rule type specific fields
  */
 
-export const buildOngoingAlert = <
+export const buildRecoveredAlert = <
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
@@ -77,75 +76,74 @@ export const buildOngoingAlert = <
 >({
   alert,
   legacyAlert,
-  payload,
-  isImproving,
   rule,
   ruleData,
-  runTimestamp,
   timestamp,
+  payload,
+  runTimestamp,
+  recoveryActionGroup,
   kibanaVersion,
   dangerouslyCreateAlertsInAllSpaces,
-}: BuildOngoingAlertOpts<
+}: BuildRecoveredAlertOpts<
   AlertData,
   LegacyState,
   LegacyContext,
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
-  // Sets array fields to empty arrays if previously reported in the existing alert
-  // but not present in the payload
-  replaceEmptyAlertFields(alert, payload);
   const cleanedPayload = stripFrameworkFields(payload);
 
   // Make sure that any alert fields that are updateable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
-
-  // Omit fields that are overwrite-able with undefined value
-  const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
   const alertState = legacyAlert.getState();
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
-  const alertInstanceId = legacyAlert.getId();
-  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+
+  // Preserve ALERT_MUTED from existing alert
+  const alertMuted = get(alert, ALERT_MUTED);
 
   const alertUpdates = {
-    // Set latest rule configuration
-    ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
-    [EVENT_ACTION]: 'active',
+    [EVENT_ACTION]: 'close',
     [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
-    // Because we're building this alert after the action execution handler has been
-    // run, the scheduledExecutionOptions for the alert has been cleared and
-    // the lastScheduledActions has been set. If we ever change the order of operations
-    // to build and persist the alert before action execution handler, we will need to
-    // update where we pull the action group from.
-    // Set latest action group as this may have changed during execution (ex: error -> warning)
-    [ALERT_ACTION_GROUP]: legacyAlert.getScheduledActionOptions()?.actionGroup,
+    [ALERT_RULE_EXECUTION_UUID]: rule[ALERT_RULE_EXECUTION_UUID],
+    // Set the recovery action group
+    [ALERT_ACTION_GROUP]: recoveryActionGroup,
     // Set latest flapping state
     [ALERT_FLAPPING]: legacyAlert.getFlapping(),
     // Set latest flapping_history
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
+    // Alert is recovering from active state so by default it is improving
+    [ALERT_SEVERITY_IMPROVING]: true,
+    [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
     // Set latest maintenance window Names
     [ALERT_MAINTENANCE_WINDOW_NAMES]: legacyAlert.getMaintenanceWindowNames(),
-    // Set latest match count
+    // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
-    // Set muted state
-    [ALERT_MUTED]: isMuted,
-    // Set the time range
-    ...(alertState.start
+    // Preserve muted state from existing alert
+    ...(alertMuted !== undefined ? { [ALERT_MUTED]: alertMuted } : {}),
+    // Set status to 'recovered'
+    [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+    // Set latest duration as recovered alerts should have updated duration
+    ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
+    // Set end time
+    ...(alertState.end && alertState.start
       ? {
-          [ALERT_TIME_RANGE]: { gte: alertState.start },
+          [ALERT_START]: alertState.start,
+          [ALERT_END]: alertState.end,
+          [ALERT_TIME_RANGE]: {
+            gte: alertState.start,
+            lte: alertState.end,
+          },
         }
       : {}),
-    // Set latest duration as ongoing alerts should have updated duration
-    ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
-    ...(isImproving != null ? { [ALERT_SEVERITY_IMPROVING]: isImproving } : {}),
-    [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
+
     [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
+    // Set latest kibana version
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(
       new Set([
@@ -172,12 +170,13 @@ export const buildOngoingAlert = <
   //   'kibana.alert.field1': 'value2'
   // }
   // the expanded field from the existing alert is removed
-  const expandedAlert = removeUnflattenedFieldsFromAlert(cleanedAlert, {
+  const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
     ...cleanedPayload,
     ...alertUpdates,
     ...refreshableAlertFields,
   });
-  return deepmerge.all([expandedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
+
+  return deepmerge.all([cleanedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };

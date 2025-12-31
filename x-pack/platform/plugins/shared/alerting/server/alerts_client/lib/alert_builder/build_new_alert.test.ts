@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Alert as LegacyAlert } from '../../alert/alert';
+import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
@@ -32,8 +32,8 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
-import { alertRule } from './test_fixtures';
-import type { AlertRuleData } from '../types';
+import { alertRule } from '../test_fixtures';
+import type { AlertRuleData } from '../../types';
 
 describe('buildNewAlert', () => {
   test('should build alert document with info from legacy alert', () => {

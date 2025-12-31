@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Alert as LegacyAlert } from '../../alert/alert';
+import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import {
   SPACE_IDS,
@@ -35,7 +35,7 @@ import {
   alertRule,
   existingFlattenedRecoveredAlert,
   existingExpandedRecoveredAlert,
-} from './test_fixtures';
+} from '../test_fixtures';
 
 describe('buildUpdatedRecoveredAlert', () => {
   test('should update already recovered flattened alert document with updated flapping values and timestamp only', () => {

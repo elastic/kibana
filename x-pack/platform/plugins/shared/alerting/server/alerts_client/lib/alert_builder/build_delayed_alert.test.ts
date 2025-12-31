@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Alert as LegacyAlert } from '../../alert/alert';
+import { Alert as LegacyAlert } from '../../../alert/alert';
 import {
   ALERT_ACTION_GROUP,
   ALERT_INSTANCE_ID,
@@ -16,7 +16,7 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_DELAYED,
 } from '@kbn/rule-data-utils';
-import { alertRule } from './test_fixtures';
+import { alertRule } from '../test_fixtures';
 import { buildDelayedAlert } from './build_delayed_alert';
 import { get } from 'lodash';
 

@@ -36,13 +36,13 @@ import {
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { Alert as LegacyAlert } from '../../alert/alert';
-import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import type { AlertRule, AlertRuleData } from '../types';
-import { stripFrameworkFields } from './strip_framework_fields';
-import { nanosToMicros } from './nanos_to_micros';
-import { filterAlertState } from './filter_alert_state';
-import { getAlertMutedStatus } from './get_alert_muted_status';
+import type { Alert as LegacyAlert } from '../../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../../types';
+import type { AlertRule, AlertRuleData } from '../../types';
+import { stripFrameworkFields } from '../strip_framework_fields';
+import { nanosToMicros } from '../nanos_to_micros';
+import { filterAlertState } from '../filter_alert_state';
+import { getAlertMutedStatus } from '../get_alert_muted_status';
 
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
