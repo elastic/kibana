@@ -62,15 +62,16 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.agentSelector.content', {
       defaultMessage:
-        'I’m here to help with your questions. Pick a different agent or customize a new one anytime.',
+        'Your agent helps answer questions using its available tools. You can switch to a different agent or create a new one from here.',
     }),
   },
   llmSelector: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.title', {
-      defaultMessage: 'You’re using this model 🧠',
+      defaultMessage: 'Select your model 🧠',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.llmSelector.content', {
-      defaultMessage: 'I’ll answer using this LLM. Switch to another model you have setup.',
+      defaultMessage:
+        'Your agent uses this LLM to generate responses. You can switch models here based on your needs.',
     }),
   },
   // TODO: Add prompts step once we have prompts.
@@ -84,19 +85,19 @@ const labels = {
   // },
   conversationsHistory: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.title', {
-      defaultMessage: 'Your conversations 💬',
+      defaultMessage: 'Browse your conversations 💬',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationsHistory.content', {
-      defaultMessage: 'Come back to earlier chats or jump between them from here.',
+      defaultMessage: 'Jump back into previous conversations or start a new one from here.',
     }),
   },
   conversationActions: {
     title: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.title', {
-      defaultMessage: 'Additional actions ⚙️',
+      defaultMessage: 'Jump to key actions ⚙️',
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.content', {
       defaultMessage:
-        'Access conversation actions, agent controls, and management settings from here.',
+        'This is your hub for key management actions. Use this menu to quickly jump to the agents, tools, and settings pages.',
     }),
   },
   closeTour: i18n.translate('xpack.agentBuilder.agentBuilderTour.closeTour', {
