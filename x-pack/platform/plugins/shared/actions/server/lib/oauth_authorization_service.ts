@@ -124,10 +124,7 @@ export class OAuthAuthorizationService {
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
     const clientId = secrets.clientId || config?.clientId;
     const scope = secrets.scope || config?.scope;
-    // Filter out empty strings for redirectUri (treat as undefined)
-    const redirectUri =
-      (secrets.redirectUri && secrets.redirectUri !== '' ? secrets.redirectUri : undefined) ||
-      (config?.redirectUri && config.redirectUri !== '' ? config.redirectUri : undefined);
+    const redirectUri = secrets.redirectUri || config?.redirectUri;
 
     if (!authorizationUrl || !clientId) {
       throw new Error(
