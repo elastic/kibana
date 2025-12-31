@@ -13,6 +13,9 @@ export interface LogDocument {
     name?: string;
     environment?: string;
   };
+  resource?: {
+    attributes?: Record<string, unknown>;
+  };
   [key: string]: unknown;
 }
 
