@@ -17,8 +17,7 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-assistant/common
-dependsOn:
-  - '@kbn/core-feature-flags-browser'
+dependsOn: []
 tags:
   - shared-common
   - package
