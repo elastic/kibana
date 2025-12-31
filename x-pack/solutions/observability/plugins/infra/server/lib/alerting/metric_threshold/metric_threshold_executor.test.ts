@@ -2627,7 +2627,6 @@ describe('The metric threshold rule type', () => {
 
     describe("noDataBehavior: 'remainActive' with groupBy", () => {
       const alertIdA = 'a';
-      const alertIdB = 'b';
 
       const execute = () =>
         executor({
