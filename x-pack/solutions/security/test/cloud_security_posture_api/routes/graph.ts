@@ -105,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
       // Note: Asset Inventory uses the 'generic' entity type
       try {
         await supertest
-          .delete(`${spacePath}/api/entity_store/engines/generic?data=true`)
+          .delete(`${spacePath}/api/entity_store/engines/generic?delete_data=true`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         logger.debug(`Deleted entity store generic engine for space: ${spaceId || 'default'}`);
@@ -140,6 +140,25 @@ export default function (providerContext: FtrProviderContext) {
       await retry.waitFor('enrich policy to be created', async () => {
         try {
           await es.enrich.getPolicy({ name: getEnrichPolicyId(spaceId) });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      });
+    },
+
+    /**
+     * Executes the enrich policy and waits for completion
+     * Uses retry logic in case the policy is not yet fully ready
+     */
+    executeEnrichPolicy: async (spaceId?: string) => {
+      const spaceIdentifier = spaceId || 'default';
+      await retry.waitFor(`enrich policy to be executed for ${spaceIdentifier} space`, async () => {
+        try {
+          await es.enrich.executePolicy({
+            name: getEnrichPolicyId(spaceId),
+            wait_for_completion: true,
+          });
           return true;
         } catch (e) {
           return false;
@@ -1091,20 +1110,6 @@ export default function (providerContext: FtrProviderContext) {
             { space: customNamespaceId }
           );
 
-          // Load fresh entity data
-          await esArchiver.load(
-            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
-          );
-
-          // Wait for entity data to be indexed before proceeding
-          // This ensures the enrich policy will have data when it executes
-          await retry.waitFor('entity data to be indexed', async () => {
-            const response = await es.count({
-              index: entitiesIndex,
-            });
-            // 8 entities in default space (3 original + 5 for multi-target test) + 4 in test space = 12 total
-            return response.count === 12;
-          });
 
           // initialize security-solution-default data-view
           dataView = dataViewRouteHelpersFactory(supertest);
@@ -1121,6 +1126,27 @@ export default function (providerContext: FtrProviderContext) {
           // Wait for enrich policy to be created (async operation after enable returns)
           await entityStoreHelpers.waitForEnrichPolicyCreated();
           await entityStoreHelpers.waitForEnrichPolicyCreated(customNamespaceId);
+
+          // Load fresh entity data
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
+          );
+
+          // Wait for entity data to be indexed before proceeding
+          // This ensures the enrich policy will have data when it executes
+          await retry.waitFor('entity data to be indexed', async () => {
+            const response = await es.count({
+              index: entitiesIndex,
+            });
+            // 8 entities in default space (3 original + 5 for multi-target test) + 4 in test space = 12 total
+            return response.count === 12;
+          });
+
+          // Explicitly execute enrich policies to ensure they have the latest entity data
+          // This is needed because the policy execution during enableAssetInventory might
+          // not have all entity data indexed yet due to async indexing
+          await entityStoreHelpers.executeEnrichPolicy();
+          await entityStoreHelpers.executeEnrichPolicy(customNamespaceId);
 
           // Wait for enrich indexes to be created AND populated with data
           await entityStoreHelpers.waitForEnrichIndexPopulated();
