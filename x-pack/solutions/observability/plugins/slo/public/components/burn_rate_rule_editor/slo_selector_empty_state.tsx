@@ -29,7 +29,7 @@ export function SloSelectorEmptyState() {
         <EuiText size="xs">
           <FormattedMessage
             id="xpack.slo.rules.sloSelector.noSlosAvailableDescription"
-            defaultMessage="This alert requires an SLO. Create an SLO to continue."
+            defaultMessage="This rule requires an SLO. Create one to continue."
           />
         </EuiText>
       }
