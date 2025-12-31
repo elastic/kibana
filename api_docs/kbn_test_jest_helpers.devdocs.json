@@ -486,81 +486,9 @@
           },
           {
             "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_list.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_list.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_list.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
             "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/index.ts"
           },
           {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/helpers/index.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/data_streams_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/data_streams_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/index_templates_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/index_templates_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/indices_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/indices_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/indices_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/indices_tab.helpers.ts"
-          },
-          {
             "plugin": "@kbn/security-ui-components",
             "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
           },
@@ -571,34 +499,6 @@
           {
             "plugin": "@kbn/security-ui-components",
             "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/index.ts"
           },
           {
             "plugin": "security",
@@ -1315,102 +1215,6 @@
             "path": "x-pack/platform/plugins/private/upgrade_assistant/__jest__/client_integration/overview/overview.helpers.ts"
           },
           {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_list.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_list.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_details.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_details.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/create_enrich_policy/create_enrich_policy.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/create_enrich_policy/create_enrich_policy.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/data_streams_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/data_streams_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/enrich_policies.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/home.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/home.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/index_templates_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/index_templates_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/indices_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/home/indices_tab.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_details_page/index_details_page.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_details_page/index_details_page.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_template_wizard/template_clone.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_template_wizard/template_clone.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_template_wizard/template_create.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_template_wizard/template_create.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_template_wizard/template_edit.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/__jest__/client_integration/index_template_wizard/template_edit.helpers.ts"
-          },
-          {
             "plugin": "searchprofiler",
             "path": "x-pack/platform/plugins/shared/searchprofiler/public/application/components/license_warning_notice/license_warning_notice.test.ts"
           },
@@ -1433,30 +1237,6 @@
           {
             "plugin": "ingestPipelines",
             "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/application/components/pipeline_editor/__jest__/processors/processor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_create.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_create.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_edit.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/component_template_edit.helpers.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/platform/plugins/shared/index_management/public/application/components/mappings_editor/__jest__/client_integration/helpers/mappings_editor.helpers.tsx"
           },
           {
             "plugin": "dataViewEditor",
