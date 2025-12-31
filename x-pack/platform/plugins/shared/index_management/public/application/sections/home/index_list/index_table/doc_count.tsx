@@ -29,7 +29,7 @@ export const DocCountCell = ({ indexName, docCountApi }: DocCountCellProps) => {
     return <EuiLoadingSpinner size="m" />;
   }
 
-  if (result.status === 'error') {
+  if (result.status === RequestResultType.Error) {
     return (
       <EuiToolTip
         content={i18n.translate('xpack.idxMgmt.indexTable.docCountErrorTooltip', {
