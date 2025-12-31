@@ -132,8 +132,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(await breakdownLabel.getVisibleText()).to.eql('Top 9 values of extension.raw');
-        // Shows all 5 extension types plus Other with 9 top values
-        expect(values).to.eql(['jpg', 'css', 'png', 'gif', 'php', 'Other']);
+        // Shows all 5 extension types (no Other bucket since all values fit within top 9)
+        expect(values).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
       });
     });
 

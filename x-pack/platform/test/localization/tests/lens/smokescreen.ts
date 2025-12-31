@@ -393,7 +393,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
 
-      expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 5));
+      expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 9));
       expect(sizeByText).to.be(termTranslator('average', 'machine.ram'));
     });
 
