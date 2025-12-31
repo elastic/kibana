@@ -30,6 +30,7 @@ import type { GenericAggType } from '@kbn/observability-plugin/public';
 import { RuleConditionChart } from '@kbn/observability-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
+import type { NoDataBehavior } from '../../../../common/alerting/metrics';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import {
   useMetricsDataViewContext,
@@ -471,6 +472,7 @@ export const Expressions: React.FC<Props> = (props) => {
           }
         >
           <EuiRadioGroup
+            name="noDataBehavior"
             options={getNoDataBehaviorOptions(hasGroupBy)}
             idSelected={
               ruleParams.noDataBehavior ||
@@ -479,7 +481,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 : 'recover')
             }
             onChange={(id) => {
-              setRuleParams('noDataBehavior', id as 'recover' | 'remainActive' | 'alertOnNoData');
+              setRuleParams('noDataBehavior', id as NoDataBehavior);
               setIsNoDataChecked(id === 'alertOnNoData');
               if (id === 'alertOnNoData') {
                 if (hasGroupBy) {
