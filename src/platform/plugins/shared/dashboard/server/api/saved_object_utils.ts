@@ -47,7 +47,7 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references
     ) as DashboardState;
-    references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
+    references = transformReferencesOut(savedObject.references ?? []);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }
