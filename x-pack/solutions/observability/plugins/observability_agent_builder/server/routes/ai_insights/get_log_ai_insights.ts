@@ -165,6 +165,7 @@ export async function getLogAiInsights({
         end,
       }),
     ]);
+ 
     if (serviceSummary.status === 'fulfilled' && serviceSummary.value) {
       context += dedent(`
         <ServiceSummary>
