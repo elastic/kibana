@@ -6,6 +6,7 @@
  */
 
 import {
+  EMPTY,
   Subject,
   bufferTime,
   catchError,
@@ -31,6 +32,7 @@ export enum RequestResultType {
 
 export const docCountApi = (httpSetup: HttpSetup) => {
   const subj = new Subject<string>();
+  const abortController = new AbortController();
 
   type RequestResult =
     | { type: RequestResultType.Success; indexNames: string[]; response: Record<string, number> }
@@ -46,12 +48,19 @@ export const docCountApi = (httpSetup: HttpSetup) => {
       from(
         httpSetup.post<Record<string, number>>(`${INTERNAL_API_BASE_PATH}/index_doc_count`, {
           body: JSON.stringify({ indexNames }),
+          signal: abortController.signal,
         })
       ).pipe(
         map(
           (response): RequestResult => ({ type: RequestResultType.Success, indexNames, response })
         ),
-        catchError(() => of<RequestResult>({ type: RequestResultType.Error, indexNames }))
+        catchError(() => {
+          // Avoid showing errors when navigating away; IndexTable aborts in componentWillUnmount.
+          if (abortController.signal.aborted) {
+            return EMPTY;
+          }
+          return of<RequestResult>({ type: RequestResultType.Error, indexNames });
+        })
       )
     ),
     // combine all the responses into a single object (but keep per-index error state)
@@ -61,13 +70,13 @@ export const docCountApi = (httpSetup: HttpSetup) => {
       if (result.type === RequestResultType.Error) {
         // If the request fails, mark only indices in that request as errored.
         for (const indexName of result.indexNames) {
-          next[indexName] = next[indexName] || { status: 'error' };
+          next[indexName] = next[indexName] || { status: RequestResultType.Error };
         }
         return next;
       } else {
         for (const indexName of result.indexNames) {
           next[indexName] = {
-            status: 'ok',
+            status: RequestResultType.Success,
             count: result.response[indexName] ?? 0,
           };
         }
@@ -82,5 +91,6 @@ export const docCountApi = (httpSetup: HttpSetup) => {
   return {
     getByName: (index: string) => subj.next(index),
     getObservable: () => observable,
+    abort: () => abortController.abort(),
   };
 };
