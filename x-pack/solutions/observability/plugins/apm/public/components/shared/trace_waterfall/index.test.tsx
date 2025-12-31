@@ -13,6 +13,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
+// Mock AutoSizer to avoid ResizeObserver issues in jsdom
+jest.mock('react-virtualized', () => {
+  const actual = jest.requireActual('react-virtualized');
+
+  return {
+    ...actual,
+    AutoSizer: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
+      children({ width: 800, height: 600 }),
+  };
+});
+
 describe('convertTreeToList', () => {
   const itemA: TraceWaterfallItem = {
     id: 'a',
@@ -224,6 +235,31 @@ describe('TraceWaterfall', () => {
       renderTraceWaterfall({ showCriticalPathControl: true });
 
       expect(screen.getByTestId('criticalPathToggle')).toBeInTheDocument();
+    });
+  });
+
+  describe('Virtualization', () => {
+    it('uses delegated scroll pattern with autoHeight', () => {
+      renderTraceWaterfall({ showAccordion: false });
+
+      const list = screen.getByRole('grid');
+      expect(list).toHaveStyle({ height: 'auto' });
+      expect(list).toHaveStyle({ overflowY: 'hidden' });
+    });
+
+    it('renders trace items with virtualization', () => {
+      renderTraceWaterfall({ showAccordion: false });
+
+      expect(screen.getByTestId('waterfall')).toBeInTheDocument();
+      expect(screen.getByRole('grid')).toBeInTheDocument();
+      expect(screen.getByText('Test Transaction')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 1')).toBeInTheDocument();
+    });
+
+    it('shows warning for empty trace items', () => {
+      renderTraceWaterfall({ traceItems: [], showAccordion: false });
+
+      expect(screen.getByTestId('traceWarning')).toBeInTheDocument();
     });
   });
 });
