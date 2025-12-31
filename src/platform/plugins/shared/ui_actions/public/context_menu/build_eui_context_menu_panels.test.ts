@@ -123,7 +123,13 @@ test('builds empty menu when no actions provided', async () => {
     closeMenu: () => {},
   });
 
-  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`Array []`);
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [],
+      },
+    ]
+  `);
 });
 
 test('can build menu with one action', async () => {

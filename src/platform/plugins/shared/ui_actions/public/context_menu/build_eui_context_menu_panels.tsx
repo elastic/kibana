@@ -222,9 +222,6 @@ export async function buildContextMenuForActions({
     }
   }
 
-  if (!panels.mainMenu.items.length) {
-    delete panels.mainMenu; // don't include mainMenu if it is empty
-  }
   const panelList = Object.values(panels);
   return removePanelMetaFields(panelList);
 }

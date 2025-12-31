@@ -430,7 +430,10 @@ export const PresentationPanelHoverActions = ({
     [setDragHandle, euiTheme.size.xs]
   );
 
-  const hasHoverActions = Boolean(quickActionElements.length || contextMenuPanels.length);
+  const hasHoverActions = useMemo(() => {
+    if (quickActionElements.length) return true;
+    return contextMenuPanels.every(({ items }) => items?.length);
+  }, [quickActionElements, contextMenuPanels]);
 
   return (
     <>
