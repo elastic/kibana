@@ -16,16 +16,16 @@ import {
   type ServiceConfig,
 } from '../utils/synthtrace_scenarios/create_synthetic_trace_metrics_data';
 
-interface RedMetricsItem {
+interface TraceMetricsItem {
   group: string;
   latency: number | null;
   throughput: number;
   failureRate: number;
 }
 
-interface GetRedMetricsToolResult extends OtherResult {
+interface GetTraceMetricsToolResult extends OtherResult {
   data: {
-    items: RedMetricsItem[];
+    items: TraceMetricsItem[];
   };
 }
 
@@ -140,10 +140,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('when fetching RED metrics without filters (default groupBy: service.name)', () => {
-      let resultData: GetRedMetricsToolResult['data'];
+      let resultData: GetTraceMetricsToolResult['data'];
 
       before(async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -213,7 +213,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when filtering by service.name', () => {
       it('returns metrics only for the specified service', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -230,7 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct metrics for payment-service', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -252,7 +252,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when filtering by service.environment', () => {
       it('returns metrics only for services in production environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -273,7 +273,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics only for services in staging environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -296,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when filtering by transaction.name', () => {
       it('returns metrics for specific transaction name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -315,7 +315,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics for worker-process transaction', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -336,7 +336,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when filtering by transaction.type', () => {
       it('returns metrics for request transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -359,7 +359,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics for page-load transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -378,7 +378,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics for messaging transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -397,7 +397,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics for worker transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -418,7 +418,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when grouping by host.name', () => {
       it('returns metrics grouped by host', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -437,7 +437,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct metrics for host-01', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -457,7 +457,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct metrics for host-02', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -480,7 +480,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when grouping by transaction.name', () => {
       it('returns metrics grouped by transaction name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -506,7 +506,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct metrics for specific transaction', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -531,7 +531,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when using combined filters', () => {
       it('filters by service and transaction type', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -551,7 +551,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('filters by environment and transaction type', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -570,7 +570,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('filters by service and groups by transaction name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -590,7 +590,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('filters by host and groups by service', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -614,7 +614,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when grouping by service.environment', () => {
       it('returns metrics grouped by environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -633,7 +633,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns higher failure rate for staging environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -657,7 +657,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('edge cases when filtering and when there is no data', () => {
       it('returns empty items when filter matches no data', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -674,7 +674,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('handles time range with no data', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-100d',
@@ -692,7 +692,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when grouping by container.id', () => {
       it('returns metrics grouped by container', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -713,7 +713,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct metrics for a specific container', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -733,7 +733,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when filtering by high-cardinality fields (labels)', () => {
       it('returns metrics when filtering by service-level label (team)', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -750,7 +750,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics when filtering by tier label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -769,7 +769,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics when filtering by standard tier label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -788,7 +788,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns metrics when filtering by transaction-level label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -807,7 +807,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns empty results when filtering by non-existent label value', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -824,7 +824,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('combines label filter with other filters', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -843,7 +843,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('filters by label and groups by transaction name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -865,7 +865,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when using various groupBy and filter combinations', () => {
       it('returns all services with default groupBy (service.name)', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -885,7 +885,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns all transaction names when grouping by transaction.name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -909,7 +909,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns all hosts when grouping by host.name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -928,7 +928,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns all containers when grouping by container.id', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -949,7 +949,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct service when filtering by transaction.name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
@@ -966,7 +966,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns correct service when filtering by high-cardinality label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetRedMetricsToolResult>({
+        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: 'now-1h',
