@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -32,7 +32,7 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
       await page.getByRole('link', { name: testData.OTEL_TRANSACTION_NAME }).click();
       await page
         .getByTestId('apmSettingsHeaderLink')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify transaction detail page shows transaction name', async () => {
@@ -55,7 +55,7 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
 
     await test.step('Verify waterfall button is visible', async () => {
       await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
-        timeout: BIGGER_TIMEOUT,
+        timeout: EXTENDED_TIMEOUT,
       });
     });
   });
@@ -106,7 +106,7 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
       await page.getByRole('link', { name: testData.EDOT_TRANSACTION_NAME }).click();
       await page
         .getByTestId('apmSettingsHeaderLink')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify transaction detail page shows transaction name', async () => {
@@ -129,7 +129,7 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
 
     await test.step('Verify waterfall button is visible', async () => {
       await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
-        timeout: BIGGER_TIMEOUT,
+        timeout: EXTENDED_TIMEOUT,
       });
     });
 

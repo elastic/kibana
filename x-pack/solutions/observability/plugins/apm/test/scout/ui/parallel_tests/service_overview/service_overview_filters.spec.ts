@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -132,7 +132,7 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
       // Click on the date picker button to open it
       await page
         .getByTestId('apmSloCalloutCreateSloButton')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       await page.getByTestId('superDatePickerToggleQuickMenuButton').click();
 
       // Click on "Absolute" tab for the start date
@@ -150,13 +150,13 @@ test.describe('Service Overview - Filters', { tag: ['@ess', '@svlOblt'] }, () =>
       await page.getByTestId('querySubmitButton').click();
 
       // Wait for URL to update with new time range
-      await page.waitForURL(/2021-10-09/, { timeout: BIGGER_TIMEOUT });
+      await page.waitForURL(/2021-10-09/, { timeout: EXTENDED_TIMEOUT });
       expect(page.url()).toContain('2021-10-09');
     });
 
     await test.step('Verify page still renders correctly', async () => {
       await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible({
-        timeout: BIGGER_TIMEOUT,
+        timeout: EXTENDED_TIMEOUT,
       });
     });
   });

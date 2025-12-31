@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -28,7 +28,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
       await page.getByRole('link', { name: 'View errors' }).click();
       await page
         .getByTestId('apmSettingsHeaderLink')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify navigated to errors page', async () => {
@@ -54,12 +54,12 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
       await page.getByRole('link', { name: 'boom' }).click();
       await page
         .getByTestId('errorDistribution')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify navigated to error detail page', async () => {
       await expect(page.getByTestId('errorDistribution')).toBeVisible({
-        timeout: BIGGER_TIMEOUT,
+        timeout: EXTENDED_TIMEOUT,
       });
     });
   });
@@ -78,7 +78,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
       await page.getByTestId('apmErrorDetailsLink').click();
       await page
         .getByTestId('errorDistribution')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify error distribution chart is visible', async () => {
@@ -100,7 +100,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
       await page.getByRole('link', { name: 'View errors' }).click();
       await page
         .getByTestId('apmSettingsHeaderLink')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify navigated to errors page', async () => {
@@ -126,12 +126,12 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
       await page.getByRole('link', { name: 'ResponseError', exact: true }).click();
       await page
         .getByTestId('errorDistribution')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify navigated to error detail page', async () => {
       await expect(page.getByText(testData.EDOT_ERROR_MESSAGE)).toBeVisible({
-        timeout: BIGGER_TIMEOUT,
+        timeout: EXTENDED_TIMEOUT,
       });
     });
   });
@@ -150,7 +150,7 @@ test.describe('Service Overview - Error Details', { tag: ['@ess', '@svlOblt'] },
       await page.getByRole('link', { name: 'ResponseError', exact: true }).click();
       await page
         .getByTestId('errorDistribution')
-        .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+        .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     });
 
     await test.step('Verify error distribution chart is visible', async () => {

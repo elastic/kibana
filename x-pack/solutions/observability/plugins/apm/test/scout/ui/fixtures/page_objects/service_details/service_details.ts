@@ -12,7 +12,7 @@ import { AlertsTab } from './alerts_tab';
 import { OverviewTab } from './overview_tab';
 import { TransactionsTab } from './transactions_tab';
 import { ErrorsTab } from './errors_tab';
-import { BIGGER_TIMEOUT } from '../../constants';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 export class ServiceDetailsPage {
   public readonly SERVICE_NAME = testData.SERVICE_OPBEANS_JAVA;
@@ -54,7 +54,7 @@ export class ServiceDetailsPage {
     );
     await this.page
       .getByTestId('superDatePickerToggleQuickMenuButton')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   // #region Mobile Services
@@ -70,7 +70,7 @@ export class ServiceDetailsPage {
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
-    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
   // #endregion
 

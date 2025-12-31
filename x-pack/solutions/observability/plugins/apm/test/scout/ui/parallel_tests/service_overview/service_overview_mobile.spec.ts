@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -93,7 +93,7 @@ test.describe('Service Overview - Mobile Services', { tag: ['@ess', '@svlOblt'] 
     );
 
     await test.step('Verify redirected to mobile-services route', async () => {
-      await page.waitForURL(/mobile-services/, { timeout: BIGGER_TIMEOUT });
+      await page.waitForURL(/mobile-services/, { timeout: EXTENDED_TIMEOUT });
       expect(page.url()).toContain('mobile-services');
       expect(page.url()).toContain(testData.SERVICE_MOBILE_ANDROID);
     });

@@ -10,7 +10,7 @@ import { testData } from '../..';
 import { OverviewTab } from './overview_tab';
 import { OperationsTab } from './operations_tab';
 import { OperationDetailSubpage } from './operation_detail';
-import { BIGGER_TIMEOUT } from '../../constants';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 export class DependencyDetailsPage {
   public readonly DEPENDENCY_NAME = 'postgresql';
@@ -55,6 +55,6 @@ export class DependencyDetailsPage {
         ...overrides,
       })}`
     );
-    await this.page.getByRole('tablist').waitFor({ timeout: BIGGER_TIMEOUT });
+    await this.page.getByRole('tablist').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 }

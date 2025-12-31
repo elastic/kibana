@@ -8,7 +8,7 @@
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
-import { BIGGER_TIMEOUT } from '../../constants';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 export class OverviewTab extends ServiceDetailsTab {
   public readonly tabName: ServiceDetailsPageTabName = 'overview';
@@ -35,8 +35,8 @@ export class OverviewTab extends ServiceDetailsTab {
 
   protected async waitForTabLoad(): Promise<void> {
     await Promise.all([
-      this.latencyChart.waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT }),
-      this.throughputChart.waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT }),
+      this.latencyChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
+      this.throughputChart.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
     ]);
   }
 

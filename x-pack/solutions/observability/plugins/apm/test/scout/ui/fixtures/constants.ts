@@ -10,7 +10,7 @@ import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/gen
 
 export const START_DATE = '2021-10-10T00:00:00.000Z';
 export const END_DATE = '2021-10-10T00:15:00.000Z';
-export const BIGGER_TIMEOUT = 45000;
+export const EXTENDED_TIMEOUT = 45000;
 
 export const SERVICE_OPBEANS_NODE = 'opbeans-node';
 export const SERVICE_OPBEANS_JAVA = 'opbeans-java';

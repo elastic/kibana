@@ -8,7 +8,7 @@
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
-import { BIGGER_TIMEOUT } from '../../constants';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 export class TransactionsTab extends ServiceDetailsTab {
   public readonly tabName: ServiceDetailsPageTabName = 'transactions';
@@ -25,7 +25,7 @@ export class TransactionsTab extends ServiceDetailsTab {
   protected async waitForTabLoad(): Promise<void> {
     await this.page
       .getByRole('heading', { name: 'Transactions', exact: true })
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   // #region Transactions Table

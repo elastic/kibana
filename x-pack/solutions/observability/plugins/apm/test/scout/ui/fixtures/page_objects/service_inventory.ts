@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { BIGGER_TIMEOUT } from '../constants';
+import { EXTENDED_TIMEOUT } from '../constants';
 import { testData } from '..';
 
 export class ServiceInventoryPage {
@@ -23,14 +23,14 @@ export class ServiceInventoryPage {
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
-    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: BIGGER_TIMEOUT });
+    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar', { timeout: EXTENDED_TIMEOUT });
     await this.waitForServicesTableToLoad();
   }
 
   async waitForServicesTableToLoad() {
     await this.page
       .getByTestId('allServices')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   getServiceLink(serviceName: string) {
@@ -42,6 +42,6 @@ export class ServiceInventoryPage {
   }
 
   async waitForServiceOverviewToLoad() {
-    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await this.page.getByRole('tablist').waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 }
