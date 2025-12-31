@@ -35,7 +35,7 @@ export function SloSelectorEmptyState() {
       }
       actions={
         <EuiButton
-          data-test-subj="sloSloSelectorAddACaseButton"
+          data-test-subj="sloSloSelectorCreateSloButton"
           color="primary"
           onClick={() => navigateToUrl(basePath.prepend(paths.sloCreate))}
           fill
