@@ -83,4 +83,4 @@ export type {
 } from './src/playwright/fixtures/scope/worker/core_fixtures';
 
 // Re-exported Playwright types
-export type { Locator, CDPSession, Request } from 'playwright/test';
+export type { Locator, CDPSession } from 'playwright/test';

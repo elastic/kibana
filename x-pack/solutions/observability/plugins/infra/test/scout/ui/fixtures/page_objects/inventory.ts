@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  expect,
-  type KibanaUrl,
-  type Locator,
-  type ScoutPage,
-  type Request,
-} from '@kbn/scout-oblt';
+import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -70,22 +64,15 @@ export class InventoryPage {
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
   }
 
-  private async startWaitingForSnapshotRequest() {
-    // Once the page has loaded once, visual loading indicator doesn't always appear on subsequent loads.
-    // So we need to wait for the network request too to ensure new data has been retrieved.
-    return this.page.waitForRequest((request) => request.url().includes('/api/metrics/snapshot'));
-  }
-
-  private async waitForNodesToLoad(snapshotPromise?: Promise<Request>) {
-    const panelPromise = this.page
-      .getByTestId('infraNodesOverviewLoadingPanel')
-      .waitFor({ state: 'hidden' });
-
-    if (snapshotPromise) {
-      await Promise.all([panelPromise, snapshotPromise]);
-    } else {
-      await panelPromise;
+  private async waitForNodesToLoad(opts: { waitForSnapshotRequest?: boolean } = {}) {
+    if (opts.waitForSnapshotRequest) {
+      // Wait for successful API completion
+      await this.page.waitForResponse(
+        (resp) => resp.url().includes('/api/metrics/snapshot') && resp.status() === 200
+      );
     }
+
+    await this.page.getByTestId('infraNodesOverviewLoadingPanel').waitFor({ state: 'hidden' });
   }
 
   private async waitForPageToLoad() {
@@ -104,33 +91,27 @@ export class InventoryPage {
   }
 
   public async toggleTimeline() {
-    await expect(this.toggleTimelineButton).toBeVisible();
     await this.toggleTimelineButton.click();
   }
 
   public async switchToTableView() {
-    await expect(this.tableViewButton).toBeVisible();
     await this.tableViewButton.click();
   }
 
   public async switchToMapView() {
-    await expect(this.mapViewButton).toBeVisible();
     await this.mapViewButton.click();
   }
 
   public async dismissK8sTour() {
-    await expect(this.k8sTourDismissButton).toBeVisible();
     await this.k8sTourDismissButton.click();
   }
 
   public async goToTime(time: string) {
-    await expect(this.datePickerInput).toBeVisible();
     await this.datePickerInput.focus();
     await this.datePickerInput.clear();
-    const requestPromise = this.startWaitingForSnapshotRequest();
     await this.datePickerInput.fill(time);
     await this.datePickerInput.press('Enter');
-    await this.waitForNodesToLoad(requestPromise);
+    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async getWaffleNode(nodeName: string) {
@@ -144,34 +125,24 @@ export class InventoryPage {
   }
 
   public async showHosts() {
-    await expect(this.inventorySwitcherButton).toBeVisible();
     await this.inventorySwitcherButton.click();
-    await expect(this.inventorySwitcherHostsButton).toBeVisible();
-    const requestPromise = this.startWaitingForSnapshotRequest();
     await this.inventorySwitcherHostsButton.click();
-    await this.waitForNodesToLoad(requestPromise);
+    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async showPods() {
-    await expect(this.inventorySwitcherButton).toBeVisible();
     await this.inventorySwitcherButton.click();
-    await expect(this.inventorySwitcherPodsButton).toBeVisible();
-    const requestPromise = this.startWaitingForSnapshotRequest();
     await this.inventorySwitcherPodsButton.click();
-    await this.waitForNodesToLoad(requestPromise);
+    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async showContainers() {
-    await expect(this.inventorySwitcherButton).toBeVisible();
     await this.inventorySwitcherButton.click();
-    await expect(this.inventorySwitcherContainersButton).toBeVisible();
-    const requestPromise = this.startWaitingForSnapshotRequest();
     await this.inventorySwitcherContainersButton.click();
-    await this.waitForNodesToLoad(requestPromise);
+    await this.waitForNodesToLoad({ waitForSnapshotRequest: true });
   }
 
   public async clickNoDataPageAddDataButton() {
-    await expect(this.noDataPageActionButton).toBeVisible();
     await this.noDataPageActionButton.click();
   }
 }
