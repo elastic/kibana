@@ -53,7 +53,6 @@ export function useFetchSloInstances({
       });
     },
     enabled: Boolean(!!sloId && enabled),
-    staleTime: 60 * 1000,
     retry: false,
     refetchOnWindowFocus: false,
   });

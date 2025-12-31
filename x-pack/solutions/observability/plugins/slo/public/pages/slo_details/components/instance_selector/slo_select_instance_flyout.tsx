@@ -142,6 +142,10 @@ export function SloSelectInstanceFlyout({
                     })
                   : undefined
               }
+              noItemsMessage={i18n.translate(
+                'xpack.slo.sloSearchInstancesFlyout.noSLOInstancesFoundLabel',
+                { defaultMessage: 'No SLO instances found' }
+              )}
               tableCaption={i18n.translate(
                 'xpack.slo.sloSearchInstancesFlyout.sloInstancesTableCaption',
                 { defaultMessage: 'SLO instances' }
