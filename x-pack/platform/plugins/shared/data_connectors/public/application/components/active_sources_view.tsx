@@ -12,12 +12,14 @@ import { ActiveSourcesTable } from './active_sources_table';
 import { ConfirmDeleteActiveSourceModal } from './confirm_delete_active_source_modal';
 import { useActiveSources } from '../hooks/use_active_sources';
 import { useDeleteActiveSource } from '../hooks/use_delete_active_source';
+import { useEditActiveSourceFlyout } from '../hooks/use_edit_active_source_flyout';
 import type { ActiveSource } from '../../types/connector';
 
 export const ActiveSourcesView: React.FC = () => {
   const { activeSources, isLoading } = useActiveSources();
   const [selectedSource, setSelectedSource] = useState<ActiveSource | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [sourceToEdit, setSourceToEdit] = useState<ActiveSource | null>(null);
 
   const handleCancelDelete = useCallback(() => {
     setSelectedSource(null);
@@ -27,13 +29,26 @@ export const ActiveSourcesView: React.FC = () => {
   const { mutate: deleteActiveSource, isLoading: isDeleting } =
     useDeleteActiveSource(handleCancelDelete);
 
+  const handleCloseEditFlyout = useCallback(() => {
+    setSourceToEdit(null);
+  }, []);
+
+  const { openFlyout: openEditFlyout, flyout: editFlyout } = useEditActiveSourceFlyout({
+    activeSource: sourceToEdit,
+    onConnectorUpdated: handleCloseEditFlyout,
+  });
+
   const handleReconnect = (source: ActiveSource) => {
     // TODO: Implement reconnect action when backend is ready
   };
 
-  const handleEdit = (source: ActiveSource) => {
-    // TODO: Implement edit action when backend is ready
-  };
+  const handleEdit = useCallback(
+    (source: ActiveSource) => {
+      setSourceToEdit(source);
+      openEditFlyout();
+    },
+    [openEditFlyout]
+  );
 
   const handleDelete = useCallback((source: ActiveSource) => {
     setSelectedSource(source);
@@ -93,6 +108,7 @@ export const ActiveSourcesView: React.FC = () => {
           isDeleting={isDeleting}
         />
       )}
+      {editFlyout}
     </>
   );
 };

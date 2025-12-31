@@ -105,11 +105,11 @@ const ActionsCell: React.FC<{
     <EuiContextMenuItem
       key="edit"
       icon="pencil"
-      disabled
       onClick={() => {
         setIsPopoverOpen(false);
         onEdit?.(source);
       }}
+      data-test-subj={`editActiveSource-${source.id}`}
     >
       {i18n.translate('xpack.dataConnectors.activeSources.editAction', {
         defaultMessage: 'Edit',

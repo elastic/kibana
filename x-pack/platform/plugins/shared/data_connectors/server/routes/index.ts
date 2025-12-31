@@ -343,6 +343,73 @@ export function registerRoutes(
     }
   );
 
+  // Update data connector by ID
+  router.put(
+    {
+      path: `${API_BASE_PATH}/{id}`,
+      validate: {
+        params: schema.object({ id: schema.string() }),
+        body: schema.object({
+          name: schema.maybe(schema.string()),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (context, request, response) => {
+      const coreContext = await context.core;
+
+      try {
+        const { name } = request.body;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
+        // Get existing data connector
+        const savedObject: SavedObject<DataConnectorAttributes> = await savedObjectsClient.get(
+          DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+          request.params.id
+        );
+
+        // Update only if name is provided
+        if (name !== undefined) {
+          await savedObjectsClient.update<DataConnectorAttributes>(
+            DATA_CONNECTOR_SAVED_OBJECT_TYPE,
+            request.params.id,
+            {
+              ...savedObject.attributes,
+              name,
+            }
+          );
+
+          // Fetch the updated saved object
+          const updatedSavedObject: SavedObject<DataConnectorAttributes> =
+            await savedObjectsClient.get(DATA_CONNECTOR_SAVED_OBJECT_TYPE, request.params.id);
+
+          logger.info(`Successfully updated data connector ${request.params.id}`);
+          return response.ok({
+            body: convertSOtoAPIResponse(updatedSavedObject),
+          });
+        }
+
+        // If no updates provided, return current state
+        return response.ok({
+          body: convertSOtoAPIResponse(savedObject),
+        });
+      } catch (error) {
+        logger.error(`Failed to update data connector: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to update data connector: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
   // Delete all data connectors
   router.delete(
     {
