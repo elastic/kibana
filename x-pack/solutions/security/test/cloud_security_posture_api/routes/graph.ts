@@ -168,7 +168,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/246732
-  describe.skip('POST /internal/cloud_security_posture/graph', () => {
+  describe('POST /internal/cloud_security_posture/graph', () => {
     describe('Authorization', () => {
       it('should return 403 for user without read access', async () => {
         await postGraph(
@@ -1125,6 +1125,8 @@ export default function (providerContext: FtrProviderContext) {
           // Wait for enrich indexes to be created AND populated with data
           await entityStoreHelpers.waitForEnrichIndexPopulated();
           await entityStoreHelpers.waitForEnrichIndexPopulated(customNamespaceId);
+
+          await entityStoreHelpers.installCloudAssetInventoryPackage();
         });
 
         after(async () => {
@@ -1152,10 +1154,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should contain entity data when asset inventory is enabled', async () => {
-          // although enrich policy is already create via 'api/asset_inventory/enable'
-          // we still would like to replicate as if cloud asset discovery integration was fully installed
-          await entityStoreHelpers.installCloudAssetInventoryPackage();
-
           // Looks like there's some async operation that runs in the background
           // so we use retry.tryForTime to wait for it to finish - otherwise sometimes policy is not yet created
           await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
@@ -1241,8 +1239,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return enriched data when asset inventory is enabled in a different space - multi target', async () => {
-          await entityStoreHelpers.installCloudAssetInventoryPackage(customNamespaceId);
-
           await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
             const response = await postGraph(
               supertest,
@@ -1332,8 +1328,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should enrich graph with entity metadata for actor acting on single target', async () => {
-          await entityStoreHelpers.installCloudAssetInventoryPackage();
-
           await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
             const response = await postGraph(supertest, {
               query: {
@@ -1424,8 +1418,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should enrich graph with multiple targets from different fields with mixed grouping', async () => {
-          await entityStoreHelpers.installCloudAssetInventoryPackage();
-
           await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
             const response = await postGraph(supertest, {
               query: {
