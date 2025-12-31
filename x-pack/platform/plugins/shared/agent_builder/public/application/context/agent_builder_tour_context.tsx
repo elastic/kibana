@@ -97,7 +97,7 @@ const labels = {
     }),
     content: i18n.translate('xpack.agentBuilder.agentBuilderTour.conversationActions.content', {
       defaultMessage:
-        'This menu is your hub for key management actions. You can quickly access key actions from here.',
+        'This menu is your hub for key management actions. You can quickly access important pages from here.',
     }),
   },
   closeTour: i18n.translate('xpack.agentBuilder.agentBuilderTour.closeTour', {
