@@ -18,8 +18,9 @@ import {
   EuiButton,
   EuiSpacer,
   EuiTablePagination,
+  EuiIcon,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActiveSource } from '../../types/connector';
 import { PAGINATION_ITEMS_PER_PAGE_OPTIONS } from '../../../common/constants';
@@ -48,6 +49,10 @@ const SourceIcon: React.FC<{ source: ActiveSource }> = ({ source }) => {
   return iconComponent;
 };
 
+const getDeleteMenuItemStyle = (theme: UseEuiTheme) => ({
+  color: theme.euiTheme.colors.danger,
+});
+
 const ActionsCell: React.FC<{
   source: ActiveSource;
   onReconnect?: (source: ActiveSource) => void;
@@ -72,12 +77,13 @@ const ActionsCell: React.FC<{
   const items = [
     <EuiContextMenuItem
       key="delete"
-      icon="trash"
-      disabled
+      icon={<EuiIcon type="trash" color="danger" />}
+      css={getDeleteMenuItemStyle}
       onClick={() => {
         setIsPopoverOpen(false);
         onDelete?.(source);
       }}
+      data-test-subj={`deleteActiveSource-${source.id}`}
     >
       {i18n.translate('xpack.dataConnectors.activeSources.deleteAction', {
         defaultMessage: 'Delete',
@@ -136,6 +142,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const handleBulkDelete = () => {
+    // TODO: Implement bulk delete once the bulk delete API is available
     selectedItems.forEach((source) => onDelete?.(source));
     setSelectedItems([]);
   };

@@ -5,15 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActiveSourcesTable } from './active_sources_table';
+import { ConfirmDeleteActiveSourceModal } from './confirm_delete_active_source_modal';
 import { useActiveSources } from '../hooks/use_active_sources';
+import { useDeleteActiveSource } from '../hooks/use_delete_active_source';
 import type { ActiveSource } from '../../types/connector';
 
 export const ActiveSourcesView: React.FC = () => {
   const { activeSources, isLoading } = useActiveSources();
+  const [selectedSource, setSelectedSource] = useState<ActiveSource | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleCancelDelete = useCallback(() => {
+    setSelectedSource(null);
+    setShowDeleteModal(false);
+  }, []);
+
+  const { mutate: deleteActiveSource, isLoading: isDeleting } =
+    useDeleteActiveSource(handleCancelDelete);
 
   const handleReconnect = (source: ActiveSource) => {
     // TODO: Implement reconnect action when backend is ready
@@ -23,9 +35,16 @@ export const ActiveSourcesView: React.FC = () => {
     // TODO: Implement edit action when backend is ready
   };
 
-  const handleDelete = (source: ActiveSource) => {
-    // TODO: Implement delete action when backend is ready
-  };
+  const handleDelete = useCallback((source: ActiveSource) => {
+    setSelectedSource(source);
+    setShowDeleteModal(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (selectedSource) {
+      deleteActiveSource(selectedSource.id);
+    }
+  }, [selectedSource, deleteActiveSource]);
 
   if (isLoading) {
     return (
@@ -64,6 +83,14 @@ export const ActiveSourcesView: React.FC = () => {
           onReconnect={handleReconnect}
           onEdit={handleEdit}
           onDelete={handleDelete}
+        />
+      )}
+      {showDeleteModal && selectedSource && (
+        <ConfirmDeleteActiveSourceModal
+          activeSource={selectedSource}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isDeleting={isDeleting}
         />
       )}
     </>
