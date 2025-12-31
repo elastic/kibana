@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod';
 import dedent from 'dedent';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../common';
 import type {
   ObservabilityAgentBuilderPluginStart,
