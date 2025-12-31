@@ -28,7 +28,7 @@ const filtersSchema = t.array(
         key: t.string,
         field: t.string,
         params: t.any,
-        value: t.string,
+        value: t.union([t.string, t.record(t.string, t.string)]),
       }),
       query: t.record(t.string, t.any),
     }),
