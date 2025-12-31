@@ -8,7 +8,11 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
+} from '../../common/constants';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type {
@@ -157,6 +161,70 @@ describe('CloudConnectorService', () => {
 
       expect(mockLogger.info).toHaveBeenCalledWith('Creating cloud connector');
       expect(mockLogger.info).toHaveBeenCalledWith('Successfully created cloud connector');
+    });
+
+    it('should create a cloud connector with accountType', async () => {
+      jest
+        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .mockResolvedValue(true);
+
+      const requestWithAccountType: CreateCloudConnectorRequest = {
+        ...mockCreateRequest,
+        accountType: SINGLE_ACCOUNT,
+      };
+
+      const savedObjectWithAccountType = {
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          accountType: SINGLE_ACCOUNT,
+        },
+      };
+
+      mockSoClient.create.mockResolvedValue(savedObjectWithAccountType);
+
+      const result = await service.create(mockSoClient, requestWithAccountType);
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          accountType: SINGLE_ACCOUNT,
+        })
+      );
+
+      expect(result.accountType).toEqual(SINGLE_ACCOUNT);
+    });
+
+    it('should create a cloud connector with organization accountType', async () => {
+      jest
+        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .mockResolvedValue(true);
+
+      const requestWithAccountType: CreateCloudConnectorRequest = {
+        ...mockCreateRequest,
+        accountType: ORGANIZATION_ACCOUNT,
+      };
+
+      const savedObjectWithAccountType = {
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          accountType: ORGANIZATION_ACCOUNT,
+        },
+      };
+
+      mockSoClient.create.mockResolvedValue(savedObjectWithAccountType);
+
+      const result = await service.create(mockSoClient, requestWithAccountType);
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          accountType: ORGANIZATION_ACCOUNT,
+        })
+      );
+
+      expect(result.accountType).toEqual(ORGANIZATION_ACCOUNT);
     });
 
     it('should throw error when vars are empty', async () => {
@@ -515,6 +583,27 @@ describe('CloudConnectorService', () => {
 
       expect(mockLogger.debug).toHaveBeenCalledWith('Getting cloud connectors list');
       expect(mockLogger.debug).toHaveBeenCalledWith('Successfully retrieved cloud connectors list');
+    });
+
+    it('should get cloud connectors list with accountType', async () => {
+      const mockCloudConnectorsWithAccountType = {
+        ...mockCloudConnectors,
+        saved_objects: [
+          {
+            ...mockCloudConnectors.saved_objects[0],
+            attributes: {
+              ...mockCloudConnectors.saved_objects[0].attributes,
+              accountType: SINGLE_ACCOUNT,
+            },
+          },
+        ],
+      };
+
+      mockSoClient.find.mockResolvedValue(mockCloudConnectorsWithAccountType);
+
+      const result = await service.getList(mockSoClient);
+
+      expect(result[0].accountType).toEqual(SINGLE_ACCOUNT);
     });
 
     it('should throw error when find operation fails', async () => {
@@ -1035,6 +1124,36 @@ describe('CloudConnectorService', () => {
 
       // Should preserve original attributes
       expect(result.name).toEqual('original-name');
+    });
+
+    it('should update cloud connector accountType successfully', async () => {
+      const mockUpdatedSavedObject = {
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          accountType: ORGANIZATION_ACCOUNT,
+          updated_at: '2023-01-01T02:00:00.000Z',
+        },
+      };
+
+      mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+      mockSoClient.update.mockResolvedValue(mockUpdatedSavedObject);
+
+      const result = await service.update(mockSoClient, 'cloud-connector-123', {
+        accountType: ORGANIZATION_ACCOUNT,
+      });
+
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'cloud-connector-123',
+        {
+          accountType: ORGANIZATION_ACCOUNT,
+          updated_at: expect.any(String),
+        }
+      );
+
+      expect(result.accountType).toEqual(ORGANIZATION_ACCOUNT);
+      expect(result.id).toEqual('cloud-connector-123');
     });
 
     describe('duplicate name validation', () => {

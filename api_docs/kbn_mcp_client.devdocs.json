@@ -161,7 +161,7 @@
               "\nConnect to the MCP client and return the connected status and capabilities."
             ],
             "signature": [
-              "() => Promise<{ connected: boolean; capabilities?: { [x: string]: unknown; experimental?: { [x: string]: unknown; } | undefined; logging?: { [x: string]: unknown; } | undefined; tools?: { [x: string]: unknown; listChanged?: boolean | undefined; } | undefined; resources?: { [x: string]: unknown; subscribe?: boolean | undefined; listChanged?: boolean | undefined; } | undefined; prompts?: { [x: string]: unknown; listChanged?: boolean | undefined; } | undefined; completions?: { [x: string]: unknown; } | undefined; } | undefined; }>"
+              "() => Promise<{ connected: boolean; capabilities?: any; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
             "deprecated": false,
@@ -267,6 +267,135 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.StreamableHTTPError",
+        "type": "Class",
+        "tags": [],
+        "label": "StreamableHTTPError",
+        "description": [],
+        "signature": [
+          "StreamableHTTPError",
+          " extends Error"
+        ],
+        "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.StreamableHTTPError.code",
+            "type": "number",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.StreamableHTTPError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.StreamableHTTPError.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "code",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.StreamableHTTPError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mcp-client",
+        "id": "def-common.UnauthorizedError",
+        "type": "Class",
+        "tags": [],
+        "label": "UnauthorizedError",
+        "description": [],
+        "signature": [
+          "UnauthorizedError",
+          " extends Error"
+        ],
+        "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mcp-client",
+            "id": "def-common.UnauthorizedError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mcp-client",
+                "id": "def-common.UnauthorizedError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

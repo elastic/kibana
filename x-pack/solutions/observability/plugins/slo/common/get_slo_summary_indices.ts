@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
+
+interface Props {
+  useAllRemoteClusters: boolean;
+  selectedRemoteClusters: string[];
+  remoteClusters?: Array<{ name: string; isConnected: boolean }>;
+}
 
 /**
  * @returns the local SLO summary index or the remote cluster indices based on the settings.
@@ -14,11 +19,11 @@ import { SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
  * If `useAllRemoteClusters` is true, it returns both the local index and a wildcard remote index.
  * If `useAllRemoteClusters` is false, it returns the local index and only the indices of the selected remote clusters that are connected.
  */
-export const getSLOSummaryIndices = (
-  settings: GetSLOSettingsResponse,
-  remoteClusters: Array<{ name: string; isConnected: boolean }> = []
-): string[] => {
-  const { useAllRemoteClusters, selectedRemoteClusters } = settings;
+export function getSLOSummaryIndices({
+  useAllRemoteClusters,
+  selectedRemoteClusters,
+  remoteClusters = [],
+}: Props): string[] {
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
     return [SUMMARY_DESTINATION_INDEX_PATTERN];
   }
@@ -36,4 +41,4 @@ export const getSLOSummaryIndices = (
     },
     [SUMMARY_DESTINATION_INDEX_PATTERN]
   );
-};
+}

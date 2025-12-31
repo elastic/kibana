@@ -80,6 +80,7 @@ interface LinksMenuProps {
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
   selectedJob?: MlJob;
+  showAnomalyAlertFlyout?: (anomaly: MlAnomaliesTableRecord) => void;
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
@@ -772,8 +773,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
   };
 
-  const { anomaly, showViewSeriesLink } = props;
-  const [canUpdateJob, canUseAiops] = usePermissionCheck(['canUpdateJob', 'canUseAiops']);
+  const { anomaly, showViewSeriesLink, showAnomalyAlertFlyout } = props;
+  const [canUpdateJob, canCreateMlAlerts, canUseAiops] = usePermissionCheck([
+    'canUpdateJob',
+    'canCreateMlAlerts',
+    'canUseAiops',
+  ]);
   const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
   const contextMenuItems = useMemo(() => {
@@ -937,6 +942,25 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
+    if (showAnomalyAlertFlyout && canCreateMlAlerts) {
+      items.push(
+        <EuiContextMenuItem
+          key="create_alert_rule"
+          icon="bell"
+          onClick={() => {
+            closePopover();
+            showAnomalyAlertFlyout(anomaly);
+          }}
+          data-test-subj="mlAnomaliesListRowActionCreateAlertRuleButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.createAlertRuleLabel"
+            defaultMessage="Create alert rule"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
     if (openInLogRateAnalysisUrl && canUseAiops) {
       items.push(
         <EuiContextMenuItem
@@ -1001,6 +1025,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     viewExamples,
     viewSeries,
     canConfigureRules,
+    canCreateMlAlerts,
     isCategorizationAnomalyRecord,
   ]);
 

@@ -20,7 +20,7 @@ import type { HTMLAttributes } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { IndexUpdateService } from '../../index_update_service';
+import type { IndexUpdateService } from '../../services/index_update_service';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 import { AddColumnPopover, COLUMN_INDEX_PROP } from './add_column_popover';
 import { isPlaceholderColumn } from '../../utils';

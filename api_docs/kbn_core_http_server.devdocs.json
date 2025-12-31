@@ -961,7 +961,7 @@
               "The headers associated with the request."
             ],
             "signature": [
-              "{ date?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; range?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; origin?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ date?: string | string[] | undefined; from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; range?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/raw_request.ts",
             "deprecated": false,
@@ -3398,11 +3398,19 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_global_execution_summary.ts"
               },
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/get/get_rule_template_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -3455,6 +3463,14 @@
               {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -3861,20 +3877,56 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_stats.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
               },
               {
                 "plugin": "contentConnectors",
@@ -3931,6 +3983,14 @@
               {
                 "plugin": "dataSourcesRegistry",
                 "path": "x-pack/platform/plugins/shared/data_sources_registry/server/routes.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -4106,6 +4166,22 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget/server/init_routes.ts"
               },
               {
@@ -4159,6 +4235,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
               },
               {
                 "plugin": "esql",
@@ -4199,14 +4283,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -4399,6 +4475,10 @@
               {
                 "plugin": "searchHomepage",
                 "path": "x-pack/solutions/search/plugins/search_homepage/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "searchHomepage",
+                "path": "x-pack/solutions/search/plugins/search_homepage/server/routes/size_stats.ts"
               },
               {
                 "plugin": "searchIndices",
@@ -5342,6 +5422,38 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/find/find_rule_template_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule_templates/apis/get/get_rule_template_route.test.ts"
               },
               {
@@ -5358,6 +5470,18 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/get/get_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/list_types/external/get_rule_types_route.test.ts"
               },
               {
@@ -5603,6 +5727,18 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/rendering/server-internal/src/bootstrap/register_bootstrap_route.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.test.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
+              },
+              {
+                "plugin": "interactiveSetup",
+                "path": "src/platform/plugins/private/interactive_setup/server/routes/status.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -5719,10 +5855,6 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/spaces/share_saved_object_permissions.test.ts"
-              },
-              {
-                "plugin": "interactiveSetup",
-                "path": "src/platform/plugins/private/interactive_setup/server/routes/status.test.ts"
               }
             ],
             "returnComment": [],
@@ -6261,6 +6393,18 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/logs/find_auto_fill_scheduler_logs_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_mute_alerts/bulk_mute_alerts_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/pagerduty_simulation.ts"
               },
@@ -6373,8 +6517,8 @@
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -6387,6 +6531,10 @@
               {
                 "plugin": "console",
                 "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes/server/routes.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -6693,12 +6841,20 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_workflow.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/conversations.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/conversations.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.ts"
               },
               {
                 "plugin": "contentConnectors",
@@ -6749,6 +6905,10 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/create.ts"
               },
@@ -6797,10 +6957,6 @@
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/valid_slack_api_channels.ts"
-              },
-              {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
@@ -6831,6 +6987,18 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -6919,6 +7087,22 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -7065,6 +7249,10 @@
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
@@ -7079,10 +7267,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -7826,6 +8010,38 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_mute_alerts/bulk_mute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_mute_alerts/bulk_mute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_mute_alerts/bulk_mute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_mute_alerts/bulk_mute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_unmute_alerts/bulk_unmute_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
               },
               {
@@ -8011,6 +8227,18 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/create/create_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/logs/find_auto_fill_scheduler_logs_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/logs/find_auto_fill_scheduler_logs_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/logs/find_auto_fill_scheduler_logs_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8281,6 +8509,10 @@
                 "path": "src/core/packages/capabilities/server-internal/src/capabilities_service.test.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/authenticate.test.ts"
+              },
+              {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/routes/key_rotation.test.ts"
               },
@@ -8545,6 +8777,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/jira_simulation.ts"
               },
@@ -8677,6 +8913,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/put_update_workflow.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
+              },
+              {
                 "plugin": "contentConnectors",
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
@@ -8734,7 +8974,15 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8747,6 +8995,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "esql",
@@ -8755,10 +9011,6 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -8861,6 +9113,10 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/index.test.ts"
               },
@@ -8931,6 +9187,22 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update/update_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/update/update_auto_fill_scheduler_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9397,6 +9669,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_delete_route.ts"
               },
@@ -9465,8 +9741,20 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflows_bulk.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.ts"
+              },
+              {
                 "plugin": "contentConnectors",
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+              },
+              {
+                "plugin": "dataConnectors",
+                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -9486,6 +9774,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget/server/init_routes.ts"
               },
               {
@@ -9497,12 +9789,12 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
                 "plugin": "infra",
@@ -9593,6 +9885,10 @@
                 "path": "src/core/packages/http/server-internal/src/http_server.test.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
+              },
+              {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/index.test.ts"
               },
@@ -9647,6 +9943,22 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/gaps/apis/gap_auto_fill_schedule/delete/delete_auto_fill_scheduler_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -10538,7 +10850,7 @@
               "\nReadonly copy of incoming request headers."
             ],
             "signature": [
-              "{ date?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; range?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; origin?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ date?: string | string[] | undefined; from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; range?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
             "deprecated": false,
@@ -14686,32 +14998,32 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/conversations.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/conversations.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/a2a.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -15134,10 +15446,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/list_scripts.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
-              },
-              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/security_ai_prompts/find_prompts.ts"
               },
@@ -15212,6 +15520,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/privileges/get_missing_privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15467,7 +15779,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_latest_readiness_tasks.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/get_readiness_categories.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15584,6 +15896,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/index.ts"
               },
               {
                 "plugin": "kubernetesSecurity",
@@ -15921,12 +16237,12 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -16380,10 +16696,6 @@
                 "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
               },
               {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/field_histograms/register_route.ts"
               },
@@ -16424,32 +16736,32 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/chat.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/chat.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/mcp.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/mcp.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/a2a.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
               },
               {
                 "plugin": "aiops",
@@ -17077,6 +17389,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts/set_workflow_status_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts/set_alert_tags_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts/set_alert_assignees_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/exceptions/api/manage_exceptions/route.ts"
               },
               {
@@ -17278,10 +17602,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/install_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness/routes/post_readiness_task.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17560,6 +17880,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/scripts_library/update_script.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/patch_rule/route.ts"
               },
               {
@@ -17718,16 +18042,20 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/tools.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/data_stream_routes.ts"
               },
               {
                 "plugin": "ml",
@@ -18621,7 +18949,7 @@
           "\nHttp request headers to read."
         ],
         "signature": [
-          "{ date?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; range?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; origin?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+          "{ date?: string | string[] | undefined; from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; range?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
         ],
         "path": "src/core/packages/http/server/src/router/headers.ts",
         "deprecated": false,
@@ -18863,7 +19191,7 @@
           "\nSet of well-known HTTP headers."
         ],
         "signature": [
-          "\"date\" | \"allow\" | \"warning\" | \"range\" | \"location\" | \"authorization\" | \"from\" | \"host\" | \"etag\" | \"expires\" | \"origin\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
+          "\"date\" | \"from\" | \"origin\" | \"warning\" | \"location\" | \"allow\" | \"range\" | \"authorization\" | \"host\" | \"etag\" | \"expires\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\""
         ],
         "path": "src/core/packages/http/server/src/router/headers.ts",
         "deprecated": false,
@@ -19613,7 +19941,7 @@
           "\nHttp response headers to set."
         ],
         "signature": [
-          "Record<string, string | string[]> | Record<\"date\" | \"allow\" | \"warning\" | \"range\" | \"location\" | \"authorization\" | \"from\" | \"host\" | \"etag\" | \"expires\" | \"origin\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
+          "Record<string, string | string[]> | Record<\"date\" | \"from\" | \"origin\" | \"warning\" | \"location\" | \"allow\" | \"range\" | \"authorization\" | \"host\" | \"etag\" | \"expires\" | \"accept\" | \"accept-encoding\" | \"accept-language\" | \"accept-patch\" | \"accept-ranges\" | \"access-control-allow-credentials\" | \"access-control-allow-headers\" | \"access-control-allow-methods\" | \"access-control-allow-origin\" | \"access-control-expose-headers\" | \"access-control-max-age\" | \"access-control-request-headers\" | \"access-control-request-method\" | \"age\" | \"alt-svc\" | \"cache-control\" | \"connection\" | \"content-disposition\" | \"content-encoding\" | \"content-language\" | \"content-length\" | \"content-location\" | \"content-range\" | \"content-type\" | \"cookie\" | \"expect\" | \"forwarded\" | \"if-match\" | \"if-modified-since\" | \"if-none-match\" | \"if-unmodified-since\" | \"last-modified\" | \"pragma\" | \"proxy-authenticate\" | \"proxy-authorization\" | \"public-key-pins\" | \"referer\" | \"retry-after\" | \"sec-fetch-site\" | \"sec-fetch-mode\" | \"sec-fetch-user\" | \"sec-fetch-dest\" | \"sec-websocket-accept\" | \"sec-websocket-extensions\" | \"sec-websocket-key\" | \"sec-websocket-protocol\" | \"sec-websocket-version\" | \"set-cookie\" | \"strict-transport-security\" | \"tk\" | \"trailer\" | \"transfer-encoding\" | \"upgrade\" | \"user-agent\" | \"vary\" | \"via\" | \"www-authenticate\", string | string[]>"
         ],
         "path": "src/core/packages/http/server/src/router/headers.ts",
         "deprecated": false,

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
@@ -33,8 +33,8 @@ import { UpdateAlertsModal } from './update_alerts_modal';
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
@@ -208,25 +208,18 @@ const TakeActionComponent: React.FC<Props> = ({
     showAssistantOverlay?.();
   }, [closePopover, showAssistantOverlay]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
-  const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : null;
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.alert,
-    attachmentData: {
-      alert: attackDiscovery
-        ? getAttackDiscoveryMarkdown({
-            attackDiscovery,
-            replacements,
-          })
-        : '',
-    },
-    attachmentPrompt: i18n.ADD_TO_CHAT,
-  });
-
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+  const reportAddToChatClick = useReportAddToChat();
   const onViewInAgentBuilder = useCallback(() => {
     closePopover();
+    reportAddToChatClick({
+      pathway: 'attack_discovery_take_action',
+      attachments: ['alert'],
+    });
     openAgentBuilderFlyout();
-  }, [closePopover, openAgentBuilderFlyout]);
+  }, [closePopover, openAgentBuilderFlyout, reportAddToChatClick]);
 
   // button for the popover:
   const button = useMemo(
@@ -267,16 +260,18 @@ const TakeActionComponent: React.FC<Props> = ({
         </EuiContextMenuItem>,
 
         attackDiscoveries.length === 1
-          ? isAgentBuilderEnabled
-            ? [
-                <EuiContextMenuItem
-                  data-test-subj="viewInAgentBuilder"
-                  key="viewInAgentBuilder"
-                  onClick={onViewInAgentBuilder}
-                >
-                  {i18n.ADD_TO_CHAT}
-                </EuiContextMenuItem>,
-              ]
+          ? isAgentChatExperienceEnabled
+            ? hasAgentBuilderPrivilege
+              ? [
+                  <EuiContextMenuItem
+                    data-test-subj="viewInAgentBuilder"
+                    key="viewInAgentBuilder"
+                    onClick={onViewInAgentBuilder}
+                  >
+                    {i18n.ADD_TO_CHAT}
+                  </EuiContextMenuItem>,
+                ]
+              : []
             : [
                 <EuiContextMenuItem
                   data-test-subj="viewInAiAssistant"
@@ -292,7 +287,8 @@ const TakeActionComponent: React.FC<Props> = ({
     [
       addToCaseDisabled,
       attackDiscoveries.length,
-      isAgentBuilderEnabled,
+      hasAgentBuilderPrivilege,
+      isAgentChatExperienceEnabled,
       onClickAddToExistingCase,
       onClickAddToNewCase,
       onViewInAgentBuilder,

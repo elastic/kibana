@@ -2299,6 +2299,9 @@
             "tags": [],
             "label": "description",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2311,7 +2314,7 @@
             "label": "processors",
             "description": [],
             "signature": [
-              "any[]"
+              "any[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
             "deprecated": false,

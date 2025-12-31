@@ -77,6 +77,21 @@ interface DeleteBackfillForRulesOpts {
   ruleIds: string[];
   namespace?: string;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  shouldUpdateGaps?: boolean;
+  internalSavedObjectsRepository?: ISavedObjectsRepository;
+  eventLogClient?: IEventLogClient;
+  eventLogger?: IEventLogger;
+  actionsClient?: ActionsClient;
+}
+
+interface DeleteBackfillsByInitiatorIdOpts {
+  initiatorId: string;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  shouldUpdateGaps?: boolean;
+  internalSavedObjectsRepository?: ISavedObjectsRepository;
+  eventLogClient?: IEventLogClient;
+  eventLogger?: IEventLogger;
+  actionsClient?: ActionsClient;
 }
 
 export class BackfillClient {
@@ -95,6 +110,106 @@ export class BackfillClient {
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
+  }
+
+  private async deleteAdHocRunsAndTasks({
+    unsecuredSavedObjectsClient,
+    adHocRuns,
+    shouldUpdateGaps,
+    internalSavedObjectsRepository,
+    eventLogClient,
+    eventLogger,
+    actionsClient,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>>;
+    shouldUpdateGaps?: boolean;
+    internalSavedObjectsRepository?: ISavedObjectsRepository;
+    eventLogClient?: IEventLogClient;
+    eventLogger?: IEventLogger;
+    actionsClient?: ActionsClient;
+  }) {
+    if (adHocRuns.length === 0) return;
+
+    const canUpdateGaps =
+      shouldUpdateGaps && actionsClient && internalSavedObjectsRepository && eventLogClient;
+
+    // Prepare backfill metadata for gap updates before deleting SOs
+    const backfillsForGapUpdate = canUpdateGaps
+      ? adHocRuns.map((so) =>
+          transformAdHocRunToBackfillResult({
+            adHocRunSO: so,
+            isSystemAction: (id: string) => actionsClient.isSystemAction(id),
+          })
+        )
+      : [];
+
+    const deleteResult = await unsecuredSavedObjectsClient.bulkDelete(
+      adHocRuns.map((adHocRun) => ({
+        id: adHocRun.id,
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      }))
+    );
+
+    const deleteErrors = deleteResult.statuses.filter((status) => !!status.error);
+    if (deleteErrors.length > 0) {
+      this.logger.warn(
+        `Error deleting backfill jobs with IDs: ${deleteErrors
+          .map((status) => status.id)
+          .join(', ')} with errors: ${deleteErrors.map(
+          (status) => status.error?.message
+        )} - jobs and associated task were not deleted.`
+      );
+    }
+
+    if (canUpdateGaps) {
+      for (const backfill of backfillsForGapUpdate ?? []) {
+        if (!('rule' in backfill)) {
+          continue;
+        }
+        try {
+          await updateGaps({
+            ruleId: backfill.rule.id,
+            start: new Date(backfill.start),
+            end: backfill.end ? new Date(backfill.end) : new Date(),
+            backfillSchedule: backfill.schedule,
+            savedObjectsRepository: internalSavedObjectsRepository,
+            logger: this.logger,
+            eventLogClient,
+            eventLogger,
+            shouldRefetchAllBackfills: true,
+            backfillClient: this,
+            actionsClient: actionsClient!,
+            initiator: backfill.initiator,
+          });
+        } catch (e) {
+          this.logger.warn(
+            `Error updating gaps after deleting backfill ${backfill.id ?? 'unknown'}: ${
+              (e as Error).message
+            }`
+          );
+        }
+      }
+    }
+
+    // delete the associated tasks
+    const taskIdsToDelete = deleteResult.statuses
+      .filter((status) => status.success)
+      .map((status) => status.id);
+
+    // only delete tasks if the associated ad hoc runs were successfully deleted
+    const taskManager = await this.taskManagerStartPromise;
+    const deleteTaskResult = await taskManager.bulkRemove(taskIdsToDelete);
+    const deleteTaskErrors = deleteTaskResult.statuses.filter((status) => !!status.error);
+    if (deleteTaskErrors.length > 0) {
+      this.logger.warn(
+        `Error deleting tasks with IDs: ${deleteTaskErrors
+          .map((status) => status.id)
+          .join(', ')} with errors: ${deleteTaskErrors
+          .map((status) => status.error?.message)
+          .join(', ')}`
+      );
+    }
   }
 
   public async bulkQueue({
@@ -407,46 +522,49 @@ export class BackfillClient {
         adHocRuns.push(...response.saved_objects);
       }
       await adHocRunFinder.close();
-
-      if (adHocRuns.length > 0) {
-        const deleteResult = await unsecuredSavedObjectsClient.bulkDelete(
-          adHocRuns.map((adHocRun) => ({
-            id: adHocRun.id,
-            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          }))
-        );
-
-        const deleteErrors = deleteResult.statuses.filter((status) => !!status.error);
-        if (deleteErrors.length > 0) {
-          this.logger.warn(
-            `Error deleting backfill jobs with IDs: ${deleteErrors
-              .map((status) => status.id)
-              .join(', ')} with errors: ${deleteErrors.map(
-              (status) => status.error?.message
-            )} - jobs and associated task were not deleted.`
-          );
-        }
-
-        // only delete tasks if the associated ad hoc runs were successfully deleted
-        const taskIdsToDelete = deleteResult.statuses
-          .filter((status) => status.success)
-          .map((status) => status.id);
-
-        // delete the associated tasks
-        const taskManager = await this.taskManagerStartPromise;
-        const deleteTaskResult = await taskManager.bulkRemove(taskIdsToDelete);
-        const deleteTaskErrors = deleteTaskResult.statuses.filter((status) => !!status.error);
-        if (deleteTaskErrors.length > 0) {
-          this.logger.warn(
-            `Error deleting tasks with IDs: ${deleteTaskErrors
-              .map((status) => status.id)
-              .join(', ')} with errors: ${deleteTaskErrors.map((status) => status.error?.message)}`
-          );
-        }
-      }
+      await this.deleteAdHocRunsAndTasks({
+        unsecuredSavedObjectsClient,
+        adHocRuns,
+      });
     } catch (error) {
       this.logger.warn(
         `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
+      );
+    }
+  }
+
+  public async deleteBackfillsByInitiatorId({
+    initiatorId,
+    unsecuredSavedObjectsClient,
+    shouldUpdateGaps,
+    internalSavedObjectsRepository,
+    eventLogClient,
+    eventLogger,
+    actionsClient,
+  }: DeleteBackfillsByInitiatorIdOpts) {
+    try {
+      const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "${initiatorId}"`,
+      });
+      const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+      for await (const response of adHocRunFinder.find()) {
+        adHocRuns.push(...response.saved_objects);
+      }
+      await adHocRunFinder.close();
+      await this.deleteAdHocRunsAndTasks({
+        unsecuredSavedObjectsClient,
+        adHocRuns,
+        shouldUpdateGaps,
+        internalSavedObjectsRepository,
+        eventLogClient,
+        eventLogger,
+        actionsClient,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Error deleting backfill jobs for initiatorId ${initiatorId} - ${(error as Error).message}`
       );
     }
   }

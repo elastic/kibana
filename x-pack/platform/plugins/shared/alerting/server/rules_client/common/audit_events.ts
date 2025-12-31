@@ -62,6 +62,7 @@ export enum GapAutoFillSchedulerAuditAction {
   GET = 'gap_auto_fill_scheduler_get',
   UPDATE = 'gap_auto_fill_scheduler_update',
   DELETE = 'gap_auto_fill_scheduler_delete',
+  GET_LOGS = 'gap_auto_fill_scheduler_get_logs',
 }
 
 export interface GapAutoFillSchedulerAuditEventParams {
@@ -310,6 +311,11 @@ const gapAutoFillSchedulerEventVerbs: Record<GapAutoFillSchedulerAuditAction, Ve
     'deleting gap auto fill scheduler',
     'deleted gap auto fill scheduler',
   ],
+  gap_auto_fill_scheduler_get_logs: [
+    'get gap auto fill scheduler logs',
+    'getting gap auto fill scheduler logs',
+    'got gap auto fill scheduler logs',
+  ],
 };
 
 const gapAutoFillSchedulerEventTypes: Record<
@@ -320,6 +326,7 @@ const gapAutoFillSchedulerEventTypes: Record<
   gap_auto_fill_scheduler_get: 'access',
   gap_auto_fill_scheduler_update: 'change',
   gap_auto_fill_scheduler_delete: 'deletion',
+  gap_auto_fill_scheduler_get_logs: 'access',
 };
 
 export function gapAutoFillSchedulerAuditEvent({

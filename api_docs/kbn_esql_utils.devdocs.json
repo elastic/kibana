@@ -183,6 +183,54 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.appendLimitToQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "appendLimitToQuery",
+        "description": [],
+        "signature": [
+          "(queryString: string, limit: number) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_limit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendLimitToQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_limit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.appendLimitToQuery.$2",
+            "type": "number",
+            "tags": [],
+            "label": "limit",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_limit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.appendStatsByToQuery",
         "type": "Function",
         "tags": [],
@@ -191,7 +239,7 @@
         "signature": [
           "(queryString: string, column: string) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_stats_by.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -205,7 +253,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_stats_by.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -220,7 +268,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_stats_by.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -235,11 +283,13 @@
         "type": "Function",
         "tags": [],
         "label": "appendToESQLQuery",
-        "description": [],
+        "description": [
+          "\nAppend in a new line the appended text to take care of the case where the user adds a comment at the end of the query.\nIn these cases a base query such as \"from index // comment\" will result in errors or wrong data if we don't append in a new line"
+        ],
         "signature": [
           "(baseESQLQuery: string, appendedText: string) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -253,7 +303,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -268,7 +318,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -283,11 +333,15 @@
         "type": "Function",
         "tags": [],
         "label": "appendWhereClauseToESQLQuery",
-        "description": [],
-        "signature": [
-          "(baseESQLQuery: string, field: string, value: unknown, operation: \"+\" | \"-\" | \"is_not_null\" | \"is_null\", fieldType: string | undefined) => string | undefined"
+        "description": [
+          "\nAppends a WHERE clause to an existing ES|QL query string."
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+        "signature": [
+          "(baseESQLQuery: string, field: string, value: unknown, operation: ",
+          "SupportedOperation",
+          ", fieldType: string | undefined) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -297,11 +351,13 @@
             "type": "string",
             "tags": [],
             "label": "baseESQLQuery",
-            "description": [],
+            "description": [
+              "the base ES|QL query to append the WHERE clause to."
+            ],
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -312,11 +368,13 @@
             "type": "string",
             "tags": [],
             "label": "field",
-            "description": [],
+            "description": [
+              "the field to filter on."
+            ],
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -327,11 +385,13 @@
             "type": "Unknown",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "the value to filter by."
+            ],
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -342,11 +402,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "operation",
-            "description": [],
-            "signature": [
-              "\"+\" | \"-\" | \"is_not_null\" | \"is_null\""
+            "description": [
+              "the operation to perform ('+', '-', 'is_not_null', 'is_null')."
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "signature": [
+              "SupportedOperation"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -357,17 +419,21 @@
             "type": "string",
             "tags": [],
             "label": "fieldType",
-            "description": [],
+            "description": [
+              "the type of the field being filtered (optional)."
+            ],
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query/append_where.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "the modified ES|QL query string with the appended WHERE clause, or undefined if no changes were made."
+        ],
         "initialIsOpen": false
       },
       {
@@ -624,9 +690,9 @@
         "signature": [
           "(renameFunction: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
@@ -634,17 +700,17 @@
           "FunctionSubtype",
           ", string>) => { original: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
           "; renamed: ",
           {
-            "pluginId": "@kbn/esql-ast",
+            "pluginId": "@kbn/esql-language",
             "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
+            "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
@@ -663,9 +729,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/esql-ast",
+                "pluginId": "@kbn/esql-language",
                 "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
+                "docId": "kibKbnEsqlLanguagePluginApi",
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               },
@@ -2721,6 +2787,45 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getProjectRoutingFromEsqlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getProjectRoutingFromEsqlQuery",
+        "description": [
+          "\nExtracts the project routing value from an ES|QL query string.\n"
+        ],
+        "signature": [
+          "(queryString: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/set_instructions_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getProjectRoutingFromEsqlQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [
+              "- The ES|QL query string to parse"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/set_instructions_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The project routing value if found, undefined otherwise"
+        ],
         "initialIsOpen": false
       },
       {

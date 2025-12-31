@@ -43,6 +43,7 @@ describe('listTypesWithSystemRoute', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: true,
         subFeature: 'endpointSecurity' as SubFeature,
+        source: 'stack',
       }),
     ];
 
@@ -63,6 +64,7 @@ describe('listTypesWithSystemRoute', () => {
             "is_system_action_type": true,
             "minimum_license_required": "gold",
             "name": "name",
+            "source": "stack",
             "sub_feature": "endpointSecurity",
             "supported_feature_ids": Array [
               "alerting",
@@ -85,6 +87,7 @@ describe('listTypesWithSystemRoute', () => {
           is_system_action_type: true,
           sub_feature: 'endpointSecurity',
           is_deprecated: false,
+          source: 'stack',
         },
       ],
     });
@@ -134,6 +137,7 @@ describe('listTypesWithSystemRoute', () => {
             "is_system_action_type": false,
             "minimum_license_required": "gold",
             "name": "name",
+            "source": "stack",
             "sub_feature": undefined,
             "supported_feature_ids": Array [
               "alerting",
@@ -165,6 +169,7 @@ describe('listTypesWithSystemRoute', () => {
           minimum_license_required: 'gold',
           is_system_action_type: false,
           is_deprecated: false,
+          source: 'stack',
         },
       ],
     });

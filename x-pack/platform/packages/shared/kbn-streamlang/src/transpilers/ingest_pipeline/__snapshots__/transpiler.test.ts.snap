@@ -242,6 +242,20 @@ Object {
       },
     },
     Object {
+      "script": Object {
+        "description": "Math processor: price * quantity",
+        "lang": "painless",
+        "source": "ctx['total'] = ($('price', null) * $('quantity', null));",
+      },
+    },
+    Object {
+      "script": Object {
+        "description": "Math processor: attributes.price * attributes.quantity + attributes.tax",
+        "lang": "painless",
+        "source": "ctx['attributes.total'] = (($('attributes.price', null) * $('attributes.quantity', null)) + $('attributes.tax', null));",
+      },
+    },
+    Object {
       "grok": Object {
         "ecs_compatibility": "v1",
         "field": "body.message",
