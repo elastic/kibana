@@ -15,8 +15,8 @@ import type { PluginConfig } from './config';
 import { configSchema } from './config';
 import { setupSavedObjects } from './saved_objects';
 import { initializeRuleExecutorTaskDefinition } from './rule_executor';
-import { CreateEsqlRuleRoute } from './routes/create_esql_rule_route';
-import { UpdateEsqlRuleRoute } from './routes/update_esql_rule_route';
+import { CreateRuleRoute } from './routes/create_rule_route';
+import { UpdateRuleRoute } from './routes/update_rule_route';
 import { registerFeaturePrivileges } from './lib/security/privileges';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
@@ -25,8 +25,8 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 
 export const module = new ContainerModule(({ bind }) => {
   // Register HTTP routes via DI
-  bind(Route).toConstantValue(CreateEsqlRuleRoute);
-  bind(Route).toConstantValue(UpdateEsqlRuleRoute);
+  bind(Route).toConstantValue(CreateRuleRoute);
+  bind(Route).toConstantValue(UpdateRuleRoute);
 
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);

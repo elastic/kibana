@@ -17,35 +17,44 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { Logger as KibanaLogger } from '@kbn/logging';
 import { inject, injectable, optional } from 'inversify';
 import { Logger, PluginStart } from '@kbn/core-di';
-import type { RouteHandler } from '@kbn/core-di-server';
 import { CoreStart, Request, Response } from '@kbn/core-di-server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import { DEFAULT_ALERTING_V2_ROUTE_SECURITY } from './constants';
 import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { createEsqlRule, createEsqlRuleDataSchema } from '../application/esql_rule/methods/create';
+import {
+  updateEsqlRule,
+  updateEsqlRuleDataSchema,
+  type UpdateEsqlRuleData,
+} from '../application/esql_rule/methods/update';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
 
-const createEsqlRuleParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+const updateRuleParamsSchema = schema.object({
+  id: schema.string(),
 });
 
 @injectable()
-export class CreateEsqlRuleRoute implements RouteHandler {
-  static method = 'post' as const;
-  static path = `${INTERNAL_ESQL_RULE_API_PATH}/{id?}`;
+export class UpdateRuleRoute {
+  static method = 'put' as const;
+  static path = `${INTERNAL_ESQL_RULE_API_PATH}/{id}`;
   static security = DEFAULT_ALERTING_V2_ROUTE_SECURITY;
-  static options = { access: 'internal' } as const;
+  static options = { access: 'internal', tags: ['access:alerting'] } as const;
   static validate = {
     request: {
-      body: createEsqlRuleDataSchema,
-      params: createEsqlRuleParamsSchema,
+      body: updateEsqlRuleDataSchema,
+      params: updateRuleParamsSchema,
     },
   } as const;
 
   constructor(
     @inject(Logger) private readonly logger: KibanaLogger,
-    @inject(Request) private readonly request: KibanaRequest,
+    @inject(Request)
+    private readonly request: KibanaRequest<
+      TypeOf<typeof updateRuleParamsSchema>,
+      unknown,
+      UpdateEsqlRuleData
+    >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(CoreStart('http')) private readonly http: HttpServiceStart,
     @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
@@ -64,10 +73,9 @@ export class CreateEsqlRuleRoute implements RouteHandler {
       const savedObjectsClient = this.savedObjects.getScopedClient(this.request, {
         includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
       });
-
-      const created = await createEsqlRule(
+      const updated = await updateEsqlRule(
         {
-          logger: this.logger,
+          logger: this.logger as any,
           request: this.request,
           taskManager: this.taskManager,
           savedObjectsClient,
@@ -76,13 +84,12 @@ export class CreateEsqlRuleRoute implements RouteHandler {
           getUserName: async () =>
             this.security?.authc.getCurrentUser(this.request)?.username ?? null,
         },
-        { data: this.request.body as any, options: { id: (this.request.params as any).id } }
+        { id: this.request.params.id, data: this.request.body }
       );
 
-      return this.response.ok({ body: created });
+      return this.response.ok({ body: updated });
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      this.logger.debug(`create esql rule route error: ${boom.message}`);
       return this.response.customError({
         statusCode: boom.output.statusCode,
         body: boom.output.payload,
@@ -90,3 +97,5 @@ export class CreateEsqlRuleRoute implements RouteHandler {
     }
   }
 }
+
+
