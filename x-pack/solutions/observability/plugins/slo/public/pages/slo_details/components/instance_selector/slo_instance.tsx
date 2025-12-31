@@ -16,9 +16,11 @@ import { SloSelectInstanceFlyout } from './slo_select_instance_flyout';
 
 export function SloInstance({ slo }: { slo: SLOWithSummaryResponse }) {
   const isFlyoutAvailable = window.location.pathname.includes(SLOS_BASE_PATH);
+
   const { search: searchParams } = useLocation();
   const history = useHistory();
   const [showSelectInstanceFlyout, setShowSelectInstanceFlyout] = useState(false);
+
   const groupBy = [slo.groupBy].flat();
   const isDefinedWithGroupBy = !groupBy.includes(ALL_VALUE);
   const groupings = Object.entries(slo.groupings ?? {});

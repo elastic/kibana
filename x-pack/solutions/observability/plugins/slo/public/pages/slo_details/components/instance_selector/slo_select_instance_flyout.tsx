@@ -135,8 +135,17 @@ export function SloSelectInstanceFlyout({
             <EuiBasicTable
               tableLayout="auto"
               loading={isLoading}
-              error={isError ? 'Error loading SLO instances' : undefined}
-              tableCaption="SLO instances"
+              error={
+                isError
+                  ? i18n.translate('xpack.slo.sloSearchInstancesFlyout.errorLabel', {
+                      defaultMessage: 'Error loading SLO instances',
+                    })
+                  : undefined
+              }
+              tableCaption={i18n.translate(
+                'xpack.slo.sloSearchInstancesFlyout.sloInstancesTableCaption',
+                { defaultMessage: 'SLO instances' }
+              )}
               items={items}
               rowHeader="instanceId"
               columns={columns}
