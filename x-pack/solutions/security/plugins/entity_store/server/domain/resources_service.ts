@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityType } from './definitions/constants';
+import { EntityType } from './definitions/entity_type';
 import type { EntityStoreLogger } from '../infra/logging';
 
 export class ResourcesService {

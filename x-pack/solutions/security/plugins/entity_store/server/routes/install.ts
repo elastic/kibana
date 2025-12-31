@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
-import { EntityType } from '../domain/definitions/constants';
+import { EntityType } from '../domain/definitions/entity_type';
 import type { ResourcesService } from '../domain/resources_service';
 import type { EntityStoreLogger } from '../infra/logging';
 
