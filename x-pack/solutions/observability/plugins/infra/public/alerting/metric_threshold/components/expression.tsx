@@ -301,6 +301,10 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('alertOnGroupDisappear', false);
     }
 
+    if (typeof ruleParams.noDataBehavior === 'undefined') {
+      setRuleParams('noDataBehavior', 'recover');
+    }
+
     setIsNoDataChecked(
       (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
         (!hasGroupBy && !!ruleParams.alertOnNoData)
