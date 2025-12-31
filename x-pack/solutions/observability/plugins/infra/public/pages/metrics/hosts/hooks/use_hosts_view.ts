@@ -90,6 +90,23 @@ export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
 
 /**
+ * Determines whether charts should not be loaded based on the hosts view state.
+ * Charts should not load if the table API failed or returned no data.
+ * This prevents querying all hosts which could cause performance issues in loaded environments.
+ */
+export const shouldNotLoadCharts = ({
+  loading,
+  error,
+  hostNodesLength,
+}: {
+  loading: boolean;
+  error: unknown;
+  hostNodesLength: number;
+}): boolean => {
+  return Boolean(error) || (!loading && hostNodesLength === 0);
+};
+
+/**
  * Helpers
  */
 

@@ -13,10 +13,11 @@ import { HOST_NAME_FIELD } from '../../../../../../../common/constants';
 import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { useHostsViewContext } from '../../../hooks/use_hosts_view';
+import { useHostsViewContext, shouldNotLoadCharts } from '../../../hooks/use_hosts_view';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
+import { ChartPlaceholder } from './chart_placeholder';
 
 export type ChartProps = LensConfig & {
   id: string;
@@ -25,7 +26,7 @@ export type ChartProps = LensConfig & {
 
 export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { loading } = useHostsViewContext();
+  const { loading, error, hostNodes } = useHostsViewContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
   const { currentPage } = useHostsTableContext();
 
@@ -61,6 +62,10 @@ export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {
     searchCriteria.panelFilters,
     shouldUseSearchCriteria,
   ]);
+
+  if (shouldNotLoadCharts({ loading, error, hostNodesLength: hostNodes.length })) {
+    return <ChartPlaceholder error={error} borderRadius="m" />;
+  }
 
   return (
     <LensChart

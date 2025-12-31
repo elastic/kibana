@@ -10,10 +10,11 @@ import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_req
 import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { useHostsViewContext } from '../../hooks/use_hosts_view';
+import { useHostsViewContext, shouldNotLoadCharts } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
+import { KpiPlaceholder } from './kpi_placeholder';
 import {
   MAX_AS_FIRST_FUNCTION_PATTERN,
   AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
@@ -67,7 +68,7 @@ export const getSubtitle = ({
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
-  const { hostNodes, loading: hostsLoading } = useHostsViewContext();
+  const { hostNodes, loading: hostsLoading, error } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
 
@@ -103,6 +104,10 @@ export const KpiCharts = () => {
     reloadRequestTime,
     getSubtitle: getSubtitleFn,
   });
+
+  if (shouldNotLoadCharts({ loading, error, hostNodesLength: hostNodes.length })) {
+    return <KpiPlaceholder error={error} />;
+  }
 
   return (
     <HostKpiCharts
