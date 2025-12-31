@@ -16,16 +16,16 @@ export class ResourcesService {
   }
 
   install(types?: EntityType[]) {
-    types = fallbackTypes(types);
+    types = this.getTypesOrDefault(types);
 
     this.logger.info(`Should initialize entity store for types ${JSON.stringify(types)}`);
   }
-}
 
-const fallbackTypes = (types?: EntityType[]): EntityType[] => {
-  if (!types) {
-    return Object.values(EntityType.Values);
+  private getTypesOrDefault(types?: EntityType[]): EntityType[] {
+    if (!types) {
+      return Object.values(EntityType.Values);
+    }
+
+    return types;
   }
-
-  return types;
-};
+}
