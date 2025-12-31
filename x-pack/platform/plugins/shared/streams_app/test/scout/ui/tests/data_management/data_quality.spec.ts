@@ -120,7 +120,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.datePicker.setAbsoluteRange(dataQualityTimeRange);
 
     // Go to Streams main page
-    await pageObjects.streams.clickRootBreadcrumb();
+    await pageObjects.streams.gotoStreamMainPage();
     await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
   });
 
