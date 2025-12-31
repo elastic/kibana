@@ -18,11 +18,11 @@ const BodySchema = z.object({
   entityType: z.array(EntityType).optional(),
 });
 
-export function registerInstall(
+export const registerInstall = (
   router: IRouter,
   resourceService: ResourcesService,
   logger: EntityStoreLogger
-) {
+) => {
   router.versioned
     .post({
       path: '/internal/security/entity-store/install',
@@ -51,4 +51,4 @@ export function registerInstall(
         });
       }
     );
-}
+};
