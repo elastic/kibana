@@ -22,7 +22,7 @@ function getNoResultsMessage({
   sequences,
   logId,
   kqlFilter,
-  interestingEventFilter,
+  errorLogsOnly,
   correlationFields,
   start,
   end,
@@ -30,7 +30,7 @@ function getNoResultsMessage({
   sequences: LogSequence[];
   logId: string | undefined;
   kqlFilter: string | undefined;
-  interestingEventFilter: string | undefined;
+  errorLogsOnly: boolean;
   correlationFields: string[];
   start: string;
   end: string;
@@ -46,12 +46,6 @@ function getNoResultsMessage({
     ? 'Matching logs exist but lack the default correlation fields (trace.id, request.id, transaction.id, etc.). Try using `correlationFields` for specifying custom correlation fields.'
     : `Matching logs exist but lack the custom correlation fields: ${correlationFields.join(', ')}`;
 
-  const isUsingDefaultEventFilter = !interestingEventFilter;
-  const eventFilterDescription = isUsingDefaultEventFilter
-    ? 'The default `interestingEventFilter` (log.level: ERROR/WARN/FATAL, HTTP 5xx, syslog severity ≤3, etc.) did not match any documents.'
-    : `The 
-interestingEventFilter" option "${interestingEventFilter}" did not match any documents.`;
-
   if (logId) {
     return `The log ID "${logId}" was not found, or the log does not have any of the ${correlationFieldsDescription}.`;
   }
@@ -59,7 +53,11 @@ interestingEventFilter" option "${interestingEventFilter}" did not match any doc
   const suggestions = [
     `No matching logs exist in this time range (${start} to ${end})`,
     ...(kqlFilter ? ['`kqlFilter` is too restrictive'] : []),
-    eventFilterDescription,
+    ...(errorLogsOnly
+      ? [
+          'No error logs found (errorLogsOnly=true filters for ERROR/WARN/FATAL, HTTP 5xx, etc.). Try errorLogsOnly=false to include all log levels.',
+        ]
+      : []),
     correlationFieldsDescription,
   ];
 
@@ -75,7 +73,7 @@ export async function getToolHandler({
   start,
   end,
   kqlFilter,
-  interestingEventFilter,
+  errorLogsOnly = true,
   index,
   correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
   logId,
@@ -92,7 +90,7 @@ export async function getToolHandler({
   start: string;
   end: string;
   kqlFilter?: string;
-  interestingEventFilter?: string;
+  errorLogsOnly?: boolean;
   index?: string;
   correlationFields?: string[];
   logId?: string;
@@ -110,7 +108,7 @@ export async function getToolHandler({
     startTime,
     endTime,
     kqlFilter,
-    interestingEventFilter,
+    errorLogsOnly,
     correlationFields,
     logger,
     logId,
@@ -141,7 +139,7 @@ export async function getToolHandler({
     sequences,
     logId,
     kqlFilter,
-    interestingEventFilter,
+    errorLogsOnly,
     correlationFields,
     start,
     end,

@@ -32,7 +32,7 @@ const getCorrelatedLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, "start", "end", "kqlFilter", and "interestingEventFilter" are ignored.'
+      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, other filter parameters are ignored.'
     ),
   kqlFilter: z
     .string()
@@ -40,11 +40,11 @@ const getCorrelatedLogsSchema = z.object({
     .describe(
       'Optional KQL filter to narrow down logs. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
     ),
-  interestingEventFilter: z
-    .string()
+  errorLogsOnly: z
+    .boolean()
     .optional()
     .describe(
-      'Optional KQL filter to define what constitutes an "interesting event" - the starting point for correlation. Defaults to matching error logs (ERROR, WARN, FATAL, HTTP 5xx, etc.). Use this to find non-error events (e.g. "event.duration > 1000000" for slow requests) or specific errors. Ignored if logId is provided.'
+      'When true (default), only anchors on error logs (ERROR, WARN, FATAL, HTTP 5xx). Set to false to anchor on any log. For slow requests: kqlFilter="event.duration > 1000000", errorLogsOnly=false.'
     ),
   correlationFields: z
     .array(z.string())
@@ -83,24 +83,21 @@ export function createGetCorrelatedLogsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getCorrelatedLogsSchema> = {
     id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves complete log sequences around events of interest (errors, slow requests, anomalies) to understand what happened.
+    description: `Retrieves complete log sequences around error events to understand what happened. By default, anchors on error logs (ERROR, WARN, FATAL, HTTP 5xx). Set errorLogsOnly=false to anchor on non-error events like slow requests.
 
 When to use:
 - Investigating WHY something failed or behaved unexpectedly
-- Understanding the sequence of events leading to an error or incident
+- Understanding the sequence of events leading to an error
 - Following a request/transaction across services using correlation IDs (trace.id, request.id, etc.)
-- An alert fired and you need to understand the root cause
 
 How it works:
-1. Finds "anchor" logs matching your criteria (default: errors with severity ERROR, WARN, FATAL, HTTP 5xx, etc.)
-2. Groups logs by correlation ID - a shared identifier that links related logs across a distributed system
-3. Returns chronologically sorted sequences showing the full story before and after each anchor
-
-Returns: { sequences: [{ correlation: { field, value }, logs: [...] }] }
+1. Finds "anchor" logs (errors by default, or any log if errorLogsOnly=false)
+2. Groups logs by correlation ID (trace.id, request.id, etc.)
+3. Returns chronologically sorted sequences showing context before and after each anchor
 
 Do NOT use for:
-- Getting a high-level overview of log patterns (use get_log_categories)
-- Analyzing why log volume changed (use run_log_rate_analysis)`,
+- High-level overview of log patterns (use get_log_categories)
+- Analyzing log volume changes (use run_log_rate_analysis)`,
     schema: getCorrelatedLogsSchema,
     tags: ['observability', 'logs'],
     availability: {
@@ -114,7 +111,7 @@ Do NOT use for:
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
-        interestingEventFilter,
+        errorLogsOnly = true,
         index,
         correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
         logId,
@@ -132,7 +129,7 @@ Do NOT use for:
           start,
           end,
           kqlFilter,
-          interestingEventFilter,
+          errorLogsOnly,
           index,
           correlationFields,
           logId,

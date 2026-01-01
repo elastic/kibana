@@ -21,7 +21,7 @@ export async function getAnchorLogsForTimeRange({
   startTime,
   endTime,
   kqlFilter,
-  interestingEventFilter,
+  errorLogsOnly,
   correlationFields,
   logger,
   maxSequences,
@@ -31,7 +31,7 @@ export async function getAnchorLogsForTimeRange({
   startTime: number;
   endTime: number;
   kqlFilter: string | undefined;
-  interestingEventFilter: string | undefined;
+  errorLogsOnly: boolean;
   correlationFields: string[];
   logger: Logger;
   maxSequences: number;
@@ -58,10 +58,8 @@ export async function getAnchorLogsForTimeRange({
             },
           },
 
-          // must be an interesting event (error by default, or match the provided filter)
-          ...(interestingEventFilter
-            ? buildKqlFilter(interestingEventFilter)
-            : [DEFAULT_ERROR_SEVERITY_FILTER]),
+          // filter by error severity (default) or include all logs
+          ...(errorLogsOnly ? [DEFAULT_ERROR_SEVERITY_FILTER] : []),
         ],
       },
     },
