@@ -28,7 +28,9 @@
 import type { ApmFields, Timerange } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { duration } from 'moment';
+import type { Client } from '@elastic/elasticsearch';
 import type { KibanaClient } from '../../../../lib/shared/base_kibana_client';
+import type { Logger } from '../../../../lib/utils/create_logger';
 import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 import { withClient } from '../../../../lib/utils/with_client';
@@ -112,8 +114,36 @@ export async function createApmAnomalyDetectionJob(
   });
 }
 
+export async function cleanupApmAnomalyDetectionJobs(
+  esClient: Client,
+  logger: Logger
+): Promise<void> {
+  try {
+    const { jobs } = await esClient.ml.getJobs({ job_id: 'apm-*' });
+    if (jobs.length > 0) {
+      logger.info(`Cleaning up ${jobs.length} existing APM anomaly detection jobs`);
+      for (const job of jobs) {
+        const jobId = job.job_id;
+
+        await esClient.ml
+          .stopDatafeed({ datafeed_id: `datafeed-${jobId}`, force: true })
+          .catch(() => {});
+
+        await esClient.ml.closeJob({ job_id: jobId, force: true }).catch(() => {});
+        await esClient.ml.deleteJob({ job_id: jobId, force: true }).catch(() => {});
+        logger.info(`Deleted ML job: ${jobId}`);
+      }
+    }
+  } catch {
+    // No jobs found or ML not available
+  }
+}
+
 export default createCliScenario({
-  teardown: async (_, kibanaClient, { logger }) => {
+  teardown: async (_, kibanaClient, esClient, { logger }) => {
+    // Clean up existing jobs before creating new ones
+    await cleanupApmAnomalyDetectionJobs(esClient, logger);
+
     logger.info('APM anomaly detection job creation requested');
     await createApmAnomalyDetectionJob(kibanaClient, 'production');
     logger.info('APM anomaly detection job creation completed');

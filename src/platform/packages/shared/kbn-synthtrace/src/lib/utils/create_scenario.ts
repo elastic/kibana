@@ -8,6 +8,7 @@
  */
 
 import type { Fields } from '@kbn/synthtrace-client';
+import type { Client } from '@elastic/elasticsearch';
 import type { Scenario, ScenarioInitOptions } from '../../cli/scenario';
 import type { SynthtraceClients } from '../../cli/utils/clients_manager';
 import type { KibanaClient } from '../shared/base_kibana_client';
@@ -23,11 +24,13 @@ type ScenarioOptions<TFields extends Fields> = Omit<
   bootstrap?: (
     clients: SynthtraceClients,
     kibanaClient: KibanaClient,
+    esClient: Client,
     options: ScenarioInitOptions
   ) => Promise<void>;
   teardown?: (
     clients: SynthtraceClients,
     kibanaClient: KibanaClient,
+    esClient: Client,
     options: ScenarioInitOptions
   ) => Promise<void>;
 };
@@ -46,10 +49,12 @@ export function createCliScenario<TFields extends Fields>(
   return async (initOptions) => ({
     generate: ({ range, clients }) => generate({ range, clients }),
     ...(bootstrap && {
-      bootstrap: (clients, kibanaClient) => bootstrap(clients, kibanaClient, initOptions),
+      bootstrap: (clients, kibanaClient, esClient) =>
+        bootstrap(clients, kibanaClient, esClient, initOptions),
     }),
     ...(teardown && {
-      teardown: (clients, kibanaClient) => teardown(clients, kibanaClient, initOptions),
+      teardown: (clients, kibanaClient, esClient) =>
+        teardown(clients, kibanaClient, esClient, initOptions),
     }),
     ...(setupPipeline && { setupPipeline }),
   });
