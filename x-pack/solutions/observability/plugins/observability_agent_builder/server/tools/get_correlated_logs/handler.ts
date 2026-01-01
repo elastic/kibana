@@ -21,7 +21,7 @@ import type { LogSequence } from './types';
 function getNoResultsMessage({
   sequences,
   logId,
-  logsFilter,
+  kqlFilter,
   interestingEventFilter,
   correlationFields,
   start,
@@ -29,7 +29,7 @@ function getNoResultsMessage({
 }: {
   sequences: LogSequence[];
   logId: string | undefined;
-  logsFilter: string | undefined;
+  kqlFilter: string | undefined;
   interestingEventFilter: string | undefined;
   correlationFields: string[];
   start: string;
@@ -58,7 +58,7 @@ interestingEventFilter" option "${interestingEventFilter}" did not match any doc
 
   const suggestions = [
     `No matching logs exist in this time range (${start} to ${end})`,
-    ...(logsFilter ? ['`logsFilter` is too restrictive'] : []),
+    ...(kqlFilter ? ['`kqlFilter` is too restrictive'] : []),
     eventFilterDescription,
     correlationFieldsDescription,
   ];
@@ -74,7 +74,7 @@ export async function getToolHandler({
   esClient,
   start,
   end,
-  logsFilter,
+  kqlFilter,
   interestingEventFilter,
   index,
   correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
@@ -91,7 +91,7 @@ export async function getToolHandler({
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  logsFilter?: string;
+  kqlFilter?: string;
   interestingEventFilter?: string;
   index?: string;
   correlationFields?: string[];
@@ -109,7 +109,7 @@ export async function getToolHandler({
     logsIndices,
     startTime,
     endTime,
-    logsFilter,
+    kqlFilter,
     interestingEventFilter,
     correlationFields,
     logger,
@@ -140,7 +140,7 @@ export async function getToolHandler({
   const message = getNoResultsMessage({
     sequences,
     logId,
-    logsFilter,
+    kqlFilter,
     interestingEventFilter,
     correlationFields,
     start,

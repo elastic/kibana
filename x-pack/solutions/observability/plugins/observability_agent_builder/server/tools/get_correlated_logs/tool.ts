@@ -32,19 +32,19 @@ const getCorrelatedLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, "start", "end", "logsFilter", and "interestingEventFilter" are ignored.'
+      'Optional ID of a specific log entry. If provided, the tool will fetch this log and find correlated logs based on its correlation identifier (e.g., trace.id). NOTE: When logId is provided, "start", "end", "kqlFilter", and "interestingEventFilter" are ignored.'
     ),
-  logsFilter: z
+  kqlFilter: z
     .string()
     .optional()
     .describe(
-      'Optional KQL query to filter the scope of logs to search. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
+      'Optional KQL filter to narrow down logs. Example: "service.name: payment AND host.name: web-server-01". Ignored if logId is provided.'
     ),
   interestingEventFilter: z
     .string()
     .optional()
     .describe(
-      'Optional KQL query to define what constitutes an "interesting event" - the starting point for correlation. Defaults to matching error logs (ERROR, WARN, FATAL, HTTP 5xx, etc.). Use this to find non-error events (e.g. "event.duration > 1000000" for slow requests) or specific errors. Ignored if logId is provided.'
+      'Optional KQL filter to define what constitutes an "interesting event" - the starting point for correlation. Defaults to matching error logs (ERROR, WARN, FATAL, HTTP 5xx, etc.). Use this to find non-error events (e.g. "event.duration > 1000000" for slow requests) or specific errors. Ignored if logId is provided.'
     ),
   correlationFields: z
     .array(z.string())
@@ -113,7 +113,7 @@ Do NOT use for:
       {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
-        logsFilter,
+        kqlFilter,
         interestingEventFilter,
         index,
         correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
@@ -131,7 +131,7 @@ Do NOT use for:
           esClient,
           start,
           end,
-          logsFilter,
+          kqlFilter,
           interestingEventFilter,
           index,
           correlationFields,

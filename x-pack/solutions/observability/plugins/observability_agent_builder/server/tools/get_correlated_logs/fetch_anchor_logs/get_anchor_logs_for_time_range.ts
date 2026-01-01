@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getTypedSearch } from '../../../utils/get_typed_search';
-import { kqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
+import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
 import type { AnchorLog } from '../types';
 import { DEFAULT_ERROR_SEVERITY_FILTER } from '../constants';
 import type { CorrelationFieldAggregations } from './types';
@@ -20,7 +20,7 @@ export async function getAnchorLogsForTimeRange({
   logsIndices,
   startTime,
   endTime,
-  logsFilter,
+  kqlFilter,
   interestingEventFilter,
   correlationFields,
   logger,
@@ -30,7 +30,7 @@ export async function getAnchorLogsForTimeRange({
   logsIndices: string[];
   startTime: number;
   endTime: number;
-  logsFilter: string | undefined;
+  kqlFilter: string | undefined;
   interestingEventFilter: string | undefined;
   correlationFields: string[];
   logger: Logger;
@@ -48,7 +48,7 @@ export async function getAnchorLogsForTimeRange({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...kqlFilter(logsFilter),
+          ...buildKqlFilter(kqlFilter),
 
           // must have at least one correlation field
           {
@@ -60,7 +60,7 @@ export async function getAnchorLogsForTimeRange({
 
           // must be an interesting event (error by default, or match the provided filter)
           ...(interestingEventFilter
-            ? kqlFilter(interestingEventFilter)
+            ? buildKqlFilter(interestingEventFilter)
             : [DEFAULT_ERROR_SEVERITY_FILTER]),
         ],
       },
