@@ -62,6 +62,12 @@ describe('parse runTest flags', () => {
     `);
   });
 
+  it('treats bare --browser-coverage as auto', () => {
+    const withBrowserCoverage = getFlags(['--config=foo', '--browser-coverage'], FLAG_OPTIONS);
+    const opts = parseFlags(new FlagsReader(withBrowserCoverage));
+    expect(opts.browserCoverage).toBe('auto');
+  });
+
   it('allows combinations of config and journey', () => {
     expect(() => test({ config: undefined })).toThrowErrorMatchingInlineSnapshot(
       `"At least one --config or --journey flag is required"`

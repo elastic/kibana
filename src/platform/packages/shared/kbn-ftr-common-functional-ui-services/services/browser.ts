@@ -57,6 +57,116 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Execute a Chrome DevTools Protocol command via Selenium/Chromedriver (fire-and-forget).
+   *
+   * Note: This only works for Chromium-based browsers (chrome/msedge). For firefox it will throw.
+   * Use sendCdpCommandAndGetResult for commands that return data.
+   */
+  public async sendCdpCommand(method: string, params: Record<string, any> = {}): Promise<void> {
+    if (!this.isChromium()) {
+      const message =
+        'CDP commands are only supported for Chromium-based browsers.\nProbably the browser in use is not chromium based.';
+      this.log.error(message);
+      throw new Error(message);
+    }
+
+    // selenium-webdriver's Chromium driver supports `sendDevToolsCommand` but it isn't typed.
+    // @ts-expect-error
+    await this.driver.sendDevToolsCommand(method, params);
+  }
+
+  /**
+   * Execute a Chrome DevTools Protocol command and return the result.
+   *
+   * Note: This only works for Chromium-based browsers (chrome/msedge). For firefox it will throw.
+   */
+  public async sendCdpCommandAndGetResult<TResult = unknown>(
+    method: string,
+    params: Record<string, any> = {}
+  ): Promise<TResult> {
+    if (!this.isChromium()) {
+      const message =
+        'CDP commands are only supported for Chromium-based browsers.\nProbably the browser in use is not chromium based.';
+      this.log.error(message);
+      throw new Error(message);
+    }
+
+    // selenium-webdriver's Chromium driver supports `sendAndGetDevToolsCommand` for commands that return results.
+    // @ts-expect-error
+    return await this.driver.sendAndGetDevToolsCommand(method, params);
+  }
+
+  /**
+   * Start Chrome's "precise coverage" profiler.
+   *
+   * Intended use is to collect execution coverage for a narrowly scoped action (e.g. a single assertion).
+   * You typically call:
+   * - `startPreciseCoverage()` → run action/assertion → `takePreciseCoverage()` → `stopPreciseCoverage()`
+   */
+  public async startPreciseCoverage(
+    options: Protocol.Profiler.StartPreciseCoverageRequest = { callCount: true, detailed: true }
+  ): Promise<void> {
+    await this.sendCdpCommand('Profiler.enable');
+    await this.sendCdpCommand('Profiler.startPreciseCoverage', options);
+  }
+
+  /**
+   * Take a snapshot of the precise coverage collected since `startPreciseCoverage()`.
+   * The response includes executed function ranges per script URL.
+   */
+  public async takePreciseCoverage(): Promise<Protocol.Profiler.TakePreciseCoverageResponse> {
+    return await this.sendCdpCommandAndGetResult('Profiler.takePreciseCoverage');
+  }
+
+  /**
+   * Stop the precise coverage profiler and disable the Profiler domain.
+   */
+  public async stopPreciseCoverage(): Promise<void> {
+    await this.sendCdpCommand('Profiler.stopPreciseCoverage');
+    await this.sendCdpCommand('Profiler.disable');
+  }
+
+  /**
+   * Convenience wrapper to collect precise coverage for a single async block (commonly: one assertion).
+   *
+   * If the callback throws, we still try to take coverage before rethrowing.
+   */
+  public async withPreciseCoverage<T>(
+    cb: () => Promise<T>,
+    options?: {
+      /** Optional label for logging/debugging. */
+      label?: string;
+      /** Options passed to `Profiler.startPreciseCoverage`. */
+      profiler?: Protocol.Profiler.StartPreciseCoverageRequest;
+    }
+  ): Promise<{ result: T; coverage: Protocol.Profiler.TakePreciseCoverageResponse }> {
+    const label = options?.label ? ` (${options.label})` : '';
+    this.log.debug(`Starting precise coverage${label}`);
+
+    await this.startPreciseCoverage(options?.profiler);
+
+    let result!: T;
+    let thrown: unknown;
+
+    try {
+      result = await cb();
+    } catch (e) {
+      thrown = e;
+    }
+
+    let coverage: Protocol.Profiler.TakePreciseCoverageResponse;
+    try {
+      coverage = await this.takePreciseCoverage();
+    } finally {
+      await this.stopPreciseCoverage();
+      this.log.debug(`Stopped precise coverage${label}`);
+    }
+
+    if (thrown) throw thrown;
+    return { result, coverage };
+  }
+
+  /**
    * Returns instance of Actions API based on driver w3c flag
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
    */

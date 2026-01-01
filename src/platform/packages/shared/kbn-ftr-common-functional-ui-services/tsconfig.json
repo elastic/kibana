@@ -12,6 +12,7 @@
     "@kbn/repo-info",
     "@kbn/test-subj-selector",
     "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-screenshot-filename",
     "@kbn/std",
     "@kbn/expect",
     "@kbn/core-chrome-layout-constants",
