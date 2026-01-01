@@ -276,7 +276,7 @@ const createReportPath = async (
 ): Promise<{ reportPath: string; cleanup: () => Promise<void> }> => {
   const buildPath = async (basePrefix: string) => {
     const tempDir = await fsPromises.mkdtemp(basePrefix);
-    const reportPath = path.join(tempDir, 'report.json');
+    const reportPath = path.join(tempDir, 'mcp-jest-report.json');
     const cleanup = async () => {
       await fsPromises.rm(tempDir, { recursive: true, force: true });
     };
@@ -380,15 +380,13 @@ const runJestWithDetails = async (
       : `node scripts/jest --config ${configPath}/jest.config.js --json --outputFile ${reportPath} ${coverageArgs}`;
 
   try {
-    const { stdout, stderr, exitCode } = await execa.command(testCommand, {
+    const { all: combinedOutput = '', exitCode } = await execa.command(testCommand, {
       cwd: REPO_ROOT,
       env: process.env,
       extendEnv: true,
-      reject: false, // Don't throw on non-zero exit codes
-      all: true, // Also provide a combined stdout+stderr stream via the "all" property.
+      reject: false, // Don't throw on non-zero exit codes.
+      all: true, // Combine stdout and stderr into the "all" property.
     });
-
-    const combinedOutput = stdout + (stderr ? '\n' + stderr : '');
     let report: unknown;
     let hasReport = false;
 
@@ -430,8 +428,9 @@ const runJestWithDetails = async (
 
     return parseJestResults(report as JestReport, pkgDir, options);
   } catch (err: unknown) {
-    const error = err as { stdout?: string; stderr?: string; message?: string };
-    const combinedOutput = `${error.stdout || ''}${error.stderr ? `\n${error.stderr}` : ''}`;
+    const error = err as { all?: string; stdout?: string; stderr?: string; message?: string };
+    const combinedOutput =
+      error.all || `${error.stdout || ''}${error.stderr ? `\n${error.stderr}` : ''}`;
     let report: unknown;
     let hasReport = false;
 
