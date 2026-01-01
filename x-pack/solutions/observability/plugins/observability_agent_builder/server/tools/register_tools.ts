@@ -41,7 +41,10 @@ import {
   createDownstreamDependenciesTool,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
 } from './get_downstream_dependencies/tool';
-
+import {
+  createGetChangeEventsTool,
+  OBSERVABILITY_GET_CHANGE_EVENTS_TOOL_ID,
+} from './get_change_events/tool';
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
@@ -60,6 +63,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_CHANGE_EVENTS_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -88,6 +92,7 @@ export async function registerTools({
     createDownstreamDependenciesTool({ core, dataRegistry, logger }),
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
+    createGetChangeEventsTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {
