@@ -163,6 +163,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
       });
+
+      it('should include job stats', async () => {
+        const jobs = toolResults[0].data.jobs;
+        const job = jobs[0];
+
+        // jobStats should be present with state and data coverage
+        expect(job).to.have.property('jobStats');
+        expect(job.jobStats.state).to.be('opened');
+
+        expect(job.jobStats.lastRecordTimestamp).to.be.a('number');
+        expect(job.jobStats.lastRecordTimestamp).to.be.greaterThan(0);
+
+        expect(job.jobStats.processedRecordCount).to.be.a('number');
+        expect(job.jobStats.processedRecordCount).to.be.greaterThan(0);
+      });
     });
 
     it('filters by specific job ID', async () => {
