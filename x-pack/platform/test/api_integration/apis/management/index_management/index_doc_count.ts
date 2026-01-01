@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('validates request body (indexNames must be non-empty)', async () => {
-      const { body } = await supertest
+      await supertest
         .post(`${INTERNAL_API_BASE_PATH}/index_doc_count`)
         .set('kbn-xsrf', 'xxx')
         .send({ indexNames: [] })
