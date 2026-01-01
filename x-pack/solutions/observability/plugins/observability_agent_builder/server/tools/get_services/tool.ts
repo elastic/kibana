@@ -15,14 +15,16 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
+const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
+
 const getServicesSchema = z.object({
-  ...timeRangeSchemaRequired,
+  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   environment: z
     .string()
     .min(1)
@@ -49,8 +51,12 @@ export function createGetServicesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Retrieves a list of monitored APM services, including their health status, active alert counts, and key performance metrics: latency, transaction error rate, and throughput. Useful for high-level system overview, identifying unhealthy services, and quantifying performance issues.',
+    description: `Retrieves a list of monitored APM services with health status, alert counts, and performance metrics (latency, error rate, throughput).
+
+When to use:
+- Getting a high-level overview of system health from a service perspective
+- Identifying key metrics for services like latency, error rate, throughput, anomalies and alert counts
+- Answering "which services are having problems?"`,
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {
@@ -59,7 +65,10 @@ export function createGetServicesTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, environment, healthStatus }, context) => {
+    handler: async (
+      { start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, environment, healthStatus },
+      context
+    ) => {
       const { request } = context;
 
       try {
@@ -74,9 +83,7 @@ export function createGetServicesTool({
 
         const total = services.length;
         const summary =
-          total === 0
-            ? 'No services found matching the criteria.'
-            : `Found ${total} service(s).`;
+          total === 0 ? 'No services found matching the criteria.' : `Found ${total} service(s).`;
 
         return {
           results: [

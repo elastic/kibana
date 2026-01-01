@@ -72,8 +72,12 @@ export function createGetAnomalyDetectionJobsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAnomalyDetectionJobsSchema> = {
     id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Retrieves Machine Learning anomaly detection jobs and their top anomaly records for a given time range. Use this to identify unusual patterns or outliers in observability data.',
+    description: `Retrieves Machine Learning anomaly detection jobs and their top anomaly records.
+
+When to use:
+- Investigating anomalies in logs, metrics, or traces
+- Finding outliers that might indicate problems
+- Answering "is anything behaving abnormally?"`,
     schema: getAnomalyDetectionJobsSchema,
     tags: ['observability', 'machine_learning', 'anomaly_detection'],
     availability: {

@@ -77,7 +77,14 @@ export function createGetAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves Observability alerts within a specified time range. Supports filtering by status (active/recovered) and KQL queries to find specific alert instances.`,
+    description: `Retrieves Observability alerts within a specified time range.
+
+When to use:
+- Checking if there are active alerts for a service or host
+- Investigating what triggered during an incident
+- Finding alerts related to specific infrastructure or services
+
+Supports filtering by status (active/recovered) and KQL queries.`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
     availability: {
