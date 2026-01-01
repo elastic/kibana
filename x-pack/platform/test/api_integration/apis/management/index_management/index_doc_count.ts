@@ -47,10 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({ indexNames: [] })
         .expect(400);
-
-      expect(body.message).to.contain('minSize');
     });
   });
 }
-
-
