@@ -126,6 +126,36 @@ interface PackageTestResult {
   };
 }
 
+/**
+ * Jest assertion result from the JSON report.
+ */
+interface JestAssertionResult {
+  title: string;
+  ancestorTitles?: string[];
+  status: 'passed' | 'failed' | 'pending';
+  failureMessages?: string[];
+  location?: {
+    line: number;
+    column: number;
+  };
+}
+
+/**
+ * Jest test suite result from the JSON report.
+ */
+interface JestTestResult {
+  name: string;
+  status: 'passed' | 'failed';
+  assertionResults?: JestAssertionResult[];
+}
+
+/**
+ * Structure of Jest's JSON output report.
+ */
+interface JestReport {
+  testResults?: JestTestResult[];
+}
+
 const getChangedFiles = async (): Promise<string[]> => {
   const [{ stdout: modifiedFiles }, { stdout: untrackedFiles }] = await Promise.all([
     execAsync('git diff --name-only --diff-filter=AM HEAD'),
@@ -265,7 +295,7 @@ const createReportPath = async (
   }
 };
 
-const parseReportFromOutput = (output: string): any | null => {
+const parseReportFromOutput = (output: string): unknown => {
   const firstBrace = output.indexOf('{');
   if (firstBrace === -1) {
     return null;
@@ -287,7 +317,7 @@ const parseReportFromOutput = (output: string): any | null => {
 };
 
 const parseJestResults = (
-  report: any,
+  report: JestReport,
   pkgDir: string,
   options: { verbose: boolean }
 ): { testSuites: TestSuiteResult[]; coverage?: PackageTestResult['coverage'] } => {
@@ -312,10 +342,8 @@ const parseJestResults = (
       filePath: suite.name,
       relativePath: path.relative(REPO_ROOT, suite.name),
       status: suite.status === 'failed' ? 'failed' : 'passed',
-      numPassingTests:
-        suite.assertionResults?.filter((a: any) => a.status === 'passed').length || 0,
-      numFailingTests:
-        suite.assertionResults?.filter((a: any) => a.status === 'failed').length || 0,
+      numPassingTests: suite.assertionResults?.filter((a) => a.status === 'passed').length || 0,
+      numFailingTests: suite.assertionResults?.filter((a) => a.status === 'failed').length || 0,
       assertions: assertions.filter((a) => a.status === 'failed' || options.verbose),
     });
   }
@@ -357,29 +385,32 @@ const runJestWithDetails = async (
       env: process.env,
       extendEnv: true,
       reject: false, // Don't throw on non-zero exit codes
-      all: true, // Combine stdout and stderr into stdout
+      all: true, // Also provide a combined stdout+stderr stream via the "all" property.
     });
 
     const combinedOutput = stdout + (stderr ? '\n' + stderr : '');
-    let report: any | null = null;
+    let report: unknown;
+    let hasReport = false;
 
     if (fs.existsSync(reportPath)) {
       try {
         const reportRaw = await fsPromises.readFile(reportPath, 'utf-8');
         report = JSON.parse(reportRaw);
+        hasReport = true;
       } catch {
         // Fall through to parse from stdout/stderr.
       }
     }
 
-    if (!report) {
+    if (!hasReport) {
       const parsed = parseReportFromOutput(combinedOutput);
       if (parsed) {
         report = parsed;
+        hasReport = true;
       }
     }
 
-    if (!report) {
+    if (!hasReport) {
       if (exitCode === 0 || exitCode === undefined) {
         const reportLocation = path.relative(REPO_ROOT, reportPath);
         return {
@@ -397,33 +428,39 @@ const runJestWithDetails = async (
       );
     }
 
-    return parseJestResults(report, pkgDir, options);
-  } catch (err: any) {
-    const combinedOutput = `${err?.stdout || ''}${err?.stderr ? `\n${err.stderr}` : ''}`;
-    let report: any | null = null;
+    return parseJestResults(report as JestReport, pkgDir, options);
+  } catch (err: unknown) {
+    const error = err as { stdout?: string; stderr?: string; message?: string };
+    const combinedOutput = `${error.stdout || ''}${error.stderr ? `\n${error.stderr}` : ''}`;
+    let report: unknown;
+    let hasReport = false;
 
     if (fs.existsSync(reportPath)) {
       try {
         const reportRaw = await fsPromises.readFile(reportPath, 'utf-8');
         report = JSON.parse(reportRaw);
+        hasReport = true;
       } catch {
         // Fall through.
       }
     }
 
-    if (!report) {
+    if (!hasReport) {
       const parsed = parseReportFromOutput(combinedOutput);
       if (parsed) {
         report = parsed;
+        hasReport = true;
       }
     }
 
-    if (report) {
-      return parseJestResults(report, pkgDir, options);
+    if (hasReport) {
+      return parseJestResults(report as JestReport, pkgDir, options);
     }
 
     const reportLocation = path.relative(REPO_ROOT, reportPath);
-    throw new Error(`Failed to read Jest JSON report at ${reportLocation}: ${err?.message || err}`);
+    throw new Error(
+      `Failed to read Jest JSON report at ${reportLocation}: ${error.message || String(err)}`
+    );
   } finally {
     await cleanup();
   }
