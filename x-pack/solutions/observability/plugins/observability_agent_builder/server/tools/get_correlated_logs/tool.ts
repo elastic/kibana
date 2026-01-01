@@ -141,8 +141,15 @@ Do NOT use for:
           maxLogsPerSequence,
         });
 
+        const total = sequences.length;
+        const totalLogs = sequences.reduce((sum, seq) => sum + seq.logs.length, 0);
+        const summary =
+          total === 0
+            ? message ?? 'No correlated log sequences found.'
+            : `Found ${total} log sequence(s) with ${totalLogs} total logs.`;
+
         return {
-          results: [{ type: ToolResultType.other, data: { sequences, message } }],
+          results: [{ type: ToolResultType.other, data: { summary, sequences, message } }],
         };
       } catch (error) {
         logger.error(`Error fetching errors and surrounding logs: ${error.message}`);

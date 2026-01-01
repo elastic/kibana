@@ -72,11 +72,19 @@ export function createGetServicesTool({
           healthStatus,
         });
 
+        const total = services.length;
+        const summary =
+          total === 0
+            ? 'No services found matching the criteria.'
+            : `Found ${total} service(s).`;
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
+                summary,
+                total,
                 services,
                 maxCountExceeded,
                 serviceOverflowCount,

@@ -71,11 +71,17 @@ export function createDownstreamDependenciesTool({
           end: args.end,
         });
 
+        const total = dependencies?.length ?? 0;
+        const summary =
+          total === 0
+            ? `No downstream dependencies found for ${args.serviceName}.`
+            : `Found ${total} downstream dependency(s) for ${args.serviceName}.`;
+
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { dependencies },
+              data: { summary, total, dependencies },
             },
           ],
         };

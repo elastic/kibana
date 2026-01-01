@@ -96,11 +96,19 @@ Do NOT use for:
           terms,
         });
 
+        const highCount = highSeverityCategories?.categories?.length ?? 0;
+        const lowCount = lowSeverityCategories?.categories?.length ?? 0;
+        const total = highCount + lowCount;
+        const summary =
+          total === 0
+            ? 'No log categories found.'
+            : `Found ${total} log category(s) (${highCount} high severity, ${lowCount} low severity).`;
+
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { highSeverityCategories, lowSeverityCategories },
+              data: { summary, highSeverityCategories, lowSeverityCategories },
             },
           ],
         };

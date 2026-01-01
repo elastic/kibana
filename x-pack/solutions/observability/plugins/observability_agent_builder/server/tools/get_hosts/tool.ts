@@ -113,11 +113,17 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
           kqlFilter,
         });
 
+        const summary =
+          total === 0
+            ? 'No hosts found matching the criteria.'
+            : `Found ${total} host(s).`;
+
         return {
           results: [
             {
               type: ToolResultType.other as const,
               data: {
+                summary,
                 hosts,
                 total,
               },

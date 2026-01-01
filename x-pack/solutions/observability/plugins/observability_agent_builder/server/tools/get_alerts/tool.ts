@@ -108,11 +108,17 @@ export function createGetAlertsTool({
           includeRecovered,
         });
 
+        const summary =
+          total === 0
+            ? 'No alerts found in the specified time range.'
+            : `Found ${total} alert(s).`;
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
+                summary,
                 total,
                 alerts,
                 selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,

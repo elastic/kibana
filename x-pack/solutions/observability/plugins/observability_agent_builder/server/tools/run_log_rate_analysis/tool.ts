@@ -98,11 +98,18 @@ Do NOT use for:
           searchQuery,
         });
 
+        const total = items.length;
+        const summary =
+          total === 0
+            ? 'No significant factors found explaining the log rate change.'
+            : `Found ${total} significant factor(s) contributing to the log rate ${analysisType}.`;
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
+                summary,
                 analysisType,
                 items,
               },

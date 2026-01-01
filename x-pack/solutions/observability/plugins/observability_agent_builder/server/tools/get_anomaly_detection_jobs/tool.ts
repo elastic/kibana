@@ -32,9 +32,9 @@ const DEFAULT_TIME_RANGE = {
 export interface GetAnomalyDetectionJobsToolResult {
   type: ToolResultType.other;
   data: {
+    summary: string;
     jobs: Awaited<ReturnType<typeof getToolHandler>>;
     totalReturned: number;
-    message?: string;
   };
 }
 
@@ -109,28 +109,20 @@ export function createGetAnomalyDetectionJobsTool({
           rangeEnd,
         });
 
-        if (!mlJobs.length) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  jobs: [],
-                  totalReturned: 0,
-                  message: 'No anomaly detection jobs found for the provided filters.',
-                },
-              },
-            ],
-          };
-        }
+        const total = mlJobs.length;
+        const summary =
+          total === 0
+            ? 'No anomaly detection jobs found for the provided filters.'
+            : `Found ${total} anomaly detection job(s).`;
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
+                summary,
                 jobs: mlJobs,
-                totalReturned: mlJobs.length,
+                totalReturned: total,
               },
             },
           ],
