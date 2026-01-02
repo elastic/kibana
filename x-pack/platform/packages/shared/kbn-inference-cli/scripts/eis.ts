@@ -7,17 +7,24 @@
 import { run } from '@kbn/dev-cli-runner';
 import { ensureEis } from '../src/eis/ensure_eis';
 
-run(({ log, addCleanupTask }) => {
-  const controller = new AbortController();
-
-  addCleanupTask(() => {
-    controller.abort();
-  });
-
-  return ensureEis({
-    log,
-    signal: controller.signal,
-  }).catch((error) => {
-    throw new Error('Failed to start EIS', { cause: error });
-  });
-});
+run(
+  ({ log, flags }) => {
+    const ssl = flags.ssl as boolean;
+    return ensureEis({ log, ssl }).catch((error) => {
+      throw new Error('Failed to configure Cloud Connected Mode for EIS', { cause: error });
+    });
+  },
+  {
+    description: 'Sets up Cloud Connected Mode for Elastic Inference Service (EIS)',
+    flags: {
+      boolean: ['ssl'],
+      default: {
+        ssl: true,
+      },
+      help: `
+      --ssl               Optional. Use HTTPS/SSL for Elasticsearch connection (Default: true).
+                          Use --no-ssl for HTTP connections.
+`,
+    },
+  }
+);
