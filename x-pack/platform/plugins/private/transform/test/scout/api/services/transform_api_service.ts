@@ -11,8 +11,7 @@ export interface TransformApiService {
   createTransform: (request: estypes.TransformPutTransformRequest) => Promise<void>;
   createTransformWithSecondaryAuth: (
     request: estypes.TransformPutTransformRequest,
-    secondaryAuthValue: string,
-    deferValidation?: boolean
+    secondaryAuthValue: string
   ) => Promise<void>;
   getTransform: (
     request: estypes.TransformGetTransformRequest
@@ -36,21 +35,14 @@ export function getTransformApiService(esClient: Client): TransformApiService {
     },
     async createTransformWithSecondaryAuth(
       request: estypes.TransformPutTransformRequest,
-      secondaryAuthEncodedApiKey: string,
-      deferValidation = false
+      secondaryAuthEncodedApiKey: string
     ) {
       try {
-        await esClient.transform.putTransform(
-          {
-            ...request,
-            defer_validation: deferValidation,
+        await esClient.transform.putTransform(request, {
+          headers: {
+            'es-secondary-authorization': `ApiKey ${secondaryAuthEncodedApiKey}`,
           },
-          {
-            headers: {
-              'es-secondary-authorization': `ApiKey ${secondaryAuthEncodedApiKey}`,
-            },
-          }
-        );
+        });
       } catch (error) {
         throw new Error(`Failed to create transform ${request.transform_id}: ${error}`);
       }

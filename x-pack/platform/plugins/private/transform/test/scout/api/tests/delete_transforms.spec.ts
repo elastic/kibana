@@ -26,7 +26,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
 
   apiTest.beforeEach(async ({ apiServices }) => {
     const config = generateTransformConfig(transformId);
-    await apiServices.transform.createTransform(transformId, config);
+    await apiServices.transform.createTransform({ transform_id: transformId, ...config });
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
@@ -110,7 +110,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
       const { cookieHeader } = await samlAuth.asTransformManager();
 
       const config = generateTransformConfig(transformId2);
-      await apiServices.transform.createTransform(transformId2, config);
+      await apiServices.transform.createTransform({ transform_id: transformId2, ...config });
 
       const reqBody: DeleteTransformsRequestSchema = {
         transformsInfo: [{ id: transformId2, state: TRANSFORM_STATE.STOPPED }],

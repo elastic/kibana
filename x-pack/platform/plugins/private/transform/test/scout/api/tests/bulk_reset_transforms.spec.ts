@@ -28,7 +28,7 @@ apiTest.describe('bulk reset', { tag: tags.ESS_ONLY }, () => {
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     for (const id of transformIds) {
       const config = generateTransformConfig(id);
-      await apiServices.transform.createTransform(id, config);
+      await apiServices.transform.createTransform({ transform_id: id, ...config });
       await esClient.transform.startTransform({ transform_id: id });
     }
 

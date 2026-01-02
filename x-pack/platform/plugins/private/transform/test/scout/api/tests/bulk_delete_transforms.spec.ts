@@ -30,7 +30,7 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     for (let i = 0; i < transformIds.length; i++) {
       const config = generateTransformConfig(transformIds[i]);
-      await apiServices.transform.createTransform(transformIds[i], config);
+      await apiServices.transform.createTransform({ transform_id: transformIds[i], ...config });
       await esClient.indices.create({ index: destinationIndices[i] });
     }
   });

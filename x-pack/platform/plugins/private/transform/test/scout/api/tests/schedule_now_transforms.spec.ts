@@ -19,7 +19,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     const config = generateTransformConfig(transformId, true);
-    await apiServices.transform.createTransform(transformId, config);
+    await apiServices.transform.createTransform({ transform_id: transformId, ...config });
     await esClient.transform.startTransform({ transform_id: transformId });
   });
 

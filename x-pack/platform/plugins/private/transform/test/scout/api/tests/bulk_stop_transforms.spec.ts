@@ -13,6 +13,7 @@ import { generateTransformConfig } from '../helpers/transform_config';
 
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
+import { estypes } from '@elastic/elasticsearch';
 
 const transformIds = ['bulk_stop_test_1', 'bulk_stop_test_2'];
 
@@ -25,8 +26,9 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
   });
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     for (const id of transformIds) {
-      const config = {
+      const config: estypes.TransformPutTransformRequest = {
         ...generateTransformConfig(id),
+        transform_id: id,
         settings: {
           docs_per_second: 10,
           max_page_search_size: 10,
@@ -35,7 +37,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
           time: { field: '@timestamp' },
         },
       };
-      await apiServices.transform.createTransform(id, config);
+      await apiServices.transform.createTransform(config);
       await esClient.transform.startTransform({ transform_id: id });
     }
   });

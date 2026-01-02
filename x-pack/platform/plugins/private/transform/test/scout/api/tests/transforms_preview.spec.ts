@@ -15,11 +15,10 @@ import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
 function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
-  // passing in an empty string for transform id since we will not use
-  // it as part of the config request schema. Destructuring will
-  // remove the `dest` part of the config.
-  const { dest, ...config } = generateTransformConfig('');
-  return config as PostTransformsPreviewRequestSchema;
+  // passing in an empty string for transform id since we will not use it.
+  // We only pick the fields required for the preview request schema.
+  const { source, pivot } = generateTransformConfig('');
+  return { source, pivot };
 }
 
 apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY }, () => {

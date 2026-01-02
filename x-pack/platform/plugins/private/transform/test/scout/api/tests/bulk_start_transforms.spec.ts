@@ -27,7 +27,7 @@ apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY },
   apiTest.beforeEach(async ({ apiServices }) => {
     for (const id of transformIds) {
       const config = generateTransformConfig(id);
-      await apiServices.transform.createTransform(id, config);
+      await apiServices.transform.createTransform({ transform_id: id, ...config });
     }
   });
 

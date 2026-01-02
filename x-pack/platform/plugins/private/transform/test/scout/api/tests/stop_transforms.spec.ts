@@ -28,7 +28,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
         time: { field: '@timestamp' },
       },
     };
-    await apiServices.transform.createTransform(transformId, config);
+    await apiServices.transform.createTransform({ transform_id: transformId, ...config });
     await esClient.transform.startTransform({ transform_id: transformId });
   });
 

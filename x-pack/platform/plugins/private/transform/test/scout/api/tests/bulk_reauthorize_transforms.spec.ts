@@ -35,19 +35,27 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
 
   apiTest.beforeEach(async ({ apiServices }) => {
     // Create transform by viewer user
+    const transformCreatedByViewerRequest = {
+      ...generateTransformConfig(transformCreatedByViewerId, true),
+      transform_id: transformCreatedByViewerId,
+      defer_validation: true,
+    };
+
     await apiServices.transform.createTransformWithSecondaryAuth(
-      transformCreatedByViewerId,
-      generateTransformConfig(transformCreatedByViewerId, true),
-      transformViewerUserApiCredentials.apiKey.encoded,
-      true // deferValidation
+      transformCreatedByViewerRequest,
+      transformViewerUserApiCredentials.apiKey.encoded
     );
 
     // Create transform by manager
+    const transformCreatedByManagerRequest = {
+      ...generateTransformConfig(transformCreatedByManagerId, true),
+      transform_id: transformCreatedByManagerId,
+      defer_validation: true,
+    };
+
     await apiServices.transform.createTransformWithSecondaryAuth(
-      transformCreatedByManagerId,
-      generateTransformConfig(transformCreatedByManagerId, true),
-      transformManagerApiCredentials.apiKey.encoded,
-      true // deferValidation
+      transformCreatedByManagerRequest,
+      transformManagerApiCredentials.apiKey.encoded
     );
   });
 
@@ -55,7 +63,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
     await apiServices.transform.cleanTransformIndices();
     const destinationIndices = getDestinationIndices();
     for (const destinationIndex of destinationIndices) {
-      await apiServices.transform.deleteIndices(destinationIndex);
+      await apiServices.transform.deleteIndices({ index: destinationIndex });
     }
   });
 

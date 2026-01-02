@@ -21,7 +21,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     const config = generateTransformConfig(transformId);
-    await apiServices.transform.createTransform(transformId, config);
+    await apiServices.transform.createTransform({ transform_id: transformId, ...config });
     await esClient.transform.startTransform({ transform_id: transformId });
 
     await esClient.transform.stopTransform({

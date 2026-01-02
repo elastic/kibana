@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IndexName, PutTransformsRequestSchema, TransformId } from '../../../../common';
+import type { IndexName, TransformId } from '../../../../common';
+import type { estypes } from '@elastic/elasticsearch';
 
 export function generateDestIndex(transformId: TransformId): IndexName {
   return `user-${transformId}`;
@@ -14,7 +15,7 @@ export function generateDestIndex(transformId: TransformId): IndexName {
 export function generateTransformConfig(
   transformId: TransformId,
   continuous = false
-): PutTransformsRequestSchema {
+): Omit<estypes.TransformPutTransformRequest, 'transform_id'> {
   const destinationIndex = generateDestIndex(transformId);
 
   return {

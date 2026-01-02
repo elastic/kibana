@@ -19,8 +19,8 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
     const config1 = generateTransformConfig(TRANSFORM_1_ID);
     const config2 = generateTransformConfig(TRANSFORM_2_ID);
 
-    await apiServices.transform.createTransform(TRANSFORM_1_ID, config1);
-    await apiServices.transform.createTransform(TRANSFORM_2_ID, config2);
+    await apiServices.transform.createTransform({ transform_id: TRANSFORM_1_ID, ...config1 });
+    await apiServices.transform.createTransform({ transform_id: TRANSFORM_2_ID, ...config2 });
   });
 
   apiTest.afterAll(async ({ apiServices }) => {

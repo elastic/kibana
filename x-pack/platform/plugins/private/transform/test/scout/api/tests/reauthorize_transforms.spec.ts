@@ -33,17 +33,22 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
+    const transformCreatedByViewerRequest = {
+      ...generateTransformConfig(transformCreatedByViewerId, true),
+      transform_id: transformCreatedByViewerId,
+      defer_validation: true,
+    };
     await apiServices.transform.createTransformWithSecondaryAuth(
-      transformCreatedByViewerId,
-      generateTransformConfig(transformCreatedByViewerId, true),
-      transformViewerUserApiCredentials.apiKey.encoded,
-      true // deferValidation
+      transformCreatedByViewerRequest,
+      transformViewerUserApiCredentials.apiKey.encoded
     );
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.transform.cleanTransformIndices();
-    await apiServices.transform.deleteIndices(generateDestIndex(transformCreatedByViewerId));
+    await apiServices.transform.deleteIndices({
+      index: generateDestIndex(transformCreatedByViewerId),
+    });
   });
 
   // single transform reauthorize_transforms

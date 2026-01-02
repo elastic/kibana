@@ -42,7 +42,7 @@ apiTest.describe(
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       const config = generateTransformConfig(TRANSFORM_ID);
-      await apiServices.transform.createTransform(TRANSFORM_ID, config);
+      await apiServices.transform.createTransform({ transform_id: TRANSFORM_ID, ...config });
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
