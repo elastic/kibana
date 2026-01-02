@@ -24,7 +24,9 @@ import type {
 
 export const VIS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export function getTransformIn(transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']) {
+export function getTransformIn(
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
+) {
   function transformIn(state: VisualizeEmbeddableState): {
     state: StoredVisualizeEmbeddableState;
     references: Reference[];

@@ -25,7 +25,9 @@ function isByRefState(state: SearchEmbeddableState): state is SearchEmbeddableBy
   return 'savedObjectId' in state;
 }
 
-export function getTransformIn(transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']) {
+export function getTransformIn(
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
+) {
   function transformIn(state: SearchEmbeddableState): {
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
@@ -68,7 +70,8 @@ export function getTransformIn(transformEnhancementsIn: EmbeddableSetup['transfo
         ...state,
         ...(enhancementsResult.state
           ? {
-              enhancements: enhancementsResult.state as StoredSearchEmbeddableByValueState['enhancements'],
+              enhancements:
+                enhancementsResult.state as StoredSearchEmbeddableByValueState['enhancements'],
             }
           : {}),
         attributes: {

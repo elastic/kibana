@@ -9,7 +9,9 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
 import type { OverviewStatsEmbeddableState } from './types';
 
-export function getTransformIn(transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']) {
+export function getTransformIn(
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
+) {
   function transformIn(state: OverviewStatsEmbeddableState): {
     state: OverviewStatsEmbeddableState;
     references: Reference[];

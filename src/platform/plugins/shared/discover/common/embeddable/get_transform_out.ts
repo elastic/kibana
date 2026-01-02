@@ -28,7 +28,9 @@ function isByValue(
   );
 }
 
-export function getTransformOut(transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']) {
+export function getTransformOut(
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+) {
   function transformOut(state: StoredSearchEmbeddableState, references?: SavedObjectReference[]) {
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, references ?? [])

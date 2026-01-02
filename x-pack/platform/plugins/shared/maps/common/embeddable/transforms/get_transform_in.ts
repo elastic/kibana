@@ -14,7 +14,9 @@ import { transformMapAttributesIn } from '../../content_management/transform_map
 
 export const MAP_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export function getTransformIn(transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']) {
+export function getTransformIn(
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
+) {
   function transformIn(state: MapEmbeddableState): {
     state: StoredMapEmbeddableState;
     references: Reference[];

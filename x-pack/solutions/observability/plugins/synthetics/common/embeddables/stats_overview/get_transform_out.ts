@@ -9,7 +9,9 @@ import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { OverviewStatsEmbeddableState } from './types';
 
-export function getTransformOut(transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']) {
+export function getTransformOut(
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+) {
   function transformOut(state: OverviewStatsEmbeddableState, references?: Reference[]) {
     const { enhancements, ...rest } = state;
     const enhancementsState = enhancements
