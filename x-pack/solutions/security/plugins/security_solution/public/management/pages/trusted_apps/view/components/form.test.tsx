@@ -429,6 +429,7 @@ describe('Trusted apps form', () => {
       afterEach(() => {
         cleanup();
       });
+
       it('should update tags to include "form_mode:advanced" and show advanced mode warning', async () => {
         await userEvent.click(getAdvancedModeToggle());
 
@@ -597,6 +598,62 @@ describe('Trusted apps form', () => {
             item: createItem({ tags: expectedTags }),
           });
           expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
+
+        it('should remove "process_descendants" tag when switching to basic mode', async () => {
+          // Start in advanced mode with the tag present
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          // Switch to basic mode
+          userEvent.click(renderResult.getAllByTestId('basicModeButton')[0]);
+
+          // The tag should be removed from the tags array
+          const expectedTags = ['policy:all'];
+          const expected = createOnChangeArgs({
+            item: createItem({ tags: expectedTags }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
+
+        it('should retain "process_descendants" tag when switching from advanced mode to basic mode and then back to advanced mode options', async () => {
+          // Start in advanced mode with the tag present
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          // Click the "Process Descendants" button to ensure it's selected
+          await userEvent.click(
+            renderResult.getByTestId('trustedApps-filterProcessDescendantsButton')
+          );
+
+          // Switch to basic mode
+          await userEvent.click(renderResult.getAllByTestId('basicModeButton')[0]);
+
+          // The tag should be removed from the tags array
+          const expectedTags = ['policy:all'];
+          const expected = createOnChangeArgs({
+            item: createItem({ tags: expectedTags }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+
+          // Switch back to advanced mode
+          await userEvent.click(renderResult.getAllByTestId('advancedModeButton')[0]);
+
+          // The process descendants tag should be present in the tags array
+          const expectedAfterSwitchBack = createOnChangeArgs({
+            item: createItem({
+              tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+            }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchBack);
         });
       });
     });

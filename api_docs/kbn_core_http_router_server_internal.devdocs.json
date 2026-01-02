@@ -749,7 +749,7 @@
             "description": [],
             "signature": [
               "<T extends string | Record<string, any> | Error | Buffer | ",
-              "Stream",
+              "stream",
               " | { message: string | Error; attributes?: ",
               "ResponseErrorAttributes",
               " | undefined; } | undefined>(options: ",

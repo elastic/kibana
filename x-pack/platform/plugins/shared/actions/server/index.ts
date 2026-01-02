@@ -23,7 +23,6 @@ export type {
   ActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  SSLSettings,
 } from './types';
 
 export type {

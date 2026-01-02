@@ -125,7 +125,7 @@ export function initializeUnsavedChangesManager({
         }
 
         if (storeUnsavedChanges) {
-          const { timeRestore, ...restOfDashboardChanges } = dashboardChanges;
+          const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
           const dashboardBackupState: DashboardBackupState = {
             // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
             viewMode,

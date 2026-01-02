@@ -115,6 +115,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         }
       }
     },
+    defaultTabId: options?.defaultTabId ?? undefined,
   };
 
   return result;

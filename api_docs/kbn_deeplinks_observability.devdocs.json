@@ -706,9 +706,6 @@
             "tags": [],
             "label": "sloId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -722,6 +719,27 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloDetailsLocatorParams.tabId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tabId",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.SloTabId",
+                "text": "SloTabId"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
             "deprecated": false,
@@ -1120,6 +1138,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.ALERTS_TAB_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTS_TAB_ID",
+        "description": [],
+        "signature": [
+          "\"alerts\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.AppId",
         "type": "Type",
         "tags": [],
@@ -1187,6 +1220,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DEFINITION_TAB_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFINITION_TAB_ID",
+        "description": [],
+        "signature": [
+          "\"definition\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.DEPENDENCY_OVERVIEW_LOCATOR_ID",
         "type": "string",
         "tags": [],
@@ -1196,6 +1244,21 @@
           "\"dependencyOverviewLocator\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.HISTORY_TAB_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_TAB_ID",
+        "description": [],
+        "signature": [
+          "\"history\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1337,6 +1400,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OVERVIEW_TAB_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OVERVIEW_TAB_ID",
+        "description": [],
+        "signature": [
+          "\"overview\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.ruleDetailsLocatorID",
         "type": "string",
         "tags": [],
@@ -1449,6 +1527,21 @@
         "description": [],
         "signature": [
           "\"SLO_LIST_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.SloTabId",
+        "type": "Type",
+        "tags": [],
+        "label": "SloTabId",
+        "description": [],
+        "signature": [
+          "\"definition\" | \"history\" | \"alerts\" | \"overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
         "deprecated": false,

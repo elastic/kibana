@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   SLO_RESOURCES_VERSION,
   SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
 } from '../../../common/constants';
 
-export const SUMMARY_SETTINGS_TEMPLATE = {
+export const SUMMARY_SETTINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
   name: SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   template: {
     settings: {

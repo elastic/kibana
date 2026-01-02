@@ -23,6 +23,13 @@ export type SplitButtonWithNotificationProps = SplitButtonProps & {
   notificationIndicatorColor?: IconColor;
   notificationIndicatorSize?: IconSize;
   notifcationIndicatorTooltipContent?: string;
+  notificationIndicatorPosition?: {
+    top?: number;
+    right?: number;
+    left?: number;
+    bottom?: number;
+  };
+  notificationIndicatorHasStroke?: boolean;
 };
 
 export const SplitButtonWithNotification = ({
@@ -30,6 +37,8 @@ export const SplitButtonWithNotification = ({
   notificationIndicatorColor = 'primary',
   notificationIndicatorSize = 'l',
   notifcationIndicatorTooltipContent,
+  notificationIndicatorPosition,
+  notificationIndicatorHasStroke = true,
   ...splitButtonProps
 }: SplitButtonWithNotificationProps) => {
   const euiThemeContext = useEuiTheme();
@@ -52,17 +61,29 @@ export const SplitButtonWithNotification = ({
           data-test-subj="split-button-notification-indicator"
           css={{
             position: 'absolute' as const,
-            top: '-10px',
-            right: secondaryButtonWidth,
+            top: notificationIndicatorPosition?.top ?? -10,
+            right: notificationIndicatorPosition?.right ?? secondaryButtonWidth,
+            left: notificationIndicatorPosition?.left,
+            bottom: notificationIndicatorPosition?.bottom,
             zIndex: 1,
+            pointerEvents: 'none',
+            ...(notificationIndicatorHasStroke && {
+              '& svg': {
+                stroke: 'white',
+                strokeWidth: '2px',
+                paintOrder: 'stroke fill',
+              },
+            }),
           }}
         >
-          <EuiIconTip
-            type="dot"
-            size={notificationIndicatorSize}
-            color={notificationIndicatorColor}
-            content={notifcationIndicatorTooltipContent}
-          />
+          <span css={{ pointerEvents: 'auto' }}>
+            <EuiIconTip
+              type="dot"
+              size={notificationIndicatorSize}
+              color={notificationIndicatorColor}
+              content={notifcationIndicatorTooltipContent}
+            />
+          </span>
         </div>
       )}
     </div>

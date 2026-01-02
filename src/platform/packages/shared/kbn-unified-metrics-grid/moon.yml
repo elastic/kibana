@@ -20,9 +20,8 @@ project:
 dependsOn:
   - '@kbn/field-types'
   - '@kbn/unified-histogram'
-  - '@kbn/metrics-experience-plugin'
   - '@kbn/shared-ux-utility'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/chart-icons'
@@ -35,16 +34,18 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/react-hooks'
   - '@kbn/data-grid-in-table-search'
-  - '@kbn/es-query'
   - '@kbn/discover-utils'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/apm-types'
   - '@kbn/esql-utils'
   - '@kbn/field-utils'
-  - '@kbn/react-query'
   - '@kbn/restorable-state'
   - '@kbn/esql-types'
+  - '@kbn/presentation-panel-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/ebt-tools'
+  - '@kbn/es-query'
 tags:
   - shared-browser
   - package

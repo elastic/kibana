@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import { isAlwaysCondition } from '../../../..';
 import type { ConvertType } from '../../../../types/formats';
 import type { ConvertProcessor } from '../../../../types/processors';

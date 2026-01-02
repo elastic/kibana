@@ -340,10 +340,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: {
-              ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 115,
-            },
+            agents: expandAgentQueue('n2-4-spot', 110),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
@@ -365,7 +362,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: integration.count,
             timeout_in_minutes: 120,
             key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
+            agents: expandAgentQueue('n2-4-spot', 105),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
@@ -403,7 +400,7 @@ export async function pickTestGroupRunOrder() {
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 120,
-                  agents: expandAgentQueue(queue),
+                  agents: expandAgentQueue(queue, 105),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,

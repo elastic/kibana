@@ -18,7 +18,7 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError } from './utils';
+export { isESClientError, rethrowIfInstanceOrWrap } from './utils';
 export {
   FleetError as FleetError,
   FleetVersionConflictError,

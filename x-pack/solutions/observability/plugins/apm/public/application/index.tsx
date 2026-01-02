@@ -59,6 +59,8 @@ export const renderApp = ({
     lens: pluginsStart.lens,
     uiActions: pluginsStart.uiActions,
     observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
+    agentBuilder: pluginsStart.agentBuilder,
+    observabilityAgentBuilder: pluginsStart.observabilityAgentBuilder,
     share: pluginsSetup.share,
     kibanaEnvironment,
     licensing: pluginsStart.licensing,

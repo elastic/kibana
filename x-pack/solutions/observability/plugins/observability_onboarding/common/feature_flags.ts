@@ -6,3 +6,4 @@
  */
 
 export const IS_MANAGED_OTLP_SERVICE_ENABLED = 'observability.managedOtlpServiceEnabled';
+export const IS_MANAGED_OTLP_GA = 'observability.managedOtlpGa';

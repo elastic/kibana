@@ -175,9 +175,7 @@
               "Observable",
               "<",
               "SessionMeta",
-              ">; readonly disableSaveAfterSearchesExpire$: ",
-              "Observable",
-              "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
+              ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
               "<string | undefined>; isSaving: (state?: ",
               "SessionStateContainer",
@@ -742,9 +740,7 @@
               "Observable",
               "<",
               "SessionMeta",
-              ">; readonly disableSaveAfterSearchesExpire$: ",
-              "Observable",
-              "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
+              ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
               "<string | undefined>; isSaving: (state?: ",
               "SessionStateContainer",
@@ -1252,9 +1248,7 @@
           "Observable",
           "<",
           "SessionMeta",
-          ">; readonly disableSaveAfterSearchesExpire$: ",
-          "Observable",
-          "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
+          ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
           "Observable",
           "<string | undefined>; isSaving: (state?: ",
           "SessionStateContainer",
@@ -15519,7 +15513,7 @@
         "label": "handleRequest",
         "description": [],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableWarningToasts, getNow, executionContext, title, description, }: ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableWarningToasts, getNow, executionContext, title, description, projectRouting, }: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -15548,7 +15542,7 @@
             "id": "def-common.handleRequest.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableWarningToasts,\n  getNow,\n  executionContext,\n  title,\n  description,\n}",
+            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableWarningToasts,\n  getNow,\n  executionContext,\n  title,\n  description,\n  projectRouting,\n}",
             "description": [],
             "signature": [
               {
@@ -28840,6 +28834,20 @@
             "path": "src/platform/plugins/shared/data/common/search/expressions/esaggs/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -30336,6 +30344,22 @@
             "signature": [
               "SearchPointInTimeReference",
               " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSourceFields.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [
+              "\n{@link ProjectRouting}"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
             "deprecated": false,
@@ -34394,7 +34418,15 @@
           },
           " | undefined; searchAfter?: ",
           "SortResults",
-          " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
+          " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; projectRouting?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
+          "; parent?: ",
           {
             "pluginId": "data",
             "scope": "common",

@@ -38,6 +38,23 @@ export interface PublicStepDefinition extends CommonStepDefinition {
    * Documentation for the step, including details, and examples.
    */
   documentation?: StepDocumentation;
+
+  /**
+   * The catalog under which the step is displayed in the actions menu
+   * Default value is `kibana`
+   */
+  actionsMenuGroup?: ActionsMenuGroup;
+}
+
+/**
+ * The catalog under which the step is displayed in the actions menu
+ */
+export enum ActionsMenuGroup {
+  elasticsearch = 'elasticsearch',
+  external = 'external',
+  ai = 'ai',
+  kibana = 'kibana',
+  data = 'data',
 }
 
 /**

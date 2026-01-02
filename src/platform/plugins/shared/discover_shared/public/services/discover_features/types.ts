@@ -20,6 +20,7 @@ import type {
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type React from 'react';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -51,6 +52,14 @@ export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
 export interface ObservabilityLogsAIAssistantFeature {
   id: 'observability-logs-ai-assistant';
   render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
+}
+
+export interface ObservabilityLogsAiInsightFeatureRenderDeps {
+  doc: DataTableRecord;
+}
+export interface ObservabilityLogsAIInsightFeature {
+  id: 'observability-logs-ai-insight';
+  render: (deps: ObservabilityLogsAiInsightFeatureRenderDeps) => JSX.Element;
 }
 
 export interface ObservabilityCreateSLOFeature {
@@ -220,6 +229,7 @@ export type ObservabilityTracesFeature =
 export type DiscoverFeature =
   | ObservabilityStreamsFeature
   | ObservabilityLogsAIAssistantFeature
+  | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature

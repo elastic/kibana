@@ -223,6 +223,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
           filterOptions={filterOptions}
+          deselectCases={deselectCases}
         />
         <CasesTableUtilityBar
           pagination={pagination}

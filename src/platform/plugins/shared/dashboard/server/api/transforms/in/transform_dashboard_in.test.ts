@@ -37,11 +37,11 @@ describe('transformDashboardIn', () => {
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
       },
       panels: [
         {
@@ -58,8 +58,8 @@ describe('transformDashboardIn', () => {
       ],
       tags: [],
       title: 'title',
-      refreshInterval: { pause: true, value: 1000 },
-      timeRange: {
+      refresh_interval: { pause: true, value: 1000 },
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -121,7 +121,7 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should return error when passed tag references', () => {
+  it('should return error when passed non-control group reference', () => {
     const dashboardState: DashboardState = {
       title: 'title',
       references: [
@@ -137,29 +137,7 @@ describe('transformDashboardIn', () => {
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": null,
-        "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
-        "references": null,
-      }
-    `);
-  });
-
-  it('should return error when passed search source references', () => {
-    const dashboardState: DashboardState = {
-      title: 'title',
-      references: [
-        {
-          id: 'fizzle-1234',
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-          type: 'index-pattern',
-        },
-      ],
-    };
-
-    const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: Search source references are not supported. Pass filters in with injected references'],
+        "error": [Error: References are only supported for controlGroupInput.],
         "references": null,
       }
     `);

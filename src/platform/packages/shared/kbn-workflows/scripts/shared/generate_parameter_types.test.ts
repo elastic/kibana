@@ -143,4 +143,61 @@ describe('generateParameterTypes', () => {
     expect(parameterTypes.urlParams).toEqual(['queryParam']);
     expect(parameterTypes.bodyParams).toEqual(['bodyParam']);
   });
+  it('should generate parameter types from an operation with oneOf in the request body', () => {
+    const operationWithOneOf: OpenAPIV3.OperationObject = {
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              oneOf: [
+                {
+                  $ref: '#/components/schemas/requestBodySchema1',
+                },
+                {
+                  $ref: '#/components/schemas/requestBodySchema2',
+                },
+              ],
+            },
+          },
+        },
+      },
+      responses: {
+        '200': {
+          description: 'Success',
+        },
+      },
+      operationId: 'operationWithOneOf',
+    };
+    const openApiDocument: OpenAPIV3.Document = {
+      openapi: '3.0.0',
+      info: {
+        title: 'Test API',
+        version: '1.0.0',
+      },
+      paths: {
+        '{pathParam}/test': {
+          get: operationWithOneOf,
+        },
+      },
+      components: {
+        schemas: {
+          requestBodySchema1: {
+            type: 'object',
+            properties: {
+              bodyParam1: { type: 'string' },
+            },
+          },
+          requestBodySchema2: {
+            type: 'object',
+            properties: {
+              bodyParam2: { type: 'string' },
+            },
+          },
+        },
+      },
+    };
+    const parameterTypes = generateParameterTypes([operationWithOneOf], openApiDocument);
+    expect(parameterTypes).toBeDefined();
+    expect(parameterTypes.bodyParams).toEqual(['bodyParam1', 'bodyParam2']);
+  });
 });

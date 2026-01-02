@@ -293,7 +293,7 @@ export const ParamsList = () => {
             },
           ],
         }}
-        message={isLoading ? LOADING_TEXT : undefined}
+        noItemsMessage={isLoading ? LOADING_TEXT : undefined}
       />
       {isDeleteModalVisible && deleteParam && (
         <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />

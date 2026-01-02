@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiTitle, EuiText, EuiFlexItem, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { AssetImage } from '../../../asset_image';
@@ -20,14 +28,36 @@ export function SuggestPipelinePanel({ children }: React.PropsWithChildren) {
         text-align: left;
       `}
       paddingSize="l"
+      data-test-subj="streamsAppSuggestPipelinePanel"
     >
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem>
           <EuiTitle size="m">
             <h4>
-              {i18n.translate('xpack.streams.stepsEditor.h3.suggestAPipelineLabel', {
-                defaultMessage: 'Suggest a pipeline',
-              })}
+              <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.streams.stepsEditor.h3.suggestAPipelineLabel', {
+                    defaultMessage: 'Suggest a pipeline',
+                  })}
+                </EuiFlexItem>
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.streams.stepsEditor.pipelineSuggestion.betaBadgeLabel',
+                    {
+                      defaultMessage: 'Technical Preview',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.streams.stepsEditor.pipelineSuggestion.betaBadgeLabel.betaBadgeDescription',
+                    {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }
+                  )}
+                  alignment="middle"
+                  size="s"
+                />
+              </EuiFlexGroup>
             </h4>
           </EuiTitle>
           <EuiText size="m">

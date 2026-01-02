@@ -124,7 +124,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
                 })
               : ''
           }
-          message={
+          noItemsMessage={
             loading
               ? i18n.translate('xpack.apm.storageExplorer.indicesStats.table.loading', {
                   defaultMessage: 'Loading...',

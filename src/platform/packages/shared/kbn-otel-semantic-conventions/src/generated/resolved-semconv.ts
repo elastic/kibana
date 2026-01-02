@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 137
- * Metric groups: 488
+ * Registry groups: 138
+ * Metric groups: 492
  * Hardcoded fields: 34
- * Total fields: 1178
+ * Total fields: 1177
  *
  * @internal
  *
- * WARNING: This object contains 1178+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1177+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1390,7 +1390,7 @@ export const semconvFlat = {
     name: 'error.type',
     description: 'Describes a class of error the operation ended with.',
     type: 'keyword',
-    example: 'timeout',
+    example: 'DEADLINE_EXCEEDED',
   },
   event_name: {
     name: 'event_name',
@@ -2484,6 +2484,20 @@ export const semconvFlat = {
     description: 'This attribute represents the state of the application.',
     type: 'keyword',
   },
+  'jsonrpc.protocol.version': {
+    name: 'jsonrpc.protocol.version',
+    description:
+      'Protocol version, as specified in the `jsonrpc` property of the request and its corresponding response.',
+    type: 'keyword',
+    example: '2',
+  },
+  'jsonrpc.request.id': {
+    name: 'jsonrpc.request.id',
+    description:
+      'A string representation of the `id` property of the request and its corresponding response.',
+    type: 'keyword',
+    example: '10',
+  },
   'jvm.buffer.pool.name': {
     name: 'jvm.buffer.pool.name',
     description: 'Name of the buffer pool.',
@@ -2793,6 +2807,18 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'true',
   },
+  'k8s.pod.hostname': {
+    name: 'k8s.pod.hostname',
+    description: 'Specifies the hostname of the Pod.',
+    type: 'keyword',
+    example: 'collector-gateway',
+  },
+  'k8s.pod.ip': {
+    name: 'k8s.pod.ip',
+    description: 'IP address allocated to the Pod.',
+    type: 'keyword',
+    example: '172.18.0.2',
+  },
   'k8s.pod.label': {
     name: 'k8s.pod.label',
     description:
@@ -2805,6 +2831,12 @@ export const semconvFlat = {
     description: 'The name of the Pod.',
     type: 'keyword',
     example: 'opentelemetry-pod-autoconf',
+  },
+  'k8s.pod.start_time': {
+    name: 'k8s.pod.start_time',
+    description: 'The start timestamp of the Pod.',
+    type: 'keyword',
+    example: 'Thu Dec 04 2025 08:41:03 GMT+0000 (Coordinated Universal Time)',
   },
   'k8s.pod.status.phase': {
     name: 'k8s.pod.status.phase',
@@ -5119,11 +5151,6 @@ export const semconvFlat = {
     description: 'Network bytes transferred.',
     type: 'double',
   },
-  'metrics.process.open_file_descriptor.count': {
-    name: 'metrics.process.open_file_descriptor.count',
-    description: 'Number of file descriptors in use by the process.',
-    type: 'double',
-  },
   'metrics.process.paging.faults': {
     name: 'metrics.process.paging.faults',
     description: 'Number of page faults the process has made.',
@@ -5134,14 +5161,24 @@ export const semconvFlat = {
     description: 'Process threads count.',
     type: 'double',
   },
+  'metrics.process.unix.file_descriptor.count': {
+    name: 'metrics.process.unix.file_descriptor.count',
+    description: 'Number of unix file descriptors in use by the process.',
+    type: 'double',
+  },
   'metrics.process.uptime': {
     name: 'metrics.process.uptime',
     description: 'The time the process has been running.',
     type: 'double',
   },
-  'metrics.rpc.client.duration': {
-    name: 'metrics.rpc.client.duration',
-    description: 'Measures the duration of outbound RPC.',
+  'metrics.process.windows.handle.count': {
+    name: 'metrics.process.windows.handle.count',
+    description: 'Number of handles held by the process.',
+    type: 'double',
+  },
+  'metrics.rpc.client.call.duration': {
+    name: 'metrics.rpc.client.call.duration',
+    description: 'Measures the duration of outbound remote procedure calls (RPC).',
     type: 'double',
   },
   'metrics.rpc.client.request.size': {
@@ -5154,9 +5191,9 @@ export const semconvFlat = {
     description: 'Measures the size of RPC response messages (uncompressed).',
     type: 'double',
   },
-  'metrics.rpc.server.duration': {
-    name: 'metrics.rpc.server.duration',
-    description: 'Measures the duration of inbound RPC.',
+  'metrics.rpc.server.call.duration': {
+    name: 'metrics.rpc.server.call.duration',
+    description: 'Measures the duration of inbound remote procedure calls (RPC).',
     type: 'double',
   },
   'metrics.rpc.server.request.size': {
@@ -5993,72 +6030,6 @@ export const semconvFlat = {
     description: 'The Schema URL for the resource.',
     type: 'keyword',
   },
-  'rpc.connect_rpc.error_code': {
-    name: 'rpc.connect_rpc.error_code',
-    description:
-      'The [error codes](https://connectrpc.com//docs/protocol/#error-codes) of the Connect request. Error codes are always string values.',
-    type: 'keyword',
-  },
-  'rpc.connect_rpc.request.metadata': {
-    name: 'rpc.connect_rpc.request.metadata',
-    description:
-      'Connect request metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: '1.2.3.4,1.2.3.5',
-  },
-  'rpc.connect_rpc.response.metadata': {
-    name: 'rpc.connect_rpc.response.metadata',
-    description:
-      'Connect response metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: 'attribute_value',
-  },
-  'rpc.grpc.request.metadata': {
-    name: 'rpc.grpc.request.metadata',
-    description:
-      'gRPC request metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: '1.2.3.4,1.2.3.5',
-  },
-  'rpc.grpc.response.metadata': {
-    name: 'rpc.grpc.response.metadata',
-    description:
-      'gRPC response metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
-    type: 'keyword',
-    example: 'attribute_value',
-  },
-  'rpc.grpc.status_code': {
-    name: 'rpc.grpc.status_code',
-    description:
-      'The gRPC status code of the last gRPC requests performed in scope of this export call.',
-    type: 'keyword',
-  },
-  'rpc.jsonrpc.error_code': {
-    name: 'rpc.jsonrpc.error_code',
-    description: '`error.code` property of response if it is an error response.',
-    type: 'long',
-    example: '-32700',
-  },
-  'rpc.jsonrpc.error_message': {
-    name: 'rpc.jsonrpc.error_message',
-    description: '`error.message` property of response if it is an error response.',
-    type: 'keyword',
-    example: 'Parse error',
-  },
-  'rpc.jsonrpc.request_id': {
-    name: 'rpc.jsonrpc.request_id',
-    description:
-      '`id` property of request or response. Since protocol allows id to be int, string, `null` or missing (for notifications), value is expected to be cast to string for simplicity. Use empty string in case of `null` value. Omit entirely if this is a notification.',
-    type: 'keyword',
-    example: '10',
-  },
-  'rpc.jsonrpc.version': {
-    name: 'rpc.jsonrpc.version',
-    description:
-      "Protocol version as in `jsonrpc` property of request/response. Since JSON-RPC 1.0 doesn't specify this, the value can be omitted.",
-    type: 'keyword',
-    example: '2',
-  },
   'rpc.message.compressed_size': {
     name: 'rpc.message.compressed_size',
     description: 'Compressed size of the message in bytes.',
@@ -6086,6 +6057,26 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'e',
   },
+  'rpc.request.metadata': {
+    name: 'rpc.request.metadata',
+    description:
+      'RPC request metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: '1.2.3.4,1.2.3.5',
+  },
+  'rpc.response.metadata': {
+    name: 'rpc.response.metadata',
+    description:
+      'RPC response metadata, `<key>` being the normalized RPC metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: 'attribute_value',
+  },
+  'rpc.response.status_code': {
+    name: 'rpc.response.status_code',
+    description: 'Status code of the RPC returned by the RPC server or generated by the client',
+    type: 'keyword',
+    example: 'OK',
+  },
   'rpc.service': {
     name: 'rpc.service',
     description:
@@ -6093,10 +6084,9 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'm',
   },
-  'rpc.system': {
-    name: 'rpc.system',
-    description:
-      'A string identifying the remoting system. See below for a list of well-known identifiers.',
+  'rpc.system.name': {
+    name: 'rpc.system.name',
+    description: 'The Remote Procedure Call (RPC) system.',
     type: 'keyword',
   },
   'scope.dropped_attributes_count': {
@@ -6174,8 +6164,7 @@ export const semconvFlat = {
   },
   'server.address': {
     name: 'server.address',
-    description:
-      'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    description: 'RPC server [host name](https://grpc.github.io/grpc/core/md_doc_naming.html).',
     type: 'keyword',
     example: 'example.com',
   },
@@ -6206,7 +6195,7 @@ export const semconvFlat = {
   'service.version': {
     name: 'service.version',
     description:
-      'The version string of the service API or implementation. The format is not defined by these conventions.',
+      'The version string of the service component. The format is not defined by these conventions.',
     type: 'keyword',
     example: '2.0.0',
   },

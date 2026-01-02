@@ -13,11 +13,12 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiTourStep,
+  useEuiTheme,
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_PROMO_TOUR_CLOSE,
-  EIS_PROMO_TOUR_CTA,
+  EIS_TOUR_DISMISS,
+  EIS_TOUR_CTA,
   EIS_PROMO_TOUR_DESCRIPTION,
   EIS_PROMO_TOUR_TITLE,
 } from '../translations';
@@ -38,22 +39,21 @@ export const EisPromotionalTour = ({
   isCloudEnabled,
   children,
 }: EisPromotionalTourProps) => {
-  const { isPromoVisible, onSkipTour } = useShowEisPromotionalContent({
-    promoId: `${promoId}Tour`,
-    isCloudEnabled,
+  const { euiTheme } = useEuiTheme();
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
+    promoId: `${promoId}EisPromoTour`,
   });
   const dataId = `${promoId}-eis-promo-tour`;
 
-  if (!isPromoVisible) {
+  if (!isPromoVisible || !isCloudEnabled) {
     return children;
   }
 
   return (
     <EuiTourStep
-      data-telemetry-id={dataId}
       data-test-subj={dataId}
       title={EIS_PROMO_TOUR_TITLE}
-      maxWidth="400px"
+      maxWidth={`${euiTheme.base * 25}px`}
       content={
         <EuiText>
           <p>{EIS_PROMO_TOUR_DESCRIPTION}</p>
@@ -63,21 +63,26 @@ export const EisPromotionalTour = ({
       anchorPosition={anchorPosition}
       step={1}
       stepsTotal={1}
-      onFinish={onSkipTour}
+      onFinish={onDismissPromo}
       footerAction={[
-        <EuiButtonEmpty data-test-subj="eisPromoTourCloseBtn" onClick={onSkipTour}>
-          {EIS_PROMO_TOUR_CLOSE}
+        <EuiButtonEmpty
+          data-test-subj="eisPromoTourCloseBtn"
+          data-telemetry-id={`${dataId}-dismiss-btn`}
+          onClick={onDismissPromo}
+        >
+          {EIS_TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
               <EuiButton
                 href={ctaLink}
                 data-test-subj="eisPromoTourCtaBtn"
+                data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
               >
-                {EIS_PROMO_TOUR_CTA}
+                {EIS_TOUR_CTA}
               </EuiButton>,
             ]
           : []),

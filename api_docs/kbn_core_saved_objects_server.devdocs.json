@@ -64,6 +64,52 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsErrorHelpers.isBulkResolveError",
+            "type": "Function",
+            "tags": [],
+            "label": "isBulkResolveError",
+            "description": [
+              "\nDetermines if an error is a saved objects bulk resolve error"
+            ],
+            "signature": [
+              "<T>(result: ",
+              "BulkResolveError",
+              " | ",
+              "SavedObjectsResolveResponse",
+              "<T>) => result is ",
+              "BulkResolveError"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsErrorHelpers.isBulkResolveError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "result",
+                "description": [
+                  "the resolve respoonse to check"
+                ],
+                "signature": [
+                  "BulkResolveError",
+                  " | ",
+                  "SavedObjectsResolveResponse",
+                  "<T>"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "boolean - true if result is a saved objects bulk resolve error"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError",
             "type": "Function",
             "tags": [],
@@ -1474,8 +1520,129 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.errorContent",
+        "type": "Function",
+        "tags": [],
+        "label": "errorContent",
+        "description": [
+          "\nExtracts the contents of a decorated error to return the attributes for bulk operations."
+        ],
+        "signature": [
+          "(error: ",
+          "DecoratedError",
+          ") => ",
+          "Payload"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/saved_objects_error_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.errorContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "DecoratedError"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AccessControlImportTransforms",
+        "type": "Interface",
+        "tags": [],
+        "label": "AccessControlImportTransforms",
+        "description": [],
+        "path": "src/core/packages/saved-objects/server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AccessControlImportTransforms.filterStream",
+            "type": "Object",
+            "tags": [],
+            "label": "filterStream",
+            "description": [],
+            "signature": [
+              "Transform"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AccessControlImportTransforms.mapStream",
+            "type": "Object",
+            "tags": [],
+            "label": "mapStream",
+            "description": [],
+            "signature": [
+              "Transform"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AuthorizationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthorizationResult",
+        "description": [
+          "\nThe AuthorizationResult interface contains the overall status of an\nauthorization check, the specific authorized privileges as an\nAuthorizationTypeMap, and the inaccessible objects that were restricted\ndue to access control."
+        ],
+        "signature": [
+          "AuthorizationResult",
+          "<A> extends ",
+          "CheckAuthorizationResult",
+          "<A>"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizationResult.inaccessibleObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "inaccessibleObjects",
+            "description": [
+              "\nA set of all inaccessible objects that were restricted due to access control"
+            ],
+            "signature": [
+              "Set<",
+              "ObjectRequiringPrivilegeCheckResult",
+              "> | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.AuthorizationTypeEntry",
@@ -1829,6 +1996,44 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AuthorizeChangeAccessControlParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthorizeChangeAccessControlParams",
+        "description": [
+          "\nThe AuthorizeChangeAccessControlParams interface extends AuthorizeParams and is\nused for the AuthorizeChangeAccessControl method of the ISavedObjectsSecurityExtension."
+        ],
+        "signature": [
+          "AuthorizeChangeAccessControlParams",
+          " extends ",
+          "AuthorizeParams"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizeChangeAccessControlParams.objects",
+            "type": "Array",
+            "tags": [],
+            "label": "objects",
+            "description": [
+              "The objects to authorize"
+            ],
+            "signature": [
+              "AuthorizeChangeAccessControlObject",
+              "[]"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.AuthorizeCheckConflictsParams",
         "type": "Interface",
         "tags": [],
@@ -2079,6 +2284,81 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AuthorizeObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthorizeObject",
+        "description": [
+          "\nThe AuthorizeObject interface contains information to specify an\nobject for authorization. This is a base interface which is\nextended by other interfaces for specific actions."
+        ],
+        "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizeObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of object"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizeObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "The id of the object"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizeObject.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "The name of the object"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AuthorizeObject.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "Access control information for the object"
+            ],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.AuthorizeObjectWithExistingSpaces",
         "type": "Interface",
         "tags": [],
@@ -2121,7 +2401,7 @@
         "tags": [],
         "label": "AuthorizeUpdateObject",
         "description": [
-          "\nThe AuthorizeUpdateObject interface extends AuthorizeObjectWithExistingSpaces\nand contains a object namespace override. Used by the authorizeUpdate\nand authorizeBulkUpdate methods."
+          "\nThe AuthorizeUpdateObject interface extends AuthorizeObjectWithExistingSpaces\nand contains an object namespace override. Used by the authorizeUpdate\nand authorizeBulkUpdate methods."
         ],
         "signature": [
           "AuthorizeUpdateObject",
@@ -2939,7 +3219,7 @@
               "<A extends string>(params: ",
               "AuthorizeCreateParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -2965,7 +3245,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -2981,7 +3261,7 @@
               "<A extends string>(params: ",
               "AuthorizeBulkCreateParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3007,7 +3287,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3023,7 +3303,7 @@
               "<A extends string>(params: ",
               "AuthorizeUpdateParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3049,7 +3329,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3065,7 +3345,7 @@
               "<A extends string>(params: ",
               "AuthorizeBulkUpdateParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3091,7 +3371,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3107,7 +3387,7 @@
               "<A extends string>(params: ",
               "AuthorizeDeleteParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3133,7 +3413,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3149,7 +3429,7 @@
               "<A extends string>(params: ",
               "AuthorizeBulkDeleteParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3175,7 +3455,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3191,7 +3471,7 @@
               "<A extends string>(params: ",
               "AuthorizeGetParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3217,7 +3497,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3233,7 +3513,7 @@
               "<A extends string>(params: ",
               "AuthorizeBulkGetParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3259,7 +3539,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3275,7 +3555,7 @@
               "<A extends string>(params: ",
               "AuthorizeCheckConflictsParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3301,7 +3581,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3317,7 +3597,7 @@
               "<A extends string>(params: ",
               "AuthorizeDeleteParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3343,7 +3623,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3359,7 +3639,7 @@
               "<A extends string>(params: ",
               "AuthorizeFindParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3385,7 +3665,66 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.authorizeChangeAccessControl",
+            "type": "Function",
+            "tags": [],
+            "label": "authorizeChangeAccessControl",
+            "description": [
+              "\nPerforms authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions"
+            ],
+            "signature": [
+              "<A extends string>(params: ",
+              "AuthorizeChangeAccessControlParams",
+              ", operation: \"changeOwnership\" | \"changeAccessMode\") => Promise<",
+              "AuthorizationResult",
+              "<A>>"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.authorizeChangeAccessControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "the namespace and object to authorize for changing ownership"
+                ],
+                "signature": [
+                  "AuthorizeChangeAccessControlParams"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.authorizeChangeAccessControl.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "operation",
+                "description": [
+                  "the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'"
+                ],
+                "signature": [
+                  "\"changeOwnership\" | \"changeAccessMode\""
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3506,7 +3845,7 @@
               "<A extends string>(params: ",
               "AuthorizeUpdateSpacesParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3532,7 +3871,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3548,7 +3887,7 @@
               "<A extends string>(params: ",
               "AuthorizeFindParams",
               ") => Promise<",
-              "CheckAuthorizationResult",
+              "AuthorizationResult",
               "<A>>"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
@@ -3574,7 +3913,7 @@
               }
             ],
             "returnComment": [
-              "CheckAuthorizationResult - the resulting authorization level and authorization map"
+              "AuthorizationResult - the resulting authorization level and authorization map"
             ]
           },
           {
@@ -3793,6 +4132,92 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.filterInaccessibleObjectsForBulkAction",
+            "type": "Function",
+            "tags": [],
+            "label": "filterInaccessibleObjectsForBulkAction",
+            "description": [
+              "\nFilters bulk operation expected results array to filter inaccessible object left"
+            ],
+            "signature": [
+              "<L extends { type: string; id?: string | undefined; error: ",
+              "Payload",
+              "; }, R extends { type: string; id: string; esRequestIndex?: number | undefined; }>(expectedResults: ",
+              "Either",
+              "<L, R>[], inaccessibleObjects: { type: string; id: string; }[], action: \"bulk_create\" | \"bulk_update\" | \"bulk_delete\", reindex?: boolean | undefined) => Promise<",
+              "Either",
+              "<L, R>[]>"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.filterInaccessibleObjectsForBulkAction.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "expectedResults",
+                "description": [],
+                "signature": [
+                  "Either",
+                  "<L, R>[]"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.filterInaccessibleObjectsForBulkAction.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "inaccessibleObjects",
+                "description": [],
+                "signature": [
+                  "{ type: string; id: string; }[]"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.filterInaccessibleObjectsForBulkAction.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "action",
+                "description": [],
+                "signature": [
+                  "\"bulk_create\" | \"bulk_update\" | \"bulk_delete\""
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSecurityExtension.filterInaccessibleObjectsForBulkAction.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reindex",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -4253,7 +4678,7 @@
             "tags": [],
             "label": "getLegacyTypes",
             "description": [
-              "Return legacy types, this types can't be registered"
+              "\nReturn legacy types, this types can't be registered"
             ],
             "signature": [
               "() => string[]"
@@ -4685,6 +5110,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.supportsAccessControl",
+            "type": "Function",
+            "tags": [],
+            "label": "supportsAccessControl",
+            "description": [
+              "\nReturns whether the type supports access control."
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.supportsAccessControl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5089,6 +5548,68 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObject.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [
+              "\nAccess control information of the saved object.\nThis can be be used to customize access to the object in addition to RBAC, e.g.\nto set an object to read-only mode, where it is only editable by the owner of\nthe object (or an admin), even if other users are granted write access via a role."
+            ],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectAccessControl",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectAccessControl",
+        "description": [
+          "\nDefinition of the Saved Object access control interface\n"
+        ],
+        "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectAccessControl.owner",
+            "type": "string",
+            "tags": [],
+            "label": "owner",
+            "description": [
+              "The ID of the user who owns this object."
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectAccessControl.accessMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessMode",
+            "description": [
+              "\nThe access mode of the object. `write_restricted` is editable only by the owner and admin users.\nAccess mode `default` is editable by all users with write access to the object."
+            ],
+            "signature": [
+              "\"default\" | \"write_restricted\""
             ],
             "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
@@ -5613,6 +6134,21 @@
             "path": "src/core/packages/saved-objects/server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectDoc.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6010,7 +6546,7 @@
               "\nThe namespace type of the savedObject type this migration is registered for"
             ],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
             "deprecated": false,
@@ -7386,6 +7922,10 @@
             "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts"
           },
           {
+            "plugin": "productDocBase",
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts"
+          },
+          {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_1.ts"
           },
@@ -8037,6 +8577,21 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.accessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "accessControl",
+            "description": [],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsRawDocSource.Unnamed",
             "type": "IndexSignature",
             "tags": [],
@@ -8619,6 +9174,42 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.setAccessControlTransforms",
+            "type": "Function",
+            "tags": [],
+            "label": "setAccessControlTransforms",
+            "description": [
+              "\nSets the {@link SavedObjectsAccessControlTransforms access control transforms}."
+            ],
+            "signature": [
+              "(transforms: ",
+              "SavedObjectsAccessControlTransforms",
+              ") => void"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.setAccessControlTransforms.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "transforms",
+                "description": [],
+                "signature": [
+                  "SavedObjectsAccessControlTransforms"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsServiceSetup.registerType",
             "type": "Function",
             "tags": [],
@@ -8665,6 +9256,24 @@
             ],
             "signature": [
               "() => string"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.isAccessControlEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isAccessControlEnabled",
+            "description": [
+              "\nReturns whether the access control feature is enabled for saved objects."
+            ],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/core/packages/saved-objects/server/src/contracts.ts",
             "deprecated": false,
@@ -9274,7 +9883,7 @@
               "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
             ],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "deprecated": false,
@@ -9431,32 +10040,8 @@
                 "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
               },
               {
-                "plugin": "links",
-                "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "data",
@@ -9469,6 +10054,30 @@
               {
                 "plugin": "data",
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
+              },
+              {
+                "plugin": "links",
+                "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "actions",
@@ -10126,10 +10735,6 @@
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/platform/plugins/shared/data/server/saved_objects/query.ts"
               },
@@ -10144,6 +10749,10 @@
               {
                 "plugin": "data",
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -10572,6 +11181,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.supportsAccessControl",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supportsAccessControl",
+            "description": [
+              "\nIf defined and set to `true`, this saved object type will support access control functionality.\n\nWhen enabled, objects of this type can have an `accessControl` property containing:\n- `owner`: The ID of the user who owns this object\n- `accessMode`: Access mode setting, supports 'write_restricted' or 'default'.\n\nThis property works in conjunction with the SavedObjectAccessControl interface defined\nin server_types.ts."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10863,7 +11488,7 @@
               "The dynamic property of the mapping, either `false` or `'strict'`. If\nunspecified `dynamic: 'strict'` will be inherited from the top-level\nindex mappings."
             ],
             "signature": [
-              "false | \"strict\" | \"false\" | undefined"
+              "false | \"false\" | \"strict\" | undefined"
             ],
             "path": "src/core/packages/saved-objects/server/src/mapping_definition.ts",
             "deprecated": false,
@@ -10918,10 +11543,140 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SetAccessControlToWriteParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SetAccessControlToWriteParams",
+        "description": [
+          "\nThe SetAccessControlToWriteParams interface defines the parameters for the setAccessControlToWrite\nfunction. It includes the incoming access control mode, saved object type, the createdBy\n(current user profile ID if it exists), and the accessControl attributes from the prfelight check."
+        ],
+        "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SetAccessControlToWriteParams.accessMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessMode",
+            "description": [
+              "The access control mode (default | write_restricted)"
+            ],
+            "signature": [
+              "\"default\" | \"write_restricted\" | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SetAccessControlToWriteParams.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The saved object type"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SetAccessControlToWriteParams.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [
+              "The relevant user profile ID for the operation - used in create and bulk create"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SetAccessControlToWriteParams.preflightAccessControl",
+            "type": "Object",
+            "tags": [],
+            "label": "preflightAccessControl",
+            "description": [
+              "The existing access control metadata from the operation's preflight check"
+            ],
+            "signature": [
+              "SavedObjectAccessControl",
+              " | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.AccessControlImportTransformsFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "AccessControlImportTransformsFactory",
+        "description": [],
+        "signature": [
+          "(typeRegistry: ",
+          "ISavedObjectTypeRegistry",
+          ", errors: ",
+          "SavedObjectsImportFailure",
+          "[]) => ",
+          "AccessControlImportTransforms"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AccessControlImportTransformsFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "typeRegistry",
+            "description": [],
+            "signature": [
+              "ISavedObjectTypeRegistry"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.AccessControlImportTransformsFactory.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "SavedObjectsImportFailure",
+              "[]"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.ALERTING_CASES_SAVED_OBJECT_INDEX",
@@ -11750,7 +12505,7 @@
           "MappingProperty",
           " & ",
           "MappingPropertyBase",
-          " & { dynamic?: false | \"strict\" | \"false\" | undefined; properties?: Record<string, ",
+          " & { dynamic?: false | \"false\" | \"strict\" | undefined; properties?: Record<string, ",
           "MappingProperty",
           "> | undefined; }"
         ],

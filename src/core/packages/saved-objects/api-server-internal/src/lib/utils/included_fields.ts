@@ -16,6 +16,7 @@ const ROOT_FIELDS = [
   'coreMigrationVersion',
   'typeMigrationVersion',
   'managed',
+  'accessControl',
   'updated_at',
   'updated_by',
   'created_at',

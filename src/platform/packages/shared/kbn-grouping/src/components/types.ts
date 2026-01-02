@@ -77,6 +77,11 @@ export type GetGroupStats<T> = (
   fieldBucket: RawBucket<T>
 ) => GroupStatsItem[];
 
+export type GetAdditionalActionButtons<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>
+) => JSX.Element[];
+
 export type GroupPanelRenderer<T> = (
   selectedGroup: string,
   fieldBucket: RawBucket<T>,
