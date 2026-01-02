@@ -497,19 +497,3 @@ export const buildColumnSuggestions = (
 export function getFunctionForInlineCast(castingType: InlineCastingType): string | undefined {
   return inlineCastsMapping[castingType];
 }
-
-export function getCastingTypesSuggestions(): ISuggestionItem[] {
-  return Object.keys(inlineCastsMapping).map((castingType) => {
-    const suggestion: ISuggestionItem = {
-      label: castingType,
-      text: castingType,
-      kind: 'Keyword',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineCastingTypeDescription', {
-        defaultMessage: `Cast value to ${castingType}`,
-        values: { castingType },
-      }),
-      category: SuggestionCategory.OPERATOR,
-    };
-    return suggestion;
-  });
-}
