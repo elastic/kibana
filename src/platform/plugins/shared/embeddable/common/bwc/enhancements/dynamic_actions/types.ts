@@ -22,3 +22,8 @@ export type SerializedEvent = {
   triggers: string[];
   action: SerializedAction;
 };
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DynamicActionsState = {
+  events: SerializedEvent[];
+};

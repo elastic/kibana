@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectReference } from '@kbn/core/types';
-import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { Reference } from '@kbn/content-management-utils';
 import type { SerializedAction, SerializedEvent } from './types';
 
 export type EnhancementsDashboardDrilldownConfig = {
@@ -18,50 +17,18 @@ export type EnhancementsDashboardDrilldownConfig = {
   openInNewTab: boolean;
 };
 
-type DashboardDrilldownPersistableState = PersistableStateService<SerializedEvent>;
+export const EMBEDDABLE_TO_DASHBOARD_DRILLDOWN = 'DASHBOARD_TO_DASHBOARD_DRILLDOWN';
 
-const generateRefName = (state: SerializedEvent, id: string) =>
-  `drilldown:${id}:${state.eventId}:dashboardId`;
+const generateRefName = (eventId: string) =>
+  `drilldown:${EMBEDDABLE_TO_DASHBOARD_DRILLDOWN}:${eventId}:dashboardId`;
 
-const injectDashboardId = (state: SerializedEvent, dashboardId: string): SerializedEvent => {
-  return {
-    ...state,
-    action: {
-      ...state.action,
-      config: {
-        ...state.action.config,
-        dashboardId,
-      },
-    },
-  };
-};
-
-export const createInject = ({
-  drilldownId,
-}: {
-  drilldownId: string;
-}): DashboardDrilldownPersistableState['inject'] => {
-  return (state: SerializedEvent, references: SavedObjectReference[]) => {
+export const dashboardDrilldownPersistableState = {
+  extract: (state: SerializedEvent) => {
     const action = state.action as SerializedAction<EnhancementsDashboardDrilldownConfig>;
-    const refName = generateRefName(state, drilldownId);
-    const ref = references.find((r) => r.name === refName);
-    if (!ref) return state;
-    if (ref.id && ref.id === action.config.dashboardId) return state;
-    return injectDashboardId(state, ref.id);
-  };
-};
-
-export const createExtract = ({
-  drilldownId,
-}: {
-  drilldownId: string;
-}): DashboardDrilldownPersistableState['extract'] => {
-  return (state: SerializedEvent) => {
-    const action = state.action as SerializedAction<EnhancementsDashboardDrilldownConfig>;
-    const references: SavedObjectReference[] = action.config.dashboardId
+    const references: Reference[] = action.config.dashboardId
       ? [
           {
-            name: generateRefName(state, drilldownId),
+            name: generateRefName(state.eventId),
             type: 'dashboard',
             id: action.config.dashboardId,
           },
@@ -80,5 +47,21 @@ export const createExtract = ({
       },
       references,
     };
-  };
+  },
+  inject: (state: SerializedEvent, references: Reference[]) => {
+    const refName = generateRefName(state.eventId);
+    const ref = references.find((r) => r.name === refName);
+    return ref
+      ? {
+        ...state,
+        action: {
+          ...state.action,
+          config: {
+            ...state.action.config,
+            dashboardId: ref.id,
+          },
+        },
+      }
+      : state;
+  },
 };

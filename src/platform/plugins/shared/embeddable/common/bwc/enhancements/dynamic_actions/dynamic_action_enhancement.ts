@@ -8,51 +8,32 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import type { SavedObjectReference } from '@kbn/core/types';
-import type { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
-import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
-import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DynamicActionsState, SerializedEvent } from './types';
+import { dashboardDrilldownPersistableState } from './dashboard_drilldown_persistable_state';
 
-export const dynamicActionEnhancement = (
-  getActionFactory: (id: string) => undefined | ActionFactory
-): EnhancementRegistryDefinition => {
-  return {
-    id: 'dynamicActions',
-    telemetry: (
-      serializableState: SerializableRecord,
-      stats: Record<string, string | number | boolean>
-    ) => {
-      const state = serializableState as DynamicActionsState;
-      stats = dynamicActionsCollector(state, stats as Record<string, number>);
-      stats = dynamicActionFactoriesCollector(getActionFactory, state, stats);
-
-      return stats;
-    },
-    extract: (state: SerializableRecord) => {
-      const references: SavedObjectReference[] = [];
-      const newState: DynamicActionsState = {
-        events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
-          const factory = getActionFactory(event.action.factoryId);
-          const result = factory
-            ? factory.extract(event)
-            : {
-                state: event,
-                references: [],
-              };
-          result.references.forEach((r) => references.push(r));
-          return result.state;
-        }),
-      };
-      return { state: newState, references };
-    },
-    inject: (state: SerializableRecord, references: SavedObjectReference[]) => {
-      return {
-        events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
-          const factory = getActionFactory(event.action.factoryId);
-          return factory ? factory.inject(event, references) : event;
-        }),
-      } as DynamicActionsState;
-    },
-  } as EnhancementRegistryDefinition;
-};
+export const dynamicActionsPersistableState = {
+  extract: (state: SerializableRecord) => {
+    const references: Reference[] = [];
+    const newState: DynamicActionsState = {
+      events: (state as DynamicActionsState).events.map((eventState: SerializedEvent) => {
+        const result = eventState.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN'
+          ? dashboardDrilldownPersistableState.extract(eventState)
+          : {
+              state: eventState,
+              references: [],
+            };
+        result.references.forEach((r) => references.push(r));
+        return result.state;
+      }),
+    };
+    return { state: newState, references };
+  },
+  inject: (state: SerializableRecord, references: Reference[]) => {
+    return {
+      events: (state as DynamicActionsState).events.map((eventState: SerializedEvent) => {
+        return eventState.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN' ? dashboardDrilldownPersistableState.inject(eventState, references) : eventState;
+      }),
+    } as DynamicActionsState;
+  }
+}

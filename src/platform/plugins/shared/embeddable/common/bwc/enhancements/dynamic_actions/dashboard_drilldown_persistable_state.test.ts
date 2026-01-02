@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createExtract, createInject } from './dashboard_drilldown_persistable_state';
+import { dashboardDrilldownPersistableState, EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './dashboard_drilldown_persistable_state';
 import type { SerializedEvent } from './types';
-
-const drilldownId = 'test_id';
-const extract = createExtract({ drilldownId });
-const inject = createInject({ drilldownId });
 
 const state: SerializedEvent = {
   eventId: 'event_id',
   triggers: [],
   action: {
-    factoryId: drilldownId,
+    factoryId: EMBEDDABLE_TO_DASHBOARD_DRILLDOWN,
     name: 'name',
     config: {
       dashboardId: 'dashboardId_1',
@@ -27,7 +23,7 @@ const state: SerializedEvent = {
 };
 
 test('should extract and injected dashboard reference', () => {
-  const { state: extractedState, references } = extract(state);
+  const { state: extractedState, references } = dashboardDrilldownPersistableState.extract(state);
   expect(extractedState).not.toEqual(state);
   expect(extractedState.action.config.dashboardId).toBeUndefined();
   expect(references).toMatchInlineSnapshot(`
@@ -40,12 +36,12 @@ test('should extract and injected dashboard reference', () => {
     ]
   `);
 
-  let injectedState = inject(extractedState, references);
+  let injectedState = dashboardDrilldownPersistableState.inject(extractedState, references);
   expect(injectedState).toEqual(state);
 
   references[0].id = 'dashboardId_2';
 
-  injectedState = inject(extractedState, references);
+  injectedState = dashboardDrilldownPersistableState.inject(extractedState, references);
   expect(injectedState).not.toEqual(extractedState);
   expect(injectedState.action.config.dashboardId).toBe('dashboardId_2');
 });
