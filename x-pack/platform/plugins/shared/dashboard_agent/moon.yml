@@ -20,9 +20,9 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/logging'
-  - '@kbn/onechat-plugin'
-  - '@kbn/onechat-common'
-  - '@kbn/onechat-server'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-server'
   - '@kbn/dashboard-plugin'
   - '@kbn/zod'
   - '@kbn/spaces-plugin'

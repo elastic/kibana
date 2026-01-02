@@ -162,12 +162,14 @@ describe('runUnitTestsTool', () => {
         throw new Error(`File not found: ${filePath}`);
       });
 
-      // Mock execa.command for Jest execution
+      // Mock execa.command for Jest execution.
+      // The code uses execa's `all` property (combined stdout+stderr).
       if (jestError) {
         mockedExeca.command.mockRejectedValue(jestError);
       } else {
         mockedExeca.command.mockResolvedValue({
-          stdout: `Some prefix text\n${JSON.stringify(jestOutput)}`,
+          all: `Some prefix text\n${JSON.stringify(jestOutput)}`,
+          exitCode: 0,
         } as any);
       }
 
@@ -375,6 +377,7 @@ describe('runUnitTestsTool', () => {
         const jestError = {
           stdout: `Error prefix\n${JSON.stringify(mockJestOutput)}`,
           stderr: 'Some error',
+          all: `Error prefix\n${JSON.stringify(mockJestOutput)}\nSome error`,
         };
 
         setupMocks({ jestError });
@@ -390,9 +393,10 @@ describe('runUnitTestsTool', () => {
 
       it('handles Jest output without JSON', async () => {
         setupMocks({});
-        // Override the execa mock after setupMocks to return output without JSON
+        // Override the execa mock after setupMocks to return output without JSON.
         mockedExeca.command.mockResolvedValue({
-          stdout: 'No JSON here',
+          all: 'No JSON here',
+          exitCode: 0,
         } as any);
 
         const result = await runUnitTestsTool.handler({

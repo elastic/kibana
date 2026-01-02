@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentServiceStartContract } from '@kbn/onechat-browser';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,

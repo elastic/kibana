@@ -137,23 +137,22 @@ describe('group editor preview', () => {
   });
 
   it('updates the chart time range', async () => {
+    const datePicker = new EuiSuperDatePickerTestHarness();
+
     // default
-    expect(EuiSuperDatePickerTestHarness.currentCommonlyUsedRange).toBe('Last 15 minutes');
+    expect(datePicker.currentCommonlyUsedRange).toBe('Last 15 minutes');
     expect(getEmbeddableTimeRange()).toEqual({ from: 'now-15m', to: 'now' });
 
     // from time picker
-    await EuiSuperDatePickerTestHarness.selectCommonlyUsedRange('Today');
+    await datePicker.selectCommonlyUsedRange('Today');
 
-    expect(EuiSuperDatePickerTestHarness.currentCommonlyUsedRange).toBe('Today');
+    expect(datePicker.currentCommonlyUsedRange).toBe('Today');
     expect(getEmbeddableTimeRange()).toEqual({ from: 'now/d', to: 'now/d' });
 
     // from chart brush
     await userEvent.click(screen.getByTestId('brushEnd'));
 
-    EuiSuperDatePickerTestHarness.assertCurrentRange(
-      { from: BRUSH_RANGE[0], to: BRUSH_RANGE[1] },
-      expect
-    );
+    datePicker.assertCurrentRange({ from: BRUSH_RANGE[0], to: BRUSH_RANGE[1] }, expect);
 
     expect(getEmbeddableTimeRange()).toEqual({
       from: new Date(BRUSH_RANGE[0]).toISOString(),
@@ -162,7 +161,8 @@ describe('group editor preview', () => {
   });
 
   it('updates the time field', async () => {
-    await EuiSuperDatePickerTestHarness.togglePopover();
+    const datePicker = new EuiSuperDatePickerTestHarness();
+    await datePicker.togglePopover();
 
     const select = screen.getByRole('combobox', { name: 'Time field' });
 
@@ -182,7 +182,8 @@ describe('group editor preview', () => {
     expect(defaultProps.refreshSearchSession).not.toHaveBeenCalled();
     expect(getEmbeddableSearchSessionId()).toBe(defaultProps.searchSessionId);
 
-    await EuiSuperDatePickerTestHarness.refresh();
+    const datePicker = new EuiSuperDatePickerTestHarness();
+    await datePicker.refresh();
 
     expect(defaultProps.refreshSearchSession).toHaveBeenCalled();
 

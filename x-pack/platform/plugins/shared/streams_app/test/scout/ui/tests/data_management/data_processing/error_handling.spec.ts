@@ -9,7 +9,8 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-test.describe(
+// FLAKY: https://github.com/elastic/kibana/issues/246547
+test.describe.skip(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {

@@ -10,8 +10,8 @@ import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
 const timeRange = {
-  rangeFrom: testData.OPBEANS_START_DATE,
-  rangeTo: testData.OPBEANS_END_DATE,
+  rangeFrom: testData.START_DATE,
+  rangeTo: testData.END_DATE,
 };
 
 test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
@@ -41,15 +41,23 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       await storageExplorerPage.waitForServicesTableLoaded();
       await expect(storageExplorerPage.servicesTableLoadedIndicator).toBeVisible();
 
+      await expect(
+        page.getByTestId('tableHeaderCell_serviceName_0').getByTestId('tableHeaderSortButton')
+      ).toBeVisible();
+      await page
+        .getByTestId('tableHeaderCell_serviceName_0')
+        .getByTestId('tableHeaderSortButton')
+        .click();
+
       // Verify the service icon links are present
       await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
       await expect(page.getByTestId('serviceLink_nodejs')).toBeVisible();
       await expect(page.getByTestId('serviceLink_go')).toHaveCount(2);
 
       // Verify the synthetic services with actual data are present
-      await expect(page.getByLabel('synth-node-1')).toBeVisible();
-      await expect(page.getByLabel('synth-go-1')).toBeVisible();
-      await expect(page.getByLabel('synth-go-2')).toBeVisible();
+      await expect(page.getByLabel(testData.SERVICE_SYNTH_NODE_1)).toBeVisible();
+      await expect(page.getByLabel(testData.SERVICE_SYNTH_GO)).toBeVisible();
+      await expect(page.getByLabel(testData.SERVICE_SYNTH_GO_2)).toBeVisible();
     });
 
     await test.step('verify navigation links Go to Service inventory and Go to Index Management and the Download report link are visible', async () => {

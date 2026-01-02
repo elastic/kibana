@@ -61,7 +61,7 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "share",
-      "onechat"
+      "agentBuilder"
     ],
     "requiredBundles": [
       "fleet",

@@ -158,18 +158,18 @@
           },
           {
             "parentPluginId": "observabilityAgentBuilder",
-            "id": "def-public.ObservabilityAgentBuilderPluginStartDependencies.onechat",
+            "id": "def-public.ObservabilityAgentBuilderPluginStartDependencies.agentBuilder",
             "type": "Object",
             "tags": [],
-            "label": "onechat",
+            "label": "agentBuilder",
             "description": [],
             "signature": [
               {
-                "pluginId": "onechat",
+                "pluginId": "agentBuilder",
                 "scope": "public",
-                "docId": "kibOnechatPluginApi",
-                "section": "def-public.OnechatPluginStart",
-                "text": "OnechatPluginStart"
+                "docId": "kibAgentBuilderPluginApi",
+                "section": "def-public.AgentBuilderPluginStart",
+                "text": "AgentBuilderPluginStart"
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
@@ -359,18 +359,18 @@
         "children": [
           {
             "parentPluginId": "observabilityAgentBuilder",
-            "id": "def-server.ObservabilityAgentBuilderPluginSetupDependencies.onechat",
+            "id": "def-server.ObservabilityAgentBuilderPluginSetupDependencies.agentBuilder",
             "type": "Object",
             "tags": [],
-            "label": "onechat",
+            "label": "agentBuilder",
             "description": [],
             "signature": [
               {
-                "pluginId": "onechat",
+                "pluginId": "agentBuilder",
                 "scope": "server",
-                "docId": "kibOnechatPluginApi",
-                "section": "def-server.OnechatPluginSetup",
-                "text": "OnechatPluginSetup"
+                "docId": "kibAgentBuilderPluginApi",
+                "section": "def-server.AgentBuilderPluginSetup",
+                "text": "AgentBuilderPluginSetup"
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
@@ -504,18 +504,18 @@
         "children": [
           {
             "parentPluginId": "observabilityAgentBuilder",
-            "id": "def-server.ObservabilityAgentBuilderPluginStartDependencies.onechat",
+            "id": "def-server.ObservabilityAgentBuilderPluginStartDependencies.agentBuilder",
             "type": "Object",
             "tags": [],
-            "label": "onechat",
+            "label": "agentBuilder",
             "description": [],
             "signature": [
               {
-                "pluginId": "onechat",
+                "pluginId": "agentBuilder",
                 "scope": "server",
-                "docId": "kibOnechatPluginApi",
-                "section": "def-server.OnechatPluginStart",
-                "text": "OnechatPluginStart"
+                "docId": "kibAgentBuilderPluginApi",
+                "section": "def-server.AgentBuilderPluginStart",
+                "text": "AgentBuilderPluginStart"
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",

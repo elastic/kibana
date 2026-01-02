@@ -30,6 +30,7 @@ export function processVertexStream(model?: string) {
               tokens: {
                 prompt: value.usageMetadata.promptTokenCount,
                 completion: value.usageMetadata.candidatesTokenCount,
+                thinking: value.usageMetadata.thoughtsTokenCount,
                 cached: value.usageMetadata.cachedContentTokenCount,
                 total: value.usageMetadata.totalTokenCount,
               },

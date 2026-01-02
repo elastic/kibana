@@ -570,6 +570,16 @@ export function getDiscoverStateContainer({
       }
     );
 
+    // Subscribe to CPS projectRouting changes (global subscription affects all tabs)
+    // When projectRouting changes, mark non-active tabs for refetch and trigger data fetch
+    const cpsProjectRoutingSubscription = services.cps?.cpsManager
+      ?.getProjectRouting$()
+      .subscribe(() => {
+        internalState.dispatch(internalStateActions.markNonActiveTabsForRefetch());
+        addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
+        fetchData();
+      });
+
     const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
       syncState({
         storageKey: GLOBAL_STATE_URL_KEY,
@@ -590,6 +600,7 @@ export function getDiscoverStateContainer({
       stopSyncingQueryGlobalStateWithStateContainer();
       stopSyncingAppStateWithUrl();
       stopSyncingGlobalStateWithUrl();
+      cpsProjectRoutingSubscription?.unsubscribe();
     };
   };
 

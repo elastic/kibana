@@ -889,9 +889,49 @@ const chunkDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'chunking_settings',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n'}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n'}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n'}, {name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.'}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n'}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n'}",
+          optional: true,
+          description:
+            'Options to customize chunking behavior. Defaults to {"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'text',
           optional: false,
           description: 'The input to chunk.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'chunking_settings',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='separator_group', values=[markdown, plaintext], description='Sets a predefined lists of separators based on the selected text type. Values may be `markdown` or `plaintext`.\nOnly applicable to the `recursive` chunking strategy. When using the `recursive` chunking strategy one of\n`separators` or `separator_group` must be specified.\n'}, {name='overlap', values=[0], description='The number of overlapping words for chunks. It is applicable only to a `word` chunking strategy.\nThis value cannot be higher than half the `max_chunk_size` value.\n'}, {name='sentence_overlap', values=[1, 0], description='The number of overlapping sentences for chunks. It is applicable only for a `sentence` chunking strategy.\nIt can be either `1` or `0`.\n'}, {name='strategy', values=[sentence, word, none, recursive], description='The chunking strategy to use. Default value is `sentence`.'}, {name='max_chunk_size', values=[300], description='The maximum size of a chunk in words. This value cannot be lower than `20` (for `sentence` strategy)\nor `10` (for `word` or `recursive` strategies). This model should not exceed the window size for any\nassociated models using the output of this function.\n'}, {name='separators', values=[(?<!\\n)\\n\\n(?!\\n), (?<!\\n)\\n(?!\\n)], description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\nregular expression (regex) pattern. The system tries each separator in order to split the text, starting from\nthe first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay\nwithin the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the\n`recursive` chunking strategy. When using the `recursive` chunking strategy one of `separators` or `separator_group`\nmust be specified.\n'}",
+          optional: true,
+          description:
+            'Options to customize chunking behavior. Defaults to {"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}.',
         },
       ],
       returnType: 'keyword',
@@ -12447,6 +12487,380 @@ const mvSumDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const mvUnionDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'mv_union',
+  description: i18n.translate('kbn-esql-language.esql.definitions.mv_union', {
+    defaultMessage:
+      'Returns all unique values from the combined input fields (set union). Null values are treated as empty sets; returns `null` only if both fields are null.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'boolean',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'boolean',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'date',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'date_nanos',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'double',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'double',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_point',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geo_shape',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohash',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geohash',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geohash',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geohex',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geohex',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geohex',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geotile',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'geotile',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'geotile',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'integer',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'integer',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'ip',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'ip',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'keyword',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'version',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'version',
+          optional: false,
+          description: 'Multivalue expression. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'version',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW a = [1, 2, 3, 4, 5], b = [2, 3, 4, 5, 6]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = [1, 2, 3, 4, 5]::long, b = [2, 3, 4, 5, 6]::long\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = [true, false], b = [false]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = [5.2, 10.5, 1.12345], b = [10.5, 2.6928]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+    'ROW a = ["one", "two", "three"], b = ["two", "four"]\n| EVAL finalValue = MV_UNION(a, b)\n| KEEP finalValue',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const mvZipDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_zip',
@@ -16040,6 +16454,83 @@ const stIntersectsDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stNpointsDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'st_npoints',
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_npoints', {
+    defaultMessage: 'Counts the number of points in the supplied geometry.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'integer',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'FROM airport_city_boundaries\n| WHERE abbrev == "CPH"\n| EVAL points = ST_NPOINTS(city_boundary)\n| KEEP abbrev, airport, points',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const stSimplifyDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_simplify',
@@ -16329,7 +16820,7 @@ const stXDefinition: FunctionDefinition = {
   name: 'st_x',
   description: i18n.translate('kbn-esql-language.esql.definitions.st_x', {
     defaultMessage:
-      'Extracts the `x` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `longitude` value.',
+      'Extracts the `x` coordinate from the supplied point.\nIf the point is of type `geo_point` this is equivalent to extracting the `longitude` value.',
   }),
   preview: false,
   alias: undefined,
@@ -16539,7 +17030,7 @@ const stYDefinition: FunctionDefinition = {
   name: 'st_y',
   description: i18n.translate('kbn-esql-language.esql.definitions.st_y', {
     defaultMessage:
-      'Extracts the `y` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `latitude` value.',
+      'Extracts the `y` coordinate from the supplied point.\nIf the point is of type `geo_point` this is equivalent to extracting the `latitude` value.',
   }),
   preview: false,
   alias: undefined,
@@ -20046,6 +20537,33 @@ const topSnippetsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n'}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.'}",
+          optional: true,
+          description:
+            '(Optional) TopSnippets additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'text',
           optional: false,
           description: 'The input to chunk.',
@@ -20056,6 +20574,33 @@ const topSnippetsDefinition: FunctionDefinition = {
           optional: false,
           description:
             'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The input to chunk.',
+        },
+        {
+          name: 'query',
+          type: 'keyword',
+          optional: false,
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed. ',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n'}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.'}",
+          optional: true,
+          description:
+            '(Optional) TopSnippets additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
         },
       ],
       returnType: 'keyword',
@@ -20800,6 +21345,7 @@ export const scalarFunctionDefinitions = [
   mvSliceDefinition,
   mvSortDefinition,
   mvSumDefinition,
+  mvUnionDefinition,
   mvZipDefinition,
   networkDirectionDefinition,
   nowDefinition,
@@ -20831,6 +21377,7 @@ export const scalarFunctionDefinitions = [
   stGeohexDefinition,
   stGeotileDefinition,
   stIntersectsDefinition,
+  stNpointsDefinition,
   stSimplifyDefinition,
   stWithinDefinition,
   stXDefinition,

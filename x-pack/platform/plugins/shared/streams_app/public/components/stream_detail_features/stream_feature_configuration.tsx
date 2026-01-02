@@ -56,7 +56,7 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
               <EuiText size="s" color="subdued">
                 {i18n.translate('xpack.streams.streamDetailView.configurationDescription', {
                   defaultMessage:
-                    'Use AI to generate logical subsets of the data in this stream. You will find useful insights like programming language, operating system, cloud provider etc. This is useful for generating better significant events.',
+                    'Use AI to generate logical subsets of the data in this stream. You will find useful insights like programming language, operating system, cloud provider etc. This is useful for generating better significant events. Generation uses the last 24 hours of data.',
                 })}
               </EuiText>
             }

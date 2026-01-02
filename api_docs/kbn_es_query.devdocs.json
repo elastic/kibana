@@ -4166,7 +4166,7 @@
         "tags": [],
         "label": "sanitizeProjectRoutingForES",
         "description": [
-          "\nSanitizes project routing value for Elasticsearch API calls.\n\nApplication-level code may use special values like 'ALL' to represent \"all projects\"\nwith explicit state, but Elasticsearch only accepts specific routing values.\n"
+          "\nSanitizes project routing value for Elasticsearch API calls.\n"
         ],
         "signature": [
           "(value: ",
@@ -6425,7 +6425,7 @@
         "tags": [],
         "label": "ProjectRouting",
         "description": [
-          "\nProject routing configuration for cross-project search (CPS).\n\nUsed in serverless environments to control whether searches are scoped to a single project or span multiple projects.\n\nExamples:\n- undefined - Search across all projects (default)\n- '_alias:_origin' - Search only in the current project\n"
+          "\nProject routing configuration for cross-project search (CPS).\n\nUsed in serverless environments to control whether searches are scoped to a single project or span multiple projects.\n\nExamples:\n- undefined - Search across all projects (default)\n- '_alias:*' - Search across all projects\n- '_alias:_origin' - Search only in the current project\n"
         ],
         "signature": [
           "string | undefined"

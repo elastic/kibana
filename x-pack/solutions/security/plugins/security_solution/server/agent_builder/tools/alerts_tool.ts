@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';

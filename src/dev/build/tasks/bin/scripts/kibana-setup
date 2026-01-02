@@ -15,11 +15,11 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
-{{#darwin}}
 NODE="${DIR}/node/default/bin/node"
-{{/darwin}}
 {{#linux}}
-NODE="${DIR}/node/glibc-217/bin/node"
+if ! "$NODE" --version >/dev/null 2>&1; then
+  NODE="${DIR}/node/glibc-217/bin/node"
+fi
 {{/linux}}
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then

@@ -11,6 +11,7 @@ export interface GenerateContentResponseUsageMetadata {
   promptTokenCount: number;
   candidatesTokenCount: number;
   totalTokenCount: number;
+  thoughtsTokenCount?: number;
 }
 
 /**

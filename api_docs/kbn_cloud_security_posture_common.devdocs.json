@@ -2166,6 +2166,21 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"cloudConnectorNameInput\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.CLOUD_SECURITY_PLUGIN_VERSION",
         "type": "string",
         "tags": [],

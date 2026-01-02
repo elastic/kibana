@@ -49,18 +49,23 @@ export const MappingsInformationPanels = ({
   const {
     plugins: { cloud },
     core: { application },
+    canUseEis,
   } = useAppContext();
   const state = useMappingsState();
+
+  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
   const showAboutMappingsStyles = css`
     ${useEuiBreakpoint(['xl'])} {
       max-width: 480px;
     }
   `;
+
   const hasSemanticText = hasSemanticTextField(state.mappingViewFields);
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
+  const shouldShowEisUpdateCallout =
+    (cloud?.isCloudEnabled && (canUseEis || cloud?.isServerlessEnabled)) ?? false;
 
-  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
   return (
     <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -70,7 +75,7 @@ export const MappingsInformationPanels = ({
               <EisUpdateCallout
                 ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
                 promoId="indexDetailsMappings"
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
+                shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
                 handleOnClick={() => setIsUpdatingElserMappings(true)}
                 direction="column"
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
@@ -89,6 +94,7 @@ export const MappingsInformationPanels = ({
                 refetchMapping={refetchMapping}
                 setIsModalOpen={setIsUpdatingElserMappings}
                 hasUpdatePrivileges={hasUpdateMappingsPrivilege}
+                modalId="indexDetailsMappings"
               />
             )}
           </>
@@ -97,7 +103,9 @@ export const MappingsInformationPanels = ({
           promoId="indexDetailsMappings"
           isSelfManaged={!cloud?.isCloudEnabled}
           direction="column"
-          navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
         />
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">

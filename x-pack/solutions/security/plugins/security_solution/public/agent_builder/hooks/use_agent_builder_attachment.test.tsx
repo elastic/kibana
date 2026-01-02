@@ -10,7 +10,7 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 
 const mockFlyoutRef = {
@@ -19,16 +19,16 @@ const mockFlyoutRef = {
 
 const mockOpenConversationFlyout = jest.fn<
   unknown,
-  Parameters<OnechatPluginStart['openConversationFlyout']>
+  Parameters<AgentBuilderPluginStart['openConversationFlyout']>
 >(() => ({
   flyoutRef: mockFlyoutRef,
 }));
 
-const createWrapper = (onechatService?: OnechatPluginStart) => {
+const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
   const mockStartServices = createStartServicesMock();
   const startServices = {
     ...mockStartServices,
-    onechat: onechatService ?? undefined,
+    agentBuilder: agentBuilderService ?? undefined,
   };
 
   // eslint-disable-next-line react/display-name
@@ -37,13 +37,13 @@ const createWrapper = (onechatService?: OnechatPluginStart) => {
   );
 };
 
-const mockOnechatService: OnechatPluginStart = {
+const mockAgentBuilderService: AgentBuilderPluginStart = {
   openConversationFlyout:
-    mockOpenConversationFlyout as OnechatPluginStart['openConversationFlyout'],
+    mockOpenConversationFlyout as AgentBuilderPluginStart['openConversationFlyout'],
   toggleConversationFlyout: jest.fn(),
-  agents: {} as OnechatPluginStart['agents'],
-  tools: {} as OnechatPluginStart['tools'],
-  attachments: {} as OnechatPluginStart['attachments'],
+  agents: {} as AgentBuilderPluginStart['agents'],
+  tools: {} as AgentBuilderPluginStart['tools'],
+  attachments: {} as AgentBuilderPluginStart['attachments'],
   setConversationFlyoutActiveConfig: jest.fn(),
   clearConversationFlyoutActiveConfig: jest.fn(),
 };
@@ -66,7 +66,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('returns openAgentBuilderFlyout function', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(mockOnechatService),
+      wrapper: createWrapper(mockAgentBuilderService),
     });
 
     expect(result.current.openAgentBuilderFlyout).toBeDefined();
@@ -75,7 +75,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('opens flyout with correct attachment data and prompt', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(mockOnechatService),
+      wrapper: createWrapper(mockAgentBuilderService),
     });
 
     act(() => {
@@ -101,7 +101,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('opens flyout with correct sessionTag', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(mockOnechatService),
+      wrapper: createWrapper(mockAgentBuilderService),
     });
 
     act(() => {
@@ -115,7 +115,7 @@ describe('useAgentBuilderAttachment', () => {
     );
   });
 
-  it('handles missing onechat service gracefully', () => {
+  it('handles missing agentBuilder service gracefully', () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
       wrapper: createWrapper(),
     });
@@ -128,17 +128,17 @@ describe('useAgentBuilderAttachment', () => {
   });
 
   it('handles missing openConversationFlyout method gracefully', () => {
-    const partialOnechatService: Partial<OnechatPluginStart> &
+    const partialAgentBuilderService: Partial<AgentBuilderPluginStart> &
       Pick<
-        OnechatPluginStart,
+        AgentBuilderPluginStart,
         'tools' | 'setConversationFlyoutActiveConfig' | 'clearConversationFlyoutActiveConfig'
       > = {
-      ...mockOnechatService,
+      ...mockAgentBuilderService,
       openConversationFlyout: undefined,
     };
 
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(partialOnechatService as OnechatPluginStart),
+      wrapper: createWrapper(partialAgentBuilderService as AgentBuilderPluginStart),
     });
 
     act(() => {
@@ -150,7 +150,7 @@ describe('useAgentBuilderAttachment', () => {
 
   it('generates attachment ID with timestamp', async () => {
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
-      wrapper: createWrapper(mockOnechatService),
+      wrapper: createWrapper(mockAgentBuilderService),
     });
 
     act(() => {

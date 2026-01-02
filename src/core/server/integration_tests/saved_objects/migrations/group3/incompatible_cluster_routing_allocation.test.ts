@@ -58,9 +58,7 @@ describe('incompatible_cluster_routing_allocation', () => {
     esServer = await startES();
   });
 
-  afterAll(async () => {
-    await esServer.stop();
-  });
+  afterAll(async () => await esServer?.stop());
 
   it('retries the INIT action with a descriptive message when cluster settings are incompatible', async () => {
     const { client, runMigrations } = await getRelocatingMigratorTestKit({

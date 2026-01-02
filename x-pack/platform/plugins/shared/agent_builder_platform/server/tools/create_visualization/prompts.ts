@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,

@@ -43,6 +43,7 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { emailSchema } from '@kbn/connector-schemas/email/schemas/latest';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
@@ -173,7 +174,6 @@ function validateConfig(
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
-
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
@@ -182,6 +182,14 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
 
   if (addrs === 0) {
     throw new Error('no [to], [cc], or [bcc] entries');
+  }
+
+  try {
+    emailSchema.parse(to);
+    emailSchema.parse(cc);
+    emailSchema.parse(bcc);
+  } catch (error) {
+    throw new Error(`Invalid email addresses: ${error}`);
   }
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));

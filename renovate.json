@@ -17,6 +17,7 @@
   ],
   "baseBranches": [
     "main",
+    "9.3",
     "9.2",
     "9.1",
     "8.19",
@@ -1965,7 +1966,7 @@
     {
       "groupName": "workflow-yaml",
       "matchDepNames": [
-        "@hey-api/openapi-ts", 
+        "@hey-api/openapi-ts",
         "vscode-languageserver-textdocument",
         "yaml-language-server"
       ],
@@ -1976,8 +1977,8 @@
         "main"
       ],
       "labels": [
-        "Team:One Workflow", 
-        "backport:all-open", 
+        "Team:One Workflow",
+        "backport:all-open",
         "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",

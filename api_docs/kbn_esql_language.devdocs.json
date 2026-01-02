@@ -12577,6 +12577,29 @@
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.FunctionParameter.hint",
+            "type": "Object",
+            "tags": [],
+            "label": "hint",
+            "description": [
+              "\nProvides information that is useful for getting parameter values from external sources.\nFor example, an inference endpoint"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.ParameterHint",
+                "text": "ParameterHint"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12610,6 +12633,48 @@
             "tags": [],
             "label": "description",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.ParameterHint",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParameterHint",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ParameterHint.entityType",
+            "type": "string",
+            "tags": [],
+            "label": "entityType",
+            "description": [],
+            "signature": [
+              "\"inference_endpoint\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.ParameterHint.constraints",
+            "type": "Object",
+            "tags": [],
+            "label": "constraints",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -16581,6 +16646,21 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.ParameterHintEntityType",
+        "type": "Type",
+        "tags": [],
+        "label": "ParameterHintEntityType",
+        "description": [],
+        "signature": [
+          "\"inference_endpoint\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.ParameterShorthandHole",
         "type": "Type",
         "tags": [],
@@ -17477,6 +17557,21 @@
             "returnComment": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.parameterHintEntityTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "parameterHintEntityTypes",
+        "description": [],
+        "signature": [
+          "readonly [\"inference_endpoint\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

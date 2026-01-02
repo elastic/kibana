@@ -40,7 +40,7 @@ const STREAM_DESCRIPTION_HELP = i18n.translate(
   'xpack.streams.streamDetailView.streamDescription.helpText',
   {
     defaultMessage:
-      'This is a natural language description of your data. This will be used in AI workflows like feature identification and significant event generation.',
+      'This is a natural language description of your data. This will be used in AI workflows like feature identification and significant event generation. Generation uses the last 24 hours of data.',
   }
 );
 

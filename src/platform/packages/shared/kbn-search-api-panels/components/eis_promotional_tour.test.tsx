@@ -38,7 +38,7 @@ describe('EisPromotionalTour', () => {
   it('renders children only when promo is not visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderEisPromotionalTour();
@@ -53,7 +53,7 @@ describe('EisPromotionalTour', () => {
   it('renders the tour when promo is visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderEisPromotionalTour();
@@ -68,11 +68,11 @@ describe('EisPromotionalTour', () => {
     expect(screen.getByText(EIS_PROMO_TOUR_TITLE)).toBeInTheDocument();
   });
 
-  it('calls onDismissTour when clicking the close button', () => {
-    const mockOnDismissTour = jest.fn();
+  it('calls onDismissPromo when clicking the close button', () => {
+    const mockOnDismissPromo = jest.fn();
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     });
 
     renderEisPromotionalTour();
@@ -80,14 +80,14 @@ describe('EisPromotionalTour', () => {
     const closeBtn = screen.getByTestId('eisPromoTourCloseBtn');
     fireEvent.click(closeBtn);
 
-    expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
   });
 
   it('renders CTA button only when ctaLink is provided', () => {
     const ctaLink = 'https://example.com';
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderEisPromotionalTour({ ctaLink });
@@ -101,7 +101,7 @@ describe('EisPromotionalTour', () => {
   it('does not render CTA button when ctaLink is undefined', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: jest.fn(),
+      onDismissPromo: jest.fn(),
     });
 
     renderEisPromotionalTour({ ctaLink: undefined });
@@ -115,7 +115,7 @@ describe('EisPromotionalTour', () => {
   it('removes the tour from the DOM when close button is clicked, child remains', () => {
     // Use a variable to simulate state
     let isVisible = true;
-    const mockOnDismissTour = jest.fn(() => {
+    const mockOnDismissPromo = jest.fn(() => {
       isVisible = false;
     });
 
@@ -123,7 +123,7 @@ describe('EisPromotionalTour', () => {
       get isPromoVisible() {
         return isVisible;
       },
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     }));
 
     const { rerender } = renderEisPromotionalTour();
@@ -134,7 +134,7 @@ describe('EisPromotionalTour', () => {
 
     // Click the close button
     fireEvent.click(screen.getByTestId('eisPromoTourCloseBtn'));
-    expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
 
     // Re-render component to simulate state update
     rerender(

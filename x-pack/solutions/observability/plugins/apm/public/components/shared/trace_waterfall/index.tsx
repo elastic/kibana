@@ -17,6 +17,7 @@ import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfal
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
+import { CriticalPathToggle } from './critical_path';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
@@ -38,6 +39,7 @@ export interface Props {
   serviceName?: string;
   isFiltered?: boolean;
   agentMarks?: Record<string, number>;
+  showCriticalPathControl?: boolean;
 }
 
 export function TraceWaterfall({
@@ -54,6 +56,7 @@ export function TraceWaterfall({
   serviceName,
   isFiltered,
   agentMarks,
+  showCriticalPathControl = false,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -70,6 +73,7 @@ export function TraceWaterfall({
       isFiltered={isFiltered}
       errors={errors}
       agentMarks={agentMarks}
+      showCriticalPathControl={showCriticalPathControl}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -93,6 +97,9 @@ function TraceWaterfallComponent() {
     isAccordionOpen,
     toggleAllAccordions,
     agentMarks,
+    showCriticalPath,
+    setShowCriticalPath,
+    showCriticalPathControl,
   } = useTraceWaterfallContext();
 
   const marks = useMemo(() => {
@@ -101,6 +108,11 @@ function TraceWaterfallComponent() {
 
   return (
     <EuiFlexGroup direction="column">
+      {showCriticalPathControl && (
+        <EuiFlexItem>
+          <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
+        </EuiFlexItem>
+      )}
       {showLegend && serviceName && (
         <EuiFlexItem>
           <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />

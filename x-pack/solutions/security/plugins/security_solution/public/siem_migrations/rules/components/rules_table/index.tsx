@@ -44,7 +44,6 @@ import * as i18n from './translations';
 import type { RulesFilterOptions, RuleMigrationStats, RuleMigrationSettings } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
-import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 import { UpdateIndexPatternForm } from './update_index_pattern';
 import { EmptyMigration, SearchField } from '../../../common/components';
 import {
@@ -377,8 +376,6 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     return (
       <>
         {reprocessMigrationModal}
-
-        {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
 
         <EuiSkeletonLoading
           data-test-subj="migrationRulesTableSkeleton"

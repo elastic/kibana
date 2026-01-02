@@ -85,8 +85,22 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
 
   useEffect(() => {
     if (history.location.state) {
-      setForwardedState(parseLocationState(history.location.state));
-      setIsExportMode(true);
+      const parsedState = parseLocationState(history.location.state);
+
+      // Only treat this as "export mode" when the forwarded state includes the data we need to
+      // verify / reuse the pre-generated insight. Other navigations (e.g. "Open ..." from
+      // Reporting) may include unrelated history state or only a timeRange, and should render the
+      // normal UI (including the date picker).
+      if (parsedState?.insight && parsedState?.reportDataHash) {
+        setForwardedState(parsedState);
+        setIsExportMode(true);
+      } else {
+        setForwardedState(undefined);
+        setIsExportMode(false);
+      }
+    } else {
+      setForwardedState(undefined);
+      setIsExportMode(false);
     }
   }, [history.location.state]);
 

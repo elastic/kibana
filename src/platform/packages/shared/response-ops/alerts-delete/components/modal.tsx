@@ -26,7 +26,6 @@ import {
   EuiPanel,
   EuiText,
   EuiIconTip,
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -315,13 +314,6 @@ export const AlertDeleteModal = ({
           <EuiModalHeaderTitle id={MODAL_ID}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>{translations.MODAL_TITLE}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  className="eui-alignTop"
-                  label={translations.RULE_SETTINGS_TECH_PREVIEW_LABEL}
-                  title={translations.RULE_SETTINGS_TECH_PREVIEW_DESCRIPTION}
-                />
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalHeaderTitle>
         </EuiModalHeader>

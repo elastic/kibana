@@ -44,14 +44,9 @@ describe('Version Compatibility', () => {
 
   afterEach(async () => {
     consoleSpy.mockRestore();
-    if (kibanaServer) {
-      await kibanaServer.stop();
-    } else {
-      abortController?.abort();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await kibanaServer?.stop();
+    abortController?.abort();
+    await esServer?.stop();
     kibanaServer = undefined;
     abortController = undefined;
     esServer = undefined;

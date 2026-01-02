@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
+    testConfigCategory: xPackAPITestsConfig.get('testConfigCategory'),
     testFiles: [
       resolve(__dirname, './apis/spaces/access_control_objects.ts'),
       resolve(__dirname, './apis/spaces/import_export.ts'),

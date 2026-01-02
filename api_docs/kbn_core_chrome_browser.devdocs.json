@@ -3011,9 +3011,9 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ 'data-test-subj'?: string | undefined; rel?: string | undefined; iconType?: ",
+          "{ target?: string | (string & {}) | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; iconType?: ",
           "IconType",
-          " | undefined; target?: string | (string & {}) | undefined; }"
+          " | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,

@@ -179,7 +179,7 @@ export const runActionTestSuite = ({
     await client.indices.delete({ index: 'existing_index_2' }).catch(() => ({}));
     await client.indices.delete({ index: 'existing_index_with_write_block' }).catch(() => ({}));
 
-    await esServer.stop();
+    await esServer?.stop();
   });
 
   describe('fetchIndices', () => {

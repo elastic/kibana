@@ -13,6 +13,7 @@ import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { Observable } from 'rxjs';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
 
@@ -124,6 +125,11 @@ export interface ISearchOptions {
    * A hash of the request params. This is attached automatically by the search interceptor. It is used to link this request with a search session.
    */
   requestHash?: string;
+
+  /**
+   * Project routing configuration for cross-project search (CPS).
+   */
+  projectRouting?: ProjectRouting;
 }
 
 /**
@@ -141,4 +147,5 @@ export type ISearchOptionsSerializable = Pick<
   | 'retrieveResults'
   | 'executionContext'
   | 'stream'
+  | 'projectRouting'
 >;

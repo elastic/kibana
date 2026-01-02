@@ -381,7 +381,12 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                         data-test-subj="searchQueryRulesQueryRulesetActionsButton"
                         size="m"
                         iconType="boxesVertical"
-                        aria-label="More"
+                        aria-label={i18n.translate(
+                          'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
+                          {
+                            defaultMessage: 'More',
+                          }
+                        )}
                         onClick={() => setPopoverActions(!isPopoverActionsOpen)}
                       />
                     }

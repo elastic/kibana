@@ -9,7 +9,7 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import type {
   FieldDefinition,
   OnFieldChangeFn,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/onechat-common/attachments';
-import { platformCoreTools } from '@kbn/onechat-common';
-import { onechatMocks } from '@kbn/onechat-plugin/server/mocks';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
@@ -19,7 +19,7 @@ import { createAlertAttachmentType } from './alert';
 
 describe('createAlertAttachmentType', () => {
   const attachmentType = createAlertAttachmentType();
-  const formatContext = onechatMocks.attachments.createFormatContextMock();
+  const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
   describe('validate', () => {
     it('returns valid when alert data is valid', async () => {

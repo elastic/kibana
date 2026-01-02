@@ -135,7 +135,7 @@ describe('appearance settings', () => {
         'lens-metric-appearance-title-and-subtitle-alignment-btn'
       );
 
-      expect(btnGroup.selected.textContent).toBe(prevLabel);
+      expect(btnGroup.getSelected()?.textContent).toBe(prevLabel);
 
       btnGroup.select(newLabel);
 
@@ -154,7 +154,7 @@ describe('appearance settings', () => {
         'lens-metric-appearance-primary-metric-alignment-btn'
       );
 
-      expect(btnGroup.selected.textContent).toBe(prevLabel);
+      expect(btnGroup.getSelected()?.textContent).toBe(prevLabel);
 
       btnGroup.select(newLabel);
 
@@ -173,7 +173,7 @@ describe('appearance settings', () => {
         'lens-metric-appearance-secondary-metric-alignment-btn'
       );
 
-      expect(btnGroup.selected.textContent).toBe(prevLabel);
+      expect(btnGroup.getSelected()?.textContent).toBe(prevLabel);
 
       btnGroup.select(newLabel);
 
@@ -198,7 +198,7 @@ describe('appearance settings', () => {
       'lens-metric-appearance-primary-metric-font-size-btn'
     );
 
-    expect(btnGroup.selected.textContent).toBe('Default');
+    expect(btnGroup.getSelected()?.textContent).toBe('Default');
 
     btnGroup.select('Fit');
     btnGroup.select('Default');
@@ -213,7 +213,7 @@ describe('appearance settings', () => {
       'lens-metric-appearance-primary-metric-font-size-btn'
     );
 
-    expect(btnGroup.selected.textContent).toBe('Fit');
+    expect(btnGroup.getSelected()?.textContent).toBe('Fit');
 
     btnGroup.select('Fit');
     btnGroup.select('Default');
@@ -228,7 +228,7 @@ describe('appearance settings', () => {
       'lens-metric-appearance-other-icon-position-btn'
     );
 
-    expect(btnGroup.selected.textContent).toBe('Left');
+    expect(btnGroup.getSelected()?.textContent).toBe('Left');
 
     btnGroup.select('Left');
     btnGroup.select('Right');
@@ -243,7 +243,7 @@ describe('appearance settings', () => {
       'lens-metric-appearance-other-icon-position-btn'
     );
 
-    expect(iconPositionBtnGroup.selected.textContent).toBe('Right');
+    expect(iconPositionBtnGroup.getSelected()?.textContent).toBe('Right');
 
     iconPositionBtnGroup.select('Right');
     iconPositionBtnGroup.select('Left');
@@ -258,7 +258,7 @@ describe('appearance settings', () => {
       'lens-metric-appearance-other-icon-position-btn'
     );
 
-    expect(iconPositionBtnGroup.selected.textContent).toBe('Left');
+    expect(iconPositionBtnGroup.getSelected()?.textContent).toBe('Left');
   });
 
   it.each([undefined, 'empty'])('should disable iconAlign option when icon is %j', async (icon) => {
@@ -274,7 +274,7 @@ describe('appearance settings', () => {
       'lens-metric-appearance-title-and-subtitle-font-weight-btn'
     );
 
-    expect(fontWeightBtnGroup.selected.textContent).toBe('Bold');
+    expect(fontWeightBtnGroup.getSelected()?.textContent).toBe('Bold');
 
     fontWeightBtnGroup.select('Regular');
     fontWeightBtnGroup.select('Bold');
@@ -289,7 +289,7 @@ describe('appearance settings', () => {
       'lens-metric-appearance-title-and-subtitle-font-weight-btn'
     );
 
-    expect(fontWeightBtnGroup.selected.textContent).toBe('Regular');
+    expect(fontWeightBtnGroup.getSelected()?.textContent).toBe('Regular');
 
     fontWeightBtnGroup.select('Regular');
     fontWeightBtnGroup.select('Bold');
@@ -309,7 +309,7 @@ describe('appearance settings', () => {
         'lens-metric-appearance-primary-metric-position-btn'
       );
 
-      expect(btnGroup.selected.textContent).toBe(prevLabel);
+      expect(btnGroup.getSelected()?.textContent).toBe(prevLabel);
 
       btnGroup.select(newLabel);
 

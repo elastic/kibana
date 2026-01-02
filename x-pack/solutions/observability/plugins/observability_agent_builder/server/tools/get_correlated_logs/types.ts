@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 export interface LogSequence<T = Record<string, unknown>> {
   correlation: AnchorLog['correlation'];

@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { APM_ALERTS_INDEX } from '../../apm/alerts/helpers/alerting_helper';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

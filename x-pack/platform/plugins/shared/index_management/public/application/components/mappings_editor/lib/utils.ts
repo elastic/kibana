@@ -42,7 +42,10 @@ import {
 
 import type { TreeItem } from '../components/tree';
 import type { FieldConfig } from '../shared_imports';
-import { ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID } from '../../../constants/mappings';
+import {
+  ELSER_ON_EIS_INFERENCE_ENDPOINT_ID,
+  ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID,
+} from '../../../constants/mappings';
 import type { MappingsOptionData } from '../../../sections/home/index_list/details_page/update_elser_mappings/update_elser_mappings_modal';
 
 export const getUniqueId = () => uuidv4();
@@ -823,8 +826,8 @@ export function hasSemanticTextField(fields: NormalizedFields): boolean {
 export const prepareFieldsForEisUpdate = (
   selectedMappings: EuiSelectableOption<MappingsOptionData>[],
   fullNormalized: NormalizedFields
-) => {
-  const selectedIds = selectedMappings.map((item) => item.key as string);
+): NormalizedFields => {
+  const selectedIds = selectedMappings.flatMap((item) => item.key ?? []);
 
   const { byId } = fullNormalized;
 
@@ -832,6 +835,10 @@ export const prepareFieldsForEisUpdate = (
   const resultRootLevel: string[] = [];
 
   function getSelectedFieldData(id: string) {
+    // Prevent duplicate processing - if already in resultById, skip
+    if (resultById[id]) {
+      return;
+    }
     const field = byId[id];
     if (!field) return;
 
@@ -841,14 +848,16 @@ export const prepareFieldsForEisUpdate = (
     if (clonedField.source?.inference_id !== undefined) {
       clonedField.source = {
         ...clonedField.source,
-        inference_id: '.elser-2-elastic',
+        inference_id: ELSER_ON_EIS_INFERENCE_ENDPOINT_ID,
       };
     }
     resultById[id] = clonedField;
 
-    // Include parent if it exists
+    // Include parent if it exists and hasn't been processed yet
     if (field.parentId) {
-      getSelectedFieldData(field.parentId);
+      if (!resultById[field.parentId]) {
+        getSelectedFieldData(field.parentId);
+      }
     } else {
       resultRootLevel.push(id);
     }

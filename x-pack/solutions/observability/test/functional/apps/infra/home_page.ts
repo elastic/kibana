@@ -115,7 +115,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with metrics present', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/233920
+    describe.skip('with metrics present', () => {
       before(async () => {
         await synthEsClient.index([
           generateHostData({

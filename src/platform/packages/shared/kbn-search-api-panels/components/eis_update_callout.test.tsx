@@ -28,7 +28,7 @@ describe('EisUpdateCallout', () => {
   const ctaLink = 'https://example.com';
   const direction: EisUpdateCalloutProps['direction'] = 'row';
 
-  const mockOnDismissTour = jest.fn();
+  const mockOnDismissPromo = jest.fn();
   const mockHandleOnClick = jest.fn();
 
   const renderEisUpdateCallout = (props?: Partial<EisUpdateCalloutProps>) => {
@@ -37,7 +37,7 @@ describe('EisUpdateCallout', () => {
         <EisUpdateCallout
           promoId={promoId}
           ctaLink={ctaLink}
-          isCloudEnabled={true}
+          shouldShowEisUpdateCallout={true}
           direction={direction}
           hasUpdatePrivileges={true}
           handleOnClick={mockHandleOnClick}
@@ -51,7 +51,7 @@ describe('EisUpdateCallout', () => {
     jest.clearAllMocks();
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: true,
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     });
   });
 
@@ -72,13 +72,13 @@ describe('EisUpdateCallout', () => {
     expect(screen.getByText(EIS_CALLOUT_DOCUMENTATION_BTN)).toBeInTheDocument();
   });
 
-  it('calls onDismissTour when dismiss button is clicked', () => {
+  it('calls onDismissPromo when dismiss button is clicked', () => {
     renderEisUpdateCallout();
 
     const dismissButton = screen.getByTestId('euiDismissCalloutButton');
     fireEvent.click(dismissButton);
 
-    expect(mockOnDismissTour).toHaveBeenCalledTimes(1);
+    expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
   });
 
   it('calls handleOnClick when CTA button is clicked', () => {
@@ -93,7 +93,7 @@ describe('EisUpdateCallout', () => {
   it('does not render callout when promo is not visible', () => {
     (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
       isPromoVisible: false,
-      onDismissTour: mockOnDismissTour,
+      onDismissPromo: mockOnDismissPromo,
     });
 
     renderEisUpdateCallout();
@@ -102,8 +102,8 @@ describe('EisUpdateCallout', () => {
     expect(panel).not.toBeInTheDocument();
   });
 
-  it('does not render callout when user is not on cloud', () => {
-    renderEisUpdateCallout({ isCloudEnabled: false });
+  it('does not render callout when user does not have the necessary environment/licensing', () => {
+    renderEisUpdateCallout({ shouldShowEisUpdateCallout: false });
 
     const panel = screen.queryByTestId(dataId);
     expect(panel).not.toBeInTheDocument();

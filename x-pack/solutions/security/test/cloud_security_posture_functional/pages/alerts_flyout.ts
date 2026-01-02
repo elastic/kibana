@@ -247,7 +247,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    describe('ECS fields only', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/246821
+    describe.skip('ECS fields only', function () {
       const entitiesIndex = '.entities.v1.latest.security_*';
       const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
       const enrichIndexName = `.enrich-${enrichPolicyName}`;

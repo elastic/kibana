@@ -10,14 +10,14 @@ import { useKibana } from '../use_kibana';
 
 export const useAgentCount = () => {
   const {
-    services: { onechat },
+    services: { agentBuilder },
   } = useKibana();
   const [toolCount, setToolCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
-    onechat?.tools
+    agentBuilder?.tools
       .list()
       .then((tools) => {
         setToolCount(tools.length);
@@ -28,7 +28,7 @@ export const useAgentCount = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [onechat]);
+  }, [agentBuilder]);
 
   return { tools: toolCount, agents: 0, isLoading, isError };
 };

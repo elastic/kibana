@@ -53,7 +53,7 @@ export class ObservabilityAgentBuilderPlugin
     });
 
     registerAttachmentUiDefinitions({
-      attachments: plugins.onechat.attachments,
+      attachments: plugins.agentBuilder.attachments,
     });
 
     return {

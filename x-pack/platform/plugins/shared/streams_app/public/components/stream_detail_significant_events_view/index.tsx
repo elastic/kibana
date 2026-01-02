@@ -66,11 +66,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     query,
   });
 
-  const { removeQuery } = useSignificantEventsApi({
-    name: definition.stream.name,
-    start: timeState.start,
-    end: timeState.end,
-  });
+  const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
