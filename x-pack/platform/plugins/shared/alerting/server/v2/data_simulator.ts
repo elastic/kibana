@@ -6,14 +6,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-
 import { v4 } from 'uuid';
 
 export interface StartDataSimulatorOpts {
   esClient: ElasticsearchClient;
 }
 
-export const DATA_INTERVAL = 10000;
+export const INTERVAL = 10000;
+export const NUM_HOSTS = 1;
 export const DATA_SIMULATOR_INDEX = '.kibana_simulator_logs';
 
 export async function startDataSimulator({ esClient }: StartDataSimulatorOpts) {
@@ -27,6 +27,11 @@ export async function startDataSimulator({ esClient }: StartDataSimulatorOpts) {
         properties: {
           '@timestamp': { type: 'date' },
           message: { type: 'keyword' },
+          host: {
+            properties: {
+              name: { type: 'keyword' },
+            },
+          },
         },
       },
     });
@@ -36,15 +41,28 @@ export async function startDataSimulator({ esClient }: StartDataSimulatorOpts) {
 
   setInterval(async () => {
     try {
-      await esClient.index({
-        index: DATA_SIMULATOR_INDEX,
-        body: {
+      const rows = [];
+      for (let i = 0; i < NUM_HOSTS; i++) {
+        rows.push({
           '@timestamp': new Date().toISOString(),
           message: `Simulated message ${v4()}`,
-        }
+          host: {
+            name: `host-${i + 1}`,
+          },
+        });
+      }
+      const bulkRequest = [];
+      for (const row of rows) {
+        bulkRequest.push({ create: {} });
+        bulkRequest.push(row);
+      }
+      await esClient.bulk({
+        index: DATA_SIMULATOR_INDEX,
+        body: bulkRequest,
       });
+      console.log(`${new Date().toISOString()} Wrote ${NUM_HOSTS} source documents`);
     } catch (e) {
       console.error(`${new Date().toISOString()} Failed to write simulator data: ${e.message}`);
     }
-  }, DATA_INTERVAL);
+  }, INTERVAL);
 }
