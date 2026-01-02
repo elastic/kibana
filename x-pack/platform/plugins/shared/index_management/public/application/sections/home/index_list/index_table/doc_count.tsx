@@ -26,7 +26,7 @@ export const DocCountCell = ({ indexName, docCountApi }: DocCountCellProps) => {
   }, [docCountApi, indexName]);
 
   if (result === undefined) {
-    return <EuiLoadingSpinner size="m" />;
+    return <EuiLoadingSpinner size="m" data-test-subj="docCountLoadingSpinner" />;
   }
 
   if (result.status === RequestResultType.Error) {

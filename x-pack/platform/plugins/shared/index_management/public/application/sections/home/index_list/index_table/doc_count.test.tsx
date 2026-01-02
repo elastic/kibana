@@ -43,7 +43,7 @@ describe('DocCountCell', () => {
     expect(docCountApi.getByName).toHaveBeenCalledWith('index-a');
 
     // Loading spinner rendered
-    expect(document.querySelector('.euiLoadingSpinner')).not.toBeNull();
+    expect(screen.getByTestId('docCountLoadingSpinner')).toBeInTheDocument();
   });
 
   it('renders an error label when the index count failed to load', () => {
