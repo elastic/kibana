@@ -23,36 +23,18 @@ export interface TransformApiService {
     transformId: TransformId
   ) => Promise<estypes.TransformGetTransformStatsTransformStats>;
   deleteTransform: (transformId: TransformId) => Promise<void>;
-  waitForTransformToExist: (transformId: TransformId) => Promise<void>;
   cleanTransformIndices: () => Promise<void>;
   deleteIndices: (index: string) => Promise<void>;
 }
 
 export function getTransformApiService(esClient: Client): TransformApiService {
   return {
-    async waitForTransformToExist(transformId: TransformId) {
-      let retries = 10;
-      while (retries > 0) {
-        try {
-          await esClient.transform.getTransform({ transform_id: transformId });
-          return; // Transform exists, we're done
-        } catch {
-          retries--;
-          if (retries === 0) {
-            throw new Error(`Transform ${transformId} was not created after waiting.`);
-          }
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-      }
-    },
-
     async createTransform(transformId: TransformId, config: PutTransformsRequestSchema) {
       try {
         await esClient.transform.putTransform({
           transform_id: transformId,
           ...config,
         } as any);
-        await this.waitForTransformToExist(transformId);
       } catch (error) {
         throw new Error(`Failed to create transform ${transformId}: ${error}`);
       }
@@ -77,8 +59,6 @@ export function getTransformApiService(esClient: Client): TransformApiService {
             },
           }
         );
-
-        await this.waitForTransformToExist(transformId);
       } catch (error) {
         throw new Error(`Failed to create transform ${transformId}: ${error}`);
       }
