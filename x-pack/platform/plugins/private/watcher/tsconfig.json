@@ -5,6 +5,7 @@
   },
   "include": [
     "__jest__/**/*",
+    "__mocks__/**/*",
     "server/**/*",
     "public/**/*",
     "common/**/*",

@@ -54,6 +54,7 @@ tags:
 fileGroups:
   src:
     - __jest__/**/*
+    - __mocks__/**/*
     - server/**/*
     - public/**/*
     - common/**/*
