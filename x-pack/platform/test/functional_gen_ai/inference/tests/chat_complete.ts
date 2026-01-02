@@ -250,10 +250,8 @@ export const chatCompleteSuite = (
 
         const message = await lastValueFrom(observable);
 
-        expect({
-          ...message,
-          content: '',
-        }).to.eql({ type: 'chatCompletionMessage', content: '', toolCalls: [] });
+        expect(message.type).to.eql('chatCompletionMessage');
+        expect(message.toolCalls).to.eql([]);
         expect(message.content).to.contain('4');
       });
 
@@ -312,9 +310,17 @@ export const chatCompleteSuite = (
         expect(tokenEvent.type).to.eql('chatCompletionTokenCount');
         expect(tokenEvent.tokens.prompt).to.be.greaterThan(0);
         expect(tokenEvent.tokens.completion).to.be.greaterThan(0);
-        expect(tokenEvent.tokens.total).to.be(
-          tokenEvent.tokens.prompt + tokenEvent.tokens.completion
-        );
+        // can include thinking token depending on the model
+        const totalIsPromptAndCompletion =
+          tokenEvent.tokens.total === tokenEvent.tokens.prompt + tokenEvent.tokens.completion;
+        const totalIsPromptCompletionAndThinking =
+          tokenEvent.tokens.total ===
+          tokenEvent.tokens.prompt + tokenEvent.tokens.completion + tokenEvent.tokens.thinking;
+        expect(totalIsPromptAndCompletion || totalIsPromptCompletionAndThinking).to.be(true);
+        // Model field is optional and may be present if provided by the connector
+        if (tokenEvent.model !== undefined) {
+          expect(tokenEvent.model).to.be.a('string');
+        }
       });
 
       it('returns an error with the expected shape in case of error', async () => {

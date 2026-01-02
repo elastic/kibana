@@ -236,6 +236,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 columns={getCriticalityLevelTableColumns()}
                 items={criticalityLevelTableItems}
                 data-test-subj="criticality-level-information-table"
+                tableCaption={i18n.CRITICALITY_LEVEL_TABLE_CAPTION}
               />
               <EuiSpacer size="s" />
             </li>
@@ -255,6 +256,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 columns={getRiskLevelTableColumns()}
                 items={riskLevelTableItems}
                 data-test-subj="risk-level-information-table"
+                tableCaption={i18n.ENTITY_RISK_LEVELS}
               />
               <EuiSpacer size="s" />
             </li>

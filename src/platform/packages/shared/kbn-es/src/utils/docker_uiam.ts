@@ -22,13 +22,13 @@ const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/co
 
 // Check new version at https://github.com/Azure/azure-cosmos-db-emulator-docker/releases. DON'T use the rolling
 // `vnext-preview` image tag.
-const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-EN20251124';
+const COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG = 'vnext-EN20251205';
 export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REPO}:${COSMOS_DB_EMULATOR_DOCKER_LATEST_VERIFIED_TAG}`;
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_REPO = `${UIAM_DOCKER_REGISTRY}/cloud-ci/uiam`;
 // Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml)
-const UIAM_DOCKER_LATEST_VERIFIED_TAG = 'git-fd2a53b8cf9f';
+const UIAM_DOCKER_LATEST_VERIFIED_TAG = 'git-f56eb1a3b9a8';
 export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_REPO}:${UIAM_DOCKER_LATEST_VERIFIED_TAG}`;
 
 const UIAM_COSMOS_DB_NAME = 'uiam-db';

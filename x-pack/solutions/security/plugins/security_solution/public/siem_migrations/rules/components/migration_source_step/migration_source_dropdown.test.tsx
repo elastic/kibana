@@ -9,6 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { MigrationSourceDropdown } from './migration_source_dropdown';
 import * as i18n from './translations';
 import { MigrationSource } from '../../../common/types';
+import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../../common/constants';
 
 describe('MigrationSourceDropdown', () => {
   const mockSetMigrationSource = jest.fn();
@@ -20,11 +21,11 @@ describe('MigrationSourceDropdown', () => {
     migrationSourceOptions: [
       {
         value: MigrationSource.SPLUNK,
-        inputDisplay: <span>{i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_SPLUNK}</span>,
+        inputDisplay: <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.SPLUNK]}</span>,
       },
       {
         value: MigrationSource.QRADAR,
-        inputDisplay: <span>{i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_QRADAR}</span>,
+        inputDisplay: <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.QRADAR]}</span>,
       },
     ],
   };
@@ -37,7 +38,7 @@ describe('MigrationSourceDropdown', () => {
     render(<MigrationSourceDropdown {...defaultProps} />);
 
     const select = screen.getByTestId('migrationSourceDropdown');
-    expect(select.textContent).toContain(i18n.MIGRATION_SOURCE_DROPDOWN_OPTION_SPLUNK);
+    expect(select.textContent).toContain(MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.SPLUNK]);
   });
 
   it('disables the dropdown when disabled equals true', () => {

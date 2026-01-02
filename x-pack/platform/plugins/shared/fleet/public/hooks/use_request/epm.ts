@@ -40,6 +40,7 @@ import type {
   DeletePackageDatastreamAssetsResponse,
   BulkRollbackPackagesRequest,
   RollbackAvailableCheckResponse,
+  BulkRollbackAvailableCheckResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -392,6 +393,19 @@ export const useGetRollbackAvailableCheck = (pkgName: string) => {
       })
   );
   return response.data ?? { isAvailable: false };
+};
+
+export const useGetBulkRollbackAvailableCheck = () => {
+  const response = useQuery<BulkRollbackAvailableCheckResponse, RequestError>(
+    ['get-bulk-rollback-available-check'],
+    () =>
+      sendRequestForRq<BulkRollbackAvailableCheckResponse>({
+        path: epmRouteService.getBulkRollbackAvailableCheckPath(),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      })
+  );
+  return response.data ?? {};
 };
 
 /**

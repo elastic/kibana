@@ -47,7 +47,7 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references
     ) as DashboardState;
-    references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
+    references = transformReferencesOut(savedObject.references ?? []);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }
@@ -56,6 +56,12 @@ export function getDashboardCRUResponseBody(
     id: savedObject.id,
     data: {
       ...dashboardState,
+      ...(savedObject?.accessControl && {
+        access_control: {
+          access_mode: savedObject.accessControl.accessMode,
+          owner: savedObject.accessControl.owner,
+        },
+      }),
       ...(references.length && { references }),
     },
     meta: getDashboardMeta(savedObject, operation),
