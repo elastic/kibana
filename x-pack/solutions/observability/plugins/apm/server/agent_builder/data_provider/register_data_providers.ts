@@ -187,7 +187,7 @@ export function registerDataProviders({
 
   observabilityAgentBuilder.registerDataProvider(
     'traceMetrics',
-    async ({ request, start, end, filter, groupBy }) => {
+    async ({ request, start, end, kqlFilter, groupBy }) => {
       const { apmEventClient, apmDataAccessServices } = await buildApmToolResources({
         core,
         plugins,
@@ -203,7 +203,7 @@ export function registerDataProviders({
         apmDataAccessServices,
         start: startMs,
         end: endMs,
-        filter,
+        kqlFilter,
         groupBy,
       });
     }

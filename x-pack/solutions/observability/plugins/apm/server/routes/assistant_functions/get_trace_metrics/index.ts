@@ -71,22 +71,22 @@ async function getPreferredDocumentSource({
   start,
   end,
   groupBy,
-  filter,
+  kqlFilter,
 }: {
   apmDataAccessServices: ApmDataAccessServices;
   start: number;
   end: number;
   groupBy: string;
-  filter?: string;
+  kqlFilter?: string;
 }) {
   const requiresTransactionMetric = TRANSACTION_METRIC_ONLY_FIELDS.some(
-    (field) => groupBy.startsWith(field) || (filter && filter.includes(field))
+    (field) => groupBy.startsWith(field) || (kqlFilter && kqlFilter.includes(field))
   );
 
   const documentSources = await apmDataAccessServices.getDocumentSources({
     start,
     end,
-    kuery: filter ?? '',
+    kuery: kqlFilter ?? '',
   });
 
   const suitableDocumentTypes = requiresTransactionMetric
@@ -120,14 +120,14 @@ export async function getTraceMetrics({
   apmDataAccessServices,
   start,
   end,
-  filter,
+  kqlFilter,
   groupBy = SERVICE_NAME,
 }: {
   apmEventClient: APMEventClient;
   apmDataAccessServices: ApmDataAccessServices;
   start: number;
   end: number;
-  filter?: string;
+  kqlFilter?: string;
   groupBy?: string;
 }): Promise<GetTraceMetricsResponse> {
   const source = await getPreferredDocumentSource({
@@ -135,7 +135,7 @@ export async function getTraceMetrics({
     start,
     end,
     groupBy,
-    filter,
+    kqlFilter,
   });
 
   const { documentType, rollupInterval, hasDurationSummaryField } = source;
@@ -157,7 +157,7 @@ export async function getTraceMetrics({
     track_total_hits: false,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), ...kqlQuery(filter)],
+        filter: [...rangeQuery(start, end), ...kqlQuery(kqlFilter)],
       },
     },
     aggs: {

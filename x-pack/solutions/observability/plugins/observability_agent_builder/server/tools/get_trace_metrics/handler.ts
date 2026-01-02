@@ -14,14 +14,14 @@ export async function getToolHandler({
   dataRegistry,
   start,
   end,
-  filter,
+  kqlFilter,
   groupBy,
 }: {
   request: KibanaRequest;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   start: string;
   end: string;
-  filter?: string;
+  kqlFilter?: string;
   groupBy?: string;
 }): Promise<{
   items: TraceMetricsItem[];
@@ -30,7 +30,7 @@ export async function getToolHandler({
     request,
     start,
     end,
-    filter,
+    kqlFilter,
     groupBy,
   });
 

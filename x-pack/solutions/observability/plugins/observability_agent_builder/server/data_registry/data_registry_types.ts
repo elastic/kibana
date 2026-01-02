@@ -226,7 +226,7 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     request: KibanaRequest;
     start: string;
     end: string;
-    filter?: string;
+    kqlFilter?: string;
     groupBy?: string;
   }) => Promise<TraceMetricsResponse>;
 }

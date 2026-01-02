@@ -39,7 +39,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-1h",
     "end": "now",
-    "filter": "service.name: \"frontend\"",
+    "kqlFilter": "service.name: \"frontend\"",
     "groupBy": "transaction.name"
   }
 }
@@ -54,7 +54,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-30m",
     "end": "now",
-    "filter": "service.name: \"checkout-service\"",
+    "kqlFilter": "service.name: \"checkout-service\"",
     "groupBy": "host.name"
   }
 }
@@ -69,7 +69,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-2h",
     "end": "now",
-    "filter": "service.name: \"payment-api\"",
+    "kqlFilter": "service.name: \"payment-api\"",
     "groupBy": "service.version"
   }
 }
@@ -84,7 +84,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-1h",
     "end": "now",
-    "filter": "transaction.type: \"request\"",
+    "kqlFilter": "transaction.type: \"request\"",
     "groupBy": "service.name"
   }
 }
@@ -99,7 +99,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-15m",
     "end": "now",
-    "filter": "service.name: \"frontend\" AND transaction.name: \"POST /api/cart\"",
+    "kqlFilter": "service.name: \"frontend\" AND transaction.name: \"POST /api/cart\"",
     "groupBy": "container.id"
   }
 }
@@ -114,7 +114,7 @@ POST kbn://api/agent_builder/tools/_execute
   "tool_params": {
     "start": "now-1h",
     "end": "now",
-    "filter": "service.name: \"api-gateway\"",
+    "kqlFilter": "service.name: \"api-gateway\"",
     "groupBy": "cloud.region"
   }
 }

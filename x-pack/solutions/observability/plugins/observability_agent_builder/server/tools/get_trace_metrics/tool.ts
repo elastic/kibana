@@ -24,7 +24,7 @@ export const OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID = 'observability.get_trace_
 
 const getTraceMetricsSchema = z.object({
   ...timeRangeSchemaRequired,
-  filter: z
+  kqlFilter: z
     .string()
     .optional()
     .describe(
@@ -63,7 +63,7 @@ Trace metrics are:
 Transaction types:
 This tool includes ALL transaction types by default, unlike ${OBSERVABILITY_GET_SERVICES_TOOL_ID} which only shows the primary transaction type per service.
 Default transaction types are: "request", "page-load", "mobile".
-To filter by transaction type, use the filter parameter: filter='transaction.type: "request"'.
+To filter by transaction type, use the kqlFilter parameter: kqlFilter='transaction.type: "request"'.
 
 When to use this tool:
 - After identifying an unhealthy service with the ${OBSERVABILITY_GET_SERVICES_TOOL_ID} tool, use this tool to drill down and find the root cause
@@ -76,8 +76,8 @@ When NOT to use this tool:
 
 Example workflow:
 1. Call the ${OBSERVABILITY_GET_SERVICES_TOOL_ID} tool to identify a service with high latency
-2. Call get_trace_metrics(filter='service.name: "frontend"', groupBy='transaction.name') to find which transaction is slow
-3. Call get_trace_metrics(filter='service.name: "frontend" AND transaction.name: "POST /api/cart"', groupBy='host.name') to identify if specific hosts are affected
+2. Call get_trace_metrics(kqlFilter='service.name: "frontend"', groupBy='transaction.name') to find which transaction is slow
+3. Call get_trace_metrics(kqlFilter='service.name: "frontend" AND transaction.name: "POST /api/cart"', groupBy='host.name') to identify if specific hosts are affected
 
 Returns an array of items with: group (the groupBy field value), latency (ms), throughput (rpm), failureRate (0-1).`,
     schema: getTraceMetricsSchema,
@@ -88,7 +88,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, filter, groupBy }, context) => {
+    handler: async ({ start, end, kqlFilter, groupBy }, context) => {
       const { request } = context;
 
       try {
@@ -97,7 +97,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           dataRegistry,
           start,
           end,
-          filter,
+          kqlFilter,
           groupBy,
         });
 

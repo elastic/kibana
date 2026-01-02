@@ -218,7 +218,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.name: "payment-service"',
+            kqlFilter: 'service.name: "payment-service"',
           },
         });
 
@@ -235,7 +235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.name: "payment-service"',
+            kqlFilter: 'service.name: "payment-service"',
           },
         });
 
@@ -257,7 +257,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.environment: "production"',
+            kqlFilter: 'service.environment: "production"',
           },
         });
 
@@ -278,7 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.environment: "staging"',
+            kqlFilter: 'service.environment: "staging"',
           },
         });
 
@@ -301,7 +301,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'transaction.name: "POST /api/payment"',
+            kqlFilter: 'transaction.name: "POST /api/payment"',
           },
         });
 
@@ -320,7 +320,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'transaction.name: "worker-process"',
+            kqlFilter: 'transaction.name: "worker-process"',
           },
         });
 
@@ -341,7 +341,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'transaction.type: "request"',
+            kqlFilter: 'transaction.type: "request"',
           },
         });
 
@@ -364,7 +364,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'transaction.type: "page-load"',
+            kqlFilter: 'transaction.type: "page-load"',
           },
         });
 
@@ -383,7 +383,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'transaction.type: "messaging"',
+            kqlFilter: 'transaction.type: "messaging"',
           },
         });
 
@@ -402,7 +402,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'transaction.type: "worker"',
+            kqlFilter: 'transaction.type: "worker"',
           },
         });
 
@@ -536,7 +536,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.name: "user-service" AND transaction.type: "request"',
+            kqlFilter: 'service.name: "user-service" AND transaction.type: "request"',
           },
         });
 
@@ -556,7 +556,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.environment: "staging" AND transaction.type: "request"',
+            kqlFilter: 'service.environment: "staging" AND transaction.type: "request"',
           },
         });
 
@@ -575,7 +575,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.name: "payment-service"',
+            kqlFilter: 'service.name: "payment-service"',
             groupBy: 'transaction.name',
           },
         });
@@ -595,7 +595,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'host.name: "host-01"',
+            kqlFilter: 'host.name: "host-01"',
             groupBy: 'service.name',
           },
         });
@@ -662,7 +662,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'service.name: "non-existent-service"',
+            kqlFilter: 'service.name: "non-existent-service"',
           },
         });
 
@@ -738,7 +738,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.team: "payments"',
+            kqlFilter: 'labels.team: "payments"',
           },
         });
 
@@ -755,7 +755,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.tier: "critical"',
+            kqlFilter: 'labels.tier: "critical"',
           },
         });
 
@@ -774,7 +774,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.tier: "standard"',
+            kqlFilter: 'labels.tier: "standard"',
           },
         });
 
@@ -793,7 +793,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.endpoint: "payment-create"',
+            kqlFilter: 'labels.endpoint: "payment-create"',
           },
         });
 
@@ -812,7 +812,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.team: "non-existent-team"',
+            kqlFilter: 'labels.team: "non-existent-team"',
           },
         });
 
@@ -829,7 +829,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.tier: "critical" AND service.environment: "production"',
+            kqlFilter: 'labels.tier: "critical" AND service.environment: "production"',
           },
         });
 
@@ -848,7 +848,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.team: "payments"',
+            kqlFilter: 'labels.team: "payments"',
             groupBy: 'transaction.name',
           },
         });
@@ -954,7 +954,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'transaction.name: "POST /api/payment"',
+            kqlFilter: 'transaction.name: "POST /api/payment"',
           },
         });
 
@@ -971,7 +971,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: 'now-1h',
             end: 'now',
-            filter: 'labels.team: "payments"',
+            kqlFilter: 'labels.team: "payments"',
           },
         });
 
