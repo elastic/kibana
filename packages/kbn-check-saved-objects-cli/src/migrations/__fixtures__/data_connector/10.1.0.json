@@ -1,0 +1,34 @@
+{
+  "10.0.0": [
+    {
+      "name": "My Notion Connector",
+      "type": "notion",
+      "workflowIds": [],
+      "toolIds": [],
+      "kscIds": ["ksc-abc123"]
+    },
+    {
+      "name": "GitHub Data Source",
+      "type": "github",
+      "workflowIds": ["workflow-123", "workflow-456"],
+      "toolIds": ["tool-789"],
+      "kscIds": ["ksc-def456"]
+    }
+  ],
+  "10.1.0": [
+    {
+      "name": "My Notion Connector",
+      "type": "notion",
+      "workflowIds": [],
+      "toolIds": [],
+      "kscIds": ["ksc-abc123"]
+    },
+    {
+      "name": "GitHub Data Source",
+      "type": "github",
+      "workflowIds": ["workflow-123", "workflow-456"],
+      "toolIds": ["tool-789"],
+      "kscIds": ["ksc-def456"]
+    }
+  ]
+}
