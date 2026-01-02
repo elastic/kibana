@@ -17,8 +17,10 @@ import { getEntityMask } from './get_entity_mask';
 // structured data can end up being a token per character.
 // since the limit is 512 tokens, to avoid truncating, set the max to 512
 const MAX_TOKENS_PER_DOC = 512;
-const NER_DOCS_URL =
+const NER_DOCS_URL_DOWNLOAD_MODEL =
   'https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-ner-example';
+const NER_DOCS_URL_DEPLOY_MODEL =
+  'https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-deploy-model';
 
 function chunkText(text: string, maxChars = MAX_TOKENS_PER_DOC): string[] {
   const chunks: string[] = [];
@@ -123,7 +125,7 @@ export async function executeNerRule({
             throw new Error(
               `The NER model '${rule.modelId}' was not found. ` +
                 `Please download and deploy the model before enabling anonymization. ` +
-                `For instructions, see: ${NER_DOCS_URL}`,
+                `For instructions, see: ${NER_DOCS_URL_DOWNLOAD_MODEL}`,
               { cause: error }
             );
           }
@@ -132,7 +134,8 @@ export async function executeNerRule({
           if (isModelNotDeployedError(error)) {
             throw new Error(
               `The NER model '${rule.modelId}' is not deployed. ` +
-                `Please deploy the model under Machine Learning > Trained Models before enabling anonymization`,
+                `Please deploy the model before enabling anonymization. ` +
+                `For instructions, see: ${NER_DOCS_URL_DEPLOY_MODEL}`,
               { cause: error }
             );
           }

@@ -85,7 +85,8 @@ describe('executeNerRule', () => {
 
     await expect(executeNerRule({ state, rule, esClient: mockEsClient })).rejects.toThrow(
       `The NER model '${rule.modelId}' is not deployed. ` +
-        `Please deploy the model under Machine Learning > Trained Models before enabling anonymization`
+        `Please deploy the model before enabling anonymization. ` +
+        `For instructions, see: https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-deploy-model`
     );
   });
 });
