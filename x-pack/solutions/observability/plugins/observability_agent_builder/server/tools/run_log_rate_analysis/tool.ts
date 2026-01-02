@@ -101,7 +101,7 @@ Do NOT use for:
         const total = items.length;
         const summary =
           total === 0
-            ? 'No significant factors found explaining the log rate change.'
+            ? `No significant factors found explaining the log rate change (baseline: ${baseline.start} to ${baseline.end}, deviation: ${deviation.start} to ${deviation.end}).`
             : `Found ${total} significant factor(s) contributing to the log rate ${analysisType}.`;
 
         return {

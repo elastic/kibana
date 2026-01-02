@@ -116,9 +116,7 @@ Supports filtering by status (active/recovered) and KQL queries.`,
         });
 
         const summary =
-          total === 0
-            ? 'No alerts found in the specified time range.'
-            : `Found ${total} alert(s).`;
+          total === 0 ? `No alerts found between ${start} and ${end}.` : `Found ${total} alert(s).`;
 
         return {
           results: [

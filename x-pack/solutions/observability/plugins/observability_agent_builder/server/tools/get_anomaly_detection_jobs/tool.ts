@@ -116,7 +116,7 @@ When to use:
         const total = mlJobs.length;
         const summary =
           total === 0
-            ? 'No anomaly detection jobs found for the provided filters.'
+            ? `No anomaly detection jobs found between ${rangeStart} and ${rangeEnd}.`
             : `Found ${total} anomaly detection job(s).`;
 
         return {

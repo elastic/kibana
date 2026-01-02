@@ -101,7 +101,7 @@ Do NOT use for:
         const total = highCount + lowCount;
         const summary =
           total === 0
-            ? 'No log categories found.'
+            ? `No log categories found between ${start} and ${end}.`
             : `Found ${total} log category(s) (${highCount} high severity, ${lowCount} low severity).`;
 
         return {

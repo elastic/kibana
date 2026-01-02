@@ -83,7 +83,9 @@ When to use:
 
         const total = services.length;
         const summary =
-          total === 0 ? 'No services found matching the criteria.' : `Found ${total} service(s).`;
+          total === 0
+            ? `No services found between ${start} and ${end}.`
+            : `Found ${total} service(s).`;
 
         return {
           results: [

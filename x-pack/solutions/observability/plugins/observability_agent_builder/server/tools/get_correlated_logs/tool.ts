@@ -142,7 +142,7 @@ Do NOT use for:
         const totalLogs = sequences.reduce((sum, seq) => sum + seq.logs.length, 0);
         const summary =
           total === 0
-            ? message ?? 'No correlated log sequences found.'
+            ? message ?? `No correlated log sequences found between ${start} and ${end}.`
             : `Found ${total} log sequence(s) with ${totalLogs} total logs.`;
 
         return {

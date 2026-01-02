@@ -88,7 +88,7 @@ When to use:
         const total = dependencies?.length ?? 0;
         const summary =
           total === 0
-            ? `No downstream dependencies found for ${serviceName}.`
+            ? `No downstream dependencies found for ${serviceName} between ${start} and ${end}.`
             : `Found ${total} downstream dependency(s) for ${serviceName}.`;
 
         return {

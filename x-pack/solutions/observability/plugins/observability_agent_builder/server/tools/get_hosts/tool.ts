@@ -35,6 +35,7 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
 export type GetHostsToolResult = OtherResult<{
+  summary: string;
   total: number;
   hosts: Array<{
     name: string;
@@ -114,9 +115,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
         });
 
         const summary =
-          total === 0
-            ? 'No hosts found matching the criteria.'
-            : `Found ${total} host(s).`;
+          total === 0 ? `No hosts found between ${start} and ${end}.` : `Found ${total} host(s).`;
 
         return {
           results: [
