@@ -28,6 +28,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         streams: { streamsRepositoryClient },
       },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const { signal, abort, refresh } = useAbortController();
@@ -52,10 +53,18 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
 
       const identifiedSystems = await firstValueFrom(events$);
 
+      telemetryClient.trackFeaturesIdentified({
+        count: identifiedSystems.systems.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
+        input_tokens_used: identifiedSystems.tokensUsed.prompt,
+        output_tokens_used: identifiedSystems.tokensUsed.completion,
+      });
+
       return identifiedSystems;
     },
     addSystemsToStream: async (systems: System[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
         signal,
         params: {
           path: {
@@ -68,9 +77,15 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           },
         },
       });
+
+      telemetryClient.trackFeaturesSaved({
+        count: systems.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
+      });
     },
     removeSystemsFromStream: async (systems: Pick<System, 'name'>[]) => {
-      return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
+      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
         signal,
         params: {
           path: {
@@ -78,14 +93,16 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
           },
           body: {
             operations: systems.map((system) => ({
-              delete: {
-                system: {
-                  name: system.name,
-                },
-              },
+              delete: { system: { name: system.name } },
             })),
           },
         },
+      });
+
+      telemetryClient.trackFeaturesDeleted({
+        count: systems.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
       });
     },
     upsertSystem: async (system: System) => {
