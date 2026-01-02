@@ -7,21 +7,27 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useReducer } from 'react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+
 import { useStreamValidation } from './use_stream_validation';
 import type { StreamNameValidator } from '../../../utils';
 import { formReducer, initialFormState } from '../reducers/form_reducer';
 
 describe('useStreamValidation', () => {
-  const mockOnCreate = jest.fn();
+  const mockOnCreate = jest.fn().mockResolvedValue(undefined);
   const mockOnValidate: StreamNameValidator = jest.fn().mockResolvedValue({
     errorType: null,
   });
 
-  const mockTemplate: TemplateDeserialized = {
+  const mockTemplate: IndexTemplate = {
     name: 'test-template',
     indexPatterns: ['logs-*'],
-  } as TemplateDeserialized;
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'default', hasDatastream: true },
+    hasSettings: false,
+    hasAliases: false,
+    hasMappings: false,
+  };
 
   // Helper to set up hook with form reducer
   const setupHook = (onValidate?: StreamNameValidator) => {
@@ -301,6 +307,88 @@ describe('useStreamValidation', () => {
       expect(mockOnCreate).toHaveBeenCalledWith('test-stream');
       expect(result.current.formState.validation.mode).toBe('idle'); // Success returns to IDLE
       expect(result.current.formState.validation.isValidating).toBe(false);
+    });
+
+    it('SHOULD set isSubmitting to true while onCreate is running and false after', async () => {
+      let resolveOnCreate: () => void;
+      const slowOnCreate = jest.fn().mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveOnCreate = resolve;
+          })
+      );
+
+      const { result } = renderHook(() => {
+        const [formState, dispatch] = useReducer(formReducer, {
+          ...initialFormState,
+          streamName: 'test-stream',
+        });
+
+        const { handleCreate } = useStreamValidation({
+          formState,
+          dispatch,
+          onCreate: slowOnCreate,
+          selectedTemplate: mockTemplate,
+          onValidate: mockOnValidate,
+        });
+
+        return { formState, handleCreate };
+      });
+
+      // Start create
+      let createPromise: Promise<void>;
+      await act(async () => {
+        createPromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      // isSubmitting should be true while onCreate is running
+      expect(result.current.formState.isSubmitting).toBe(true);
+      expect(slowOnCreate).toHaveBeenCalledWith('test-stream');
+
+      // Resolve onCreate
+      await act(async () => {
+        resolveOnCreate!();
+        await createPromise!;
+      });
+
+      // isSubmitting should be false after onCreate completes
+      expect(result.current.formState.isSubmitting).toBe(false);
+    });
+
+    it('SHOULD set isSubmitting to false even if onCreate throws an error', async () => {
+      // onCreate handles its own errors, the hook just needs to reset isSubmitting
+      const failingOnCreate = jest.fn().mockImplementation(() => {
+        return Promise.reject(new Error('Create failed'));
+      });
+
+      const { result } = renderHook(() => {
+        const [formState, dispatch] = useReducer(formReducer, {
+          ...initialFormState,
+          streamName: 'test-stream',
+        });
+
+        const { handleCreate } = useStreamValidation({
+          formState,
+          dispatch,
+          onCreate: failingOnCreate,
+          selectedTemplate: mockTemplate,
+          onValidate: mockOnValidate,
+        });
+
+        return { formState, handleCreate };
+      });
+
+      await act(async () => {
+        const handleCreatePromise = result.current.handleCreate();
+        await jest.runOnlyPendingTimersAsync();
+        // Error is swallowed - onCreate is expected to handle its own errors
+        await handleCreatePromise;
+      });
+
+      // isSubmitting should be false even after error
+      expect(result.current.formState.isSubmitting).toBe(false);
+      expect(failingOnCreate).toHaveBeenCalledWith('test-stream');
     });
 
     it('SHOULD set validation error and not call onCreate on validation failure', async () => {

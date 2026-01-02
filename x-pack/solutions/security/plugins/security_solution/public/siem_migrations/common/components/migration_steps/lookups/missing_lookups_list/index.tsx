@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import type { UploadedLookups } from '../../types';
+import { MigrationSource } from '../../../../types';
 
 const scrollPanelCss = css`
   max-height: 200px;
@@ -28,23 +29,34 @@ const scrollPanelCss = css`
 `;
 
 interface MissingLookupsListProps {
+  migrationSource?: MigrationSource;
   missingLookups: string[];
   uploadedLookups: UploadedLookups;
   omitLookup: (lookupsName: string) => void;
   onCopied: () => void;
 }
 export const MissingLookupsList = React.memo<MissingLookupsListProps>(
-  ({ missingLookups, uploadedLookups, omitLookup, onCopied }) => {
+  ({
+    migrationSource = MigrationSource.SPLUNK,
+    missingLookups,
+    uploadedLookups,
+    omitLookup,
+    onCopied,
+  }) => {
     const { euiTheme } = useEuiTheme();
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.copyExportQuery.description"
-              defaultMessage="Log in to your Splunk admin account, go to the {app}, download the following lookups individually and upload them below. You can also omit lookups that are empty or not needed, and they will be ignored in the translation."
-              values={{ app: <b>{i18n.LOOKUPS_SPLUNK_APP}</b> }}
-            />
+            {migrationSource === MigrationSource.QRADAR ? (
+              i18n.REFERENCE_SETS_QRADAR_APP
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.copyExportQuery.splunk.description"
+                defaultMessage="Log in to your Splunk admin account, go to the {app}, download the following lookups individually and upload them below. You can also omit lookups that are empty or not needed, and they will be ignored in the translation."
+                values={{ app: <b>{i18n.LOOKUPS_SPLUNK_APP}</b> }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -82,6 +94,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                               lookupName={lookupName}
                               onCopied={onCopied}
                               copy={copy}
+                              migrationSource={migrationSource}
                             />
                           )}
                         </EuiCopy>
@@ -91,6 +104,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                           lookupName={lookupName}
                           omitLookup={omitLookup}
                           isDisabled={isOmitted}
+                          migrationSource={migrationSource}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -110,21 +124,41 @@ interface CopyLookupNameButtonProps {
   lookupName: string;
   onCopied: () => void;
   copy: () => void;
+  migrationSource: MigrationSource;
 }
+
+interface ConfigSetting {
+  tooltip: string;
+  label: string;
+}
+
+const CONFIGS: Record<MigrationSource, ConfigSetting> = {
+  [MigrationSource.SPLUNK]: {
+    tooltip: i18n.COPY_LOOKUP_NAME_TOOLTIP,
+    label: i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP,
+  },
+  [MigrationSource.QRADAR]: {
+    tooltip: i18n.COPY_REFERENCE_SET_NAME_TOOLTIP,
+    label: i18n.CLEAR_EMPTY_REFERENCE_SET_TOOLTIP,
+  },
+};
 const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
-  ({ lookupName, onCopied, copy }) => {
+  ({ lookupName, onCopied, copy, migrationSource }) => {
     const onClick = useCallback(() => {
       copy();
       onCopied();
     }, [copy, onCopied]);
+
+    const testId =
+      migrationSource === MigrationSource.QRADAR ? 'referenceSetNameCopy' : 'lookupNameCopy';
     return (
-      <EuiToolTip content={i18n.COPY_LOOKUP_NAME_TOOLTIP}>
+      <EuiToolTip content={CONFIGS[migrationSource].tooltip} disableScreenReaderOutput>
         <EuiButtonIcon
           onClick={onClick}
           iconType="copy"
           color="text"
-          aria-label={`${i18n.COPY_LOOKUP_NAME_TOOLTIP} ${lookupName}`}
-          data-test-subj="lookupNameCopy"
+          aria-label={`${CONFIGS[migrationSource].tooltip} ${lookupName}`}
+          data-test-subj={testId}
         />
       </EuiToolTip>
     );
@@ -136,14 +170,17 @@ interface OmitLookupButtonProps {
   lookupName: string;
   omitLookup: (lookupName: string) => void;
   isDisabled: boolean;
+  migrationSource: MigrationSource;
 }
 const OmitLookupButton = React.memo<OmitLookupButtonProps>(
-  ({ lookupName, omitLookup, isDisabled: isDisabledDefault }) => {
+  ({ lookupName, omitLookup, isDisabled: isDisabledDefault, migrationSource }) => {
     const [isDisabled, setIsDisabled] = useState(isDisabledDefault);
     const onClick = useCallback(() => {
       setIsDisabled(true);
       omitLookup(lookupName);
     }, [omitLookup, lookupName]);
+    const testId =
+      migrationSource === MigrationSource.QRADAR ? 'referenceSetNameClear' : 'lookupNameClear';
 
     const button = useMemo(
       () => (
@@ -151,17 +188,17 @@ const OmitLookupButton = React.memo<OmitLookupButtonProps>(
           onClick={onClick}
           iconType="cross"
           color="text"
-          aria-label={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}
-          data-test-subj="lookupNameClear"
+          aria-label={CONFIGS[migrationSource].label}
+          data-test-subj={testId}
           isDisabled={isDisabled}
         />
       ),
-      [onClick, isDisabled]
+      [onClick, migrationSource, testId, isDisabled]
     );
     if (isDisabled) {
       return button;
     }
-    return <EuiToolTip content={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}>{button}</EuiToolTip>;
+    return <EuiToolTip content={CONFIGS[migrationSource].label}>{button}</EuiToolTip>;
   }
 );
 OmitLookupButton.displayName = 'OmitLookupButton';

@@ -19,7 +19,7 @@
     ],
     "requiredPlugins": [
       "serverless",
-      "onechat",
+      "agentBuilder",
       "workflowsManagement",
       "dataConnectors"
     ],

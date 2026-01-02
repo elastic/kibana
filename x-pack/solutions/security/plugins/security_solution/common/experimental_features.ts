@@ -68,7 +68,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enable privmon modifier in risk scoring calculation
    */
-  enableRiskScorePrivmonModifier: false,
+  enableRiskScorePrivmonModifier: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -78,7 +78,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
-  entityDetailsHighlightsEnabled: false,
+  entityDetailsHighlightsEnabled: true,
 
   /**
    * Enables the experimental Threat Hunting home experience.

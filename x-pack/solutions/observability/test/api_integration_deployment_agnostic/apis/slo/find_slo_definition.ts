@@ -16,6 +16,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const sloApi = getService('sloApi');
   const logger = getService('log');
+  const retry = getService('retry');
   const samlAuth = getService('samlAuth');
   const dataViewApi = getService('dataViewApi');
 
@@ -25,9 +26,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
 
   describe('Find SLOs by outdated status and tags', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/246127
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
@@ -131,27 +129,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const createResponse = await sloApi.create(slo, adminRoleAuthc);
 
-      const definitions = await sloApi.findDefinitions(adminRoleAuthc, {
-        includeHealth: 'true',
+      // Wait for transforms & health to become available — transforms run asynchronously
+      await retry.tryForTime(180 * 1000, async () => {
+        const definitions = await sloApi.findDefinitions(adminRoleAuthc, {
+          includeHealth: 'true',
+        });
+
+        expect(definitions.total).to.be.greaterThan(0);
+
+        const createdSlo = definitions.results.find((def) => def.id === createResponse.id);
+        expect(createdSlo).to.not.be(undefined);
+        expect(createdSlo?.health).to.not.be(undefined);
+
+        expect(createdSlo?.health?.isProblematic).eql(false);
+
+        expect(createdSlo?.health?.rollup.isProblematic).eql(false);
+        expect(createdSlo?.health?.rollup.missing).eql(false);
+        expect(createdSlo?.health?.rollup.status).eql('healthy');
+        expect(['started', 'indexing']).to.contain(createdSlo?.health?.rollup.state);
+
+        expect(createdSlo?.health?.summary.isProblematic).eql(false);
+        expect(createdSlo?.health?.summary.missing).eql(false);
+        expect(createdSlo?.health?.summary.status).eql('healthy');
+        expect(['started', 'indexing']).to.contain(createdSlo?.health?.summary.state);
       });
-
-      expect(definitions.total).to.be.greaterThan(0);
-
-      const createdSlo = definitions.results.find((def) => def.id === createResponse.id);
-      expect(createdSlo).to.not.be(undefined);
-      expect(createdSlo?.health).to.not.be(undefined);
-
-      expect(createdSlo?.health?.isProblematic).eql(false);
-
-      expect(createdSlo?.health?.rollup.isProblematic).eql(false);
-      expect(createdSlo?.health?.rollup.missing).eql(false);
-      expect(createdSlo?.health?.rollup.status).eql('healthy');
-      expect(['started', 'indexing']).to.contain(createdSlo?.health?.rollup.state);
-
-      expect(createdSlo?.health?.summary.isProblematic).eql(false);
-      expect(createdSlo?.health?.summary.missing).eql(false);
-      expect(createdSlo?.health?.summary.status).eql('healthy');
-      expect(['started', 'indexing']).to.contain(createdSlo?.health?.summary.state);
     });
   });
 }
