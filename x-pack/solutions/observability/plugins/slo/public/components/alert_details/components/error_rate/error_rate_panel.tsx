@@ -20,16 +20,23 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_EVALUATION_VALUE, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
+import { ALERT_EVALUATION_VALUE, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { ErrorRateChart } from '../../../slo/error_rate_chart';
+import type { TimeRange } from '../../../slo/error_rate_chart/use_lens_definition';
 import type { BurnRateAlert } from '../../types';
 import { getActionGroupWindow } from '../../utils/alert';
 import { getLastDurationInUnit } from '../../utils/last_duration_i18n';
 import { getDataTimeRange } from '../../utils/time_range';
+
+function getAlertTimeRange(timeRange: { gte: string; lte?: string }): TimeRange {
+  return {
+    from: new Date(timeRange.gte),
+    to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
+  };
+}
 
 interface Props {
   alert: BurnRateAlert;
@@ -43,10 +50,8 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   } = useKibana();
   const dataTimeRange = getDataTimeRange(alert);
   const actionGroupWindow = getActionGroupWindow(alert);
-  const alertTimeRange = getPaddedAlertTimeRange(
-    alert.fields[ALERT_START]!,
-    alert.fields[ALERT_END]
-  );
+  // @ts-ignore
+  const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE]);
   const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
 
   if (isLoading) {
@@ -146,10 +151,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
             <ErrorRateChart
               slo={slo}
               dataTimeRange={dataTimeRange}
-              alertTimeRange={{
-                from: new Date(alertTimeRange.from),
-                to: new Date(alertTimeRange.to),
-              }}
+              alertTimeRange={alertTimeRange}
               threshold={actionGroupWindow!.burnRateThreshold}
               variant="danger"
             />
