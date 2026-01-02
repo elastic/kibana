@@ -90,7 +90,7 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
       });
       await createAlertTransitions(results, esClient);
     } catch (e) {
-      console.error(`Director failed: ${e.message}`);
+      console.error(`${new Date().toISOString()} Director failed: ${e.message}`);
     } finally {
       setTimeout(
         runDirectorForPendingAndRecoveringTransitions,
@@ -116,7 +116,7 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
       });
       await createAlertTransitions(results, esClient);
     } catch (e) {
-      console.error(`Director failed: ${e.message}`);
+      console.error(`${new Date().toISOString()} Director failed: ${e.message}`);
     } finally {
       setTimeout(
         runDirectorForActiveAndInactiveTransitions,
@@ -155,5 +155,5 @@ async function createAlertTransitions(
     index: ALERT_TRANSITIONS_INDEX,
     body: bulkRequest,
   });
-  console.log(`Indexed ${alertTransitions.length} transitions`);
+  console.log(`${new Date().toISOString()} Indexed ${alertTransitions.length} transitions`);
 }

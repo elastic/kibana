@@ -43,7 +43,7 @@ export function esqlRule({ esClient }: ESQLRuleOpts) {
       });
       await createAlertEvents(results, esClient);
     } catch (e) {
-      console.error(`Failed to execute esql rule: ${e.message}`);
+      console.error(`${new Date().toISOString()} Failed to execute esql rule: ${e.message}`);
     } finally {
       setTimeout(runEsqlRule, Math.max(RULE_INTERVAL - (Date.now() - start), 0));
     }
@@ -87,5 +87,5 @@ async function createAlertEvents(rows: Record<string, unknown>[], esClient: Elas
     index: ALERT_EVENTS_INDEX,
     body: bulkRequest,
   });
-  console.log(`Indexed ${alertEvents.length} alert events`);
+  console.log(`${new Date().toISOString()} Indexed ${alertEvents.length} alert events`);
 }

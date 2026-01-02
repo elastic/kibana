@@ -31,7 +31,7 @@ export async function startDataSimulator({ esClient }: StartDataSimulatorOpts) {
       },
     });
   } catch (e) {
-    console.error(`Failed to setup indices: ${e.message}`);
+    console.error(`${new Date().toISOString()} Failed to setup indices: ${e.message}`);
   }
 
   setInterval(async () => {
@@ -44,7 +44,7 @@ export async function startDataSimulator({ esClient }: StartDataSimulatorOpts) {
         }
       });
     } catch (e) {
-      console.error(`Failed to write simulator data: ${e.message}`);
+      console.error(`${new Date().toISOString()} Failed to write simulator data: ${e.message}`);
     }
   }, DATA_INTERVAL);
 }

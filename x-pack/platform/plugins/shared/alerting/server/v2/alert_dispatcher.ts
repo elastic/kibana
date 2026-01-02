@@ -49,7 +49,7 @@ export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
     try {
       await runAlertEventDispatcher({ esClient });
     } catch (e) {
-      console.error(`Dispatcher error: ${e.message}`);
+      console.error(`${new Date().toISOString()} Dispatcher error: ${e.message}`);
     } finally {
       setTimeout(runDispatcherOnEventData, Math.max(INTERVAL - (Date.now() - start), 0));
     }
@@ -61,7 +61,7 @@ export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
     try {
       await runAlertActionDispatcher({ esClient });
     } catch (e) {
-      console.error(`Dispatcher error: ${e.message}`);
+      console.error(`${new Date().toISOString()} Dispatcher error: ${e.message}`);
     } finally {
       setTimeout(runDispatcherOnActionData, Math.max(INTERVAL - (Date.now() - start), 0));
     }
@@ -105,7 +105,7 @@ async function dispatchAlertEvents(rows: Record<string, unknown>[], esClient: El
   for (const row of rows) {
     const ruleId = row['rule.id'] as string;
     const timestamp = row['@timestamp'] as string;
-    // console.log(`Dispatching: ${JSON.stringify(row)}`);
+    // console.log(`${new Date().toISOString()} Dispatching: ${JSON.stringify(row)}`);
     if (fireActions[ruleId] === undefined) {
       fireActions[ruleId] = [];
     }
@@ -132,7 +132,7 @@ async function dispatchAlertEvents(rows: Record<string, unknown>[], esClient: El
     index: ALERT_ACTIONS_INDEX,
     body: bulkRequest,
   });
-  console.log(`Dispatched ${rows.length} alert events`);
+  console.log(`${new Date().toISOString()} Dispatched ${rows.length} alert events`);
 }
 
 async function dispatchAlertActions(
@@ -144,7 +144,7 @@ async function dispatchAlertActions(
   for (const row of rows) {
     const ruleId = row['rule.id'] as string;
     const timestamp = row['@timestamp'] as string;
-    // console.log(`Dispatching: ${JSON.stringify(row)}`);
+    // console.log(`${new Date().toISOString()} Dispatching: ${JSON.stringify(row)}`);
     if (fireActions[ruleId] === undefined) {
       fireActions[ruleId] = [];
     }
@@ -171,5 +171,5 @@ async function dispatchAlertActions(
     index: ALERT_ACTIONS_INDEX,
     body: bulkRequest,
   });
-  console.log(`Dispatched ${rows.length} alert actions`);
+  console.log(`${new Date().toISOString()} Dispatched ${rows.length} alert actions`);
 }
