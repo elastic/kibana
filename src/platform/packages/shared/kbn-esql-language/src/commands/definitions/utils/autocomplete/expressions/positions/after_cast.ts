@@ -35,7 +35,7 @@ export async function suggestAfterCast(ctx: ExpressionContext): Promise<ISuggest
   let inlineCastNode: ESQLInlineCast | undefined;
   Walker.walk(ctx.expressionRoot, {
     visitInlineCast(node) {
-      if (within(ctx.cursorPosition, node)) {
+      if (within(ctx.cursorPosition - 1, node)) {
         inlineCastNode = node;
       }
     },

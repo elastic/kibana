@@ -47,6 +47,10 @@ export function getPosition(
     return 'after_not';
   }
 
+  if (INLINE_CAST_PATTERN.test(innerText)) {
+    return 'after_cast';
+  }
+
   if (!expressionRoot) {
     return 'empty_expression';
   }
@@ -91,10 +95,6 @@ export function getPosition(
 
   if (isLiteral(expressionRoot)) {
     return 'after_complete';
-  }
-
-  if (INLINE_CAST_PATTERN.test(innerText)) {
-    return 'after_cast';
   }
 
   return 'empty_expression';
