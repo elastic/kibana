@@ -9,6 +9,7 @@ exports[`IndicesList should render normally 1`] = `
     <tbody>
       <tr
         class="euiTableRow emotion-euiTableRow-desktop"
+        data-test-subj="indicesListTableRow"
       >
         <td
           class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
@@ -37,6 +38,7 @@ exports[`IndicesList should render normally 1`] = `
       </tr>
       <tr
         class="euiTableRow emotion-euiTableRow-desktop"
+        data-test-subj="indicesListTableRow"
       >
         <td
           class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"

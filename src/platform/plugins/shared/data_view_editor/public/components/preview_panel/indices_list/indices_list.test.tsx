@@ -63,16 +63,22 @@ describe('IndicesList', () => {
 
   it('should change per page', async () => {
     const user = userEvent.setup();
-    renderWithI18n(<IndicesList {...commonProps} query="" />);
+    const moreIndices = [...indices, ...indices, ...indices, ...indices, ...indices, ...indices];
+
+    renderWithI18n(<IndicesList {...commonProps} indices={moreIndices} query="" />);
 
     const rowsPerPageButton = screen.getByText('Rows per page: 10');
+    let rows = screen.getAllByTestId('indicesListTableRow');
+    expect(rows).toHaveLength(10);
     await user.click(rowsPerPageButton);
 
     const listMenu = screen.getByTestId('perPageIndicesListMenu');
     const option1 = within(listMenu).getByText('5');
     await user.click(option1);
 
+    rows = screen.getAllByTestId('indicesListTableRow');
     expect(screen.getByText('Rows per page: 5')).toBeVisible();
+    expect(rows).toHaveLength(5);
   });
 
   it('should highlight the query in the matches', () => {
