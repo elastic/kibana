@@ -1043,6 +1043,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false // default force value
       );
@@ -1072,6 +1073,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         true
       );
@@ -1101,6 +1103,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         'true' // Handler will pass the string value
       );
@@ -1125,6 +1128,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false
       );
@@ -1171,6 +1175,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         undefined,
         false
       );
@@ -1194,6 +1199,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false // should default to false
       );
@@ -1219,6 +1225,7 @@ describe('Cloud Connector API', () => {
 
       expect(mockCloudConnectorService.delete).toHaveBeenCalledWith(
         expect.any(Object), // internalSoClient
+        expect.any(Object), // esClient
         'connector-123',
         false
       );
