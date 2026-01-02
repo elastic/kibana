@@ -57,7 +57,7 @@ describe('cleanFiltersForSerialize', () => {
       {
         meta: {
           params: [
-            { query: { a: 'a' }, meta: { value: undefined, key: undefined, alias: undefined } },
+            { query: { a: 'a' }, meta: { value: 'value1', key: undefined, alias: undefined } },
             { query: { b: 'b' }, meta: { value: undefined, key: undefined, alias: undefined } },
           ],
         },
