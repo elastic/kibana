@@ -115,7 +115,7 @@ import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 import { createIndices } from './v2/create_indices';
-import { esqlRule } from './v2/esql_rule';
+import { startEsqlRules } from './v2/esql_rules';
 import { alertDirector } from './v2/alert_director';
 import { alertDispatcher } from './v2/alert_dispatcher';
 import { startDataSimulator } from './v2/data_simulator';
@@ -754,7 +754,7 @@ export class AlertingPlugin {
     ); // it shouldn't reject, but just in case
 
     setTimeout(() => {
-      esqlRule({ esClient: core.elasticsearch.client.asInternalUser });
+      startEsqlRules({ esClient: core.elasticsearch.client.asInternalUser });
       alertDirector({ esClient: core.elasticsearch.client.asInternalUser });
       alertDispatcher({ esClient: core.elasticsearch.client.asInternalUser });
       startDataSimulator({ esClient: core.elasticsearch.client.asInternalUser });

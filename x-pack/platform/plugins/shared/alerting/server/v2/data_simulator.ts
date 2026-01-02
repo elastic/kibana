@@ -8,61 +8,86 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { v4 } from 'uuid';
 
-export interface StartDataSimulatorOpts {
+export interface DataSimulatorOpts {
   esClient: ElasticsearchClient;
 }
 
 export const INTERVAL = 10000;
-export const NUM_HOSTS = 1;
-export const DATA_SIMULATOR_INDEX = '.kibana_simulator_logs';
+export const NUM_HOSTS_LOGS_PER_INTERVAL = 1;
+export const NUM_HOSTS_METRICS_PER_INTERVAL = 1;
+export const DATA_SIMULATOR_INDEX = '.kibana_simulator_data';
 
-export async function startDataSimulator({ esClient }: StartDataSimulatorOpts) {
+export async function startDataSimulator({ esClient }: DataSimulatorOpts) {
   try {
-    await esClient.indices.delete({ index: DATA_SIMULATOR_INDEX }, { ignore: [404] });
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await esClient.indices.create({
-      index: DATA_SIMULATOR_INDEX,
-      mappings: {
-        dynamic: false,
-        properties: {
-          '@timestamp': { type: 'date' },
-          message: { type: 'keyword' },
-          host: {
-            properties: {
-              name: { type: 'keyword' },
-            },
-          },
-        },
-      },
-    });
+    await createIndex({ esClient });
   } catch (e) {
-    console.error(`${new Date().toISOString()} Failed to setup indices: ${e.message}`);
+    console.error(`${new Date().toISOString()} Failed to setup data simulator index: ${e.message}`);
   }
 
   setInterval(async () => {
     try {
-      const rows = [];
-      for (let i = 0; i < NUM_HOSTS; i++) {
-        rows.push({
-          '@timestamp': new Date().toISOString(),
-          message: `Simulated message ${v4()}`,
-          host: {
-            name: `host-${i + 1}`,
-          },
-        });
-      }
-      const bulkRequest = [];
-      for (const row of rows) {
-        bulkRequest.push({ create: {} });
-        bulkRequest.push(row);
-      }
-      await esClient.bulk({
-        index: DATA_SIMULATOR_INDEX,
-        body: bulkRequest,
-      });
-      console.log(`${new Date().toISOString()} Wrote ${NUM_HOSTS} source documents`);
+      await indexSimulatedData({ esClient });
     } catch (e) {
       console.error(`${new Date().toISOString()} Failed to write simulator data: ${e.message}`);
     }
   }, INTERVAL);
+}
+
+async function createIndex({ esClient }: DataSimulatorOpts) {
+  await esClient.indices.delete({ index: DATA_SIMULATOR_INDEX }, { ignore: [404] });
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  await esClient.indices.create({
+    index: DATA_SIMULATOR_INDEX,
+    mappings: {
+      dynamic: false,
+      properties: {
+        '@timestamp': { type: 'date' },
+        message: { type: 'keyword' },
+        host: {
+          properties: {
+            name: { type: 'keyword' },
+            cpu: {
+              properties: {
+                usage: { type: 'double' },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+async function indexSimulatedData({ esClient }: DataSimulatorOpts) {
+  const rows = [];
+  for (let i = 0; i < NUM_HOSTS_LOGS_PER_INTERVAL; i++) {
+    rows.push({
+      '@timestamp': new Date().toISOString(),
+      message: `Some message ${v4()}`,
+      host: {
+        name: `host-${i + 1}`,
+      },
+    });
+  }
+  for (let i = 0; i < NUM_HOSTS_METRICS_PER_INTERVAL; i++) {
+    rows.push({
+      '@timestamp': new Date().toISOString(),
+      host: {
+        name: `host-${i + 1}`,
+        cpu: {
+          usage: Math.random(),
+        },
+      },
+    });
+  }
+  const bulkRequest = [];
+  for (const row of rows) {
+    bulkRequest.push({ create: {} });
+    bulkRequest.push(row);
+  }
+  await esClient.bulk({
+    index: DATA_SIMULATOR_INDEX,
+    body: bulkRequest,
+  });
+  console.log(`${new Date().toISOString()} Wrote ${rows.length} source documents`);
 }

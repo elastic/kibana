@@ -14,21 +14,41 @@ export interface ESQLRuleOpts {
   esClient: ElasticsearchClient;
 }
 
-export const RULE_UUID = '599df5ec-4821-4565-8ae7-64afc13561bd';
-export const RULE_INTERVAL = 1000;
-export const ESQL_QUERY = `FROM ${DATA_SIMULATOR_INDEX} METADATA _id, _index`;
-export const RULE_LOOKBACK = '5m';
+export interface Rule {
+  id: string;
+  interval: number;
+  query: string;
+  lookbackWindow: string;
+  groupingFields: string[];
+}
 
-export function esqlRule({ esClient }: ESQLRuleOpts) {
-  async function runEsqlRule() {
+export const rules: Rule[] = [
+  {
+    id: '599df5ec-4821-4565-8ae7-64afc13561bd',
+    interval: 1000,
+    query: `FROM ${DATA_SIMULATOR_INDEX} METADATA _id, _index | WHERE message IS NOT NULL`,
+    lookbackWindow: '5m',
+    groupingFields: ['_id', '_index'],
+  },
+  {
+    id: 'ef9f2d76-e045-4c10-b133-8c3bd0e894d2',
+    interval: 1000,
+    query: `FROM ${DATA_SIMULATOR_INDEX} | WHERE message IS NULL | STATS avg_cpu = AVG(host.cpu.usage) BY host.name | WHERE avg_cpu > 0.8`,
+    lookbackWindow: '5m',
+    groupingFields: ['host.name'],
+  },
+];
+
+export function startEsqlRules({ esClient }: ESQLRuleOpts) {
+  async function runEsqlRule(rule: Rule) {
     const start = Date.now();
     try {
       const result = await esClient.esql.query({
-        query: ESQL_QUERY,
+        query: rule.query,
         filter: {
           range: {
             '@timestamp': {
-              gte: `now-${RULE_LOOKBACK}`,
+              gte: `now-${rule.lookbackWindow}`,
             },
           },
         },
@@ -41,40 +61,40 @@ export function esqlRule({ esClient }: ESQLRuleOpts) {
         }
         return obj;
       });
-      await createAlertEvents(results, esClient);
+      await createAlertEvents(rule, results, esClient);
     } catch (e) {
       console.error(`${new Date().toISOString()} Failed to execute esql rule: ${e.message}`);
     } finally {
-      setTimeout(runEsqlRule, Math.max(RULE_INTERVAL - (Date.now() - start), 0));
+      setTimeout(() => runEsqlRule(rule), Math.max(rule.interval - (Date.now() - start), 0));
     }
   }
-  runEsqlRule();
+  for (const rule of rules) {
+    runEsqlRule(rule);
+  }
 }
 
-async function createAlertEvents(rows: Record<string, unknown>[], esClient: ElasticsearchClient) {
+async function createAlertEvents(
+  rule: Rule,
+  rows: Record<string, unknown>[],
+  esClient: ElasticsearchClient
+) {
   if (rows.length === 0) return;
   const now = new Date();
   const alertEvents = rows.map((row) => {
     return {
       '@timestamp': now,
       rule: {
-        id: RULE_UUID,
+        id: rule.id,
         tags: [],
       },
-      grouping: [
-        {
-          key: '_id',
-          value: row._id,
-        },
-        {
-          key: '_index',
-          value: row._index,
-        },
-      ],
+      grouping: rule.groupingFields.map((field) => ({
+        key: field,
+        value: row[field],
+      })),
       data: row,
       status: 'breach',
       // Can't have timestamp in here..
-      alert_series_id: `${row._id}:${row._index}`,
+      alert_series_id: rule.groupingFields.map((field) => row[field]).join(':'),
       source: 'rule',
     };
   });
