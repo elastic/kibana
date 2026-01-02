@@ -1062,7 +1062,7 @@
         "signature": [
           "(client: ",
           "ElasticsearchClient",
-          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"content\" | \"all\" | \"access_control\", syncStatus?: ",
+          ", connectorId?: string | undefined, from?: number, size?: number, syncJobType?: \"all\" | \"content\" | \"access_control\", syncStatus?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -1160,7 +1160,7 @@
             "label": "syncJobType",
             "description": [],
             "signature": [
-              "\"content\" | \"all\" | \"access_control\""
+              "\"all\" | \"content\" | \"access_control\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/fetch_sync_jobs.ts",
             "deprecated": false,
@@ -6926,13 +6926,21 @@
             "section": "def-common.ConnectorFeatures",
             "text": "ConnectorFeatures"
           },
-          "; description: string | null; status: ",
+          "; status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
             "docId": "kibKbnSearchConnectorsPluginApi",
             "section": "def-common.ConnectorStatus",
             "text": "ConnectorStatus"
+          },
+          "; description: string | null; configuration: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorConfiguration",
+            "text": "ConnectorConfiguration"
           },
           "; language: string | null; pipeline?: ",
           {
@@ -6942,15 +6950,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; deleted: boolean | null; index_name: string | null; configuration: ",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorConfiguration",
-            "text": "ConnectorConfiguration"
-          },
-          "; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          " | null | undefined; deleted: boolean | null; index_name: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
