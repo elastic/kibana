@@ -27,15 +27,10 @@ const ALL_OPTION: EuiComboBoxOptionOption<string> = {
   value: ALL_VALUE,
 };
 
-export function SloInstanceSelector({
-  sloId,
-  initialInstanceId,
-  onSelected,
-  hasError,
-}: Props) {
-  const [selectedOptions, setSelectedOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
+export function SloInstanceSelector({ sloId, onSelected, hasError }: Props) {
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    []
+  );
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchAfter, setSearchAfter] = useState<string | undefined>();
   const [isSearching, setIsSearching] = useState(false);
@@ -83,29 +78,7 @@ export function SloInstanceSelector({
     if (selectedOptions.length > 0) {
       return;
     }
-
-    if (initialInstanceId === undefined || initialInstanceId === ALL_VALUE) {
-      setSelectedOptions([ALL_OPTION]);
-      onSelected(ALL_VALUE);
-    } else {
-      const initialInstance = instancesData.results.find(
-        (instance) => instance.instanceId === initialInstanceId
-      );
-      if (initialInstance) {
-        setSelectedOptions([
-          {
-            label: initialInstance.instanceId,
-            value: initialInstance.instanceId,
-          },
-        ]);
-        onSelected(initialInstance.instanceId);
-      } else {
-        // If the initial instance is not found, default to ALL_VALUE
-        setSelectedOptions([ALL_OPTION]);
-        onSelected(ALL_VALUE);
-      }
-    }
-  }, [initialInstanceId, instancesData, onSelected, selectedOptions.length, isSearching]);
+  }, [instancesData, onSelected, selectedOptions.length, isSearching]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     // User explicitly selected an option, stop searching mode
@@ -134,19 +107,16 @@ export function SloInstanceSelector({
     }
   };
 
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      // When user starts typing, clear selection to allow free searching
-      if (value && selectedOptionsRef.current.length > 0) {
-        setSelectedOptions([]);
-        onSelectedRef.current(undefined);
-      }
-      setIsSearching(!!value);
-      setSearchValue(value);
-      setSearchAfter(undefined); // Reset pagination when search changes
-    },
-    []
-  );
+  const handleSearchChange = useCallback((value: string) => {
+    // When user starts typing, clear selection to allow free searching
+    if (value && selectedOptionsRef.current.length > 0) {
+      setSelectedOptions([]);
+      onSelectedRef.current(undefined);
+    }
+    setIsSearching(!!value);
+    setSearchValue(value);
+    setSearchAfter(undefined); // Reset pagination when search changes
+  }, []);
 
   const onSearchChange = useMemo(
     () => debounce(handleSearchChange, 300),
@@ -166,9 +136,12 @@ export function SloInstanceSelector({
         aria-label={i18n.translate('xpack.slo.sloEmbeddable.config.sloInstanceSelector.ariaLabel', {
           defaultMessage: 'SLO Instance',
         })}
-        placeholder={i18n.translate('xpack.slo.sloEmbeddable.config.sloInstanceSelector.placeholder', {
-          defaultMessage: 'Select an instance or choose all',
-        })}
+        placeholder={i18n.translate(
+          'xpack.slo.sloEmbeddable.config.sloInstanceSelector.placeholder',
+          {
+            defaultMessage: 'Select an instance or choose all',
+          }
+        )}
         data-test-subj="sloInstanceSelector"
         options={options}
         selectedOptions={selectedOptions}
@@ -184,4 +157,3 @@ export function SloInstanceSelector({
     </EuiFormRow>
   );
 }
-

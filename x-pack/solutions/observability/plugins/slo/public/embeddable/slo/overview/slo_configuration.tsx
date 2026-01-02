@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
-import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { SloDefinitionSelector } from './slo_definition_selector';
 import { SloInstanceSelector } from './slo_instance_selector';
 
@@ -56,57 +55,13 @@ interface GroupConfigurationProps {
   initialInput?: GroupSloCustomInput;
 }
 
-function SingleSloConfiguration({
-  overviewMode,
-  onCreate,
-  onCancel,
-  initialInput,
-}: SingleConfigurationProps & { initialInput?: SingleSloCustomInput }) {
+function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
   const [selectedSloDefinition, setSelectedSloDefinition] = useState<
     SLODefinitionResponse | undefined
   >();
-  const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(
-    initialInput?.sloInstanceId ?? ALL_VALUE
-  );
-  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(
-    initialInput?.showAllGroupByInstances ?? false
-  );
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(ALL_VALUE);
+  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
   const [hasError, setHasError] = useState(false);
-
-  // For backward compatibility: fetch SLO details if we have an initial sloId
-  const { data: initialSloData } = useFetchSloDetails({
-    sloId: initialInput?.sloId,
-    instanceId: initialInput?.sloInstanceId,
-    remoteName: initialInput?.remoteName,
-    shouldRefetch: false,
-  });
-
-  // Initialize selected SLO definition from initial data (backward compatibility)
-  useEffect(() => {
-    if (initialSloData && !selectedSloDefinition) {
-      // Convert SLOWithSummaryResponse to SLODefinitionResponse format
-      // The SLO details response contains the definition fields we need
-      const definition: SLODefinitionResponse = {
-        id: initialSloData.id,
-        name: initialSloData.name,
-        description: initialSloData.description,
-        indicator: initialSloData.indicator,
-        timeWindow: initialSloData.timeWindow,
-        budgetingMethod: initialSloData.budgetingMethod,
-        objective: initialSloData.objective,
-        settings: initialSloData.settings,
-        revision: initialSloData.revision,
-        enabled: initialSloData.enabled,
-        tags: initialSloData.tags,
-        createdAt: initialSloData.createdAt,
-        updatedAt: initialSloData.updatedAt,
-        groupBy: initialSloData.groupBy,
-        version: initialSloData.version,
-        ...(initialSloData.remote && { remote: initialSloData.remote }),
-      };
-      setSelectedSloDefinition(definition);
-    }
-  }, [initialSloData, selectedSloDefinition]);
 
   // Check if the selected SLO has groupBy (not ALL_VALUE and has values)
   const hasGroupBy = useMemo(() => {
@@ -150,7 +105,6 @@ function SingleSloConfiguration({
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem data-test-subj="singleSloDefinitionSelector" grow>
                 <SloDefinitionSelector
-                  initialSloId={initialInput?.sloId}
                   hasError={hasError && !selectedSloDefinition}
                   onSelected={(slo) => {
                     setSelectedSloDefinition(slo);
@@ -332,7 +286,6 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
           overviewMode={overviewMode}
           onCreate={onCreate}
           onCancel={onCancel}
-          initialInput={initialInput as SingleSloCustomInput}
         />
       )}
     </EuiFlyout>
