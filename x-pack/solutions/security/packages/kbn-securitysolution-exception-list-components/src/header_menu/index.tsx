@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import * as i18n from '../translations';
 
 export interface Action {
   key: string;
@@ -58,7 +59,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   iconSide = 'left',
   anchorPosition = 'downCenter',
   panelPaddingSize = 's',
-  ariaLabel = 'Actions',
+  ariaLabel = i18n.ACTIONS_ARIA_LABEL,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

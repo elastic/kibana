@@ -35,7 +35,7 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
     <EuiButtonIcon
       iconType="question"
       onClick={togglePopover}
-      aria-label="Version comparison help"
+      aria-label={i18n.VERSION_COMPARISON_HELP_ARIA_LABEL}
     />
   );
 

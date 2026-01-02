@@ -80,7 +80,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             iconType="arrowDown"
             iconSide="right"
             panelPaddingSize="none"
-            ariaLabel="Linked rules"
+            ariaLabel={i18n.LINKED_RULES_ARIA_LABEL}
           />
         ) : (
           <EuiTextColor data-test-subj="noLinkedRules" css={noLinkedRulesCss} color="subdued">
@@ -136,7 +136,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
           ]}
           disableActions={isReadonly}
           anchorPosition="downCenter"
-          ariaLabel="Exception list actions"
+          ariaLabel={i18n.EXCEPTION_LIST_ACTIONS_ARIA_LABEL}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

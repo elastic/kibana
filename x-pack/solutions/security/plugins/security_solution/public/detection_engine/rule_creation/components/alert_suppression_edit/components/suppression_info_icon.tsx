@@ -10,6 +10,7 @@ import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL } from './translations';
 
 const POPOVER_WIDTH = 320;
 
@@ -24,7 +25,7 @@ export function SuppressionInfoIcon(): JSX.Element {
     <EuiButtonIcon
       iconType="question"
       onClick={togglePopover}
-      aria-label="Alert suppression missing fields help"
+      aria-label={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
     />
   );
 

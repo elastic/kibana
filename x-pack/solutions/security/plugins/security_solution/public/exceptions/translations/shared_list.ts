@@ -401,3 +401,9 @@ export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_EXPORT_BUTTON = i18n.translate(
     defaultMessage: 'Export',
   }
 );
+
+export const EXCEPTION_LIST_CARD_ACTIONS_ARIA_LABEL = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.listCardActionsAriaLabel', {
+    values: { listName },
+    defaultMessage: 'Actions for {listName}',
+  });
