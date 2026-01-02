@@ -31,6 +31,7 @@ const TITLE_CASE_GLOSSARY = [
   'Anomaly Detection Jobs',
   'Data Frame Analytics Jobs',
   'GenAI Settings',
+  'AI Assistant',
   'AI Assistants',
   'Role Mappings',
   'Cross-Cluster Replication',
@@ -48,6 +49,9 @@ const TITLE_CASE_GLOSSARY = [
   'Ingest and Integrations',
   'API keys',
   'Detection rules (SIEM)',
+  'SLOs',
+  'TLS certificates',
+  'Cloud Connect',
 ] as const;
 
 const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLowerCase(), entry]));
