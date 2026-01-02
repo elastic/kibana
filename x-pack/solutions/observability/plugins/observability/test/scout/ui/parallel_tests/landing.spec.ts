@@ -127,7 +127,12 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     logsSynthtraceEsClient,
   }) => {
     // Generate Fleet Agent status change log data which should be ignored
-    await generateLogsData(logsSynthtraceEsClient, { dataset: 'elastic_agent.status_change' });
+    await generateLogsData({
+      from: new Date(TEST_START_DATE).getTime(),
+      to: new Date(TEST_END_DATE).getTime(),
+      client: logsSynthtraceEsClient,
+      opts: { dataset: 'elastic_agent.status_change' },
+    });
 
     // Navigate to observability landing page with no data
     await pageObjects.observabilityNavigation.gotoLanding();
