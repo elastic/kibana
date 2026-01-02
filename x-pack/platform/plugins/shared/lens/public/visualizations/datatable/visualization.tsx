@@ -127,6 +127,7 @@ export const getDatatableVisualization = ({
       columns: [],
       layerId: addNewLayer(),
       layerType: LayerTypes.DATA,
+      showRowNumbers: true,
     };
   },
 
@@ -262,7 +263,9 @@ export const getDatatableVisualization = ({
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: forceSuggestion ? 1 : (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
         state: {
-          ...(state || {}),
+          ...(state || {
+            showRowNumbers: true,
+          }),
           layerId: table.layerId,
           layerType: LayerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
