@@ -118,11 +118,11 @@ export async function executeNerRule({
             }
           )
         ).catch((error) => {
-          // The model was not found, probably not installed.
+          // The model was not found, probably not downloaded.
           if (isNotFoundError(error)) {
             throw new Error(
               `The NER model '${rule.modelId}' was not found. ` +
-                `Please install and deploy the model before enabling anonymization. ` +
+                `Please download and deploy the model before enabling anonymization. ` +
                 `For instructions, see: ${NER_DOCS_URL}`,
               { cause: error }
             );
@@ -132,8 +132,7 @@ export async function executeNerRule({
           if (isModelNotDeployedError(error)) {
             throw new Error(
               `The NER model '${rule.modelId}' is not deployed. ` +
-                `Please deploy the model before enabling anonymization. ` +
-                `For instructions, see: ${NER_DOCS_URL}`,
+                `Please deploy the model under Machine Learning > Trained Models before enabling anonymization`,
               { cause: error }
             );
           }
