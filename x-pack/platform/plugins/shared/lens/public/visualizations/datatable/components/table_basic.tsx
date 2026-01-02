@@ -529,6 +529,26 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       defaultMessage: 'Data table visualization',
     });
 
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+    if (!props.args.showRowNumbers) {
+      return [];
+    }
+    return [
+      {
+        id: 'rowNumber',
+        headerCellRender: () => null,
+        rowCellRender: function RowCellRender({ rowIndex }) {
+          return (
+            <span>
+              {(pagination?.pageIndex ?? 0) * (pagination?.pageSize ?? 0) + rowIndex + 1}
+            </span>
+          );
+        },
+        width: 50,
+      },
+    ];
+  }, [props.args.showRowNumbers, pagination]);
+
   return (
     <div
       css={datatableContainerStyles}
@@ -559,6 +579,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           inMemory={{ level: 'sorting' }}
           columns={columns}
           columnVisibility={columnVisibility}
+          leadingControlColumns={leadingControlColumns}
           trailingControlColumns={trailingControlColumns}
           rowCount={firstLocalTable.rows.length}
           renderCellValue={renderCellValue}

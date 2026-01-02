@@ -656,6 +656,7 @@ export const getDatatableVisualization = ({
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
       density: state.density ?? LENS_DATAGRID_DENSITY.NORMAL,
+      showRowNumbers: state.showRowNumbers,
     }).toAst();
 
     return {
