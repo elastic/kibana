@@ -185,8 +185,8 @@ describe('Pie/Donut Schema', () => {
                 type: 'dynamic',
                 range: 'absolute',
                 steps: [
-                  { type: 'from', from: 0, color: 'red' },
-                  { type: 'to', to: 100, color: 'blue' },
+                  { lt: 0, color: 'red' },
+                  { gte: 100, color: 'blue' },
                 ],
               },
             },
@@ -759,8 +759,8 @@ describe('Pie/Donut Schema', () => {
                 type: 'dynamic',
                 range: 'absolute',
                 steps: [
-                  { type: 'from', from: 0, color: 'red' },
-                  { type: 'to', to: 100, color: 'blue' },
+                  { lt: 0, color: 'red' },
+                  { gte: 100, color: 'blue' },
                 ],
               },
             },
