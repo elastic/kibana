@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse, SLODefinitionResponseWithRemote } from '@kbn/slo-schema';
 import { SloDefinitionSelector } from './slo_definition_selector';
 import { SloInstanceSelector } from './slo_instance_selector';
 
@@ -88,11 +88,16 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
     const finalShowAllGroupByInstances =
       selectedInstanceId === ALL_VALUE ? true : showAllGroupByInstances;
 
+    const remoteName: string | undefined =
+      'remote' in selectedSloDefinition
+        ? (selectedSloDefinition as SLODefinitionResponseWithRemote).remote?.remoteName
+        : undefined;
+
     onCreate({
       showAllGroupByInstances: finalShowAllGroupByInstances,
       sloId: selectedSloDefinition.id,
       sloInstanceId: selectedInstanceId ?? ALL_VALUE,
-      remoteName: selectedSloDefinition.remote?.remoteName,
+      remoteName,
       overviewMode,
     });
   };
