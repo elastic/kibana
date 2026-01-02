@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { convertTreeToList, TraceWaterfall } from '.';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
@@ -133,6 +133,10 @@ describe('convertTreeToList', () => {
 });
 
 describe('TraceWaterfall', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   const mockTraceItems: TraceItem[] = [
     {
       id: 'trace-1',
@@ -239,24 +243,34 @@ describe('TraceWaterfall', () => {
   });
 
   describe('Virtualization', () => {
-    it('uses delegated scroll pattern with autoHeight', () => {
+    it('uses delegated scroll pattern to prevent scroll issues', () => {
       renderTraceWaterfall({ showAccordion: false });
 
       const list = screen.getByRole('grid');
+
+      // These style assertions are critical to ensure the delegated scroll pattern works correctly.
+      // The List component must use autoHeight to allow WindowScroller to handle scrolling.
+      // Without these, the waterfall scroll will break.
       expect(list).toHaveStyle({ height: 'auto' });
       expect(list).toHaveStyle({ overflowY: 'hidden' });
     });
 
-    it('renders trace items with virtualization', () => {
+    it('renders the waterfall container with virtualized list', () => {
       renderTraceWaterfall({ showAccordion: false });
 
       expect(screen.getByTestId('waterfall')).toBeInTheDocument();
       expect(screen.getByRole('grid')).toBeInTheDocument();
-      expect(screen.getByText('Test Transaction')).toBeInTheDocument();
-      expect(screen.getByText('Test Span 1')).toBeInTheDocument();
     });
 
-    it('shows warning for empty trace items', () => {
+    it('renders trace items within the virtualized list', () => {
+      renderTraceWaterfall({ showAccordion: false });
+
+      expect(screen.getByText('Test Transaction')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 1')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 2')).toBeInTheDocument();
+    });
+
+    it('renders warning when trace items array is empty', () => {
       renderTraceWaterfall({ traceItems: [], showAccordion: false });
 
       expect(screen.getByTestId('traceWarning')).toBeInTheDocument();

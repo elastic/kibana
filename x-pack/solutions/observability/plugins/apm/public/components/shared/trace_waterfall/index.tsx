@@ -184,8 +184,6 @@ function TraceTree() {
 
   const listRef = useRef<List>(null);
 
-  // Cache for measuring row heights
-  // CellMeasurer automatically handles re-measurement when cell content changes
   const rowHeightCache = useRef(
     new CellMeasurerCache({
       fixedWidth: true,
