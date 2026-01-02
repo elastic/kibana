@@ -295,6 +295,11 @@ export class WorkflowsService {
         updated_at: now.toISOString(),
       };
 
+      // If deleted_at is provided, update it
+      if ('deleted_at' in workflow && workflow.deleted_at !== undefined) {
+        updatedData.deleted_at = workflow.deleted_at;
+      }
+
       // If yaml is being updated, validate and update definition
       let shouldUpdateScheduler = false;
 
@@ -1105,6 +1110,7 @@ export class WorkflowsService {
       valid: source.valid,
       createdAt: source.created_at,
       lastUpdatedAt: source.updated_at,
+      deletedAt: source.deleted_at,
     };
   }
 
