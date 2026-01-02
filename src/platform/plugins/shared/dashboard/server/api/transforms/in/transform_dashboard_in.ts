@@ -44,7 +44,7 @@ export const transformDashboardIn = (
       ...rest
     } = dashboardState;
 
-    if (incomingReferences) {
+    if (incomingReferences && incomingReferences.length) {
       throw new Error(`References are not supported.`);
     }
     const tagReferences = transformTagsIn(tags);
@@ -60,7 +60,7 @@ export const transformDashboardIn = (
           sections: undefined,
           references: [],
         };
-
+    console.log(panelsJSON, panelReferences);
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,
       query
