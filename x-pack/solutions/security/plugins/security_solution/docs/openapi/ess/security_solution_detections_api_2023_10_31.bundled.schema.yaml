@@ -11276,7 +11276,6 @@ tags:
       rule's API key:
 
 
-<<<<<<< HEAD
       | Security Solution API | API key behavior |
 
       |----------------------|------------------|
@@ -11332,84 +11331,18 @@ tags:
       | Upgrade Prebuilt Rules - type change (`POST
       /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Creates new key
       |
-=======
-      | Security Solution API | Creates New API Key |
-
-      |----------------------|---------------------|
-
-      | Create Rule (enabled) (`POST /api/detection_engine/rules`) | Yes |
-
-      | Create Rule (disabled) (`POST /api/detection_engine/rules`) | No |
-
-      | Update Rule (`PUT /api/detection_engine/rules`) | Yes (+ See notes for
-      Rule Enable) |
-
-      | Patch Rule (`PATCH /api/detection_engine/rules`) | Yes (+ See notes for
-      Rule Enable) |
-
-      | Delete Rule (`DELETE /api/detection_engine/rules`) | N/A (rule deleted)
-      |
-
-      | Bulk Enable (`POST /api/detection_engine/rules/_bulk_action`, action:
-      enable) | Yes if null (+ See notes for Rule Enable |
-
-      | Bulk Disable (`POST /api/detection_engine/rules/_bulk_action`, action:
-      disable) | No |
-
-      | Bulk Delete (`POST /api/detection_engine/rules/_bulk_action`, action:
-      delete) | N/A (rule deleted) |
-
-      | Bulk Duplicate (`POST /api/detection_engine/rules/_bulk_action`, action:
-      duplicate) | Yes (on create and update) |
-
-      | Bulk Edit (`POST /api/detection_engine/rules/_bulk_action`, action:
-      edit) | Conditional (See notes for Bulk Edit) |
-
-      | Bulk Export (`POST /api/detection_engine/rules/_bulk_action`, action:
-      export) | No |
-
-      | Bulk Run (`POST /api/detection_engine/rules/_bulk_action`, action: run)
-      | No |
-
-      | Import Rules - new (`POST /api/detection_engine/rules/_import`) | Yes |
-
-      | Import Rules - overwrite (`POST /api/detection_engine/rules/_import`) |
-      Yes (+ Conditional for enable) |
-
-      | Install Prebuilt Rules (`POST
-      /api/detection_engine/rules/prepackaged/_perform`) | Yes |
-
-      | Upgrade Prebuilt Rules - same type (`POST
-      /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Yes |
-
-      | Upgrade Prebuilt Rules - type change (`POST
-      /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Yes (for a new
-      rule) |
->>>>>>> ec9f128c14c32550c5025831616e7c8a32ca7972
 
 
       ### \* Notes
 
-<<<<<<< HEAD
       - **Exception list changes (9.2+)**: After version 9.2, editing only
       exception list parameters will not regenerate the API key.
-=======
-      - **Rule Enable**: Creates an API key only if the rule doesn't already
-      have one. This commonly happens for rules that are exported and
-      re-imported, as rules are exported with `enabled: false` and API key
-      values are stripped.
->>>>>>> ec9f128c14c32550c5025831616e7c8a32ca7972
 
       - **Enabling during update**: If an update, patch, or import operation
       also enables the rule (changes `enabled` from `false` to `true`), and no
       API key exists, a new key will be created.
 
-<<<<<<< HEAD
       - **Exported rules**: Rules are exported with `enabled: false` and API key
       values are stripped. When re-imported, the enable behavior applies.
-=======
-      - **Update/Patch**: After version 9.2, editing exception list parameters
-      will not invalidate the existing API key.
->>>>>>> ec9f128c14c32550c5025831616e7c8a32ca7972
     name: Security Detections API
     x-displayName: Security detections
