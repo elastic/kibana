@@ -33,7 +33,6 @@ export function SloInstanceSelector({ sloId, onSelected, hasError }: Props) {
   );
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchAfter, setSearchAfter] = useState<string | undefined>();
-  const [isSearching, setIsSearching] = useState(false);
   const selectedOptionsRef = useRef(selectedOptions);
   const onSelectedRef = useRef(onSelected);
 
@@ -63,27 +62,7 @@ export function SloInstanceSelector({ sloId, onSelected, hasError }: Props) {
     return [ALL_OPTION, ...instanceOptions];
   }, [instancesData]);
 
-  // Set initial selection
-  useEffect(() => {
-    if (instancesData?.results === undefined) {
-      return;
-    }
-
-    // Don't set initial selection if user is actively searching
-    if (isSearching) {
-      return;
-    }
-
-    // If we already have a selection, don't override it
-    if (selectedOptions.length > 0) {
-      return;
-    }
-  }, [instancesData, onSelected, selectedOptions.length, isSearching]);
-
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    // User explicitly selected an option, stop searching mode
-    setIsSearching(false);
-
     // Allow clearing selection to enable searching
     if (opts.length === 0) {
       setSelectedOptions([]);
@@ -113,7 +92,6 @@ export function SloInstanceSelector({ sloId, onSelected, hasError }: Props) {
       setSelectedOptions([]);
       onSelectedRef.current(undefined);
     }
-    setIsSearching(!!value);
     setSearchValue(value);
     setSearchAfter(undefined); // Reset pagination when search changes
   }, []);
