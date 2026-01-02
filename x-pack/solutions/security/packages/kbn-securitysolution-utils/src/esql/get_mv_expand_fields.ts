@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, isColumn } from '@kbn/esql-ast';
+import { parse, isColumn } from '@kbn/esql-language';
 
 export const getMvExpandFields = (query: string): string[] => {
   const { root } = parse(query);

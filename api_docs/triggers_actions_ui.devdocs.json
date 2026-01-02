@@ -4572,7 +4572,7 @@
           },
           " extends ",
           "CommonFieldSchema",
-          "<string>"
+          "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
         "deprecated": false,
@@ -5115,7 +5115,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
