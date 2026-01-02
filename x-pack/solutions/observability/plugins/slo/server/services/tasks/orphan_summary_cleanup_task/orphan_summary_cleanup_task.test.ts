@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -115,28 +116,31 @@ describe('cleanupOrphanSummaries', () => {
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          should: [
-            {
-              bool: {
-                must: [{ term: { 'slo.id': 'slo-3' } }, { term: { 'slo.revision': 1 } }],
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  must: [{ term: { 'slo.id': 'slo-3' } }, { term: { 'slo.revision': 1 } }],
+                },
               },
-            },
-            {
-              bool: {
-                must: [{ term: { 'slo.id': 'slo-4' } }, { term: { 'slo.revision': 1 } }],
+              {
+                bool: {
+                  must: [{ term: { 'slo.id': 'slo-4' } }, { term: { 'slo.revision': 1 } }],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
-    });
+      expect.objectContaining({ signal: abortController.signal })
+    );
   });
 
   it('should delete all summaries when no definitions exist', async () => {
@@ -160,28 +164,31 @@ describe('cleanupOrphanSummaries', () => {
     );
 
     expect(result).toEqual({ aborted: false, completed: true });
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          should: [
-            {
-              bool: {
-                must: [{ term: { 'slo.id': 'slo-1' } }, { term: { 'slo.revision': 1 } }],
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  must: [{ term: { 'slo.id': 'slo-1' } }, { term: { 'slo.revision': 1 } }],
+                },
               },
-            },
-            {
-              bool: {
-                must: [{ term: { 'slo.id': 'slo-2' } }, { term: { 'slo.revision': 1 } }],
+              {
+                bool: {
+                  must: [{ term: { 'slo.id': 'slo-2' } }, { term: { 'slo.revision': 1 } }],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
-    });
+      expect.objectContaining({ signal: abortController.signal })
+    );
   });
 
   it('should paginate through summaries using after_key', async () => {
@@ -228,42 +235,50 @@ describe('cleanupOrphanSummaries', () => {
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
 
     // First delete call for slo-orphan-1
-    expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          should: [
-            {
-              bool: {
-                must: [{ term: { 'slo.id': 'slo-orphan-1' } }, { term: { 'slo.revision': 1 } }],
+    expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(
+      1,
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  must: [{ term: { 'slo.id': 'slo-orphan-1' } }, { term: { 'slo.revision': 1 } }],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
-    });
+      expect.objectContaining({ signal: abortController.signal })
+    );
 
     // Second delete call for slo-orphan-2
-    expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(2, {
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          should: [
-            {
-              bool: {
-                must: [{ term: { 'slo.id': 'slo-orphan-2' } }, { term: { 'slo.revision': 1 } }],
+    expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(
+      2,
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  must: [{ term: { 'slo.id': 'slo-orphan-2' } }, { term: { 'slo.revision': 1 } }],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
-    });
+      expect.objectContaining({ signal: abortController.signal })
+    );
   });
 
   it('should pass the after_key to subsequent search calls', async () => {
@@ -320,6 +335,29 @@ describe('cleanupOrphanSummaries', () => {
     );
 
     expect(esClient.search).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ signal: abortController.signal })
+    );
+  });
+
+  it('should use abort controller signal in deleteByQuery calls', async () => {
+    esClient.search.mockResolvedValueOnce(
+      createMockAggregationResponse([{ key: { id: 'orphan-slo', revision: 1 } }])
+    );
+
+    soClient.find.mockResolvedValueOnce({
+      total: 0,
+      saved_objects: [],
+      page: 1,
+      per_page: 1,
+    } as any);
+
+    await cleanupOrphanSummaries(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({ signal: abortController.signal })
     );
@@ -408,5 +446,29 @@ describe('cleanupOrphanSummaries', () => {
       }),
       expect.any(Object)
     );
+  });
+
+  it('should handle RequestAbortedError and preserve state', async () => {
+    const searchAfter = { id: 'slo-1', revision: 1 };
+    esClient.search.mockRejectedValueOnce(new errors.RequestAbortedError('Aborted'));
+
+    const result = await cleanupOrphanSummaries(
+      { searchAfter },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(result).toEqual({
+      aborted: true,
+      completed: false,
+      nextState: { searchAfter },
+    });
+  });
+
+  it('should handle other errors appropriately', async () => {
+    esClient.search.mockRejectedValueOnce(new Error('Network error'));
+
+    await expect(
+      cleanupOrphanSummaries({}, { esClient, soClient: soClient as any, logger, abortController })
+    ).rejects.toThrow('Network error');
   });
 });

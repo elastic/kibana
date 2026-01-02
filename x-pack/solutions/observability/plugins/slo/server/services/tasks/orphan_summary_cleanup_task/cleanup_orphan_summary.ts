@@ -85,34 +85,37 @@ export async function cleanupOrphanSummaries(
           `Deleting ${nextDelete.length} SLO ids from the summary index (including all their instances)`
         );
 
-        await esClient.deleteByQuery({
-          index: SUMMARY_DESTINATION_INDEX_PATTERN,
-          wait_for_completion: false,
-          conflicts: 'proceed',
-          slices: 'auto',
-          query: {
-            bool: {
-              should: nextDelete.map(({ id, revision }) => {
-                return {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          'slo.id': id,
+        await esClient.deleteByQuery(
+          {
+            index: SUMMARY_DESTINATION_INDEX_PATTERN,
+            wait_for_completion: false,
+            conflicts: 'proceed',
+            slices: 'auto',
+            query: {
+              bool: {
+                should: nextDelete.map(({ id, revision }) => {
+                  return {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'slo.id': id,
+                          },
                         },
-                      },
-                      {
-                        term: {
-                          'slo.revision': revision,
+                        {
+                          term: {
+                            'slo.revision': revision,
+                          },
                         },
-                      },
-                    ],
-                  },
-                };
-              }),
+                      ],
+                    },
+                  };
+                }),
+              },
             },
           },
-        });
+          { signal: dependencies.abortController.signal }
+        );
       }
 
       if (currentRun >= maxRuns) {
@@ -136,6 +139,7 @@ export async function cleanupOrphanSummaries(
         nextState: { searchAfter },
       };
     }
+    throw error;
   }
 
   return { aborted: false, completed: true };
