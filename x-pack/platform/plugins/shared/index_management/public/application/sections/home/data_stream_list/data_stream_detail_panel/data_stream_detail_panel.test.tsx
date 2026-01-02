@@ -6,15 +6,18 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { useLoadDataStream } from '../../../../services/api';
 import { useAppContext } from '../../../../app_context';
-import type { DataStream } from '../../../../../../common';
 import type { AppDependencies } from '../../../../app_context';
+import {
+  createMockAppContext,
+  createMockDataStream,
+} from './data_stream_detail_panel.test_helpers';
 
 // Mock dependencies
 jest.mock('../../../../services/api');
@@ -24,65 +27,8 @@ jest.mock('./streams_promotion', () => ({
   StreamsPromotion: () => null,
 }));
 
-const mockUseLoadDataStream = useLoadDataStream as jest.MockedFunction<typeof useLoadDataStream>;
-const mockUseAppContext = useAppContext as jest.MockedFunction<typeof useAppContext>;
-
-const createMockDataStream = (overrides?: Partial<DataStream>): DataStream => ({
-  name: 'test-data-stream',
-  timeStampField: { name: '@timestamp' },
-  indices: [
-    {
-      name: 'indexName',
-      uuid: 'indexId',
-      preferILM: false,
-      managedBy: 'Data stream lifecycle',
-    },
-  ],
-  generation: 1,
-  nextGenerationManagedBy: 'Data stream lifecycle',
-  health: 'green',
-  indexTemplateName: 'indexTemplate',
-  storageSize: '1b',
-  storageSizeBytes: 1,
-  maxTimeStamp: 420,
-  meteringStorageSize: '1b',
-  meteringStorageSizeBytes: 1,
-  meteringDocsCount: 10,
-  privileges: {
-    delete_index: true,
-    manage_data_stream_lifecycle: true,
-    read_failure_store: true,
-  },
-  hidden: false,
-  lifecycle: {
-    enabled: true,
-    data_retention: '7d',
-  },
-  indexMode: 'standard',
-  failureStoreEnabled: false,
-  ...overrides,
-});
-
-const createMockAppContext = (): AppDependencies =>
-  ({
-    url: {
-      locators: {
-        get: jest.fn(() => ({
-          getRedirectUrl: jest.fn(() => '/app/path'),
-        })),
-      },
-    },
-    core: {
-      application: {
-        navigateToUrl: jest.fn(),
-      },
-    },
-    config: {
-      enableSizeAndDocCount: true,
-      enableDataStreamStats: true,
-      enableTogglingDataRetention: true,
-    },
-  } as unknown as AppDependencies);
+const mockUseLoadDataStream = jest.mocked(useLoadDataStream);
+const mockUseAppContext = jest.mocked(useAppContext);
 
 describe('DataStreamDetailPanel', () => {
   const onCloseMock = jest.fn();
@@ -105,7 +51,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -126,7 +73,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -150,7 +98,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { queryByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -174,7 +123,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -198,7 +148,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -222,7 +173,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -247,7 +199,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -273,7 +226,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -301,13 +255,13 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
       );
 
-      // Wait for the component to load
       await waitFor(() => {
         expect(getByTestId('manageDataStreamButton')).toBeInTheDocument();
       });
@@ -336,13 +290,13 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId, queryByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
       );
 
-      // Wait for the component to load
       await waitFor(() => {
         expect(getByTestId('manageDataStreamButton')).toBeInTheDocument();
       });
@@ -364,7 +318,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: true,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -373,21 +328,19 @@ describe('DataStreamDetailPanel', () => {
       const content = getByTestId('content');
       expect(content).toBeInTheDocument();
       // When loading, the content should contain the SectionLoading component
-      expect(content.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(within(content).getByTestId('sectionLoading')).toBeInTheDocument();
     });
 
     it('displays error state when data fails to load', async () => {
-      const error = {
-        statusCode: 500,
-        message: 'Internal Server Error',
-      };
+      const error = new Error('Internal Server Error');
 
       mockUseLoadDataStream.mockReturnValue({
         data: undefined,
         isLoading: false,
         error,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -408,7 +361,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -434,7 +388,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="my-custom-data-stream" onClose={onCloseMock} />
@@ -459,7 +414,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -480,7 +436,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -501,7 +458,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
@@ -522,7 +480,8 @@ describe('DataStreamDetailPanel', () => {
         isLoading: false,
         error: null,
         resendRequest: jest.fn(),
-      } as any);
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
 
       const { getByTestId } = renderWithI18n(
         <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
