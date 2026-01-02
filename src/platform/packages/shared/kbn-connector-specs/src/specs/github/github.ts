@@ -268,28 +268,15 @@ export const GithubConnector: ConnectorSpec = {
         const ref = typedInput.ref || 'main';
 
         // Get the content of the specified file
-        let response;
-        try {
-          response = await ctx.client.get(
-            `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
-            {
-              params: { ref },
-              headers: {
-                Accept: 'application/vnd.github.v3+json',
-              },
-            }
-          );
-        } catch (error: unknown) {
-          const httpError = error as { response?: { status?: number } };
-          if (httpError.response?.status === 404) {
-            throw new Error(
-              `File not found: ${typedInput.path} in repository ${typedInput.owner}/${
-                typedInput.repo
-              }${ref !== 'main' ? ` (ref: ${ref})` : ''}`
-            );
+        const response = await ctx.client.get(
+          `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
+          {
+            params: { ref },
+            headers: {
+              Accept: 'application/vnd.github.v3+json',
+            },
           }
-          throw error;
-        }
+        );
 
         const getDocResponseSchema = z.object({
           name: z.string(),
