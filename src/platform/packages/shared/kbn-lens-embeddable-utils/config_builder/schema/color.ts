@@ -157,10 +157,10 @@ const categoricalColorMappingSchema = schema.object({
   }),
   mapping: schema.arrayOf(
     schema.object({
-      values: schema.arrayOf(serializedValueSchema, { maxSize: 100 }),
+      values: schema.arrayOf(serializedValueSchema, { maxSize: 1000 }),
       color: colorDefSchema,
     }),
-    { maxSize: 100 }
+    { maxSize: 1000 }
   ),
   unassignedColor: schema.maybe(colorCodeSchema),
 });
@@ -178,7 +178,7 @@ const gradientColorMappingSchema = schema.object({
       { maxSize: 100 }
     )
   ),
-  gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 100 })),
+  gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
   unassignedColor: schema.maybe(colorCodeSchema),
 });
 

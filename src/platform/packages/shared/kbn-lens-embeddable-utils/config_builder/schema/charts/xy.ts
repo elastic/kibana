@@ -31,7 +31,7 @@ import { builderEnums } from '../enums';
 /**
  * Statistical functions that can be displayed in chart legend for data series
  */
-const statisticsSchema = schema.oneOf(
+export const statisticsSchema = schema.oneOf(
   [
     schema.oneOf([
       schema.literal('min'),
@@ -61,6 +61,9 @@ const statisticsSchema = schema.oneOf(
     },
   }
 );
+
+// Should be kept in sync with the number of statistics options
+export const statisticsOptionsSize = 17;
 
 /**
  * Y-axis extent configuration defining how the axis bounds are calculated
@@ -166,7 +169,7 @@ const sharedLegendSchema = {
   statistics: schema.maybe(
     schema.arrayOf(statisticsSchema, {
       meta: { description: 'Statistics to display in legend' },
-      maxSize: 100,
+      maxSize: statisticsOptionsSize,
     })
   ),
   truncate_after_lines: schema.maybe(
