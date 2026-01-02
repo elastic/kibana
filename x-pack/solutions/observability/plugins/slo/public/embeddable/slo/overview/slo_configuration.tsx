@@ -170,7 +170,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
 
           <EuiButton
             data-test-subj="sloConfirmButton"
-            isDisabled={!selectedSloDefinition || hasError}
+            isDisabled={!selectedSloDefinition || hasError || (hasGroupBy && !selectedInstanceId)}
             onClick={onConfirmClick}
             fill
           >
