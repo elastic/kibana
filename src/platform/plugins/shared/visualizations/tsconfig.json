@@ -82,6 +82,7 @@
     "@kbn/visualizations-common",
     "@kbn/lens-common",
     "@kbn/cps",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }
