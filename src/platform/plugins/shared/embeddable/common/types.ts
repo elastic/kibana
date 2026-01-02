@@ -15,15 +15,18 @@ export type EmbeddableTransforms<
   EmbeddableState extends object = object
 > = {
   /**
-   * Temporary flag indicating transformOut injects references
-   * When true, container REST API responses will drop references for panels that use transformOut
-   * TODO: remove once all reference injection is done in server
-   */
-  transformOutInjectsReferences?: boolean;
-  /**
    * Converts StoredEmbeddableState and injects references into EmbeddableState
+   * @param storedState
+   * @param panelReferences Panel references - BWC issue where panel references can not be determined for by-value panels created in 7.12
+   *                                           Use containerReferences to look for missing panel references
+   * @param containerReferences Container references
+   * @returns EmbeddableState
    */
-  transformOut?: (storedState: StoredEmbeddableState, references?: Reference[]) => EmbeddableState;
+  transformOut?: (
+    storedState: StoredEmbeddableState,
+    panelReferences?: Reference[],
+    containerReferences?: Reference[]
+  ) => EmbeddableState;
   /**
    * Converts EmbeddableState into StoredEmbeddableState and extracts references
    */

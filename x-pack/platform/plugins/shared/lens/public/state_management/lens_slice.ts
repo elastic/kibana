@@ -74,6 +74,7 @@ export const initialState: LensAppState = {
     indexPatterns: {},
   },
   annotationGroups: {},
+  projectRouting: undefined,
   managed: false,
 };
 

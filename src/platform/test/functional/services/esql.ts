@@ -184,6 +184,21 @@ export class ESQLService extends FtrService {
     await this.waitESQLEditorLoaded();
   }
 
+  public async focusEditor(editorSubjId = 'ESQLEditor') {
+    await this.retry.try(async () => {
+      const editor = await this.testSubjects.find(editorSubjId);
+      await editor.click();
+    });
+  }
+
+  public async isQuickSearchVisorVisible() {
+    const visorContainer = await this.testSubjects.find('ESQLEditor-quick-search-visor');
+    const visorWrapper = await visorContainer.findByCssSelector(':scope > div');
+    const opacity = await visorWrapper.getComputedStyle('opacity');
+
+    return opacity === '1';
+  }
+
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
     const editor = await this.testSubjects.find(editorSubjId);
     const textarea = await editor.findByCssSelector('textarea');
@@ -236,6 +251,26 @@ export class ESQLService extends FtrService {
 
       await optionToSelect.click();
       return true;
+    });
+  }
+
+  public async toggleQuickSearchVisor(open: boolean) {
+    await this.testSubjects.click('ESQLEditor-toggle-quick-search-visor');
+    await this.retry.try(async () => {
+      expect(await this.isQuickSearchVisorVisible()).to.be(open);
+    });
+  }
+
+  public async toggleDatasourceDropdown(open: boolean) {
+    if (open) {
+      await this.testSubjects.click('visorSourcesDropdownButton');
+    } else {
+      await this.browser.pressKeys(Key.ESCAPE);
+    }
+
+    await this.retry.try(async () => {
+      const exists = await this.testSubjects.exists('esqlEditor-visor-datasourcesList-switcher');
+      expect(exists).to.be(open);
     });
   }
 }

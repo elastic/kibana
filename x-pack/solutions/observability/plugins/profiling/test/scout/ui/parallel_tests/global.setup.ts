@@ -6,7 +6,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import { APM_AGENT_POLICY_ID } from '../fixtures/constants';
+import { APM_AGENT_POLICY_ID } from '../../common/fixtures/constants';
 
 globalSetupHook(
   'Set up Profiling Resources and Data',

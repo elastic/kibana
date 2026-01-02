@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
@@ -22,7 +25,8 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server/types';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 
 export interface ObservabilityAgentBuilderPluginSetup {
@@ -32,22 +36,24 @@ export interface ObservabilityAgentBuilderPluginSetup {
 export type ObservabilityAgentBuilderPluginStart = Record<string, never>;
 
 export interface ObservabilityAgentBuilderPluginSetupDependencies {
-  onechat: OnechatPluginSetup;
+  agentBuilder: AgentBuilderPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
   security: SecurityPluginSetup;
   ml?: MlPluginSetup;
+  inference: InferenceServerSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
-  onechat: OnechatPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
   metricsDataAccess: MetricsDataPluginStart;
   security: SecurityPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
-  ml?: MlPluginStart;
   inference: InferenceServerStart;
+  ml?: MlPluginStart;
+  spaces?: SpacesPluginStart;
 }

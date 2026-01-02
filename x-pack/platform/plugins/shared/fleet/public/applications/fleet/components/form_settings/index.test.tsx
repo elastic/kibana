@@ -242,4 +242,23 @@ describe('ConfiguredSettings', () => {
     expect(learnMoreLink.closest('a')).toHaveAttribute('href', learnMoreUrl);
     expect(learnMoreLink.closest('a')).toHaveAttribute('target', '_blank');
   });
+
+  it('should render string field with yaml type', () => {
+    const result = render([
+      {
+        name: 'agent.internal',
+        title: 'Advanced Internal YAML Settings',
+        description: () => 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'agent_internal',
+        },
+        schema: z.string(),
+        type: 'yaml',
+      },
+    ]);
+
+    expect(result.getByText('Advanced Internal YAML Settings')).not.toBeNull();
+    expect(result.getByText('# Add YAML settings here')).not.toBeNull();
+  });
 });

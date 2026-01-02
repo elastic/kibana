@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
+import { type EuiSideNavItemType, type EuiPageSectionProps } from '@elastic/eui';
 import type { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -23,7 +23,7 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
-import { SearchBarPortal } from './search_bar_portal';
+
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
@@ -42,7 +42,6 @@ export type WrappedPageTemplateProps = Pick<
   pageSectionProps?: EuiPageSectionProps;
   bottomBar?: React.ReactNode;
   bottomBarProps?: _EuiPageBottomBarProps;
-  topSearchBar?: React.ReactNode;
 };
 
 export interface NavigationEntry {
@@ -106,7 +105,6 @@ export function ObservabilityPageTemplate({
   bottomBar,
   bottomBarProps,
   pageSectionProps,
-  topSearchBar,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -209,7 +207,6 @@ export function ObservabilityPageTemplate({
               alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
               {...pageSectionProps}
             >
-              {topSearchBar && <SearchBarPortal>{topSearchBar}</SearchBarPortal>}
               {children}
             </KibanaPageTemplate.Section>
           </KibanaErrorBoundary>

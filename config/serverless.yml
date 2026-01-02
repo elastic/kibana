@@ -269,6 +269,7 @@ xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
+xpack.reporting.csv.maxRows: 100000
 
 # Disabled Platform plugins
 monitoring.enabled: false
@@ -300,3 +301,6 @@ xpack.genAiSettings:
 # Cross Project Search
 cps.enabled: true
 cps.cpsEnabled: false
+
+# Disable saved objects access control features (write-restricted dashboards)
+savedObjects.enableAccessControl: false

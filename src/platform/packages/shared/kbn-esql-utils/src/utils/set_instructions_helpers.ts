@@ -12,7 +12,7 @@ import {
   isFunctionExpression,
   isLiteral,
   LeafPrinter,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 
 /**
  * Extracts the project routing value from an ES|QL query string.

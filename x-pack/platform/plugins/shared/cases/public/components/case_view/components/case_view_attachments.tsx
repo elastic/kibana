@@ -13,9 +13,11 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiTitle,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
+import { useAttachmentsSubTabClickedEBT } from '../../../analytics/use_attachments_tab_ebt';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
@@ -28,6 +30,7 @@ import {
   FILES_TAB,
   OBSERVABLES_TAB,
 } from '../translations';
+import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 
 const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
   switch (activeTab) {
@@ -56,13 +59,18 @@ const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
 export const CaseViewAttachments = ({
   caseData,
   activeTab,
+  onSearch,
+  searchTerm,
   children,
 }: PropsWithChildren<{
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
+  onSearch: (searchTerm: string) => void;
+  searchTerm?: string;
 }>) => {
-  const { tabs: caseViewTabs } = useCaseAttachmentTabs({ caseData, activeTab });
+  const { tabs: caseViewTabs } = useCaseAttachmentTabs({ caseData, activeTab, searchTerm });
   const { navigateToCaseView } = useCaseViewNavigation();
+  const trackSubTabClick = useAttachmentsSubTabClickedEBT();
 
   const tabAsSelectableOptions = useMemo(() => {
     return caseViewTabs.map(
@@ -76,15 +84,23 @@ export const CaseViewAttachments = ({
           showIcons: false,
           onClick: () => {
             navigateToCaseView({ detailName: caseData.id, tabId: tab.id });
+            trackSubTabClick(tab.id);
           },
         } as EuiSelectableOption)
     );
-  }, [caseViewTabs, activeTab, navigateToCaseView, caseData.id]);
+  }, [caseViewTabs, activeTab, navigateToCaseView, caseData.id, trackSubTabClick]);
 
   return (
     <>
       <EuiFlexItem grow={6}>
-        <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+        <CaseViewTabs caseData={caseData} activeTab={activeTab} searchTerm={searchTerm} />
+        <EuiSpacer size="s" />
+        <EuiFieldSearch
+          placeholder={SEARCH_PLACEHOLDER}
+          onSearch={onSearch}
+          data-test-subj="cases-files-search"
+          fullWidth
+        />
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" responsive={false} data-test-subj="case-view-attachments">
           <EuiFlexItem grow={1} css={{ minWidth: '18rem', maxWidth: '18rem' }}>
