@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/alerts-ui-shared'
   - '@kbn/controls-plugin'
   - '@kbn/cps'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - shared-common
   - package
