@@ -12,6 +12,7 @@ import dedent from 'dedent';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import { ENTITY_LINKING_PROMPT } from '../../utils/entity_linking_prompt';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -207,28 +208,8 @@ async function generateAlertSummary({
     - If recovered or normalizing, recommend light‑weight validation and watchful follow‑up.
     - If inconclusive or signals skew Indirect/Unrelated, state that the alert may be unrelated/noisy and suggest targeted traces/logging for the suspected path.
 
-    ## Entity Linking
-    When you identify the following entities in your context or data, you MUST format them using the specific relative URL paths defined below.
-
-    ### Services
-      - Trigger: When mentioning a service by its \`service.name\`.
-      - Template: \`[<service.name>](/app/apm/services/<service.name>)\`
-      - Example:
-      - Text: "The billing-service is down."
-      - Output: "The [billing-service](/app/apm/services/billing-service) is down."
-    ### Traces
-      - Trigger: When mentioning a trace by its \`trace.id\`.
-      - Template: \`[<trace.id>](/app/apm/link-to/trace/<trace.id>)\`
-      - Example:
-      - Text: "Investigate trace 8a3c42."
-      - Output: "Investigate trace [8a3c42](/app/apm/link-to/trace/8a3c42)"
-    ### Errors
-      - Trigger: When mentioning an error that has an associated \`service.name\` and \`error.grouping_key\`.
-      - Template: \`[<error.grouping_key>](/app/apm/services/<service.name>/errors/<error.grouping_key>)\`
-      - Example:
-      - Text: "Found NullPointer in frontend."
-      - Output: "Found [abcde](/app/apm/services/frontend/errors/abcde) in [frontend](/app/apm/services/frontend)."
-    `);
+    ${ENTITY_LINKING_PROMPT}
+  `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;
 

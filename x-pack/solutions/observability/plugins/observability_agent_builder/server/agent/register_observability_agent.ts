@@ -14,6 +14,7 @@ import type {
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '../tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import { ENTITY_LINKING_PROMPT } from '../utils/entity_linking_prompt';
 
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
@@ -51,26 +52,8 @@ export async function registerObservabilityAgent({
         `- Generate human-friendly column names by converting dotted paths to Title Case and stripping common prefixes like \`kibana.alert.\` or \`service.\`.\n` +
         `- Leave cells blank when values are missing.\n` +
         `- Always add a summary of the results in addition to the table. Mention the total number of alerts in the summary.\n` +
-        `## Entity Linking\n` +
-        `You must improve the SRE's navigation workflow by formatting specific Observability entities as Markdown links. When you identify the following entities in your context or data, you MUST format them using the specific relative URL paths defined below.\n` +
-        `\n### Services\n` +
-        `- Trigger: When mentioning a service by its \`service.name\`.\n` +
-        `- Template: \`[<service.name>](/app/apm/services/<service.name>)\`\n` +
-        `- Example:\n` +
-        `  - Text: "The billing-service is down."\n` +
-        `  - Output: "The [billing-service](/app/apm/services/billing-service) is down."\n` +
-        `\n### Traces\n` +
-        `- Trigger: When mentioning a trace by its \`trace.id\`.\n` +
-        `- Template: \`[<trace.id>](/app/apm/link-to/trace/<trace.id>)\`\n` +
-        `- Example:\n` +
-        `  - Text: "Investigate trace 8a3c42."\n` +
-        `  - Output: "Investigate trace [8a3c42](/app/apm/link-to/trace/8a3c42)."\n` +
-        `\n### Errors\n` +
-        `- Trigger: When mentioning an error that has an associated \`service.name\` and \`error.grouping_key\`.\n` +
-        `- Template: \`[<error.grouping_key>](/app/apm/services/<service.name>/errors/<error.grouping_key>)\`\n` +
-        `- Example:\n` +
-        `  - Text: "Found NullPointer in frontend."\n` +
-        `  - Output: "Found [abcde](/app/apm/services/frontend/errors/abcde) in [frontend](/app/apm/services/frontend)."`,
+        '\n' +
+        ENTITY_LINKING_PROMPT,
       tools: [
         {
           tool_ids: OBSERVABILITY_AGENT_TOOL_IDS,
