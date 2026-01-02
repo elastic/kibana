@@ -18,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
   const apiClient = new SpaceTestApiClient(supertest);
+  const retry = getService('retry');
 
   describe('Global Settings', function () {
     skipIfNoDockerRegistry(providerContext);
@@ -61,17 +62,17 @@ export default function (providerContext: FtrProviderContext) {
       const updatedSettings = await apiClient.getSettings();
       expect(updatedSettings.item.integration_knowledge_enabled).to.be(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      const response = await apiClient.getPackage({
-        pkgName: 'knowledge_base_test',
-        pkgVersion: '1.0.0',
+      await retry.tryForTime(10000, async () => {
+        const response = await apiClient.getPackage({
+          pkgName: 'knowledge_base_test',
+          pkgVersion: '1.0.0',
+        });
+        expect(
+          response.item.installationInfo?.installed_es.some(
+            (esAsset) => esAsset.type === 'knowledge_base'
+          )
+        ).to.be(true);
       });
-      expect(
-        response.item.installationInfo?.installed_es.some(
-          (esAsset) => esAsset.type === 'knowledge_base'
-        )
-      ).to.be(true);
     });
   });
 }

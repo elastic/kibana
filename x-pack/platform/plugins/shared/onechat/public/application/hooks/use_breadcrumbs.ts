@@ -52,7 +52,7 @@ export const useBreadcrumb = (breadcrumbs: OnechatBreadcrumb[]) => {
     });
 
     chrome.setBreadcrumbs([...baseCrumbs, ...additionalCrumbs], {
-      project: { value: additionalCrumbs.length ? additionalCrumbs : baseCrumbs, absolute: true },
+      project: { value: [...baseCrumbs, ...additionalCrumbs], absolute: true },
     });
     return () => {
       chrome.setBreadcrumbs([]);
