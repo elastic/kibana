@@ -39,6 +39,7 @@ export const useSelectorListStyles = ({ listId }: { listId: string }) => {
     &#${listId} .euiSelectableListItem {
       border-style: none;
       color: unset;
+      padding: calc(${euiTheme.size.m} * 0.5) ${euiTheme.size.m};
       :hover {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
       }

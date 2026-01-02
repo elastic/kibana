@@ -12,6 +12,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +32,7 @@ import { useAgentOptions } from './use_agent_options';
 import { InputPopoverButton } from '../input_popover_button';
 import { AgentAvatar } from '../../../../common/agent_avatar';
 
-const AGENT_OPTION_ROW_HEIGHT = 40;
+const AGENT_OPTION_ROW_HEIGHT = 44;
 
 const selectAgentAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.agentSelector.selectAgent.ariaLabel',
@@ -181,7 +182,9 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       >
         {(list) => (
           <>
+            <EuiSpacer size="s" />
             {list}
+            <EuiSpacer size="s" />
             <AgentListFooter />
           </>
         )}
