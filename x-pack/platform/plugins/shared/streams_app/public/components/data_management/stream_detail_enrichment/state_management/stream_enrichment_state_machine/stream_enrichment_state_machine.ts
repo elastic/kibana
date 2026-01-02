@@ -102,7 +102,7 @@ export const streamEnrichmentMachine = setup({
 
       const validationResult = validateStreamlang(context.nextStreamlangDSL, {
         reservedFields: [],
-        isWiredStream,
+        streamType: isWiredStream ? 'wired' : 'classic',
       });
 
       const errorsByStep = new Map<string, typeof validationResult.errors>();

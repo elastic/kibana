@@ -70,7 +70,7 @@ export interface StreamlangValidationOptions {
    * List of reserved/forbidden field names that cannot be modified by processors
    */
   reservedFields: string[];
-  isWiredStream?: boolean;
+  streamType?: 'classic' | 'wired';
 }
 
 export interface StreamlangValidationResult {
@@ -767,21 +767,21 @@ function validateCondition(
  * - Conditions are complete (all required values filled, range conditions have both bounds)
  * - Processor-specific values are valid (expressions, patterns, date formats etc.)
  *
- * For WIRED streams only (isWiredStream: true), this additionally validates that:
+ * For WIRED streams only (streamType: 'wired'), this additionally validates that:
  * - All generated fields are properly namespaced (contain at least one dot)
  * - Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes
  * - Processors don't modify reserved/system fields
  * - Fields are used with compatible types
  *
  * @param streamlangDSL - The Streamlang DSL to validate
- * @param options - Validation options (reservedFields, isWiredStream)
+ * @param options - Validation options (reservedFields, streamType)
  * @returns Validation result with any errors found
  */
 export function validateStreamlang(
   streamlangDSL: StreamlangDSL,
   options: StreamlangValidationOptions
 ): StreamlangValidationResult {
-  const { reservedFields, isWiredStream = true } = options;
+  const { reservedFields, streamType = 'wired' } = options;
   const errors: StreamlangValidationError[] = [];
   let fieldTypesByProcessor = new Map<string, FieldTypeMap>();
 
@@ -789,7 +789,7 @@ export function validateStreamlang(
   const flattenedSteps = flattenSteps(streamlangDSL.steps);
 
   // Track field types and validate type usage (only for wired streams)
-  if (isWiredStream) {
+  if (streamType === 'wired') {
     const typeResult = trackFieldTypesAndValidate(flattenedSteps);
     // Add type validation errors
     errors.push(...typeResult.errors);
@@ -818,7 +818,7 @@ export function validateStreamlang(
     }
 
     // Wired stream specific validations: namespacing and reserved fields
-    if (isWiredStream) {
+    if (streamType === 'wired') {
       // Extract fields that this processor modifies
       const modifiedFields = extractModifiedFields(step);
 
