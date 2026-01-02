@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin/common';
+import { EARSSupportedOAuthProvider } from '@kbn/data-sources-registry-plugin';
 import {
   generateGetDataSourceWorkflow,
   generateGetPageWorkflow,
