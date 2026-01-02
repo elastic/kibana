@@ -814,7 +814,12 @@ describe('GithubConnector', () => {
           },
         }
       );
-      const typedResult = result as { name: string; path: string; content: string; html_url: string };
+      const typedResult = result as {
+        name: string;
+        path: string;
+        content: string;
+        html_url: string;
+      };
       expect(typedResult.path).toBe('docs/guide.md');
     });
 
@@ -835,7 +840,12 @@ describe('GithubConnector', () => {
         path: 'config.json',
       });
 
-      const typedResult = result as { name: string; path: string; content: string; html_url: string };
+      const typedResult = result as {
+        name: string;
+        path: string;
+        content: string;
+        html_url: string;
+      };
       expect(typedResult.name).toBe('config.json');
       expect(typedResult.path).toBe('config.json');
     });

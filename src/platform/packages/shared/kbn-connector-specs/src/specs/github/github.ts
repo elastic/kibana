@@ -129,19 +129,21 @@ export const GithubConnector: ConnectorSpec = {
         });
 
         // Transform response to only include essential fields
-        const transformedItems = response.data.items.map((item: {
-          name: string;
-          path: string;
-          html_url: string;
-          repository: { full_name: string };
-          score: number;
-        }) => ({
-          name: item.name,
-          path: item.path,
-          html_url: item.html_url,
-          repository: item.repository.full_name,
-          score: item.score,
-        }));
+        const transformedItems = response.data.items.map(
+          (item: {
+            name: string;
+            path: string;
+            html_url: string;
+            repository: { full_name: string };
+            score: number;
+          }) => ({
+            name: item.name,
+            path: item.path,
+            html_url: item.html_url,
+            repository: item.repository.full_name,
+            score: item.score,
+          })
+        );
 
         const searchRepoContentsResponseSchema = z.object({
           total_count: z.number(),
@@ -281,7 +283,9 @@ export const GithubConnector: ConnectorSpec = {
           const httpError = error as { response?: { status?: number } };
           if (httpError.response?.status === 404) {
             throw new Error(
-              `File not found: ${typedInput.path} in repository ${typedInput.owner}/${typedInput.repo}${ref !== 'main' ? ` (ref: ${ref})` : ''}`
+              `File not found: ${typedInput.path} in repository ${typedInput.owner}/${
+                typedInput.repo
+              }${ref !== 'main' ? ` (ref: ${ref})` : ''}`
             );
           }
           throw error;
