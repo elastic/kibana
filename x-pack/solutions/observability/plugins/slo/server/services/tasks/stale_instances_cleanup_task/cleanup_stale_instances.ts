@@ -29,7 +29,7 @@ const REQUESTS_PER_SECOND = 300;
 const MAX_TASK_DURATION_NANOS = 24 * 60 * 60 * 1000 * 1000; // 24 hours
 
 /**
- * At most we will delete MAX_DOCS_PER_DELETE documents in the delete by query (DBQ), using 300 deletion per seconds.
+ * At most we will delete MAX_DOCS_PER_DELETE documents in the delete by query (DBQ), using REQUESTS_PER_SECOND deletion per seconds.
  * Given that, we can estimate the maximum duration of the DBQ: 1M/300 = ~3333 seconds = ~55 minutes.
  * The task is scheduled to run every 4hours, so we have enough buffer to let the task complete before the next run.
  * However, in case the DBQ takes longer than expected, we check to see if the previous DBQ is still running.

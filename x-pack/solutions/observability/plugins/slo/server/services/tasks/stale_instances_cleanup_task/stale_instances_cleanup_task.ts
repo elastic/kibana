@@ -99,7 +99,7 @@ export class StaleInstancesCleanupTask {
         params: {},
       });
     } catch (e) {
-      this.logger.error(`Error scheduling task, error: ${e}`);
+      this.logger.debug(`Error scheduling task, error: ${e}`);
     }
   }
 
