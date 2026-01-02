@@ -20,7 +20,8 @@ export const ESQL_QUERY = `FROM ${DATA_SIMULATOR_INDEX} METADATA _id, _index`;
 export const RULE_LOOKBACK = '5m';
 
 export function esqlRule({ esClient }: ESQLRuleOpts) {
-  setInterval(async () => {
+  async function runEsqlRule() {
+    const start = Date.now();
     try {
       const result = await esClient.esql.query({
         query: ESQL_QUERY,
@@ -40,52 +41,51 @@ export function esqlRule({ esClient }: ESQLRuleOpts) {
         }
         return obj;
       });
-      createAlertEvents(results, esClient);
+      await createAlertEvents(results, esClient);
     } catch (e) {
       console.error(`Failed to execute esql rule: ${e.message}`);
+    } finally {
+      setTimeout(runEsqlRule, Math.max(RULE_INTERVAL - (Date.now() - start), 0));
     }
-  }, RULE_INTERVAL);
+  }
+  runEsqlRule();
 }
 
 async function createAlertEvents(rows: Record<string, unknown>[], esClient: ElasticsearchClient) {
   if (rows.length === 0) return;
-  try {
-    const now = new Date();
-    const alertEvents = rows.map((row) => {
-      return {
-        '@timestamp': now,
-        rule: {
-          id: RULE_UUID,
-          tags: [],
+  const now = new Date();
+  const alertEvents = rows.map((row) => {
+    return {
+      '@timestamp': now,
+      rule: {
+        id: RULE_UUID,
+        tags: [],
+      },
+      grouping: [
+        {
+          key: '_id',
+          value: row._id,
         },
-        grouping: [
-          {
-            key: '_id',
-            value: row._id,
-          },
-          {
-            key: '_index',
-            value: row._index,
-          },
-        ],
-        data: row,
-        status: 'breach',
-        // Can't have timestamp in here..
-        alert_series_id: `${row._id}:${row._index}`,
-        source: 'rule',
-      };
-    });
-    const bulkRequest = [];
-    for (const alertEvent of alertEvents) {
-      bulkRequest.push({ create: {} });
-      bulkRequest.push(alertEvent);
-    }
-    await esClient.bulk({
-      index: ALERT_EVENTS_INDEX,
-      body: bulkRequest,
-    });
-    console.log(`Indexed ${alertEvents.length} alert events`);
-  } catch (e) {
-    console.error(`Failed to create alert events: ${e.message}`);
+        {
+          key: '_index',
+          value: row._index,
+        },
+      ],
+      data: row,
+      status: 'breach',
+      // Can't have timestamp in here..
+      alert_series_id: `${row._id}:${row._index}`,
+      source: 'rule',
+    };
+  });
+  const bulkRequest = [];
+  for (const alertEvent of alertEvents) {
+    bulkRequest.push({ create: {} });
+    bulkRequest.push(alertEvent);
   }
+  await esClient.bulk({
+    index: ALERT_EVENTS_INDEX,
+    body: bulkRequest,
+  });
+  console.log(`Indexed ${alertEvents.length} alert events`);
 }

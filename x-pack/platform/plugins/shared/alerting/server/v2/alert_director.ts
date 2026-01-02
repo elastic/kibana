@@ -74,7 +74,8 @@ export interface AlertDirectorOpts {
 }
 
 export function alertDirector({ esClient }: AlertDirectorOpts) {
-  setInterval(async () => {
+  async function runDirectorForPendingAndRecoveringTransitions() {
+    const start = Date.now();
     try {
       const result = await esClient.esql.query({
         query: DIRECTOR_PENDING_RECOVERING_QUERY,
@@ -87,13 +88,20 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
         }
         return obj;
       });
-      createAlertTransitions(results, esClient);
+      await createAlertTransitions(results, esClient);
     } catch (e) {
       console.error(`Director failed: ${e.message}`);
+    } finally {
+      setTimeout(
+        runDirectorForPendingAndRecoveringTransitions,
+        Math.max(DIRECTOR_INTERVAL - (Date.now() - start), 0)
+      );
     }
-  }, DIRECTOR_INTERVAL);
+  }
+  runDirectorForPendingAndRecoveringTransitions();
 
-  setInterval(async () => {
+  async function runDirectorForActiveAndInactiveTransitions() {
+    const start = Date.now();
     try {
       const result = await esClient.esql.query({
         query: DIRECTORY_ACTIVE_INACTIVE_QUERY,
@@ -106,11 +114,17 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
         }
         return obj;
       });
-      createAlertTransitions(results, esClient);
+      await createAlertTransitions(results, esClient);
     } catch (e) {
       console.error(`Director failed: ${e.message}`);
+    } finally {
+      setTimeout(
+        runDirectorForActiveAndInactiveTransitions,
+        Math.max(DIRECTOR_INTERVAL - (Date.now() - start), 0)
+      );
     }
-  }, DIRECTOR_INTERVAL);
+  }
+  runDirectorForActiveAndInactiveTransitions();
 }
 
 async function createAlertTransitions(
@@ -118,32 +132,28 @@ async function createAlertTransitions(
   esClient: ElasticsearchClient
 ) {
   if (rows.length === 0) return;
-  try {
-    const alertTransitions = rows.map((row) => {
-      return {
-        '@timestamp': row['@timestamp'],
-        rule_id: row.rule_id,
-        alert_series_id: row.alert_series_id,
-        // TODO: Find last episode..
-        episode_id:
-          row.start_state === 'inactive' && row.end_state === 'pending'
-            ? v4()
-            : row.episode_id || v4(),
-        start_state: row.start_state,
-        end_state: row.end_state,
-      };
-    });
-    const bulkRequest = [];
-    for (const alertTransition of alertTransitions) {
-      bulkRequest.push({ create: {} });
-      bulkRequest.push(alertTransition);
-    }
-    await esClient.bulk({
-      index: ALERT_TRANSITIONS_INDEX,
-      body: bulkRequest,
-    });
-    console.log(`Indexed ${alertTransitions.length} transitions`);
-  } catch (e) {
-    console.error(`Failed to index transitions: ${e.message}`);
+  const alertTransitions = rows.map((row) => {
+    return {
+      '@timestamp': row['@timestamp'],
+      rule_id: row.rule_id,
+      alert_series_id: row.alert_series_id,
+      // TODO: Find last episode..
+      episode_id:
+        row.start_state === 'inactive' && row.end_state === 'pending'
+          ? v4()
+          : row.episode_id || v4(),
+      start_state: row.start_state,
+      end_state: row.end_state,
+    };
+  });
+  const bulkRequest = [];
+  for (const alertTransition of alertTransitions) {
+    bulkRequest.push({ create: {} });
+    bulkRequest.push(alertTransition);
   }
+  await esClient.bulk({
+    index: ALERT_TRANSITIONS_INDEX,
+    body: bulkRequest,
+  });
+  console.log(`Indexed ${alertTransitions.length} transitions`);
 }

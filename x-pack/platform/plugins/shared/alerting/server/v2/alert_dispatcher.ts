@@ -44,90 +44,95 @@ export const DISPATCHER_ACTIONS_QUERY = `FROM .kibana_alert_actions
         BY rule.id, alert_series_id, action_action_type`;
 
 export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
-  setInterval(async () => {
-    await Promise.all([
-      runAlertEventDispatcher({ esClient }),
-      runAlertActionDispatcher({ esClient }),
-    ]);
-  }, INTERVAL);
+  async function runDispatcherOnEventData() {
+    const start = Date.now();
+    try {
+      await runAlertEventDispatcher({ esClient });
+    } catch (e) {
+      console.error(`Dispatcher error: ${e.message}`);
+    } finally {
+      setTimeout(runDispatcherOnEventData, Math.max(INTERVAL - (Date.now() - start), 0));
+    }
+  }
+  runDispatcherOnEventData();
+
+  async function runDispatcherOnActionData() {
+    const start = Date.now();
+    try {
+      await runAlertActionDispatcher({ esClient });
+    } catch (e) {
+      console.error(`Dispatcher error: ${e.message}`);
+    } finally {
+      setTimeout(runDispatcherOnActionData, Math.max(INTERVAL - (Date.now() - start), 0));
+    }
+  }
+  runDispatcherOnActionData();
 }
 
 async function runAlertEventDispatcher({ esClient }: AlertDispatcherOpts) {
-  try {
-    const result = await esClient.esql.query({
-      query: DISPATCHER_EVENTS_QUERY,
-    });
-    const columns = result.columns.map((col) => col.name);
-    const results = result.values.map((val) => {
-      const obj: Record<string, unknown> = {};
-      for (let i = 0; i < val.length; i++) {
-        obj[columns[i]] = val[i];
-      }
-      return obj;
-    });
-    dispatchAlertEvents(results, esClient);
-  } catch (e) {
-    console.error(`Dispatcher error: ${e.message}`);
-  }
+  const result = await esClient.esql.query({
+    query: DISPATCHER_EVENTS_QUERY,
+  });
+  const columns = result.columns.map((col) => col.name);
+  const results = result.values.map((val) => {
+    const obj: Record<string, unknown> = {};
+    for (let i = 0; i < val.length; i++) {
+      obj[columns[i]] = val[i];
+    }
+    return obj;
+  });
+  await dispatchAlertEvents(results, esClient);
 }
 
 async function runAlertActionDispatcher({ esClient }: AlertDispatcherOpts) {
-  try {
-    const result = await esClient.esql.query({
-      query: DISPATCHER_ACTIONS_QUERY,
-    });
-    const columns = result.columns.map((col) => col.name);
-    const results = result.values.map((val) => {
-      const obj: Record<string, unknown> = {};
-      for (let i = 0; i < val.length; i++) {
-        obj[columns[i]] = val[i];
-      }
-      return obj;
-    });
-    dispatchAlertActions(results, esClient);
-  } catch (e) {
-    console.error(`Dispatcher error: ${e.message}`);
-  }
+  const result = await esClient.esql.query({
+    query: DISPATCHER_ACTIONS_QUERY,
+  });
+  const columns = result.columns.map((col) => col.name);
+  const results = result.values.map((val) => {
+    const obj: Record<string, unknown> = {};
+    for (let i = 0; i < val.length; i++) {
+      obj[columns[i]] = val[i];
+    }
+    return obj;
+  });
+  await dispatchAlertActions(results, esClient);
 }
 
 async function dispatchAlertEvents(rows: Record<string, unknown>[], esClient: ElasticsearchClient) {
   if (rows.length === 0) return;
-  try {
-    const fireActions: Record<string, Record<string, Date>> = {};
-    for (const row of rows) {
-      const ruleId = row['rule.id'] as string;
-      const timestamp = row['@timestamp'] as string;
-      // console.log(`Dispatching: ${JSON.stringify(row)}`);
-      if (fireActions[ruleId] === undefined) {
-        fireActions[ruleId] = [];
-      }
-      if (
-        fireActions[ruleId][row.alert_series_id] === undefined ||
-        fireActions[ruleId][row.alert_series_id] < new Date(timestamp)
-      ) {
-        fireActions[ruleId][row.alert_series_id] = new Date(timestamp);
-      }
+  const fireActions: Record<string, Record<string, Date>> = {};
+  for (const row of rows) {
+    const ruleId = row['rule.id'] as string;
+    const timestamp = row['@timestamp'] as string;
+    // console.log(`Dispatching: ${JSON.stringify(row)}`);
+    if (fireActions[ruleId] === undefined) {
+      fireActions[ruleId] = [];
     }
-    const bulkRequest = [];
-    for (const ruleId of Object.keys(fireActions)) {
-      for (const alertSeriesId of Object.keys(fireActions[ruleId])) {
-        bulkRequest.push({ index: {} });
-        bulkRequest.push({
-          '@timestamp': fireActions[ruleId][alertSeriesId].toISOString(),
-          rule_id: ruleId,
-          alert_series_id: alertSeriesId,
-          action_type: 'fire-event',
-        });
-      }
+    if (
+      fireActions[ruleId][row.alert_series_id] === undefined ||
+      fireActions[ruleId][row.alert_series_id] < new Date(timestamp)
+    ) {
+      fireActions[ruleId][row.alert_series_id] = new Date(timestamp);
     }
-    await esClient.bulk({
-      index: ALERT_ACTIONS_INDEX,
-      body: bulkRequest,
-    });
-    console.log(`Dispatched ${rows.length} alert events`);
-  } catch (e) {
-    console.error(`Failed to dispatch: ${e.message}`);
   }
+  const bulkRequest = [];
+  for (const ruleId of Object.keys(fireActions)) {
+    for (const alertSeriesId of Object.keys(fireActions[ruleId])) {
+      bulkRequest.push({ index: {} });
+      bulkRequest.push({
+        '@timestamp': fireActions[ruleId][alertSeriesId].toISOString(),
+        rule_id: ruleId,
+        alert_series_id: alertSeriesId,
+        action_type: 'fire-event',
+      });
+    }
+  }
+  await esClient.bulk({
+    index: ALERT_ACTIONS_INDEX,
+    body: bulkRequest,
+  });
+  console.log(`Dispatched ${rows.length} alert events`);
 }
 
 async function dispatchAlertActions(
@@ -135,40 +140,36 @@ async function dispatchAlertActions(
   esClient: ElasticsearchClient
 ) {
   if (rows.length === 0) return;
-  try {
-    const fireActions: Record<string, Record<string, Date>> = {};
-    for (const row of rows) {
-      const ruleId = row['rule.id'] as string;
-      const timestamp = row['@timestamp'] as string;
-      // console.log(`Dispatching: ${JSON.stringify(row)}`);
-      if (fireActions[ruleId] === undefined) {
-        fireActions[ruleId] = [];
-      }
-      if (
-        fireActions[ruleId][row.alert_series_id] === undefined ||
-        fireActions[ruleId][row.alert_series_id] < new Date(timestamp)
-      ) {
-        fireActions[ruleId][row.alert_series_id] = new Date(timestamp);
-      }
+  const fireActions: Record<string, Record<string, Date>> = {};
+  for (const row of rows) {
+    const ruleId = row['rule.id'] as string;
+    const timestamp = row['@timestamp'] as string;
+    // console.log(`Dispatching: ${JSON.stringify(row)}`);
+    if (fireActions[ruleId] === undefined) {
+      fireActions[ruleId] = [];
     }
-    const bulkRequest = [];
-    for (const ruleId of Object.keys(fireActions)) {
-      for (const alertSeriesId of Object.keys(fireActions[ruleId])) {
-        bulkRequest.push({ index: {} });
-        bulkRequest.push({
-          '@timestamp': fireActions[ruleId][alertSeriesId].toISOString(),
-          rule_id: ruleId,
-          alert_series_id: alertSeriesId,
-          action_type: 'fire-action',
-        });
-      }
+    if (
+      fireActions[ruleId][row.alert_series_id] === undefined ||
+      fireActions[ruleId][row.alert_series_id] < new Date(timestamp)
+    ) {
+      fireActions[ruleId][row.alert_series_id] = new Date(timestamp);
     }
-    await esClient.bulk({
-      index: ALERT_ACTIONS_INDEX,
-      body: bulkRequest,
-    });
-    console.log(`Dispatched ${rows.length} alert actions`);
-  } catch (e) {
-    console.error(`Failed to dispatch: ${e.message}`);
   }
+  const bulkRequest = [];
+  for (const ruleId of Object.keys(fireActions)) {
+    for (const alertSeriesId of Object.keys(fireActions[ruleId])) {
+      bulkRequest.push({ index: {} });
+      bulkRequest.push({
+        '@timestamp': fireActions[ruleId][alertSeriesId].toISOString(),
+        rule_id: ruleId,
+        alert_series_id: alertSeriesId,
+        action_type: 'fire-action',
+      });
+    }
+  }
+  await esClient.bulk({
+    index: ALERT_ACTIONS_INDEX,
+    body: bulkRequest,
+  });
+  console.log(`Dispatched ${rows.length} alert actions`);
 }
