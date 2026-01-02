@@ -41,6 +41,29 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('returns counts for > 10 indices (terms agg size must cover all requested indices)', async () => {
+      const indices: string[] = await Promise.all(
+        Array.from({ length: 12 }, (_, i) => createIndex(`doc-count-many-${i}`))
+      );
+
+      // Put docs in a couple indices, including one beyond the 10th bucket.
+      await es.index({ index: indices[0], document: { foo: 'a1' } });
+      await es.index({ index: indices[11], document: { foo: 'z1' } });
+
+      await es.indices.refresh({ index: indices });
+
+      const { body } = await supertest
+        .post(`${INTERNAL_API_BASE_PATH}/index_doc_count`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ indexNames: indices })
+        .expect(200);
+
+      expect(Object.keys(body).length).to.be(indices.length);
+      expect(body[indices[0]]).to.be(1);
+      expect(body[indices[11]]).to.be(1);
+      expect(body[indices[5]]).to.be(0);
+    });
+
     it('validates request body (indexNames must be non-empty)', async () => {
       await supertest
         .post(`${INTERNAL_API_BASE_PATH}/index_doc_count`)
