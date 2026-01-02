@@ -19,13 +19,13 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM .kibana_alert_events
       last_status = LAST(status, @timestamp),
       last_event_timestamp = MAX(@timestamp)
         BY rule.id, alert_series_id
-  | RENAME alert_series_id AS event_alert_series_id
+  | RENAME alert_series_id AS event_alert_series_id, last_event_timestamp AS event_last_event_timestamp
   | LOOKUP JOIN .kibana_alert_transitions
         ON rule.id == rule_id AND event_alert_series_id == alert_series_id
   | STATS
       last_tracked_state = COALESCE(LAST(end_state, @timestamp), "inactive"),
       last_episode_id = LAST(episode_id, @timestamp)
-        BY rule.id, event_alert_series_id, last_status, last_event_timestamp
+        BY rule.id, event_alert_series_id, last_status, event_last_event_timestamp
   | EVAL
       candidate_state =
         CASE(
@@ -41,7 +41,7 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM .kibana_alert_events
   | WHERE candidate_state IS NOT NULL
   | RENAME rule.id AS rule_id, event_alert_series_id AS alert_series_id,
       last_episode_id AS episode_id, candidate_state AS end_state,
-      last_tracked_state AS start_state, last_event_timestamp AS @timestamp
+      last_tracked_state AS start_state, event_last_event_timestamp AS @timestamp
   | DROP last_status
   | LIMIT 10000`;
 
@@ -51,7 +51,7 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM .kibana_alert_events
 export const DIRECTORY_ACTIVE_INACTIVE_QUERY = `FROM .kibana_alert_transitions
   | STATS
       last_tracked_state = LAST(end_state, @timestamp),
-      last_transition = MAX(@timestamp)
+      last_transition = MAX(last_event_timestamp)
         BY rule_id, alert_series_id, episode_id
   | WHERE last_tracked_state == "pending" OR last_tracked_state == "recovering"
   | RENAME alert_series_id AS transition_alert_series_id
@@ -146,8 +146,7 @@ async function createAlertTransitions(
   if (rows.length === 0) return;
   const alertTransitions = rows.map((row) => {
     return {
-      // TODO: Maybe this should be "now" and we move @timestamp in last_event_timestamp to filter in the query
-      '@timestamp': row['@timestamp'],
+      '@timestamp': new Date().toISOString(),
       rule_id: row.rule_id,
       alert_series_id: row.alert_series_id,
       // TODO: Find last episode..
@@ -157,6 +156,7 @@ async function createAlertTransitions(
           : row.episode_id || v4(),
       start_state: row.start_state,
       end_state: row.end_state,
+      last_event_timestamp: row['@timestamp'],
     };
   });
   const bulkRequest = [];

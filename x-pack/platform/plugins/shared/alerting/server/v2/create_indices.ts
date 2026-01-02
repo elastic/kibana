@@ -96,6 +96,7 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
         // Other fields
         start_state: { type: 'keyword' },
         end_state: { type: 'keyword' },
+        last_event_timestamp: { type: 'date' },
       },
     },
   });
