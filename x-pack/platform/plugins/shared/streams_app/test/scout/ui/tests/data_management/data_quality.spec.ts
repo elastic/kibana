@@ -177,7 +177,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
     // Verify on Main page
-    await pageObjects.streams.clickRootBreadcrumb();
+    await pageObjects.streams.clickStreamsBreadcrumb();
     await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
     // Navigate to a different stream and verify time persists
