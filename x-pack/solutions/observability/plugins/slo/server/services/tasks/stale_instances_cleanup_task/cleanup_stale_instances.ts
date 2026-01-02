@@ -7,7 +7,6 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
-import { omit } from 'lodash';
 import {
   DEFAULT_STALE_SLO_THRESHOLD_HOURS,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -27,7 +26,15 @@ const SPACES_PER_BATCH = 100;
 const MAX_BATCHES_PER_RUN = 10;
 const MAX_DOCS_PER_DELETE = 1_000_000;
 const REQUESTS_PER_SECOND = 300;
+const MAX_TASK_DURATION_NANOS = 24 * 60 * 60 * 1000 * 1000; // 24 hours
 
+/**
+ * At most we will delete MAX_DOCS_PER_DELETE documents in the delete by query (DBQ), using 300 deletion per seconds.
+ * Given that, we can estimate the maximum duration of the DBQ: 1M/300 = ~3333 seconds = ~55 minutes.
+ * The task is scheduled to run every 4hours, so we have enough buffer to let the task complete before the next run.
+ * However, in case the DBQ takes longer than expected, we check to see if the previous DBQ is still running.
+ * If it is, we skip the current run to avoid overlapping delete tasks. We cancel previous DBQ if it has been running for more than MAX_TASK_DURATION_NANOS.
+ */
 export async function cleanupStaleInstances(
   previousState: TaskState,
   dependencies: Dependencies
@@ -73,7 +80,6 @@ export async function cleanupStaleInstances(
       }
 
       const query = buildDeleteQuery(enabledSettings);
-
       const hasStaleDocuments = await hasDocumentsToDelete(query, dependencies);
 
       if (!hasStaleDocuments) {
@@ -132,14 +138,33 @@ async function isTaskRunning(taskId: string, dependencies: Dependencies): Promis
       { task_id: taskId },
       { signal: abortController.signal }
     );
-    // TODO handle long running task? cancel it?
-    return !response.completed;
+
+    if (response.completed) {
+      return false;
+    }
+
+    const runningDurationInNanos = response.task?.running_time_in_nanos;
+    if (runningDurationInNanos > MAX_TASK_DURATION_NANOS) {
+      logger.debug(
+        `Task ${taskId} has been running for ${runningDurationInNanos}ns, exceeding the maximum of ${MAX_TASK_DURATION_NANOS}ns. Cancelling it.`
+      );
+
+      try {
+        await esClient.tasks.cancel({ task_id: taskId }, { signal: abortController.signal });
+      } catch (cancelError) {
+        logger.debug(`Failed to cancel task ${taskId}: ${cancelError}`);
+      }
+      return false;
+    }
+
+    return true;
   } catch (error) {
     if (error instanceof errors.RequestAbortedError) {
       throw error;
     }
 
     if (error?.meta?.statusCode === 404) {
+      logger.debug(`Task ${taskId} not found, assuming it has completed`);
       return false;
     }
 
@@ -261,7 +286,12 @@ async function getEnabledSpaceSettings(
 
   let response;
   try {
-    response = await soClient.bulkGet<StoredSLOSettings>(omit(settingsObjects, 'spaceId'));
+    response = await soClient.bulkGet<StoredSLOSettings>(
+      settingsObjects.map((obj) => ({
+        type: obj.type,
+        id: obj.id,
+      }))
+    );
   } catch (error) {
     logger.debug(`Failed to fetch space settings, using none: ${error}`);
     return [];

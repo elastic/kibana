@@ -32,4 +32,5 @@ const defaultSettings: GetSLOSettingsResponse = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
   staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
+  staleInstancesCleanupEnabled: false,
 };

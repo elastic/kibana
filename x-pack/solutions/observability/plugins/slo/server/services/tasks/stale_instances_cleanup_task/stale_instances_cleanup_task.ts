@@ -44,7 +44,7 @@ export class StaleInstancesCleanupTask {
         title: 'Stale SLO instances cleanup task',
         description: 'Removes SLO summary documents not updated within configured threshold',
         timeout: '5m',
-        maxAttempts: 3,
+        maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
           abortController,

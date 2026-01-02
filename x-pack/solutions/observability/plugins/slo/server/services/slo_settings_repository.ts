@@ -74,6 +74,7 @@ export class DefaultSLOSettingsRepository implements SLOSettingsRepository {
       useAllRemoteClusters: settings.useAllRemoteClusters,
       selectedRemoteClusters: settings.selectedRemoteClusters,
       staleThresholdInHours: settings.staleThresholdInHours,
+      staleInstancesCleanupEnabled: settings.staleInstancesCleanupEnabled,
     };
   }
 }
