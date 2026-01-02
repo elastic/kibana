@@ -12,7 +12,6 @@ import type { SerializedTitles, StoredTitles } from './types';
 export const transformTitlesIn = <ApiStateType extends SerializedTitles>(
   state: ApiStateType
 ): Omit<ApiStateType, keyof SerializedTitles> & StoredTitles => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { hide_title, title, description, ...rest } = state;
 
   return {

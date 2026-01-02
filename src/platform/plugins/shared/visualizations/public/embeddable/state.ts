@@ -59,7 +59,7 @@ export const deserializeSavedObjectState = async ({
   timeRange,
   title: embeddableTitle,
   description: embeddableDescription,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   hide_title,
 }: VisualizeByReferenceState) => {
   // Load a saved visualization from the library
