@@ -40,8 +40,13 @@ export function SettingsForm() {
   const { http } = useKibana().services;
   const { isServerless } = usePluginContext();
 
-  const { data: currentSettings } = useGetSettings();
-  const { mutate: updateSettings, isLoading: isUpdating } = usePutSloSettings();
+  const { data, loading: loadingRemoteClusters } = useFetcher(() => {
+    return http?.get<Array<{ name: string }>>('/api/remote_clusters');
+  }, [http]);
+  const { data: currentSettings, isLoading: isLoadingSettings } = useGetSettings();
+  const { mutate: updateSettings, isLoading: isUpdatingSettings } = usePutSloSettings();
+
+  const loading = loadingRemoteClusters || isLoadingSettings;
 
   const { control, reset, handleSubmit, formState, watch } = useForm<SloSettingsForm>({
     defaultValues: {
@@ -53,10 +58,6 @@ export function SettingsForm() {
     values: currentSettings,
     mode: 'all',
   });
-
-  const { data, loading } = useFetcher(() => {
-    return http?.get<Array<{ name: string }>>('/api/remote_clusters');
-  }, [http]);
 
   const useAllRemoteClustersValue = watch('useAllRemoteClusters');
 
@@ -149,6 +150,7 @@ export function SettingsForm() {
                   render={({ field: { ref, onChange, value, ...field } }) => (
                     <EuiComboBox
                       {...field}
+                      isLoading={loading}
                       options={
                         data?.map((cluster) => ({ label: cluster.name, value: cluster.name })) || []
                       }
@@ -246,8 +248,8 @@ export function SettingsForm() {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            isLoading={loading || isUpdating}
-            data-test-subj="o11ySettingsFormCancelButton"
+            isLoading={loading || isUpdatingSettings}
+            data-test-subj="sloSettingsFormCancelButton"
             onClick={() => reset()}
             isDisabled={!formState.isDirty}
           >
@@ -258,7 +260,7 @@ export function SettingsForm() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            isLoading={loading || isUpdating}
+            isLoading={loading || isUpdatingSettings}
             data-test-subj="sloSettingsFormSaveButton"
             color="primary"
             fill
