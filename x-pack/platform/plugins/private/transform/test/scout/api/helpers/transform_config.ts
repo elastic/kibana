@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IndexName, TransformId } from '../../../../common';
 import type { estypes } from '@elastic/elasticsearch';
+import type { IndexName, TransformId } from '../../../../common';
 
 export function generateDestIndex(transformId: TransformId): IndexName {
   return `user-${transformId}`;

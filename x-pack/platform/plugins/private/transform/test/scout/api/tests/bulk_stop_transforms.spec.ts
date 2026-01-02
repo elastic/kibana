@@ -7,13 +7,13 @@
 
 import { expect, tags } from '@kbn/scout';
 import type { CookieHeader } from '@kbn/scout';
+import type { estypes } from '@elastic/elasticsearch';
 import type { StopTransformsRequestSchema, StopTransformsResponseSchema } from '../../../../common';
 import { TRANSFORM_STATE } from '../../../../common/constants';
 import { generateTransformConfig } from '../helpers/transform_config';
 
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
-import { estypes } from '@elastic/elasticsearch';
 
 const transformIds = ['bulk_stop_test_1', 'bulk_stop_test_2'];
 
