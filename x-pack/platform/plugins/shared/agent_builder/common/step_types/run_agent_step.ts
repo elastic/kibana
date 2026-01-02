@@ -25,6 +25,32 @@ export const InputSchema = z.object({
    * The user input message to send to the agent.
    */
   message: z.string().describe('The user input message to send to the agent.'),
+  /**
+   * Optional attachments to provide to the agent.
+   */
+  attachments: z
+    .array(
+      z.object({
+        /**
+         * Optional unique identifier for the attachment.
+         */
+        id: z.string().optional(),
+        /**
+         * Type of the attachment (e.g., "security.alert").
+         */
+        type: z.string(),
+        /**
+         * Data payload of the attachment, specific to the attachment type.
+         */
+        data: z.record(z.string(), z.any()),
+        /**
+         * When true, the attachment will not be displayed in the UI.
+         */
+        hidden: z.boolean().optional(),
+      })
+    )
+    .optional()
+    .describe('Optional attachments to provide to the agent.'),
 });
 
 /**
