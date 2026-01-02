@@ -92,6 +92,12 @@ export const sloKeys = {
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
   bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
+  instances: (
+    sloId: string,
+    search: string | undefined,
+    size: number,
+    searchAfter: string | undefined
+  ) => [...sloKeys.all, 'instances', sloId, search, size, searchAfter] as const,
 };
 
 export type SloKeys = typeof sloKeys;

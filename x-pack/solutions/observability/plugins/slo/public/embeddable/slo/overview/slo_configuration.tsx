@@ -63,7 +63,6 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // Check if the selected SLO has groupBy (not ALL_VALUE and has values)
   const hasGroupBy = useMemo(() => {
     if (!selectedSloDefinition?.groupBy) {
       return false;
@@ -125,7 +124,6 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
                 <EuiFlexItem data-test-subj="singleSloInstanceSelector" grow>
                   <SloInstanceSelector
                     sloId={selectedSloDefinition.id}
-                    initialInstanceId={selectedInstanceId}
                     onSelected={(instanceId) => {
                       setSelectedInstanceId(instanceId);
                       // When "All instances" is selected, automatically enable showAllGroupByInstances

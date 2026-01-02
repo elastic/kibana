@@ -95,11 +95,12 @@ export function SloInstanceSelector({ sloId, onSelected, hasError }: Props) {
     setSearchAfter(undefined); // Reset pagination when search changes
   }, []);
 
-  const onSearchChange = useMemo(
-    () => debounce(handleSearchChange, 300),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const onSearchChange = useMemo(() => debounce(handleSearchChange, 300), [handleSearchChange]);
+  useEffect(() => {
+    return () => {
+      onSearchChange.cancel();
+    };
+  }, [onSearchChange]);
 
   return (
     <EuiFormRow

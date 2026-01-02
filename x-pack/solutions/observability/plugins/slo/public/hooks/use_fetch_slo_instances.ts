@@ -34,7 +34,7 @@ export function useFetchSloInstances({
   const { sloClient } = usePluginContext();
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: ['slo', 'instances', sloId, search, size, searchAfter],
+    queryKey: sloKeys.instances(sloId, search, size, searchAfter),
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch('GET /internal/observability/slos/{id}/_instances', {
@@ -49,7 +49,7 @@ export function useFetchSloInstances({
           signal,
         });
       } catch (error) {
-        throw new Error(`Something went wrong. Error: ${error}`);
+        // ignore error
       }
     },
     enabled: Boolean(sloId),
@@ -59,4 +59,3 @@ export function useFetchSloInstances({
 
   return { isLoading, isError, isSuccess, data, refetch };
 }
-
