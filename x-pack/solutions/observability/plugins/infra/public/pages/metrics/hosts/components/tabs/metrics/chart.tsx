@@ -64,7 +64,7 @@ export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {
   ]);
 
   if (shouldNotLoadCharts({ loading, error, hostNodesLength: hostNodes.length })) {
-    return <ChartPlaceholder error={error} borderRadius="m" />;
+    return <ChartPlaceholder error={error} />;
   }
 
   return (

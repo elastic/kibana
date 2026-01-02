@@ -13,10 +13,8 @@ import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations/constants
 
 interface KpiPlaceholderProps {
   error?: unknown;
-  count?: number;
+  count: number;
 }
-
-const KPI_CHART_COUNT = 4; // cpuUsage, normalizedLoad1m, memoryUsage, diskUsage
 
 const SingleKpiPlaceholder = ({ error }: { error?: unknown }) => {
   const isError = Boolean(error);
@@ -70,7 +68,7 @@ const SingleKpiPlaceholder = ({ error }: { error?: unknown }) => {
   );
 };
 
-export const KpiPlaceholder = ({ error, count = KPI_CHART_COUNT }: KpiPlaceholderProps) => {
+export const KpiPlaceholder = ({ error, count }: KpiPlaceholderProps) => {
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (

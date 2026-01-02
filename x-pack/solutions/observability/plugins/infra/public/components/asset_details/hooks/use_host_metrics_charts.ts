@@ -16,6 +16,27 @@ import {
 } from '../constants';
 import { useChartSeriesColor } from './use_chart_series_color';
 
+type HostChartsResult = Awaited<
+  ReturnType<ReturnType<typeof findInventoryModel<'host'>>['metrics']['getCharts']>
+>;
+
+const getHostKpiChartsArray = (
+  cpu: HostChartsResult['cpu'],
+  memory: HostChartsResult['memory'],
+  disk: HostChartsResult['disk']
+) => [
+  cpu.metric.cpuUsage,
+  cpu.metric.normalizedLoad1m,
+  memory.metric.memoryUsage,
+  disk.metric.diskUsage,
+];
+
+export const HOST_KPI_CHARTS_COUNT = getHostKpiChartsArray(
+  {} as any as HostChartsResult['cpu'],
+  {} as any as HostChartsResult['memory'],
+  {} as any as HostChartsResult['disk']
+).length;
+
 export const useHostCharts = ({
   metric,
   indexPattern,
@@ -125,12 +146,9 @@ export const useHostKpiCharts = ({
       schema: schema ?? 'ecs',
     });
 
-    return [
-      cpu.metric.cpuUsage,
-      cpu.metric.normalizedLoad1m,
-      memory.metric.memoryUsage,
-      disk.metric.diskUsage,
-    ].map((chart) => ({
+    const hostKpiCharts = getHostKpiChartsArray(cpu, memory, disk);
+
+    return hostKpiCharts.map((chart) => ({
       ...chart,
       seriesColor,
       decimals: 1,

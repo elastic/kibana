@@ -19,6 +19,7 @@ import {
   MAX_AS_FIRST_FUNCTION_PATTERN,
   AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
 } from '../../../../../components/asset_details/constants';
+import { HOST_KPI_CHARTS_COUNT } from '../../../../../components/asset_details/hooks/use_host_metrics_charts';
 
 export const getSubtitle = ({
   formulaValue,
@@ -106,7 +107,7 @@ export const KpiCharts = () => {
   });
 
   if (shouldNotLoadCharts({ loading, error, hostNodesLength: hostNodes.length })) {
-    return <KpiPlaceholder error={error} />;
+    return <KpiPlaceholder error={error} count={HOST_KPI_CHARTS_COUNT} />;
   }
 
   return (

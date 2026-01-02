@@ -13,15 +13,9 @@ import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/con
 
 interface ChartPlaceholderProps {
   error?: unknown;
-  height?: number;
-  borderRadius?: 'none' | 's' | 'm' | 'l';
 }
 
-export const ChartPlaceholder = ({
-  error,
-  height = METRIC_CHART_HEIGHT,
-  borderRadius = 'm',
-}: ChartPlaceholderProps) => {
+export const ChartPlaceholder = ({ error }: ChartPlaceholderProps) => {
   const isError = Boolean(error);
   const iconType = isError ? 'alert' : 'visLine';
   const title = isError
@@ -47,7 +41,7 @@ export const ChartPlaceholder = ({
       hasShadow={false}
       paddingSize="m"
       css={css`
-        min-height: ${height}px;
+        min-height: ${METRIC_CHART_HEIGHT}px;
         display: flex;
         align-items: center;
         justify-content: center;
