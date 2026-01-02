@@ -23,7 +23,19 @@ export const GroupStreamDetailView = ({ stream }: { stream: Streams.GroupStream.
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
     if (stream) {
-      onPageReady();
+      onPageReady({
+        meta: {
+          description: '[ttfmp_streams] streamType: group',
+        },
+        customMetrics: {
+          key1: 'member_count',
+          value1: stream.stream.group.members.length,
+          key2: 'tag_count',
+          value2: stream.stream.group.tags.length,
+          key3: 'metadata_count',
+          value3: Object.keys(stream.stream.group.metadata).length,
+        },
+      });
     }
   }, [stream, onPageReady]);
 

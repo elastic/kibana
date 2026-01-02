@@ -22,7 +22,7 @@ import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
 import { EmptyState } from './empty_state';
-import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
   SELECTED_FEATURES_URL_PARAM,
@@ -66,11 +66,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     query,
   });
 
-  const { removeQuery } = useSignificantEventsApi({
-    name: definition.stream.name,
-    start: timeState.start,
-    end: timeState.end,
-  });
+  const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
@@ -152,7 +148,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     />
   ) : null;
 
-  const editFlyout = (generateAutomatically: boolean) => (
+  const editFlyout = (generateOnMount: boolean) => (
     <EditSignificantEventFlyout
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
@@ -165,8 +161,9 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       selectedFeatures={selectedFeatures}
       setSelectedFeatures={setSelectedFeatures}
       features={features}
-      generateAutomatically={generateAutomatically}
       onFeatureIdentificationClick={identifyFeaturesCallback}
+      generateOnMount={generateOnMount}
+      aiFeatures={aiFeatures}
     />
   );
 
@@ -193,6 +190,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
             setInitialFlow('ai');
             setIsEditFlyoutOpen(true);
           }}
+          aiFeatures={aiFeatures}
         />
         {featureDetectionFlyout}
         {editFlyout(true)}
