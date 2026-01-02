@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -15,9 +13,8 @@ import usePrevious from 'react-use/lib/usePrevious';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import type { ExpressionInputProps } from '../types';
-import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
-import { CODE_EDITOR_OPTIONS, LANGUAGE_CONFIGURATION } from './constants';
+import type { ExpressionInputProps } from './types';
+import { CODE_EDITOR_OPTIONS, EXPRESSIONS_LANGUAGE_ID, LANGUAGE_CONFIGURATION } from './constants';
 import { getHoverProvider, getSuggestionProvider } from './providers';
 
 /**
@@ -25,7 +22,7 @@ import { getHoverProvider, getSuggestionProvider } from './providers';
  * as it is being written.  Be certain to provide ExpressionFunctions by calling `registerExpressionFunctions`
  * from the start contract of the presentationUtil plugin.
  */
-export const ExpressionInput = (props: ExpressionInputProps) => {
+export const ExpressionInputInternal = (props: ExpressionInputProps) => {
   const {
     expressionFunctions,
     expression: initialExpression,
