@@ -9,14 +9,21 @@
 
 import { useEffect, useState } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import {
-  dashboardAttachments,
-  DASHBOARD_AGENT_ID,
-  type PanelSummary,
-} from '@kbn/dashboard-agent-plugin/common';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { agentBuilderService } from '../../services/kibana_services';
 import { isDashboardSection, type DashboardState } from '../../../common';
+
+// TODO: These constants and types are duplicated from @kbn/dashboard-agent-plugin/common
+// to avoid a circular dependency (dashboard -> dashboardAgent -> dashboard).
+// In the future, these should be moved to a shared package like @kbn/dashboard-agent-common.
+const DASHBOARD_NAMESPACE = 'platform.dashboard';
+const DASHBOARD_AGENT_ID = `${DASHBOARD_NAMESPACE}.dashboard_agent`;
+const DASHBOARD_ATTACHMENT_TYPE = `${DASHBOARD_NAMESPACE}.dashboard`;
+
+interface PanelSummary {
+  type: string;
+  title?: string;
+}
 
 /**
  * Extracts panel summaries from the serialized dashboard state
@@ -99,11 +106,12 @@ export function useAgentBuilderContext({
         description: description || undefined,
         panelCount,
         panels: panelSummaries,
+        attachmentLabel: dashboardTitle,
       };
 
       const dashboardAttachment: AttachmentInput = {
         id: `dashboard-${savedDashboardId}`,
-        type: dashboardAttachments.dashboard,
+        type: DASHBOARD_ATTACHMENT_TYPE,
         data: attachmentData,
       };
 
