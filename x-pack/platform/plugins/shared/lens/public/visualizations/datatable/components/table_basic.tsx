@@ -511,6 +511,22 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [props.args.density]
   );
 
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+    if (!props.args.showRowNumbers) {
+      return [];
+    }
+    return [
+      {
+        id: 'rowNumber',
+        headerCellRender: () => null,
+        rowCellRender: function RowCellRender({ rowIndex }) {
+          return <span data-test-subj="lnsDataTable-rowNumber">{rowIndex + 1}</span>;
+        },
+        width: 50,
+      },
+    ];
+  }, [props.args.showRowNumbers]);
+
   if (isEmpty) {
     return (
       <div
@@ -528,26 +544,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     i18n.translate('xpack.lens.table.defaultAriaLabel', {
       defaultMessage: 'Data table visualization',
     });
-
-  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    if (!props.args.showRowNumbers) {
-      return [];
-    }
-    return [
-      {
-        id: 'rowNumber',
-        headerCellRender: () => null,
-        rowCellRender: function RowCellRender({ rowIndex }) {
-          return (
-            <span>
-              {(pagination?.pageIndex ?? 0) * (pagination?.pageSize ?? 0) + rowIndex + 1}
-            </span>
-          );
-        },
-        width: 50,
-      },
-    ];
-  }, [props.args.showRowNumbers, pagination]);
 
   return (
     <div
