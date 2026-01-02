@@ -135,13 +135,13 @@ describe('MigrationReadyPanel', () => {
 
   it('should show missing resources button and text when resources are missing', async () => {
     mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() => setMissingResources(mockMissingResources));
       return {
-        getMissingResources: jest.fn(() => setMissingResources(mockMissingResources)),
+        getMissingResources: mockGetMissingResources,
         isLoading: false,
         error: null,
       };
     });
-    mockGetMissingResources.mockReturnValue(mockMissingResources);
 
     renderTestComponent();
 
@@ -168,8 +168,11 @@ describe('MigrationReadyPanel', () => {
 
   it('should show start translation button', () => {
     mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() =>
+        setMissingResources(mockEmptyMissingResources)
+      );
       return {
-        getMissingResources: jest.fn(() => setMissingResources(mockEmptyMissingResources)),
+        getMissingResources: mockGetMissingResources,
         isLoading: false,
         error: null,
       };

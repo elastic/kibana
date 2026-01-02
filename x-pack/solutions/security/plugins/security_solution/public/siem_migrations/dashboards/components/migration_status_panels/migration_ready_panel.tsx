@@ -21,7 +21,7 @@ import { useMigrationDataInputContext } from '../../../common/components/migrati
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
 import type { MigrationSettingsBase } from '../../../common/types';
-import { useMissingResources } from '../../../rules/components/data_input_flyout/steps/hooks/use_missing_resources';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 
 export interface MigrationReadyPanelProps {
   migrationStats: DashboardMigrationStats;

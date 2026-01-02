@@ -29,7 +29,7 @@ import { type RuleMigrationSettings, type RuleMigrationStats } from '../../types
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
-import { useMissingResources } from './steps/hooks/use_missing_resources';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 import type {
   HandleMissingResourcesIndexed,
   MigrationStepProps,

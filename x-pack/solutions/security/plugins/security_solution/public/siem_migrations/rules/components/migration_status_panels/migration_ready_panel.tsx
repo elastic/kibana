@@ -23,7 +23,7 @@ import { StartTranslationButton } from '../../../common/components/start_transla
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { MigrationSource } from '../../../common/types';
-import { useMissingResources } from '../data_input_flyout/steps/hooks/use_missing_resources';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
@@ -111,6 +111,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
                   <span>{migrationPanelDescription}</span>
                   {!isLoading && missingResourceCount > 0 && (
                     <span>
+                      {' '}
                       {RULE_MIGRATION_READY_MISSING_RESOURCES_DESCRIPTION[migrationStats.vendor]}
                     </span>
                   )}

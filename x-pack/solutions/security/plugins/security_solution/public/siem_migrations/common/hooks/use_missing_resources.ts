@@ -6,12 +6,9 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { SiemMigrationResourceBase } from '../../../../../../../common/siem_migrations/model/common.gen';
-import type {
-  HandleMissingResourcesIndexed,
-  MissingResourcesIndexed,
-} from '../../../../../common/types';
-import { MigrationSource } from '../../../../../common/types';
+import type { SiemMigrationResourceBase } from '../../../../common/siem_migrations/model/common.gen';
+import type { HandleMissingResourcesIndexed, MissingResourcesIndexed } from '../types';
+import { MigrationSource } from '../types';
 
 export const useMissingResources = ({
   handleMissingResourcesIndexed,

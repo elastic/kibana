@@ -30,7 +30,7 @@ import type { DashboardMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
 import type { HandleMissingResourcesIndexed, MigrationSettingsBase } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
-import { useMissingResources } from '../../../rules/components/data_input_flyout/steps/hooks/use_missing_resources';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
 import { STEP_COMPONENTS } from './configs';
 import { PanelText } from '../../../../common/components/panel_text';
 import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
