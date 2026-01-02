@@ -59,7 +59,7 @@
     "@kbn/inference-tracing",
     "@kbn/core-http-browser",
     "@kbn/spaces-utils",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": ["target/**/*"]
 }

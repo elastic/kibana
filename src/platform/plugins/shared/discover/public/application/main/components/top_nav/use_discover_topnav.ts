@@ -9,6 +9,7 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -34,6 +35,7 @@ export const useDiscoverTopNav = ({
   const hasUnsavedChanges = Boolean(
     hasSavedSearchChanges && stateContainer.savedSearchState.getId()
   );
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const topNavBadges = useMemo(
     () =>
@@ -42,8 +44,9 @@ export const useDiscoverTopNav = ({
         services,
         hasUnsavedChanges,
         topNavCustomization,
+        isMobile,
       }),
-    [stateContainer, services, hasUnsavedChanges, topNavCustomization]
+    [stateContainer, services, hasUnsavedChanges, topNavCustomization, isMobile]
   );
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();

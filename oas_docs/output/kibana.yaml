@@ -6948,6 +6948,7 @@ paths:
       operationId: getCaseDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_includeComments'
       responses:
         '200':
           content:
@@ -63872,7 +63873,8 @@ components:
     Cases_ids:
       description: |
         The cases that you want to removed. All non-ASCII characters must be URL encoded.
-      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+      example:
+        - d4e7abb0-b462-11ec-9a8d-698504725a43
       in: query
       name: ids
       required: true
@@ -63882,6 +63884,14 @@ components:
           minItems: 1
           type: string
         type: array
+    Cases_includeComments:
+      deprecated: true
+      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
+      in: query
+      name: includeComments
+      schema:
+        default: true
+        type: boolean
     Cases_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
@@ -68202,6 +68212,9 @@ components:
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
+        refusal:
+          description: Refusal reason returned by the model when content is filtered.
+          type: string
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageRole'
           description: Message role.
