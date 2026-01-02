@@ -157,7 +157,7 @@ export class PreinstalledWorkflowsBootstrap {
 
     await this.workflowsManagement.management!.updateWorkflow(
       workflowId,
-      { yaml, deleted_at: null },
+      { yaml },
       this.spaceId,
       this.systemRequest
     );
