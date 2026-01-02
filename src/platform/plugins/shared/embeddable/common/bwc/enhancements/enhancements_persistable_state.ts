@@ -1,6 +1,15 @@
-import { Serializable, SerializableRecord } from "@kbn/utility-types";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { Reference } from '@kbn/content-management-utils';
-import { dynamicActionsPersistableState } from "./dynamic_actions/dynamic_action_enhancement";
+import { dynamicActionsPersistableState } from './dynamic_actions/dynamic_action_enhancement';
 
 export const enhancementsPersistableState = {
   extract: (enhancementsState: SerializableRecord) => {
@@ -8,9 +17,10 @@ export const enhancementsPersistableState = {
     const extractedReferences: Reference[] = [];
     Object.keys(enhancementsState).forEach((key) => {
       if (!enhancementsState[key]) return;
-      const { state, references } = key === 'dynamicActions'
-        ? dynamicActionsPersistableState.extract(enhancementsState[key] as SerializableRecord)
-        : { state: enhancementsState[key], references: [] };
+      const { state, references } =
+        key === 'dynamicActions'
+          ? dynamicActionsPersistableState.extract(enhancementsState[key] as SerializableRecord)
+          : { state: enhancementsState[key], references: [] };
       outputEnhancementsState[key] = state as Serializable;
       extractedReferences.push(...references);
     });
@@ -24,14 +34,18 @@ export const enhancementsPersistableState = {
     const outputEnhancementsState: Record<string, Serializable> = {};
     Object.keys(enhancementsState).forEach((key) => {
       if (!enhancementsState[key]) return;
-      outputEnhancementsState[key] = key === 'dynamicActions'
-        ? dynamicActionsPersistableState.inject(enhancementsState[key] as SerializableRecord, references)
-        : enhancementsState[key];
+      outputEnhancementsState[key] =
+        key === 'dynamicActions'
+          ? dynamicActionsPersistableState.inject(
+              enhancementsState[key] as SerializableRecord,
+              references
+            )
+          : enhancementsState[key];
     });
 
     return outputEnhancementsState;
   },
-}
+};
 /*
 export const dynamicActionEnhancement = (
   uiActionsEnhanced: UiActionsServiceEnhancements

@@ -9,21 +9,18 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SerializedAction<Config extends SerializableRecord = SerializableRecord> = {
   readonly factoryId: string;
   readonly name: string;
   readonly config: Config;
 };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SerializedEvent = {
   eventId: string;
   triggers: string[];
   action: SerializedAction;
 };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type DynamicActionsState = {
   events: SerializedEvent[];
 };

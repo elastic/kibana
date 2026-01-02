@@ -12,7 +12,7 @@ import type { EmbeddableStateWithType } from './types';
 import { telemetryBaseEmbeddableInput } from './migrate_base_input';
 
 export const getTelemetryFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>
 ) => {
   return (
     state: EmbeddableStateWithType,
@@ -24,7 +24,7 @@ export const getTelemetryFunction = (
     if (factory) {
       outputTelemetryData = factory.telemetry(state, outputTelemetryData);
     }
-    
+
     return outputTelemetryData;
   };
 };

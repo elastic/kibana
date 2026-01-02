@@ -53,15 +53,15 @@ export const dashboardDrilldownPersistableState = {
     const ref = references.find((r) => r.name === refName);
     return ref
       ? {
-        ...state,
-        action: {
-          ...state.action,
-          config: {
-            ...state.action.config,
-            dashboardId: ref.id,
+          ...state,
+          action: {
+            ...state.action,
+            config: {
+              ...state.action.config,
+              dashboardId: ref.id,
+            },
           },
-        },
-      }
+        }
       : state;
   },
 };

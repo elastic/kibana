@@ -13,7 +13,9 @@ import type { MapByValueState } from '../types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
 
-export function getTransformOut(transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']) {
+export function getTransformOut(
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+) {
   function transformOut(
     state: StoredMapEmbeddableState,
     panelReferences?: Reference[],

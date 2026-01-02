@@ -14,13 +14,13 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Reference } from '@kbn/content-management-utils';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
 import type { EmbeddableTransforms } from '../common';
 import type { AddFromLibraryFormProps } from './add_from_library/add_from_library_flyout';
-import { SerializableRecord } from '@kbn/utility-types';
-import { Reference } from '@kbn/content-management-utils';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -79,9 +79,9 @@ export interface EmbeddableSetup {
   ) => void;
 
   transformEnhancementsIn: (enhancementsState: SerializableRecord) => {
-      state: SerializableRecord,
-      references: Reference[],
-    };
+    state: SerializableRecord;
+    references: Reference[];
+  };
   transformEnhancementsOut: (
     enhancementsState: SerializableRecord,
     references: Reference[]

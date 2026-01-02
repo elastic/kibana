@@ -30,7 +30,8 @@ const dashboardToMenuItem = (dashboardId: string, title: string) => ({
   label: title,
 });
 
-export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<DashboardDrilldownConfig, object> {
+export interface DashboardDrilldownCollectConfigProps
+  extends CollectConfigProps<DashboardDrilldownConfig, object> {
   params: Params;
 }
 

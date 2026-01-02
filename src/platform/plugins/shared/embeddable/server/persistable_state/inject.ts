@@ -9,12 +9,12 @@
 
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { enhancementsPersistableState } from '../../common/bwc/enhancements/enhancements_persistable_state';
 import type { EmbeddableStateWithType } from './types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
-import { enhancementsPersistableState } from '@kbn/embeddable-plugin/common/bwc/enhancements/enhancements_persistable_state';
 
 export const getInjectFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>
 ) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const factory = getEmbeddableFactory(state.type);
@@ -25,8 +25,11 @@ export const getInjectFunction = (
       updatedInput = factory.inject(updatedInput, references) as EmbeddableStateWithType;
     }
 
-    updatedInput.enhancements = enhancementsPersistableState.inject(state.enhancements || {}, references);
-    
+    updatedInput.enhancements = enhancementsPersistableState.inject(
+      state.enhancements || {},
+      references
+    );
+
     return updatedInput;
   };
 };

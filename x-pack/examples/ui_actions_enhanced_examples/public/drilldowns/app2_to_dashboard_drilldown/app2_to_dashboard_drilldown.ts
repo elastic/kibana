@@ -20,7 +20,10 @@ export class App2ToDashboardDrilldown extends AbstractDashboardDrilldown<Context
 
   public readonly supportedTriggers = () => [SAMPLE_APP2_CLICK_TRIGGER];
 
-  protected async getLocation(config: DashboardDrilldownConfig, context: Context): Promise<KibanaLocation> {
+  protected async getLocation(
+    config: DashboardDrilldownConfig,
+    context: Context
+  ): Promise<KibanaLocation> {
     const location = await this.locator.getLocation({
       dashboardId: config.dashboardId,
     });

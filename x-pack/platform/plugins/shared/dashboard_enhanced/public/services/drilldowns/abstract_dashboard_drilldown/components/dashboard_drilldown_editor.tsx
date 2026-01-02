@@ -13,8 +13,8 @@ import {
   DashboardDrilldownOptionsComponent,
 } from '@kbn/presentation-util-plugin/public';
 
-import type { DashboardDrilldownConfig } from '../types';
 import { i18n } from '@kbn/i18n';
+import type { DashboardDrilldownConfig } from '../types';
 
 const DashboardDrilldownOptions = withSuspense(DashboardDrilldownOptionsComponent, null);
 
@@ -41,12 +41,17 @@ export const DashboardDrilldownEditor: React.FC<DashboardDrilldownEditorProps> =
 
   return (
     <>
-      <EuiFormRow label={i18n.translate(
-        'xpack.dashboard.components.DashboardDrilldownConfig.chooseDestinationDashboard',
-        {
-          defaultMessage: 'Choose destination dashboard',
-        }
-      )} fullWidth isInvalid={!!error} error={error}>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.dashboard.components.DashboardDrilldownConfig.chooseDestinationDashboard',
+          {
+            defaultMessage: 'Choose destination dashboard',
+          }
+        )}
+        fullWidth
+        isInvalid={!!error}
+        error={error}
+      >
         <EuiComboBox<string>
           async
           selectedOptions={

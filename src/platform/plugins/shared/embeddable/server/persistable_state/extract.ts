@@ -8,12 +8,12 @@
  */
 
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { enhancementsPersistableState } from '../../common/bwc/enhancements/enhancements_persistable_state';
 import type { EmbeddableStateWithType } from './types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
-import { enhancementsPersistableState } from '@kbn/embeddable-plugin/common/bwc/enhancements/enhancements_persistable_state';
 
 export const getExtractFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>
 ) => {
   return (state: EmbeddableStateWithType) => {
     const factory = getEmbeddableFactory(state.type);

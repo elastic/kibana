@@ -58,19 +58,26 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
     CollectConfigProps<DashboardDrilldownConfig, BaseActionFactoryContext>
   >;
 
-  public readonly CollectConfig: React.FC<CollectConfigProps<DashboardDrilldownConfig, BaseActionFactoryContext>>;
+  public readonly CollectConfig: React.FC<
+    CollectConfigProps<DashboardDrilldownConfig, BaseActionFactoryContext>
+  >;
 
   public readonly createConfig = () => ({
     dashboardId: '',
     ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
   });
 
-  public readonly isConfigValid = (config: DashboardDrilldownConfig): config is DashboardDrilldownConfig => {
+  public readonly isConfigValid = (
+    config: DashboardDrilldownConfig
+  ): config is DashboardDrilldownConfig => {
     if (!config.dashboardId) return false;
     return true;
   };
 
-  public readonly getHref = async (config: DashboardDrilldownConfig, context: Context): Promise<string> => {
+  public readonly getHref = async (
+    config: DashboardDrilldownConfig,
+    context: Context
+  ): Promise<string> => {
     const { app, path } = await this.getLocation(config, context, true);
     const url = await this.params.start().core.application.getUrlForApp(app, {
       path,

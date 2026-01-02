@@ -17,6 +17,7 @@ import type {
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
 import type { ObjectType } from '@kbn/config-schema';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -28,7 +29,6 @@ import {
 import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms } from '../common';
 import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
-import { SerializableRecord } from '@kbn/utility-types';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -43,8 +43,8 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   getAllMigrations: () => MigrateFunctionsObject;
   transformEnhancementsIn: (enhancementsState: SerializableRecord) => {
-    state: SerializableRecord,
-    references: Reference[],
+    state: SerializableRecord;
+    references: Reference[];
   };
   transformEnhancementsOut: (
     enhancementsState: SerializableRecord,
@@ -67,9 +67,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
 
   public setup(core: CoreSetup) {
-    this.migrateFn = getMigrateFunction(
-      this.getEmbeddableFactory,
-    );
+    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
@@ -81,20 +79,11 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       },
       transformEnhancementsIn: enhancementsPersistableState.extract,
       transformEnhancementsOut: enhancementsPersistableState.inject,
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-      ),
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
@@ -107,20 +96,11 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-      ),
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 

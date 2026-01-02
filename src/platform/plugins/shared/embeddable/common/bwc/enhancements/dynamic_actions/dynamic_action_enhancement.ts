@@ -17,12 +17,13 @@ export const dynamicActionsPersistableState = {
     const references: Reference[] = [];
     const newState: DynamicActionsState = {
       events: (state as DynamicActionsState).events.map((eventState: SerializedEvent) => {
-        const result = eventState.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN'
-          ? dashboardDrilldownPersistableState.extract(eventState)
-          : {
-              state: eventState,
-              references: [],
-            };
+        const result =
+          eventState.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN'
+            ? dashboardDrilldownPersistableState.extract(eventState)
+            : {
+                state: eventState,
+                references: [],
+              };
         result.references.forEach((r) => references.push(r));
         return result.state;
       }),
@@ -32,8 +33,10 @@ export const dynamicActionsPersistableState = {
   inject: (state: SerializableRecord, references: Reference[]) => {
     return {
       events: (state as DynamicActionsState).events.map((eventState: SerializedEvent) => {
-        return eventState.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN' ? dashboardDrilldownPersistableState.inject(eventState, references) : eventState;
+        return eventState.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN'
+          ? dashboardDrilldownPersistableState.inject(eventState, references)
+          : eventState;
       }),
     } as DynamicActionsState;
-  }
-}
+  },
+};

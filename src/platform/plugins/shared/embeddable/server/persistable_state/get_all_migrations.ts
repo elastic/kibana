@@ -14,10 +14,7 @@ import type {
 } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import { baseEmbeddableMigrations } from './migrate_base_input';
 
-export const getAllMigrations = (
-  factories: unknown[],
-  migrateFn: PersistableStateMigrateFn
-) => {
+export const getAllMigrations = (factories: unknown[], migrateFn: PersistableStateMigrateFn) => {
   const uniqueVersions = new Set<string>();
   for (const baseMigrationVersion of Object.keys(baseEmbeddableMigrations)) {
     uniqueVersions.add(baseMigrationVersion);
@@ -27,7 +24,7 @@ export const getAllMigrations = (
     const factoryMigrations = typeof migrations === 'function' ? migrations() : migrations;
     Object.keys(factoryMigrations).forEach((version) => uniqueVersions.add(version));
   }
-  
+
   const migrations: MigrateFunctionsObject = {};
   uniqueVersions.forEach((version) => {
     migrations[version] = (state) => ({

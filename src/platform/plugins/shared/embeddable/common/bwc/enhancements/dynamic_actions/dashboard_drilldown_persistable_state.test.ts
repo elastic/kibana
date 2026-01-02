@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dashboardDrilldownPersistableState, EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './dashboard_drilldown_persistable_state';
+import {
+  dashboardDrilldownPersistableState,
+  EMBEDDABLE_TO_DASHBOARD_DRILLDOWN,
+} from './dashboard_drilldown_persistable_state';
 import type { SerializedEvent } from './types';
 
 const state: SerializedEvent = {
