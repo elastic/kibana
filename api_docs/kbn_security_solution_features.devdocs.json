@@ -107,7 +107,7 @@
             "signature": [
               "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
-              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
+              " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
               "AppCategory",
               "; app: readonly string[]; privileges: { all: ",
               {
@@ -385,7 +385,7 @@
         "signature": [
           "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
-          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
+          " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
           "AppCategory",
           "; app: readonly string[]; privileges: { all: ",
           {
@@ -1563,7 +1563,7 @@
         "label": "SubFeaturesPrivileges",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"read\" | \"all\" | undefined; minimumLicense?: ",
+          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"all\" | \"read\" | undefined; minimumLicense?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
