@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import '@kbn/code-editor-mock/jest_helper';
 
 import { getWatch } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';
@@ -35,8 +36,6 @@ const renderWatchEditPage = ({
     </I18nProvider>
   );
 };
-
-jest.mock('@kbn/code-editor');
 
 describe('<WatchEditPage />', () => {
   let httpSetup: HttpSetup;

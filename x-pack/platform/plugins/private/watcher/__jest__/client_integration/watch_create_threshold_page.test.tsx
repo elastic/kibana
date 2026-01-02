@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import '@kbn/code-editor-mock/jest_helper';
 
 import { getExecuteDetails } from '../../__fixtures__';
 import { ACTION_TYPES, API_BASE_PATH, WATCH_TYPES } from '../../common/constants';
@@ -57,8 +58,6 @@ jest.mock('uuid', () => ({
     return require('./helpers/jest_constants').WATCH_ID;
   },
 }));
-
-jest.mock('@kbn/code-editor');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import '@kbn/code-editor-mock/jest_helper';
 
 import { getExecuteDetails } from '../../__fixtures__';
 import { API_BASE_PATH, WATCH_TYPES } from '../../common/constants';
@@ -18,8 +19,6 @@ import type { HttpSetup } from '@kbn/core/public';
 import { WatchEditPage } from '../../public/application/sections/watch_edit_page/watch_edit_page';
 import { registerRouter } from '../../public/application/lib/navigation';
 import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
-
-jest.mock('@kbn/code-editor');
 
 const renderCreateJsonWatch = (httpSetup: HttpSetup) => {
   const Wrapped = WithAppDependencies(WatchEditPage, httpSetup);
