@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
+    testConfigCategory: xPackAPITestsConfig.get('testConfigCategory'),
     testFiles: [resolve(__dirname, './apis/spaces/feature_disabled.ts')],
     services: {
       ...kibanaAPITestsConfig.get('services'),
