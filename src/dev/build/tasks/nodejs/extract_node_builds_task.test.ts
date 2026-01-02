@@ -89,11 +89,20 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  process.env.CI_FORCE_NODE_GLIBC_217 = originalGlibc217;
-  process.env.CI_FORCE_NODE_POINTER_COMPRESSION = originalPointerCompression;
+  if (originalGlibc217 === undefined) {
+    delete process.env.CI_FORCE_NODE_GLIBC_217;
+  } else {
+    process.env.CI_FORCE_NODE_GLIBC_217 = originalGlibc217;
+  }
+
+  if (originalPointerCompression === undefined) {
+    delete process.env.CI_FORCE_NODE_POINTER_COMPRESSION;
+  } else {
+    process.env.CI_FORCE_NODE_POINTER_COMPRESSION = originalPointerCompression;
+  }
 });
 
-async function extractNodeBuilds() {
+async function runExtractNodeBuildsTask() {
   const { config } = await setup();
 
   await ExtractNodeBuilds.run(config, log);
@@ -115,19 +124,19 @@ async function extractNodeBuilds() {
 
 describe('runs expected fs operations', () => {
   it('default variant', async () => {
-    const usedMethods = await extractNodeBuilds();
+    const usedMethods = await runExtractNodeBuildsTask();
     expect(usedMethods).toMatchSnapshot();
   });
 
   it('glibc-217 variant (CI_FORCE_NODE_GLIBC_217)', async () => {
     process.env.CI_FORCE_NODE_GLIBC_217 = 'true';
-    const usedMethods = await extractNodeBuilds();
+    const usedMethods = await runExtractNodeBuildsTask();
     expect(usedMethods).toMatchSnapshot();
   });
 
   it('pointer-compression variant (CI_FORCE_NODE_POINTER_COMPRESSION)', async () => {
     process.env.CI_FORCE_NODE_POINTER_COMPRESSION = 'true';
-    const usedMethods = await extractNodeBuilds();
+    const usedMethods = await runExtractNodeBuildsTask();
     expect(usedMethods).toMatchSnapshot();
   });
 });
