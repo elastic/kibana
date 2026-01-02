@@ -87,7 +87,7 @@ export function getCastingTypesSuggestions(sourceType?: SupportedDataType): ISug
     const suggestion: ISuggestionItem = {
       label: castingType,
       text: castingType,
-      kind: 'Text',
+      kind: 'Keyword',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineCastingTypeDescription', {
         defaultMessage: `Cast value to ${castingType}`,
         values: { castingType },
