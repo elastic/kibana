@@ -7,7 +7,7 @@
 import Path from 'path';
 import { node } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { identifySystemFeatures } from '@kbn/streams-ai';
+import { identifySystems } from '@kbn/streams-ai';
 import kbnDatemath from '@kbn/datemath';
 import type { ScoutTestConfig } from '@kbn/scout';
 import { omit, uniq } from 'lodash';
@@ -21,7 +21,7 @@ import { FEATURE_IDENTIFICATION_DATASETS } from './feature_identification_datase
 
 evaluate.describe.configure({ timeout: 600_000 });
 
-evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
+evaluate.describe('Streams systems identification', { tag: '@svlOblt' }, () => {
   const from = kbnDatemath.parse('now-15m')!;
   const to = kbnDatemath.parse('now')!;
 
@@ -242,34 +242,27 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
             });
           }
 
-          const { features } = await identifySystemFeatures({
+          const { systems } = await identifySystems({
             start: from.valueOf(),
             end: to.valueOf(),
             esClient,
             inferenceClient,
             logger,
             stream,
-            dropUnmapped: true,
             signal: new AbortController().signal,
-            analysis: await describeDataset({
-              esClient,
-              start: from.valueOf(),
-              end: to.valueOf(),
-              index: stream.name,
-            }),
           });
 
-          const featuresWithAnalysis = await Promise.all(
-            features.map(async (feature) => {
+          const systemsWithAnalysis = await Promise.all(
+            systems.map(async (system) => {
               return {
-                feature,
+                system,
                 analysis: formatDocumentAnalysis(
                   await describeDataset({
                     esClient,
                     start: from.valueOf(),
                     end: to.valueOf(),
                     index: stream.name,
-                    filter: conditionToQueryDsl(feature.filter),
+                    filter: conditionToQueryDsl(system.filter),
                   }),
                   {
                     dropEmpty: true,
@@ -288,13 +281,13 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
           });
 
           return {
-            features: features.map(({ name, filter }) => ({
+            systems: systems.map(({ name, filter }) => ({
               name,
               filter,
             })),
-            analysis: featuresWithAnalysis.map(({ feature, analysis }) => {
+            analysis: systemsWithAnalysis.map(({ system, analysis }) => {
               return {
-                name: feature.name,
+                name: system.name,
                 analysis,
               };
             }),
@@ -309,7 +302,7 @@ evaluate.describe('Streams feature identification', { tag: '@svlOblt' }, () => {
             const result = await evaluators.criteria(expected.criteria).evaluate({
               input: input.stream,
               expected,
-              output: output.features,
+              output: output.systems,
               metadata,
             });
 

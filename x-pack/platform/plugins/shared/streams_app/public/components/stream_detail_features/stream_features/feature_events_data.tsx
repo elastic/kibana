@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FeatureWithFilter, Streams } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -20,7 +20,7 @@ export const FeatureEventsData = ({
   feature,
   definition,
 }: {
-  feature: FeatureWithFilter;
+  feature: System;
   definition: Streams.all.Definition;
 }) => {
   const {

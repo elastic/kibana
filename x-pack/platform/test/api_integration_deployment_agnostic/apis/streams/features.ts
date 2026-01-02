@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import type { FeatureType } from '@kbn/streams-schema';
-import { emptyAssets, type Feature } from '@kbn/streams-schema';
+import type { System } from '@kbn/streams-schema';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -23,36 +23,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  describe('Features', function () {
+  describe('Systems', function () {
     const STREAM_NAME = 'logs.features-test';
 
-    const upsertFeature = async (body: Feature) => {
-      return await apiClient.fetch(
-        'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
-        {
-          params: {
-            path: { name: STREAM_NAME, featureType: body.type, featureName: body.name },
-            body,
-          },
-        }
-      );
+    const upsertFeature = async (body: System) => {
+      return await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
+        params: {
+          path: { name: STREAM_NAME, systemName: body.name },
+          body,
+        },
+      });
     };
 
-    const listFeatures = async (): Promise<Feature[]> => {
-      const res = await apiClient.fetch('GET /internal/streams/{name}/features', {
+    const listFeatures = async (): Promise<System[]> => {
+      const res = await apiClient.fetch('GET /internal/streams/{name}/systems', {
         params: { path: { name: STREAM_NAME } },
       });
       expect(res.status).to.be(200);
-      return res.body.features as Feature[];
+      return res.body.systems as System[];
     };
 
     const bulkOps = async (
-      operations: Array<
-        | { index: { feature: Feature } }
-        | { delete: { feature: { type: FeatureType; name: string } } }
-      >
+      operations: Array<{ index: { system: System } } | { delete: { system: { name: string } } }>
     ) => {
-      return await apiClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+      return await apiClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
         params: {
           path: { name: STREAM_NAME },
           body: { operations },
@@ -61,10 +55,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     const clearAllFeatures = async () => {
-      const features = await listFeatures();
-      if (!features.length) return;
-      const operations = features.map((feature) => ({
-        delete: { feature: { type: feature.type, name: feature.name } },
+      const systems = await listFeatures();
+      if (!systems.length) return;
+      const operations = systems.map((system) => ({
+        delete: { system: { name: system.name } },
       }));
       await bulkOps(operations);
     };
@@ -117,24 +111,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('gets and lists the feature', async () => {
         const getResponse = await apiClient.fetch(
-          'GET /internal/streams/{name}/features/{featureType}/{featureName}',
+          'GET /internal/streams/{name}/systems/{systemName}',
           {
             params: {
-              path: { name: STREAM_NAME, featureType: 'system', featureName: 'feature-a' },
+              path: { name: STREAM_NAME, systemName: 'feature-a' },
             },
           }
         );
         expect(getResponse.status).to.be(200);
-        expect(getResponse.body.feature).to.eql({
+        expect(getResponse.body.system).to.eql({
           type: 'system',
           name: 'feature-a',
           description: 'Initial description',
           filter: { always: {} },
         });
 
-        const features = await listFeatures();
-        expect(features).to.have.length(1);
-        expect(features[0]).to.eql({
+        const systems = await listFeatures();
+        expect(systems).to.have.length(1);
+        expect(systems[0]).to.eql({
           type: 'system',
           name: 'feature-a',
           description: 'Initial description',
@@ -175,10 +169,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('reflects the updated feature', async () => {
           const getUpdatedResponse = await apiClient.fetch(
-            'GET /internal/streams/{name}/features/{featureType}/{featureName}',
+            'GET /internal/streams/{name}/systems/{featureName}',
             {
               params: {
-                path: { name: STREAM_NAME, featureType: 'system', featureName: 'feature-a' },
+                path: { name: STREAM_NAME, systemName: 'feature-a' },
               },
             }
           );
@@ -198,12 +192,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const bulkCreate = await bulkOps([
           {
             index: {
-              feature: { name: 's1', type: 'system', description: 'one', filter: { always: {} } },
+              system: { name: 's1', type: 'system', description: 'one', filter: { always: {} } },
             },
           },
           {
             index: {
-              feature: {
+              system: {
                 name: 's2',
                 type: 'system',
                 description: 'two',
@@ -220,17 +214,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists newly indexed features', async () => {
-        const features = await listFeatures();
-        expect(features.map((f: Feature) => f.name).sort()).to.eql(['s1', 's2']);
+        const systems = await listFeatures();
+        expect(systems.map((s: System) => s.name).sort()).to.eql(['s1', 's2']);
       });
 
       describe('after delete and index via bulk', () => {
         beforeEach(async () => {
           const bulkModify = await bulkOps([
-            { delete: { feature: { type: 'system', name: 's1' } } },
+            { delete: { system: { name: 's1' } } },
             {
               index: {
-                feature: {
+                system: {
                   type: 'system',
                   name: 's3',
                   description: 'three',
@@ -243,8 +237,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('lists updated set of features', async () => {
-          const features = await listFeatures();
-          expect(features.map((f: Feature) => f.name).sort()).to.eql(['s2', 's3']);
+          const systems = await listFeatures();
+          expect(systems.map((s: System) => s.name).sort()).to.eql(['s2', 's3']);
         });
       });
     });
@@ -254,18 +248,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const bulkCreate = await bulkOps([
           {
             index: {
-              feature: { name: 'sd1', type: 'system', description: 'one', filter: { always: {} } },
+              system: { name: 'sd1', type: 'system', description: 'one', filter: { always: {} } },
             },
           },
           {
             index: {
-              feature: { name: 'sd2', type: 'system', description: 'two', filter: { always: {} } },
+              system: { name: 'sd2', type: 'system', description: 'two', filter: { always: {} } },
             },
           },
         ]);
         expect(bulkCreate.status).to.be(200);
-        const features = await listFeatures();
-        expect(features.map((f: Feature) => f.name).sort()).to.eql(['sd1', 'sd2']);
+        const systems = await listFeatures();
+        expect(systems.map((s: System) => s.name).sort()).to.eql(['sd1', 'sd2']);
       });
 
       afterEach(async () => {
@@ -322,54 +316,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('GET feature returns 403', async () => {
-        const res = await apiClient.fetch(
-          'GET /internal/streams/{name}/features/{featureType}/{featureName}',
-          {
-            params: { path: { name: STREAM_NAME, featureType: 'system', featureName: 'nope' } },
-          }
-        );
+        const res = await apiClient.fetch('GET /internal/streams/{name}/systems/{systemName}', {
+          params: { path: { name: STREAM_NAME, systemName: 'nope' } },
+        });
         expect(res.status).to.be(403);
       });
 
       it('DELETE feature returns 403', async () => {
-        const res = await apiClient.fetch(
-          'DELETE /internal/streams/{name}/features/{featureType}/{featureName}',
-          {
-            params: { path: { name: STREAM_NAME, featureType: 'system', featureName: 'nope' } },
-          }
-        );
+        const res = await apiClient.fetch('DELETE /internal/streams/{name}/systems/{systemName}', {
+          params: { path: { name: STREAM_NAME, systemName: 'nope' } },
+        });
         expect(res.status).to.be(403);
       });
 
       it('PUT feature returns 403', async () => {
-        const res = await apiClient.fetch(
-          'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
-          {
-            params: {
-              path: { name: STREAM_NAME, featureType: 'system', featureName: 'nope' },
-              body: { type: 'system', name: 'nope', description: 'x', filter: { always: {} } },
-            },
-          }
-        );
+        const res = await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
+          params: {
+            path: { name: STREAM_NAME, systemName: 'nope' },
+            body: { type: 'system', name: 'nope', description: 'x', filter: { always: {} } },
+          },
+        });
         expect(res.status).to.be(403);
       });
 
       it('GET features list returns 403', async () => {
-        const res = await apiClient.fetch('GET /internal/streams/{name}/features', {
+        const res = await apiClient.fetch('GET /internal/streams/{name}/systems', {
           params: { path: { name: STREAM_NAME } },
         });
         expect(res.status).to.be(403);
       });
 
       it('POST bulk returns 403', async () => {
-        const res = await apiClient.fetch('POST /internal/streams/{name}/features/_bulk', {
+        const res = await apiClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
           params: {
             path: { name: STREAM_NAME },
             body: {
               operations: [
                 {
                   index: {
-                    feature: {
+                    system: {
                       name: 'a',
                       type: 'system',
                       description: 'A',
@@ -377,7 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     },
                   },
                 },
-                { delete: { feature: { type: 'system', name: 'a' } } },
+                { delete: { system: { name: 'a' } } },
               ],
             },
           },

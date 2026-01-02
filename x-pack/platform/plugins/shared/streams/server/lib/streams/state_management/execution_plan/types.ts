@@ -149,8 +149,8 @@ export interface UnlinkAssetsAction {
   };
 }
 
-export interface UnlinkFeaturesAction {
-  type: 'unlink_features';
+export interface UnlinkSystemsAction {
+  type: 'unlink_systems';
   request: {
     name: string;
   };
@@ -187,7 +187,7 @@ export type ElasticsearchAction =
   | UpdateDataStreamMappingsAction
   | DeleteQueriesAction
   | UnlinkAssetsAction
-  | UnlinkFeaturesAction
+  | UnlinkSystemsAction
   | UpdateFailureStoreAction
   | UpdateIngestSettingsAction;
 
@@ -210,7 +210,7 @@ export interface ActionsByType {
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
   unlink_assets: UnlinkAssetsAction[];
-  unlink_features: UnlinkFeaturesAction[];
+  unlink_systems: UnlinkSystemsAction[];
   update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
 }

@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
-import { type FeatureType, featureTypeSchema } from '@kbn/streams-schema';
 import {
   STREAM_NAME,
   FEATURE_UUID,
@@ -19,7 +18,7 @@ import {
 } from './fields';
 
 export interface StoredFeature {
-  [FEATURE_TYPE]: FeatureType;
+  [FEATURE_TYPE]: 'system';
   [FEATURE_UUID]: string;
   [FEATURE_NAME]: string;
   [FEATURE_DESCRIPTION]: string;
@@ -28,7 +27,7 @@ export interface StoredFeature {
 }
 
 export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
-  [FEATURE_TYPE]: featureTypeSchema,
+  [FEATURE_TYPE]: z.literal('system'),
   [FEATURE_UUID]: z.string(),
   [FEATURE_NAME]: z.string(),
   [FEATURE_DESCRIPTION]: z.string(),

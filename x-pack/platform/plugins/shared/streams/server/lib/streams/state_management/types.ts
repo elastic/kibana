@@ -12,6 +12,7 @@ import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../storage/streams_storage_client';
 import type { QueryClient } from '../assets/query/query_client';
 import type { AttachmentClient } from '../attachments/attachment_client';
+import type { SystemClient } from '../system/system_client';
 
 interface StreamUpsertChange {
   type: 'upsert';
@@ -31,6 +32,7 @@ export interface StateDependencies {
   streamsClient: StreamsClient;
   storageClient: StreamsStorageClient;
   scopedClusterClient: IScopedClusterClient;
+  systemClient: SystemClient;
   attachmentClient: AttachmentClient;
   queryClient: QueryClient;
   isServerless: boolean;

@@ -12,6 +12,7 @@ import type { IdentifiedSystemsEvent } from '@kbn/streams-plugin/server/routes/i
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
+import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
   upsertSystem: (system: System) => Promise<void>;
@@ -64,46 +65,56 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
       return identifiedSystems;
     },
     addSystemsToStream: async (systems: System[]) => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
+      const response = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/systems/_bulk',
+        {
+          signal,
+          params: {
+            path: {
+              name: definition.name,
+            },
+            body: {
+              operations: systems.map((system) => ({
+                index: { system },
+              })),
+            },
           },
-          body: {
-            operations: systems.map((system) => ({
-              index: { system },
-            })),
-          },
-        },
-      });
+        }
+      );
 
       telemetryClient.trackFeaturesSaved({
         count: systems.length,
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
       });
+
+      return response;
     },
     removeSystemsFromStream: async (systems: Pick<System, 'name'>[]) => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/{name}/systems/_bulk', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
+      const response = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/systems/_bulk',
+        {
+          signal,
+          params: {
+            path: {
+              name: definition.name,
+            },
+            body: {
+              operations: systems.map((system) => ({
+                delete: { system: { name: system.name } },
+              })),
+            },
           },
-          body: {
-            operations: systems.map((system) => ({
-              delete: { system: { name: system.name } },
-            })),
-          },
-        },
-      });
+        }
+      );
 
       telemetryClient.trackFeaturesDeleted({
         count: systems.length,
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
       });
+
+      return response;
     },
     upsertSystem: async (system: System) => {
       await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {

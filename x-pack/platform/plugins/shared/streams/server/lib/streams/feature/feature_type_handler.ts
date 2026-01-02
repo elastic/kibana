@@ -6,11 +6,12 @@
  */
 
 import type { Feature, FeatureType } from '@kbn/streams-schema';
-import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import objectHash from 'object-hash';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { FEATURE_TYPE, FEATURE_NAME, STREAM_NAME } from './fields';
 import type { StoredFeature } from './stored_feature';
+
+interface IdentifyFeaturesOptions {}
 
 export abstract class FeatureTypeHandler<T extends Feature = Feature> {
   abstract readonly type: FeatureType;
