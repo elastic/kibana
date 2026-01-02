@@ -8,3 +8,11 @@
 export const ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID = '.elser-2-elasticsearch';
 
 export const ELSER_ON_EIS_INFERENCE_ENDPOINT_ID = '.elser-2-elastic';
+
+export const LICENSE_TIER_ENTERPRISE = 'enterprise';
+export const LICENSE_TIER_PLATINUM = 'platinum';
+
+export const INFERENCE_ENDPOINT_LICENSE_MAP = {
+  [ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID]: 'platinum',
+  [ELSER_ON_EIS_INFERENCE_ENDPOINT_ID]: 'enterprise',
+};
