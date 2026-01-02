@@ -26,16 +26,7 @@ export function initializeDynamicActionsManager(
   state: SerializedPanelState<DynamicActionsSerializedState>,
   services: StartDependencies
 ): EmbeddableDynamicActionsManager {
-  const enhancement = services.embeddable.getEnhancement('dynamicActions');
-  const initialEnhancementsState =
-    enhancement && state.rawState.enhancements?.dynamicActions
-      ? {
-          dynamicActions: enhancement.inject(
-            state.rawState.enhancements.dynamicActions,
-            state.references ?? []
-          ),
-        }
-      : state.rawState.enhancements;
+  const initialEnhancementsState = state.rawState.enhancements;
   const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
     getDynamicActionsState(initialEnhancementsState)
   );
