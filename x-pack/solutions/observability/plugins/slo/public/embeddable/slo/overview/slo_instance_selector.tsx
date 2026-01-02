@@ -15,7 +15,6 @@ import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 
 interface Props {
   sloId: string;
-  initialInstanceId?: string;
   onSelected: (instanceId: string | undefined) => void;
   hasError?: boolean;
 }
