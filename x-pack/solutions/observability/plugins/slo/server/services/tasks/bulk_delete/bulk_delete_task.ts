@@ -7,9 +7,9 @@
 
 import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
 import type { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { IndicatorTypes } from '../../../domain/models';
-import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
+import type { SLOPluginStartDependencies } from '../../../types';
 import { DeleteSLO } from '../../delete_slo';
 import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
 import { DefaultSummaryTransformGenerator } from '../../summary_transform_generator/summary_transform_generator';
@@ -23,27 +23,19 @@ export const TYPE = 'slo:bulk-delete-task';
 interface TaskSetupContract {
   core: CoreSetup<SLOPluginStartDependencies>;
   logFactory: LoggerFactory;
-  plugins: {
-    [key in keyof SLOPluginSetupDependencies]: {
-      setup: Required<SLOPluginSetupDependencies>[key];
-    };
-  } & {
-    [key in keyof SLOPluginStartDependencies]: {
-      start: () => Promise<Required<SLOPluginStartDependencies>[key]>;
-    };
-  };
+  taskManager: TaskManagerSetupContract;
 }
 
 export class BulkDeleteTask {
   private logger: Logger;
 
   constructor(setupContract: TaskSetupContract) {
-    const { core, plugins, logFactory } = setupContract;
+    const { core, taskManager, logFactory } = setupContract;
     this.logger = logFactory.get(TYPE);
 
     this.logger.debug('Registering task with [10m] timeout');
 
-    plugins.taskManager.setup.registerTaskDefinitions({
+    taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO bulk delete',
         timeout: '10m',
