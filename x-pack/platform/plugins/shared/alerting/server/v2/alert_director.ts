@@ -42,7 +42,8 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM .kibana_alert_events
   | RENAME rule.id AS rule_id, event_alert_series_id AS alert_series_id,
       last_episode_id AS episode_id, candidate_state AS end_state,
       last_tracked_state AS start_state, last_event_timestamp AS @timestamp
-  | DROP last_status`;
+  | DROP last_status
+  | LIMIT 10000`;
 
 // Query for:
 // pending -> active
@@ -67,7 +68,8 @@ export const DIRECTORY_ACTIVE_INACTIVE_QUERY = `FROM .kibana_alert_transitions
           last_tracked_state == "recovering", "inactive", NULL)
   | WHERE candidate_state IS NOT NULL
   | RENAME last_event_timestamp AS @timestamp, candidate_state AS end_state,
-      last_tracked_state AS start_state, rule.id AS rule_id`;
+      last_tracked_state AS start_state, rule.id AS rule_id
+  | LIMIT 10000`;
 
 export interface AlertDirectorOpts {
   esClient: ElasticsearchClient;

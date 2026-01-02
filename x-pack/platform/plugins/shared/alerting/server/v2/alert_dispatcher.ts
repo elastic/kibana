@@ -25,7 +25,8 @@ export const DISPATCHER_EVENTS_QUERY = `FROM .kibana_alert_events
   | WHERE event_timestamp > last_fire OR last_fire IS NULL
   | KEEP event_timestamp, rule.id, event_alert_series_id
   | RENAME event_alert_series_id AS alert_series_id
-  | STATS @timestamp = MAX(event_timestamp) BY rule.id, alert_series_id`;
+  | STATS @timestamp = MAX(event_timestamp) BY rule.id, alert_series_id
+  | LIMIT 10000`;
 export const DISPATCHER_ACTIONS_QUERY = `FROM .kibana_alert_actions
   | WHERE action_type != "fire-action" AND action_type != "fire-event"
   | RENAME alert_series_id AS action_alert_series_id, @timestamp AS action_timestamp,
@@ -41,7 +42,8 @@ export const DISPATCHER_ACTIONS_QUERY = `FROM .kibana_alert_actions
   | KEEP action_timestamp, action_rule_id, action_alert_series_id, action_action_type
   | RENAME action_alert_series_id AS alert_series_id, action_rule_id AS rule.id
   | STATS @timestamp = MAX(action_timestamp)
-        BY rule.id, alert_series_id, action_action_type`;
+        BY rule.id, alert_series_id, action_action_type
+  | LIMIT 10000`;
 
 export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
   async function runDispatcherOnEventData() {

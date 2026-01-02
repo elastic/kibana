@@ -6,9 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { pipeline } from 'node:stream/promises';
 
 import { ALERT_EVENTS_INDEX } from './create_indices';
 import { DATA_SIMULATOR_INDEX } from './data_simulator';
+import { tsvToRowStream } from './lib/tsv_to_row_stream';
+import { createRowSink } from './lib/create_row_sink';
 
 export interface ESQLRuleOpts {
   esClient: ElasticsearchClient;
@@ -43,7 +46,7 @@ export function startEsqlRules({ esClient }: ESQLRuleOpts) {
   async function runEsqlRule(rule: Rule) {
     const start = Date.now();
     try {
-      const result = await esClient.esql.query({
+      const queryOpts = {
         query: rule.query,
         filter: {
           range: {
@@ -52,7 +55,9 @@ export function startEsqlRules({ esClient }: ESQLRuleOpts) {
             },
           },
         },
-      });
+      };
+      const result = await esClient.esql.query(queryOpts);
+      // streamEsqlToConsole(esClient, queryOpts);
       const columns = result.columns.map((col) => col.name);
       const results = result.values.map((val) => {
         const obj: Record<string, unknown> = {};
@@ -108,4 +113,17 @@ async function createAlertEvents(
     body: bulkRequest,
   });
   console.log(`${new Date().toISOString()} Indexed ${alertEvents.length} alert events`);
+}
+
+async function streamEsqlToConsole(esClient: ElasticsearchClient, opts: any) {
+  const result = await esClient.esql.query({ ...opts, format: 'tsv' }, { asStream: true });
+  await pipeline(
+    result,
+    tsvToRowStream<Record<string, unknown>>(),
+    createRowSink({
+      async flush(rows) {
+        console.log('FLUSH ROWS', rows);
+      },
+    })
+  );
 }
