@@ -29,7 +29,7 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { type DashboardListingProps, type DashboardSavedObjectUserContent } from './types';
+import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
 
 type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,

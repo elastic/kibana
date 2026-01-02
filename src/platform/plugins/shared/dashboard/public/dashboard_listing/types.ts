@@ -13,6 +13,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { AppDeepLinkLocations } from '@kbn/core/public';
+import type { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 /** Tab interface with optional deep link support. */
 export type DashboardListingTab = TableListTab & {
@@ -36,7 +37,7 @@ export type DashboardListingProps = PropsWithChildren<{
 }>;
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
-  type: 'dashboard';
+  type: typeof DASHBOARD_SAVED_OBJECT_TYPE;
   managed?: boolean;
   attributes: {
     title: string;

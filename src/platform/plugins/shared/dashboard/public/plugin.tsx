@@ -224,7 +224,6 @@ export class DashboardPlugin
       defaultPath: `#${LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      deepLinks: [],
       mount: async (params: AppMountParameters) => {
         performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;

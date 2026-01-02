@@ -54,6 +54,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/content-management-tabbed-table-list-view",
+    "@kbn/content-management-table-list-view-table",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/content-management-content-editor",
     "@kbn/serverless",
@@ -100,9 +102,7 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/cps",
-    "@kbn/content-management-tabbed-table-list-view",
-    "@kbn/content-management-table-list-view-table"
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

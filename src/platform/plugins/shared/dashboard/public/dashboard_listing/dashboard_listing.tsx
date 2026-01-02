@@ -19,7 +19,7 @@ import { QueryClientProvider } from '@kbn/react-query';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import { type DashboardListingProps } from './types';
+import type { DashboardListingProps } from './types';
 
 export const DashboardListing = ({
   children,
