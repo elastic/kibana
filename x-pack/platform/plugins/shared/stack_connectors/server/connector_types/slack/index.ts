@@ -15,7 +15,7 @@ import { IncomingWebhook } from '@slack/webhook';
 import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
 import type {
-  ActionType as ConnectorType,
+  ActionTypeWithExecutor as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ExecutorType,

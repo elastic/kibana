@@ -6,7 +6,7 @@
  */
 
 import type {
-  ActionType as ConnectorType,
+  ActionTypeWithExecutor as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';

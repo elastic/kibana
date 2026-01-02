@@ -235,6 +235,14 @@ export interface ActionType<
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
 
+export type ActionTypeWithExecutor<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> = ActionType<Config, Secrets, Params, ExecutorResultData> &
+  Required<Pick<ActionType<Config, Secrets, Params, ExecutorResultData>, 'executor'>>;
+
 export interface RawAction extends Record<string, unknown> {
   actionTypeId: string;
   name: string;
