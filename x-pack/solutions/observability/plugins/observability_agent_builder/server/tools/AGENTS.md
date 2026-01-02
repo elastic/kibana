@@ -43,7 +43,8 @@ Each tool should clearly map to one or more of these investigation phases.
 
 7. **Noise reduction** — Filter out irrelevant data; return only what's useful for incident investigation.
 8. **ECS and OTel compatible** — Tools must work with both Elastic Common Schema and OpenTelemetry data formats.
-9. **Simple implementation** — Code should be maintainable, easy to read, and avoid unnecessary complexity.
+9. **Guard rails** — Use concurrency limits (e.g., `p-limit`) and result caps to avoid overloading Elasticsearch.
+10. **Simple implementation** — Code should be maintainable, easy to read, and avoid unnecessary complexity.
 
 ---
 
