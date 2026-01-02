@@ -80,6 +80,11 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
       const result = await esClient.esql.query({
         query: DIRECTOR_PENDING_RECOVERING_QUERY,
       });
+      console.log(
+        `${new Date().toISOString()} Director query for pending and recovering transitions took ${
+          result.took
+        }ms`
+      );
       const columns = result.columns.map((col) => col.name);
       const results = result.values.map((val) => {
         const obj: Record<string, unknown> = {};
@@ -106,6 +111,11 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
       const result = await esClient.esql.query({
         query: DIRECTORY_ACTIVE_INACTIVE_QUERY,
       });
+      console.log(
+        `${new Date().toISOString()} Director query for active and inactive transitions took ${
+          result.took
+        }ms`
+      );
       const columns = result.columns.map((col) => col.name);
       const results = result.values.map((val) => {
         const obj: Record<string, unknown> = {};

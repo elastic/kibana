@@ -73,6 +73,9 @@ async function runAlertEventDispatcher({ esClient }: AlertDispatcherOpts) {
   const result = await esClient.esql.query({
     query: DISPATCHER_EVENTS_QUERY,
   });
+  console.log(
+    `${new Date().toISOString()} Dispatcher query for alert events took ${result.took}ms`
+  );
   const columns = result.columns.map((col) => col.name);
   const results = result.values.map((val) => {
     const obj: Record<string, unknown> = {};
@@ -88,6 +91,9 @@ async function runAlertActionDispatcher({ esClient }: AlertDispatcherOpts) {
   const result = await esClient.esql.query({
     query: DISPATCHER_ACTIONS_QUERY,
   });
+  console.log(
+    `${new Date().toISOString()} Dispatcher query for alert actions took ${result.took}ms`
+  );
   const columns = result.columns.map((col) => col.name);
   const results = result.values.map((val) => {
     const obj: Record<string, unknown> = {};
