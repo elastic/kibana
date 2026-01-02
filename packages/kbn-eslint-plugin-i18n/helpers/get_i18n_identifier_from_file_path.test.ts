@@ -38,6 +38,11 @@ const testMap = [
     'src/platform/packages/shared/kbn-unified-metrics-grid/src/components/flyout/metrics_insights_flyout.tsx',
     'metricsExperience',
   ],
+  // Package in x-pack with src/ directory (entry in root .i18nrc.json with x-pack/ prefix)
+  [
+    'x-pack/solutions/observability/packages/alert-details/src/components/alert_active_time_range_annotation.tsx',
+    'observabilityAlertDetails',
+  ],
 ];
 
 describe('Get i18n Identifier for file', () => {
