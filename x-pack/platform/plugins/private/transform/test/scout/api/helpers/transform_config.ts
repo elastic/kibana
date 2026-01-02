@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { estypes } from '@elastic/elasticsearch';
+import type { IndexName, TransformId } from '../../../../common';
 
-export async function asyncForEach(array: any[], callback: Function) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-}
-
-export function generateDestIndex(transformId: string): string {
+export function generateDestIndex(transformId: TransformId): IndexName {
   return `user-${transformId}`;
 }
 
 export function generateTransformConfig(
-  transformId: string,
+  transformId: TransformId,
   continuous = false
-): PutTransformsRequestSchema {
+): Omit<estypes.TransformPutTransformRequest, 'transform_id'> {
   const destinationIndex = generateDestIndex(transformId);
 
   return {
