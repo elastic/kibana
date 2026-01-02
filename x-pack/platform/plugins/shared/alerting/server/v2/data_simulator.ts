@@ -12,7 +12,7 @@ export interface DataSimulatorOpts {
   esClient: ElasticsearchClient;
 }
 
-export const INTERVAL = 10000;
+export const INTERVAL = 1000;
 export const NUM_HOSTS_LOGS_PER_INTERVAL = 1;
 export const NUM_HOSTS_METRICS_PER_INTERVAL = 1;
 export const DATA_SIMULATOR_INDEX = '.kibana_simulator_data';

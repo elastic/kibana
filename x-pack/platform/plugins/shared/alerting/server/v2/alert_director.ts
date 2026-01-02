@@ -146,6 +146,7 @@ async function createAlertTransitions(
   if (rows.length === 0) return;
   const alertTransitions = rows.map((row) => {
     return {
+      // TODO: Maybe this should be "now" and we move @timestamp in last_event_timestamp to filter in the query
       '@timestamp': row['@timestamp'],
       rule_id: row.rule_id,
       alert_series_id: row.alert_series_id,

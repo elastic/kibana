@@ -30,14 +30,14 @@ export const rules: Rule[] = [
     id: '599df5ec-4821-4565-8ae7-64afc13561bd',
     interval: 1000,
     query: `FROM ${DATA_SIMULATOR_INDEX} METADATA _id, _index | WHERE message IS NOT NULL`,
-    lookbackWindow: '5m',
+    lookbackWindow: '5s',
     groupingFields: ['_id', '_index'],
   },
   {
     id: 'ef9f2d76-e045-4c10-b133-8c3bd0e894d2',
     interval: 1000,
     query: `FROM ${DATA_SIMULATOR_INDEX} | WHERE message IS NULL | STATS avg_cpu = AVG(host.cpu.usage) BY host.name | WHERE avg_cpu > 0`,
-    lookbackWindow: '5m',
+    lookbackWindow: '5s',
     groupingFields: ['host.name'],
   },
 ];
