@@ -30,6 +30,7 @@ jest.mock('../../../../../components/asset_details', () => ({
 
 // Import after mocking
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
+import { HOST_KPI_CHARTS_COUNT } from '../../../../../components/asset_details/hooks/use_host_metrics_charts';
 
 const mockUseHostsViewContext = useHostsViewContext as jest.MockedFunction<
   typeof useHostsViewContext
@@ -114,8 +115,8 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      // KpiPlaceholder renders 4 placeholder panels
-      expect(screen.getAllByText('Unable to load KPIs')).toHaveLength(4);
+      // KpiPlaceholder renders HOST_KPI_CHARTS_COUNT length placeholder panels
+      expect(screen.getAllByText('Unable to load KPIs')).toHaveLength(HOST_KPI_CHARTS_COUNT);
       expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
     });
 
@@ -128,7 +129,7 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      expect(screen.getAllByText('Unable to load KPIs')).toHaveLength(4);
+      expect(screen.getAllByText('Unable to load KPIs')).toHaveLength(HOST_KPI_CHARTS_COUNT);
       expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
     });
   });
@@ -143,8 +144,8 @@ describe('KpiCharts', () => {
 
       renderKpiCharts();
 
-      // KpiPlaceholder renders 4 placeholder panels
-      expect(screen.getAllByText('No data available')).toHaveLength(4);
+      // KpiPlaceholder renders HOST_KPI_CHARTS_COUNT length placeholder panels
+      expect(screen.getAllByText('No data available')).toHaveLength(HOST_KPI_CHARTS_COUNT);
       expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
     });
   });

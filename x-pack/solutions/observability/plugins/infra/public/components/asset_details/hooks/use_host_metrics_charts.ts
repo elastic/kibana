@@ -32,9 +32,9 @@ const getHostKpiChartsArray = (
 ];
 
 export const HOST_KPI_CHARTS_COUNT = getHostKpiChartsArray(
-  {} as any as HostChartsResult['cpu'],
-  {} as any as HostChartsResult['memory'],
-  {} as any as HostChartsResult['disk']
+  { metric: { cpuUsage: null, normalizedLoad1m: null } } as any as HostChartsResult['cpu'],
+  { metric: { memoryUsage: null } } as any as HostChartsResult['memory'],
+  { metric: { diskUsage: null } } as any as HostChartsResult['disk']
 ).length;
 
 export const useHostCharts = ({
