@@ -22,9 +22,7 @@ import type { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
 import type { IErrorObject } from '../../types';
-import RecommendedTimeSizeWarning, {
-  RECOMMENDED_TIMESIZE_WARNING,
-} from './components/recommended_time_size_warning';
+import RecommendedTimeSizeWarning from './components/recommended_time_size_warning';
 
 export interface ForLastExpressionProps {
   description?: string;
@@ -107,16 +105,12 @@ export const ForLastExpression = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow
-              isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
-              error={
-                isTimeSizeBelowRecommended
-                  ? [RECOMMENDED_TIMESIZE_WARNING]
-                  : (errors.timeWindowSize as string[])
-              }
+              isInvalid={Number(errors.timeWindowSize?.length) > 0}
+              error={errors.timeWindowSize as string[]}
             >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
-                isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
+                isInvalid={Number(errors.timeWindowSize?.length) > 0}
                 min={0}
                 value={timeWindowSize || ''}
                 onChange={(e) => {
