@@ -64,12 +64,6 @@ tool_name/
 
 ## 2. Tool Registration
 
-### Tool ID Convention
-
-```typescript
-export const OBSERVABILITY_<TOOL_NAME>_TOOL_ID = 'observability.<tool_name>';
-```
-
 ### Allow List
 
 All new tools **must** be added to the Agent Builder allow list to pass CI:
