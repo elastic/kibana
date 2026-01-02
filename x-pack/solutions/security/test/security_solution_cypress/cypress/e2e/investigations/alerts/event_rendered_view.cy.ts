@@ -35,8 +35,7 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-// Failing: See https://github.com/elastic/kibana/issues/236608
-describe.skip(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());

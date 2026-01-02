@@ -15,14 +15,18 @@ import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { StoredMapEmbeddableState } from './types';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
-  function transformOut(state: StoredMapEmbeddableState, references?: Reference[]) {
+  function transformOut(
+    state: StoredMapEmbeddableState,
+    panelReferences?: Reference[],
+    containerReferences?: Reference[]
+  ) {
     const stateWithApiTitles = transformTitlesOut(state);
     const enhancementsState = stateWithApiTitles.enhancements
-      ? transformEnhancementsOut(stateWithApiTitles.enhancements, references ?? [])
+      ? transformEnhancementsOut(stateWithApiTitles.enhancements, panelReferences ?? [])
       : undefined;
 
     // by ref
-    const savedObjectRef = (references ?? []).find(
+    const savedObjectRef = (panelReferences ?? []).find(
       (ref) => MAP_SAVED_OBJECT_TYPE === ref.type && ref.name === MAP_SAVED_OBJECT_REF_NAME
     );
     if (savedObjectRef) {
@@ -40,7 +44,12 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         attributes: transformMapAttributesOut(
           (stateWithApiTitles as MapByValueState).attributes,
-          references ?? []
+          (targetName: string) => {
+            const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
+            if (panelRef) return panelRef;
+
+            return (containerReferences ?? []).find(({ name }) => name === targetName);
+          }
         ),
       };
     }

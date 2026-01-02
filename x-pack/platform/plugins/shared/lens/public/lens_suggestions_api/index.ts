@@ -96,7 +96,7 @@ export const suggestionsApi = ({
     activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
-    subVisualizationId: isInitialSubTypeSupported ? preferredChartType : undefined,
+    subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
   });
   if (!suggestions.length) return [];

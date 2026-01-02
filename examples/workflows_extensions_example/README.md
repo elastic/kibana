@@ -30,8 +30,9 @@ The public configuration includes:
 - `outputSchema` - Must match server-side schema
 - `label` - User-facing label
 - `description` - User-facing description
-- `icon` - EUI icon type
+- `icon` - icon image (preferably lazy loaded)
 - `documentation` - Documentation with summary, details, and examples
+- `actionsMenuCatalog` - (Optional) The catalog under which the step is displayed in the actions menu. Must be one of `StepMenuCatalog.elasticsearch`, `StepMenuCatalog.external`, `StepMenuCatalog.ai`, or `StepMenuCatalog.kibana`. Defaults to `StepMenuCatalog.kibana` if not provided.
 
 ## Usage Example
 

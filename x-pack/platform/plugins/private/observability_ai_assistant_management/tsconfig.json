@@ -32,7 +32,10 @@
     "@kbn/cloud-plugin",
     "@kbn/inference-common",
     "@kbn/licensing-plugin",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

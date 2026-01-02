@@ -40,6 +40,8 @@ export const sloKeys = {
   group: (filters: SloGroupListFilter) => [...sloKeys.groups(), filters] as const,
   groups: () => [...sloKeys.all, 'group'] as const,
   overview: (filters: SLOOverviewFilter) => ['overview', filters] as const,
+  templates: () => [...sloKeys.all, 'templates'] as const,
+  template: (templateId: string) => [...sloKeys.templates(), templateId] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId: string, instanceId: string | undefined, remoteName: string | undefined) =>
     [...sloKeys.details(), { sloId, instanceId, remoteName }] as const,
@@ -60,6 +62,7 @@ export const sloKeys = {
     validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
+  allHealth: () => [...sloKeys.all, 'health'] as const,
   health: (list: Array<{ id: string; instanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
   burnRates: (

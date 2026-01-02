@@ -78,9 +78,12 @@ const formRowCSS = css`
 `;
 
 const pageHeaderCSS = css`
-  max-width: 1248px;
-  margin: auto;
   border-bottom: none;
+
+  .euiPageHeaderContent {
+    max-width: 1248px;
+    margin: auto;
+  }
 `;
 
 const betaBadgeCSS = ({ euiTheme }: Theme) => css`

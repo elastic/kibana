@@ -14,6 +14,7 @@ import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { builderEnums } from '../enums';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
@@ -39,28 +40,25 @@ const tagcloudStateTagsByOptionsSchema = schema.object({
 });
 
 const tagcloudStateSharedOptionsSchema = {
-  /**
-   * Orientation of the tagcloud:
-   * - 'horizontal': Horizontal orientation (default)
-   * - 'vertical': Vertical orientation
-   * - 'right_angled': Right angled orientation
-   **/
   orientation: schema.maybe(
-    schema.oneOf(
-      [schema.literal('horizontal'), schema.literal('vertical'), schema.literal('angled')],
-      { meta: { description: 'Orientation of the tagcloud' }, defaultValue: 'horizontal' }
-    )
+    builderEnums.orientation({
+      meta: { description: 'Orientation of the tagcloud' },
+      defaultValue: 'horizontal',
+    })
   ),
-  /**
-   * Font size configuration:
-   * - 'min': Minimum font size (default: 18)
-   * - 'max': Maximum font size (default: 72)
-   **/
   font_size: schema.maybe(
     schema.object(
       {
-        min: schema.number({ defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize, min: 1 }),
-        max: schema.number({ defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize, max: 120 }),
+        min: schema.number({
+          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
+          min: 1,
+          meta: { description: 'Minimum font size' },
+        }),
+        max: schema.number({
+          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
+          max: 120,
+          meta: { description: 'Maximum font size' },
+        }),
       },
       { meta: { description: 'Minimum and maximum font size for the tags' } }
     )

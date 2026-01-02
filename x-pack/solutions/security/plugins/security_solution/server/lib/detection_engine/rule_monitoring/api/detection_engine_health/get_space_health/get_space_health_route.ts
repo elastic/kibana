@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -38,7 +39,7 @@ export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
       path: GET_SPACE_HEALTH_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })
@@ -66,7 +67,7 @@ export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
       path: GET_SPACE_HEALTH_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })

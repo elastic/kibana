@@ -25,16 +25,16 @@ export const getTransformOut = ({
   builder,
   transformEnhancementsOut,
 }: LensTransformDependencies): LensTransformOut => {
-  return function transformOut(state, references) {
+  return function transformOut(state, panelReferences) {
     const stateWithApiTitles = transformTitlesOut(state);
     const enhancements = stateWithApiTitles.enhancements
-      ? transformEnhancementsOut?.(stateWithApiTitles.enhancements, references ?? [])
+      ? transformEnhancementsOut?.(stateWithApiTitles.enhancements, panelReferences ?? [])
       : undefined;
     const enhancementsState = (
       enhancements ? { enhancements } : {}
     ) as DynamicActionsSerializedState;
 
-    const savedObjectRef = findLensReference(references);
+    const savedObjectRef = findLensReference(panelReferences);
 
     if (savedObjectRef && isByRefLensState(stateWithApiTitles)) {
       return {
@@ -51,7 +51,7 @@ export const getTransformOut = ({
         ...enhancementsState,
         attributes: migratedAttributes,
       },
-      references
+      panelReferences
     );
 
     const chartType = builder.getType(migratedAttributes);

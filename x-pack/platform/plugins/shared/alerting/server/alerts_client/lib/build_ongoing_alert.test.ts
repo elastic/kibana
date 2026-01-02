@@ -17,6 +17,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
   ALERT_START,
   ALERT_STATUS,
@@ -69,6 +70,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore - ALERT_MUTED appears both here and in the flattened conditional below
         // The duplicate is intentional - the second occurrence overwrites the first for flattened alerts.
         [ALERT_MUTED]: false,
@@ -138,6 +140,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -181,12 +184,14 @@ for (const flattened of [true, false]) {
         .replaceState({ start: '2023-03-28T12:27:28.159Z', duration: '36000000' });
       legacyAlert.setFlappingHistory([false, false, true, true]);
       legacyAlert.setMaintenanceWindowIds(['maint-xyz']);
+      legacyAlert.setMaintenanceWindowNames(['maint-xyz-name']);
 
       const alert = flattened
         ? {
             ...existingAlert,
             [ALERT_FLAPPING_HISTORY]: [true, false, false, false, true, true],
             [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+            [ALERT_MAINTENANCE_WINDOW_NAMES]: ['maint-1-name', 'maint-321-name'],
             [ALERT_MUTED]: false,
           }
         : {
@@ -199,6 +204,7 @@ for (const flattened of [true, false]) {
                 ...existingAlert.kibana.alert,
                 flapping_history: [true, false, false, false, true, true],
                 maintenance_window_ids: ['maint-1', 'maint-321'],
+                maintenance_window_names: ['maint-1-name', 'maint-321-name'],
               },
             },
           };
@@ -223,6 +229,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-xyz'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['maint-xyz-name'],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -266,12 +273,14 @@ for (const flattened of [true, false]) {
         .replaceState({ start: '2023-03-28T12:27:28.159Z', duration: '36000000' });
       legacyAlert.setFlappingHistory([false, false, true, true]);
       legacyAlert.setMaintenanceWindowIds(['maint-xyz']);
+      legacyAlert.setMaintenanceWindowNames(['maint-xyz-name']);
 
       const alert = flattened
         ? {
             ...existingAlert,
             [ALERT_FLAPPING_HISTORY]: [true, false, false, false, true, true],
             [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+            [ALERT_MAINTENANCE_WINDOW_NAMES]: ['maint-1-name', 'maint-321-name'],
             [ALERT_MUTED]: false,
           }
         : {
@@ -284,6 +293,7 @@ for (const flattened of [true, false]) {
                 ...existingAlert.kibana.alert,
                 flapping_history: [true, false, false, false, true, true],
                 maintenance_window_ids: ['maint-1', 'maint-321'],
+                maintenance_window_names: ['maint-1-name', 'maint-321-name'],
               },
             },
           };
@@ -309,6 +319,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-xyz'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['maint-xyz-name'],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -389,6 +400,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -488,6 +500,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -552,6 +565,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -656,6 +670,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -765,6 +780,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -854,6 +870,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
@@ -960,6 +977,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,

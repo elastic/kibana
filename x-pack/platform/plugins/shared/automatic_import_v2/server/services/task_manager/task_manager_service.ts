@@ -71,8 +71,7 @@ export class TaskManagerService {
   ): Promise<{ taskId: string }> {
     assert(this.taskManager, 'TaskManager not initialized');
 
-    // Generate an unique task ID
-    const taskId = `data-stream-task-${params.integrationId}-${params.dataStreamId}`;
+    const taskId = this.generateDataStreamTaskId(params);
 
     const taskInstance = await this.taskManager.schedule({
       id: taskId,
@@ -85,6 +84,19 @@ export class TaskManagerService {
     this.logger.info(`Task scheduled: ${taskInstance.id}`);
 
     return { taskId: taskInstance.id };
+  }
+
+  public async removeDataStreamCreationTask(
+    dataStreamTaskParams: DataStreamTaskParams
+  ): Promise<void> {
+    assert(this.taskManager, 'TaskManager not initialized');
+    const taskId = this.generateDataStreamTaskId(dataStreamTaskParams);
+    try {
+      await this.taskManager.removeIfExists(taskId);
+      this.logger.info(`Task deleted: ${taskId}`);
+    } catch (error) {
+      this.logger.error(`Failed to remove task ${taskId}:`, error);
+    }
   }
 
   public async getTaskStatus(taskId: string): Promise<{
@@ -139,5 +151,9 @@ export class TaskManagerService {
     // Cancel the AI task here
     this.logger.info(`Cancelling task ${taskInstance.id}`);
     return { state: { task_status: TASK_STATUSES.cancelled } };
+  }
+
+  private generateDataStreamTaskId(params: DataStreamTaskParams): string {
+    return `data-stream-task-${params.integrationId}-${params.dataStreamId}`;
   }
 }

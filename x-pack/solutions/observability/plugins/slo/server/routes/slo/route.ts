@@ -7,9 +7,9 @@
 
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
-import { purgeInstancesRoute, getPurgeInstancesStatusRoute } from './purge_instances';
 import { createSLORoute } from './create_slo';
 import { deleteSloInstancesRoute } from './delete_instances';
+import { findSLOInstancesRoute } from './find_instances';
 import { deleteSLORoute } from './delete_slo';
 import { disableSLORoute } from './disable_slo';
 import { enableSLORoute } from './enable_slo';
@@ -27,15 +27,18 @@ import { getSloSettingsRoute } from './get_slo_settings';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
 import { getSLOSuggestionsRoute } from './get_suggestions';
 import { inspectSLORoute } from './inspect_slo';
-import { putSloSettings } from './put_slo_settings';
+import { getPurgeInstancesStatusRoute, purgeInstancesRoute } from './purge_instances';
 import { resetSLORoute } from './reset_slo';
+import { repairSLORoute } from './repair_slo';
 import { updateSLORoute } from './update_slo';
+import { updateSloSettings } from './update_slo_settings';
+import { getSLOTemplateRoute, findSLOTemplatesRoute } from './slo_templates';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
-    ...putSloSettings(isServerless),
+    ...updateSloSettings(isServerless),
     ...createSLORoute,
     ...inspectSLORoute,
     ...deleteSLORoute,
@@ -58,7 +61,11 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getSLOStatsOverview,
     ...bulkDeleteSLORoute,
     ...getBulkDeleteStatusRoute,
+    ...repairSLORoute,
     ...purgeInstancesRoute,
     ...getPurgeInstancesStatusRoute,
+    ...findSLOInstancesRoute,
+    ...getSLOTemplateRoute,
+    ...findSLOTemplatesRoute,
   };
 };

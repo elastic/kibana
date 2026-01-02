@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
         // Cannot predict order of SO creation.
         const re = new RegExp(
-          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}-[1-2], ${pkgName}-[1-2]`,
+          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3]`,
           'g'
         );
         expect(res.body.message).to.match(re);
@@ -223,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
         // Cannot predict order of SO creation.
-        const errorMsg = String.raw`${pkgName}-[1-2] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
+        const errorMsg = String.raw`${pkgName}(-all-spaces)?-[1-2-3] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
         const re = new RegExp(
           `Failed to roll back package ${pkgName}: Wrong previous version for package policies: ${errorMsg}, ${errorMsg}`,
           'g'
@@ -388,6 +388,21 @@ export default function (providerContext: FtrProviderContext) {
           isAvailable: false,
           reason:
             'Rollback not available because some integration policies are not upgraded to version 0.2.0',
+        });
+      });
+
+      it('should return bulk rollback available check for installed packages', async () => {
+        await createPackagePolicies(policyIds, pkgName, oldPkgVersion);
+        await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, true);
+
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/_bulk_rollback/available_check`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        expect(res.body.multiple_versions).to.eql({
+          isAvailable: true,
         });
       });
     });

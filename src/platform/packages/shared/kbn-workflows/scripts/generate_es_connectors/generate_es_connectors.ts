@@ -8,6 +8,7 @@
  */
 
 import { createClient } from '@hey-api/openapi-ts';
+import { execSync } from 'child_process';
 import fs from 'fs';
 import type { OpenAPIV3 } from 'openapi-types';
 import Path from 'path';
@@ -16,10 +17,12 @@ import {
   ES_CONTRACTS_OUTPUT_FILE_PATH,
   ES_GENERATED_OUTPUT_FOLDER_PATH,
   ES_SPEC_OPENAPI_PATH,
+  ES_SPEC_OUTPUT_PATH,
   ES_SPEC_SCHEMA_PATH,
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
+import { INCLUDED_OPERATIONS } from './included_operations';
 import type { SpecificationTypes } from './types';
 import type { HttpMethod } from '../../types/latest';
 import {
@@ -40,8 +43,9 @@ import {
 
 export async function run() {
   cleanGeneratedFolder();
-  await generateZodSchemas();
-  generateAndSaveEsConnectors();
+  const contracts = generateContracts();
+  await generateZodSchemas(contracts);
+  saveEsConnectors(contracts);
   eslintFixGeneratedCode({
     paths: [
       ES_CONTRACTS_OUTPUT_FILE_PATH,
@@ -55,11 +59,10 @@ function cleanGeneratedFolder() {
   fs.mkdirSync(ES_GENERATED_OUTPUT_FOLDER_PATH);
 }
 
-function generateAndSaveEsConnectors() {
+function saveEsConnectors(contracts: ContractMeta[]) {
   try {
     const startedAt = performance.now();
     console.log('2/3 Generating Elasticsearch connectors...');
-    const contracts = generateContracts();
     const indexFile = generateEsConnectorsIndexFile(contracts);
     fs.writeFileSync(ES_CONTRACTS_OUTPUT_FILE_PATH, indexFile);
     for (const contract of contracts) {
@@ -88,14 +91,16 @@ function generateAndSaveEsConnectors() {
 }
 
 function generateContracts() {
-  const schema = JSON.parse(
-    fs.readFileSync(ES_SPEC_SCHEMA_PATH, 'utf8')
-  ) as SpecificationTypes.Model;
   const openApiSpec = JSON.parse(
     fs.readFileSync(ES_SPEC_OPENAPI_PATH, 'utf8')
   ) as OpenAPIV3.Document;
+  const schema = JSON.parse(
+    fs.readFileSync(ES_SPEC_SCHEMA_PATH, 'utf8')
+  ) as SpecificationTypes.Model;
 
-  const endpoints = schema.endpoints.filter((endpoint) => !endpoint.name.startsWith('_internal.'));
+  const endpoints = schema.endpoints.filter((endpoint) =>
+    INCLUDED_OPERATIONS.includes(endpoint.name)
+  );
 
   console.log(`Generating Elasticsearch connectors from ${endpoints.length} endpoints...`);
 
@@ -103,12 +108,13 @@ function generateContracts() {
 }
 
 function generateEsConnectorsIndexFile(contracts: ContractMeta[]) {
+  const esSpecCommitHash = getShortEsSpecCommitHash();
   return `${getLicenseHeader()}
 
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
- * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
+ * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository (https://github.com/elastic/elasticsearch-specification/commit/${esSpecCommitHash}).
  * Generated at: ${new Date().toISOString()}
  * Source: elasticsearch-specification repository (${contracts.length} APIs)
  * 
@@ -136,7 +142,9 @@ function generateEsConnectorFile(contract: ContractMeta) {
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
- * Source: elasticsearch-specification repository, operations: ${contract.operationIds.join(', ')}
+ * Source: elasticsearch-specification repository, operations: ${contract.operations
+   .map((op) => op.id)
+   .join(', ')}
  * 
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -157,19 +165,40 @@ ${generateContractBlock(contract)}
 `;
 }
 
-async function generateZodSchemas() {
+function getShortEsSpecCommitHash(): string {
+  try {
+    return execSync('git rev-parse HEAD', { cwd: ES_SPEC_OUTPUT_PATH })
+      .toString()
+      .trim()
+      .substring(0, 7);
+  } catch (error) {
+    console.error('❌ Failed to get Elasticsearch specification commit hash:', error);
+    return 'unknown';
+  }
+}
+
+async function generateZodSchemas(contracts: ContractMeta[]) {
   try {
     const startedAt = performance.now();
     console.log('1/3 Generating Zod schemas from OpenAPI spec...');
 
     console.log('- Importing openapi-ts config...');
-    const openapiTsConfig = await import('./openapi_ts.config').then((module) => module.default);
+    const buildTsConfig = await import('./openapi_ts.config').then((module) => module.default);
     console.log(`- Openapi-ts config imported in ${formatDuration(startedAt, performance.now())}`);
 
     const createClientStartedAt = performance.now();
     console.log('- Creating Zod schemas with openapi-ts...');
+
+    console.log(contracts.flatMap((contract) => contract.type));
+
     // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
-    await createClient(openapiTsConfig);
+    await createClient(
+      buildTsConfig({
+        include: contracts.flatMap((contract) =>
+          contract.operations.map((op) => `${op.method} ${op.path}`)
+        ),
+      })
+    );
     console.log(
       `- Zod schemas generated in ${formatDuration(createClientStartedAt, performance.now())}`
     );
@@ -209,7 +238,8 @@ function generateContractMeta(
   endpoint: SpecificationTypes.Endpoint,
   openApiDocument: OpenAPIV3.Document
 ): ContractMeta {
-  const operations = getRelatedOperations(endpoint, openApiDocument);
+  const operationsMeta = getRelatedOperations(endpoint, openApiDocument);
+  const operations = operationsMeta.map((operationMeta) => operationMeta.operation);
   const type = `elasticsearch.${endpoint.name}`;
   const description = `${endpoint.description}\n\n Documentation: ${endpoint.docUrl}`;
   const summary = generateSummary(operations);
@@ -241,7 +271,11 @@ function generateContractMeta(
     // The `type` field keeps dots for runtime compatibility
     fileName: `elasticsearch.${endpoint.name.replace(/\./g, '_')}.gen.ts`,
     contractName,
-    operationIds,
+    operations: operationsMeta.map((op) => ({
+      id: op.operation.operationId,
+      path: op.path,
+      method: op.method,
+    })),
     schemaImports,
     paramsSchemaString,
     outputSchemaString,
@@ -255,8 +289,8 @@ function generateContractName(endpoint: SpecificationTypes.Endpoint): string {
 function getRelatedOperations(
   endpoint: SpecificationTypes.Endpoint,
   openApiDocument: OpenAPIV3.Document
-): OpenAPIV3.OperationObject[] {
-  const operations: OpenAPIV3.OperationObject[] = [];
+): { path: string; method: string; operation: OpenAPIV3.OperationObject }[] {
+  const operations: { path: string; method: string; operation: OpenAPIV3.OperationObject }[] = [];
   for (const url of endpoint.urls) {
     const openapiPath = openApiDocument.paths[url.path];
     if (openapiPath) {
@@ -265,7 +299,11 @@ function getRelatedOperations(
           method.toLowerCase() as keyof typeof openapiPath
         ] as OpenAPIV3.OperationObject;
         if (operation && operation.operationId) {
-          operations.push(operation);
+          operations.push({
+            path: url.path,
+            method: method.toUpperCase(),
+            operation,
+          });
         }
       }
     }

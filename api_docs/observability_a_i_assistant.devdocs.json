@@ -100,6 +100,39 @@
     "functions": [
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.AIAgentTourCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "AIAgentTourCallout",
+        "description": [],
+        "signature": [
+          "({ children, zIndex, isConversationApp, }: AIAgentTourCalloutProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/ai_agent_tour_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.AIAgentTourCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  zIndex,\n  isConversationApp = false,\n}",
+            "description": [],
+            "signature": [
+              "AIAgentTourCalloutProps"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/ai_agent_tour_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ChatItemControls",
         "type": "Function",
         "tags": [],
@@ -1039,6 +1072,93 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useAgentBuilderOptIn",
+        "type": "Function",
+        "tags": [],
+        "label": "useAgentBuilderOptIn",
+        "description": [],
+        "signature": [
+          "({ navigateFromConversationApp, }?: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseAgentBuilderOptInParams",
+            "text": "UseAgentBuilderOptInParams"
+          },
+          ") => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.UseAgentBuilderOptInResult",
+            "text": "UseAgentBuilderOptInResult"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.useAgentBuilderOptIn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  navigateFromConversationApp = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.UseAgentBuilderOptInParams",
+                "text": "UseAgentBuilderOptInParams"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useAIAgentTourDismissed",
+        "type": "Function",
+        "tags": [],
+        "label": "useAIAgentTourDismissed",
+        "description": [],
+        "signature": [
+          "(defaultValue: boolean) => [boolean, (isDismissed: boolean) => void]"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_ai_agent_tour_dismissed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.useAIAgentTourDismissed.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_ai_agent_tour_dismissed.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.useElasticLlmCalloutDismissed",
         "type": "Function",
         "tags": [],
@@ -1150,6 +1270,24 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useIsAgentBuilderEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsAgentBuilderEnabled",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseIsAgentBuilderEnabledResult"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_is_agent_builder_enabled.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -5091,6 +5229,130 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.UseAgentBuilderOptInParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseAgentBuilderOptInParams",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseAgentBuilderOptInParams.navigateFromConversationApp",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "navigateFromConversationApp",
+            "description": [
+              "\nWhen true, confirming the opt-in will first navigate to the\nObservability home page before opening the Agent Builder flyout.\nThis is used when the CTA is rendered inside the full conversations app."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.UseAgentBuilderOptInResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseAgentBuilderOptInResult",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseAgentBuilderOptInResult.showAgentBuilderOptInCta",
+            "type": "boolean",
+            "tags": [],
+            "label": "showAgentBuilderOptInCta",
+            "description": [
+              "\nWhether the CTA should be shown to the current user.\nThis requires:\n- Agent Builder capability (RBAC) enabled\n- Chat experience not already set to Agent\n- Advanced settings edit privilege\n- Agent Builder selection service available"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseAgentBuilderOptInResult.isAgentBuilderConfirmationModalOpen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAgentBuilderConfirmationModalOpen",
+            "description": [
+              "\nWhether the confirmation modal is currently open."
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseAgentBuilderOptInResult.openAgentBuilderConfirmationModal",
+            "type": "Function",
+            "tags": [],
+            "label": "openAgentBuilderConfirmationModal",
+            "description": [
+              "\nOpen the confirmation modal."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseAgentBuilderOptInResult.closeAgentBuilderConfirmationModal",
+            "type": "Function",
+            "tags": [],
+            "label": "closeAgentBuilderConfirmationModal",
+            "description": [
+              "\nClose the confirmation modal."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseAgentBuilderOptInResult.confirmAgentBuilderOptIn",
+            "type": "Function",
+            "tags": [],
+            "label": "confirmAgentBuilderOptIn",
+            "description": [
+              "\nConfirm switching to the Agent Builder:\n- Updates preferred chat experience to Agent\n- Optionally navigates to Observability home (when enabled)\n- Opens the Agent Builder flyout"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_agent_builder_opt_in.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.UseChatResult",
         "type": "Interface",
         "tags": [],
@@ -5597,6 +5859,21 @@
           "(T extends Promise<infer TReturn> ? State<TReturn> : State<T>) & { refresh: () => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.AIAgentTourKey",
+        "type": "string",
+        "tags": [],
+        "label": "AIAgentTourKey",
+        "description": [],
+        "signature": [
+          "\"observabilityAIAssistant.aiAgentTourDismissed\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_ai_agent_tour_dismissed.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6900,21 +7177,6 @@
           "[] | undefined; description?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/functions/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.E5_LARGE_IN_EIS_INFERENCE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "E5_LARGE_IN_EIS_INFERENCE_ID",
-        "description": [],
-        "signature": [
-          "\".multilingual-e5-large-elastic\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8928,7 +9190,9 @@
                       "ActionTypeSecrets",
                       ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
                       "ActionsConfigurationUtilities",
-                      ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
+                      ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; getAxiosInstance: (actionId: string) => Promise<",
+                      "AxiosInstance",
+                      ">; bulkEnqueueExecution: (options: ",
                       "ExecuteOptions",
                       "[]) => Promise<",
                       "ExecutionResponse",
@@ -10258,7 +10522,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; role: ",
+                      "{ id: string; text: string; role: ",
                       {
                         "pluginId": "observabilityAIAssistant",
                         "scope": "common",
@@ -10266,7 +10530,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
+                      "; title?: string | undefined; user?: { name: string; } | undefined; labels?: Record<string, string> | undefined; public: boolean; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -13502,55 +13766,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.createFunctionNotFoundError",
-        "type": "Function",
-        "tags": [],
-        "label": "createFunctionNotFoundError",
-        "description": [],
-        "signature": [
-          "(name: string) => ",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.ChatCompletionError",
-            "text": "ChatCompletionError"
-          },
-          "<",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.ChatCompletionErrorCode",
-            "text": "ChatCompletionErrorCode"
-          },
-          ".FunctionNotFoundError>"
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.createFunctionNotFoundError.$1",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.createInternalServerError",
         "type": "Function",
         "tags": [],
@@ -14657,21 +14872,6 @@
           ".ConversationUpdate; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.E5_LARGE_IN_EIS_INFERENCE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "E5_LARGE_IN_EIS_INFERENCE_ID",
-        "description": [],
-        "signature": [
-          "\".multilingual-e5-large-elastic\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

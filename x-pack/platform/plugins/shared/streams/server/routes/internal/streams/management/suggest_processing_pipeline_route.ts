@@ -8,8 +8,9 @@
 import { z } from '@kbn/zod';
 import { Streams } from '@kbn/streams-schema';
 import { suggestProcessingPipeline } from '@kbn/streams-ai';
-import { from, map } from 'rxjs';
+import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
+import { createSSEInternalError } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
 import { type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
@@ -119,135 +120,139 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     server,
     logger,
   }): Promise<SuggestProcessingPipelineResponse> => {
-    try {
-      logger.debug('[suggest_pipeline] Request received');
-      logger.debug(
-        `[suggest_pipeline] extracted_patterns: grok=${Boolean(
-          params.body.extracted_patterns?.grok
-        )} dissect=${Boolean(params.body.extracted_patterns?.dissect)}`
-      );
-      const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-        STREAMS_TIERED_ML_FEATURE.id
-      );
-      if (!isAvailableForTier) {
-        throw new SecurityError('Cannot access API on the current pricing tier');
-      }
+    logger.debug('[suggest_pipeline] Request received');
+    logger.debug(
+      `[suggest_pipeline] extracted_patterns: grok=${Boolean(
+        params.body.extracted_patterns?.grok
+      )} dissect=${Boolean(params.body.extracted_patterns?.dissect)}`
+    );
 
-      const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
-        await getScopedClients({ request });
+    // Wrap entire logic in Observable so errors can be sent as SSE events
+    return from(
+      (async () => {
+        const isAvailableForTier = server.core.pricing.isFeatureAvailable(
+          STREAMS_TIERED_ML_FEATURE.id
+        );
+        if (!isAvailableForTier) {
+          throw new SecurityError('Cannot access API on the current pricing tier');
+        }
 
-      const stream = await streamsClient.getStream(params.path.name);
-      if (!Streams.ingest.all.Definition.is(stream)) {
-        throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
-      }
+        const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+          await getScopedClients({ request });
 
-      const abortController = new AbortController();
-      let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
+        const stream = await streamsClient.getStream(params.path.name);
+        if (!Streams.ingest.all.Definition.is(stream)) {
+          throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
+        }
 
-      if (params.body.extracted_patterns) {
-        const { grok, dissect } = params.body.extracted_patterns;
-        const candidatePromises: Array<
-          Promise<{
-            type: 'grok' | 'dissect';
-            processor: GrokProcessor | DissectProcessor;
-            parsedRate: number;
-          } | null>
-        > = [];
+        const abortController = new AbortController();
+        let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
-        if (grok) {
-          logger.debug(
-            `[suggest_pipeline] (parallel) scheduling grok patternGroups=${grok.patternGroups.length} fieldName=${grok.fieldName}`
+        if (params.body.extracted_patterns) {
+          const { grok, dissect } = params.body.extracted_patterns;
+          const candidatePromises: Array<
+            Promise<{
+              type: 'grok' | 'dissect';
+              processor: GrokProcessor | DissectProcessor;
+              parsedRate: number;
+            } | null>
+          > = [];
+
+          if (grok) {
+            logger.debug(
+              `[suggest_pipeline] (parallel) scheduling grok patternGroups=${grok.patternGroups.length} fieldName=${grok.fieldName}`
+            );
+            candidatePromises.push(
+              processGrokPatterns({
+                patternGroups: grok.patternGroups,
+                fieldName: grok.fieldName,
+                streamName: stream.name,
+                connectorId: params.body.connector_id,
+                documents: params.body.documents,
+                inferenceClient,
+                scopedClusterClient,
+                streamsClient,
+                fieldsMetadataClient,
+                signal: abortController.signal,
+                logger,
+              })
+            );
+          }
+          if (dissect) {
+            logger.debug(
+              `[suggest_pipeline] (parallel) scheduling dissect messages=${dissect.messages.length} fieldName=${dissect.fieldName}`
+            );
+            candidatePromises.push(
+              processDissectPattern({
+                messages: dissect.messages,
+                fieldName: dissect.fieldName,
+                streamName: stream.name,
+                connectorId: params.body.connector_id,
+                documents: params.body.documents,
+                inferenceClient,
+                scopedClusterClient,
+                streamsClient,
+                fieldsMetadataClient,
+                signal: abortController.signal,
+                logger,
+              })
+            );
+          }
+
+          const results = await Promise.all(candidatePromises);
+          const candidates = results.filter(
+            (
+              r
+            ): r is {
+              type: 'grok' | 'dissect';
+              processor: GrokProcessor | DissectProcessor;
+              parsedRate: number;
+            } => r !== null
           );
-          candidatePromises.push(
-            processGrokPatterns({
-              patternGroups: grok.patternGroups,
-              fieldName: grok.fieldName,
-              streamName: stream.name,
-              connectorId: params.body.connector_id,
-              documents: params.body.documents,
-              inferenceClient,
+          candidates.forEach((c) =>
+            logger.debug(`[suggest_pipeline] Candidate type=${c.type} parsedRate=${c.parsedRate}`)
+          );
+          if (candidates.length > 0) {
+            candidates.sort((a, b) => b.parsedRate - a.parsedRate);
+            logger.debug(
+              `[suggest_pipeline] Selected processor type=${candidates[0].type} parsedRate=${candidates[0].parsedRate}`
+            );
+            parsingProcessor = candidates[0].processor;
+          }
+        }
+
+        return await suggestProcessingPipeline({
+          definition: stream,
+          inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
+          parsingProcessor,
+          maxSteps: 4, // Limit reasoning steps for latency and token cost
+          signal: abortController.signal,
+          documents: params.body.documents,
+          esClient: scopedClusterClient.asCurrentUser,
+          fieldsMetadataClient,
+          simulatePipeline: (pipeline: StreamlangDSL) =>
+            simulateProcessing({
+              params: {
+                path: { name: stream.name },
+                body: { processing: pipeline, documents: params.body.documents },
+              },
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
-              logger,
-            })
-          );
-        }
-        if (dissect) {
-          logger.debug(
-            `[suggest_pipeline] (parallel) scheduling dissect messages=${dissect.messages.length} fieldName=${dissect.fieldName}`
-          );
-          candidatePromises.push(
-            processDissectPattern({
-              messages: dissect.messages,
-              fieldName: dissect.fieldName,
-              streamName: stream.name,
-              connectorId: params.body.connector_id,
-              documents: params.body.documents,
-              inferenceClient,
-              scopedClusterClient,
-              streamsClient,
-              fieldsMetadataClient,
-              signal: abortController.signal,
-              logger,
-            })
-          );
-        }
-
-        const results = await Promise.all(candidatePromises);
-        const candidates = results.filter(
-          (
-            r
-          ): r is {
-            type: 'grok' | 'dissect';
-            processor: GrokProcessor | DissectProcessor;
-            parsedRate: number;
-          } => r !== null
-        );
-        candidates.forEach((c) =>
-          logger.debug(`[suggest_pipeline] Candidate type=${c.type} parsedRate=${c.parsedRate}`)
-        );
-        if (candidates.length > 0) {
-          candidates.sort((a, b) => b.parsedRate - a.parsedRate);
-          logger.debug(
-            `[suggest_pipeline] Selected processor type=${candidates[0].type} parsedRate=${candidates[0].parsedRate}`
-          );
-          parsingProcessor = candidates[0].processor;
-        }
-      }
-
-      const pipelinePromise = suggestProcessingPipeline({
-        definition: stream,
-        inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
-        parsingProcessor,
-        maxSteps: undefined,
-        signal: abortController.signal,
-        documents: params.body.documents,
-        esClient: scopedClusterClient.asCurrentUser,
-        fieldsMetadataClient,
-        simulatePipeline: (pipeline: StreamlangDSL) =>
-          simulateProcessing({
-            params: {
-              path: { name: stream.name },
-              body: { processing: pipeline, documents: params.body.documents },
-            },
-            scopedClusterClient,
-            streamsClient,
-            fieldsMetadataClient,
-          }),
-      });
-
-      return from(pipelinePromise).pipe(
-        map((pipeline) => ({
-          type: 'suggested_processing_pipeline' as const,
-          pipeline,
-        }))
-      );
-    } catch (error) {
-      logger.error('Failed to generate pipeline suggestion:', error);
-      throw error;
-    }
+            }),
+        });
+      })()
+    ).pipe(
+      map((pipeline) => ({
+        type: 'suggested_processing_pipeline' as const,
+        pipeline,
+      })),
+      catchError((error) => {
+        logger.error('Failed to generate pipeline suggestion:', error);
+        // Convert error to SSE error event so it's sent to client with full message
+        throw createSSEInternalError(error.message || 'Failed to generate pipeline suggestion');
+      })
+    );
   },
 });
 

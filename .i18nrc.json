@@ -79,7 +79,6 @@
     "interpreter": "src/legacy/core_plugins/interpreter",
     "imageEmbeddable": "src/platform/plugins/private/image_embeddable",
     "kbn": "src/legacy/core_plugins/kibana",
-    "kbn-esql-validation-autocomplete": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src",
     "kbnConfig": "src/platform/packages/shared/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kibana_utils": "src/platform/plugins/shared/kibana_utils",

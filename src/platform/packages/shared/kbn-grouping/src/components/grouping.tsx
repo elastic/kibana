@@ -32,7 +32,12 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
-import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
+import type {
+  ParsedGroupingAggregation,
+  GroupPanelRenderer,
+  GetGroupStats,
+  GetAdditionalActionButtons,
+} from './types';
 import type { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
@@ -45,7 +50,8 @@ export interface GroupingProps<T> {
   getGroupStats?: GetGroupStats<T>;
   groupingId: string;
   groupingLevel?: number;
-  inspectButton?: JSX.Element;
+  /** Optional array of custom controls to display in the toolbar alongside the group selector */
+  additionalToolbarControls?: JSX.Element[];
   isLoading: boolean;
   itemsPerPage: number;
   onChangeGroupsItemsPerPage?: (size: number) => void;
@@ -73,6 +79,10 @@ export interface GroupingProps<T> {
   // because if the field is a multi-value field, and we emit each value separatly the size of the field will be ignored
   // when filtering by it
   multiValueFields?: string[];
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
+  /** Optional function to get additional action buttons to display in group stats before the Take actions button */
+  getAdditionalActionButtons?: GetAdditionalActionButtons<T>;
 }
 
 const GroupingComponent = <T,>({
@@ -83,7 +93,7 @@ const GroupingComponent = <T,>({
   groupSelector,
   groupingId,
   groupingLevel = 0,
-  inspectButton,
+  additionalToolbarControls,
   isLoading,
   itemsPerPage,
   onChangeGroupsItemsPerPage,
@@ -97,6 +107,8 @@ const GroupingComponent = <T,>({
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
   multiValueFields,
+  emptyGroupingComponent,
+  getAdditionalActionButtons,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -160,6 +172,10 @@ const GroupingComponent = <T,>({
                   groupNumber={groupNumber}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
                   takeActionItems={takeActionItems}
+                  additionalActionButtons={
+                    getAdditionalActionButtons &&
+                    getAdditionalActionButtons(selectedGroup, groupBucket)
+                  }
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
@@ -212,6 +228,7 @@ const GroupingComponent = <T,>({
       trigger,
       unit,
       multiValueFields,
+      getAdditionalActionButtons,
     ]
   );
 
@@ -219,6 +236,10 @@ const GroupingComponent = <T,>({
     () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
     [groupCount, itemsPerPage]
   );
+
+  const emptyComponent = useMemo(() => {
+    return emptyGroupingComponent ? emptyGroupingComponent : <EmptyGroupingComponent />;
+  }, [emptyGroupingComponent]);
 
   return (
     <>
@@ -246,8 +267,13 @@ const GroupingComponent = <T,>({
             ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              {additionalToolbarControls &&
+                additionalToolbarControls.map((control, index) => (
+                  <EuiFlexItem key={`additional-control-${index}`} grow={false}>
+                    {control}
+                  </EuiFlexItem>
+                ))}
               <EuiFlexItem>{groupSelector}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -289,7 +315,7 @@ const GroupingComponent = <T,>({
             )}
           </span>
         ) : (
-          <EmptyGroupingComponent />
+          emptyComponent
         )}
       </div>
     </>

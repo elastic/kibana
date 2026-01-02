@@ -7,82 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiText,
   euiScrollBarStyles,
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
+import type { MetricField } from '../types';
 import { PAGE_SIZE } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { useFilteredMetricFields, usePagination } from '../hooks';
+import { usePagination } from '../hooks';
 import { MetricsGridLoadingProgress } from './empty_state/empty_state';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
-    ChartSectionProps,
-    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'histogramCss'
+    UnifiedMetricsGridProps,
+    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
   > {
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
-  isFieldsLoading?: boolean;
   isDiscoverLoading?: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
-  fields: allFields,
+  fields,
   services,
   discoverFetch$,
   fetchParams,
   onBrushEnd,
   onFilter,
+  actions,
   histogramCss,
-  isFieldsLoading = false,
   isDiscoverLoading = false,
 }: MetricsExperienceGridContentProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { timeRange } = fetchParams;
-
-  const { searchTerm, currentPage, dimensions, valueFilters, onPageChange } =
-    useMetricsExperienceState();
-
-  const onFilterComplete = useCallback(() => {
-    onPageChange(0);
-  }, [onPageChange]);
-
-  const {
-    fields: filteredFields,
-    filters,
-    isLoading: isFilteredFieldsLoading,
-  } = useFilteredMetricFields({
-    allFields,
-    isFieldsLoading,
-    dimensions,
-    searchTerm,
-    valueFilters,
-    timeRange,
-    onFilterComplete,
-  });
+  const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
     totalPages = 0,
     totalCount: filteredFieldsCount = 0,
   } = usePagination({
-    items: filteredFields,
+    items: fields,
     pageSize: PAGE_SIZE,
     currentPage,
   }) ?? {};
@@ -132,11 +109,6 @@ export const MetricsExperienceGridContent = ({
                   </strong>
                 </EuiText>
               </EuiFlexItem>
-              {(isFilteredFieldsLoading || isFieldsLoading) && (
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="s" />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -159,16 +131,14 @@ export const MetricsExperienceGridContent = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>
-        {(isDiscoverLoading || isFilteredFieldsLoading || isFieldsLoading) && (
-          <MetricsGridLoadingProgress />
-        )}
+        {isDiscoverLoading && <MetricsGridLoadingProgress />}
         <MetricsGrid
           columns={columns}
-          dimensions={dimensions}
-          filters={filters}
+          dimensions={selectedDimensions}
           services={services}
           fields={currentPageFields}
           onBrushEnd={onBrushEnd}
+          actions={actions}
           onFilter={onFilter}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}

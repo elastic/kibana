@@ -16,6 +16,7 @@ import type {
 import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { SyncGlobalParamsPrivateLocationsTask } from './tasks/sync_global_params_task';
 import type {
   SyntheticsPluginsSetupDependencies,
   SyntheticsPluginsStartDependencies,
@@ -44,6 +45,7 @@ export class Plugin implements PluginType {
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
+  private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
@@ -97,12 +99,18 @@ export class Plugin implements PluginType {
 
     this.syncPrivateLocationMonitorsTask = new SyncPrivateLocationMonitorsTask(
       this.server,
+      this.syntheticsMonitorClient
+    );
+    this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
+
+    this.syncGlobalParamsTask = new SyncGlobalParamsPrivateLocationsTask(
+      this.server,
       plugins.taskManager,
       this.syntheticsMonitorClient
     );
 
+    this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
-      transformOutInjectsReferences: true,
       transformIn: getTransformIn(plugins.embeddable.transformEnhancementsIn),
       transformOut: getTransformOut(plugins.embeddable.transformEnhancementsOut),
     });

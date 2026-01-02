@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useRef } from 'react';
-import type { FileUploadManager } from '../../..';
+import type { FileUploadManager } from '../../../file_upload_manager';
 
 interface Props {
   fileUploadManager: FileUploadManager;

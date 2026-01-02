@@ -20,6 +20,7 @@ import {
   EuiMarkdownEditor,
   EuiSpacer,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -70,16 +71,16 @@ export const StreamFeatureDetailsFlyout = ({
         </EuiTitle>
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
-
       <EuiFlyoutBody>
         <div>
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h3>
               {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
                 defaultMessage: 'Description',
               })}
             </h3>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiMarkdownEditor
             aria-label={i18n.translate(
               'xpack.streams.streamDetailView.featureDetailExpanded.markdownEditorAriaLabel',
@@ -89,14 +90,15 @@ export const StreamFeatureDetailsFlyout = ({
             )}
             value={updatedFeature.description}
             onChange={(value) => setUpdatedFeature({ ...updatedFeature, description: value })}
-            height={400}
+            height={320}
             readOnly={false}
             initialViewMode="viewing"
+            autoExpandPreview={false}
           />
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule />
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-              <EuiTitle size="xs">
+              <EuiTitle size="xxs">
                 <h3>
                   {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
                     defaultMessage: 'Filter',
@@ -129,9 +131,7 @@ export const StreamFeatureDetailsFlyout = ({
               />
             )}
           </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
-
+          <EuiHorizontalRule />
           {isFeatureWithFilter(feature) && (
             <FeatureEventsData feature={updatedFeature} definition={definition} />
           )}

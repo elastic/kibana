@@ -16,6 +16,8 @@ import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_
 import type { StartPlugins } from '../../types';
 import { getManagementFilteredLinks } from '../../management/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 const mockGetManagementFilteredLinks = getManagementFilteredLinks as jest.MockedFunction<
   typeof getManagementFilteredLinks
@@ -40,6 +42,8 @@ describe('getFilteredLinks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock uiSettings.get$ to return an observable that emits immediately
+    mockCore.uiSettings.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   });
 
   it('returns filtered links including AI Value links', async () => {

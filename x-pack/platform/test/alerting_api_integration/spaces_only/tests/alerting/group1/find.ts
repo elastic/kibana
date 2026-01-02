@@ -266,6 +266,69 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body.data[0].params.severity).to.eql('medium');
       });
 
+      it('should search by actions.params', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Test connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: matchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'test',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, matchingAlert.id, 'rule', 'alerting');
+
+        const { body: nonMatchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'anothermessage',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, nonMatchingAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rules/_find?search=test&search_fields=actions.params`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        const foundRule = response.body.data[0];
+        expect(foundRule.id).to.equal(matchingAlert.id);
+        expect(foundRule.actions[0].params.message).to.eql('test');
+      });
+
       it('should filter on parameters', async () => {
         const response = await supertest.get(
           `${getUrlPrefix(

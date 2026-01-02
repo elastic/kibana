@@ -27,19 +27,49 @@ export class PrivateLocationTestService {
     this.getService = getService;
   }
 
+  async cleanupFleetPolicies() {
+    // Delete package policies first (they reference agent policies)
+    const packagePoliciesRes = await this.supertest
+      .get('/api/fleet/package_policies?perPage=1000')
+      .set('kbn-xsrf', 'true');
+
+    if (packagePoliciesRes.status === 200) {
+      const packagePolicies = packagePoliciesRes.body.items || [];
+      for (const packagePolicy of packagePolicies) {
+        await this.supertest
+          .delete(`/api/fleet/package_policies/${packagePolicy.id}?force=true`)
+          .set('kbn-xsrf', 'true');
+      }
+    }
+
+    // Then delete agent policies
+    const agentPoliciesRes = await this.supertest
+      .get('/api/fleet/agent_policies?perPage=1000')
+      .set('kbn-xsrf', 'true');
+
+    if (agentPoliciesRes.status === 200) {
+      const agentPolicies = agentPoliciesRes.body.items || [];
+      for (const agentPolicy of agentPolicies) {
+        if (agentPolicy.is_managed) {
+          continue;
+        }
+        await this.supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'true')
+          .send({ agentPolicyId: agentPolicy.id });
+      }
+    }
+  }
+
   async installSyntheticsPackage() {
     await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-    const response = await this.supertest
-      .get(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
+    // Attempt to delete any existing package so we can install a specific version
+    await this.supertest.delete(`/api/fleet/epm/packages/synthetics`).set('kbn-xsrf', 'true');
+    await this.supertest
+      .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
       .set('kbn-xsrf', 'true')
+      .send({ force: true })
       .expect(200);
-    if (response.body.item.status !== 'installed') {
-      await this.supertest
-        .post(`/api/fleet/epm/packages/synthetics/${INSTALLED_VERSION}`)
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
-    }
   }
 
   async addFleetPolicy(name?: string) {

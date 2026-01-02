@@ -81,8 +81,16 @@ export const IGNORED_FIELD = '_ignored';
 export const IGNORED_FIELD_VALUES_FIELD = 'ignored_field_values';
 export const DEGRADED_DOCS_FIELDS = [IGNORED_FIELD, IGNORED_FIELD_VALUES_FIELD] as const;
 
+// Error
+export const ERROR_CULPRIT_FIELD = 'error.culprit';
+export const ERROR_GROUPING_NAME_FIELD = 'error.grouping_name';
+
+// Error Exception
+export const ERROR_EXCEPTION_MESSAGE = 'error.exception.message';
+export const ERROR_EXCEPTION_TYPE_FIELD = 'error.exception.type';
+export const OTEL_EXCEPTION_TYPE_FIELD = 'exception.type';
+
 // Error Stacktrace
 export const ERROR_STACK_TRACE = 'error.stack_trace';
-export const ERROR_EXCEPTION_MESSAGE = 'error.exception.message';
 export const ERROR_EXCEPTION_STACKTRACE_ABS_PATH = 'error.exception.stacktrace.abs_path';
 export const ERROR_LOG_STACKTRACE_ABS_PATH = 'error.log.stacktrace.abs_path';

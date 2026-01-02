@@ -47,7 +47,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
   parameterTypes: {
     headerParams: [],
     pathParams: ['caseId'],
-    urlParams: [],
+    urlParams: ['includeComments'],
     bodyParams: [],
   },
   paramsSchema: z.object({

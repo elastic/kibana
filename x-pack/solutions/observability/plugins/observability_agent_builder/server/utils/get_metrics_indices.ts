@@ -9,9 +9,9 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import type {
-  ObservabilityAgentPluginSetupDependencies,
-  ObservabilityAgentPluginStart,
-  ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStart,
+  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 
 export async function getMetricsIndices({
@@ -19,8 +19,11 @@ export async function getMetricsIndices({
   plugins,
   logger,
 }: {
-  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
-  plugins: ObservabilityAgentPluginSetupDependencies;
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): Promise<string[]> {
   const [coreStart] = await core.getStartServices();

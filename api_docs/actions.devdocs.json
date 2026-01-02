@@ -2607,6 +2607,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionType.subFeature",
             "type": "string",
             "tags": [],
@@ -3415,6 +3429,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ConnectorType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\""
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/types/connector_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ConnectorType.subFeature",
             "type": "string",
             "tags": [],
@@ -3846,104 +3874,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
-        "id": "def-server.SSLSettings",
-        "type": "Interface",
-        "tags": [],
-        "label": "SSLSettings",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.verificationMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "verificationMode",
-            "description": [],
-            "signature": [
-              "\"none\" | \"certificate\" | \"full\" | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.pfx",
-            "type": "Object",
-            "tags": [],
-            "label": "pfx",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.cert",
-            "type": "Object",
-            "tags": [],
-            "label": "cert",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.key",
-            "type": "Object",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.passphrase",
-            "type": "string",
-            "tags": [],
-            "label": "passphrase",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-server.SSLSettings.ca",
-            "type": "Object",
-            "tags": [],
-            "label": "ca",
-            "description": [],
-            "signature": [
-              "Buffer | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -4096,7 +4026,9 @@
           "ActionTypeSecrets",
           ">)[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
-          ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
+          ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; getAxiosInstance: (actionId: string) => Promise<",
+          "AxiosInstance",
+          ">; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
           "[]) => Promise<",
           "ExecutionResponse",
@@ -5544,6 +5476,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-common.ActionType.source",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "\"spec\" | \"yml\" | \"stack\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-common.ActionType.subFeature",
             "type": "string",
             "tags": [],
@@ -6244,6 +6190,21 @@
             "text": "ActionTypeExecutorResult"
           },
           "<Data> & { error?: Error | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ActionTypeSource",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeSource",
+        "description": [],
+        "signature": [
+          "\"spec\" | \"yml\" | \"stack\""
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
         "deprecated": false,

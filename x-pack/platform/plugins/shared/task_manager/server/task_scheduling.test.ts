@@ -507,6 +507,37 @@ describe('TaskScheduling', () => {
         5 * 60 * 1000
       );
     });
+    test('should call store bulk update with request when provided', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: false,
+        schedule: { interval: '3h' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkEnable([id], false, { request: mockRequest });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            enabled: true,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: undefined,
+          options: { request: mockRequest },
+        },
+      ]);
+    });
   });
 
   describe('bulkDisable', () => {
@@ -586,6 +617,38 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
+    test('should call store bulk update with request when provided', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: true,
+        schedule: { interval: '3h' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkDisable([id], false, { request: mockRequest });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            enabled: false,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: undefined,
+          options: { request: mockRequest },
+        },
+      ]);
     });
   });
 
@@ -988,6 +1051,42 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(
         moment.duration(1, 'days').asMilliseconds()
       );
+    });
+
+    test('should call store bulk update with request when provided', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: rruleScheduleExample24h,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      await taskScheduling.bulkUpdateSchedules(
+        [id],
+        { interval: '12h' },
+        {
+          request: mockRequest,
+        }
+      );
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0];
+
+      expect(bulkUpdatePayload).toEqual([
+        [
+          {
+            ...task,
+            runAt: expect.any(Date),
+            schedule: { interval: '12h' },
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        },
+      ]);
     });
   });
 
