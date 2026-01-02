@@ -23,8 +23,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
     const config = generateTransformConfig(transformId);
     await apiServices.transform.createTransform(transformId, config);
     await esClient.transform.startTransform({ transform_id: transformId });
-    // Wait a bit for transform to process some data
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     await esClient.transform.stopTransform({
       transform_id: transformId,
       wait_for_completion: true,

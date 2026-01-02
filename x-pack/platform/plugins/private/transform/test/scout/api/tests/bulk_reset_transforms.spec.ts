@@ -31,7 +31,7 @@ apiTest.describe('bulk reset', { tag: tags.ESS_ONLY }, () => {
       await apiServices.transform.createTransform(id, config);
       await esClient.transform.startTransform({ transform_id: id });
     }
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     for (const id of transformIds) {
       await esClient.transform.stopTransform({ transform_id: id, wait_for_completion: true });
     }
