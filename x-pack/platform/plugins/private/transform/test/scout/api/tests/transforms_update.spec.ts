@@ -50,7 +50,7 @@ apiTest.describe(
     });
 
     apiTest('should update a transform', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const originalResponse = await apiClient.get(
         `internal/transform/transforms/${TRANSFORM_ID}`,

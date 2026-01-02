@@ -28,9 +28,9 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
   });
 
   apiTest(
-    'should return a list of transforms for transform_admin',
+    'should return a list of transforms for transform manager',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const { body, statusCode } = await apiClient.get('internal/transform/transforms', {
         headers: {
@@ -65,7 +65,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
   );
 
   apiTest(
-    'should return a list of transforms for transform_user',
+    'should return a list of transforms for transform viewer',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asTransformViewer();
 
@@ -92,9 +92,9 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
   );
 
   apiTest(
-    'should return a specific transform configuration for transform admin',
+    'should return a specific transform configuration for transform manager',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const { statusCode, body } = await apiClient.get(
         `internal/transform/transforms/${TRANSFORM_1_ID}`,
@@ -122,7 +122,7 @@ apiTest.describe('/internal/transform/transforms', { tag: tags.ESS_ONLY }, () =>
   );
 
   apiTest(
-    'should return a specific transform configuration for transform user',
+    'should return a specific transform configuration for transform viewer',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asTransformViewer();
 

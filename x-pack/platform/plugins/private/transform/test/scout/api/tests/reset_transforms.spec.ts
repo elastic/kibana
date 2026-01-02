@@ -36,7 +36,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
   });
 
   apiTest('should reset transform by transformId', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+    const { cookieHeader } = await samlAuth.asTransformManager();
 
     // Check that batch transform finished running and assert stats.
     const reqBody: ResetTransformsRequestSchema = {
@@ -78,7 +78,7 @@ apiTest.describe('/internal/transform/reset_transforms', { tag: tags.ESS_ONLY },
   apiTest(
     'should return 200 with error in response if invalid transformId',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const reqBody: ResetTransformsRequestSchema = {
         transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],

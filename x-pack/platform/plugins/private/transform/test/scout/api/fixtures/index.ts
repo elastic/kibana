@@ -18,13 +18,13 @@ import { getTransformApiService } from '../services/transform_api_service';
 import { TRANSFORM_USERS } from './constants';
 
 export interface TransformSamlAuthFixture extends SamlAuth {
-  asTransformPowerUser: () => Promise<RoleSessionCredentials>;
+  asTransformManager: () => Promise<RoleSessionCredentials>;
   asTransformViewer: () => Promise<RoleSessionCredentials>;
   asTransformUnauthorizedUser: () => Promise<RoleSessionCredentials>;
 }
 
 export interface TransformRequestAuthFixture extends RequestAuthFixture {
-  loginAsTransformPowerUser: () => Promise<RoleApiCredentials>;
+  loginAsTransformManager: () => Promise<RoleApiCredentials>;
   loginAsTransformViewerUser: () => Promise<RoleApiCredentials>;
 }
 
@@ -38,23 +38,23 @@ export const transformApiTest = apiTest.extend<{
   apiServices: TransformApiServicesFixture;
 }>({
   requestAuth: async ({ requestAuth }, use) => {
-    const loginAsTransformPowerUser = async () =>
-      requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformPowerUser);
+    const loginAsTransformManager = async () =>
+      requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformManager);
 
     const loginAsTransformViewerUser = async () =>
       requestAuth.getApiKeyForCustomRole(TRANSFORM_USERS.transformViewerUser);
 
     const extendedRequestAuth: TransformRequestAuthFixture = {
       ...requestAuth,
-      loginAsTransformPowerUser,
+      loginAsTransformManager,
       loginAsTransformViewerUser,
     };
     await use(extendedRequestAuth);
   },
 
   samlAuth: async ({ samlAuth }, use) => {
-    const asTransformPowerUser = async () =>
-      samlAuth.asInteractiveUser(TRANSFORM_USERS.transformPowerUser);
+    const asTransformManager = async () =>
+      samlAuth.asInteractiveUser(TRANSFORM_USERS.transformManager);
 
     const asTransformViewer = async () =>
       samlAuth.asInteractiveUser(TRANSFORM_USERS.transformViewerUser);
@@ -64,7 +64,7 @@ export const transformApiTest = apiTest.extend<{
 
     const extendedSamlAuth: TransformSamlAuthFixture = {
       ...samlAuth,
-      asTransformPowerUser,
+      asTransformManager,
       asTransformViewer,
       asTransformUnauthorizedUser,
     };

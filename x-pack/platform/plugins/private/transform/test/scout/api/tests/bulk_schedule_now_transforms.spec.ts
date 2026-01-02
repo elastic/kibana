@@ -17,11 +17,11 @@ import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
   const transformIds = ['bulk_schedule_now_test_1', 'bulk_schedule_now_test_2'];
-  let transformPowerUserCookieHeader: CookieHeader;
+  let transformManagerCookieHeader: CookieHeader;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
-    const credentials = await samlAuth.asTransformPowerUser();
-    transformPowerUserCookieHeader = credentials.cookieHeader;
+    const credentials = await samlAuth.asTransformManager();
+    transformManagerCookieHeader = credentials.cookieHeader;
   });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
@@ -43,7 +43,7 @@ apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
       {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserCookieHeader,
+          ...transformManagerCookieHeader,
         },
         body: reqBody,
         responseType: 'json',
@@ -71,7 +71,7 @@ apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserCookieHeader,
+            ...transformManagerCookieHeader,
           },
           body: reqBody,
           responseType: 'json',

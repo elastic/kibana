@@ -28,7 +28,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
   });
 
   apiTest('should schedule the transform by transformId', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+    const { cookieHeader } = await samlAuth.asTransformManager();
 
     const reqBody: ScheduleNowTransformsRequestSchema = [{ id: transformId }];
     const { statusCode, body } = await apiClient.post(
@@ -78,7 +78,7 @@ apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_
   apiTest(
     'should return 200 with error in response if invalid transformId',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const reqBody: ScheduleNowTransformsRequestSchema = [{ id: 'invalid_transform_id' }];
       const { statusCode, body } = await apiClient.post(

@@ -17,11 +17,11 @@ apiTest.describe(
   { tag: tags.ESS_ONLY },
   () => {
     let dataViewToBeDeletedTitle: string | undefined;
-    let transformPowerUserCookieHeader: CookieHeader;
+    let transformManagerCookieHeader: CookieHeader;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      const credentials = await samlAuth.asTransformPowerUser();
-      transformPowerUserCookieHeader = credentials.cookieHeader;
+      const credentials = await samlAuth.asTransformManager();
+      transformManagerCookieHeader = credentials.cookieHeader;
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
@@ -41,7 +41,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserCookieHeader,
+            ...transformManagerCookieHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -72,7 +72,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserCookieHeader,
+            ...transformManagerCookieHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -107,7 +107,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserCookieHeader,
+            ...transformManagerCookieHeader,
           },
           body: generateTransformConfig(transformId),
           responseType: 'json',
@@ -143,7 +143,7 @@ apiTest.describe(
           {
             headers: {
               ...COMMON_HEADERS,
-              ...transformPowerUserCookieHeader,
+              ...transformManagerCookieHeader,
             },
             body: {
               ...generateTransformConfig(transformId),
@@ -172,7 +172,7 @@ apiTest.describe(
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserCookieHeader,
+            ...transformManagerCookieHeader,
           },
           body: config,
           responseType: 'json',

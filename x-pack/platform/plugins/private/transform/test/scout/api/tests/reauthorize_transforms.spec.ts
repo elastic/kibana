@@ -48,7 +48,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
 
   // single transform reauthorize_transforms
   apiTest(
-    'should not reauthorize transform created by transform_viewer for transform_unauthorized',
+    'should not reauthorize transform created by transform viewer for transform unauthorized',
     async ({ apiClient, apiServices, samlAuth }) => {
       const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
       const transformUnauthorizedUserSessionCookie = await samlAuth
@@ -80,7 +80,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
   );
 
   apiTest(
-    'should not reauthorize transform created by transform_viewer for transform_viewer',
+    'should not reauthorize transform created by transform viewer for transform viewer',
     async ({ apiClient, samlAuth, apiServices }) => {
       const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
 
@@ -113,11 +113,11 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
   );
 
   apiTest(
-    'should reauthorize transform created by transform_viewer with new api key of poweruser and start the transform',
+    'should reauthorize transform created by transform viewer with new api key of transform manager and start the transform',
     async ({ apiClient, samlAuth, apiServices }) => {
       const reqBody: ReauthorizeTransformsRequestSchema = [{ id: transformCreatedByViewerId }];
-      const transformPowerUserSessionCookie = await samlAuth
-        .asTransformPowerUser()
+      const transformManagerSessionCookie = await samlAuth
+        .asTransformManager()
         .then((c) => c.cookieHeader);
 
       const { statusCode, body } = await apiClient.post(
@@ -126,7 +126,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
           headers: {
             ...COMMON_HEADERS,
 
-            ...transformPowerUserSessionCookie,
+            ...transformManagerSessionCookie,
           },
           body: reqBody,
           responseType: 'json',
@@ -148,8 +148,8 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
     'should return 200 with error in response if invalid transformId',
     async ({ apiClient, samlAuth }) => {
       const reqBody: ReauthorizeTransformsRequestSchema = [{ id: invalidTransformId }];
-      const transformPowerUserSessionCookie = await samlAuth
-        .asTransformPowerUser()
+      const transformManagerSessionCookie = await samlAuth
+        .asTransformManager()
         .then((c) => c.cookieHeader);
 
       const { statusCode, body } = await apiClient.post(
@@ -158,7 +158,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_O
           headers: {
             ...COMMON_HEADERS,
 
-            ...transformPowerUserSessionCookie,
+            ...transformManagerSessionCookie,
           },
           body: reqBody,
           responseType: 'json',

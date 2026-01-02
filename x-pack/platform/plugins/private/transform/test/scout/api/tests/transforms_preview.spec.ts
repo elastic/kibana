@@ -24,7 +24,7 @@ function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
 
 apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY }, () => {
   apiTest('should return a transform preview', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+    const { cookieHeader } = await samlAuth.asTransformManager();
 
     const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
       headers: {
@@ -44,7 +44,7 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
   apiTest(
     'should return a correct error for transform preview',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const { statusCode, body } = await apiClient.post('internal/transform/transforms/_preview', {
         headers: {
@@ -69,7 +69,7 @@ apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY
     }
   );
 
-  apiTest('should return 403 for transform view-only user', async ({ apiClient, samlAuth }) => {
+  apiTest('should return 403 for transform viewer user', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asTransformViewer();
 
     const { statusCode } = await apiClient.post('internal/transform/transforms/_preview', {

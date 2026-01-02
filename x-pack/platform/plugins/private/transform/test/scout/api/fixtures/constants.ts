@@ -15,7 +15,7 @@ export const COMMON_API_HEADERS = {
 } as const;
 
 export const TRANSFORM_USERS: Record<string, KibanaRole> = {
-  transformPowerUser: {
+  transformManager: {
     kibana: [
       {
         base: ['all'],

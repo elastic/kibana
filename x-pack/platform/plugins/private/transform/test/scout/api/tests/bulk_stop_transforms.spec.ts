@@ -17,11 +17,11 @@ import { COMMON_HEADERS } from '../constants';
 const transformIds = ['bulk_stop_test_1', 'bulk_stop_test_2'];
 
 apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, () => {
-  let transformPowerUserCookieHeader: CookieHeader;
+  let transformManagerCookieHeader: CookieHeader;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
-    const credentials = await samlAuth.asTransformPowerUser();
-    transformPowerUserCookieHeader = credentials.cookieHeader;
+    const credentials = await samlAuth.asTransformManager();
+    transformManagerCookieHeader = credentials.cookieHeader;
   });
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     for (const id of transformIds) {
@@ -52,7 +52,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
     const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserCookieHeader,
+        ...transformManagerCookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -78,7 +78,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
       const { statusCode, body } = await apiClient.post('internal/transform/stop_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserCookieHeader,
+          ...transformManagerCookieHeader,
         },
         body: reqBody,
         responseType: 'json',

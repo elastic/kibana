@@ -40,7 +40,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
   });
 
   apiTest('should delete transform by transformId', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+    const { cookieHeader } = await samlAuth.asTransformManager();
 
     const reqBody: DeleteTransformsRequestSchema = {
       transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
@@ -83,7 +83,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
   apiTest(
     'should return 200 with error in response if invalid transformId',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const reqBody: DeleteTransformsRequestSchema = {
         transformsInfo: [{ id: 'invalid_transform_id', state: TRANSFORM_STATE.STOPPED }],
@@ -107,7 +107,7 @@ apiTest.describe('/internal/transform/delete_transforms', { tag: tags.ESS_ONLY }
   apiTest(
     'should delete transform and destination index with deleteDestIndex setting',
     async ({ apiClient, apiServices, esClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const config = generateTransformConfig(transformId2);
       await apiServices.transform.createTransform(transformId2, config);

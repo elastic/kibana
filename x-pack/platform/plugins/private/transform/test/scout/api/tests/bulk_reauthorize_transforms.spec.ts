@@ -15,12 +15,12 @@ import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.ESS_ONLY }, () => {
   const transformCreatedByViewerId = 'transform-by-viewer';
-  const transformCreatedByPowerUserId = 'transform-by-poweruser';
-  const transformIds = [transformCreatedByViewerId, transformCreatedByPowerUserId];
+  const transformCreatedByManagerId = 'transform-by-manager';
+  const transformIds = [transformCreatedByViewerId, transformCreatedByManagerId];
 
   let transformViewerUserApiCredentials: RoleApiCredentials;
-  let transformPowerUserApiCredentials: RoleApiCredentials;
-  let transformPowerUserCookieHeader: CookieHeader;
+  let transformManagerApiCredentials: RoleApiCredentials;
+  let transformManagerCookieHeader: CookieHeader;
 
   function getDestinationIndices() {
     return transformIds.map((id) => generateDestIndex(id));
@@ -28,9 +28,9 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
 
   apiTest.beforeAll(async ({ samlAuth, requestAuth }) => {
     transformViewerUserApiCredentials = await requestAuth.loginAsTransformViewerUser();
-    transformPowerUserApiCredentials = await requestAuth.loginAsTransformPowerUser();
+    transformManagerApiCredentials = await requestAuth.loginAsTransformManager();
 
-    transformPowerUserCookieHeader = (await samlAuth.asTransformPowerUser()).cookieHeader;
+    transformManagerCookieHeader = (await samlAuth.asTransformManager()).cookieHeader;
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
@@ -42,11 +42,11 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
       true // deferValidation
     );
 
-    // Create transform by poweruser
+    // Create transform by manager
     await apiServices.transform.createTransformWithSecondaryAuth(
-      transformCreatedByPowerUserId,
-      generateTransformConfig(transformCreatedByPowerUserId, true),
-      transformPowerUserApiCredentials.apiKey.encoded,
+      transformCreatedByManagerId,
+      generateTransformConfig(transformCreatedByManagerId, true),
+      transformManagerApiCredentials.apiKey.encoded,
       true // deferValidation
     );
   });
@@ -60,13 +60,13 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
   });
 
   apiTest(
-    'should reauthorize multiple transforms for transform_poweruser, even if one of the transformIds is invalid',
+    'should reauthorize multiple transforms for transform manager, even if one of the transformIds is invalid',
     async ({ apiClient, apiServices }) => {
       const invalidTransformId = 'invalid_transform_id';
 
       const reqBody: ReauthorizeTransformsRequestSchema = [
         { id: transformCreatedByViewerId },
-        { id: transformCreatedByPowerUserId },
+        { id: transformCreatedByManagerId },
         { id: invalidTransformId },
       ];
 
@@ -75,7 +75,7 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
         {
           headers: {
             ...COMMON_HEADERS,
-            ...transformPowerUserCookieHeader,
+            ...transformManagerCookieHeader,
           },
           body: reqBody,
           responseType: 'json',
@@ -86,17 +86,17 @@ apiTest.describe('/internal/transform/reauthorize_transforms bulk', { tag: tags.
 
       // Valid transforms should be reauthorized successfully
       expect(body[transformCreatedByViewerId].success).toBe(true);
-      expect(body[transformCreatedByPowerUserId].success).toBe(true);
+      expect(body[transformCreatedByManagerId].success).toBe(true);
 
-      // Verify both transforms are now authorized with poweruser role
+      // Verify both transforms are now authorized with manager role
       await expectReauthorizedTransform(
         transformCreatedByViewerId,
         transformViewerUserApiCredentials,
         apiServices
       );
       await expectReauthorizedTransform(
-        transformCreatedByPowerUserId,
-        transformPowerUserApiCredentials,
+        transformCreatedByManagerId,
+        transformManagerApiCredentials,
         apiServices
       );
 

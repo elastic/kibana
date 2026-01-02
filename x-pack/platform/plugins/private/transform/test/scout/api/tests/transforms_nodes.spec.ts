@@ -12,9 +12,9 @@ import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe('/internal/transform/transforms/_nodes', { tag: tags.ESS_ONLY }, () => {
   apiTest(
-    'should return the number of available transform nodes for a power user',
+    'should return the number of available transform nodes for a transform manager',
     async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asTransformPowerUser();
+      const { cookieHeader } = await samlAuth.asTransformManager();
 
       const { statusCode, body } = await apiClient.get('internal/transform/transforms/_nodes', {
         headers: {

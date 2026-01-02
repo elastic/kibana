@@ -37,7 +37,7 @@ apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, 
   });
 
   apiTest('should stop the transform by transformId', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asTransformPowerUser();
+    const { cookieHeader } = await samlAuth.asTransformManager();
 
     const reqBody: StopTransformsRequestSchema = [
       { id: transformId, state: TRANSFORM_STATE.STARTED },

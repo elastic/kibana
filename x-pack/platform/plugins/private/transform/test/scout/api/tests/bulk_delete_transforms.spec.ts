@@ -20,11 +20,11 @@ const transformIds = ['bulk_delete_test_1', 'bulk_delete_test_2'];
 
 apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
   const destinationIndices = transformIds.map(generateDestIndex);
-  let transformPowerUserCookieHeader: CookieHeader;
+  let transformManagerCookieHeader: CookieHeader;
 
   apiTest.beforeAll(async ({ samlAuth }) => {
-    const credentials = await samlAuth.asTransformPowerUser();
-    transformPowerUserCookieHeader = credentials.cookieHeader;
+    const credentials = await samlAuth.asTransformManager();
+    transformManagerCookieHeader = credentials.cookieHeader;
   });
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
@@ -52,7 +52,7 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
     const { statusCode, body } = await apiClient.post('internal/transform/delete_transforms', {
       headers: {
         ...COMMON_HEADERS,
-        ...transformPowerUserCookieHeader,
+        ...transformManagerCookieHeader,
       },
       body: reqBody,
       responseType: 'json',
@@ -81,7 +81,7 @@ apiTest.describe('bulk delete', { tag: tags.ESS_ONLY }, () => {
       const { statusCode, body } = await apiClient.post('internal/transform/delete_transforms', {
         headers: {
           ...COMMON_HEADERS,
-          ...transformPowerUserCookieHeader,
+          ...transformManagerCookieHeader,
         },
         body: reqBody,
         responseType: 'json',
