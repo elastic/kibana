@@ -52,7 +52,7 @@ describe('cleanFiltersForSerialize', () => {
     expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
   });
 
-  test('should remove these undefined properties from compound filters as well', () => {
+  test('should remove undefined "meta.key", "meta.alias", and "meta.value" properties from nested compound filters', () => {
     const filters: Filter[] = [
       {
         meta: {
