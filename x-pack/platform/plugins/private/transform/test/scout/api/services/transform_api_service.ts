@@ -6,53 +6,45 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
-import type { PutTransformsRequestSchema, TransformId } from '../../../../common';
 
 export interface TransformApiService {
-  createTransform: (transformId: TransformId, config: PutTransformsRequestSchema) => Promise<void>;
+  createTransform: (request: estypes.TransformPutTransformRequest) => Promise<void>;
   createTransformWithSecondaryAuth: (
-    transformId: TransformId,
-    config: PutTransformsRequestSchema,
+    request: estypes.TransformPutTransformRequest,
     secondaryAuthValue: string,
     deferValidation?: boolean
   ) => Promise<void>;
   getTransform: (
-    transformId: TransformId
+    request: estypes.TransformGetTransformRequest
   ) => Promise<estypes.TransformGetTransformTransformSummary>;
   getTransformStats: (
-    transformId: TransformId
+    request: estypes.TransformGetTransformStatsRequest
   ) => Promise<estypes.TransformGetTransformStatsTransformStats>;
-  deleteTransform: (transformId: TransformId) => Promise<void>;
+  deleteTransform: (request: estypes.TransformDeleteTransformRequest) => Promise<void>;
   cleanTransformIndices: () => Promise<void>;
-  deleteIndices: (index: string) => Promise<void>;
+  deleteIndices: (request: estypes.IndicesDeleteRequest) => Promise<void>;
 }
 
 export function getTransformApiService(esClient: Client): TransformApiService {
   return {
-    async createTransform(transformId: TransformId, config: PutTransformsRequestSchema) {
+    async createTransform(request: estypes.TransformPutTransformRequest) {
       try {
-        await esClient.transform.putTransform({
-          transform_id: transformId,
-          ...config,
-        } as any);
+        await esClient.transform.putTransform(request);
       } catch (error) {
-        throw new Error(`Failed to create transform ${transformId}: ${error}`);
+        throw new Error(`Failed to create transform ${request.transform_id}: ${error}`);
       }
     },
-
     async createTransformWithSecondaryAuth(
-      transformId: TransformId,
-      config: PutTransformsRequestSchema,
+      request: estypes.TransformPutTransformRequest,
       secondaryAuthEncodedApiKey: string,
       deferValidation = false
     ) {
       try {
         await esClient.transform.putTransform(
           {
-            transform_id: transformId,
+            ...request,
             defer_validation: deferValidation,
-            ...config,
-          } as any,
+          },
           {
             headers: {
               'es-secondary-authorization': `ApiKey ${secondaryAuthEncodedApiKey}`,
@@ -60,45 +52,43 @@ export function getTransformApiService(esClient: Client): TransformApiService {
           }
         );
       } catch (error) {
-        throw new Error(`Failed to create transform ${transformId}: ${error}`);
+        throw new Error(`Failed to create transform ${request.transform_id}: ${error}`);
       }
     },
 
-    async getTransform(transformId: TransformId) {
+    async getTransform(request: estypes.TransformGetTransformRequest) {
       try {
-        const response = await esClient.transform.getTransform({ transform_id: transformId });
+        const response = await esClient.transform.getTransform(request);
         return response.transforms[0];
       } catch (error) {
-        throw new Error(`Failed to get transform ${transformId}: ${error}`);
+        throw new Error(`Failed to get transform ${request.transform_id}: ${error}`);
       }
     },
 
-    async getTransformStats(transformId: TransformId) {
+    async getTransformStats(request: estypes.TransformGetTransformStatsRequest) {
       try {
         const response = await esClient.transform.getTransformStats({
-          transform_id: transformId,
+          ...request,
         });
         return response.transforms[0];
       } catch (error) {
-        throw new Error(`Failed to get transform stats for ${transformId}: ${error}`);
+        throw new Error(`Failed to get transform stats for ${request.transform_id}: ${error}`);
       }
     },
 
-    async deleteTransform(transformId: TransformId) {
+    async deleteTransform(request: estypes.TransformDeleteTransformRequest) {
       try {
         // Stop the transform first
         await esClient.transform.stopTransform({
-          transform_id: transformId,
+          ...request,
           force: true,
           wait_for_completion: true,
         });
 
         // Then delete it
-        await esClient.transform.deleteTransform({
-          transform_id: transformId,
-        });
+        await esClient.transform.deleteTransform(request);
       } catch (error) {
-        throw new Error(`Failed to delete transform ${transformId}: ${error}`);
+        throw new Error(`Failed to delete transform ${request.transform_id}: ${error}`);
       }
     },
 
@@ -142,14 +132,14 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       }
     },
 
-    async deleteIndices(index: string) {
+    async deleteIndices(request: estypes.IndicesDeleteRequest) {
       try {
         await esClient.indices.delete({
-          index,
+          ...request,
           ignore_unavailable: true,
         });
       } catch (error) {
-        throw new Error(`Failed to delete indices ${index}: ${error}`);
+        throw new Error(`Failed to delete indices ${request.index}: ${error}`);
       }
     },
   };
