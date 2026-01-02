@@ -42,8 +42,9 @@
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/observability-nav-icons",
-    "@kbn/server-route-repository-client",
-    "@kbn/agent-builder-browser"
+    "@kbn/agent-builder-browser",
+    "@kbn/sse-utils-client",
+    "@kbn/sse-utils-server"
   ],
   "exclude": ["target/**/*"]
 }
