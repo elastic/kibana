@@ -35,7 +35,7 @@ export const PreviewUi: React.FC = (props) => {
         <EuiSpacer />
         <h2>ComposerQuery API: Pipe method</h2>
         <EuiSpacer />
-        <EuiCodeBlock language="esql" isCopyable>
+        <EuiCodeBlock language="typescript" isCopyable>
           import &#123; esql &#125; from &#39;@kbn/esql-language&#39;;
           <EuiSpacer />
           const query = esql`{sourceStatement}`;{'\n'}
