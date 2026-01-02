@@ -128,8 +128,8 @@ describe('getAxiosInstance()', () => {
         validate: {
           config: { schema: z.object({}) },
           secrets: { schema: z.object({ foobar: z.boolean() }) },
-          params: { schema: z.object({}) },
         },
+        executor: undefined,
       })
     );
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
@@ -177,8 +177,8 @@ describe('getAxiosInstance()', () => {
           validate: {
             config: { schema: z.object({}) },
             secrets: { schema: z.object({ foobar: z.boolean() }) },
-            params: { schema: z.object({}) },
           },
+          executor: undefined,
         })
       );
       await actionsClient.getAxiosInstance(inMemoryConnectorId);
@@ -226,8 +226,8 @@ describe('getAxiosInstance()', () => {
           validate: {
             config: { schema: z.object({}) },
             secrets: { schema: z.object({ foobar: z.boolean() }) },
-            params: { schema: z.object({}) },
           },
+          executor: undefined,
         })
       );
       await actionsClient.getAxiosInstance(inMemoryConnectorId);
@@ -275,6 +275,11 @@ describe('getAxiosInstance()', () => {
           supportedFeatureIds: ['workflows'],
           getKibanaPrivileges: () => ['test/other'],
           isSystemActionType: true,
+          validate: {
+            config: { schema: z.object({}) },
+            secrets: { schema: z.object({ foobar: z.boolean() }) },
+          },
+          executor: undefined,
         })
       );
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
@@ -301,8 +306,8 @@ describe('getAxiosInstance()', () => {
           validate: {
             config: { schema: z.object({}) },
             secrets: { schema: z.object({ foobar: z.string() }) },
-            params: { schema: z.object({}) },
           },
+          executor: undefined,
         })
       );
 

@@ -31,16 +31,16 @@ describe('createConnectorTypeFromSpec', () => {
         supportedFeatureIds: ['alerting'],
         ...overrides.metadata,
       },
-      schema: {
-        type: 'object',
-        properties: {},
-        ...overrides.schema,
+      schema: overrides.schema || z4.object({}),
+      auth: overrides.auth || {
+        types: ['none'],
       },
-      auth: {
-        type: 'none',
-        ...overrides.auth,
+      actions: overrides.actions || {
+        testAction: {
+          input: z4.object({ test: z4.string() }),
+          handler: jest.fn(),
+        },
       },
-      actions: overrides.actions || {},
     } as ConnectorSpec);
 
   beforeEach(() => {
@@ -70,6 +70,7 @@ describe('createConnectorTypeFromSpec', () => {
     const spec = createMockSpec({
       metadata: {
         id: 'workflows-only-connector',
+        description: 'foobar',
         displayName: 'Workflows Only Connector',
         minimumLicense: 'basic',
         supportedFeatureIds: [WorkflowsConnectorFeatureId],
@@ -94,6 +95,7 @@ describe('createConnectorTypeFromSpec', () => {
     const spec = createMockSpec({
       metadata: {
         id: 'workflows-multi-feature-connector',
+        description: 'foobar',
         displayName: 'Workflows Multi Feature Connector',
         minimumLicense: 'basic',
         supportedFeatureIds: [WorkflowsConnectorFeatureId, 'alerting'],
@@ -118,6 +120,7 @@ describe('createConnectorTypeFromSpec', () => {
     const spec = createMockSpec({
       metadata: {
         id: 'workflows-multi-feature-connector-no-actions',
+        description: 'foobar',
         displayName: 'Workflows Multi Feature Connector No Actions',
         minimumLicense: 'basic',
         supportedFeatureIds: [WorkflowsConnectorFeatureId, 'alerting'],
@@ -135,6 +138,7 @@ describe('createConnectorTypeFromSpec', () => {
     const spec = createMockSpec({
       metadata: {
         id: 'workflows-connector',
+        description: 'foobar',
         displayName: 'Workflows Connector',
         minimumLicense: 'basic',
         supportedFeatureIds: [WorkflowsConnectorFeatureId],
@@ -151,7 +155,7 @@ describe('createConnectorTypeFromSpec', () => {
   it('includes globalAuthHeaders when provided in spec', () => {
     const spec = createMockSpec({
       auth: {
-        type: 'none',
+        types: [],
         headers: {
           'X-Custom-Header': 'value',
         },
@@ -311,7 +315,9 @@ describe('createConnectorTypeFromSpec', () => {
   describe('secrets schema validation', () => {
     it('generates secrets schema correctly', () => {
       const spec = createMockSpec({
-        auth: { type: 'none' },
+        auth: {
+          types: [{ type: 'api_key_header', defaults: { headerField: 'Key' } }],
+        },
       });
 
       createConnectorTypeFromSpec(spec, mockActionsPlugin);
@@ -324,9 +330,7 @@ describe('createConnectorTypeFromSpec', () => {
         ssl: { pfx: { enabled: true } },
       });
 
-      const spec = createMockSpec({
-        auth: { type: 'none' },
-      });
+      const spec = createMockSpec({});
 
       const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
 
@@ -381,24 +385,20 @@ describe('createConnectorTypeFromSpec', () => {
       );
     });
 
-    it.each([[null], [undefined]])(
-      'generates schema with authType when schema is not provided',
-      (schema) => {
-        const spec = createMockSpec({
-          schema,
-        });
+    it('generates schema with authType when schema is not provided', () => {
+      const spec = createMockSpec();
+      spec.schema = undefined;
 
-        const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
 
-        expect(connectorType.validate.config).toBeDefined();
+      expect(connectorType.validate.config).toBeDefined();
 
-        const configWithAuthType = { authType: 'basic' };
+      const configWithAuthType = { authType: 'basic' };
 
-        expect(() => connectorType.validate.config.schema.parse(configWithAuthType)).not.toThrow();
-        expect(connectorType.validate.config.schema.parse(configWithAuthType)).toEqual(
-          configWithAuthType
-        );
-      }
-    );
+      expect(() => connectorType.validate.config.schema.parse(configWithAuthType)).not.toThrow();
+      expect(connectorType.validate.config.schema.parse(configWithAuthType)).toEqual(
+        configWithAuthType
+      );
+    });
   });
 });

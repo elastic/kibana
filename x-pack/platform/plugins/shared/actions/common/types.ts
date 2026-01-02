@@ -31,7 +31,7 @@ export interface ActionType {
   isDeprecated: boolean;
   allowMultipleSystemActions?: boolean;
   validate?: {
-    params?: PublicValidatorType;
+    params: PublicValidatorType;
   };
 }
 

@@ -12,7 +12,7 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType as CommonActionType } from '../common';
-import { areValidFeatures, WorkflowsConnectorFeatureId } from '../common';
+import { areValidFeatures } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
@@ -23,6 +23,7 @@ import type {
   ActionTypeSecrets,
   InMemoryConnector,
 } from './types';
+import { isWorkflowsOnlyConnectorType } from './lib/single_file_connectors/is_workflows_only_connector';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -205,9 +206,7 @@ export class ActionTypeRegistry {
     // Only workflows-only connectors (with no other feature IDs) can be registered without execute and params
     const hasExecutor = !!actionType.executor;
     const hasParamsValidator = !!actionType.validate.params;
-    const isWorkflowsOnlyConnector =
-      actionType.supportedFeatureIds.length === 1 &&
-      actionType.supportedFeatureIds[0] === WorkflowsConnectorFeatureId;
+    const isWorkflowsOnlyConnector = isWorkflowsOnlyConnectorType(actionType);
     const hasMultipleFeatureIds = actionType.supportedFeatureIds.length > 1;
 
     // For workflows-only connectors: both executor and params must be missing

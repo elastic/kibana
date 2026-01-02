@@ -15,12 +15,12 @@ import type {
   ActionType,
 } from '../../types';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
-import { WorkflowsConnectorFeatureId } from '../../../common';
 
 import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
+import { isWorkflowsOnlyConnectorType } from './is_workflows_only_connector';
 
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
@@ -29,10 +29,7 @@ export const createConnectorTypeFromSpec = (
   const configUtils = actions.getActionsConfigurationUtilities();
 
   // Only workflows-only connectors (with no other feature IDs) can skip executor and params
-  const isWorkflowsOnlyConnector =
-    spec.metadata.supportedFeatureIds.length === 1 &&
-    spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId;
-
+  const isWorkflowsOnlyConnector = isWorkflowsOnlyConnectorType(spec.metadata);
   const shouldGenerateExecutor = !isWorkflowsOnlyConnector;
   const shouldGenerateParams = !isWorkflowsOnlyConnector;
 

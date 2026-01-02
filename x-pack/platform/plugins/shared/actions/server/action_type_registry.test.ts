@@ -942,15 +942,20 @@ describe('actionTypeRegistry', () => {
   });
 
   describe('register() - optional executor and params', () => {
+    const defaultValidateNoParams = {
+      config: { schema: z.object({}) },
+      secrets: { schema: z.object({}) },
+    };
+
     it('allows workflows-only connectors to be registered without executor and params', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       const workflowsConnector = getConnectorType({
         id: 'workflows-connector',
         name: 'Workflows Connector',
         supportedFeatureIds: ['workflows'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
       });
-      delete workflowsConnector.executor;
-      delete workflowsConnector.validate.params;
 
       expect(() => actionTypeRegistry.register(workflowsConnector)).not.toThrow();
       expect(actionTypeRegistry.has('workflows-connector')).toBe(true);
@@ -963,8 +968,8 @@ describe('actionTypeRegistry', () => {
         id: 'workflows-connector-with-executor',
         name: 'Workflows Connector With Executor',
         supportedFeatureIds: ['workflows'],
+        validate: defaultValidateNoParams,
       });
-      delete workflowsConnector.validate.params;
 
       expect(() => actionTypeRegistry.register(workflowsConnector)).toThrowError(
         'Connector type "workflows-connector-with-executor" is a workflows-only connector and must not have executor or params validator. Both must be omitted.'
@@ -973,14 +978,14 @@ describe('actionTypeRegistry', () => {
 
     it('throws error when workflows-only connector has params but no executor', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      const workflowsConnector = getConnectorType({
+      const workflowsConnector2 = getConnectorType({
         id: 'workflows-connector-with-params',
         name: 'Workflows Connector With Params',
         supportedFeatureIds: ['workflows'],
+        executor: undefined,
       });
-      delete workflowsConnector.executor;
 
-      expect(() => actionTypeRegistry.register(workflowsConnector)).toThrowError(
+      expect(() => actionTypeRegistry.register(workflowsConnector2)).toThrowError(
         'Connector type "workflows-connector-with-params" is a workflows-only connector and must not have executor or params validator. Both must be omitted.'
       );
     });
@@ -1004,8 +1009,8 @@ describe('actionTypeRegistry', () => {
         id: 'multi-feature-connector',
         name: 'Multi Feature Connector',
         supportedFeatureIds: ['workflows', 'alerting'],
+        executor: undefined,
       });
-      delete multiFeatureConnector.executor;
 
       expect(() => actionTypeRegistry.register(multiFeatureConnector)).toThrowError(
         'Connector type "multi-feature-connector" has multiple feature IDs and must have both executor and params validator.'
@@ -1018,8 +1023,8 @@ describe('actionTypeRegistry', () => {
         id: 'multi-feature-connector-no-params',
         name: 'Multi Feature Connector No Params',
         supportedFeatureIds: ['workflows', 'alerting'],
+        validate: defaultValidateNoParams,
       });
-      delete multiFeatureConnector.validate.params;
 
       expect(() => actionTypeRegistry.register(multiFeatureConnector)).toThrowError(
         'Connector type "multi-feature-connector-no-params" has multiple feature IDs and must have both executor and params validator.'
@@ -1032,9 +1037,9 @@ describe('actionTypeRegistry', () => {
         id: 'multi-feature-connector-both-missing',
         name: 'Multi Feature Connector Both Missing',
         supportedFeatureIds: ['workflows', 'alerting'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
       });
-      delete multiFeatureConnector.executor;
-      delete multiFeatureConnector.validate.params;
 
       expect(() => actionTypeRegistry.register(multiFeatureConnector)).toThrowError(
         'Connector type "multi-feature-connector-both-missing" has multiple feature IDs and must have both executor and params validator.'
@@ -1047,8 +1052,8 @@ describe('actionTypeRegistry', () => {
         id: 'non-workflows-connector',
         name: 'Non Workflows Connector',
         supportedFeatureIds: ['alerting'],
+        executor: undefined,
       });
-      delete nonWorkflowsConnector.executor;
 
       expect(() => actionTypeRegistry.register(nonWorkflowsConnector)).toThrowError(
         'Connector type "non-workflows-connector" must have both executor and params validator.'
@@ -1061,8 +1066,8 @@ describe('actionTypeRegistry', () => {
         id: 'non-workflows-connector-no-params',
         name: 'Non Workflows Connector No Params',
         supportedFeatureIds: ['alerting'],
+        validate: defaultValidateNoParams,
       });
-      delete nonWorkflowsConnector.validate.params;
 
       expect(() => actionTypeRegistry.register(nonWorkflowsConnector)).toThrowError(
         'Connector type "non-workflows-connector-no-params" must have both executor and params validator.'
@@ -1075,9 +1080,9 @@ describe('actionTypeRegistry', () => {
         id: 'non-workflows-connector-both-missing',
         name: 'Non Workflows Connector Both Missing',
         supportedFeatureIds: ['alerting'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
       });
-      delete nonWorkflowsConnector.executor;
-      delete nonWorkflowsConnector.validate.params;
 
       expect(() => actionTypeRegistry.register(nonWorkflowsConnector)).toThrowError(
         'Connector type "non-workflows-connector-both-missing" must have both executor and params validator.'
@@ -1092,9 +1097,9 @@ describe('actionTypeRegistry', () => {
         id: 'workflows-connector-no-executor-params',
         name: 'Workflows Connector No Executor Params',
         supportedFeatureIds: ['workflows'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
       });
-      delete workflowsConnector.executor;
-      delete workflowsConnector.validate.params;
 
       actionTypeRegistry.register(workflowsConnector);
 
