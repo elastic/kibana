@@ -884,6 +884,7 @@
     "@kbn/response-ops-alerts-table": "link:src/platform/packages/shared/response-ops/alerts-table",
     "@kbn/response-ops-form-generator": "link:src/platform/packages/shared/response-ops/form-generator",
     "@kbn/response-ops-recurring-schedule-form": "link:src/platform/packages/shared/response-ops/recurring-schedule-form",
+    "@kbn/response-ops-retry-service": "link:x-pack/platform/packages/shared/response-ops/retry-service",
     "@kbn/response-ops-rule-form": "link:src/platform/packages/shared/response-ops/rule_form",
     "@kbn/response-ops-rule-params": "link:src/platform/packages/shared/response-ops/rule_params",
     "@kbn/response-ops-rules-apis": "link:src/platform/packages/shared/response-ops/rules-apis",
