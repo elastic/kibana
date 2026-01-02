@@ -123,7 +123,6 @@ import type {
 import type { ExternalCallback } from '..';
 
 import {
-  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
   MAX_CONCURRENT_PACKAGE_ASSETS,
@@ -3026,10 +3025,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     if (cloudConnectorVars && enrichedPackagePolicy?.supports_cloud_connector) {
       if (enrichedPackagePolicy?.cloud_connector_id) {
-        const existingCloudConnector = await soClient.get<CloudConnector>(
-          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-          enrichedPackagePolicy.cloud_connector_id
-        );
+        // Update the existing cloud connector with new vars
         logger.info(`Updating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         try {
           const cloudConnector = await cloudConnectorService.update(
@@ -3037,7 +3033,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             enrichedPackagePolicy.cloud_connector_id,
             {
               vars: cloudConnectorVars,
-              packagePolicyCount: existingCloudConnector.attributes.packagePolicyCount + 1,
             }
           );
           logger.info(`Successfully updated cloud connector: ${cloudConnector.id}`);

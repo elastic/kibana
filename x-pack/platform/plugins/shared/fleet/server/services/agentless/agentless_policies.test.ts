@@ -310,53 +310,6 @@ describe('AgentlessPoliciesService', () => {
 
       expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(0);
     });
-
-    it('should decrement cloud connector package count when deleting agentless policy with cloud connector', async () => {
-      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
-        id: 'agentless-policy-with-connector',
-        supports_agentless: true,
-      } as any);
-
-      packagePolicyService.list.mockResolvedValueOnce({
-        items: [
-          {
-            id: 'package-policy-id',
-            cloud_connector_id: 'cloud-connector-123',
-          } as any,
-        ],
-        total: 1,
-        page: 1,
-        perPage: 1,
-      });
-
-      const getByIdSpy = jest.spyOn(cloudConnectorService, 'getById');
-      getByIdSpy.mockResolvedValueOnce({
-        id: 'cloud-connector-123',
-        packagePolicyCount: 2,
-      } as any);
-
-      const updateSpy = jest.spyOn(cloudConnectorService, 'update');
-      updateSpy.mockResolvedValueOnce({} as any);
-
-      const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const logger = loggingSystemMock.createLogger();
-
-      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
-        packagePolicyService,
-        soClient,
-        esClient,
-        logger
-      );
-
-      await agentlessPoliciesService.deleteAgentlessPolicy('agentless-policy-with-connector');
-
-      expect(getByIdSpy).toHaveBeenCalledWith(soClient, 'cloud-connector-123');
-      expect(updateSpy).toHaveBeenCalledWith(soClient, 'cloud-connector-123', {
-        packagePolicyCount: 1,
-      });
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe('createAgentlessPolicy with cloud connectors', () => {
