@@ -99,5 +99,6 @@ export type PluginStats = PluginMetaInfo & ApiStats & EslintDisableCounts & Enzy
 /**
  * All plugin stats keyed by plugin ID.
  */
-export type AllPluginStats = { [key: string]: PluginStats };
-
+export interface AllPluginStats {
+  [key: string]: PluginStats;
+}
