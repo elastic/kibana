@@ -44,6 +44,7 @@ export type OverviewProps = DocViewRenderProps & {
   indexes: ObservabilityIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
+  disableScrollContainer?: boolean;
 };
 
 export type TraceOverviewSections = 'errors-table';
@@ -63,6 +64,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
       showWaterfall = true,
       dataView,
       decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
+      disableScrollContainer = false,
     },
     ref
   ) => {
@@ -108,7 +110,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
           <div
             ref={setContainerRef}
             css={
-              containerHeight
+              !disableScrollContainer && containerHeight
                 ? css`
                     max-height: ${containerHeight}px;
                     overflow: auto;

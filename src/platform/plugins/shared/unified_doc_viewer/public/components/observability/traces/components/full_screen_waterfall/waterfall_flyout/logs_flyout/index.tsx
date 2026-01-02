@@ -69,6 +69,7 @@ export function LogsFlyout({ onCloseFlyout, id, dataView }: SpanFlyoutProps) {
           dataView={logDataView}
           indexes={indexes}
           showTraceWaterfall={false}
+          disableScrollContainer={true}
         />
       ) : null}
     </WaterfallFlyout>
