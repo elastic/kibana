@@ -24,9 +24,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Systems', function () {
-    const STREAM_NAME = 'logs.features-test';
+    const STREAM_NAME = 'logs.systems-test';
 
-    const upsertFeature = async (body: System) => {
+    const upsertSystem = async (body: System) => {
       return await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
         params: {
           path: { name: STREAM_NAME, systemName: body.name },
@@ -35,7 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     };
 
-    const listFeatures = async (): Promise<System[]> => {
+    const listSystems = async (): Promise<System[]> => {
       const res = await apiClient.fetch('GET /internal/streams/{name}/systems', {
         params: { path: { name: STREAM_NAME } },
       });
@@ -54,8 +54,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     };
 
-    const clearAllFeatures = async () => {
-      const systems = await listFeatures();
+    const clearAllSystems = async () => {
+      const systems = await listSystems();
       if (!systems.length) return;
       const operations = systems.map((system) => ({
         delete: { system: { name: system.name } },
@@ -71,7 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
 
-      // Create a basic wired stream to attach features to
+      // Create a basic wired stream to attach systems to
       await putStream(apiClient, STREAM_NAME, {
         stream: {
           description: '',
@@ -94,9 +94,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('single feature lifecycle', () => {
+    describe('single system lifecycle', () => {
       beforeEach(async () => {
-        const resp = await upsertFeature({
+        const resp = await upsertSystem({
           name: 'feature-a',
           type: 'system',
           description: 'Initial description',
@@ -106,10 +106,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       afterEach(async () => {
-        await clearAllFeatures();
+        await clearAllSystems();
       });
 
-      it('gets and lists the feature', async () => {
+      it('gets and lists the system', async () => {
         const getResponse = await apiClient.fetch(
           'GET /internal/streams/{name}/systems/{systemName}',
           {
@@ -126,7 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           filter: { always: {} },
         });
 
-        const systems = await listFeatures();
+        const systems = await listSystems();
         expect(systems).to.have.length(1);
         expect(systems[0]).to.eql({
           type: 'system',
@@ -136,21 +136,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('cannot create a feature with a name starting with an underscore', async () => {
-        const resp = await upsertFeature({
-          name: '_invalid-feature',
+      it('cannot create a system with a name starting with an underscore', async () => {
+        const resp = await upsertSystem({
+          name: '_invalid-system',
           type: 'system',
-          description: 'A feature with an invalid name',
+          description: 'A system with an invalid name',
           filter: { always: {} },
         });
         expect(resp.status).to.be(400);
       });
 
-      it('cannot create a feature with a name starting with a dot', async () => {
-        const resp = await upsertFeature({
-          name: '.invalid-feature',
+      it('cannot create a system with a name starting with a dot', async () => {
+        const resp = await upsertSystem({
+          name: '.invalid-system',
           type: 'system',
-          description: 'A feature with an invalid name',
+          description: 'A system with an invalid name',
           filter: { always: {} },
         });
         expect(resp.status).to.be(400);
@@ -158,7 +158,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after update', () => {
         beforeEach(async () => {
-          const resp = await upsertFeature({
+          const resp = await upsertSystem({
             name: 'feature-a',
             type: 'system',
             description: 'Updated description',
@@ -167,9 +167,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(resp.status).to.be(200);
         });
 
-        it('reflects the updated feature', async () => {
+        it('reflects the updated system', async () => {
           const getUpdatedResponse = await apiClient.fetch(
-            'GET /internal/streams/{name}/systems/{featureName}',
+            'GET /internal/streams/{name}/systems/{systemName}',
             {
               params: {
                 path: { name: STREAM_NAME, systemName: 'feature-a' },
@@ -177,7 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             }
           );
           expect(getUpdatedResponse.status).to.be(200);
-          expect(getUpdatedResponse.body.feature).to.eql({
+          expect(getUpdatedResponse.body.system).to.eql({
             type: 'system',
             name: 'feature-a',
             description: 'Updated description',
@@ -210,11 +210,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       afterEach(async () => {
-        await clearAllFeatures();
+        await clearAllSystems();
       });
 
-      it('lists newly indexed features', async () => {
-        const systems = await listFeatures();
+      it('lists newly indexed systems', async () => {
+        const systems = await listSystems();
         expect(systems.map((s: System) => s.name).sort()).to.eql(['s1', 's2']);
       });
 
@@ -236,14 +236,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(bulkModify.status).to.be(200);
         });
 
-        it('lists updated set of features', async () => {
-          const systems = await listFeatures();
+        it('lists updated set of systems', async () => {
+          const systems = await listSystems();
           expect(systems.map((s: System) => s.name).sort()).to.eql(['s2', 's3']);
         });
       });
     });
 
-    describe('features are removed when stream is deleted', () => {
+    describe('systems are removed when stream is deleted', () => {
       beforeEach(async () => {
         const bulkCreate = await bulkOps([
           {
@@ -258,7 +258,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
         expect(bulkCreate.status).to.be(200);
-        const systems = await listFeatures();
+        const systems = await listSystems();
         expect(systems.map((s: System) => s.name).sort()).to.eql(['sd1', 'sd2']);
       });
 
@@ -277,16 +277,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           ...emptyAssets,
         });
-        await clearAllFeatures();
+        await clearAllSystems();
       });
 
-      it('deletes all feature documents belonging to the stream', async () => {
+      it('deletes all system documents belonging to the stream', async () => {
         await deleteStream(apiClient, STREAM_NAME);
 
-        // Verify via ES that no docs remain in the features index for this stream
+        // Verify via ES that no docs remain in the systems index for this stream
         await retry.tryForTime(10000, async () => {
           const res = await esClient.search({
-            index: '.kibana_streams_systems', // Initially features were called systems
+            index: '.kibana_streams_systems',
             size: 0,
             track_total_hits: true,
             query: { term: { 'stream.name': STREAM_NAME } },
@@ -312,24 +312,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
         });
-        await clearAllFeatures();
+        await clearAllSystems();
       });
 
-      it('GET feature returns 403', async () => {
+      it('GET system returns 403', async () => {
         const res = await apiClient.fetch('GET /internal/streams/{name}/systems/{systemName}', {
           params: { path: { name: STREAM_NAME, systemName: 'nope' } },
         });
         expect(res.status).to.be(403);
       });
 
-      it('DELETE feature returns 403', async () => {
+      it('DELETE system returns 403', async () => {
         const res = await apiClient.fetch('DELETE /internal/streams/{name}/systems/{systemName}', {
           params: { path: { name: STREAM_NAME, systemName: 'nope' } },
         });
         expect(res.status).to.be(403);
       });
 
-      it('PUT feature returns 403', async () => {
+      it('PUT system returns 403', async () => {
         const res = await apiClient.fetch('PUT /internal/streams/{name}/systems/{systemName}', {
           params: {
             path: { name: STREAM_NAME, systemName: 'nope' },
@@ -339,7 +339,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(res.status).to.be(403);
       });
 
-      it('GET features list returns 403', async () => {
+      it('GET systems list returns 403', async () => {
         const res = await apiClient.fetch('GET /internal/streams/{name}/systems', {
           params: { path: { name: STREAM_NAME } },
         });
