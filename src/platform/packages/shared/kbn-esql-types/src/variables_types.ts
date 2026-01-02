@@ -39,9 +39,9 @@ export interface ESQLControlVariable {
   value: string | number | (string | number)[];
   type: ESQLVariableType;
   meta?: {
-    // controlledBy is there to identify who owns the variable
+    // `controlledBy` is the ID of the control that publishes the variable
     controlledBy?: string;
-    // allows grouping of variables
+    // `group` allows grouping of variables
     group?: string;
   };
 }
