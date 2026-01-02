@@ -18,7 +18,6 @@ import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/pub
 import { UiActionsServiceEnhancements } from './services';
 import type { PublicDrilldownManagerComponent } from './drilldowns';
 import { createPublicDrilldownManager } from './drilldowns';
-import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -40,12 +39,7 @@ export interface StartContract
   extends UiActionsStart,
     Pick<
       UiActionsServiceEnhancements,
-      | 'getActionFactory'
-      | 'hasActionFactory'
-      | 'getActionFactories'
-      | 'telemetry'
-      | 'extract'
-      | 'inject'
+      'getActionFactory' | 'hasActionFactory' | 'getActionFactories'
     > {
   DrilldownManager: PublicDrilldownManagerComponent;
 }
@@ -77,7 +71,6 @@ export class AdvancedUiActionsPublicPlugin
       featureUsageSetup: licensing?.featureUsage,
       getFeatureUsageStart: () => startServices().plugins.licensing?.featureUsage,
     });
-    embeddable.registerEnhancement(dynamicActionEnhancement(this.enhancements));
     return {
       ...uiActions,
       ...this.enhancements,
