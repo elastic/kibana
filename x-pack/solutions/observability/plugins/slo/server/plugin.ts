@@ -43,8 +43,8 @@ import {
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
 import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
-import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
-import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task';
+import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
+import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
 import type {
   SLOConfig,
@@ -65,7 +65,7 @@ export class SLOPlugin
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;
   private readonly isDev: boolean;
-  private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
+  private orphanSummaryCleanupTask?: OrphanSummaryCleanupTask;
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -241,11 +241,12 @@ export class SLOPlugin
         }
       });
 
-    this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
-      plugins.taskManager,
-      this.logger,
-      this.config
-    );
+    this.orphanSummaryCleanupTask = new OrphanSummaryCleanupTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
 
     this.tempSummaryCleanupTask = new TempSummaryCleanupTask({
       core,
@@ -256,7 +257,7 @@ export class SLOPlugin
 
     new BulkDeleteTask({
       core,
-      plugins: mappedPlugins,
+      taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
     });
 
@@ -264,13 +265,9 @@ export class SLOPlugin
   }
 
   public start(core: CoreStart, plugins: SLOPluginStartDependencies): SLOServerStart {
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const internalEsClient = core.elasticsearch.client.asInternalUser;
 
-    this.sloOrphanCleanupTask
-      ?.start(plugins.taskManager, internalSoClient, internalEsClient)
-      .catch(() => {});
-
+    this.orphanSummaryCleanupTask?.start(plugins).catch(() => {});
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
 
     return {
