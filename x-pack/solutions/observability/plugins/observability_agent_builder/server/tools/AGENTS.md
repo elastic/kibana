@@ -23,26 +23,27 @@ During incident investigation, SREs follow a mental model of progressive diagnos
 
 Each tool should clearly map to one or more of these investigation phases.
 
-### Design Implications
-
-1. **Tools should answer specific questions** — A tool that tries to answer too many questions becomes confusing for the LLM to select.
-
-2. **Tool descriptions should reference the question** — Include phrases like "Answering 'which services are having problems?'" in the description.
-
-3. **Progressive disclosure** — Return high-level summaries first; detailed data should be available for deeper investigation.
-
-4. **Cross-tool navigation** — Tool output should enable the LLM to suggest related tools (e.g., after `get_alerts`, suggest `get_correlated_logs` for the affected service).
-
 ---
 
 ## Design Principles
 
-1. **Optimized for LLM Tool Selection** — Tool descriptions should be self-documenting so an LLM can choose the right tool and use it correctly.
-2. **Optimized for LLM Summarization** — Tool output should be structured so an LLM can easily extract key insights and present them to the SRE in natural language.
-3. **Minimal Required Parameters** — Tools should work with as few required parameters as possible. Common use cases should require zero or one parameter.
-4. **Simple Implementation** — Code should be maintainable, easy to read, and avoid unnecessary complexity.
-5. **Noise Reduction** — Filter out irrelevant data; return only what's useful for incident investigation.
-6. **ECS and OTel Compatible** — Tools must work with both Elastic Common Schema and OpenTelemetry data formats.
+### LLM Optimization
+
+1. **Self-documenting for tool selection** — Tool descriptions should enable LLMs to choose the right tool and use it correctly.
+2. **Structured for summarization** — Output should be easy for LLMs to extract insights and present them in natural language.
+3. **Progressive disclosure** — Return high-level summaries first; detailed data for deeper investigation.
+
+### Tool Design
+
+4. **Answer specific questions** — A tool that tries to answer too many questions becomes confusing for the LLM to select.
+5. **Minimal required parameters** — Common use cases should require zero or one parameter.
+6. **Cross-tool navigation** — Tool output should enable the LLM to suggest related tools (e.g., after `get_alerts`, suggest `get_correlated_logs`).
+
+### Data & Implementation
+
+7. **Noise reduction** — Filter out irrelevant data; return only what's useful for incident investigation.
+8. **ECS and OTel compatible** — Tools must work with both Elastic Common Schema and OpenTelemetry data formats.
+9. **Simple implementation** — Code should be maintainable, easy to read, and avoid unnecessary complexity.
 
 ---
 
@@ -54,7 +55,7 @@ Every tool should follow this directory structure:
 tool_name/
 ├── tool.ts           # Tool definition: ID, schema, description, handler wrapper
 ├── handler.ts        # Core business logic (separated for testability)
-├── README.md         # Usage examples (2-4 examples, <50 lines)
+├── README.md         # Usage examples
 └── <sub-feature>.ts  # Optional: complex logic broken into sub-modules
 ```
 
@@ -137,24 +138,7 @@ Every tool **must** return a `summary` field — a single sentence the LLM can u
 
 ---
 
-## 6. Empty Results
-
-When no results are found, provide helpful context:
-
-```typescript
-// Simple case
-const summary = 'No alerts found in the specified time range.';
-
-// With guidance
-const message = `No matching logs found. Possible reasons:
-- Time range (${start} to ${end}) contains no data
-- kqlFilter is too restrictive
-- No error logs exist (try errorLogsOnly=false)`;
-```
-
----
-
-## 7. ECS and OTel Compatibility
+## 6. ECS and OTel Compatibility
 
 Tools must work with both [ECS (Elastic Common Schema)](https://www.elastic.co/docs/reference/ecs/ecs-field-reference) and [OTel (OpenTelemetry Semantic Conventions)](https://opentelemetry.io/docs/specs/semconv/) data.
 
@@ -177,7 +161,7 @@ When querying or filtering, check **both** ECS and OTel field variants:
 
 ---
 
-## 8. Documentation (README)
+## 7. Documentation (README)
 
 Each tool should have a concise `README.md`:
 
@@ -190,7 +174,7 @@ Each tool should have a concise `README.md`:
 
 ---
 
-## 9. Testing and Development
+## 8. Testing and Development
 
 ### File Locations
 
