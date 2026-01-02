@@ -12,6 +12,7 @@ plugins:
     - security_solution
     - spaces
     - streams_app
+    - transform
   disabled:
 
 packages:
