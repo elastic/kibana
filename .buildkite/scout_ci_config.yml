@@ -17,6 +17,7 @@ plugins:
     - spaces
     - streams_app
     - workflows_extensions
+    - transform
   disabled:
 
 packages:
