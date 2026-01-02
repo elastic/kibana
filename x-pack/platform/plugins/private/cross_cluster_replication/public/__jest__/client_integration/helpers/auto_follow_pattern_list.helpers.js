@@ -41,7 +41,7 @@ export const setup = (props = {}) => {
     actions: {
       async selectAutoFollowPatternAt(index) {
         const table = new EuiTableTestHarness('autoFollowPatternListTable');
-        const checkbox = within(table.rows[index]).getByRole('checkbox');
+        const checkbox = within(table.getRows()[index]).getByRole('checkbox');
         await result.user.click(checkbox);
       },
 
