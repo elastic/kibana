@@ -22,6 +22,5 @@ export function getLensTransforms(deps: LensTransformDependencies): LensTransfor
   return {
     transformIn: getTransformIn(deps),
     transformOut: getTransformOut(deps),
-    transformOutInjectsReferences: true,
   };
 }
