@@ -156,7 +156,11 @@ export class TaskScheduling {
     );
   }
 
-  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
+  public async bulkDisable(
+    taskIds: string[],
+    clearStateIdsOrBoolean?: string[] | boolean,
+    options?: ApiKeyOptions
+  ) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
@@ -171,10 +175,11 @@ export class TaskScheduling {
           : {}),
       }),
       validate: false,
+      options,
     });
   }
 
-  public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
+  public async bulkEnable(taskIds: string[], runSoon: boolean = true, options?: ApiKeyOptions) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
@@ -193,6 +198,7 @@ export class TaskScheduling {
         return { ...task, enabled: true };
       },
       validate: false,
+      options,
     });
   }
 

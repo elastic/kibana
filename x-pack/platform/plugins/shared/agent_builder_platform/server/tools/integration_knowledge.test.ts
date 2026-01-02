@@ -9,9 +9,9 @@ import type { CoreSetup } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { ToolResultType } from '@kbn/onechat-common';
-import { platformCoreTools } from '@kbn/onechat-common';
-import type { ToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
