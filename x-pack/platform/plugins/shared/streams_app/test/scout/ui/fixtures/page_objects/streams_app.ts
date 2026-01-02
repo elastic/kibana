@@ -122,8 +122,8 @@ export class StreamsApp {
 
   async clickStreamsBreadcrumb() {
     await this.page
-      .locator('[data-test-subj^="breadcrumb"]')
-      .filter({ hasText: 'Streams' })
+      .locator('a[data-test-subj^="breadcrumb"]')
+      .filter({ hasText: /^Streams$/ })
       .click();
   }
 
