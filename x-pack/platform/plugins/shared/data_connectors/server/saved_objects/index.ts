@@ -17,7 +17,22 @@ export interface DataConnectorAttributes {
   kscIds: string[];
 }
 
-export const dataConnectorSchemaV1 = schema.object({
+// Original schema from model version 1
+const dataConnectorSchemaV1Original = schema.object({
+  name: schema.string(),
+  type: schema.string(),
+  config: schema.object({}),
+  createdAt: schema.string(),
+  updatedAt: schema.string(),
+  features: schema.maybe(schema.arrayOf(schema.string())),
+  workflowIds: schema.arrayOf(schema.string()),
+  toolIds: schema.arrayOf(schema.string()),
+  kscIds: schema.arrayOf(schema.string()),
+});
+
+// Current minimal schema (model version 2)
+// Removed: config, createdAt, updatedAt, features
+export const dataConnectorSchemaV2 = schema.object({
   name: schema.string(),
   type: schema.string(),
   workflowIds: schema.arrayOf(schema.string()),
@@ -70,8 +85,20 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       1: {
         changes: [],
         schemas: {
-          forwardCompatibility: dataConnectorSchemaV1.extends({}, { unknowns: 'ignore' }),
-          create: dataConnectorSchemaV1,
+          forwardCompatibility: dataConnectorSchemaV1Original.extends({}, { unknowns: 'ignore' }),
+          create: dataConnectorSchemaV1Original,
+        },
+      },
+      2: {
+        changes: [
+          {
+            type: 'mappings_deprecation',
+            deprecatedMappings: ['config', 'createdAt', 'updatedAt', 'features'],
+          },
+        ],
+        schemas: {
+          forwardCompatibility: dataConnectorSchemaV2.extends({}, { unknowns: 'ignore' }),
+          create: dataConnectorSchemaV2,
         },
       },
     },
