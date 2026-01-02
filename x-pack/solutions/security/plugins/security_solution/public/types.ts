@@ -66,7 +66,6 @@ import type { ProductFeatureKeyType, ProductFeatureKeys } from '@kbn/security-so
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
