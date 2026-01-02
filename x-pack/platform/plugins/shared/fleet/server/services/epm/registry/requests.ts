@@ -14,6 +14,8 @@ import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
+import type { Agent as HttpAgent } from 'http';
+import type { Agent as HttpsAgent } from 'https';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
@@ -121,6 +123,6 @@ export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   const logger = appContextService.getLogger();
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
-  options.agent = getProxyAgent({ proxyUrl, targetUrl });
+  options.agent = getProxyAgent({ proxyUrl, targetUrl }) as unknown as HttpAgent | HttpsAgent;
   return options;
 }

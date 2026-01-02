@@ -28368,6 +28368,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        '200':
+          description: OK
       summary: Delete a monitor
       tags:
         - synthetics
@@ -28532,6 +28535,9 @@ paths:
                 - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
               type: object
         required: true
+      responses:
+        '200':
+          description: OK
       summary: Update a monitor
       tags:
         - synthetics
@@ -28693,11 +28699,11 @@ paths:
       tags:
         - synthetics
   /api/synthetics/params/_bulk_delete:
-    delete:
+    post:
       description: |
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/_bulk_delete</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/_bulk_delete</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -28771,6 +28777,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        '200':
+          description: OK
       summary: Delete a parameter
       tags:
         - synthetics
@@ -29057,6 +29066,9 @@ paths:
             maxLength: 1024
             minLength: 1
             type: string
+      responses:
+        '200':
+          description: OK
       summary: Delete a private location
       tags:
         - synthetics
@@ -36774,7 +36786,8 @@ components:
     Cases_ids:
       description: |
         The cases that you want to removed. All non-ASCII characters must be URL encoded.
-      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+      example:
+        - d4e7abb0-b462-11ec-9a8d-698504725a43
       in: query
       name: ids
       required: true
@@ -43745,6 +43758,9 @@ components:
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
+        refusal:
+          description: Refusal reason returned by the model when content is filtered.
+          type: string
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageRole'
           description: Message role.
@@ -56153,6 +56169,8 @@ components:
               type: string
             synthetics_args:
               description: Synthetics agent CLI arguments.
+              items:
+                type: string
               type: array
             type:
               description: The monitor type.
@@ -56312,7 +56330,7 @@ components:
     Synthetics_httpMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
-        - additionalproperties: true
+        - additionalProperties: true
           type: object
           properties:
             check:
@@ -57442,7 +57460,6 @@ components:
           description: |
             Base64-encoded PEM CA certificate content for PKI authentication (Other provider only). Optional.
           minLength: 1
-      required: []
     opsgenie_secrets:
       title: Connector secrets properties for an Opsgenie connector
       required:

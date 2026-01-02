@@ -3,10 +3,12 @@ plugins:
   enabled:
     - console
     - discover_enhanced
+    - index_management
     - maps
     - observability_onboarding
     - painless_lab
     - security_solution
+    - spaces
     - streams_app
   disabled:
 

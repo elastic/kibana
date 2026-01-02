@@ -59209,6 +59209,9 @@ components:
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
+        refusal:
+          description: Refusal reason returned by the model when content is filtered.
+          type: string
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageRole'
           description: Message role.
@@ -72774,7 +72777,6 @@ components:
           description: |
             Base64-encoded PEM CA certificate content for PKI authentication (Other provider only). Optional.
           minLength: 1
-      required: []
     opsgenie_secrets:
       title: Connector secrets properties for an Opsgenie connector
       required:

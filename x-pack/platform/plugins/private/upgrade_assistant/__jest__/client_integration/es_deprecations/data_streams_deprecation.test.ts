@@ -120,7 +120,6 @@ describe('Data streams deprecation', () => {
           nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
           nodeName: 'MacBook-Pro.local',
           available: '25%',
-          lowDiskWatermarkSetting: '50%',
         },
       ]);
 
@@ -448,7 +447,6 @@ describe('Data streams deprecation', () => {
           nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
           nodeName: 'MacBook-Pro.local',
           available: '25%',
-          lowDiskWatermarkSetting: '50%',
         },
       ]);
 

@@ -19,7 +19,7 @@ import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { expandAgentQueue } from '#pipeline-utils';
+import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -205,32 +205,6 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
   } catch (_) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
-  }
-}
-
-/**
- * Collects environment variables from labels on the PR
- * TODO: extract this (and other functions from this big file) to a separate module
- */
-function collectEnvFromLabels() {
-  const LABEL_MAPPING: Record<string, Record<string, string>> = {
-    'ci:use-chrome-beta': {
-      USE_CHROME_BETA: 'true',
-    },
-  };
-
-  const envFromlabels: Record<string, string> = {};
-  if (!process.env.GITHUB_PR_LABELS) {
-    return envFromlabels;
-  } else {
-    const labels = process.env.GITHUB_PR_LABELS.split(',');
-    labels.forEach((label) => {
-      const env = LABEL_MAPPING[label];
-      if (env) {
-        Object.assign(envFromlabels, env);
-      }
-    });
-    return envFromlabels;
   }
 }
 
@@ -536,10 +510,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: {
-              ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 115,
-            },
+            agents: expandAgentQueue('n2-4-spot', 110),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
@@ -561,7 +532,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: integration.count,
             timeout_in_minutes: 120,
             key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
+            agents: expandAgentQueue('n2-4-spot', 105),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
@@ -599,7 +570,7 @@ export async function pickTestGroupRunOrder() {
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 120,
-                  agents: expandAgentQueue(queue),
+                  agents: expandAgentQueue(queue, 105),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
@@ -618,72 +589,6 @@ export async function pickTestGroupRunOrder() {
               ),
           }
         : [],
-    ].flat()
-  );
-}
-
-// copied from src/platform/packages/shared/kbn-scout/src/config/discovery/search_configs.ts
-interface ScoutTestDiscoveryConfig {
-  group: string;
-  path: string;
-  usesParallelWorkers: boolean;
-  configs: string[];
-  type: 'plugin' | 'package';
-}
-
-export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
-  const bk = new BuildkiteClient();
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  if (!Fs.existsSync(scoutConfigsPath)) {
-    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
-  }
-
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as Record<
-    string,
-    ScoutTestDiscoveryConfig
-  >;
-  const pluginsOrPackagesWithScoutTests: string[] = Object.keys(rawScoutConfigs);
-
-  if (pluginsOrPackagesWithScoutTests.length === 0) {
-    // no scout configs found, nothing to need to upload steps
-    return;
-  }
-
-  const scoutCiRunGroups = pluginsOrPackagesWithScoutTests.map((name) => ({
-    label: `Scout: [ ${rawScoutConfigs[name].group} / ${name} ] ${rawScoutConfigs[name].type}`,
-    key: name,
-    agents: expandAgentQueue(rawScoutConfigs[name].usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-    group: rawScoutConfigs[name].group,
-  }));
-
-  // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      {
-        group: 'Scout Configs',
-        key: 'scout-configs',
-        depends_on: ['build_scout_tests'],
-        steps: scoutCiRunGroups.map(
-          ({ label, key, group, agents }): BuildkiteStep => ({
-            label,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            timeout_in_minutes: 60,
-            agents,
-            env: {
-              SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG_GROUP_TYPE: group,
-              ...envFromlabels,
-            },
-            retry: {
-              automatic: [
-                { exit_status: '10', limit: 1 },
-                { exit_status: '*', limit: 3 },
-              ],
-            },
-          })
-        ),
-      },
     ].flat()
   );
 }

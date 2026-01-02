@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.9>>
 * <<release-notes-8.19.8>>
 * <<release-notes-8.19.7>>
 * <<release-notes-8.19.6>>
@@ -115,10 +116,51 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+
+[[release-notes-8.19.9]]
+== {kib} 8.19.9
+
+The 8.19.9 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.19.9]]
+=== Enhancements
+Data ingestion and Fleet::
+* Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index ({kibana-pull}242612[#242612]).
+
+Kibana platform::
+* The **API keys** management page now defaults to showing personal API keys only ({kibana-pull}245261[#245261]).
+* Adds a warning when deleting API keys currently used by alerting rules ({kibana-pull}243353[#243353]).
+
+[float]
+[[fixes-v8.19.9]]
+=== Fixes
+Alerting::
+* Fixes an issue that caused the Security alerts table to not update columns correctly when switching view modes ({kibana-pull}245253[#245253]).
+* Adds `consecutiveMatches` to action context ({kibana-pull}244997[#244997]).
+Elastic Observability solution::
+* Handles alias resolution when checking lock index mappings ({kibana-pull}244559[#244559]).
+Elastic Security solution::
+For the Elastic Security 8.19.9 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes "now" and mixed-format date handling in the **Share** menu ({kibana-pull}245539[#245539]).
+* Fixes an issue with authentication when multiple OIDC providers are configured ({kibana-pull}243869[#243869]).
+* Fixes an ECS incompatibility with the `kibana_started.elasticsearch.waitTime` value in logs ({kibana-pull}245706[#245706]).
+* Fixes the serialization of `meta.error` in JSON layouts. If it is an `Error` instance, only `message`, `name`, and `stack` are included. Other fields are no longer returned in the logs ({kibana-pull}244364[#244364]).
+* Fixes an issue where Upgrade Assistant gave incorrect warnings about nodes exceeding the `storage low watermark` when the `max headroom` setting was configured ({kibana-pull}243906[#243906]).
+
+
+
+
 [[release-notes-8.19.8]]
 == {kib} 8.19.8
+The 8.19.8 release includes the following enhancements and fixes.
 
-The 8.19.8 release includes the following fixes.
+[float]
+[[enhancement-v8.19.8]]
+=== Enhancements
+Observability::
+* Adds new sub-feature privileges for Synthetics global parameters  ({kibana-pull}243821[#243821]).
 
 [float]
 [[fixes-v8.19.8]]
@@ -474,6 +516,19 @@ Before you upgrade to 8.19.0, review the breaking changes, then mitigate the imp
 *Details* +
 Fields and functions variables are now described with `??` in {esql} queries. For value variables, you can continue to use `?` ({kibana-pull}213916[#213916]).
 ====
+
+[discrete]
+.API keys are used for authenticating report generation requests
+[%collapsible]
+====
+*Details* +
+
+Starting in 8.19.0, report generation requests are authenticated by API keys instead of session cookies. There are several key differences between the authentication methods. API keys capture your role privileges, whereas session cookie are based on your user credentials. API keys are also longer-lived, compared to session cookies, which have a shorter lifespan ({kibana-pull}216558[#216558]).
+
+If you have a cross-cluster search environment and want to generate reports from remote clusters, you must have the appropriate cluster and index privileges on the remote cluster and local cluster. For example, if requests are authenticated with an API key, the API key requires certain privileges on the local cluster that contains the local index, in addition to the remote. For more information and examples, refer to {ref}/remote-clusters-cert.html#remote-clusters-privileges-cert[Configure roles and users for remote clusters].
+
+====
+
 
 [float]
 [[deprecations-8.19.0]]
