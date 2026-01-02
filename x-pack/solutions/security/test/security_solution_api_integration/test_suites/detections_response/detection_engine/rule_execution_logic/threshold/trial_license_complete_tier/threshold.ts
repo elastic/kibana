@@ -26,6 +26,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
@@ -742,6 +743,101 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests![1].description).toBe(
           'Find all terms that exceeds threshold value after host.id: f9c7ca2d33f548a8b37667f6fffc59ce'
         );
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await supertest
+          .delete(`/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        // Create documents with different namespaces
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          'data_stream.namespace': 'namespace1',
+          host: { id: 'host-1' },
+        };
+        const docNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          'data_stream.namespace': 'namespace2',
+          host: { id: 'host-2' },
+        };
+        const docNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          'data_stream.namespace': 'namespace3',
+          host: { id: 'host-3' },
+        };
+
+        await indexListOfDocuments([
+          docNamespace1,
+          docNamespace1,
+          docNamespace2,
+          docNamespace2,
+          docNamespace3,
+          docNamespace3,
+        ]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await supertest
+          .post(`/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`)
+          .set('kbn-xsrf', 'true')
+          .send({ value: ['namespace1', 'namespace2'] })
+          .expect(200);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          query: `id:${id}`,
+          threshold: {
+            field: ['host.id'],
+            value: 1,
+          },
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+          sort: ['data_stream.namespace'],
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(2);
+        const namespaces = previewAlerts.map((alert) => alert._source?.['data_stream.namespace']);
+        expect(namespaces).toContain('namespace1');
+        expect(namespaces).toContain('namespace2');
+        expect(namespaces).not.toContain('namespace3');
       });
     });
   });
