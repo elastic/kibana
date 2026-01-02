@@ -11,9 +11,7 @@ import {
   visualizationElement,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import { dashboardTools } from '../common';
-
-export const DASHBOARD_AGENT_ID = 'platform.dashboard.dashboard_agent';
+import { dashboardTools, DASHBOARD_AGENT_ID } from '../common';
 
 export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
   agentBuilder.agents.register({

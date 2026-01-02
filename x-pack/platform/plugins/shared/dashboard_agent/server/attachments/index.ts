@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export {
-  DASHBOARD_NAMESPACE,
-  DASHBOARD_AGENT_ID,
-  dashboardTools,
-  dashboardAttachments,
-} from './constants';
-export type { DashboardAttachmentData, PanelSummary } from './types';
+export { createDashboardAttachmentType } from './dashboard_attachment';

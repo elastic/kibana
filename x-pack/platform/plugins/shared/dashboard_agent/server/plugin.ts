@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerDashboardAgent } from './register_agent';
 import { createDashboardTool, updateDashboardTool } from './tools';
+import { createDashboardAttachmentType } from './attachments';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
 
@@ -89,6 +90,9 @@ export class DashboardAgentPlugin
 
     // Register the dashboard agent
     registerDashboardAgent(setupDeps.agentBuilder);
+
+    // Register the dashboard attachment type
+    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType());
   }
 
   start(
