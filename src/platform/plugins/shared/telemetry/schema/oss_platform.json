@@ -10224,6 +10224,15 @@
             }
           }
         },
+        "securitySolution:includedDataStreamNamespacesForRuleExecution": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
+          }
+        },
         "securitySolution:maxUnassociatedNotes": {
           "type": "integer",
           "_meta": {
