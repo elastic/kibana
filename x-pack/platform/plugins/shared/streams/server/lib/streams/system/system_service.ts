@@ -12,7 +12,8 @@ import type { SystemStorageSettings } from './storage_settings';
 import { systemStorageSettings } from './storage_settings';
 import { SYSTEM_TYPE } from './fields';
 import { SystemClient } from './system_client';
-import { StoredSystem, storedSystemSchema } from './stored_system';
+import type { StoredSystem } from './stored_system';
+import { storedSystemSchema } from './stored_system';
 
 export class SystemService {
   constructor(

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  generateStreamDescription,
-  identifySystems,
-  IdentifySystemsOptions,
-  sumTokens,
-} from '@kbn/streams-ai';
-import { System } from '@kbn/streams-schema';
-import { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { IdentifySystemsOptions } from '@kbn/streams-ai';
+import { generateStreamDescription, identifySystems, sumTokens } from '@kbn/streams-ai';
+import type { System } from '@kbn/streams-schema';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { withSpan } from '@kbn/apm-utils';
 
 export async function identifySystemsWithDescription(
