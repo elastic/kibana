@@ -145,10 +145,7 @@
     "@kbn/fleet-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
-    "@kbn/observability-agent-builder-plugin",
-    "@kbn/fleet-plugin",
-    "@kbn/onechat-plugin",
-    "@kbn/ai-insights"
+    "@kbn/observability-agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }
