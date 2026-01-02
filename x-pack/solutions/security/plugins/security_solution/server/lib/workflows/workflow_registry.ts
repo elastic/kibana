@@ -17,7 +17,7 @@ export interface PreinstalledWorkflow {
 export const PREINSTALLED_WORKFLOWS: PreinstalledWorkflow[] = [
   {
     id: 'workflow-3cf6d7f4-864f-4722-834d-ae1743f445ee',
-    filePath: './preinstalled_workflows/alert_validation_worklfow.yml',
+    filePath: './preinstalled_workflows/alert_validation_workflow.yml',
   },
 ];
 

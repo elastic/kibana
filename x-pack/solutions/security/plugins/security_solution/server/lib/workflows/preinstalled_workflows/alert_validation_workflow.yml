@@ -1,6 +1,6 @@
 name: security.alert.validation
 enabled: true
-description: Security alert validation workflow
+description: Security alert validation workflow. Author: Elastic
 version: "1"
 tags:
   - security
