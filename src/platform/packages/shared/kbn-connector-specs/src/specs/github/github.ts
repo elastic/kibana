@@ -101,6 +101,67 @@ export const GithubConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    searchRepoContents: {
+      isTool: false,
+      input: z.object({
+        owner: z.string(),
+        repo: z.string(),
+        query: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          owner: string;
+          repo: string;
+          query?: string;
+        };
+        let searchQuery = `repo:${typedInput.owner}/${typedInput.repo}`;
+        if (typedInput.query) {
+          searchQuery += ` ${typedInput.query}`;
+        }
+
+        const response = await ctx.client.get('https://api.github.com/search/code', {
+          params: {
+            q: searchQuery,
+          },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+          },
+        });
+
+        // Transform response to only include essential fields
+        const transformedItems = response.data.items.map((item: {
+          name: string;
+          path: string;
+          html_url: string;
+          repository: { full_name: string };
+          score: number;
+        }) => ({
+          name: item.name,
+          path: item.path,
+          html_url: item.html_url,
+          repository: item.repository.full_name,
+          score: item.score,
+        }));
+
+        const searchRepoContentsResponseSchema = z.object({
+          total_count: z.number(),
+          items: z.array(
+            z.object({
+              name: z.string(),
+              path: z.string(),
+              html_url: z.string(),
+              repository: z.string(),
+              score: z.number(),
+            })
+          ),
+        });
+
+        return searchRepoContentsResponseSchema.parse({
+          total_count: response.data.total_count,
+          items: transformedItems,
+        });
+      },
+    },
     getDocs: {
       isTool: false,
       input: z.object({

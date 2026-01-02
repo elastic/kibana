@@ -297,6 +297,180 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('searchRepoContents action', () => {
+    it('should search for code without query', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 2,
+          items: [
+            {
+              name: 'file1.ts',
+              path: 'src/file1.ts',
+              sha: 'abc123',
+              url: 'https://api.github.com/repos/owner/repo/git/blobs/abc123',
+              git_url: 'https://api.github.com/repos/owner/repo/git/blobs/abc123',
+              html_url: 'https://github.com/owner/repo/blob/main/src/file1.ts',
+              repository: {
+                id: 123,
+                name: 'repo',
+                full_name: 'owner/repo',
+              },
+              score: 1.0,
+            },
+            {
+              name: 'file2.js',
+              path: 'src/file2.js',
+              sha: 'def456',
+              url: 'https://api.github.com/repos/owner/repo/git/blobs/def456',
+              git_url: 'https://api.github.com/repos/owner/repo/git/blobs/def456',
+              html_url: 'https://github.com/owner/repo/blob/main/src/file2.js',
+              repository: {
+                id: 123,
+                name: 'repo',
+                full_name: 'owner/repo',
+              },
+              score: 0.9,
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.searchRepoContents.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/code', {
+        params: {
+          q: 'repo:owner/repo',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+      expect(result).toEqual({
+        total_count: 2,
+        items: [
+          {
+            name: 'file1.ts',
+            path: 'src/file1.ts',
+            html_url: 'https://github.com/owner/repo/blob/main/src/file1.ts',
+            repository: 'owner/repo',
+            score: 1.0,
+          },
+          {
+            name: 'file2.js',
+            path: 'src/file2.js',
+            html_url: 'https://github.com/owner/repo/blob/main/src/file2.js',
+            repository: 'owner/repo',
+            score: 0.9,
+          },
+        ],
+      });
+    });
+
+    it('should search for code with query', async () => {
+      const mockResponse = {
+        data: {
+          total_count: 1,
+          items: [
+            {
+              name: 'file1.ts',
+              path: 'src/file1.ts',
+              sha: 'abc123',
+              url: 'https://api.github.com/repos/owner/repo/git/blobs/abc123',
+              git_url: 'https://api.github.com/repos/owner/repo/git/blobs/abc123',
+              html_url: 'https://github.com/owner/repo/blob/main/src/file1.ts',
+              repository: {
+                id: 123,
+                name: 'repo',
+                full_name: 'owner/repo',
+              },
+              score: 1.0,
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GithubConnector.actions.searchRepoContents.handler(mockContext, {
+        owner: 'owner',
+        repo: 'repo',
+        query: 'function',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.github.com/search/code', {
+        params: {
+          q: 'repo:owner/repo function',
+        },
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+      expect(result).toEqual({
+        total_count: 1,
+        items: [
+          {
+            name: 'file1.ts',
+            path: 'src/file1.ts',
+            html_url: 'https://github.com/owner/repo/blob/main/src/file1.ts',
+            repository: 'owner/repo',
+            score: 1.0,
+          },
+        ],
+      });
+    });
+
+    it('should handle invalid search query', async () => {
+      const error: HttpError = new Error('Validation failed');
+      error.response = {
+        status: 422,
+        data: {
+          message: 'Invalid query syntax',
+        },
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.searchRepoContents.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+          query: 'invalid query syntax',
+        })
+      ).rejects.toThrow('Validation failed');
+    });
+
+    it('should handle 422 error without message', async () => {
+      const error: HttpError = new Error('Validation failed');
+      error.response = {
+        status: 422,
+        data: {},
+      };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.searchRepoContents.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+        })
+      ).rejects.toThrow('Validation failed');
+    });
+
+    it('should rethrow non-422 errors', async () => {
+      const error: HttpError = new Error('Server error');
+      error.response = { status: 500 };
+      mockClient.get.mockRejectedValue(error);
+
+      await expect(
+        GithubConnector.actions.searchRepoContents.handler(mockContext, {
+          owner: 'owner',
+          repo: 'repo',
+        })
+      ).rejects.toThrow('Server error');
+    });
+  });
+
   describe('getDocs action', () => {
     it('should get markdown files from repository', async () => {
       const commitResponse = {
