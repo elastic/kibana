@@ -247,7 +247,6 @@ export const useDashboardListingTable = ({
                 });
 
               return {
-                type: 'dashboard',
                 id,
                 updatedAt: meta.updated_at,
                 createdAt: meta.created_at,
