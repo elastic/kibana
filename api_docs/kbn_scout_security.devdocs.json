@@ -9829,6 +9829,20 @@
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityApiServicesFixture.cloudConnectorApi",
+            "type": "Object",
+            "tags": [],
+            "label": "cloudConnectorApi",
+            "description": [],
+            "signature": [
+              "CloudConnectorApiService"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9902,6 +9916,20 @@
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityPageObjects.cspmIntegrationPage",
+            "type": "Object",
+            "tags": [],
+            "label": "cspmIntegrationPage",
+            "description": [],
+            "signature": [
+              "CspmIntegrationPage"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9943,6 +9971,20 @@
             "description": [],
             "signature": [
               "DetectionRuleApiService"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityParallelApiServicesFixture.cloudConnectorApi",
+            "type": "Object",
+            "tags": [],
+            "label": "cloudConnectorApi",
+            "description": [],
+            "signature": [
+              "CloudConnectorApiService"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/types.ts",
             "deprecated": false,
