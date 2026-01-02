@@ -10536,7 +10536,7 @@ tags:
       |
 
 
-      ### Notes
+      ### \* Notes
 
       - **Exception list changes (9.2+)**: After version 9.2, editing only
       exception list parameters will not regenerate the API key.

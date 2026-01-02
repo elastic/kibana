@@ -47,7 +47,7 @@ tags:
       | Upgrade Prebuilt Rules - same type (`POST /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Regenerates if exists* |
       | Upgrade Prebuilt Rules - type change (`POST /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Creates new key |
 
-      ### Notes
+      ### \* Notes
       - **Exception list changes (9.2+)**: After version 9.2, editing only exception list parameters will not regenerate the API key.
       - **Enabling during update**: If an update, patch, or import operation also enables the rule (changes `enabled` from `false` to `true`), and no API key exists, a new key will be created.
       - **Exported rules**: Rules are exported with `enabled: false` and API key values are stripped. When re-imported, the enable behavior applies.
