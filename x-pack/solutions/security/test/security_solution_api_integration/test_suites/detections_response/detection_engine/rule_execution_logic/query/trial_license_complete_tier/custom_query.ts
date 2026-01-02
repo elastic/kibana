@@ -72,6 +72,7 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -2889,10 +2890,9 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
         // Clean up UI setting
-        await supertest
-          .delete(`/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
       });
 
       it('should only include documents from specified namespaces when filter is configured', async () => {

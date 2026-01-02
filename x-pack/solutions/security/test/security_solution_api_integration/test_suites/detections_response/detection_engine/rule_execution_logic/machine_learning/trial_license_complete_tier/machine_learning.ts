@@ -53,6 +53,7 @@ import {
   previewRule,
   previewRuleWithExceptionEntries,
   setupMlModulesWithRetry,
+  setAdvancedSettings,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -384,23 +385,16 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with data stream namespace filter', () => {
       before(async () => {
         // Clean up UI setting before test
-        try {
-          await supertest
-            .delete(
-              `/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`
-            )
-            .set('kbn-xsrf', 'true');
-        } catch (e) {
-          // Setting might not exist, ignore error
-        }
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
       });
 
       after(async () => {
         // Clean up UI setting
-        await supertest
-          .delete(`/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
       });
 
       it('should include namespace filter in ML anomaly query when filter is configured', async () => {
