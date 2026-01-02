@@ -2270,20 +2270,6 @@
             "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.GlobalQueryStateFromUrl.projectRouting",
-            "type": "string",
-            "tags": [],
-            "label": "projectRouting",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/data/public/query/state_sync/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

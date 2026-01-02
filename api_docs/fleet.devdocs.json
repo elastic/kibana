@@ -3468,7 +3468,7 @@
             "label": "calloutTopSpacerSize",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | \"xs\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
             "deprecated": false,
@@ -31871,7 +31871,7 @@
         "signature": [
           "{ type?: ",
           "PackageSpecPackageType",
-          " | undefined; name: string; version: string; title: string; description?: string | undefined; path?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
+          " | undefined; name: string; version: string; path?: string | undefined; title: string; description?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

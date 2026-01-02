@@ -16,7 +16,7 @@ interface UseShowEisPromotionalContentProps {
 export const useShowEisPromotionalContent = ({ promoId }: UseShowEisPromotionalContentProps) => {
   const localStorageKey = `${promoId}Closed`;
   const [isPromoVisible, setIsPromoVisible] = useState<boolean>(false);
-  const onDismissTour = useCallback(() => {
+  const onDismissPromo = useCallback(() => {
     localStorage.setItem(localStorageKey, 'true');
     setIsPromoVisible(false);
   }, [localStorageKey]);
@@ -29,5 +29,5 @@ export const useShowEisPromotionalContent = ({ promoId }: UseShowEisPromotionalC
     }
   }, [isPromoVisible, localStorageKey]);
 
-  return { isPromoVisible, onDismissTour };
+  return { isPromoVisible, onDismissPromo };
 };

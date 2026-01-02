@@ -209,7 +209,7 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     from: string;
     to: string;
     limit: number;
-    kqlFilter?: string;
+    query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
 }
