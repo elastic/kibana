@@ -60,7 +60,7 @@ export const transformDashboardIn = (
           sections: undefined,
           references: [],
         };
-    console.log(panelsJSON, panelReferences);
+
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,
       query
