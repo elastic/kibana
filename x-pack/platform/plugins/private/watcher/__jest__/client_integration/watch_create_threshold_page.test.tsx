@@ -18,8 +18,6 @@ import { WatchEditPage } from '../../public/application/sections/watch_edit_page
 import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 import { registerRouter } from '../../public/application/lib/navigation';
 
-jest.mock('@elastic/charts');
-
 const WATCH_NAME = 'my_test_watch';
 const WATCH_TIME_FIELD = '@timestamp';
 
