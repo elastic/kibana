@@ -48,7 +48,7 @@ export const DIRECTOR_PENDING_RECOVERING_QUERY = `FROM .kibana_alert_events
 // Query for:
 // pending -> active
 // recoverig -> inactive
-export const DIRECTORY_ACTIVE_INACTIVE_QUERY = `FROM .kibana_alert_transitions
+export const DIRECTOR_ACTIVE_INACTIVE_QUERY = `FROM .kibana_alert_transitions
   | STATS
       last_tracked_state = LAST(end_state, @timestamp),
       last_transition = MAX(last_event_timestamp)
