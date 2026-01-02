@@ -171,13 +171,16 @@ describe('MigrationReadyPanel', () => {
 
   describe('Missing Resources', () => {
     const missingResources = [missingMacro, missingLookup];
+    const mockGetMissingResources = jest.fn();
 
     beforeEach(() => {
+      mockGetMissingResources.mockReset();
       useGetMissingResourcesMock.mockImplementation((type, setterFn: Function) => {
+        mockGetMissingResources.mockImplementation(() => {
+          setterFn(missingResources);
+        });
         return {
-          getMissingResources: jest.fn().mockImplementation(() => {
-            setterFn(missingResources);
-          }),
+          getMissingResources: mockGetMissingResources,
           isLoading: false,
         };
       });
