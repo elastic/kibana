@@ -24,7 +24,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
@@ -886,33 +885,6 @@ describe('Package policy service', () => {
         },
       } as any;
 
-      // Mock existing cloud connector
-      const existingCloudConnector = {
-        id: 'existing-connector-id',
-        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        attributes: {
-          name: 'existing-connector',
-          namespace: '*',
-          cloudProvider: 'aws',
-          vars: {
-            role_arn: {
-              value: 'arn:aws:iam::123456789012:role/OldRole',
-              type: 'text',
-            },
-            external_id: {
-              value: {
-                id: 'OLDEXTERNALID1234567',
-                isSecretRef: true,
-              },
-              type: 'password',
-            },
-          },
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        },
-      };
-
       // Mock updated cloud connector response
       const updatedCloudConnector = {
         id: 'existing-connector-id',
@@ -932,13 +904,10 @@ describe('Package policy service', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 2, // Incremented
+        packagePolicyCount: 2,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T02:00:00.000Z',
       };
-
-      // Mock soClient.get for the existing connector
-      soClient.get = jest.fn().mockResolvedValue(existingCloudConnector);
 
       // Mock the cloudConnectorService.update method
       const originalUpdate = cloudConnectorService.update;
@@ -952,10 +921,6 @@ describe('Package policy service', () => {
         );
 
         expect(result).toEqual(updatedCloudConnector);
-        expect(soClient.get).toHaveBeenCalledWith(
-          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-          'existing-connector-id'
-        );
         expect(cloudConnectorService.update).toHaveBeenCalledWith(
           soClient,
           'existing-connector-id',
@@ -973,7 +938,6 @@ describe('Package policy service', () => {
                 type: 'password',
               },
             },
-            packagePolicyCount: 2, // Original count (1) + 1
           }
         );
       } finally {
@@ -1025,24 +989,6 @@ describe('Package policy service', () => {
         },
       } as any;
 
-      // Mock existing cloud connector
-      const existingCloudConnector = {
-        id: 'existing-connector-id',
-        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        attributes: {
-          name: 'existing-connector',
-          namespace: '*',
-          cloudProvider: 'aws',
-          vars: {},
-          packagePolicyCount: 1,
-          created_at: '2023-01-01T00:00:00.000Z',
-          updated_at: '2023-01-01T00:00:00.000Z',
-        },
-      };
-
-      // Mock soClient.get for the existing connector
-      soClient.get = jest.fn().mockResolvedValue(existingCloudConnector);
-
       // Mock the cloudConnectorService.update method to throw an error
       const originalUpdate = cloudConnectorService.update;
       cloudConnectorService.update = jest
@@ -1058,12 +1004,14 @@ describe('Package policy service', () => {
           )
         ).rejects.toThrow(CloudConnectorUpdateError);
 
-        // Verify that get was called but create was not
-        expect(soClient.get).toHaveBeenCalledWith(
-          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-          'existing-connector-id'
+        // Verify that update was called
+        expect(cloudConnectorService.update).toHaveBeenCalledWith(
+          soClient,
+          'existing-connector-id',
+          expect.objectContaining({
+            vars: expect.any(Object),
+          })
         );
-        expect(cloudConnectorService.update).toHaveBeenCalled();
       } finally {
         // Restore the original method
         cloudConnectorService.update = originalUpdate;
