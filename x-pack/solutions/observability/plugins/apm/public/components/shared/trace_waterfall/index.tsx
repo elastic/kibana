@@ -249,7 +249,7 @@ function TraceTree() {
   );
 }
 
-interface VirtualRowProps extends Pick<ListRowProps, 'index' | 'style' | 'key' | 'parent'> {
+interface VirtualRowProps extends Pick<ListRowProps, 'index' | 'style' | 'parent'> {
   rowHeightCache: CellMeasurerCache;
   item: TraceWaterfallItem;
   childrenCount: number;
