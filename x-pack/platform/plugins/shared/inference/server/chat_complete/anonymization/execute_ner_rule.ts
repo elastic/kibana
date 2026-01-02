@@ -33,7 +33,7 @@ function isModelNotDeployedError(error: unknown): boolean {
     return false;
   }
 
-  const reason = error.body?.error?.reason;
+  const reason = error.body?.error?.reason ?? '';
   return reason.includes('must be deployed') || reason.includes('Please deploy');
 }
 
