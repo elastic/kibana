@@ -11,7 +11,6 @@ export type {
   EARSOAuthConfiguration,
   CustomOAuthConfiguration,
   WorkflowInfo,
-  EARSSupportedOAuthProvider,
 } from './common';
 
-export { PLUGIN_ID, PLUGIN_NAME } from './common';
+export { PLUGIN_ID, PLUGIN_NAME, EARSSupportedOAuthProvider } from './common';
