@@ -15,3 +15,5 @@ export const ValueExpression = suspendedComponentWithProps(lazy(() => import('./
 export const WhenExpression = suspendedComponentWithProps(lazy(() => import('./when')));
 export const OfExpression = suspendedComponentWithProps(lazy(() => import('./of')));
 export const ThresholdExpression = suspendedComponentWithProps(lazy(() => import('./threshold')));
+
+export { RECOMMENDED_TIMESIZE_WARNING } from './components/recommended_time_size_warning';

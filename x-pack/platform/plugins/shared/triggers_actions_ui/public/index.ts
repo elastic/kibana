@@ -105,6 +105,7 @@ export {
   GroupByExpression,
   connectorDeprecatedMessage,
   deprecatedMessage,
+  RECOMMENDED_TIMESIZE_WARNING,
 } from './common';
 
 export { useSubAction } from './application/hooks';

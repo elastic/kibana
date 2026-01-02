@@ -35,7 +35,10 @@ import type {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ForLastExpression,
+  RECOMMENDED_TIMESIZE_WARNING,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
@@ -402,6 +405,14 @@ export default function Expressions(props: Props) {
     };
   }, []);
 
+  const forLastExpressionErrors = useMemo(() => {
+    return {
+      aggField: [],
+      timeSizeUnit: [],
+      timeWindowSize: isTimeSizeBelowRecommended ? [RECOMMENDED_TIMESIZE_WARNING] : [],
+    };
+  }, [isTimeSizeBelowRecommended]);
+
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const ruleCriteria =
@@ -649,7 +660,7 @@ export default function Expressions(props: Props) {
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={emptyError}
+        errors={forLastExpressionErrors}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
