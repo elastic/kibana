@@ -11,11 +11,16 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
+
+import { IconSparkles } from '../../../../../common/icons/sparkles';
+import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
 import { Subtitle } from './subtitle';
 
 export const ATTACK_GROUP_TEST_ID_SUFFIX = '-group-renderer' as const;
 export const ATTACK_TITLE_TEST_ID_SUFFIX = '-title' as const;
 export const ATTACK_DESCRIPTION_TEST_ID_SUFFIX = '-description' as const;
+export const ATTACK_STATUS_TEST_ID_SUFFIX = '-status' as const;
+export const ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX = '-sparkles-icon' as const;
 
 export const AttackGroupContent = React.memo<{
   attack: AttackDiscoveryAlert;
@@ -40,9 +45,24 @@ export const AttackGroupContent = React.memo<{
       gutterSize="s"
     >
       <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj={`${dataTestSubj}${ATTACK_TITLE_TEST_ID_SUFFIX}`} size="xs">
-          <h5>{title}</h5>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle data-test-subj={`${dataTestSubj}${ATTACK_TITLE_TEST_ID_SUFFIX}`} size="xs">
+              <h5>{title}</h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <IconSparkles
+              data-test-subj={`${dataTestSubj}${ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX}`}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            data-test-subj={`${dataTestSubj}${ATTACK_STATUS_TEST_ID_SUFFIX}`}
+          >
+            <RuleStatus value={attack.alertWorkflowStatus} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}

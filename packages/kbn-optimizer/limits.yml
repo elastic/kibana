@@ -1,6 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
+  agentBuilder: 79354
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 13590
   aiops: 15359
@@ -54,6 +55,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 40244
+  entityStore: 4075
   esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -175,7 +177,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 27001
+  streamsApp: 27134
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -207,6 +209,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 68415
+  workflowsExtensions: 77926
   workflowsManagement: 8497
   workplaceAIApp: 6135
