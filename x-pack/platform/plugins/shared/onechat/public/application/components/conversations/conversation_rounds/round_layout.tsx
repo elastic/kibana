@@ -36,19 +36,36 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const { steps, response, input } = rawRound;
 
+  const [hasBeenLoading, setHasBeenLoading] = useState(false);
+
   const { isResponseLoading, error, retry: retrySendMessage } = useSendMessage();
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
 
+  // Track if this round has ever been in a loading state during this session
   useEffect(() => {
-    // Pending rounds and error rounds should have a min-height to match the scroll container height
-    if ((isCurrentRound && isResponseLoading) || isErrorCurrentRound) {
-      setRoundContainerMinHeight(scrollContainerHeight);
-    } else {
-      setRoundContainerMinHeight(0);
+    if (isCurrentRound && isResponseLoading) {
+      setHasBeenLoading(true);
     }
-  }, [isCurrentRound, isResponseLoading, scrollContainerHeight, isErrorCurrentRound]);
+  }, [isCurrentRound, isResponseLoading]);
+
+  useEffect(() => {
+    // Keep min-height if:
+    // - Round is loading or errored
+    // - Round has finished streaming but is still the current round (hasBeenLoading)
+    // Remove min-height when a new round starts (isCurrentRound becomes false)
+    const shouldHaveMinHeight =
+      isErrorCurrentRound || (isCurrentRound && (isResponseLoading || hasBeenLoading));
+
+    setRoundContainerMinHeight(shouldHaveMinHeight ? scrollContainerHeight : 0);
+  }, [
+    isCurrentRound,
+    isResponseLoading,
+    hasBeenLoading,
+    scrollContainerHeight,
+    isErrorCurrentRound,
+  ]);
 
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
