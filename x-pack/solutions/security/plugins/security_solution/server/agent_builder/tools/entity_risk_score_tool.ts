@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
@@ -123,33 +125,38 @@ const getAlertsById = async ({
 };
 
 export const entityRiskScoreTool = (
-  core: CoreSetup
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
 ): BuiltinToolDefinition<typeof entityRiskScoreSchema> => {
   return {
     id: SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities.`,
+    description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). Use identifier "*" to get all entities of the specified type sorted by risk score. IMPORTANT: Always use 'calculated_score_norm' (0-100) when reporting risk scores, NOT 'calculated_score' which is a raw value. The 'calculated_score_norm' field is the normalized score suitable for comparison between entities. The 'modifiers' array contains risk adjustments such as asset criticality and privileged user monitoring (watchlist/privmon type).`,
     schema: entityRiskScoreSchema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ spaceId }: ToolAvailabilityContext) => {
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
         try {
-          const [coreStart] = await core.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
-          const riskIndex = getRiskIndex(spaceId, true);
+          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
+          if (availability.status === 'available') {
+            const [coreStart] = await core.getStartServices();
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const riskIndex = getRiskIndex(spaceId, true);
 
-          const indexExists = await esClient.indices.exists({
-            index: riskIndex,
-          });
+            const indexExists = await esClient.indices.exists({
+              index: riskIndex,
+            });
 
-          if (indexExists) {
-            return { status: 'available' };
+            if (indexExists) {
+              return { status: 'available' };
+            }
+
+            return {
+              status: 'unavailable',
+              reason: 'Risk score index does not exist for this space',
+            };
           }
-
-          return {
-            status: 'unavailable',
-            reason: 'Risk score index does not exist for this space',
-          };
+          return availability;
         } catch (error) {
           return {
             status: 'unavailable',
@@ -160,7 +167,7 @@ export const entityRiskScoreTool = (
         }
       },
     },
-    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient, logger }) => {
+    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient }) => {
       const spaceId = getSpaceIdFromRequest(request);
       const alertsIndexPattern = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
       const entityType = identifierType as EntityType;
@@ -219,12 +226,7 @@ export const entityRiskScoreTool = (
                       ...(score.criticality_level !== undefined && {
                         criticality_level: score.criticality_level,
                       }),
-                      ...(score.is_privileged_user !== undefined && {
-                        is_privileged_user: score.is_privileged_user,
-                      }),
-                      ...(score.privileged_user_modifier !== undefined && {
-                        privileged_user_modifier: score.privileged_user_modifier,
-                      }),
+                      ...(score.modifiers && { modifiers: score.modifiers ?? [] }),
                     };
                   }),
                 },
@@ -296,12 +298,7 @@ export const entityRiskScoreTool = (
           ...(latestRiskScore.criticality_level !== undefined && {
             criticality_level: latestRiskScore.criticality_level,
           }),
-          ...(latestRiskScore.is_privileged_user !== undefined && {
-            is_privileged_user: latestRiskScore.is_privileged_user,
-          }),
-          ...(latestRiskScore.privileged_user_modifier !== undefined && {
-            privileged_user_modifier: latestRiskScore.privileged_user_modifier,
-          }),
+          ...(latestRiskScore.modifiers && { modifiers: latestRiskScore.modifiers ?? [] }),
         };
 
         return {

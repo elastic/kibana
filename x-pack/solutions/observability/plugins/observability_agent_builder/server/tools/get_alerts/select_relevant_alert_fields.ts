@@ -7,7 +7,7 @@
 
 import { chunk, uniq } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type { ModelProvider } from '@kbn/onechat-server';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { ShortIdTable } from '../../utils/short_id_table';
 
 const SELECT_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful AI assistant for Elastic Observability. 
@@ -18,10 +18,10 @@ You must not output any field names — only the corresponding "id" values. Ensu
 export async function selectRelevantAlertFields({
   query,
   candidateFieldNames,
-  modelProvider,
+  inferenceClient,
   logger,
 }: {
-  modelProvider: ModelProvider;
+  inferenceClient: BoundInferenceClient;
   candidateFieldNames: string[];
   logger: Logger;
   query: string;
@@ -30,8 +30,6 @@ export async function selectRelevantAlertFields({
     if (candidateFieldNames.length === 0) {
       return [];
     }
-
-    const { inferenceClient } = await modelProvider.getDefaultModel();
 
     const MAX_CHUNKS = 5;
     const FIELD_NAMES_PER_CHUNK = 250;

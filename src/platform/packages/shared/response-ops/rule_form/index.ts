@@ -25,6 +25,8 @@ export {
 
 export { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE } from './src/constants';
 
+export { useRuleTemplate } from './src/common/hooks/use_rule_template';
+
 export {
   RuleActionsNotifyWhen,
   RuleActionsAlertsFilter,

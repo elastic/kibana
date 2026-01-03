@@ -131,6 +131,22 @@ describe('useGrouping', () => {
     expect(getByTestId('grouping-table')).toBeInTheDocument();
   });
 
+  it('Passes settings to group selector', () => {
+    const settings = {
+      hideNoneOption: true,
+      hideCustomFieldOption: true,
+      popoverButtonLabel: 'Custom Label',
+      hideOptionsTitle: true,
+    };
+    const { result } = renderHook(() =>
+      useGrouping({
+        ...defaultArgs,
+        settings,
+      })
+    );
+    expect(result.current.groupSelector.props.settings).toEqual(settings);
+  });
+
   describe('additionalToolbarControls', () => {
     it('passes additionalToolbarControls to grouping component when provided', async () => {
       const customControl1 = <button data-test-subj="custom-control-1">Control 1</button>;
