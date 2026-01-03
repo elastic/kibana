@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-language';
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import type { RenameProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
 import { buildIgnoreMissingFilter, buildOverrideFilter } from './common';
@@ -24,7 +24,7 @@ import { buildIgnoreMissingFilter, buildOverrideFilter } from './common';
 export function convertRenameProcessorToESQL(processor: RenameProcessor): ESQLAstCommand[] {
   const {
     from,
-    to, // eslint-disable-next-line @typescript-eslint/naming-convention
+    to,
     ignore_missing = false, // default same as Rename Ingest Processor
     override = false, // default same as Rename Ingest Processor
     where,

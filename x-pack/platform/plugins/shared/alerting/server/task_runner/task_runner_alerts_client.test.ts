@@ -871,6 +871,7 @@ describe('Task Runner', () => {
         });
 
         const ruleSpecificFlapping = {
+          enabled: false,
           lookBackWindow: 10,
           statusChangeThreshold: 10,
         };
@@ -890,14 +891,15 @@ describe('Task Runner', () => {
         expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             flappingSettings: {
-              enabled: true,
-              ...ruleSpecificFlapping,
+              enabled: false,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
             },
           })
         );
       });
 
-      test('should not use rule specific flapping settings if global flapping is disabled', async () => {
+      test('should still use rule specific flapping settings if global flapping is disabled', async () => {
         rulesSettingsService.getSettings.mockResolvedValue({
           flappingSettings: {
             enabled: false,
@@ -947,9 +949,9 @@ describe('Task Runner', () => {
         expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             flappingSettings: {
-              enabled: false,
-              lookBackWindow: 20,
-              statusChangeThreshold: 20,
+              enabled: true,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
             },
           })
         );

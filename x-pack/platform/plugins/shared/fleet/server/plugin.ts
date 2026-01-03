@@ -160,6 +160,7 @@ import {
   registerAgentlessDeploymentSyncTask,
   scheduleAgentlessDeploymentSyncTask,
 } from './tasks/agentless/deployment_sync_task';
+import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -664,6 +665,7 @@ export class FleetPlugin
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
+    registerReindexIntegrationKnowledgeTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({

@@ -104,8 +104,8 @@ describe('SearchAPI projectRouting', () => {
 
     searchAPI.search([createSearchRequest()]).subscribe(() => {
       expect(mockSearch).toHaveBeenCalled();
-      const callArgs = mockSearch.mock.calls[0][0];
-      expect(callArgs.params.body.project_routing).toBe(expectedValue);
+      const searchOptions = mockSearch.mock.calls[0][1];
+      expect(searchOptions?.projectRouting).toBe(expectedValue);
       done();
     });
   };
@@ -137,9 +137,5 @@ describe('SearchAPI projectRouting', () => {
 
   test('should not include project_routing in ES params when projectRouting is undefined', (done) => {
     testProjectRouting(undefined, undefined, done);
-  });
-
-  test('should sanitize ALL projectRouting value', (done) => {
-    testProjectRouting('ALL', undefined, done);
   });
 });

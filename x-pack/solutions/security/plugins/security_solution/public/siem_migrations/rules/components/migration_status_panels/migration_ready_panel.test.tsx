@@ -15,6 +15,7 @@ import type { SiemMigrationResourceBase } from '../../../../../common/siem_migra
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { MigrationDataInputContextProvider } from '../../../common/components';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -33,6 +34,7 @@ const mockMigrationStateWithError: RuleMigrationStats = {
   items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
+  vendor: MigrationSource.SPLUNK,
 };
 
 const mockMigrationStatsStopped: RuleMigrationStats = {
@@ -42,6 +44,8 @@ const mockMigrationStatsStopped: RuleMigrationStats = {
   items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
+
+  vendor: MigrationSource.SPLUNK,
 };
 
 const mockMigrationStatsReady: RuleMigrationStats = {
@@ -51,6 +55,7 @@ const mockMigrationStatsReady: RuleMigrationStats = {
   items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
+  vendor: MigrationSource.SPLUNK,
 };
 
 const missingMacro: SiemMigrationResourceBase = {

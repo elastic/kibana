@@ -7,23 +7,27 @@
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
+import { CriticalPathToggle } from './critical_path';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
+import { WaterfallAccordionButton } from './waterfall_accordion_button';
 
 export interface Props {
   traceItems: TraceItem[];
+  errors?: Error[];
   showAccordion?: boolean;
   highlightedTraceId?: string;
   onClick?: OnNodeClick;
@@ -34,10 +38,13 @@ export interface Props {
   showLegend?: boolean;
   serviceName?: string;
   isFiltered?: boolean;
+  agentMarks?: Record<string, number>;
+  showCriticalPathControl?: boolean;
 }
 
 export function TraceWaterfall({
   traceItems,
+  errors,
   showAccordion = true,
   highlightedTraceId,
   onClick,
@@ -48,6 +55,8 @@ export function TraceWaterfall({
   showLegend = false,
   serviceName,
   isFiltered,
+  agentMarks,
+  showCriticalPathControl = false,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -62,6 +71,9 @@ export function TraceWaterfall({
       showLegend={showLegend}
       serviceName={serviceName}
       isFiltered={isFiltered}
+      errors={errors}
+      agentMarks={agentMarks}
+      showCriticalPathControl={showCriticalPathControl}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -80,10 +92,27 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
+    errorMarks,
+    showAccordion,
+    isAccordionOpen,
+    toggleAllAccordions,
+    agentMarks,
+    showCriticalPath,
+    setShowCriticalPath,
+    showCriticalPathControl,
   } = useTraceWaterfallContext();
+
+  const marks = useMemo(() => {
+    return [...agentMarks, ...errorMarks];
+  }, [agentMarks, errorMarks]);
 
   return (
     <EuiFlexGroup direction="column">
+      {showCriticalPathControl && (
+        <EuiFlexItem>
+          <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
+        </EuiFlexItem>
+      )}
       {showLegend && serviceName && (
         <EuiFlexItem>
           <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
@@ -101,6 +130,9 @@ function TraceWaterfallComponent() {
               border-bottom: ${euiTheme.border.thin};
             `}
           >
+            {showAccordion && (
+              <WaterfallAccordionButton isOpen={isAccordionOpen} onClick={toggleAllAccordions} />
+            )}
             <TimelineAxisContainer
               xMax={duration}
               margins={{
@@ -110,6 +142,7 @@ function TraceWaterfallComponent() {
                 bottom: 0,
               }}
               numberOfTicks={3}
+              marks={marks}
             />
           </div>
           <VerticalLinesContainer
@@ -120,6 +153,7 @@ function TraceWaterfallComponent() {
               right,
               bottom: 0,
             }}
+            marks={marks}
           />
           <div
             css={css`
@@ -135,22 +169,16 @@ function TraceWaterfallComponent() {
 }
 
 function TraceTree() {
-  const { traceWaterfallMap, traceWaterfall, scrollElement } = useTraceWaterfallContext();
+  const {
+    traceWaterfallMap,
+    traceWaterfall,
+    scrollElement,
+    accordionStatesMap,
+    toggleAccordionState,
+  } = useTraceWaterfallContext();
+
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
-  const [accordionStatesMap, setAccordionStateMap] = useState(
-    traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
-      acc[item.id] = 'open';
-      return acc;
-    }, {})
-  );
-
-  function toggleAccordionState(id: string) {
-    setAccordionStateMap((prevStates) => ({
-      ...prevStates,
-      [id]: prevStates[id] === 'open' ? 'closed' : 'open',
-    }));
-  }
 
   const onRowLoad = (index: number, size: number) => {
     rowSizeMapRef.current.set(index, size);

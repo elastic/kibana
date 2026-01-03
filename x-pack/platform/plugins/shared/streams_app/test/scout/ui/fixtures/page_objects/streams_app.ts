@@ -9,11 +9,11 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import {
-  expect,
+  EuiCodeBlockWrapper,
+  EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  EuiComboBoxWrapper,
-  EuiCodeBlockWrapper,
+  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
@@ -66,7 +66,6 @@ export class StreamsApp {
 
   async goto() {
     await this.page.gotoApp('streams');
-    await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
   async gotoStreamMainPage() {
@@ -870,6 +869,59 @@ export class StreamsApp {
     const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
     await expect(modal).toBeVisible();
     await expect(modal.getByTestId('streamsAppCreateStreamConfirmationModalTitle')).toBeVisible();
+  }
+
+  /**
+   * Pipeline Suggestions utility methods
+   */
+  getSuggestPipelineButton() {
+    return this.page.getByTestId('streamsAppGenerateSuggestionButton');
+  }
+
+  async clickSuggestPipelineButton() {
+    const button = this.getSuggestPipelineButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getSuggestPipelinePanel() {
+    return this.page.getByTestId('streamsAppSuggestPipelinePanel');
+  }
+
+  getPipelineSuggestionCallout() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionCallout');
+  }
+
+  getPipelineSuggestionAcceptButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionAcceptButton');
+  }
+
+  async acceptPipelineSuggestion() {
+    const button = this.getPipelineSuggestionAcceptButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getPipelineSuggestionRejectButton() {
+    return this.page.getByTestId('streamsAppPipelineSuggestionRejectButton');
+  }
+
+  async rejectPipelineSuggestion() {
+    const button = this.getPipelineSuggestionRejectButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  getRegeneratePipelineSuggestionButton() {
+    return this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+  }
+
+  async regeneratePipelineSuggestion() {
+    const regenerateButton = this.getRegeneratePipelineSuggestionButton();
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
   }
 
   /**
