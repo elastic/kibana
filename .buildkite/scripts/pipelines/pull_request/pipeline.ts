@@ -167,7 +167,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:build-cloud-image') &&
       !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
-      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-fips-deploy')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_cloud_image.yml'));
     }
@@ -176,7 +177,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:build-cloud-fips-image') &&
       !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
-      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-fips-deploy')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_cloud_fips_image.yml'));
     }
