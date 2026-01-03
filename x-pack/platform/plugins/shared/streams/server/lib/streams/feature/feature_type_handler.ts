@@ -11,7 +11,9 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { FEATURE_TYPE, FEATURE_NAME, STREAM_NAME } from './fields';
 import type { StoredFeature } from './stored_feature';
 
-interface IdentifyFeaturesOptions {}
+interface IdentifyFeaturesOptions {
+  stream: string;
+}
 
 export abstract class FeatureTypeHandler<T extends Feature = Feature> {
   abstract readonly type: FeatureType;

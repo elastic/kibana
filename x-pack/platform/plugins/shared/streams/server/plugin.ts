@@ -155,7 +155,7 @@ export class StreamsPlugin
         request,
         attachmentClient,
         queryClient,
-        featureClient,
+        systemClient,
       });
 
       return {
