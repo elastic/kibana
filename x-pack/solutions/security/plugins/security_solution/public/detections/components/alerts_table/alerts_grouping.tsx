@@ -16,11 +16,13 @@ import {
   type NamedAggregation,
   type RawBucket,
   useGrouping,
+  type GroupSettings,
 } from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type {
+  GetAdditionalActionButtons,
   GetGroupStats,
   GroupingArgs,
   GroupPanelRenderer,
@@ -94,6 +96,7 @@ export interface AlertsTableComponentProps {
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   tableId: TableIdLiteral;
   to: string;
+  settings?: GroupSettings;
 
   /**
    * A callback function that is invoked whenever the grouping aggregations are updated.
@@ -108,6 +111,12 @@ export interface AlertsTableComponentProps {
 
   /** Optional array of custom controls to display in the toolbar alongside the group selector */
   additionalToolbarControls?: JSX.Element[];
+
+  /** Optional custom component to render when there are no grouping results */
+  emptyGroupingComponent?: React.ReactElement;
+
+  /** Optional function to get additional action buttons to display in group stats before the Take actions button */
+  getAdditionalActionButtons?: GetAdditionalActionButtons<AlertsGroupingAggregation>;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -204,6 +213,15 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
+  useEffect(() => {
+    dispatch(
+      updateGroups({
+        tableId: props.tableId,
+        settings: props.settings,
+      })
+    );
+  }, [dispatch, props.tableId, props.settings]);
+
   const fields = useMemo(
     () =>
       newDataViewPickerEnabled
@@ -252,6 +270,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       onGroupToggle,
       unit: defaultUnit,
       multiValueFields: multiValueFieldsToFlatten,
+      emptyGroupingComponent: props.emptyGroupingComponent,
+      getAdditionalActionButtons: props.getAdditionalActionButtons,
     },
     defaultGroupingOptions: groupingOptions,
     fields,
@@ -260,6 +280,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onGroupChange,
     onOptionsChange,
     tracker: track,
+    settings: props.settings,
   });
   const groupId = useMemo(() => groupIdSelector(), []);
   const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
@@ -396,6 +417,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           multiValueFieldsToFlatten={multiValueFieldsToFlatten}
           onAggregationsChange={props.onAggregationsChange}
           additionalToolbarControls={props.additionalToolbarControls}
+          emptyGroupingComponent={props.emptyGroupingComponent}
         />
       );
     },

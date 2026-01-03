@@ -31,7 +31,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/esql-types",
     "@kbn/i18n-react",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/restorable-state",
     "@kbn/licensing-types",
     "@kbn/index-editor",

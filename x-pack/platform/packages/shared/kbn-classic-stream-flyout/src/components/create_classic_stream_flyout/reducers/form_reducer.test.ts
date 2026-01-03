@@ -20,6 +20,7 @@ describe('formReducer', () => {
         ...initialFormState,
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
+        isSubmitting: true,
         validation: {
           mode: 'live',
           isValidating: false,
@@ -253,6 +254,7 @@ describe('formReducer', () => {
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
         streamNameParts: [],
+        isSubmitting: false,
         validation: {
           mode: 'live',
           isValidating: true,
@@ -270,6 +272,7 @@ describe('formReducer', () => {
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
         streamNameParts: [],
+        isSubmitting: false,
         validation: {
           mode: 'idle',
           isValidating: false,
@@ -280,6 +283,31 @@ describe('formReducer', () => {
     });
   });
 
+  describe('START_SUBMITTING', () => {
+    it('should set isSubmitting to true', () => {
+      const state = formReducer(initialFormState, {
+        type: 'START_SUBMITTING',
+      });
+
+      expect(state.isSubmitting).toBe(true);
+    });
+  });
+
+  describe('STOP_SUBMITTING', () => {
+    it('should set isSubmitting to false', () => {
+      const submitting: FormState = {
+        ...initialFormState,
+        isSubmitting: true,
+      };
+
+      const state = formReducer(submitting, {
+        type: 'STOP_SUBMITTING',
+      });
+
+      expect(state.isSubmitting).toBe(false);
+    });
+  });
+
   describe('RESET_FORM', () => {
     it('should reset to initial state', () => {
       const withState: FormState = {
@@ -287,6 +315,7 @@ describe('formReducer', () => {
         streamName: 'test-stream',
         selectedIndexPattern: 'logs-*',
         streamNameParts: [],
+        isSubmitting: true,
         validation: {
           mode: 'live',
           isValidating: true,

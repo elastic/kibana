@@ -33,6 +33,8 @@ export class ConnectionDetailsService {
         // eslint-disable-next-line no-console
         console.error('Error checking API key creation permissions', error);
       });
+
+    if (opts.defaultTabId) this.tabId$.next(opts.defaultTabId);
   }
 
   public readonly setTab = (tab: TabID) => {

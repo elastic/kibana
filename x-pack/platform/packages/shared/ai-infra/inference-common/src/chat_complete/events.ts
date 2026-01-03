@@ -33,6 +33,10 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       content: string;
       /**
+       * Optional refusal reason returned by the model when content is filtered.
+       */
+      refusal?: string;
+      /**
        * Optional deanonymized input messages metadata
        */
       deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
@@ -85,6 +89,10 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      */
     content: string;
     /**
+     * Optional refusal reason chunk.
+     */
+    refusal?: string;
+    /**
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
@@ -112,7 +120,11 @@ export interface ChatCompletionTokenCount {
    */
   completion: number;
   /**
-   * Total token count
+   * Thinking token count, if available
+   */
+  thinking?: number;
+  /**
+   * Total token count (prompt + completion + thinking)
    */
   total: number;
   /**
@@ -132,6 +144,7 @@ export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
      * The token count structure
      */
     tokens: ChatCompletionTokenCount;
+    model?: string;
   }
 >;
 
