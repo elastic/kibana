@@ -37,6 +37,7 @@ import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
+import type { SystemClient } from './system/system_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -72,6 +73,7 @@ export class StreamsClient {
       scopedClusterClient: IScopedClusterClient;
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
+      systemClient: SystemClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       request: KibanaRequest;
