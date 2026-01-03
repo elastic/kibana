@@ -990,6 +990,7 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -1160,7 +1161,7 @@ x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-presentation-tea
 x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
-x-pack/solutions/observability/plugins/observability @elastic/observability-ui
+x-pack/solutions/observability/plugins/observability @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-exploration-team
@@ -1234,6 +1235,7 @@ x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-sec
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-generative-ai
+x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
@@ -1844,8 +1846,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/management/transforms/ @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group2/transform.ts @elastic/kibana-management
-/x-pack/platform/test/api_integration/apis/transform/ @elastic/kibana-management
-/x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/kibana-management
 /x-pack/platform/test/functional/apps/transform/ @elastic/kibana-management
 /x-pack/platform/test/functional/services/transform @elastic/kibana-management
 /x-pack/platform/test/functional_basic/apps/transform/ @elastic/kibana-management
@@ -2571,6 +2571,7 @@ x-pack/platform/test/api_integration/apis/entity_manager @elastic/core-analysis
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/core-analysis
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/core-analysis
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/core-analysis
+x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 
 ## Security Solution sub teams - Threat Hunting
 
