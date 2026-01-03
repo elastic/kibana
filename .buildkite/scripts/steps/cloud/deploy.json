@@ -3,7 +3,7 @@
     "integrations_server": [
       {
         "elasticsearch_cluster_ref_id": "main-elasticsearch",
-        "region": "gcp-us-west2",
+        "region": "us-gov-east-1",
         "plan": {
           "cluster_topology": [
             {
@@ -24,7 +24,7 @@
     ],
     "elasticsearch": [
       {
-        "region": "gcp-us-west2",
+        "region": "us-gov-east-1",
         "settings": {
           "dedicated_masters_threshold": 6
         },
@@ -164,7 +164,7 @@
     "kibana": [
       {
         "elasticsearch_cluster_ref_id": "main-elasticsearch",
-        "region": "gcp-us-west2",
+        "region": "us-gov-east-1",
         "plan": {
           "cluster_topology": [
             {
