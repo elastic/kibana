@@ -155,7 +155,7 @@
             "enabled_built_in_plugins": []
           },
           "deployment_template": {
-            "id": "gcp-cpu-optimized"
+            "id": "aws-general-purpose"
           }
         },
         "ref_id": "main-elasticsearch"
