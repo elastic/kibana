@@ -3508,6 +3508,20 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.ApiServicesFixture.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "DataViewsApiService"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.ApiServicesFixture.fleet",
             "type": "Object",
             "tags": [],
@@ -4091,6 +4105,34 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.CookieHeader",
+        "type": "Interface",
+        "tags": [],
+        "label": "CookieHeader",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CookieHeader.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[Cookie: string]: string",
+            "description": [],
+            "signature": [
+              "[Cookie: string]:  string"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8961,6 +9003,51 @@
       },
       {
         "parentPluginId": "@kbn/scout",
+        "id": "def-common.RoleSessionCredentials",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleSessionCredentials",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.RoleSessionCredentials.cookieValue",
+            "type": "string",
+            "tags": [],
+            "label": "cookieValue",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.RoleSessionCredentials.cookieHeader",
+            "type": "Object",
+            "tags": [],
+            "label": "cookieHeader",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.CookieHeader",
+                "text": "CookieHeader"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
         "id": "def-common.SamlAuth",
         "type": "Interface",
         "tags": [],
@@ -9062,6 +9149,83 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlAuth.asInteractiveUser",
+            "type": "Function",
+            "tags": [],
+            "label": "asInteractiveUser",
+            "description": [
+              "\nGenerates a SAML session cookie for an interactive user with the specified role.\n\nThis method is ideal for testing internal APIs that are typically accessed via the UI.\nIt authenticates as an interactive user and returns session credentials including cookie\nheaders that can be used in API requests.\n"
+            ],
+            "signature": [
+              "(role: string | ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaRole",
+                "text": "KibanaRole"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ElasticsearchRoleDescriptor",
+                "text": "ElasticsearchRoleDescriptor"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.RoleSessionCredentials",
+                "text": "RoleSessionCredentials"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlAuth.asInteractiveUser.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "role",
+                "description": [
+                  "- Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or\n  a custom role descriptor with specific permissions (Kibana or Elasticsearch)"
+                ],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.KibanaRole",
+                    "text": "KibanaRole"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ElasticsearchRoleDescriptor",
+                    "text": "ElasticsearchRoleDescriptor"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/core_fixtures.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "Promise resolving to credentials with cookieValue and cookieHeader properties"
+            ]
           }
         ],
         "initialIsOpen": false

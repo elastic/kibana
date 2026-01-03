@@ -1154,6 +1154,9 @@
             "tags": [],
             "label": "packagePolicyCount",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
