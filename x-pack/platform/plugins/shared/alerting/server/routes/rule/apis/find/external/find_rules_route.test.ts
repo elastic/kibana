@@ -17,11 +17,11 @@ const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('../../../lib/track_legacy_terminology', () => ({
+jest.mock('../../../../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
