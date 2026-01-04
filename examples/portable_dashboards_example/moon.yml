@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/presentation-publishing'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/presentation-util-plugin'
 tags:
   - plugin
   - prod

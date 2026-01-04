@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import type { CloudConnector, CloudProvider, CloudConnectorVars } from '../models/cloud_connector';
+import type {
+  CloudConnector,
+  CloudProvider,
+  CloudConnectorVars,
+  AccountType,
+} from '../models/cloud_connector';
 
 // Request interfaces
 export interface CreateCloudConnectorRequest {
   name: string;
   vars: CloudConnectorVars;
   cloudProvider: CloudProvider;
+  accountType?: AccountType;
 }
 
 export interface UpdateCloudConnectorRequest {
   name?: string;
   vars?: CloudConnectorVars;
-  packagePolicyCount?: number;
   cloudProvider?: CloudProvider;
+  accountType?: AccountType;
 }
 
 // Response interfaces following Fleet conventions

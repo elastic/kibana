@@ -24,6 +24,7 @@ import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymizat
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
 import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
 import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
@@ -78,7 +79,7 @@ jest.mock(
   })
 );
 
-const mockSecurityCapabilities = [`${SECURITY_FEATURE_ID}.show`];
+const mockSecurityCapabilities = [SECURITY_UI_SHOW_PRIVILEGE];
 
 jest.mock('../../common/links', () => ({
   useLinkInfo: () =>

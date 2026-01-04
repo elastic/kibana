@@ -14,7 +14,8 @@ import type {
   ErrorCause,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
-import type { Either } from '../utils';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-server';
+import type { Either } from '@kbn/core-saved-objects-api-server';
 import type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
 
 /**
@@ -49,12 +50,13 @@ export interface BulkDeleteParams {
  * @internal
  */
 export type ExpectedBulkDeleteResult = Either<
-  { type: string; id: string; error: Payload },
+  { type: string; id: string; error: Payload; accessControl?: SavedObjectAccessControl },
   {
     type: string;
     id: string;
     namespaces: string[];
     esRequestIndex: number;
+    accessControl?: SavedObjectAccessControl;
   }
 >;
 
@@ -79,7 +81,14 @@ export type NewBulkItemResponse = BulkResponseItem & { error: ErrorCause & { ind
  */
 export type BulkDeleteExpectedBulkGetResult = Either<
   { type: string; id: string; error: Payload },
-  { type: string; id: string; version?: string; esRequestIndex?: number; fields?: string[] }
+  {
+    type: string;
+    id: string;
+    version?: string;
+    esRequestIndex?: number;
+    fields?: string[];
+    accessControl?: SavedObjectAccessControl;
+  }
 >;
 
 export type ObjectToDeleteAliasesFor = Pick<

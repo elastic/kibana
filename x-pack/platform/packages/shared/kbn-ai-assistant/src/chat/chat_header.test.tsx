@@ -8,24 +8,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHeader } from './chat_header';
-import {
-  getElasticManagedLlmConnector,
-  ElasticLlmTourCallout,
-  useObservabilityAIAssistantFlyoutStateContext,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
-  ElasticLlmTourCallout: jest.fn(({ children }) => (
-    <div data-test-subj="elastic-llm-tour">{children}</div>
+  AIAgentTourCallout: jest.fn(({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="ai-agent-tour-callout">{children}</div>
   )),
-  getElasticManagedLlmConnector: jest.fn(),
-  useElasticLlmCalloutDismissed: jest.fn().mockReturnValue([false, jest.fn()]),
-  useObservabilityAIAssistantFlyoutStateContext: jest.fn().mockReturnValue({ isFlyoutOpen: false }),
-  ElasticLlmCalloutKey: {
-    TOUR_CALLOUT: 'tour_callout',
-  },
+  useAIAgentTourDismissed: jest.fn(),
 }));
+
+import * as ObservabilityAIAssistantPublic from '@kbn/observability-ai-assistant-plugin/public';
 
 jest.mock('./chat_actions_menu', () => ({
   ChatActionsMenu: () => <div data-test-subj="chat-actions-menu" />,
@@ -39,25 +30,12 @@ jest.mock('./chat_context_menu', () => ({
   ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
 }));
 
-const elasticManagedConnector = createMockConnectorFindResult({
-  id: 'elastic-llm',
-  actionTypeId: '.inference',
-  name: 'Elastic LLM',
-  isPreconfigured: true,
-  isDeprecated: false,
-  isSystemAction: false,
-  config: {
-    provider: 'elastic',
-    taskType: 'chat_completion',
-    inferenceId: '.rainbow-sprinkles-elastic',
-    providerConfig: {
-      model_id: 'rainbow-sprinkles',
-    },
-  },
-  referencedByCount: 0,
-});
-
 describe('ChatHeader', () => {
+  const useAIAgentTourDismissedMock =
+    ObservabilityAIAssistantPublic.useAIAgentTourDismissed as unknown as jest.Mock;
+  const aiAgentTourCalloutMock =
+    ObservabilityAIAssistantPublic.AIAgentTourCallout as unknown as jest.Mock;
+
   const baseProps = {
     conversationId: 'abc',
     conversation: {
@@ -91,16 +69,15 @@ describe('ChatHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useAIAgentTourDismissedMock.mockReturnValue([true, jest.fn()]);
   });
 
-  it('shows the Elastic Managed LLM connector tour callout when the connector is present', () => {
-    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(elasticManagedConnector);
-
+  it('renders the chat actions menu', () => {
     render(
       <ChatHeader
         {...baseProps}
         connectors={{
-          connectors: [elasticManagedConnector],
+          connectors: [],
           selectedConnector: undefined,
           loading: false,
           error: undefined,
@@ -112,13 +89,11 @@ describe('ChatHeader', () => {
       />
     );
 
-    expect(screen.getByTestId('elastic-llm-tour')).toBeInTheDocument();
     expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
-    expect(ElasticLlmTourCallout).toHaveBeenCalled();
   });
 
-  it('does not render the tour callout when the Elastic Managed LLM Connector is not present', () => {
-    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(undefined);
+  it('wraps the chat actions menu with the AI agent tour callout when not dismissed', () => {
+    useAIAgentTourDismissedMock.mockReturnValue([false, jest.fn()]);
 
     render(
       <ChatHeader
@@ -136,23 +111,19 @@ describe('ChatHeader', () => {
       />
     );
 
-    expect(screen.queryByTestId('elastic-llm-tour')).toBeNull();
+    expect(screen.getByTestId('ai-agent-tour-callout')).toBeInTheDocument();
     expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
-    expect(ElasticLlmTourCallout).not.toHaveBeenCalled();
   });
 
-  it('hides the tour callout from the AI Assistant page when the flyout is open', () => {
-    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(elasticManagedConnector);
-    (useObservabilityAIAssistantFlyoutStateContext as jest.Mock).mockReturnValue({
-      isFlyoutOpen: true,
-    });
+  it('passes isConversationApp to the AI agent tour callout', () => {
+    useAIAgentTourDismissedMock.mockReturnValue([false, jest.fn()]);
 
     render(
       <ChatHeader
         {...baseProps}
         isConversationApp={true}
         connectors={{
-          connectors: [elasticManagedConnector],
+          connectors: [],
           selectedConnector: undefined,
           loading: false,
           error: undefined,
@@ -164,36 +135,7 @@ describe('ChatHeader', () => {
       />
     );
 
-    expect(screen.queryByTestId('elastic-llm-tour')).toBeNull();
-    expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
-    expect(ElasticLlmTourCallout).not.toHaveBeenCalled();
-  });
-
-  it('shows the tour callout on the AI Assistant page when the flyout is closed', () => {
-    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(elasticManagedConnector);
-    (useObservabilityAIAssistantFlyoutStateContext as jest.Mock).mockReturnValue({
-      isFlyoutOpen: false,
-    });
-
-    render(
-      <ChatHeader
-        {...baseProps}
-        isConversationApp={true}
-        connectors={{
-          connectors: [elasticManagedConnector],
-          selectedConnector: undefined,
-          loading: false,
-          error: undefined,
-          selectConnector: (id: string) => {},
-          reloadConnectors: () => {},
-          getConnector: () => undefined,
-          isConnectorSelectionRestricted: false,
-        }}
-      />
-    );
-
-    expect(screen.getByTestId('elastic-llm-tour')).toBeInTheDocument();
-    expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
-    expect(ElasticLlmTourCallout).toHaveBeenCalled();
+    expect(aiAgentTourCalloutMock).toHaveBeenCalled();
+    expect(aiAgentTourCalloutMock.mock.calls[0][0]).toMatchObject({ isConversationApp: true });
   });
 });

@@ -15,7 +15,6 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation
 ): LastValueIndexPatternColumn => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { field, format, sort_by, show_array_values } = options;
 
   return {

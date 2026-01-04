@@ -7,6 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import _ from 'lodash';
 
+import { isDefined } from '../../../../common/utils/nullable';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 
 import type {
@@ -20,13 +21,17 @@ import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privi
 
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_VALUE } from './constants';
-import { getGlobalWeightForIdentifierType } from './calculate_risk_scores';
-import type { AssetCriticalityRiskFields } from './modifiers/asset_criticality';
-import { applyCriticalityModifier } from './modifiers/asset_criticality';
-import type { PrivmonRiskFields } from './modifiers/privileged_users';
+import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
+
+import {
+  applyCriticalityModifier,
+  buildLegacyCriticalityFields,
+} from './modifiers/asset_criticality';
+
 import { applyPrivmonModifier } from './modifiers/privileged_users';
-import { max10DecimalPlaces } from './helpers';
 import type { ExperimentalFeatures } from '../../../../common';
+import type { Modifier } from './modifiers/types';
+import { bayesianUpdate } from '../asset_criticality/helpers';
 interface ModifiersUpdateParams {
   now: string;
   deps: {
@@ -95,8 +100,8 @@ export const riskScoreDocFactory =
   ({ now, identifierField, globalWeight = 1 }: RiskScoreDocFactoryParams) =>
   (
     bucket: RiskScoreBucket,
-    criticalityFields: AssetCriticalityRiskFields,
-    privmonFields: PrivmonRiskFields
+    criticalityModifierFields: Modifier<'asset_criticality'> | undefined,
+    privmonWatchlistModifierFields: Modifier<'watchlist'> | undefined
   ): EntityRiskScoreRecord => {
     const risk = bucket.top_inputs.risk_details;
 
@@ -105,10 +110,15 @@ export const riskScoreDocFactory =
       category_1_count: risk.value.category_1_count,
     };
 
-    const totalScoreWithModifiers =
-      risk.value.normalized_score * globalWeight +
-      criticalityFields.category_2_score +
-      privmonFields.category_3_score;
+    const totalModifier =
+      (criticalityModifierFields?.modifier_value ?? 1) *
+      (privmonWatchlistModifierFields?.modifier_value ?? 1);
+
+    const originalScore = risk.value.normalized_score * globalWeight;
+    const totalScoreWithModifiers = bayesianUpdate({
+      modifier: totalModifier,
+      score: originalScore,
+    });
 
     const weightedScore =
       globalWeight !== undefined ? risk.value.score * globalWeight : risk.value.score;
@@ -118,14 +128,36 @@ export const riskScoreDocFactory =
       calculated_score_norm: max10DecimalPlaces(totalScoreWithModifiers),
     };
 
+    const appliedModifiers = [criticalityModifierFields, privmonWatchlistModifierFields].filter(
+      isDefined
+    );
+
+    const getContribution = getProportionalModifierContribution(
+      appliedModifiers.map((modifier) => modifier.modifier_value ?? 1),
+      originalScore,
+      totalScoreWithModifiers
+    );
+
+    type DocModifier = NonNullable<EntityRiskScoreRecord['modifiers']>[number];
+    const modifiers = appliedModifiers.map<DocModifier>((modifier) => ({
+      ...modifier,
+      contribution: max10DecimalPlaces(getContribution(modifier.modifier_value ?? 1)),
+    }));
+
+    const found = modifiers.find((mod) => mod.type === 'asset_criticality') as
+      | (Modifier<'asset_criticality'> & { contribution: number })
+      | undefined;
+
+    const legacyCat2Fields = buildLegacyCriticalityFields(found);
+
     return {
       '@timestamp': now,
       id_field: identifierField,
       id_value: bucket.key[identifierField],
       ...finalRiskScoreFields,
       ...alertsRiskScoreFields,
-      ...criticalityFields,
-      ...privmonFields,
+      ...legacyCat2Fields,
+      modifiers,
       notes: risk.value.notes,
       inputs: risk.value.risk_inputs.map((riskInput) => ({
         id: riskInput.id,
@@ -137,4 +169,23 @@ export const riskScoreDocFactory =
         contribution_score: riskInput.contribution,
       })),
     };
+  };
+
+const getProportionalModifierContribution =
+  (allModifiers: number[], originalScore: number, finalScore: number) => (modifier: number) => {
+    // This converts the modifiers to Log-Odds, transforming non-linear multiplication into linear addition, allowing us to measure the force of the change.
+    const modifierWeight = Math.log(modifier);
+    const combinedWeight = allModifiers
+      .map((each) => Math.log(each))
+      .reduce((sum, next) => sum + next, 0);
+
+    const combinedWeightIsEffectivelyZero = Math.abs(combinedWeight) < 0.0001;
+
+    const scalingFactor = combinedWeightIsEffectivelyZero
+      ? // If the combined weight is 0, we can't divide by it. In this case, we use the slope.
+        (originalScore * (100 - originalScore)) / 100
+      : // If the combined weight is not 0, we distribute the actual score change.
+        (finalScore - originalScore) / combinedWeight;
+
+    return scalingFactor * modifierWeight;
   };

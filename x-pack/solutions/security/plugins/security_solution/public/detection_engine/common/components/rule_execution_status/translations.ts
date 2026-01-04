@@ -56,13 +56,6 @@ export const ASK_ASSISTANT_ERROR_BUTTON = i18n.translate(
   }
 );
 
-export const ASK_AGENT_ERROR_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleStatus.askAgent',
-  {
-    defaultMessage: 'Ask Agent',
-  }
-);
-
 export const ASK_ASSISTANT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleStatus.askAssistantDesc',
   {

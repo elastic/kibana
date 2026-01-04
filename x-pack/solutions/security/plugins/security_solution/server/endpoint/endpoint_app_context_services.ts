@@ -479,23 +479,18 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    if (!this.startDependencies.config[key]) {
+    if (!Object.prototype.hasOwnProperty.call(this.startDependencies.config, key)) {
       throw new EndpointError(`Missing config value for key: ${key}`);
     }
 
     return this.startDependencies.config[key];
   }
 
-  getScriptsLibraryClient(
-    spaceId: string,
-    username: string,
-    esClient: ElasticsearchClient
-  ): ScriptsLibraryClient {
+  getScriptsLibraryClient(spaceId: string, username: string): ScriptsLibraryClient {
     return new ScriptsLibraryClient({
       spaceId,
       username,
       endpointService: this,
-      esClient,
     });
   }
 }

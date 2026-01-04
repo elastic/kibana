@@ -22,6 +22,7 @@ import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types/action_types';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -97,6 +98,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const [testExecutionActionParams, setTestExecutionActionParams] = useState<
     Record<string, unknown>
   >({});
+
+  const onEditAction = useCallback(
+    (field: string, value: unknown) =>
+      setTestExecutionActionParams((oldParams) => ({ ...oldParams, [field]: value })),
+    []
+  );
+
   const [testExecutionResult, setTestExecutionResult] =
     useState<Option<ActionTypeExecutorResult<unknown> | undefined>>(none);
 
@@ -293,7 +301,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         connector={connector}
         executeEnabled={!isFormModified}
         actionParams={testExecutionActionParams}
-        setActionParams={setTestExecutionActionParams}
+        onEditAction={onEditAction}
         onExecutionAction={onExecutionAction}
         isExecutingAction={isExecutingConnector}
         executionResult={testExecutionResult}
@@ -302,12 +310,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
-    actionTypeRegistry,
-    isExecutingConnector,
     isFormModified,
     testExecutionActionParams,
-    testExecutionResult,
+    onEditAction,
     onExecutionAction,
+    isExecutingConnector,
+    testExecutionResult,
+    actionTypeRegistry,
   ]);
 
   const renderConnectorRulesList = useCallback(() => {
@@ -325,6 +334,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     }
     return actionTypeModel?.isExperimental;
   }, [actionTypeModel, connector]);
+
+  const isTestable =
+    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
 
   return (
     <>
@@ -345,6 +357,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           icon={actionTypeModel?.iconClass}
           isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
+          isTestable={isTestable}
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}

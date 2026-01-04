@@ -51,7 +51,6 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
-import { registerTools } from './agent_builder/tools';
 import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
 
 export class APMPlugin
@@ -249,21 +248,6 @@ export class APMPlugin
     plugins.observability.alertDetailsContextualInsightsService.registerHandler(
       getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
     );
-
-    if (plugins.onechat) {
-      registerTools({
-        core,
-        plugins,
-        logger: this.logger!.get('observabilityAgentBuilder'),
-      }).catch((e) => {
-        this.logger?.error(
-          `Failed to register observability agent builder APM tools: ${e.message}`
-        );
-        this.logger?.debug(e);
-      });
-
-      this.logger?.debug('Successfully registered observability agent APM tools');
-    }
 
     registerDataProviders({
       core,

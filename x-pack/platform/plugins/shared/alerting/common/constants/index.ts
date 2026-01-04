@@ -19,3 +19,5 @@ export { alertDeleteCategoryIds } from './alert_delete';
 export type { BackfillInitiator } from './backfill';
 export { backfillInitiator } from './backfill';
 export { gapAutoFillSchedulerLimits } from './gap_auto_fill_scheduler';
+export { GAP_AUTO_FILL_STATUS } from './gap_auto_fill_scheduler';
+export type { GapAutoFillStatus } from './gap_auto_fill_scheduler';

@@ -234,7 +234,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/security-ai-prompts",
     "@kbn/inference-common",
-    "@kbn/esql-ast",
+    "@kbn/esql-language",
     "@kbn/inference-langchain",
     "@kbn/scout-security",
     "@kbn/custom-icons",
@@ -254,8 +254,8 @@
     "@kbn/core-metrics-server",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/rrule",
-    "@kbn/onechat-genai-utils",
-    "@kbn/onechat-server",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-server",
     "@kbn/object-utils",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
@@ -263,10 +263,12 @@
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/connector-schemas",
     "@kbn/deeplinks-analytics",
-    "@kbn/tour-queue",
     "@kbn/shared-ux-file-types",
-    "@kbn/onechat-common",
-    "@kbn/onechat-plugin",
-    "@kbn/core-ui-settings-server-mocks"
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-plugin",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/agent-builder-browser",
+    "@kbn/ai-assistant-common",
+    "@kbn/product-doc-common"
   ]
 }

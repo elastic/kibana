@@ -19,6 +19,19 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '../../primitive.gen';
 import { OriginalSource } from '../../common_attributes.gen';
 
+export type DeleteDataStreamRequestParams = z.infer<typeof DeleteDataStreamRequestParams>;
+export const DeleteDataStreamRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type DeleteDataStreamRequestParamsInput = z.input<typeof DeleteDataStreamRequestParams>;
+
 export type StopAutoImportDataStreamRequestParams = z.infer<
   typeof StopAutoImportDataStreamRequestParams
 >;
