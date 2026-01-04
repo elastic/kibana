@@ -129,7 +129,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   theme: themeServiceMock.createStartContract(),
   chrome: {
     ...chromeServiceMock.createStartContract(),
-    getActiveSolutionNavId$: () => of(undefined),
+    getActiveSolutionNavId$: () => of('es'),
   },
   application: applicationService,
   kibanaVersion: {
