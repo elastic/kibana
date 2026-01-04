@@ -56,13 +56,10 @@ export function createGetLogChangePointsTool({
     description: `Analyzes logs to detect statistically significant changes in log message patterns over time.
 
 When to use:
-- Investigating when a new error pattern started appearing
-- Detecting spikes or dips in specific log message categories
-- Answering "what changed in my logs?" for incident timeline analysis
-- Finding the exact timestamp when a failure mode started
+- Detecting significant changes in log message categories (spike, dip, step change, trend change, distribution change, stationary/non‑stationary, indeterminable) and identifying when they occur.
 
 How it works:
-Uses "categorize_text" aggregation to group similar unstructured messages into patterns, then detects change points (spikes, dips, trend changes) within each category.
+Uses "categorize_text" aggregation to group similar unstructured messages into patterns, then detects change points (spikes, dips, trend changes) within each category.`,
     schema: getLogChangePointsSchema,
     tags: ['observability', 'logs'],
     handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {

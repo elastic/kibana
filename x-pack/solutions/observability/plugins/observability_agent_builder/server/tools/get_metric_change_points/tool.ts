@@ -66,7 +66,11 @@ export function createGetMetricChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getMetricChangePointsSchema> = {
     id: OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Detects statistically significant changes (spikes/dips) in metrics across groups (e.g., by service, host, or custom fields).`,
+    description: `Detects statistically significant changes in metrics across groups (e.g., by service, host, or custom fields).
+
+When to use:
+- Detecting significant changes in metric values (spike, dip, step change, trend change, distribution change, stationary/non‑stationary, indeterminable) and identifying when they occur.
+`,
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
     handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
