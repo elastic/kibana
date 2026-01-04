@@ -59,7 +59,7 @@ export class WorkflowExecutionRepository {
     await this.esClient.index({
       index: this.indexName,
       id: workflowExecution.id,
-      refresh: true,
+      refresh: false,
       document: workflowExecution,
     });
   }
@@ -85,7 +85,7 @@ export class WorkflowExecutionRepository {
     await this.esClient.update<Partial<EsWorkflowExecution>>({
       index: this.indexName,
       id: workflowExecution.id,
-      refresh: true,
+      refresh: false,
       doc: workflowExecution,
     });
   }
