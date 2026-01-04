@@ -7,7 +7,7 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
-export function getHitsTotal(response: Pick<SearchResponse<unknown>, 'hits'> | undefined): number {
+export function getTotalHits(response: Pick<SearchResponse<unknown>, 'hits'> | undefined): number {
   const total = response?.hits?.total;
   return typeof total === 'number' ? total : total?.value ?? 0;
 }
