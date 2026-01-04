@@ -4,20 +4,6 @@ This document defines best practices for implementing Observability tools in Kib
 
 ---
 
-## Table of Contents
-
-1. [SRE Incident Investigation Workflow](#1-sre-incident-investigation-workflow)
-2. [Design Principles](#2-design-principles)
-3. [Tool Description Guidelines](#3-tool-description-guidelines)
-4. [Parameter Naming Conventions](#4-parameter-naming-conventions)
-5. [Output Structure](#5-output-structure)
-6. [ECS and OpenTelemetry Compatibility](#6-ecs-and-opentelemetry-compatibility)
-7. [Documentation Requirements](#7-documentation-requirements)
-8. [Testing and Development](#8-testing-and-development)
-9. [Pre-Merge Checklist](#9-pre-merge-checklist)
-
----
-
 ## 1. SRE Incident Investigation Workflow
 
 Understanding how SREs investigate incidents is essential for designing effective tools. The LLM acts as an intelligent assistant that helps SREs answer critical questions faster.
