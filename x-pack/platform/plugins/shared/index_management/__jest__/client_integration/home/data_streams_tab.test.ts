@@ -26,8 +26,6 @@ import {
   createNonDataStreamIndex,
 } from './data_streams_tab.helpers';
 
-jest.mock('react-use/lib/useObservable', () => () => jest.fn());
-
 const nonBreakingSpace = ' ';
 
 const getRedirectUrl = jest.fn(() => '/app/path');
@@ -407,7 +405,20 @@ describe('Data Streams tab', () => {
 
     test('clicking the indices count navigates to the backing indices', async () => {
       const { table, actions } = testBed;
-      await actions.clickIndicesAt(0);
+      // Doc count is fetched async with a 100ms RxJS bufferTime.
+      httpRequestsMockHelpers.setLoadIndexDocCountResponse({ 'data-stream-index': 0 });
+      jest.useFakeTimers();
+      try {
+        await actions.clickIndicesAt(0);
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+          jest.runOnlyPendingTimers();
+          await Promise.resolve();
+        });
+        testBed.component.update();
+      } finally {
+        jest.useRealTimers();
+      }
       expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
         ['', 'data-stream-index', '', '', '', '', '0', '', 'dataStream1'],
       ]);
@@ -1046,7 +1057,24 @@ describe('Data Streams tab', () => {
 
       test('clicking the indices count navigates to the backing indices', async () => {
         const { table, actions } = testBed;
-        await actions.clickIndicesAt(0);
+        // Doc count is fetched async with a 100ms RxJS bufferTime.
+        httpRequestsMockHelpers.setLoadIndexDocCountResponse({
+          'data-stream-index': 0,
+          'data-stream-index2': 0,
+        });
+        jest.useFakeTimers();
+        try {
+          await actions.clickIndicesAt(0);
+          await act(async () => {
+            jest.advanceTimersByTime(500);
+            jest.runOnlyPendingTimers();
+            await Promise.resolve();
+            await Promise.resolve();
+          });
+          testBed.component.update();
+        } finally {
+          jest.useRealTimers();
+        }
         expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
           ['', 'data-stream-index', '', '', '', '', '0', '', '%dataStream'],
         ]);
