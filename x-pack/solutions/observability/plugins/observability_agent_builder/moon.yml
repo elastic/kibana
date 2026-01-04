@@ -58,6 +58,8 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/sse-utils-client'
   - '@kbn/sse-utils-server'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/server-route-repository-client'
 tags:
   - plugin
   - prod
