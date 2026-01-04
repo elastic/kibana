@@ -65,8 +65,6 @@ export const findInternalRulesRoute = (
 
         const findResult = await rulesClient.find({
           options,
-          excludeFromPublicApi: false,
-          includeSnoozeData: true,
         });
 
         const responseBody: FindRulesInternalResponseV1 = transformFindRulesInternalResponseV1(

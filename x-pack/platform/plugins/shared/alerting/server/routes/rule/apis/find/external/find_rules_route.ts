@@ -83,8 +83,6 @@ export const findRulesRoute = (
 
         const findResult = await rulesClient.find({
           options,
-          excludeFromPublicApi: true,
-          includeSnoozeData: true,
         });
 
         const responseBody: FindRulesResponseV1 = transformFindRulesResponseV1(

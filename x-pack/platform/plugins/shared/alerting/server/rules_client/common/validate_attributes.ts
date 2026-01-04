@@ -6,51 +6,10 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 import { alertMappings } from '../../../common/saved_objects/rules/mappings';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const astFunctionType = ['is', 'range', 'nested'];
-
-export const getFieldNameAttribute = (fieldName: string, attributesToIgnore: string[]) => {
-  const fieldNameSplit = (fieldName || '')
-    .split('.')
-    .filter((fn: string) => !attributesToIgnore.includes(fn));
-
-  return fieldNameSplit.length > 0 ? fieldNameSplit[0] : '';
-};
-
-export const validateOperationOnAttributes = (
-  astFilter: KueryNode | null,
-  sortField: string | undefined,
-  searchFields: string[] | undefined,
-  excludedFieldNames: string[]
-) => {
-  if (sortField) {
-    validateSortField(sortField, excludedFieldNames);
-  }
-  if (!isEmpty(searchFields)) {
-    validateSearchFields(searchFields ?? [], excludedFieldNames);
-  }
-  if (astFilter) {
-    validateFilterKueryNode({ astFilter, excludedFieldNames });
-  }
-};
-
-export const validateSortField = (sortField: string, excludedFieldNames: string[]) => {
-  if (excludedFieldNames.filter((efn) => sortField.split('.')[0].includes(efn)).length > 0) {
-    throw new Error(`Sort is not supported on this field ${sortField}`);
-  }
-};
-
-export const validateSearchFields = (searchFields: string[], excludedFieldNames: string[]) => {
-  const excludedSearchFields = searchFields.filter(
-    (sf) => excludedFieldNames.filter((efn) => sf.split('.')[0].includes(efn)).length > 0
-  );
-  if (excludedSearchFields.length > 0) {
-    throw new Error(`Search field ${excludedSearchFields.join()} not supported`);
-  }
-};
 
 export interface IterateActionProps {
   ast: KueryNode;
@@ -125,35 +84,5 @@ export const iterateFilterKureyNode = ({
         localFieldName,
       });
     }
-  });
-};
-
-export const validateFilterKueryNode = ({
-  astFilter,
-  excludedFieldNames,
-  hasNestedKey = false,
-  nestedKeys,
-  storeValue,
-  path = 'arguments',
-}: ValidateFilterKueryNodeParams) => {
-  const action = ({ index, fieldName }: IterateActionProps) => {
-    if (index === 0) {
-      const firstAttribute = getFieldNameAttribute(fieldName, [
-        RULE_SAVED_OBJECT_TYPE,
-        'attributes',
-      ]);
-      if (excludedFieldNames.includes(firstAttribute)) {
-        throw new Error(`Filter is not supported on this field ${fieldName}`);
-      }
-    }
-  };
-
-  iterateFilterKureyNode({
-    astFilter,
-    hasNestedKey,
-    nestedKeys,
-    storeValue,
-    path,
-    action,
   });
 };

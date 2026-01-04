@@ -11,6 +11,8 @@ import { ruleResponseSchemaV1 } from '../../../../response';
 
 export const findRuleParamsExamples = () => path.join(__dirname, 'examples_find_rules.yaml');
 
+const unsupportedFields = ['monitoring', 'mapped_params', 'snoozeSchedule', 'activeSnoozes'];
+
 export const findRulesRequestQuerySchema = schema.object({
   per_page: schema.number({
     defaultValue: 10,
@@ -45,6 +47,12 @@ export const findRulesRequestQuerySchema = schema.object({
       meta: {
         description: 'The fields to perform the simple_query_string parsed query against.',
       },
+      validate: (value) => {
+        return validateUnsupportedFields(
+          value,
+          (field) => `Search field ${field} is not supported`
+        );
+      },
     })
   ),
   sort_field: schema.maybe(
@@ -52,6 +60,12 @@ export const findRulesRequestQuerySchema = schema.object({
       meta: {
         description:
           'Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.',
+      },
+      validate: (value) => {
+        return validateUnsupportedFields(
+          value,
+          (field) => `Sort is not supported on this field ${field}`
+        );
       },
     })
   ),
@@ -93,6 +107,12 @@ export const findRulesRequestQuerySchema = schema.object({
         description:
           'A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.',
       },
+      validate: (value) => {
+        return validateUnsupportedFields(
+          value,
+          (field) => `Filter is not supported on this field ${field}`
+        );
+      },
     })
   ),
   filter_consumers: schema.maybe(
@@ -114,3 +134,26 @@ export const findRulesResponseSchema = schema.object({
   total: schema.number(),
   data: findRulesResponseDataSchema,
 });
+
+const validateUnsupportedFields = (
+  value: string | string[],
+  getErrorMessage: (field: string) => string
+) => {
+  const includesInValue = (val: string, search: string) => {
+    return val.includes(search);
+  };
+
+  if (Array.isArray(value)) {
+    const unsupportedFieldValue = value.find((field) =>
+      unsupportedFields.some((unsupportedField) => includesInValue(field, unsupportedField))
+    );
+
+    return getErrorMessage(unsupportedFieldValue!);
+  }
+
+  const unsupportedFieldValue = unsupportedFields.find((unsupportedField) =>
+    includesInValue(value, unsupportedField)
+  );
+
+  return getErrorMessage(unsupportedFieldValue!);
+};
