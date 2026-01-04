@@ -71,9 +71,7 @@ export function useStreamingAiInsight(fetchInsight: (signal?: AbortSignal) => Pr
 
     try {
       const observable$ = defer(() =>
-        from(fetchInsight(abortController.signal)).pipe(
-          map((response) => ({ response }))
-        )
+        from(fetchInsight(abortController.signal)).pipe(map((response) => ({ response })))
       ).pipe(
         httpResponseIntoObservable(),
         filter(
