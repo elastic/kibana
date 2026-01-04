@@ -34,6 +34,8 @@ export interface GetAnomalyDetectionJobsToolResult {
   data: {
     jobs: Awaited<ReturnType<typeof getToolHandler>>;
     totalReturned: number;
+    message?: string;
+    toolParams?: Record<string, unknown>;
   };
 }
 

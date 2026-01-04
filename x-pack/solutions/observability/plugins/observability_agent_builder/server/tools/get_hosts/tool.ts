@@ -35,6 +35,7 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
 export type GetHostsToolResult = OtherResult<{
+  toolParams?: Record<string, unknown>;
   total: number;
   hosts: Array<{
     name: string;
