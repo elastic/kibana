@@ -8,54 +8,10 @@
  */
 
 import type { Fields } from '@kbn/synthtrace-client';
-import type { Client } from '@elastic/elasticsearch';
-import type { Scenario, ScenarioInitOptions } from '../../cli/scenario';
-import type { SynthtraceClients } from '../../cli/utils/clients_manager';
-import type { KibanaClient } from '../shared/base_kibana_client';
+import type { Scenario } from '../../cli/scenario';
 
-type ScenarioResult<TFields extends Fields> = Awaited<ReturnType<Scenario<TFields>>>;
+type GenerateFn<TFields extends Fields> = Awaited<ReturnType<Scenario<TFields>>>['generate'];
 
-type GenerateFn<TFields extends Fields> = ScenarioResult<TFields>['generate'];
-
-type ScenarioOptions<TFields extends Fields> = Omit<
-  ScenarioResult<TFields>,
-  'bootstrap' | 'teardown'
-> & {
-  bootstrap?: (
-    clients: SynthtraceClients,
-    kibanaClient: KibanaClient,
-    esClient: Client,
-    options: ScenarioInitOptions
-  ) => Promise<void>;
-  teardown?: (
-    clients: SynthtraceClients,
-    kibanaClient: KibanaClient,
-    esClient: Client,
-    options: ScenarioInitOptions
-  ) => Promise<void>;
-};
-
-export function createCliScenario<TFields extends Fields>(
-  generatorOrOptions: GenerateFn<TFields> | ScenarioOptions<TFields>
-): Scenario<TFields> {
-  if (typeof generatorOrOptions === 'function') {
-    return async () => ({
-      generate: ({ range, clients }) => generatorOrOptions({ range, clients }),
-    });
-  }
-
-  const { generate, bootstrap, teardown, setupPipeline } = generatorOrOptions;
-
-  return async (initOptions) => ({
-    generate: ({ range, clients }) => generate({ range, clients }),
-    ...(bootstrap && {
-      bootstrap: (clients, kibanaClient, esClient) =>
-        bootstrap(clients, kibanaClient, esClient, initOptions),
-    }),
-    ...(teardown && {
-      teardown: (clients, kibanaClient, esClient) =>
-        teardown(clients, kibanaClient, esClient, initOptions),
-    }),
-    ...(setupPipeline && { setupPipeline }),
-  });
-}
+export const createCliScenario =
+  <TFields extends Fields>(generate: GenerateFn<TFields>): Scenario<TFields> =>
+  async () => ({ generate });
