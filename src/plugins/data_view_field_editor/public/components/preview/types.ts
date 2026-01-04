@@ -30,7 +30,7 @@ export interface EsDocument {
 export type ScriptErrorCodes = 'PAINLESS_SCRIPT_ERROR' | 'PAINLESS_SYNTAX_ERROR';
 export type FetchDocErrorCodes = 'DOC_NOT_FOUND' | 'ERR_FETCHING_DOC';
 
-interface PreviewError {
+export interface PreviewError {
   code: ScriptErrorCodes;
   error:
     | RuntimeFieldPainlessError
@@ -57,11 +57,9 @@ export interface ClusterData {
 // The parameters required to preview the field
 export interface Params {
   name: string | null;
-  index: string | null;
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
   format: SerializedFieldFormat | null;
-  document: { [key: string]: unknown } | null;
   // used for composite subfields
   parentName: string | null;
 }
