@@ -140,7 +140,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           index: WORKFLOWS_EXECUTIONS_INDEX,
-          refresh: true,
+          refresh: false,
           document: expect.objectContaining({
             spaceId,
             workflowId: workflow.id,

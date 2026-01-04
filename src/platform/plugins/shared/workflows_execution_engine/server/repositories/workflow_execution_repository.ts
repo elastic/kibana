@@ -47,10 +47,15 @@ export class WorkflowExecutionRepository {
    * Creates a new workflow execution document in Elasticsearch.
    *
    * @param workflowExecution - A partial object representing the workflow execution to be created.
+   * @param options - Optional settings for the create operation.
+   * @param options.refresh - Whether to refresh the index after writing. Use 'wait_for' when
+   *                          immediate searchability is required (e.g., for deduplication checks).
+   *                          Defaults to false for better performance.
    * @returns A promise that resolves when the workflow execution has been indexed.
    */
   public async createWorkflowExecution(
-    workflowExecution: Partial<EsWorkflowExecution>
+    workflowExecution: Partial<EsWorkflowExecution>,
+    options: { refresh?: boolean | 'wait_for' } = {}
   ): Promise<void> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
@@ -59,7 +64,7 @@ export class WorkflowExecutionRepository {
     await this.esClient.index({
       index: this.indexName,
       id: workflowExecution.id,
-      refresh: true,
+      refresh: options.refresh ?? false,
       document: workflowExecution,
     });
   }
@@ -85,7 +90,7 @@ export class WorkflowExecutionRepository {
     await this.esClient.update<Partial<EsWorkflowExecution>>({
       index: this.indexName,
       id: workflowExecution.id,
-      refresh: true,
+      refresh: false,
       doc: workflowExecution,
     });
   }

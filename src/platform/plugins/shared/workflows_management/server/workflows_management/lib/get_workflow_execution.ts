@@ -97,5 +97,7 @@ function transformToWorkflowExecutionDetailDto(
     stepExecutions,
     triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
     yaml,
+    traceId: workflowExecution.traceId,
+    entryTransactionId: workflowExecution.entryTransactionId,
   };
 }
