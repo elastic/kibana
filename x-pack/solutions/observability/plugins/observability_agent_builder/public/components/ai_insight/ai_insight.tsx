@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiIcon,
   EuiAccordion,
@@ -27,12 +27,9 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
-import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { filter, map, of } from 'rxjs';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
-import { untilAborted } from '../../utils/until_aborted';
+import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 
@@ -68,12 +65,6 @@ export interface AiInsightProps {
 export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [summary, setSummary] = useState('');
-  const [context, setContext] = useState('');
-  const [wasStopped, setWasStopped] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const {
     services: { agentBuilder, application },
@@ -88,103 +79,8 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
-  const handleFetchInsight = useCallback(async () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    setIsLoading(true);
-    setError(undefined);
-    setWasStopped(false);
-    setSummary('');
-    setContext('');
-
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
-    try {
-      const result = await fetchInsight(abortController.signal);
-
-      if (abortController.signal.aborted) {
-        return;
-      }
-
-      let accumulatedContent = '';
-      let contextValue = '';
-
-      const observable$ = of({ response: result }).pipe(
-        httpResponseIntoObservable(),
-        filter(
-          (event: { type: string }): boolean =>
-            event.type === 'context' ||
-            event.type === 'chatCompletionChunk' ||
-            event.type === 'chatCompletionMessage'
-        ),
-        map((event: { type: string; [key: string]: unknown }) => {
-          if (event.type === 'context') {
-            return { type: 'context' as const, context: (event.context as string) || '' };
-          }
-          if (event.type === 'chatCompletionChunk') {
-            return { type: 'chunk' as const, content: (event.content as string) || '' };
-          }
-          return { type: 'message' as const, content: (event.content as string) || '' };
-        }),
-        untilAborted(abortController.signal)
-      );
-
-      observable$.subscribe({
-        next: (event: { type: string; context?: string; content?: string } | null) => {
-          if (event?.type === 'context') {
-            contextValue = event.context || '';
-            setContext(contextValue);
-          } else if (event?.type === 'chunk') {
-            accumulatedContent += event.content || '';
-            setSummary(accumulatedContent);
-          } else if (event?.type === 'message') {
-            accumulatedContent = event.content || '';
-            setSummary(accumulatedContent);
-            setIsLoading(false);
-          }
-        },
-        error: (err: unknown) => {
-          if (err instanceof AbortError) {
-            setIsLoading(false);
-            return;
-          }
-          setError(err instanceof Error ? err.message : 'Failed to load AI insight');
-          setIsLoading(false);
-        },
-        complete: () => {
-          setIsLoading(false);
-        },
-      });
-    } catch (e) {
-      if (e instanceof AbortError) {
-        setIsLoading(false);
-        return;
-      }
-      setError(e instanceof Error ? e.message : 'Failed to load AI insight');
-      setIsLoading(false);
-    }
-  }, [fetchInsight]);
-
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
-
-  const handleStopGenerating = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      setIsLoading(false);
-      setWasStopped(true);
-    }
-  }, []);
-
-  const handleRegenerate = handleFetchInsight;
+  const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
+    useStreamingAiInsight(fetchInsight);
 
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
@@ -245,14 +141,14 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
         onToggle={(open) => {
           setIsOpen(open);
           if (open && !error && !summary && !isLoading) {
-            handleFetchInsight();
+            fetch();
           }
         }}
       >
         <EuiSpacer size="m" />
         <EuiPanel color="subdued">
           {error ? (
-            <AiInsightErrorBanner error={error} onRetry={handleFetchInsight} />
+            <AiInsightErrorBanner error={error} onRetry={fetch} />
           ) : (
             <EuiText size="s">
               <EuiMarkdownFormat
@@ -273,7 +169,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
               color="text"
               iconType="stop"
               size="s"
-              onClick={handleStopGenerating}
+              onClick={stop}
             >
               {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.stopGeneratingButton', {
                 defaultMessage: 'Stop generating',
@@ -286,7 +182,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
               data-test-subj="observabilityAgentBuilderRegenerateButton"
               size="s"
               iconType="sparkles"
-              onClick={handleRegenerate}
+              onClick={regenerate}
             >
               {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
                 defaultMessage: 'Regenerate',
