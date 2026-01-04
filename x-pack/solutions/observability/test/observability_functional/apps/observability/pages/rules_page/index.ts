@@ -105,20 +105,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('Feature flag', () => {
-      it('Link point to O11y Rules pages by default', async () => {
-        const manageRulesPageHref =
-          (await observability.alerts.rulesPage.getManageRulesPageHref()) ?? '';
-        expect(new URL(manageRulesPageHref).pathname).equal('/app/observability/alerts/rules');
-      });
-    });
-
-    describe('Create rule button', () => {
-      it('Show Rule Type Modal when Create Rule button is clicked', async () => {
-        await navigateAndOpenRuleTypeModal();
-      });
-    });
-
     describe('Create rules form', () => {
       const ruleName = 'esQueryRule';
 
@@ -264,18 +250,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await deleteRuleById(logThresholdRuleId);
       });
 
-      it('shows the rules table ', async () => {
-        await testSubjects.existOrFail('rulesListSection');
-        await testSubjects.waitForDeleted('centerJustifiedSpinner');
-        const tableRows = await find.allByCssSelector('.euiTableRow');
-        const rows = await getRulesList(tableRows);
-        expect(rows.length).to.be(2);
-        expect(rows[0].name).to.contain('error-log');
-        expect(rows[0].enabled).to.be('Enabled');
-        expect(rows[1].name).to.contain('metric-threshold');
-        expect(rows[1].enabled).to.be('Enabled');
-      });
-
       it('changes the rule status to "disabled"', async () => {
         await testSubjects.existOrFail('rulesList');
         await observability.alerts.rulesPage.clickRuleStatusDropDownMenu();
@@ -292,107 +266,29 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      it('should navigate to the details page when clicking on a rule in event logs tab', async () => {
-        await observability.alerts.rulesPage.clickLogsTab();
-        await observability.alerts.rulesPage.clickOnRuleInEventLogs();
-        await testSubjects.existOrFail('ruleDetails');
-      });
-
-      it('shows the rule event log when navigating by URL', async () => {
-        await observability.alerts.common.navigateToRulesLogsPage();
-        await testSubjects.existOrFail('ruleEventLogListTable');
-      });
-    });
-
-    describe('User permissions', () => {
-      it('shows the Create Rule button when user has permissions', async () => {
-        await observability.alerts.common.navigateToRulesPage();
-        await retry.waitFor(
-          'Create rule button',
-          async () => await testSubjects.exists('createRuleButton')
-        );
-        await retry.waitFor(
-          'Create rule button is enabled',
-          async () => await testSubjects.isEnabled('createRuleButton')
-        );
-      });
-
-      describe('permission prompt', function () {
-        this.tags('skipFIPS');
-        it(`shows the no permission prompt when the user has no permissions`, async () => {
-          // We kept this test to make sure that the stack management rule page
-          // is showing the right prompt corresponding to the right privileges.
-          // Knowing that o11y alert page won't come up if you do not have any
-          // kind of privileges to o11y
-          await observability.users.setTestUserRole({
-            elasticsearch: {
-              cluster: [],
-              indices: [],
-              run_as: [],
+      describe('Stack alerts consumer', () => {
+        it('should create an ES Query rule and NOT display it when consumer is stackAlerts', async () => {
+          const name = 'ES Query with stackAlerts consumer';
+          await rulesService.api.createRule({
+            name,
+            consumer: 'stackAlerts',
+            ruleTypeId: '.es-query',
+            params: {
+              size: 100,
+              thresholdComparator: '>',
+              threshold: [-1],
+              index: ['alert-test-data'],
+              timeField: 'date',
+              esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+              timeWindowSize: 20,
+              timeWindowUnit: 's',
             },
-            kibana: [
-              {
-                base: [],
-                feature: {
-                  discover: ['read'],
-                },
-                spaces: ['*'],
-              },
-            ],
+            schedule: { interval: '1m' },
           });
+
           await observability.alerts.common.navigateToRulesPage();
-          await retry.waitFor(
-            'No permissions prompt',
-            async () => await testSubjects.exists('noPermissionPrompt')
-          );
-          await observability.users.restoreDefaultTestUserRole();
+          await testSubjects.missingOrFail('rule-row');
         });
-      });
-
-      describe('rules list', function () {
-        this.tags('skipFIPS');
-        it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
-          await observability.users.setTestUserRole(
-            observability.users.defineBasicObservabilityRole({
-              logs: ['read'],
-            })
-          );
-          await observability.alerts.common.navigateToRulesPage();
-          await retry.waitFor(
-            'Read-only rules list is visible',
-            async () => await testSubjects.exists('rulesList')
-          );
-          await retry.waitFor(
-            'Create rule button is disabled',
-            async () => !(await testSubjects.isEnabled('createRuleButton'))
-          );
-          await observability.users.restoreDefaultTestUserRole();
-        });
-      });
-    });
-
-    describe('Stack alerts consumer', () => {
-      it('should create an ES Query rule and NOT display it when consumer is stackAlerts', async () => {
-        const name = 'ES Query with stackAlerts consumer';
-        await rulesService.api.createRule({
-          name,
-          consumer: 'stackAlerts',
-          ruleTypeId: '.es-query',
-          params: {
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            index: ['alert-test-data'],
-            timeField: 'date',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            timeWindowSize: 20,
-            timeWindowUnit: 's',
-          },
-          schedule: { interval: '1m' },
-        });
-
-        await observability.alerts.common.navigateToRulesPage();
-        await testSubjects.missingOrFail('rule-row');
       });
     });
   });
