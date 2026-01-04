@@ -12,17 +12,27 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
 import { EntityType } from '../domain/definitions/constants';
 import type { ResourcesService } from '../domain/resources_service';
 import type { EntityStoreLogger } from '../infra/logging';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 type QueryParametersSchema = z.infer<typeof QueryParametersSchema>;
 const QueryParametersSchema = z.object({
   entityType: z.array(EntityType).optional(),
 });
 
-export function registerInstall(
+const fallbackTypes = (types?: EntityType[]): EntityType[] => {
+  if (!types) {
+    return Object.values(EntityType.Values);
+  }
+
+  return types;
+};
+
+export function registerInstall({ router, resourcesService, logger, taskManager }: {
   router: IRouter,
-  resourceService: ResourcesService,
-  logger: EntityStoreLogger
-) {
+  resourcesService: ResourcesService,
+  logger: EntityStoreLogger,
+  taskManager: TaskManagerSetupContract
+}) {
   router.versioned
     .post({
       path: '/internal/entity-store/v2/install',
@@ -42,7 +52,9 @@ export function registerInstall(
       },
       async (ctx, req, res) => {
         logger.debug('Install api called');
-        resourceService.install(req.query.entityType);
+        const types = fallbackTypes(req.query.entityType);
+
+        resourcesService.install(types, taskManager);
 
         return res.ok({
           body: {

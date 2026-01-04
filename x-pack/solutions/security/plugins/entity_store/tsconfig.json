@@ -19,5 +19,6 @@
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/zod-helpers",
+    "@kbn/task-manager-plugin"
   ]
 }

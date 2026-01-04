@@ -8,10 +8,13 @@
 import type { IRouter } from '@kbn/core/server';
 import { registerInstall } from './install';
 import type { EntityStoreDependencies } from '../dependencies';
+import { EntityStorePlugins } from '../types';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 export const registerRoutes = (
   router: IRouter,
-  { resourcesService, logger }: EntityStoreDependencies
+  { resourcesService, logger }: EntityStoreDependencies,
+  { taskManager }: EntityStorePlugins
 ) => {
-  registerInstall(router, resourcesService, logger);
+  registerInstall({ router, resourcesService, logger, taskManager: taskManager as TaskManagerSetupContract });
 };

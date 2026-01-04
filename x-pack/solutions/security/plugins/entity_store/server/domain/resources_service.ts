@@ -7,6 +7,8 @@
 
 import { EntityType } from './definitions/constants';
 import type { EntityStoreLogger } from '../infra/logging';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { entityTasks } from '../tasks/entity_task';
 
 export class ResourcesService {
   logger: EntityStoreLogger;
@@ -15,17 +17,12 @@ export class ResourcesService {
     this.logger = logger;
   }
 
-  install(types?: EntityType[]) {
-    types = fallbackTypes(types);
-
+  install(types: EntityType[], taskManager: TaskManagerSetupContract) {
     this.logger.info(`Should initialize entity store for types ${JSON.stringify(types)}`);
+    
+    types.forEach(entityType => {
+      const task = entityTasks[entityType](this.logger);
+      task.register(taskManager);
+    });
   }
 }
-
-const fallbackTypes = (types?: EntityType[]): EntityType[] => {
-  if (!types) {
-    return Object.values(EntityType.Values);
-  }
-
-  return types;
-};

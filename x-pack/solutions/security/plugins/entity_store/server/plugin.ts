@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import type { EntityStoreDependencies } from './dependencies';
 import { initDependencies } from './dependencies';
-
+import type { EntityStorePlugins } from './types';
 export class EntityStorePlugin implements Plugin {
   private readonly dependencies: EntityStoreDependencies;
 
@@ -17,17 +17,17 @@ export class EntityStorePlugin implements Plugin {
     this.dependencies = initDependencies(initializerContext);
   }
 
-  public setup(core: CoreSetup) {
+  setup(core: CoreSetup, plugins: EntityStorePlugins) {
     const router = core.http.createRouter();
 
-    registerRoutes(router, this.dependencies);
+    registerRoutes(router, this.dependencies, plugins);
   }
 
-  public start() {
+  start(core: CoreStart, plugins: EntityStorePlugins) {
     this.dependencies.logger.info('Initializing plugin');
   }
 
-  public stop() {
+  stop() {
     this.dependencies.logger.info('Stopping plugin');
   }
 }
