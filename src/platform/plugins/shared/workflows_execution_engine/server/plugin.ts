@@ -355,7 +355,11 @@ export class WorkflowsExecutionEnginePlugin
                   scheduleDelayMs,
                 },
               };
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+              // Use refresh: 'wait_for' to ensure the execution is immediately searchable
+              // for deduplication checks by subsequent scheduled tasks
+              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+                refresh: 'wait_for',
+              });
 
               await runWorkflow({
                 workflowRunId: workflowExecution.id,
