@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -14,6 +14,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { ResourceTypes } from '@kbn/product-doc-common';
 import { DocumentationSection } from './documentation_section';
+
+jest.mock('@kbn/react-kibana-mount', () => ({
+  // In unit tests we don’t need a real MountPoint; returning the node allows us to assert on its contents.
+  toMountPoint: (node: unknown) => node,
+}));
 
 describe('DocumentationSection', () => {
   const coreStart = coreMock.createStart();
@@ -81,6 +86,17 @@ describe('DocumentationSection', () => {
         expect(screen.getByTestId('documentationSection')).toBeInTheDocument();
         expect(screen.getByTestId('documentationTitle')).toBeInTheDocument();
         expect(screen.getByTestId('documentationTable')).toBeInTheDocument();
+      });
+    });
+
+    it('should render a "Learn more" link in the description', async () => {
+      renderComponent(mockProductDocBase);
+
+      await waitFor(() => {
+        expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
+          'href',
+          coreStart.docLinks.links.aiAssistantSettings
+        );
       });
     });
 
@@ -231,6 +247,43 @@ describe('DocumentationSection', () => {
           inferenceId: '.elser-2-elasticsearch',
         });
       });
+    });
+
+    it('should show a helpful toast (air-gapped hint + docs link) when install fails', async () => {
+      mockProductDocBase.installation.getStatus = jest.fn().mockResolvedValue({
+        inferenceId: '.elser-2-elasticsearch',
+        overall: 'uninstalled',
+        perProducts: {},
+      });
+      mockProductDocBase.installation.install = jest.fn().mockRejectedValue(new Error('boom'));
+
+      renderComponent(mockProductDocBase, true);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('documentation-install-elastic_documents'));
+
+      await waitFor(() => {
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalled();
+      });
+
+      const toastArg = (coreStart.notifications.toasts.addDanger as jest.Mock).mock.calls[0][0];
+      expect(toastArg.title).toBe('Failed to install documentation');
+
+      // toMountPoint is mocked to return a React node, so we can assert on its contents.
+      const { container } = render(<>{toastArg.text}</>);
+      const toast = within(container);
+      expect(
+        toast.getByText(
+          'If your environment has no internet access, you can host these artifacts yourself.'
+        )
+      ).toBeInTheDocument();
+      expect(toast.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
+        'href',
+        coreStart.docLinks.links.aiAssistantSettings
+      );
     });
 
     it('should call install for Security Labs when install action is clicked', async () => {

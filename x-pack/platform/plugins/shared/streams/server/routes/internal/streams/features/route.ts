@@ -22,6 +22,7 @@ import type { Observable } from 'rxjs';
 import { from, map, catchError } from 'rxjs';
 import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
@@ -298,7 +299,12 @@ export const identifyFeaturesRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
     }),
@@ -326,7 +332,7 @@ export const identifyFeaturesRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { connectorId: connectorIdParam, from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -334,6 +340,12 @@ export const identifyFeaturesRoute = createServerRoute({
     if (!read) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
+
+    const connectorId = await resolveConnectorId({
+      connectorId: connectorIdParam,
+      uiSettingsClient,
+      logger,
+    });
 
     // Get connector info for error enrichment
     const connector = await inferenceClient.getConnectorById(connectorId);
@@ -353,7 +365,8 @@ export const identifyFeaturesRoute = createServerRoute({
       logger,
     });
 
-    const { featurePromptOverride } = await promptsConfigService.getPrompt();
+    const { featurePromptOverride, descriptionPromptOverride } =
+      await promptsConfigService.getPrompt();
 
     return from(
       featureRegistry.identifyFeatures({
@@ -365,7 +378,8 @@ export const identifyFeaturesRoute = createServerRoute({
         stream,
         features: hits,
         signal,
-        systemPromptOverride: featurePromptOverride,
+        featurePromptOverride,
+        descriptionPromptOverride,
       })
     ).pipe(
       map(({ features, tokensUsed }) => {
@@ -397,7 +411,12 @@ export const describeStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
       from: dateFromString,
       to: dateFromString,
     }),
@@ -409,16 +428,22 @@ export const describeStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Observable<StreamDescriptionEvent>> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+      streamsClient,
+      inferenceClient,
+      soClient,
+    } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name },
-      query: { connectorId, from: start, to: end },
+      query: { connectorId: connectorIdParam, from: start, to: end },
     } = params;
 
     const { read } = await checkAccess({ name, scopedClusterClient });
@@ -429,10 +454,23 @@ export const describeStreamRoute = createServerRoute({
       );
     }
 
+    const connectorId = await resolveConnectorId({
+      connectorId: connectorIdParam,
+      uiSettingsClient,
+      logger,
+    });
+
     // Get connector info for error enrichment
     const connector = await inferenceClient.getConnectorById(connectorId);
 
     const stream = await streamsClient.getStream(name);
+
+    const promptsConfigService = new PromptsConfigService({
+      soClient,
+      logger,
+    });
+
+    const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
 
     return from(
       generateStreamDescription({
@@ -443,6 +481,7 @@ export const describeStreamRoute = createServerRoute({
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
         logger: logger.get('stream_description'),
+        systemPromptOverride: descriptionPromptOverride,
       })
     ).pipe(
       map((result) => {

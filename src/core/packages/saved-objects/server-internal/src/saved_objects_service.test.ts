@@ -101,7 +101,7 @@ describe('SavedObjectsService', () => {
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: 10000,
-        enableAccessControl: accessControlEnabled ?? false,
+        enableAccessControl: accessControlEnabled ?? true, // default to true
       });
     });
     return mockCoreContext.create({ configService, env });
@@ -406,18 +406,18 @@ describe('SavedObjectsService', () => {
     });
 
     describe('#isAccessControlEnabled', () => {
-      it('returns false by default', async () => {
+      it('returns true by default', async () => {
         const coreContext = createCoreContext({});
         const soService = new SavedObjectsService(coreContext);
         const { isAccessControlEnabled } = await soService.setup(createSetupDeps());
-        expect(isAccessControlEnabled()).toEqual(false);
+        expect(isAccessControlEnabled()).toEqual(true);
       });
 
-      it('can be set to true', async () => {
-        const coreContext = createCoreContext({ accessControlEnabled: true });
+      it('can be set to false', async () => {
+        const coreContext = createCoreContext({ accessControlEnabled: false });
         const soService = new SavedObjectsService(coreContext);
         const { isAccessControlEnabled } = await soService.setup(createSetupDeps());
-        expect(isAccessControlEnabled()).toEqual(true);
+        expect(isAccessControlEnabled()).toEqual(false);
       });
 
       describe('#setAccessControlTransforms', () => {

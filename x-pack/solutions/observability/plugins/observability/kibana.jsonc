@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": ["@elastic/observability-ui"],
+  "owner": ["@elastic/actionable-obs-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -40,11 +40,11 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams",
-      "observabilityAgentBuilder"
+      "streams"
     ],
     "optionalPlugins": [
-      "onechat",
+      "observabilityAgentBuilder",
+      "agentBuilder",
       "aiops",
       "cases",
       "discover",
@@ -67,7 +67,8 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]
   }
