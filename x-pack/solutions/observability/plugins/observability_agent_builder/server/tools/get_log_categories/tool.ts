@@ -82,8 +82,12 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, { esClient }) => {
-      const { index, start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, terms } =
-        toolParams;
+      const {
+        index,
+        start = DEFAULT_TIME_RANGE.start,
+        end = DEFAULT_TIME_RANGE.end,
+        terms,
+      } = toolParams;
 
       try {
         const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
