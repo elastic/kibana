@@ -9,6 +9,12 @@
 
 import type { DashboardPanel, DashboardSection } from '../server';
 
+/**
+ * Type guard that checks if a widget is a {@link DashboardSection}.
+ *
+ * @param widget - The widget to check, which can be either a {@link DashboardPanel} or {@link DashboardSection}.
+ * @returns `true` if the widget is a {@link DashboardSection}, `false` otherwise.
+ */
 export const isDashboardSection = (
   widget: DashboardPanel | DashboardSection
 ): widget is DashboardSection => {

@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
 import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
+/** The attributes of a dashboard saved object. */
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
   projectRouting?: string;
 };

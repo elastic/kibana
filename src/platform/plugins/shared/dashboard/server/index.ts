@@ -11,6 +11,7 @@ import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
+/** Configuration schema for the Dashboard plugin. */
 export const configSchema = schema.object({
   /**
    * this config is unused, but cannot be removed as removing a yml setting is a breaking change.
