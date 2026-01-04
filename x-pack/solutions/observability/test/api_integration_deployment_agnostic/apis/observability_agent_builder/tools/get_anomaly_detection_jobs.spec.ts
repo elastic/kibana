@@ -174,7 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
       expect(toolResults[0].data.jobs).to.be.empty();
-      expect(toolResults[0].data.message).to.contain(
+      expect(toolResults[0].data.summary).to.contain(
         'No anomaly detection jobs found for the provided filters'
       );
     });
