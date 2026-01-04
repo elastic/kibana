@@ -35,7 +35,6 @@ export interface GetAnomalyDetectionJobsToolResult {
     jobs: Awaited<ReturnType<typeof getToolHandler>>;
     totalReturned: number;
     message?: string;
-    toolParams?: Record<string, unknown>;
   };
 }
 
@@ -125,7 +124,6 @@ When to use:
                   totalReturned: 0,
                   message:
                     'No anomaly detection jobs found for the specified time range and filters.',
-                  toolParams,
                 },
               },
             ],

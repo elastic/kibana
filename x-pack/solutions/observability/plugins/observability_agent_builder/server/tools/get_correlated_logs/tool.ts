@@ -21,7 +21,7 @@ import {
   DEFAULT_LOG_SOURCE_FIELDS,
 } from './constants';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { getToolHandler } from './handler';
+import { getNoResultsMessage, getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID = 'observability.get_correlated_logs';
 
@@ -121,7 +121,7 @@ Do NOT use for:
       } = toolParams;
 
       try {
-        const { sequences, message: handlerMessage } = await getToolHandler({
+        const { sequences } = await getToolHandler({
           core,
           logger,
           esClient,
@@ -138,14 +138,23 @@ Do NOT use for:
         });
 
         if (sequences.length === 0) {
-          const message =
-            handlerMessage ?? 'No correlated log sequences found for the specified time range.';
+          const message = getNoResultsMessage({
+            logId,
+            kqlFilter,
+            errorLogsOnly,
+            correlationFields,
+            start,
+            end,
+          });
 
           return {
             results: [
               {
                 type: ToolResultType.other,
-                data: { sequences: [], message, toolParams },
+                data: {
+                  sequences: [],
+                  message,
+                },
               },
             ],
           };

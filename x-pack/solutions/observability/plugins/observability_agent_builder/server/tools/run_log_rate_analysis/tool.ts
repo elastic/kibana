@@ -107,7 +107,6 @@ Do NOT use for:
                   items: [],
                   message:
                     'No significant factors found for the specified baseline and deviation periods.',
-                  toolParams,
                 },
               },
             ],

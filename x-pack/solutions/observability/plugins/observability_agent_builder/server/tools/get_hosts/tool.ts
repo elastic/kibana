@@ -35,7 +35,6 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
 export type GetHostsToolResult = OtherResult<{
-  toolParams?: Record<string, unknown>;
   total: number;
   hosts: Array<{
     name: string;
@@ -125,7 +124,6 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
                   hosts: [],
                   total: 0,
                   message: 'No hosts found for the specified time range and filters.',
-                  toolParams,
                 },
               },
             ],

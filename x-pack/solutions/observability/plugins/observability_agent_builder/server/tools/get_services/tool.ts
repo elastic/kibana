@@ -93,7 +93,6 @@ When to use:
                   total: 0,
                   services: [],
                   message: 'No services found for the specified time range and filters.',
-                  toolParams,
                 },
               },
             ],

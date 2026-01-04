@@ -16,10 +16,8 @@ import { parseDatemath } from '../../utils/time';
 import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_LOG_SOURCE_FIELDS } from './constants';
 import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
-import type { LogSequence } from './types';
 
-function getNoResultsMessage({
-  sequences,
+export function getNoResultsMessage({
   logId,
   kqlFilter,
   errorLogsOnly,
@@ -27,18 +25,13 @@ function getNoResultsMessage({
   start,
   end,
 }: {
-  sequences: LogSequence[];
   logId: string | undefined;
   kqlFilter: string | undefined;
   errorLogsOnly: boolean;
   correlationFields: string[];
   start: string;
   end: string;
-}): string | undefined {
-  if (sequences.length > 0) {
-    return undefined;
-  }
-
+}): string {
   const isUsingDefaultCorrelationFields =
     correlationFields === DEFAULT_CORRELATION_IDENTIFIER_FIELDS;
 
@@ -135,15 +128,5 @@ export async function getToolHandler({
     })
   );
 
-  const message = getNoResultsMessage({
-    sequences,
-    logId,
-    kqlFilter,
-    errorLogsOnly,
-    correlationFields,
-    start,
-    end,
-  });
-
-  return { sequences, message };
+  return { sequences };
 }

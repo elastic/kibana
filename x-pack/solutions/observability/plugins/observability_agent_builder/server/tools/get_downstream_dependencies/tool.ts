@@ -95,7 +95,6 @@ When to use:
                   dependencies: [],
                   message:
                     'No downstream dependencies found for the specified service and time range.',
-                  toolParams,
                 },
               },
             ],
