@@ -35,7 +35,6 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
 export type GetHostsToolResult = OtherResult<{
-  summary: string;
   total: number;
   hosts: Array<{
     name: string;
@@ -96,14 +95,16 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
       },
     },
     handler: async (
-      {
+      toolParams,
+      { request }
+    ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
+      const {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
         limit = DEFAULT_LIMIT,
         kqlFilter,
-      },
-      { request }
-    ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
+      } = toolParams;
+
       try {
         const { hosts, total } = await getToolHandler({
           request,
@@ -114,15 +115,28 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
           kqlFilter,
         });
 
-        const summary =
-          total === 0 ? `No hosts found between ${start} and ${end}.` : `Found ${total} host(s).`;
+        if (total === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other as const,
+                data: {
+                  hosts: [],
+                  total: 0,
+                  message:
+                    'No hosts found for the specified time range and filters. Verify that infrastructure metrics are being collected.',
+                  toolParams,
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
             {
               type: ToolResultType.other as const,
               data: {
-                summary,
                 hosts,
                 total,
               },

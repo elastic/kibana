@@ -64,15 +64,13 @@ When to use:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      {
+    handler: async (toolParams, context) => {
+      const {
         serviceName,
         serviceEnvironment,
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
-      },
-      context
-    ) => {
+      } = toolParams;
       const { request } = context;
 
       try {
@@ -86,16 +84,32 @@ When to use:
         });
 
         const total = dependencies?.length ?? 0;
-        const summary =
-          total === 0
-            ? `No downstream dependencies found for ${serviceName} between ${start} and ${end}.`
-            : `Found ${total} downstream dependency(s) for ${serviceName}.`;
+
+        if (total === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  total: 0,
+                  dependencies: [],
+                  message:
+                    'No downstream dependencies found for the specified service and time range. This service may not make external calls during this period.',
+                  toolParams,
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { summary, total, dependencies },
+              data: {
+                total,
+                dependencies,
+              },
             },
           ],
         };

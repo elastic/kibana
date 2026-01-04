@@ -81,10 +81,9 @@ Do NOT use for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery },
-      context
-    ) => {
+    handler: async (toolParams, context) => {
+      const { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery } = toolParams;
+
       try {
         const esClient = context.esClient.asCurrentUser;
 
@@ -98,18 +97,28 @@ Do NOT use for:
           searchQuery,
         });
 
-        const total = items.length;
-        const summary =
-          total === 0
-            ? `No significant factors found explaining the log rate change (baseline: ${baseline.start} to ${baseline.end}, deviation: ${deviation.start} to ${deviation.end}).`
-            : `Found ${total} significant factor(s) contributing to the log rate ${analysisType}.`;
+        if (items.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  analysisType,
+                  items: [],
+                  message:
+                    'No significant factors found explaining the log rate change for the specified baseline and deviation periods. The change may be uniformly distributed across all field values.',
+                  toolParams,
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                summary,
                 analysisType,
                 items,
               },

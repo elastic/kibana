@@ -81,10 +81,10 @@ Do NOT use for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { index, start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, terms },
-      { esClient }
-    ) => {
+    handler: async (toolParams, { esClient }) => {
+      const { index, start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, terms } =
+        toolParams;
+
       try {
         const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
           core,
@@ -99,16 +99,28 @@ Do NOT use for:
         const highCount = highSeverityCategories?.categories?.length ?? 0;
         const lowCount = lowSeverityCategories?.categories?.length ?? 0;
         const total = highCount + lowCount;
-        const summary =
-          total === 0
-            ? `No log categories found between ${start} and ${end}.`
-            : `Found ${total} log category(s) (${highCount} high severity, ${lowCount} low severity).`;
+
+        if (total === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  highSeverityCategories: { categories: [] },
+                  lowSeverityCategories: { categories: [] },
+                  message: 'No log categories found for the specified time range and filters.',
+                  toolParams,
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { summary, highSeverityCategories, lowSeverityCategories },
+              data: { highSeverityCategories, lowSeverityCategories },
             },
           ],
         };

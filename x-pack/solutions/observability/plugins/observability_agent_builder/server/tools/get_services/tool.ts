@@ -65,10 +65,13 @@ When to use:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { start = DEFAULT_TIME_RANGE.start, end = DEFAULT_TIME_RANGE.end, environment, healthStatus },
-      context
-    ) => {
+    handler: async (toolParams, context) => {
+      const {
+        start = DEFAULT_TIME_RANGE.start,
+        end = DEFAULT_TIME_RANGE.end,
+        environment,
+        healthStatus,
+      } = toolParams;
       const { request } = context;
 
       try {
@@ -81,19 +84,29 @@ When to use:
           healthStatus,
         });
 
-        const total = services.length;
-        const summary =
-          total === 0
-            ? `No services found between ${start} and ${end}.`
-            : `Found ${total} service(s).`;
+        if (services.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  total: 0,
+                  services: [],
+                  message:
+                    'No services found for the specified time range and filters. Verify that APM agents are configured and sending data.',
+                  toolParams,
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                summary,
-                total,
+                total: services.length,
                 services,
                 maxCountExceeded,
                 serviceOverflowCount,

@@ -93,16 +93,15 @@ Supports filtering by status (active/recovered) and KQL queries.`,
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      {
+    handler: async (toolParams, { request }) => {
+      const {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
         includeRecovered,
         query,
-      },
-      { request }
-    ) => {
+      } = toolParams;
+
       try {
         const { alerts, selectedFields, total } = await getToolHandler({
           core,
@@ -115,15 +114,31 @@ Supports filtering by status (active/recovered) and KQL queries.`,
           includeRecovered,
         });
 
-        const summary =
-          total === 0 ? `No alerts found between ${start} and ${end}.` : `Found ${total} alert(s).`;
+        if (total === 0) {
+          const message = includeRecovered
+            ? 'No alerts found for the specified time range and filters.'
+            : 'No active alerts found for the specified time range. Note: only active alerts are returned by default. Set includeRecovered=true to include resolved alerts.';
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  total: 0,
+                  alerts: [],
+                  message,
+                  toolParams,
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                summary,
                 total,
                 alerts,
                 selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,

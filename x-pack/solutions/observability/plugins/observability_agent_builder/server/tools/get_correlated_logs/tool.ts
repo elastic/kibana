@@ -106,8 +106,8 @@ Do NOT use for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      {
+    handler: async (toolParams, { esClient }) => {
+      const {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
@@ -118,11 +118,10 @@ Do NOT use for:
         logSourceFields = DEFAULT_LOG_SOURCE_FIELDS,
         maxSequences = 10,
         maxLogsPerSequence = 200,
-      },
-      { esClient }
-    ) => {
+      } = toolParams;
+
       try {
-        const { sequences, message } = await getToolHandler({
+        const { sequences, message: handlerMessage } = await getToolHandler({
           core,
           logger,
           esClient,
@@ -138,15 +137,25 @@ Do NOT use for:
           maxLogsPerSequence,
         });
 
-        const total = sequences.length;
-        const totalLogs = sequences.reduce((sum, seq) => sum + seq.logs.length, 0);
-        const summary =
-          total === 0
-            ? message ?? `No correlated log sequences found between ${start} and ${end}.`
-            : `Found ${total} log sequence(s) with ${totalLogs} total logs.`;
+        if (sequences.length === 0) {
+          const message =
+            handlerMessage ??
+            (errorLogsOnly
+              ? 'No correlated log sequences found for the specified time range. Note: only error logs (ERROR, WARN, FATAL, HTTP 5xx) are searched by default. Set errorLogsOnly=false to search all logs.'
+              : 'No correlated log sequences found for the specified time range and filters.');
+
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: { sequences: [], message, toolParams },
+              },
+            ],
+          };
+        }
 
         return {
-          results: [{ type: ToolResultType.other, data: { summary, sequences, message } }],
+          results: [{ type: ToolResultType.other, data: { sequences } }],
         };
       } catch (error) {
         logger.error(`Error fetching errors and surrounding logs: ${error.message}`);

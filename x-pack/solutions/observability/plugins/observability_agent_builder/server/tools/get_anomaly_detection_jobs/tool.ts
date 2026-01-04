@@ -32,7 +32,6 @@ const DEFAULT_TIME_RANGE = {
 export interface GetAnomalyDetectionJobsToolResult {
   type: ToolResultType.other;
   data: {
-    summary: string;
     jobs: Awaited<ReturnType<typeof getToolHandler>>;
     totalReturned: number;
   };
@@ -87,16 +86,17 @@ When to use:
       },
     },
     handler: async (
-      {
-        jobIds,
-        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
-        start: rangeStart = DEFAULT_TIME_RANGE.start,
-        end: rangeEnd = DEFAULT_TIME_RANGE.end,
-      },
+      toolParams,
       { esClient, request }
     ): Promise<{
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
+      const {
+        jobIds,
+        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
+        start: rangeStart = DEFAULT_TIME_RANGE.start,
+        end: rangeEnd = DEFAULT_TIME_RANGE.end,
+      } = toolParams;
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;
 
@@ -113,20 +113,30 @@ When to use:
           rangeEnd,
         });
 
-        const total = mlJobs.length;
-        const summary =
-          total === 0
-            ? `No anomaly detection jobs found between ${rangeStart} and ${rangeEnd}.`
-            : `Found ${total} anomaly detection job(s).`;
+        if (mlJobs.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  jobs: [],
+                  totalReturned: 0,
+                  message:
+                    'No anomaly detection jobs found for the specified time range and filters. Verify that ML jobs are configured in Machine Learning > Anomaly Detection.',
+                  toolParams,
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                summary,
                 jobs: mlJobs,
-                totalReturned: total,
+                totalReturned: mlJobs.length,
               },
             },
           ],
