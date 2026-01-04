@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture, KbnClient, ScoutLogger } from '@kbn/scout-oblt';
+import type { ApiServicesFixture, KbnClient } from '@kbn/scout-oblt';
 import type { ApmFields, LogDocument } from '@kbn/synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
 import { apm, log, timerange } from '@kbn/synthtrace-client';
@@ -18,44 +18,6 @@ export const TEST_END_DATE = '2024-01-01T01:00:00.000Z';
 export const RULE_NAMES = {
   FIRST_RULE_TEST: '!!! - Scout - First Rule Test',
 } as const;
-
-// Data view constants for custom threshold tests
-export const DATA_VIEWS = {
-  FILEBEAT: {
-    ID: 'data-view-id_1',
-    NAME: 'test-data-view-name_1',
-    TITLE: 'filebeat-*',
-  },
-  METRICBEAT: {
-    ID: 'data-view-id_2',
-    NAME: 'test-data-view-name_2',
-    TITLE: 'metricbeat-*',
-  },
-} as const;
-
-/**
- * Delete a data view via API
- */
-export async function deleteDataView({
-  kbnClient,
-  log: logger,
-  id,
-}: {
-  kbnClient: KbnClient;
-  log: ScoutLogger;
-  id: string;
-}): Promise<void> {
-  try {
-    await kbnClient.request({
-      method: 'DELETE',
-      path: `/api/data_views/data_view/${id}`,
-    });
-    logger.info(`Deleted data view: ${id}`);
-  } catch (error) {
-    // Data view might not exist, which is fine
-    logger.debug(`Data view deletion result for ${id}: ${error}`);
-  }
-}
 
 /**
  * Generate synthetic logs data for testing
@@ -166,9 +128,9 @@ export async function generateRulesData(apiServices: ApiServicesFixture) {
  */
 export const createDataView = async (
   kbnClient: KbnClient,
-  dataViewParams: { id: string; name: string; title: string; log: ScoutLogger }
+  dataViewParams: { id: string; name: string; title: string }
 ) => {
-  const { id, name, title, log: logger } = dataViewParams;
+  const { id, name, title } = dataViewParams;
 
   try {
     await kbnClient.request({
@@ -191,13 +153,11 @@ export const createDataView = async (
         version: 1,
       },
     });
-    logger.info(`Created data view: ${name} (${id})`);
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 409) {
       return;
     }
     // Data view might already exist, which is fine
-    logger.debug(`Data view creation result for ${name}: ${error}`);
     throw error;
   }
 };

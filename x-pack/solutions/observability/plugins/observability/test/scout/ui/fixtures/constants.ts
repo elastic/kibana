@@ -61,15 +61,9 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // Rule Type Selection
   CUSTOM_THRESHOLD_RULE_TYPE_CARD: 'observability.rules.custom_threshold-SelectOption',
 
-  // Rule Type Modal
-  CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR: 'observability.rules.custom_threshold-SelectOption',
-
   // Rule Form
   RULE_FORM: 'ruleForm',
   RULE_NAME_INPUT: 'ruleDetailsNameInput',
-  RULE_TAGS_INPUT: 'ruleDetailsTagsInput',
-  SAVE_BUTTON: 'rulePageFooterSaveButton',
-  CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
 
   // Data View Selection
   DATA_VIEW_EXPRESSION: 'selectDataViewExpression',
@@ -79,32 +73,4 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // Rule Save
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
   CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
-
-  // Aggregation
-  AGGREGATION_NAME_A: 'aggregationNameA',
-  AGGREGATION_NAME_B: 'aggregationNameB',
-  AGGREGATION_TYPE_SELECT: 'aggregationTypeSelect',
-  AGGREGATION_FIELD: 'aggregationField',
-  ADD_AGGREGATION_BUTTON: 'thresholdRuleCustomEquationEditorAddAggregationFieldButton',
-  CLOSE_POPOVER_BUTTON: 'o11yClosablePopoverTitleButton',
-  SEARCH_FIELD: 'o11ySearchField',
-
-  // Custom Equation
-  CUSTOM_EQUATION: 'customEquation',
-  EQUATION_TEXT_FIELD: 'thresholdRuleCustomEquationEditorFieldText',
-  EQUATION_LABEL_INPUT: 'thresholdRuleCustomEquationEditorFieldTextLabel',
-
-  // Threshold
-  THRESHOLD_POPOVER: 'thresholdPopover',
-  COMPARATOR_SELECT: 'comparatorOptionsComboBox',
-  THRESHOLD_INPUT_0: 'alertThresholdInput0',
-  THRESHOLD_INPUT_1: 'alertThresholdInput1',
-
-  // Time Range
-  FOR_LAST_EXPRESSION: 'forLastExpression',
-  TIME_WINDOW_SIZE: 'timeWindowSizeNumber',
-  TIME_WINDOW_UNIT: 'timeWindowUnitSelect',
-
-  // Group By
-  GROUP_BY_INPUT: 'thresholdRuleMetricsExplorer-groupBy',
 } as const;
