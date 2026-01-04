@@ -124,8 +124,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
                 data: {
                   hosts: [],
                   total: 0,
-                  message:
-                    'No hosts found for the specified time range and filters. Verify that infrastructure metrics are being collected.',
+                  message: 'No hosts found for the specified time range and filters.',
                   toolParams,
                 },
               },

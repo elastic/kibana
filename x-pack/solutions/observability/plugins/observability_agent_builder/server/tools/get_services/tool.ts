@@ -92,8 +92,7 @@ When to use:
                 data: {
                   total: 0,
                   services: [],
-                  message:
-                    'No services found for the specified time range and filters. Verify that APM agents are configured and sending data.',
+                  message: 'No services found for the specified time range and filters.',
                   toolParams,
                 },
               },

@@ -124,7 +124,7 @@ When to use:
                   jobs: [],
                   totalReturned: 0,
                   message:
-                    'No anomaly detection jobs found for the specified time range and filters. Verify that ML jobs are configured in Machine Learning > Anomaly Detection.',
+                    'No anomaly detection jobs found for the specified time range and filters.',
                   toolParams,
                 },
               },

@@ -94,7 +94,7 @@ When to use:
                   total: 0,
                   dependencies: [],
                   message:
-                    'No downstream dependencies found for the specified service and time range. This service may not make external calls during this period.',
+                    'No downstream dependencies found for the specified service and time range.',
                   toolParams,
                 },
               },

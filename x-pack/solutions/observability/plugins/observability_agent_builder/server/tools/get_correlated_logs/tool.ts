@@ -139,10 +139,7 @@ Do NOT use for:
 
         if (sequences.length === 0) {
           const message =
-            handlerMessage ??
-            (errorLogsOnly
-              ? 'No correlated log sequences found for the specified time range. Note: only error logs (ERROR, WARN, FATAL, HTTP 5xx) are searched by default. Set errorLogsOnly=false to search all logs.'
-              : 'No correlated log sequences found for the specified time range and filters.');
+            handlerMessage ?? 'No correlated log sequences found for the specified time range.';
 
           return {
             results: [

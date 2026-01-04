@@ -112,7 +112,7 @@ Do NOT use for:
                 data: {
                   highSeverityCategories: { categories: [] },
                   lowSeverityCategories: { categories: [] },
-                  message: 'No log categories found for the specified time range and filters.',
+                  message: 'No log categories found for the specified time range.',
                   toolParams,
                 },
               },

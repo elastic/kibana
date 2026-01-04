@@ -106,7 +106,7 @@ Do NOT use for:
                   analysisType,
                   items: [],
                   message:
-                    'No significant factors found explaining the log rate change for the specified baseline and deviation periods. The change may be uniformly distributed across all field values.',
+                    'No significant factors found for the specified baseline and deviation periods.',
                   toolParams,
                 },
               },

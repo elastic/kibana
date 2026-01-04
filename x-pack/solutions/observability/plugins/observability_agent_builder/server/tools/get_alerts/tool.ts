@@ -115,10 +115,6 @@ Supports filtering by status (active/recovered) and KQL queries.`,
         });
 
         if (total === 0) {
-          const message = includeRecovered
-            ? 'No alerts found for the specified time range and filters.'
-            : 'No active alerts found for the specified time range. Note: only active alerts are returned by default. Set includeRecovered=true to include resolved alerts.';
-
           return {
             results: [
               {
@@ -126,7 +122,7 @@ Supports filtering by status (active/recovered) and KQL queries.`,
                 data: {
                   total: 0,
                   alerts: [],
-                  message,
+                  message: 'No alerts found for the specified time range and filters.',
                   toolParams,
                 },
               },
