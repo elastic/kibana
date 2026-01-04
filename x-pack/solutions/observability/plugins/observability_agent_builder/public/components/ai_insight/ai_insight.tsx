@@ -29,8 +29,10 @@ import {
 } from '@elastic/eui';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { filter, map, of } from 'rxjs';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
+import { untilAborted } from '../../utils/until_aborted';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 
@@ -107,6 +109,9 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
         return;
       }
 
+      let accumulatedContent = '';
+      let contextValue = '';
+
       const observable$ = of({ response: result }).pipe(
         httpResponseIntoObservable(),
         filter(
@@ -123,19 +128,12 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
             return { type: 'chunk' as const, content: (event.content as string) || '' };
           }
           return { type: 'message' as const, content: (event.content as string) || '' };
-        })
+        }),
+        untilAborted(abortController.signal)
       );
 
-      let accumulatedContent = '';
-      let contextValue = '';
-
-      const subscription = observable$.subscribe({
+      observable$.subscribe({
         next: (event: { type: string; context?: string; content?: string } | null) => {
-          if (abortController.signal.aborted) {
-            subscription.unsubscribe();
-            return;
-          }
-
           if (event?.type === 'context') {
             contextValue = event.context || '';
             setContext(contextValue);
@@ -149,26 +147,24 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
           }
         },
         error: (err: unknown) => {
-          if (!abortController.signal.aborted) {
-            setError(err instanceof Error ? err.message : 'Failed to load AI insight');
+          if (err instanceof AbortError) {
             setIsLoading(false);
+            return;
           }
+          setError(err instanceof Error ? err.message : 'Failed to load AI insight');
+          setIsLoading(false);
         },
         complete: () => {
-          if (!abortController.signal.aborted) {
-            setIsLoading(false);
-          }
+          setIsLoading(false);
         },
       });
-
-      abortController.signal.addEventListener('abort', () => {
-        subscription.unsubscribe();
-      });
     } catch (e) {
-      if (!abortController.signal.aborted) {
-        setError(e instanceof Error ? e.message : 'Failed to load AI insight');
+      if (e instanceof AbortError) {
         setIsLoading(false);
+        return;
       }
+      setError(e instanceof Error ? e.message : 'Failed to load AI insight');
+      setIsLoading(false);
     }
   }, [fetchInsight]);
 

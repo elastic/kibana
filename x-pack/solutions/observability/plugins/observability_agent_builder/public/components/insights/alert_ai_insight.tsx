@@ -7,6 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import {
+  createRepositoryClient,
+  type DefaultClientOptions,
+} from '@kbn/server-route-repository-client';
+import type { ObservabilityAgentBuilderServerRouteRepository } from '../../../server';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
@@ -24,18 +29,27 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
     services: { http },
   } = useKibana();
 
-  const fetchInsight = async (signal?: AbortSignal) => {
-    const response = await http.fetch('/internal/observability_agent_builder/ai_insights/alert', {
-      method: 'POST',
-      body: JSON.stringify({
-        alertId,
-      }),
-      asResponse: true,
-      rawResponse: true,
-      signal,
-    });
+  const apiClient = createRepositoryClient<
+    ObservabilityAgentBuilderServerRouteRepository,
+    DefaultClientOptions
+  >({ http });
 
-    return response.response!;
+  const fetchInsight = async (signal?: AbortSignal) => {
+    const response = (await apiClient.fetch(
+      'POST /internal/observability_agent_builder/ai_insights/alert',
+      {
+        signal: signal ?? null,
+        params: {
+          body: {
+            alertId,
+          },
+        },
+        asResponse: true,
+        rawResponse: true,
+      }
+    )) as unknown as { response: Response };
+
+    return response.response;
   };
 
   const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
