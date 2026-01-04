@@ -1844,8 +1844,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/management/transforms/ @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group2/transform.ts @elastic/kibana-management
-/x-pack/platform/test/api_integration/apis/transform/ @elastic/kibana-management
-/x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/kibana-management
 /x-pack/platform/test/functional/apps/transform/ @elastic/kibana-management
 /x-pack/platform/test/functional/services/transform @elastic/kibana-management
 /x-pack/platform/test/functional_basic/apps/transform/ @elastic/kibana-management
