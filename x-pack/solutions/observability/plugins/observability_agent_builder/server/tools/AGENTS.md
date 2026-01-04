@@ -149,51 +149,7 @@ Use consistent parameter names across all Observability tools:
 
 ---
 
-## 5. Output Structure
-
-### Required: Summary Field
-
-Every tool MUST return a `summary` field — a single sentence the LLM can use directly in its response.
-
-```typescript
-return {
-  summary: 'Found 12 services. 2 critical, 3 warning, 7 healthy.',
-  services: [...],
-};
-```
-
-### Summary Guidelines
-
-- Include key counts and findings
-- Highlight the most important insight
-- For empty results, explain why or suggest next steps
-- Keep under 100 characters
-
-### Examples
-
-```typescript
-// Good summaries
-'Found 3 downstream dependencies for payment-service. 1 showing elevated latency.';
-'Identified 5 log categories. Top category: "Connection timeout" (45% of logs).';
-'No alerts found in the last hour for service: checkout-api.';
-
-// Bad summaries
-'Query completed successfully.'; // No actionable information
-'Found 1,247 results.'; // No context on what was found
-```
-
-### Metric Normalization
-
-For consistency across tools:
-
-- Latency in **milliseconds** (convert from microseconds if needed)
-- Throughput in **requests per minute**
-- Failure rate as **0-1 decimal** (not percentage)
-- Timestamps in **ISO 8601** format
-
----
-
-## 6. ECS and OpenTelemetry Compatibility
+## 5. ECS and OpenTelemetry Compatibility
 
 Tools must work with both [ECS (Elastic Common Schema)](https://www.elastic.co/docs/reference/ecs/ecs-field-reference) and [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/).
 
@@ -269,7 +225,7 @@ Tools that support grouping or filtering should support these common dimensions:
 
 ---
 
-## 7. Documentation Requirements
+## 6. Documentation Requirements
 
 Each tool should have a concise `README.md`:
 
@@ -280,7 +236,7 @@ Each tool should have a concise `README.md`:
 
 ---
 
-## 8. Testing and Development
+## 7. Testing and Development
 
 ### File Locations
 
@@ -358,7 +314,7 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.t
 
 ---
 
-## 9. Pre-Merge Checklist
+## 8. Pre-Merge Checklist
 
 Before merging a new or updated tool:
 
