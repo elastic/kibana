@@ -298,7 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { sequences, message } = results[0].data;
         expect(sequences.length).to.be(0);
-        expect(message).to.contain('No correlated log sequences found');
+        expect(message).to.contain('No log sequences found.');
       });
     });
 
