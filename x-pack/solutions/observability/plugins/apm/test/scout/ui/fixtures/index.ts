@@ -25,8 +25,13 @@ import { AgentExplorerPage } from './page_objects/agent_explorer';
 import { AgentKeysPage } from './page_objects/agent_keys';
 import { AnomalyDetectionPage } from './page_objects/anomaly_detection';
 import { ErrorsPage } from './page_objects/errors';
-import { APM_ROLES } from './constants';
+import { TransactionsOverviewPage } from './page_objects/transactions_overview';
 import { TransactionDetailsPage } from './page_objects/transaction_details';
+import { ServiceDetailsPage } from './page_objects/service_details/service_details';
+import { DependenciesInventoryPage } from './page_objects/dependencies_inventory';
+import { APM_ROLES } from './constants';
+import { DependencyDetailsPage } from './page_objects/dependency_details/dependency_details';
+import { AlertsControls } from './page_objects/alerts_controls/alerts_controls';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
@@ -48,7 +53,12 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     agentKeysPage: AgentKeysPage;
     anomalyDetectionPage: AnomalyDetectionPage;
     errorsPage: ErrorsPage;
+    transactionsOverviewPage: TransactionsOverviewPage;
     transactionDetailsPage: TransactionDetailsPage;
+    serviceDetailsPage: ServiceDetailsPage;
+    dependenciesInventoryPage: DependenciesInventoryPage;
+    dependencyDetailsPage: DependencyDetailsPage;
+    alertsControls: AlertsControls;
   };
   browserAuth: ApmBrowserAuthFixture;
 }
@@ -80,7 +90,12 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       agentKeysPage: createLazyPageObject(AgentKeysPage, page, kbnUrl),
       anomalyDetectionPage: createLazyPageObject(AnomalyDetectionPage, page, kbnUrl),
       errorsPage: createLazyPageObject(ErrorsPage, page, kbnUrl),
+      transactionsOverviewPage: createLazyPageObject(TransactionsOverviewPage, page, kbnUrl),
       transactionDetailsPage: createLazyPageObject(TransactionDetailsPage, page, kbnUrl),
+      serviceDetailsPage: createLazyPageObject(ServiceDetailsPage, page, kbnUrl),
+      dependenciesInventoryPage: createLazyPageObject(DependenciesInventoryPage, page, kbnUrl),
+      dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
+      alertsControls: createLazyPageObject(AlertsControls, page),
     };
 
     await use(extendedPageObjects);

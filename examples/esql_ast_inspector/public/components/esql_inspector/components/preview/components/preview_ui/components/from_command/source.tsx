@@ -17,8 +17,8 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ESQLSource } from '@kbn/esql-ast';
-import type { ESQLAstBaseItem } from '@kbn/esql-ast/src/types';
+import type { ESQLSource } from '@kbn/esql-language';
+import type { ESQLAstBaseItem } from '@kbn/esql-language/src/types';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 
