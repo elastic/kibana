@@ -62,6 +62,7 @@ export const Default: StoryFn<{}> = () => {
       onClose={() => {}}
       onSave={async (queries) => {}}
       refreshDefinition={() => {}}
+      aiFeatures={null}
       features={[
         {
           type: 'system',
@@ -87,6 +88,7 @@ export const Edit: StoryFn<{}> = () => {
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      aiFeatures={null}
       features={[
         {
           type: 'system',

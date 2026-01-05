@@ -29,7 +29,7 @@ export function extractSemanticsFromGrok(pattern: string): GrokColumn[] {
   const columns: GrokColumn[] = [];
 
   // Regex for Grok's %{SYNTAX:SEMANTIC:TYPE} pattern
-  const grokSyntaxRegex = /%{\w+:(?<column>[\w@]+)(?::(?<type>\w+))?}/g;
+  const grokSyntaxRegex = /%{\w+:(?<column>[\w@.]+)(?::(?<type>\w+))?}/g;
   let grokMatch;
   while ((grokMatch = grokSyntaxRegex.exec(pattern)) !== null) {
     if (grokMatch?.groups?.column) {
@@ -44,7 +44,7 @@ export function extractSemanticsFromGrok(pattern: string): GrokColumn[] {
 
   // Regex for Oniguruma-style named capture groups (?<name>...) or (?'name'...)
   // Oniguruma supports both `?<name>` and `?'name'` for named capture groups.
-  const onigurumaNamedCaptureRegex = /(?<column>\(\?<(\w+)>|\(\?'(\w+)'\)[^)]*\))/g;
+  const onigurumaNamedCaptureRegex = /(?<column>\(\?<([\w.]+)>|\(\?'([\w.]+)'\)[^)]*\))/g;
   let onigurumaMatch;
   while ((onigurumaMatch = onigurumaNamedCaptureRegex.exec(pattern)) !== null) {
     // If it's a (?<name>...) style
