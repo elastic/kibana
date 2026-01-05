@@ -182,9 +182,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       >
         {(list) => (
           <>
-            <EuiSpacer size="s" />
             {list}
-            <EuiSpacer size="s" />
             <AgentListFooter />
           </>
         )}
