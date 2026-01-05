@@ -683,10 +683,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         (policyId) =>
           agentPolicyService.bumpRevision(deps.soClient, deps.esClient, policyId, {
             user: options?.user,
-            asyncDeploy:
-              options.asyncDeploy || policyIds.length > ASYNC_DEPLOY_POLICIES_THRESHOLD
-                ? true
-                : false,
+            asyncDeploy: options.asyncDeploy || policyIds.length > ASYNC_DEPLOY_POLICIES_THRESHOLD,
             removeProtection: options.removeProtectionFn
               ? options.removeProtectionFn(policyId)
               : undefined,
