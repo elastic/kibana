@@ -22,7 +22,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
-import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
+import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 type PrivmonUser = ListPrivMonUsersResponse[number];
@@ -356,7 +356,7 @@ export const PrivMonUtils = (
       ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
       ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
       ctx._source.user.entity.attributes.Privileged = params.new_privileged_status;
-      ctx._source.user.roles = params.roles;      
+      ctx._source.user.roles = params.roles;
     `,
         params: { new_privileged_status: isPrivileged, roles: rolesParam },
       },

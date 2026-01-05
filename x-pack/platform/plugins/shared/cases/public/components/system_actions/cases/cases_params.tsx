@@ -251,6 +251,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               onChange={(e) => {
                 handleTimeWindowChange('timeWindowSize', e.target.value);
               }}
+              aria-label={i18n.TIME_WINDOW_VALUE_LABEL}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
@@ -262,6 +263,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
                 handleTimeWindowChange('timeWindowUnit', e.target.value);
               }}
               options={getTimeUnitOptions(timeWindowSize)}
+              aria-label={i18n.TIME_WINDOW_UNIT_LABEL}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -124,6 +124,7 @@ describe('uploadAllEventsFromPath', () => {
     spies.statSync.mockReturnValue({
       isDirectory: () => true,
     } as unknown as fs.Stats);
+    // @ts-expect-error upgrade typescript v5.9.3
     spies.readdirSync.mockReturnValue(['file.txt' as unknown as fs.Dirent]);
 
     // assume the provided event log path exists

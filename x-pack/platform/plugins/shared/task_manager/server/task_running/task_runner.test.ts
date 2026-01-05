@@ -2129,7 +2129,7 @@ describe('TaskManagerRunner', () => {
         expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
 
-      test('testtest emits TaskEvent when an ad-hoc task run throws an error due to timeout', async () => {
+      test('emits TaskEvent when an ad-hoc task run throws an error due to timeout', async () => {
         jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const error = new Error('Task was cancelled');

@@ -512,10 +512,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: {
-              ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 115,
-            },
+            agents: expandAgentQueue('n2-4-spot', 110),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
@@ -537,7 +534,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: integration.count,
             timeout_in_minutes: 120,
             key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
+            agents: expandAgentQueue('n2-4-spot', 105),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
@@ -575,7 +572,7 @@ export async function pickTestGroupRunOrder() {
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 120,
-                  agents: expandAgentQueue(queue),
+                  agents: expandAgentQueue(queue, 105),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
@@ -594,72 +591,6 @@ export async function pickTestGroupRunOrder() {
               ),
           }
         : [],
-    ].flat()
-  );
-}
-
-// copied from src/platform/packages/shared/kbn-scout/src/config/discovery/search_configs.ts
-interface ScoutTestDiscoveryConfig {
-  group: string;
-  path: string;
-  usesParallelWorkers: boolean;
-  configs: string[];
-  type: 'plugin' | 'package';
-}
-
-export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
-  const bk = new BuildkiteClient();
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  if (!Fs.existsSync(scoutConfigsPath)) {
-    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
-  }
-
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8')) as Record<
-    string,
-    ScoutTestDiscoveryConfig
-  >;
-  const pluginsOrPackagesWithScoutTests: string[] = Object.keys(rawScoutConfigs);
-
-  if (pluginsOrPackagesWithScoutTests.length === 0) {
-    // no scout configs found, nothing to need to upload steps
-    return;
-  }
-
-  const scoutCiRunGroups = pluginsOrPackagesWithScoutTests.map((name) => ({
-    label: `Scout: [ ${rawScoutConfigs[name].group} / ${name} ] ${rawScoutConfigs[name].type}`,
-    key: name,
-    agents: expandAgentQueue(rawScoutConfigs[name].usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-    group: rawScoutConfigs[name].group,
-  }));
-
-  // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      {
-        group: 'Scout Configs',
-        key: 'scout-configs',
-        depends_on: ['build_scout_tests'],
-        steps: scoutCiRunGroups.map(
-          ({ label, key, group, agents }): BuildkiteStep => ({
-            label,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            timeout_in_minutes: 60,
-            agents,
-            env: {
-              SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG_GROUP_TYPE: group,
-              ...envFromlabels,
-            },
-            retry: {
-              automatic: [
-                { exit_status: '10', limit: 1 },
-                { exit_status: '*', limit: 3 },
-              ],
-            },
-          })
-        ),
-      },
     ].flat()
   );
 }

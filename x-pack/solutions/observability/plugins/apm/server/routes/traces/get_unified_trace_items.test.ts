@@ -12,10 +12,10 @@ describe('getErrorsByDocId', () => {
   it('groups errors by doc id from apmErrors and unprocessedOtelErrors', () => {
     const unifiedTraceErrors = {
       apmErrors: [
-        { transaction: { id: 'a' }, id: 'error-1' },
-        { transaction: { id: 'a' }, id: 'error-2' },
-        { span: { id: 'b' }, id: 'error-3' },
-        { span: { id: undefined }, id: 'error-4' },
+        { spanId: 'a', id: 'error-1' },
+        { spanId: 'a', id: 'error-2' },
+        { spanId: 'b', id: 'error-3' },
+        { spanId: undefined, id: 'error-4' },
       ],
       unprocessedOtelErrors: [
         { spanId: 'a', id: 'error-5' },
@@ -46,7 +46,7 @@ describe('getErrorsByDocId', () => {
 
   it('ignores errors with undefined ids', () => {
     const unifiedTraceErrors = {
-      apmErrors: [{ span: { id: undefined }, id: 'error-1' }],
+      apmErrors: [{ spanId: undefined, id: 'error-1' }],
       unprocessedOtelErrors: [{ spanId: undefined, id: 'error-2' }],
       totalErrors: 0,
     } as unknown as UnifiedTraceErrors;

@@ -522,6 +522,15 @@ export class LensVisService {
       }
     }
 
+    if (preferredVisAttributes) {
+      const dataSource = preferredVisAttributes.state.datasourceStates?.textBased;
+      const layers = Object.values(dataSource?.layers ?? {});
+      if (!layers.some((layer) => layer.index === dataView.id)) {
+        // the preferred vis attributes don't contain the current data view, so we discard it to avoid issues
+        preferredVisAttributes = undefined;
+      }
+    }
+
     if (
       dataView.isTimeBased() &&
       timeRange &&

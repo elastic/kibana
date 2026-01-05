@@ -37,7 +37,7 @@ export const SecondaryMenuSectionComponent = ({
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
   return (
-    <nav
+    <div
       css={css`
         padding: ${euiTheme.size.m};
 
@@ -45,6 +45,7 @@ export const SecondaryMenuSectionComponent = ({
           border-bottom: 1px ${euiTheme.colors.borderBaseSubdued} solid;
         }
       `}
+      role="group"
       aria-labelledby={sectionId || undefined}
     >
       {label && (
@@ -68,9 +69,10 @@ export const SecondaryMenuSectionComponent = ({
           width: 100%;
           gap: ${euiTheme.size.xxs};
         `}
+        role="none"
       >
         {children}
       </ul>
-    </nav>
+    </div>
   );
 };

@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -79,6 +80,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const toggleDetails = (id: string) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -175,14 +177,19 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
                 onClick={() => toggleDetails(id)}
                 aria-label={itemIdToExpandedRowMapValues[id] ? 'Collapse' : 'Expand'}
                 color="danger"
+                size={isMobile ? 's' : 'm'}
               >
                 <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-                  <EuiText>
-                    {i18n.translate('indexPatternManagement.dataViewTable.review', {
-                      defaultMessage: 'Review',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
+                  {!isMobile && (
+                    <>
+                      <EuiText>
+                        {i18n.translate('indexPatternManagement.dataViewTable.review', {
+                          defaultMessage: 'Review',
+                        })}
+                      </EuiText>
+                      <EuiSpacer size="xs" />
+                    </>
+                  )}
                   <EuiIcon type={itemIdToExpandedRowMapValues[id] ? 'arrowDown' : 'arrowRight'} />
                 </EuiFlexGroup>
               </EuiButtonEmpty>

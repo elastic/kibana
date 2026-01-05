@@ -12,6 +12,7 @@ import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import type { ScoutPage } from '.';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
+import { checkA11y } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 
 /**
@@ -58,6 +59,7 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   const extendedMethods: Partial<Record<keyof Page, Function>> & {
     typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
     clearInput?: ScoutPage['testSubj']['clearInput'];
+    dragTo?: ScoutPage['testSubj']['dragTo'];
   } = {};
 
   for (const method of methods) {
@@ -78,6 +80,12 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
     await page.locator(testSubjSelector).fill('');
   };
 
+  // custom method to drag an element to another element
+  extendedMethods.dragTo = async (sourceSelector: string, targetSelector: string) => {
+    const sourceTestSubjSelector = subj(sourceSelector);
+    const targetTestSubjSelector = subj(targetSelector);
+    await page.locator(sourceTestSubjSelector).dragTo(page.locator(targetTestSubjSelector));
+  };
   return extendedMethods as ScoutPage['testSubj'];
 }
 
@@ -99,12 +107,14 @@ export function extendPlaywrightPage({
     extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
       state: 'attached',
     });
+
+  extendedPage.checkA11y = (options) => checkA11y(page, options);
+
   // Method to type text with delay character by character
   extendedPage.typeWithDelay = (selector: string, text: string, options?: { delay: number }) =>
     typeWithDelay(page, selector, text, options);
   return extendedPage;
 }
-
 /**
  * Extends the 'page' fixture with Kibana-specific functionality
  *

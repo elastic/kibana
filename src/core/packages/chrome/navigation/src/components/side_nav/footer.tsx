@@ -10,46 +10,71 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 
+export interface FooterIds {
+  footerNavigationInstructionsId: string;
+}
+
+export type FooterChildren = ReactNode | ((ids: FooterIds) => ReactNode);
 export interface SideNavFooterProps {
-  children: ReactNode;
+  children: FooterChildren;
   isCollapsed: boolean;
 }
 
 export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const footerNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'footer-navigation-instructions',
+  });
+
+  const renderChildren = () => {
+    if (typeof children === 'function') {
+      return children({ footerNavigationInstructionsId });
+    }
+    return children;
+  };
 
   return (
-    // The footer itself is not interactive but the children are
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-    <footer
-      aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
-        defaultMessage: 'Side navigation',
-      })}
-      css={css`
-        align-items: center;
-        border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.xs};
-        justify-content: center;
-        padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-      `}
-      onKeyDown={handleRovingIndex}
-      ref={(ref) => {
-        if (ref) {
-          const elements = getFocusableElements(ref);
-          updateTabIndices(elements);
-        }
-      }}
-    >
-      {children}
-    </footer>
+    <>
+      <EuiScreenReaderOnly>
+        <p id={footerNavigationInstructionsId}>
+          {i18n.translate('core.ui.chrome.sideNavigation.footerInstructions', {
+            defaultMessage:
+              'You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.',
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+      {/* The footer itself is not interactive but the children are */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      <footer
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
+          defaultMessage: 'Side navigation',
+        })}
+        css={css`
+          align-items: center;
+          border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+          display: flex;
+          flex-direction: column;
+          gap: ${euiTheme.size.xs};
+          justify-content: center;
+          padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+        `}
+        onKeyDown={handleRovingIndex}
+        ref={(ref) => {
+          if (ref) {
+            const elements = getFocusableElements(ref);
+            updateTabIndices(elements);
+          }
+        }}
+      >
+        {renderChildren()}
+      </footer>
+    </>
   );
 };

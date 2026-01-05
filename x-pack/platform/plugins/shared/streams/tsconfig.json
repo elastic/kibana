@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -59,6 +59,7 @@
     "@kbn/grok-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/safer-lodash-set",
     "@kbn/sse-utils",
     "@kbn/global-search-plugin",

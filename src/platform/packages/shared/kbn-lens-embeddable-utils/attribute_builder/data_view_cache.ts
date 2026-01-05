@@ -44,6 +44,7 @@ export class DataViewCache {
   private setSpec(key: string, value: DataViewSpec): void {
     if (this.cache.size >= this.capacity) {
       const lruKey = this.cache.keys().next().value;
+      // @ts-expect-error upgrade typescript v5.9.3
       this.cache.delete(lruKey);
     }
 

@@ -133,7 +133,7 @@ export class SLOPlugin
       if (hasPlatinumLicense) {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
-        pluginsStart.dashboard.registerDashboardPanelSettings(
+        pluginsStart.presentationUtil.registerPanelPlacementSettings(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState?: SerializedPanelState<SloOverviewEmbeddableState>) => {
             if (
@@ -145,9 +145,12 @@ export class SLOPlugin
             return { placementSettings: { width: 12, height: 8 } };
           }
         );
-        pluginsStart.dashboard.registerDashboardPanelSettings(SLO_BURN_RATE_EMBEDDABLE_ID, () => {
-          return { placementSettings: { width: 14, height: 7 } };
-        });
+        pluginsStart.presentationUtil.registerPanelPlacementSettings(
+          SLO_BURN_RATE_EMBEDDABLE_ID,
+          () => {
+            return { placementSettings: { width: 14, height: 7 } };
+          }
+        );
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
           const { getOverviewEmbeddableFactory } = await import(

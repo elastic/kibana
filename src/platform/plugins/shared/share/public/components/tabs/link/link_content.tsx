@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   copyToClipboard,
   EuiButton,
@@ -123,20 +122,23 @@ export const LinkContent = ({
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
-  const changeTimeType = (e: EuiSwitchEvent) => {
-    setIsAbsoluteTime(e.target.checked);
-    if (urlToCopy?.current && e.target.checked !== isAbsoluteTime) {
-      urlToCopy.current = undefined;
-    }
-  };
+  const handleTimeTypeChange = useCallback(
+    (isAbsolute: boolean) => {
+      if (urlToCopy?.current && isAbsolute !== isAbsoluteTime) {
+        urlToCopy.current = undefined;
+      }
+      setIsAbsoluteTime(isAbsolute);
+    },
+    [isAbsoluteTime]
+  );
 
   return (
     <>
       <EuiForm>
         <TimeTypeSection
           timeRange={timeRange}
-          isAbsoluteTime={isAbsoluteTime}
-          changeTimeType={changeTimeType}
+          onTimeTypeChange={handleTimeTypeChange}
+          isAbsoluteTimeByDefault={isAbsoluteTime}
         />
         {isDirty && DraftModeCallout && (
           <>

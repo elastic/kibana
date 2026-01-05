@@ -466,3 +466,95 @@ test('format() meta.toJSON() is used if present on prototype', () => {
     foo: 'bar',
   });
 });
+
+test('format() correctly serializes meta.error if it is an Error object', () => {
+  const layout = new JsonLayout();
+  const metaError = new Error('Meta error message');
+  metaError.name = 'MetaErrorType';
+  metaError.stack = 'MetaErrorStack';
+
+  expect(
+    JSON.parse(
+      layout.format({
+        level: LogLevel.Debug,
+        context: 'context-meta-error',
+        message: 'message-meta-error',
+        timestamp,
+        pid: 5355,
+        meta: {
+          server: {
+            address: 'localhost',
+          },
+          error: metaError, // This is the Error object within meta
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    log: {
+      level: 'DEBUG',
+      logger: 'context-meta-error',
+    },
+    message: 'message-meta-error',
+    server: {
+      address: 'localhost',
+    },
+    error: {
+      message: metaError.message,
+      type: metaError.name,
+      stack_trace: metaError.stack,
+    },
+    process: {
+      pid: 5355,
+      uptime: 10,
+    },
+  });
+});
+
+test('format() correctly serializes meta.error after calling meta.toJSON() if meta.error is an Error object', () => {
+  const layout = new JsonLayout();
+  const metaError = new Error('Special meta error');
+  metaError.name = 'SpecialErrorType';
+  metaError.stack = 'SpecialErrorStack';
+
+  const customMeta = {
+    someProp: 'initialValue',
+    error: metaError,
+    toJSON() {
+      return { customData: 'toJSON-executed', someProp: this.someProp, error: this.error };
+    },
+  };
+
+  expect(
+    JSON.parse(
+      layout.format({
+        level: LogLevel.Debug,
+        context: 'context-meta-error-with-toJSON',
+        message: 'message-meta-error-with-toJSON',
+        timestamp,
+        pid: 5355,
+        meta: customMeta,
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    customData: 'toJSON-executed',
+    log: {
+      level: 'DEBUG',
+      logger: 'context-meta-error-with-toJSON',
+    },
+    message: 'message-meta-error-with-toJSON',
+    someProp: 'initialValue',
+    error: {
+      message: metaError.message,
+      type: metaError.name,
+      stack_trace: metaError.stack,
+    },
+    process: {
+      pid: 5355,
+      uptime: 10,
+    },
+  });
+});

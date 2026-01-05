@@ -17,7 +17,7 @@ export interface HeaderPromoProps {
 
 export const HeaderPromo = ({ title, description, updates, cta }: HeaderPromoProps) => {
   return (
-    <EuiPanel color="transparent" paddingSize="xl">
+    <EuiPanel color="transparent" paddingSize="none">
       <EuiTitle size="l">
         <h1>{title}</h1>
       </EuiTitle>
@@ -25,7 +25,7 @@ export const HeaderPromo = ({ title, description, updates, cta }: HeaderPromoPro
       <EuiText grow={false}>
         <p>{description}</p>
       </EuiText>
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
       {updates && updates.length > 0 ? <FeatureUpdateGroup updates={updates} /> : null}
       {cta}
     </EuiPanel>

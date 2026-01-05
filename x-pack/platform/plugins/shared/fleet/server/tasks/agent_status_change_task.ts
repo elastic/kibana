@@ -18,7 +18,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory, SavedObjectsClientContract } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
+import { errors, type estypes } from '@elastic/elasticsearch';
 
 import { agentPolicyService, appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
@@ -39,6 +39,17 @@ const AGENT_STATUS_CHANGE_DATA_STREAM = {
   namespace: 'default',
 };
 const AGENT_STATUS_CHANGE_DATA_STREAM_NAME = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${AGENT_STATUS_CHANGE_DATA_STREAM.namespace}`;
+
+export const HAS_CHANGED_RUNTIME_FIELD: estypes.SearchRequest['runtime_mappings'] = {
+  hasChanged: {
+    type: 'boolean',
+    script: {
+      lang: 'painless',
+      source:
+        "emit(doc['last_known_status'].size() == 0 || doc['status'].size() == 0 || doc['last_known_status'].value != doc['status'].value );",
+    },
+  },
+};
 
 interface AgentStatusChangeTaskConfig {
   taskInterval?: string;
@@ -172,6 +183,8 @@ export class AgentStatusChangeTask {
     let agentlessPolicies: string[] | undefined;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
       perPage: AGENTS_BATCHSIZE,
+      kuery: 'hasChanged:true',
+      runtimeFields: HAS_CHANGED_RUNTIME_FIELD,
     });
     for await (const agentPageResults of agentsFetcher) {
       if (!agentPageResults.length) {
@@ -180,15 +193,9 @@ export class AgentStatusChangeTask {
       }
 
       const updateErrors = {};
-      const agentsToUpdate = [];
 
-      for (const agent of agentPageResults) {
-        this.throwIfAborted(abortController);
-
-        if (agent.status !== agent.last_known_status) {
-          agentsToUpdate.push(agent);
-        }
-      }
+      const agentsToUpdate = agentPageResults;
+      this.throwIfAborted(abortController);
 
       if (agentsToUpdate.length === 0) {
         continue;

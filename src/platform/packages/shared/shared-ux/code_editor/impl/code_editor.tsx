@@ -7,31 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useState,
-  useRef,
-  useCallback,
-  useMemo,
-  useEffect,
-  type KeyboardEvent,
-  type FC,
-  type PropsWithChildren,
-} from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   htmlIdGenerator,
   EuiToolTip,
   keys,
-  EuiButtonIcon,
-  EuiOverlayMask,
-  EuiI18n,
-  EuiFocusTrap,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import { Global } from '@emotion/react';
 import {
   monaco,
   CODE_EDITOR_DEFAULT_THEME_ID,
@@ -45,11 +29,17 @@ import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from './react_monaco_editor';
-import { remeasureFonts } from './remeasure_fonts';
-import { useContextMenuUtils } from './use_context_menu_utils';
-import type { ContextMenuAction } from './use_context_menu_utils';
-
-import { PlaceholderWidget } from './placeholder_widget';
+import { remeasureFonts } from './utils/remeasure_fonts';
+import {
+  type ContextMenuAction,
+  useCopy,
+  useContextMenuUtils,
+  useFullScreen,
+  usePlaceholder,
+  useFitToContent,
+  ReBroadcastMouseDownEvents,
+  RepositionSuggestionWidget,
+} from './mods';
 import { styles } from './editor.styles';
 
 export interface CodeEditorProps {
@@ -617,8 +607,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </EuiFlexGroup>
           </div>
         ) : null}
-        <UseBug177756ReBroadcastMouseDown>
-          <UseBug223981FixRepositionSuggestWidget
+        <ReBroadcastMouseDownEvents>
+          <RepositionSuggestionWidget
             editor={_editor}
             enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
           >
@@ -661,282 +651,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 ...options,
               }}
             />
-          </UseBug223981FixRepositionSuggestWidget>
-        </UseBug177756ReBroadcastMouseDown>
+          </RepositionSuggestionWidget>
+        </ReBroadcastMouseDownEvents>
       </FullScreenDisplay>
-    </div>
-  );
-};
-
-/**
- * Fullscreen logic
- */
-
-const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const { euiTheme } = useEuiTheme();
-
-  const toggleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
-  };
-
-  const onKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === keys.ESCAPE) {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsFullScreen(false);
-    }
-  }, []);
-
-  const FullScreenButton: React.FC = () => {
-    if (!allowFullScreen) return null;
-    return (
-      <EuiI18n
-        tokens={['euiCodeBlock.fullscreenCollapse', 'euiCodeBlock.fullscreenExpand']}
-        defaults={['Collapse', 'Expand']}
-      >
-        {([fullscreenCollapse, fullscreenExpand]: string[]) => (
-          <EuiButtonIcon
-            onClick={toggleFullScreen}
-            iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
-            color="text"
-            aria-label={isFullScreen ? fullscreenCollapse : fullscreenExpand}
-            size="xs"
-          />
-        )}
-      </EuiI18n>
-    );
-  };
-
-  const FullScreenDisplay = useMemo(
-    () =>
-      ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
-        if (!isFullScreen) return <>{children}</>;
-
-        return (
-          <EuiOverlayMask>
-            <EuiFocusTrap clickOutsideDisables={true}>
-              <div css={styles.fullscreenContainer(euiTheme)}>{children}</div>
-            </EuiFocusTrap>
-          </EuiOverlayMask>
-        );
-      },
-    [isFullScreen, euiTheme]
-  );
-
-  return {
-    FullScreenButton,
-    FullScreenDisplay,
-    onKeyDown,
-    isFullScreen,
-    setIsFullScreen,
-  };
-};
-
-const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) => {
-  const showCopyButton = isCopyable && value;
-
-  const CopyButton = () => {
-    if (!showCopyButton) return null;
-
-    return (
-      <div className="euiCodeBlock__copyButton">
-        <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
-          {(copyButton: string) => (
-            <EuiCopy textToCopy={value}>
-              {(copy) => (
-                <EuiButtonIcon
-                  onClick={copy}
-                  iconType="copyClipboard"
-                  color="text"
-                  aria-label={copyButton}
-                  size="xs"
-                />
-              )}
-            </EuiCopy>
-          )}
-        </EuiI18n>
-      </div>
-    );
-  };
-
-  return { showCopyButton, CopyButton };
-};
-
-const usePlaceholder = ({
-  placeholder,
-  euiTheme,
-  editor,
-  value,
-}: {
-  placeholder: string | undefined;
-  euiTheme: UseEuiTheme['euiTheme'];
-  editor: monaco.editor.IStandaloneCodeEditor | null;
-  value: string;
-}) => {
-  useEffect(() => {
-    if (!placeholder || !editor) return;
-
-    let placeholderWidget: PlaceholderWidget | null = null;
-
-    const addPlaceholder = () => {
-      if (!placeholderWidget) {
-        placeholderWidget = new PlaceholderWidget(placeholder, euiTheme, editor);
-      }
-    };
-
-    const removePlaceholder = () => {
-      if (placeholderWidget) {
-        placeholderWidget.dispose();
-        placeholderWidget = null;
-      }
-    };
-
-    if (!value) {
-      addPlaceholder();
-    }
-
-    const onDidChangeContent = editor.getModel()?.onDidChangeContent(() => {
-      if (!editor.getModel()?.getValue()) {
-        addPlaceholder();
-      } else {
-        removePlaceholder();
-      }
-    });
-
-    return () => {
-      onDidChangeContent?.dispose();
-      removePlaceholder();
-    };
-  }, [placeholder, value, euiTheme, editor]);
-};
-
-const useFitToContent = ({
-  editor,
-  fitToContent,
-  isFullScreen,
-}: {
-  editor: monaco.editor.IStandaloneCodeEditor | null;
-  isFullScreen: boolean;
-  fitToContent?: { minLines?: number; maxLines?: number };
-}) => {
-  const isFitToContent = !!fitToContent;
-  const minLines = fitToContent?.minLines;
-  const maxLines = fitToContent?.maxLines;
-  useEffect(() => {
-    if (!editor) return;
-    if (isFullScreen) return;
-    if (!isFitToContent) return;
-
-    const updateHeight = () => {
-      const contentHeight = editor.getContentHeight();
-      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-      const minHeight = (minLines ?? 1) * lineHeight;
-      let maxHeight = maxLines ? maxLines * lineHeight : contentHeight;
-      maxHeight = Math.max(minHeight, maxHeight);
-      editor.layout({
-        height: Math.min(maxHeight, Math.max(minHeight, contentHeight)),
-        width: editor.getLayoutInfo().width,
-      });
-    };
-    updateHeight();
-    const disposable = editor.onDidContentSizeChange(updateHeight);
-    return () => {
-      disposable.dispose();
-      editor.layout(); // reset the layout that was controlled by the fitToContent
-    };
-  }, [editor, isFitToContent, minLines, maxLines, isFullScreen]);
-};
-
-/**
- * @description See {@link https://github.com/elastic/kibana/issues/223981} for the rationale behind this bug fix implementation
- */
-const UseBug223981FixRepositionSuggestWidget: FC<
-  PropsWithChildren<{
-    editor: monaco.editor.IStandaloneCodeEditor | null;
-    enableSuggestWidgetRepositioning: boolean;
-  }>
-> = ({ children, editor, enableSuggestWidgetRepositioning }) => {
-  const { euiTheme } = useEuiTheme();
-  const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
-
-  useEffect(() => {
-    // @ts-expect-errors -- "widget" is not part of the TS interface but does exist
-    const suggestionWidget = editor?.getContribution('editor.contrib.suggestController')?.widget
-      ?.value;
-    // The "onDidShow" and "onDidHide" is not documented so we guard from possible changes in the underlying lib
-    if (
-      suggestionWidget &&
-      suggestionWidget.onDidShow &&
-      suggestionWidget.onDidHide &&
-      enableSuggestWidgetRepositioning
-    ) {
-      let $suggestWidgetNode: HTMLElement | null = null;
-
-      // add a className that hides the suggestion widget by default so we might be to correctly position the suggestion widget,
-      // then make it visible
-      ($suggestWidgetNode = suggestionWidget.element?.domNode)?.classList?.add(
-        suggestWidgetModifierClassName
-      );
-
-      let originalTopPosition: string | null = null;
-
-      suggestionWidget.onDidShow(() => {
-        if ($suggestWidgetNode) {
-          originalTopPosition = $suggestWidgetNode.style.top;
-          const headerOffset = `var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))`;
-          $suggestWidgetNode.style.top = `max(${originalTopPosition}, calc(${headerOffset} + ${euiTheme.size.m}))`;
-          $suggestWidgetNode.classList.remove(suggestWidgetModifierClassName);
-        }
-      });
-      suggestionWidget.onDidHide(() => {
-        if ($suggestWidgetNode) {
-          $suggestWidgetNode.classList.add(suggestWidgetModifierClassName);
-          $suggestWidgetNode.style.top = originalTopPosition ?? '';
-        }
-      });
-    }
-  }, [editor, euiTheme.size.m, enableSuggestWidgetRepositioning]);
-
-  return (
-    <React.Fragment>
-      {enableSuggestWidgetRepositioning && (
-        <Global
-          // @ts-expect-error -- it's necessary that we apply the important modifier
-          styles={{
-            [`.${suggestWidgetModifierClassName}`]: {
-              visibility: 'hidden !important',
-            },
-          }}
-        />
-      )}
-      <React.Fragment>{children}</React.Fragment>
-    </React.Fragment>
-  );
-};
-
-const UseBug177756ReBroadcastMouseDown: FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [$codeWrapper, setCodeWrapper] = React.useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const rebroadcastEvent = (event: MouseEvent) => {
-      // rebroadcast mouse event to accommodate integration with other parts of the codebase
-      // especially that the monaco it self does prevent default for mouse events
-      if ($codeWrapper?.contains(event.target as Node) && event.defaultPrevented) {
-        $codeWrapper.dispatchEvent(new MouseEvent(event.type, event));
-      }
-    };
-
-    if ($codeWrapper) {
-      $codeWrapper.addEventListener('mousedown', rebroadcastEvent);
-
-      return () => $codeWrapper.removeEventListener('mousedown', rebroadcastEvent);
-    }
-  }, [$codeWrapper]);
-
-  return (
-    <div ref={setCodeWrapper} style={{ display: 'contents' }}>
-      {children}
     </div>
   );
 };

@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
+import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
-import Path from 'path';
 import fetch from 'node-fetch';
-import { validatePath, validateMimeType, validateFileSignature, type MimeType } from './validators';
+import { validateMimeType, validateFileSignature, type MimeType } from './validators';
 
-export const download = async (fileUrl: string, filePath: string, expectedMimeType: MimeType) => {
-  validatePath(filePath);
-
-  const dirPath = Path.dirname(filePath);
-
-  await mkdir(dirPath, { recursive: true });
-  const writeStream = createWriteStream(filePath);
+export const download = async (
+  fileUrl: string,
+  filePathAtVolume: string,
+  expectedMimeType: MimeType,
+  abortController?: AbortController
+): Promise<string> => {
+  const writeStream = createWriteStream(filePathAtVolume);
 
   const res = await fetch(fileUrl);
 
@@ -34,5 +32,9 @@ export const download = async (fileUrl: string, filePath: string, expectedMimeTy
 
   await pipeline(res.body, writeStream);
 
-  await validateFileSignature(filePath, expectedMimeType);
+  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
+
+  await validateFileSignature(artifactFullPath, expectedMimeType);
+
+  return artifactFullPath;
 };

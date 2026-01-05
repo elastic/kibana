@@ -20,6 +20,7 @@ interface PodDocument extends Fields {
   'kubernetes.pod.uid': string;
   'kubernetes.node.name': string;
   'metricset.name'?: string;
+  'event.module'?: string;
 }
 
 export class Pod extends Entity<PodDocument> {
@@ -48,5 +49,6 @@ export function pod(uid: string, nodeName: string) {
     'agent.id': 'synthtrace',
     'host.hostname': nodeName,
     'host.name': nodeName,
+    'event.module': 'kubernetes',
   });
 }

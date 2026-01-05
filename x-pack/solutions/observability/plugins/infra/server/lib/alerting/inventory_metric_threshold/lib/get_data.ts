@@ -150,7 +150,9 @@ export const getData = async ({
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
+        // @ts-expect-error upgrade typescript v5.9.3
         warn: bucket?.shouldWarn.value > 0 ?? false,
+        // @ts-expect-error upgrade typescript v5.9.3
         trigger: bucket?.shouldTrigger.value > 0 ?? false,
         container: containerList,
         ...additionalContextSource,

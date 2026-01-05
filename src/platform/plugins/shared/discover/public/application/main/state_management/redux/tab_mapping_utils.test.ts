@@ -108,6 +108,9 @@ describe('tab mapping utils', () => {
               "bar": "foo",
             },
           },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
+          },
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
@@ -178,6 +181,9 @@ describe('tab mapping utils', () => {
             "visContext": Object {
               "bar": "foo",
             },
+          },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
           },
           "isDataViewLoading": false,
           "label": "Tab 2",

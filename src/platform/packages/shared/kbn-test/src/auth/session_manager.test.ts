@@ -160,15 +160,13 @@ describe('SamlSessionManager', () => {
 
     test(`throws error when role is not in 'supportedRoles'`, async () => {
       const nonExistingRole = 'tester';
-      const expectedErrorMessage = `Role '${nonExistingRole}' not found in ${
-        supportedRoles.sourcePath
-      }. Available predefined roles: ${supportedRoles.roles.join(', ')}
-
-      Is '${nonExistingRole}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
-
-      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
-        supportedRoles.sourcePath
-      } to enable it for testing.`;
+      const expectedErrorMessage = [
+        `Role '${nonExistingRole}' not found in ${
+          supportedRoles.sourcePath
+        }. Available predefined roles: ${supportedRoles.roles.join(', ')}.`,
+        `Is '${nonExistingRole}' a custom test role? → Use 'loginWithCustomRole()' for functional tests or 'getApiKeyForCustomRole()' for API tests to log in with custom Kibana and Elasticsearch privileges.`,
+        `Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${supportedRoles.sourcePath} to enable it for testing.`,
+      ].join('\n\n');
       const samlSessionManager = new SamlSessionManager({
         ...samlSessionManagerOptions,
         supportedRoles,
@@ -376,15 +374,13 @@ describe('SamlSessionManager', () => {
 
     test(`throws error for non-existing role when 'supportedRoles' is defined`, async () => {
       const nonExistingRole = 'tester';
-      const expectedErrorMessage = `Role '${nonExistingRole}' not found in ${
-        supportedRoles.sourcePath
-      }. Available predefined roles: ${supportedRoles.roles.join(', ')}
-
-      Is '${nonExistingRole}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
-
-      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
-        supportedRoles.sourcePath
-      } to enable it for testing.`;
+      const expectedErrorMessage = [
+        `Role '${nonExistingRole}' not found in ${
+          supportedRoles.sourcePath
+        }. Available predefined roles: ${supportedRoles.roles.join(', ')}.`,
+        `Is '${nonExistingRole}' a custom test role? → Use 'loginWithCustomRole()' for functional tests or 'getApiKeyForCustomRole()' for API tests to log in with custom Kibana and Elasticsearch privileges.`,
+        `Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${supportedRoles.sourcePath} to enable it for testing.`,
+      ].join('\n\n');
       const samlSessionManager = new SamlSessionManager({
         ...samlSMOptionsWithCloudHostName,
         supportedRoles,

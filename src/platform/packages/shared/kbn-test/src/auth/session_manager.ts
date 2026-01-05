@@ -187,17 +187,17 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     return session;
   };
 
-  private validateRole = (role: string): void => {
+  validateRole = (role: string): void => {
     if (this.supportedRoles && !this.supportedRoles.roles.includes(role)) {
-      throw new Error(`Role '${role}' not found in ${
-        this.supportedRoles.sourcePath
-      }. Available predefined roles: ${this.supportedRoles.roles.join(', ')}
+      const errorMessage = [
+        `Role '${role}' not found in ${
+          this.supportedRoles.sourcePath
+        }. Available predefined roles: ${this.supportedRoles.roles.join(', ')}.`,
+        `Is '${role}' a custom test role? → Use 'loginWithCustomRole()' for functional tests or 'getApiKeyForCustomRole()' for API tests to log in with custom Kibana and Elasticsearch privileges.`,
+        `Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${this.supportedRoles.sourcePath} to enable it for testing.`,
+      ].join('\n\n');
 
-      Is '${role}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
-
-      Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
-        this.supportedRoles.sourcePath
-      } to enable it for testing.`);
+      throw new Error(errorMessage);
     }
   };
 

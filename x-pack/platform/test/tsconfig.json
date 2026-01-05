@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -173,5 +173,6 @@
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
     "@kbn/alerting-types",
+    "@kbn/setup-node-env",
   ]
 }

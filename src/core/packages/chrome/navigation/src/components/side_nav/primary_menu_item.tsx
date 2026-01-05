@@ -30,6 +30,8 @@ export interface SideNavPrimaryMenuItemProps extends MenuItem {
   isCollapsed: boolean;
   isHorizontal?: boolean;
   onClick?: () => void;
+  'aria-posinset'?: number;
+  'aria-setsize'?: number;
 }
 
 export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrimaryMenuItemProps>(

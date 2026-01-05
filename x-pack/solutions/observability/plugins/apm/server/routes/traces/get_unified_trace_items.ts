@@ -63,22 +63,16 @@ const optionalFields = asMutableArray([
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
 
-  function addError(id: string, errorDocId: string) {
-    if (!groupedErrorsByDocId[id]) {
-      groupedErrorsByDocId[id] = [];
-    }
-    groupedErrorsByDocId[id].push({ errorDocId });
-  }
-
   unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
-    const id = errorDoc.transaction?.id || errorDoc.span?.id;
-    if (id) {
-      addError(id, errorDoc.id);
+    if (errorDoc.spanId) {
+      (groupedErrorsByDocId[errorDoc.spanId] ??= []).push({ errorDocId: errorDoc.id });
     }
   });
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) =>
-    errorDoc.spanId ? addError(errorDoc.spanId, errorDoc.id) : undefined
-  );
+  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
+    if (errorDoc.spanId) {
+      (groupedErrorsByDocId[errorDoc.spanId] ??= []).push({ errorDocId: errorDoc.id });
+    }
+  });
 
   return groupedErrorsByDocId;
 }
@@ -139,6 +133,7 @@ export async function getUnifiedTraceItems({
           minimum_should_match: 1,
         },
       },
+      collapse: { field: SPAN_ID },
       fields: [...fields, ...optionalFields],
       sort: [
         { _score: 'asc' },

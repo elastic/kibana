@@ -159,7 +159,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions?.some((x) => x);
 
-  const { getType, dispatchEvent, renderMode, formatFactory, syncColors } = props;
+  const { getType, dispatchEvent, formatFactory, syncColors } = props;
 
   const formatters: Record<string, IFieldFormat> = useMemo(
     () =>
@@ -256,8 +256,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [columnConfig]
   );
 
-  const isReadOnlySorted = renderMode !== 'edit';
-
   const onColumnResize = useMemo(
     () => createGridResizeHandler(columnConfig, setColumnConfig, onEditAction),
     [onEditAction, setColumnConfig, columnConfig]
@@ -306,7 +304,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         firstLocalTable,
         handleFilterClick,
         handleTransposedColumnClick,
-        isReadOnlySorted,
         columnConfig,
         visibleColumns,
         formatFactory,
@@ -324,7 +321,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       firstLocalTable,
       handleFilterClick,
       handleTransposedColumnClick,
-      isReadOnlySorted,
       columnConfig,
       visibleColumns,
       formatFactory,

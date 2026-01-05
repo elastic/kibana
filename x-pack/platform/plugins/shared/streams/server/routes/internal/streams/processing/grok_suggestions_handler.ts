@@ -77,6 +77,13 @@ export const handleProcessingGrokSuggestions = async ({
       review_fields: JSON.stringify(params.body.review_fields),
     },
   });
+
+  if (!('toolCalls' in response) || response.toolCalls.length === 0) {
+    throw new Error(
+      'Failed to generate grok suggestions due to error with the AI generation, please try again later.'
+    );
+  }
+
   const reviewResult = response.toolCalls[0].function.arguments;
 
   // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names

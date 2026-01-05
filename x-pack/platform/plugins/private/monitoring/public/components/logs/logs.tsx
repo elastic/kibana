@@ -192,7 +192,13 @@ export class LogsContent extends PureComponent<LogsContentProps> {
     }
 
     return (
-      <EuiBasicTable items={logs || []} columns={nodeId || indexUuid ? columns : clusterColumns} />
+      <EuiBasicTable
+        items={logs || []}
+        columns={nodeId || indexUuid ? columns : clusterColumns}
+        tableCaption={i18n.translate('xpack.monitoring.logs.listing.tableCaption', {
+          defaultMessage: 'Recent log entries',
+        })}
+      />
     );
   }
 

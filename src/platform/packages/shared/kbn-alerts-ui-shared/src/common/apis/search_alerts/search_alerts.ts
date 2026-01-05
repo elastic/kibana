@@ -145,6 +145,7 @@ export const searchAlerts = ({
             total,
             querySnapshot: {
               request: response?.inspect?.dsl ?? [],
+              // @ts-expect-error upgrade typescript v5.9.3
               response: [JSON.stringify(rawResponse)] ?? [],
             },
             error: alertsError,
