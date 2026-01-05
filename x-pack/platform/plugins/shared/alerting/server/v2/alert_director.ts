@@ -111,7 +111,7 @@ export function alertDirector({ esClient }: AlertDirectorOpts) {
     const start = Date.now();
     try {
       const result = await esClient.esql.query({
-        query: DIRECTORY_ACTIVE_INACTIVE_QUERY,
+        query: DIRECTOR_ACTIVE_INACTIVE_QUERY,
       });
       console.log(
         `${new Date().toISOString()} Director query for active and inactive transitions took ${
