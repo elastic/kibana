@@ -156,7 +156,7 @@ export const GAP_AUTO_FILL_STATUS_ERROR_ALL_FAILED_TOOLTIP = i18n.translate(
   }
 );
 
-export const GAP_AUTO_FILL_STATUS_ERROR_SOME_FAILED_TOOLTIP = i18n.translate(
+export const GAP_AUTO_FILL_STATUS_ERROR_SOME_SUCCEEDED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusErrorSomeFailedTooltip',
   {
     defaultMessage: 'At least 1 rule successfully scheduled, but other failed to schedule.',
@@ -189,6 +189,13 @@ export const GAP_AUTO_FILL_STATUS_SKIPPED_RULES_DISABLED_TOOLTIP = i18n.translat
   'xpack.securitySolution.gapAutoFillLogs.statusSkippedRulesDisabledTooltip',
   {
     defaultMessage: 'There are unfilled gaps, but rules are disabled.',
+  }
+);
+
+export const GAP_AUTO_FILL_STATUS_SKIPPED_SOME_SUCCEEDED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.statusSkippedSomeSucceededTooltip',
+  {
+    defaultMessage: 'At least 1 rule successfully scheduled. No capacity to schedule more backfills.',
   }
 );
 

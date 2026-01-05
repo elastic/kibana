@@ -600,7 +600,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(
             expectedProcessCalls
           );
-          expectFinalLog(expectedProcessCalls === 0 ? 'skipped' : 'success', expectMessage);
+          expectFinalLog('skipped', expectMessage);
           if (expectedProcessCalls === 0) {
             expect(rulesClient.getRuleIdsWithGaps).not.toHaveBeenCalled();
           }
@@ -668,7 +668,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expect(result).toEqual({ state: {} });
           expect(logEventMock).toHaveBeenCalledWith(
             expect.objectContaining({
-              status: 'success',
+              status: 'error',
               results: [],
               message: expect.stringContaining(
                 'Gap Auto Fill Scheduler cancelled by timeout | Results: \nprocessed 0 gaps across 0 rules'

@@ -482,7 +482,7 @@ export function registerGapAutoFillSchedulerTask({
 
               if (gapFillsResult.state === SchedulerLoopState.CAPACITY_EXHAUSTED) {
                 await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
+                  status: GAP_AUTO_FILL_STATUS.SKIPPED,
                   results: consolidated,
                   message: `Stopped early: gap auto-fill capacity limit reached. This task can schedule at most ${
                     capacityCheckInitial.maxBackfills
@@ -495,7 +495,7 @@ export function registerGapAutoFillSchedulerTask({
 
               if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
                 await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
+                  status: GAP_AUTO_FILL_STATUS.ERROR,
                   results: consolidated,
                   message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${formatConsolidatedSummary(
                     consolidated

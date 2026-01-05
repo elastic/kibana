@@ -44,12 +44,12 @@ interface GapAutoFillLogsFlyoutProps {
 }
 
 export const getStatusTooltip = (logEntry: SchedulerLog): string => {
-  const { status, message } = logEntry;
-
+  const { status, message, results } = logEntry;
   if (!status) {
     return '';
   }
 
+  const successCount = results?.filter((r) => r.status === 'success').length ?? 0;
   const messageLower = message?.toLowerCase() || '';
 
   switch (status) {
@@ -63,20 +63,25 @@ export const getStatusTooltip = (logEntry: SchedulerLog): string => {
       if (messageLower.includes('error during execution')) {
         return i18n.GAP_AUTO_FILL_STATUS_ERROR_TASK_CRASH_TOOLTIP;
       }
-      if (messageLower.includes('all rules failed to schedule')) {
-        return i18n.GAP_AUTO_FILL_STATUS_ERROR_ALL_FAILED_TOOLTIP;
+
+      // Use results array to determine error type if available
+      if (results && results.length > 0) {
+        const errorCount = results.filter((r) => r.status === 'error').length;
+        if (errorCount === results.length) {
+          return i18n.GAP_AUTO_FILL_STATUS_ERROR_ALL_FAILED_TOOLTIP;
+        } else if (successCount > 0) {
+          return i18n.GAP_AUTO_FILL_STATUS_ERROR_SOME_SUCCEEDED_TOOLTIP;
+        }
       }
-      if (
-        messageLower.includes(
-          'at least one rule successfully scheduled gap fills, but others failed to schedule'
-        )
-      ) {
-        return i18n.GAP_AUTO_FILL_STATUS_ERROR_SOME_FAILED_TOOLTIP;
-      }
+
       return i18n.GAP_AUTO_FILL_STATUS_ERROR_TOOLTIP;
 
     case GAP_AUTO_FILL_STATUS.SKIPPED:
       if (messageLower.includes('capacity limit reached')) {
+        if (successCount > 0) {
+          return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_SOME_SUCCEEDED_TOOLTIP;
+        }
+
         return i18n.GAP_AUTO_FILL_STATUS_SKIPPED_NO_CAPACITY_TOOLTIP;
       }
       if (messageLower.includes("can't schedule gap fills for any enabled rule")) {
