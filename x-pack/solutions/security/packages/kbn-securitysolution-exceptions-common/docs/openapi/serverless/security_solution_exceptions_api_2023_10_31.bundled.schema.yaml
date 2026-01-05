@@ -2656,6 +2656,8 @@ components:
                 - endpoint_blocklists
               example: endpoint_blocklists
               type: string
+          required:
+            - list_id
     CreateExceptionListItemComment:
       type: object
       properties:
@@ -2678,6 +2680,8 @@ components:
                 - endpoint_list
               example: endpoint_list
               type: string
+          required:
+            - list_id
     CreateExceptionListItemEventFilters:
       allOf:
         - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
@@ -2689,6 +2693,8 @@ components:
                 - endpoint_event_filters
               example: endpoint_event_filters
               type: string
+          required:
+            - list_id
     CreateExceptionListItemGeneric:
       example:
         description: This is a sample detection type exception item.
@@ -2758,6 +2764,8 @@ components:
                 - endpoint_host_isolation_exceptions
               example: endpoint_host_isolation_exceptions
               type: string
+          required:
+            - list_id
     CreateExceptionListItemTrustedApps:
       allOf:
         - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
@@ -2769,6 +2777,8 @@ components:
                 - endpoint_trusted_apps
               example: endpoint_trusted_apps
               type: string
+          required:
+            - list_id
     CreateExceptionListItemTrustedDevices:
       allOf:
         - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
@@ -2780,6 +2790,8 @@ components:
                 - endpoint_trusted_devices
               example: endpoint_trusted_devices
               type: string
+          required:
+            - list_id
     CreateRuleExceptionListItemComment:
       type: object
       properties:
@@ -3392,6 +3404,8 @@ components:
                 - endpoint_blocklists
               example: endpoint_blocklists
               type: string
+          required:
+            - list_id
     UpdateExceptionListItemComment:
       type: object
       properties:
@@ -3416,6 +3430,8 @@ components:
                 - endpoint_list
               example: endpoint_list
               type: string
+          required:
+            - list_id
     UpdateExceptionListItemEventFilters:
       allOf:
         - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
@@ -3427,6 +3443,8 @@ components:
                 - endpoint_event_filters
               example: endpoint_event_filters
               type: string
+          required:
+            - list_id
     UpdateExceptionListItemGeneric:
       example:
         comments: []
@@ -3498,6 +3516,8 @@ components:
                 - endpoint_host_isolation_exceptions
               example: endpoint_host_isolation_exceptions
               type: string
+          required:
+            - list_id
     UpdateExceptionListItemTrustedApps:
       allOf:
         - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
@@ -3509,6 +3529,8 @@ components:
                 - endpoint_trusted_apps
               example: endpoint_trusted_apps
               type: string
+          required:
+            - list_id
     UpdateExceptionListItemTrustedDevices:
       allOf:
         - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
@@ -3520,6 +3542,8 @@ components:
                 - endpoint_trusted_devices
               example: endpoint_trusted_devices
               type: string
+          required:
+            - list_id
     UUID:
       description: A universally unique identifier
       format: uuid
