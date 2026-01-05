@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import querystring from 'querystring';
-import React from 'react';
-import { renderToString } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs';
 
@@ -25,6 +22,7 @@ import type {
   FeaturesPluginSetup as FeaturesPluginSetup,
   FeaturesPluginStart as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
+import { i18n as i18nLib } from '@kbn/i18n';
 import {
   Actions,
   privilegesFactory,
@@ -46,13 +44,13 @@ import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_obj
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { authorizationModeFactory } from './mode';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
-import { ResetSessionPage } from './reset_session_page';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import type { SpacesService } from '../plugin';
 
 export { Actions } from '@kbn/security-authorization-core';
@@ -193,26 +191,24 @@ export class AuthorizationService {
         }
 
         if (canRedirectRequest(request)) {
-          const customBrandingValue = await customBranding.getBrandingFor(request, {
-            unauthenticated: false,
-          });
           const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
-          const body = renderToString(
-            <ResetSessionPage
-              staticAssets={http.staticAssets}
-              basePath={http.basePath}
-              logoutUrl={http.basePath.prepend(
-                `/api/security/logout?${querystring.stringify({ next })}`
-              )}
-              customBranding={customBrandingValue}
-            />
+
+          const location = http.basePath.prepend(
+            `/security/reset_session?next=${encodeURIComponent(next)}`
           );
 
+          const body = createRedirectHtmlPage(
+            i18nLib.translate('xpack.security.authorization.unauthenticatedTitle', {
+              defaultMessage: 'Unauthenticated',
+            }),
+            location
+          );
           return toolkit.render({
             body,
             headers: {
               'Content-Security-Policy': http.csp.header,
               'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
+              Refresh: `0;url=${location}`,
             },
           });
         }
