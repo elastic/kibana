@@ -103,6 +103,8 @@ dependsOn:
   - '@kbn/core-saved-objects-base-server-mocks'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
+  - '@kbn/scout'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod
@@ -114,6 +116,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
 tasks:
