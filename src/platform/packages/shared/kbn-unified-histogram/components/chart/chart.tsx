@@ -76,9 +76,6 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  controlsState?: ControlPanelsState<ESQLControlVariable>;
-}
-
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
 const HistogramMemoized = memo(Histogram);
 
