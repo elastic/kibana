@@ -14,7 +14,7 @@ import { esqlRuleModelVersions } from './model_versions';
 
 export const ESQL_RULE_SAVED_OBJECT_TYPE = 'alerting_esql_rule';
 
-export function setupSavedObjects({
+export function registerSavedObjects({
   savedObjects,
   logger,
 }: {
@@ -30,7 +30,7 @@ export function setupSavedObjects({
     management: {
       importableAndExportable: false,
       getTitle(esqlRuleSavedObject: SavedObject<RawEsqlRule>) {
-        return `ES|QL Rule: [${esqlRuleSavedObject.attributes.name}]`;
+        return `Rule: [${esqlRuleSavedObject.attributes.name}]`;
       },
     },
     modelVersions: esqlRuleModelVersions,

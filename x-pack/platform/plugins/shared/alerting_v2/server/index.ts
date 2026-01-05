@@ -13,7 +13,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
-import { setupSavedObjects } from './saved_objects';
+import { registerSavedObjects } from './saved_objects';
 import { initializeRuleExecutorTaskDefinition } from './rule_executor';
 import { CreateRuleRoute } from './routes/create_rule_route';
 import { UpdateRuleRoute } from './routes/update_rule_route';
@@ -43,7 +43,7 @@ export const module = new ContainerModule(({ bind }) => {
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
     // Saved Objects + Encrypted Saved Objects registration
-    setupSavedObjects({
+    registerSavedObjects({
       savedObjects: container.get(CoreSetup('savedObjects')),
       logger,
     });
