@@ -61,7 +61,6 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
-import { adjustSuggestWidget } from '../lib/adjust_suggest_widget';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
 import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
@@ -76,6 +75,10 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
+import {
+  monkeyPatchSuggestWidget,
+  resetSuggestWidgetPatch,
+} from '../lib/monkey_patch_suggest_widget';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -347,7 +350,7 @@ export const WorkflowYAMLEditor = ({
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 
-        adjustSuggestWidget(editor);
+        monkeyPatchSuggestWidget(editor);
 
         // Create unified providers with template expression support
         const providerConfig = {
@@ -372,6 +375,7 @@ export const WorkflowYAMLEditor = ({
 
   const handleEditorWillUnmount = useCallback(() => {
     unregisterKeyboardCommands();
+    resetSuggestWidgetPatch();
   }, [unregisterKeyboardCommands]);
 
   // Clean up the monaco model and editor on unmount
@@ -482,7 +486,7 @@ export const WorkflowYAMLEditor = ({
   }, [isExecutionYaml]);
 
   useEffect(() => {
-    // Monkey patching
+    // Monkey patching 'setModelMarkers'
     // 1. to set the initial markers https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
     // 2. to intercept and format markers validation messages – this prevents Monaco from ever seeing the problematic numeric enum messages
     const setModelMarkers = monaco.editor.setModelMarkers;

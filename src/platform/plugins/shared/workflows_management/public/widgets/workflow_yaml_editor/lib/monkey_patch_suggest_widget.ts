@@ -9,39 +9,57 @@
 
 import type { monaco } from '@kbn/monaco';
 
+// Store references needed for reset
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let suggestWidget: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let patchedDetailsOverlay: any = null;
+let originalDetailsVisible: boolean | undefined;
+let originalPlaceAtAnchor: ((anchor: HTMLElement, preferAlignAtTop: boolean) => void) | null = null;
+
 /**
- * Adjust the suggestions widget:
- *  - for details to always be visible
- *  - for the widget to be wider: by default 500x500px
- *  - for the details overlay to always appear at the top, aligned with the suggestion list
+ * Monkey-patch the suggestions widget:
+ *  - make details always visible
+ *  - make details overlay always appear at the top, aligned with the suggestion list
  * @param editor - The Monaco editor instance
  */
-export const adjustSuggestWidget = (editor: monaco.editor.IStandaloneCodeEditor) => {
+export const monkeyPatchSuggestWidget = (editor: monaco.editor.IStandaloneCodeEditor) => {
   // Hack to make suggestions details visible by default
   // https://github.com/microsoft/monaco-editor/issues/2241#issuecomment-997339142
   const contribution = editor.getContribution('editor.contrib.suggestController');
   if (contribution) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const widget = (contribution as any).widget;
-    const suggestWidget = widget.value;
+    suggestWidget = widget.value;
     if (suggestWidget && suggestWidget._setDetailsVisible) {
       // This will default to visible details. But when user switches it off
       // they will remain switched off:
+      originalDetailsVisible = suggestWidget._isDetailsVisible();
       suggestWidget._setDetailsVisible(true);
     }
-    // Make the suggestions widget larger by default (500x500px) to include long suggestions
-    if (suggestWidget && suggestWidget._persistedSize) {
-      suggestWidget._persistedSize.store({ width: 500, height: 500 });
-    }
-
     // Make the details overlay always appear at the top, aligned with the suggestion list
     if (suggestWidget && suggestWidget._details) {
       const detailsOverlay = suggestWidget._details;
+      // Store references for reset
+      patchedDetailsOverlay = detailsOverlay;
+      originalPlaceAtAnchor = detailsOverlay.placeAtAnchor.bind(detailsOverlay);
       // Override placeAtAnchor to always pass true for preferAlignAtTop
-      const originalPlaceAtAnchor = detailsOverlay.placeAtAnchor.bind(detailsOverlay);
       detailsOverlay.placeAtAnchor = function (anchor: HTMLElement, _preferAlignAtTop: boolean) {
-        originalPlaceAtAnchor(anchor, true); // Force preferAlignAtTop to true for always aligning at the top
+        originalPlaceAtAnchor?.(anchor, true); // Force preferAlignAtTop to true for always aligning at the top
       };
     }
+  }
+};
+
+/**
+ * Reset the monkey-patching applied to the suggestions widget.
+ * Call this in the unmounting effect to restore original behavior.
+ */
+export const resetSuggestWidgetPatch = () => {
+  if (suggestWidget && patchedDetailsOverlay && originalPlaceAtAnchor) {
+    suggestWidget._setDetailsVisible(originalDetailsVisible);
+    patchedDetailsOverlay.placeAtAnchor = originalPlaceAtAnchor;
+    patchedDetailsOverlay = null;
+    originalPlaceAtAnchor = null;
   }
 };
