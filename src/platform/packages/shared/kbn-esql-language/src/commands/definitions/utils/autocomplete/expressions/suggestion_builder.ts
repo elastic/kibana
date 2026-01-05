@@ -79,6 +79,7 @@ export class SuggestionBuilder {
       options: {
         ignored,
         addComma: options?.addComma,
+        suggestOnlyName: this.context.options.isCursorFollowedByParens,
         addSpaceAfterFunction,
         openSuggestions,
         constantGeneratingOnly,

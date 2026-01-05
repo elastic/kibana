@@ -188,6 +188,7 @@ interface FunctionSuggestionOptions {
   addSpaceAfterFunction?: boolean;
   openSuggestions?: boolean;
   constantGeneratingOnly?: boolean;
+  suggestOnlyName?: boolean;
 }
 
 interface GetFunctionsSuggestionsParams {
@@ -208,6 +209,7 @@ export function getFunctionsSuggestions({
   const {
     ignored = [],
     addComma = false,
+    suggestOnlyName = false,
     addSpaceAfterFunction = false,
     openSuggestions = false,
     constantGeneratingOnly = false,
@@ -242,15 +244,16 @@ export function getFunctionsSuggestions({
   return filteredFunctions.map((fn) => {
     const suggestion = getFunctionSuggestion(fn);
 
+    if (suggestOnlyName) {
+      suggestion.text = fn.name.toUpperCase();
+      return suggestion;
+    }
+
     if (textSuffix) {
       suggestion.text += textSuffix;
     }
 
-    if (openSuggestions) {
-      return withAutoSuggest(suggestion);
-    }
-
-    return suggestion;
+    return withAutoSuggest(suggestion);
   });
 }
 

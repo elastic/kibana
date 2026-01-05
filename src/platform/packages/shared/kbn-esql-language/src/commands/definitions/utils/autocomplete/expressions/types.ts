@@ -55,6 +55,7 @@ export interface ExpressionContextOptions {
   addSpaceAfterFirstField?: boolean;
   ignoredColumnsForEmptyExpression?: string[];
   isCursorFollowedByComma?: boolean;
+  isCursorFollowedByParens?: boolean;
   suggestFields?: boolean;
   suggestFunctions?: boolean;
   controlType?: ESQLVariableType;
