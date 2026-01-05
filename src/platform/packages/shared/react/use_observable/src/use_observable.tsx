@@ -37,8 +37,10 @@ export function useObservable<T>(observable$: Observable<T>, initialValue?: T): 
   const subscribe = useCallback(
     (notify: () => void) => {
       const subscription = observable$.subscribe((nextValue) => {
-        valueRef.current = nextValue;
-        notify();
+        if (nextValue !== valueRef.current) {
+          valueRef.current = nextValue;
+          notify();
+        }
       });
       return () => subscription.unsubscribe();
     },

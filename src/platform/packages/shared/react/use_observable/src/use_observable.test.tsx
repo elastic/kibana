@@ -108,4 +108,63 @@ describe('useObservable', () => {
 
     consoleWarnSpy.mockRestore();
   });
+
+  it('does not re-render when same primitive value emitted', async () => {
+    const subject$ = new BehaviorSubject(42);
+    let renderCount = 0;
+
+    const { result } = renderHook(() => {
+      renderCount++;
+      return useObservable(subject$);
+    });
+
+    expect(result.current).toBe(42);
+    expect(renderCount).toBe(1);
+
+    await act(() => {
+      subject$.next(42);
+      subject$.next(42);
+    });
+
+    expect(renderCount).toBe(1);
+  });
+
+  it('does not re-render when same object reference emitted', async () => {
+    const obj = { count: 1 };
+    const subject$ = new BehaviorSubject(obj);
+    let renderCount = 0;
+
+    const { result } = renderHook(() => {
+      renderCount++;
+      return useObservable(subject$);
+    });
+
+    expect(result.current).toBe(obj);
+    expect(renderCount).toBe(1);
+
+    await act(() => {
+      subject$.next(obj);
+    });
+
+    expect(renderCount).toBe(1);
+  });
+
+  it('re-renders when different object reference emitted', async () => {
+    const subject$ = new BehaviorSubject({ count: 0 });
+    let renderCount = 0;
+
+    const { result } = renderHook(() => {
+      renderCount++;
+      return useObservable(subject$);
+    });
+
+    expect(result.current).toEqual({ count: 0 });
+    expect(renderCount).toBe(1);
+
+    await act(() => {
+      subject$.next({ count: 0 });
+    });
+
+    expect(renderCount).toBe(2);
+  });
 });
