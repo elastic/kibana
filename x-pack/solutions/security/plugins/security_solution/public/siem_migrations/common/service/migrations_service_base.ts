@@ -174,7 +174,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
           !result.last_execution?.error
         ) {
           const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
-          if (connectorId && !this.hasMissingCapabilities('all')) {
+          if (connectorId && !this.hasMissingCapabilities('minimum')) {
             await this.startMigrationFromStats(connectorId, result);
             pendingMigrationIds.push(result.id);
           }
