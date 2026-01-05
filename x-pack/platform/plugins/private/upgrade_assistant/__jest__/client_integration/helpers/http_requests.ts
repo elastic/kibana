@@ -37,6 +37,16 @@ const registerHttpRequestMockHelpers = (
       });
     }
 
+    const isReindexStatusRequest = method === 'GET' && path.startsWith(REINDEX_SERVICE_BASE_PATH);
+
+    // Reindex status is fetched on mount by IndexStatusProvider. Resolve it on a macrotask tick so
+    // RTL has a chance to start awaiting a UI boundary, preventing React act() warnings.
+    if (isReindexStatusRequest) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(responsePromise), 0);
+      });
+    }
+
     return responsePromise;
   };
 
