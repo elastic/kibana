@@ -1,0 +1,263 @@
+# Changelog Configuration
+# This file configures the valid values for changelog fields.
+# Place this file as `changelog.yml` in the `docs/` directory
+
+# Available types for changelog entries
+# available_types:
+#   - breaking-change
+#   - bug-fix
+#   - deprecation
+#   - docs
+#   - enhancement
+#   - feature
+#   - known-issue
+#   - regression
+#   - security
+#   - other
+
+# Available subtypes for breaking changes
+# available_subtypes:
+#   - api
+#   - behavioral
+#   - configuration
+#   - dependency
+#   - subscription
+#   - plugin
+#   - security
+#   - other
+
+# Available lifecycle values
+# available_lifecycles:
+#   - preview
+#   - beta
+#   - ga
+
+# Available areas (optional - if not specified, all areas are allowed)
+available_areas:
+  - Alerting
+  - Beats management
+  - Canvas
+  - Code
+  - Dashboards and Visualizations
+  - Data ingestion and Fleet
+  - Discover
+  - Elastic Observability solution
+  - Elastic Security solution
+  - ES|QL
+  - Kibana Platform
+  - Kibana Security
+  - Kibana UI
+  - Logstash
+  - Machine learning
+  - Management
+  - Maps
+  - Monitoring
+  - Operations
+  - Platform
+  - QA
+  - Querying and filtering
+  - Reporting
+  - Search
+  - Sharing
+
+  # Add more areas as needed
+
+# Available products (optional - if not specified, all products are allowed)
+available_products:
+  - kibana
+  - cloud-serverless
+  # Add more products as needed
+
+# GitHub label mappings (optional - used when --pr option is specified)
+# Maps GitHub PR labels to changelog type values
+# When a PR has a label that matches a key, the corresponding type value is used
+label_to_type:
+  "release_note:breaking": breaking-change
+  "release_note:fix": bug-fix
+  "release_note:deprecation": deprecation
+  # ">docs": docs
+  # "documentation": docs
+  "release_note:enhancement": enhancement
+  # ">enhancement": enhancement
+  "release_note:feature": feature
+  # "type:known": known-issue
+  # ">regression": regression
+  # "type:security": security
+  # "type:other": other
+
+# Maps GitHub PR labels to changelog area values
+# Multiple labels can map to the same area, and a single label can map to multiple areas (comma-separated)
+label_to_areas:
+  "Feature:Alerting": "Alerting"
+  "Team:Alerting Services": "Alerting"
+  "Feature:Actions": "Alerting"
+  "Team:ResponseOps": "Alerting"
+  "Feature:beats-cm": "Beats management"
+  "Team:Beats": "Beats management"
+  "Feature:Canvas": "Canvas"
+  "Feature:Dashboard": "Dashboards and Visualizations"
+  "Feature:Drilldowns": "Dashboards and Visualizations"
+  "Project:TimeToVisualize": "Dashboards and Visualizations"
+  "Team:Presentation": "Dashboards and Visualizations"
+  "Feature:Lens": "Dashboards and Visualizations"
+  "Feature:Timelion": "Dashboards and Visualizations"
+  "Feature:TSVB": "Dashboards and Visualizations"
+  "Feature:Coordinate Map": "Dashboards and Visualizations"
+  "Feature:Region Map": "Dashboards and Visualizations"
+  "Feature:Vega": "Dashboards and Visualizations"
+  "Feature:Gauge Vis": "Dashboards and Visualizations"
+  "Feature:Tagcloud": "Dashboards and Visualizations"
+  "Feature:Vis Loader": "Dashboards and Visualizations"
+  "Feature:Vislib": "Dashboards and Visualizations"
+  "Feature:Vis Editor": "Dashboards and Visualizations"
+  "Feature:Aggregations": "Dashboards and Visualizations"
+  "Feature:Input Control": "Dashboards and Visualizations"
+  "Feature:Visualizations": "Dashboards and Visualizations"
+  "Feature:Markdown": "Dashboards and Visualizations"
+  "Feature:Data Table": "Dashboards and Visualizations"
+  "Feature:Heatmap": "Dashboards and Visualizations"
+  "Feature:Pie Chart": "Dashboards and Visualizations"
+  "Feature:XYAxis": "Dashboards and Visualizations"
+  "Feature:Graph": "Dashboards and Visualizations"
+  "Feature:New Feature": "Dashboards and Visualizations"
+  "Feature:MetricVis": "Dashboards and Visualizations"
+  "Team:Visualizations": "Dashboards and Visualizations"  
+  "Team:Fleet": "Data ingestion and Fleet"
+  "Ingest": "Data ingestion and Fleet"
+  "Feature:Ingest Node Pipelines": "Data ingestion and Fleet"
+  "Feature:Discover": "Discover"
+  "Team:DataDiscovery": "Discover"
+  "Team:ESQL": "Discover, ES|QL"
+  "Feature:Observability Home": "Elastic Observability solution"
+  "Feature:SLO": "Elastic Observability solution"
+  "Team:obs-ux-management": "Elastic Observability solution"
+  "Team:Obs AI Assistant": "Elastic Observability solution"
+  "Team:obs-ux-infra_services": "Elastic Observability solution"
+  "Team:obs-ux-logs": "Elastic Observability solution"
+  "Team:obs-knowledge": "Elastic Observability solution"
+  "Team:obs-entities": "Elastic Observability solution"
+  "ci:project-deploy-observability": "Elastic Observability solution"
+  "Feature:Uptime": "Elastic Observability solution"
+  "Team:uptime": "Elastic Observability solution"
+  "Team:apm": "Elastic Observability solution"
+  "Team:APM": "Elastic Observability solution"
+  "Feature:Metrics UI": "Elastic Observability solution"
+  "Team:logs-metrics-ui": "Elastic Observability solution"
+  "Feature:Logs UI": "Elastic Observability solution"
+  "Feature:Infra UI": "Elastic Observability solution"
+  "Feature:Service Maps": "Elastic Observability solution"
+  "Team:SIEM": "Elastic Security solution"
+  "Team:SecuritySolution": "Elastic Security solution"
+  "Team: SecuritySolution": "Elastic Security solution"
+  "Team:Endpoint Response": "Elastic Security solution"
+  "Team:Entity Analytics": "Elastic Security solution"
+  "Team:Security Generative AI": "Elastic Security solution"
+  "Team:Threat Hunting": "Elastic Security solution"
+  "Team:Threat Hunting:Explore": "Elastic Security solution"
+  "Team:Threat Hunting:Investigations": "Elastic Security solution"
+  "Team:Detections and Resp": "Elastic Security solution"
+  "Team:Asset Management": "Elastic Security solution"
+  "Team:Onboarding and Lifecycle Mgt": "Elastic Security solution"
+  "Team:Security Solution Platform": "Elastic Security solution"
+  "Team:Detection Alerts": "Elastic Security solution"
+  "Team: CTI": "Elastic Security solution"
+  "Team:Threat Hunting:Cases": "Elastic Security solution"
+  "Team:Cloud Security": "Elastic Security solution"
+  "Team:Detection Engine": "Elastic Security solution"
+  "Team:Defend Workflows": "Elastic Security solution"
+  "Team:Detection Rules": "Elastic Security solution"
+  "Team:Security-Scalability": "Elastic Security solution"
+  "Feature:Timeline": "Elastic Security solution"
+  "Feature:Detection Rules": "Elastic Security solution"
+  "Feature:Detection Alerts": "Elastic Security solution"
+  "Feature:Entity Analytics": "Elastic Security solution"
+  "Feature:Rule Exceptions": "Elastic Security solution"
+  "Feature:AutomaticImport": "Elastic Security solution"
+  "Team:SharedUX":  "Kibana platform"
+  "Team:Design":  "Kibana platform"
+  "Project:Accessibility":  "Kibana platform"
+  "Feature:Add Data":  "Kibana platform"
+  "Feature:Home":  "Kibana platform"
+  "Team:Cloud":  "Kibana platform"
+  "Team:Security": "Kibana Security"
+  "Feature:Security/Spaces": "Kibana Security"
+  "Feature:users and roles": "Kibana Security"
+  "Feature:Security/Authentication": "Kibana Security"
+  "Feature:Security/Authorization": "Kibana Security"
+  "Feature:Security/Feature Controls": "Kibana Security"
+  "Team:Security-Scalability": "Kibana Security"
+  "Kibana UI": "Kibana UI"
+  "Team:Core UI": "Kibana UI"
+  Feature:Header": "Kibana UI"
+  "Feature:Logstash Pipelines": "Logstash"
+  ":ml": "Machine learning"
+  "Feature:Anomaly Detection": "Machine learning"
+  "Feature:Data Frames": "Machine learning"
+  "Feature:File Data Viz": "Machine learning"
+  "Feature:ml-results": "Machine learning"
+  "Feature:Data Frame Analytics": "Machine learning"
+  "Feature:Inference UI": "Machine learning"
+  "Feature:license": "Management, Operations"
+  "Feature:Console": "Management"
+  "Feature:Search Profiler": "Management"
+  "Feature:watcher": "Management"
+  "Feature:Index Patterns": "Management"
+  "Feature:Data Views": "Management"
+  "Feature:Kibana Management": "Management"
+  "Feature:Dev Tools": "Management"
+  "Feature:Inspector": "Management"
+  "Feature:Index Management": "Management"
+  "Feature:Streams": "Management"
+  "Feature:Snapshot and Restore": "Management"
+  "Team:Elasticsearch UI": "Management"
+  "Team:Stack Management": "Management"
+  "Feature:FieldFormatters": "Management"
+  "Feature:CCR": "Management"
+  "Feature:ILM": "Management"
+  "Feature:Transforms": "Management"
+  "Feature:Search": "Management"
+  "Project:AsyncSearch": "Management"
+  "Feature:Upgrade Assistant": "Management"
+  "Team:Geo": "Maps"
+  "Team:Monitoring": "Monitoring"
+  "Feature:Telemetry": "Monitoring"
+  "Feature:Stack Monitoring": "Monitoring"
+  "Team:Operations": "Operations"
+  "Team:Core": "Platform"
+  "Feature:Plugins": "Platform"
+  "Feature:New Platform": "Platform"
+  "Project:i18n": "Platform"
+  "Feature:ExpressionLanguage": "Platform"
+  "Feature:Saved Objects": "Platform"
+  "Team:Stack Services": "Platform"
+  "Feature:NP Migration": "Platform"
+  "Feature:Task Manager": "Platform"
+  "Team:Pulse": "Platform"
+  "Team:QA": "QA"
+  "Feature:Query Bar": "Querying and filtering"
+  "Feature:Courier": "Querying and filtering"
+  "Feature:Filters": "Querying and filtering"
+  "Feature:Timepicker": "Querying and filtering"
+  "Feature:Highlight": "Querying and filtering"
+  "Feature:KQL": "Querying and filtering"
+  "Feature:Rollups": "Querying and filtering"
+  "Feature:Search": "Querying and filtering"
+  "Project:AsyncSearch": "Querying and filtering"
+  "Feature:Reporting": "Reporting"
+  "Team:Reporting Services": "Reporting"
+  "Team:Search": "Search"
+  "Feature:Embedding": "Sharing"
+  "Feature:SharingURLs": "Sharing"
+  
+# Product-specific label blockers (optional)
+# Maps product IDs to lists of labels that prevent changelog creation for that product
+# If you run the changelog add command with the --prs option and a PR has any of these labels, the changelog is not created
+product_label_blockers:
+  kibana:
+    - "release_note:skip"
+    - "reverted"
+    - "backport"
+  cloud-serverless:
+    - "release_note:skip"
+    - "reverted"
+    - "backport"
