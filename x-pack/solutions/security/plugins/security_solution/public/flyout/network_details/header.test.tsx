@@ -10,7 +10,6 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { PanelHeader } from './header';
 import { FlowTargetSourceDest } from '../../../common/search_strategy';
-import { SecuritySolutionLinkAnchor } from '../../common/components/links';
 
 const mockProps = {
   ip: '192.168.1.1/24',
@@ -24,10 +23,6 @@ jest.mock('../../common/components/links', () => {
     SecuritySolutionLinkAnchor: jest.fn(({ children, path }) => <a href={path}>{children}</a>),
   };
 });
-
-const SecuritySolutionLinkAnchorMock = SecuritySolutionLinkAnchor as jest.Mocked<
-  typeof SecuritySolutionLinkAnchor
->;
 
 describe('<PanelHeader />', () => {
   it('should check for href value of the anchor element', () => {
