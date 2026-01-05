@@ -79,7 +79,7 @@ export const getRulesBaseKibanaFeature = (
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRolesTitle',
     {
-      defaultMessage: 'Rules',
+      defaultMessage: 'Rules, Alerts, and Exceptions',
     }
   ),
   order: 1100,
