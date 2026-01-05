@@ -87,7 +87,12 @@ const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRou
      * during onboarding.
      */
     packageClient.ensureInstalledPackage({ pkgName: 'aws' }).catch((error) => {
-      logger.error(`Failed installing AWS package: ${error}`);
+      // Conflict errors are expected when the package was already installed in another space
+      if (error.constructor?.name === 'PackageSavedObjectConflictError') {
+        logger.debug(`AWS package already installed: ${error.message}`);
+      } else {
+        logger.error(`Failed installing AWS package: ${error}`);
+      }
     });
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
