@@ -768,6 +768,7 @@ describe('GithubConnector', () => {
         owner: 'owner',
         repo: 'repo',
         path: 'README.md',
+        ref: 'main',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(

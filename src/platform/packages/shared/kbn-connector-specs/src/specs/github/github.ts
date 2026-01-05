@@ -255,23 +255,21 @@ export const GithubConnector: ConnectorSpec = {
         owner: z.string(),
         repo: z.string(),
         path: z.string(),
-        ref: z.string().optional(),
+        ref: z.string().default('main'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           owner: string;
           repo: string;
           path: string;
-          ref?: string;
+          ref: string;
         };
-
-        const ref = typedInput.ref || 'main';
 
         // Get the content of the specified file
         const response = await ctx.client.get(
           `https://api.github.com/repos/${typedInput.owner}/${typedInput.repo}/contents/${typedInput.path}`,
           {
-            params: { ref },
+            params: { ref: typedInput.ref },
             headers: {
               Accept: 'application/vnd.github.v3+json',
             },
