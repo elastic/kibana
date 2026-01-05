@@ -151,17 +151,17 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     defaultConnectorId,
     conversation,
     nextInput,
-    promptManagerState,
+    promptState,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
     conversation?: Conversation;
     nextInput?: ConverseInput;
-    promptManagerState?: PromptManagerInitialState;
+    promptState?: PromptManagerInitialState;
   }): ScopedRunner => {
     const resultStore = createResultStore(conversation?.rounds);
     const stateManager = createConversationStateManager(conversation);
-    const promptManager = createPromptManager(promptManagerState);
+    const promptManager = createPromptManager(promptState);
 
     if (nextInput !== undefined) {
       initPromptManager({ promptManager, conversation, input: nextInput });
@@ -182,13 +182,13 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   return {
     runTool: (runToolParams) => {
-      const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, defaultConnectorId });
+      const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
+      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runTool(otherParams);
     },
     runInternalTool: (runToolParams) => {
-      const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, defaultConnectorId });
+      const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
+      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
       return runner.runInternalTool(otherParams);
     },
     runAgent: (params) => {
@@ -198,7 +198,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         defaultConnectorId,
         conversation: params.agentParams.conversation,
         nextInput: params.agentParams.nextInput,
-        promptManagerState: getAgentPromptManagerState({
+        promptState: getAgentPromptManagerState({
           input: params.agentParams.nextInput,
           conversation: params.agentParams.conversation,
         }),
