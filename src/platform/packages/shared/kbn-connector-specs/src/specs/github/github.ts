@@ -77,16 +77,16 @@ export const GithubConnector: ConnectorSpec = {
       input: z.object({
         owner: z.string(),
         repo: z.string(),
-        ref: z.string().optional(),
+        ref: z.string().default('main'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           owner: string;
           repo: string;
-          ref?: string;
+          ref: string;
         };
 
-        const ref = typedInput.ref || 'main';
+        const ref = typedInput.ref;
 
         // Get the commit SHA for the ref
         const commitResponse = await ctx.client.get(

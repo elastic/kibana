@@ -8,9 +8,9 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/core/server';
 import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
-import { bulkCreateMcpTools } from '@kbn/onechat-plugin/server/services/tools/utils/bulk_create_mcp_tools';
-import type { ToolRegistry } from '@kbn/onechat-plugin/server/services/tools';
-import { getMcpTools } from '@kbn/onechat-plugin/server/services/tools/tool_types/mcp/tool_type';
+import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils/bulk_create_mcp_tools';
+import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
+import { getMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
 
 export const createMcpConnector = async (
   registry: ToolRegistry,

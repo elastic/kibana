@@ -12,7 +12,10 @@ import type {
   DataSourcesRegistryPluginSetup,
   DataSourcesRegistryPluginStart,
 } from '@kbn/data-sources-registry-plugin/server';
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
@@ -23,11 +26,11 @@ export interface DataConnectorsServerStart {}
 export interface DataConnectorsServerSetupDependencies {
   actions: ActionsPluginSetup;
   dataSourcesRegistry: DataSourcesRegistryPluginSetup;
-  onechat: OnechatPluginSetup;
+  agentBuilder: AgentBuilderPluginSetup;
 }
 
 export interface DataConnectorsServerStartDependencies {
   actions: ActionsPluginStart;
   dataSourcesRegistry: DataSourcesRegistryPluginStart;
-  onechat: OnechatPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }

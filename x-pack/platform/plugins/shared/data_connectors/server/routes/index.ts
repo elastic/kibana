@@ -174,7 +174,7 @@ export function registerRoutes(
 
       try {
         const { name, type, token } = request.body;
-        const [, { actions, dataSourcesRegistry, onechat }] = await getStartServices();
+        const [, { actions, dataSourcesRegistry, agentBuilder }] = await getStartServices();
 
         const dataCatalog = dataSourcesRegistry.getCatalog();
         const dataConnectorTypeDef = dataCatalog.get(type);
@@ -195,7 +195,7 @@ export function registerRoutes(
         let stackConnector: ActionResult;
         let secrets: Record<string, string> = {};
         if (connectorType === '.mcp') {
-          const registry = await onechat.tools.getRegistry({ request });
+          const registry = await agentBuilder.tools.getRegistry({ request });
           stackConnector = await createMcpConnector(
             registry,
             actions,
