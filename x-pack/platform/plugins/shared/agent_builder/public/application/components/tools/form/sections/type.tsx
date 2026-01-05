@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { docLinks } from '../../../../../../common/doc_links';
+import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
 import { useToolTypes } from '../../../../hooks/tools/use_tool_type_info';
@@ -26,6 +26,7 @@ export const TypeSection = ({ mode }: TypeProps) => {
     control,
   } = useFormContext<ToolFormData>();
   const type = useWatch({ control, name: 'type' });
+  const { docLinksService } = useAgentBuilderServices();
 
   const toolConfig = getToolTypeConfig(type);
   const ConfigurationComponent = useMemo(() => {
@@ -53,7 +54,7 @@ export const TypeSection = ({ mode }: TypeProps) => {
       description={i18nMessages.configuration.documentation.description}
       documentation={{
         title: i18nMessages.configuration.documentation.documentationLink,
-        href: docLinks.tools,
+        href: docLinksService.tools,
       }}
     >
       <EuiFormRow label={i18nMessages.configuration.form.type.label} error={errors.type?.message}>

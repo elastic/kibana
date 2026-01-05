@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
@@ -16,7 +15,7 @@ import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
-import { isSearchSourceReference } from '../out/transform_references_out';
+import { isLegacyControlGroupReference } from '../out/transform_references_out';
 
 export const transformDashboardIn = (
   dashboardState: DashboardState
@@ -46,19 +45,9 @@ export const transformDashboardIn = (
       ...rest
     } = dashboardState;
 
-    // TODO remove when references are removed from API
-    const hasTagReference = (incomingReferences ?? []).some(
-      ({ type }) => type === tagSavedObjectTypeName
-    );
-    if (hasTagReference) {
-      throw new Error(`Tag references are not supported. Pass tags in with 'data.tags'`);
-    }
-    // TODO remove when references are removed from API
-    const hasSearchSourceReference = (incomingReferences ?? []).some(isSearchSourceReference);
-    if (hasSearchSourceReference) {
-      throw new Error(
-        `Search source references are not supported. Pass filters in with injected references'`
-      );
+    const controlGroupReferences = (incomingReferences ?? []).filter(isLegacyControlGroupReference);
+    if (incomingReferences && controlGroupReferences.length !== incomingReferences.length) {
+      throw new Error(`References are only supported for controlGroupInput.`);
     }
 
     const tagReferences = transformTagsIn(tags);
@@ -100,7 +89,7 @@ export const transformDashboardIn = (
       attributes,
       references: [
         ...tagReferences,
-        ...(incomingReferences ?? []),
+        ...controlGroupReferences,
         ...panelReferences,
         ...searchSourceReferences,
       ],

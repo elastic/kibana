@@ -113,7 +113,12 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
       data-test-subj="migrationPanelTitle"
     >
       {migrationStats.vendor && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={{
+            marginRight: euiTheme.size.xs,
+          }}
+        >
           <EuiBadge
             color={MIGRATION_VENDOR_COLOR_CONFIG[migrationStats.vendor]}
             data-test-subj="migrationVendorBadge"
