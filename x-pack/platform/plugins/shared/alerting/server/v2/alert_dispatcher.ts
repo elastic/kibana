@@ -6,75 +6,104 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_ACTIONS_INDEX } from './create_indices';
+import { ALERT_EVENTS_INDEX, ALERT_ACTIONS_INDEX } from './create_indices';
 
 export interface AlertDispatcherOpts {
   esClient: ElasticsearchClient;
 }
 
-export const INTERVAL = 1000;
-export const DISPATCHER_EVENTS_QUERY = `FROM .kibana_alert_events
+export const DISPATCHER_INTERVAL_MS = 1000;
+export const ADDITIONAL_LOOKBACK_MS = 5000;
+
+// Query for:
+//  - alert events that have been reported since the last time the dispatcher fired them
+export const DISPATCHER_EVENTS_QUERY = `FROM ${ALERT_EVENTS_INDEX}
+  {timeFilter}
   | RENAME alert_series_id AS event_alert_series_id, @timestamp AS event_timestamp
-  | LOOKUP JOIN .kibana_alert_actions
+  | LOOKUP JOIN ${ALERT_ACTIONS_INDEX}
       ON
         rule.id == rule_id AND
           alert_series_id == event_alert_series_id AND
           action_type == "fire-event"
-  | INLINE STATS last_fire = MAX(@timestamp)
+  | STATS last_fire = MAX(max_source_timestmap), max_event_timestamp = MAX(event_timestamp)
         BY rule.id, event_alert_series_id
-  | WHERE event_timestamp > last_fire OR last_fire IS NULL
-  | KEEP event_timestamp, rule.id, event_alert_series_id
-  | RENAME event_alert_series_id AS alert_series_id
-  | STATS @timestamp = MAX(event_timestamp) BY rule.id, alert_series_id
+  | WHERE last_fire IS NULL OR max_event_timestamp > last_fire
   | LIMIT 10000`;
-export const DISPATCHER_ACTIONS_QUERY = `FROM .kibana_alert_actions
+
+// Query for:
+//  - alert actions that have been created since the last time the dispatcher fired them
+export const DISPATCHER_ACTIONS_QUERY = `FROM ${ALERT_ACTIONS_INDEX}
+  {timeFilter}
   | WHERE action_type != "fire-action" AND action_type != "fire-event"
   | RENAME alert_series_id AS action_alert_series_id, @timestamp AS action_timestamp,
       action_type AS action_action_type, rule_id AS action_rule_id
-  | LOOKUP JOIN .kibana_alert_actions
+  | LOOKUP JOIN ${ALERT_ACTIONS_INDEX}
         ON
           action_rule_id == rule_id AND
             action_alert_series_id == alert_series_id AND
             action_type == "fire-action"
-  | INLINE STATS last_fire = MAX(@timestamp)
+  | STATS last_fire = MAX(max_source_timestmap), max_action_timestamp = MAX(action_timestamp)
         BY action_rule_id, action_alert_series_id
-  | WHERE action_timestamp > last_fire OR last_fire IS NULL
-  | KEEP action_timestamp, action_rule_id, action_alert_series_id, action_action_type
-  | RENAME action_alert_series_id AS alert_series_id, action_rule_id AS rule.id
-  | STATS @timestamp = MAX(action_timestamp)
-        BY rule.id, alert_series_id, action_action_type
+  | WHERE last_fire IS NULL OR max_action_timestamp > last_fire
   | LIMIT 10000`;
 
 export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
+  let lastStartForEventDataDispatcher: number;
   async function runDispatcherOnEventData() {
-    const start = Date.now();
+    const queryLookback = lastStartForEventDataDispatcher
+      ? `| WHERE @timestamp > "${new Date(
+          lastStartForEventDataDispatcher - ADDITIONAL_LOOKBACK_MS
+        ).toISOString()}"`
+      : '';
+    lastStartForEventDataDispatcher = Date.now();
     try {
-      await runAlertEventDispatcher({ esClient });
+      await runAlertEventDispatcher({ esClient, queryLookback });
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(`${new Date().toISOString()} Dispatcher error: ${e.message}`);
     } finally {
-      setTimeout(runDispatcherOnEventData, Math.max(INTERVAL - (Date.now() - start), 0));
+      setTimeout(
+        runDispatcherOnEventData,
+        Math.max(DISPATCHER_INTERVAL_MS - (Date.now() - lastStartForEventDataDispatcher), 0)
+      );
     }
   }
   runDispatcherOnEventData();
 
+  let lastStartForActionDataDispatcher: number;
   async function runDispatcherOnActionData() {
-    const start = Date.now();
+    const queryLookback = lastStartForActionDataDispatcher
+      ? `| WHERE @timestamp > "${new Date(
+          lastStartForActionDataDispatcher - ADDITIONAL_LOOKBACK_MS
+        ).toISOString()}"`
+      : '';
+    lastStartForActionDataDispatcher = Date.now();
     try {
-      await runAlertActionDispatcher({ esClient });
+      await runAlertActionDispatcher({ esClient, queryLookback });
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(`${new Date().toISOString()} Dispatcher error: ${e.message}`);
     } finally {
-      setTimeout(runDispatcherOnActionData, Math.max(INTERVAL - (Date.now() - start), 0));
+      setTimeout(
+        runDispatcherOnActionData,
+        Math.max(DISPATCHER_INTERVAL_MS - (Date.now() - lastStartForActionDataDispatcher), 0)
+      );
     }
   }
   runDispatcherOnActionData();
 }
 
-async function runAlertEventDispatcher({ esClient }: AlertDispatcherOpts) {
+async function runAlertEventDispatcher({
+  esClient,
+  queryLookback,
+}: {
+  esClient: ElasticsearchClient;
+  queryLookback: string;
+}) {
   const result = await esClient.esql.query({
-    query: DISPATCHER_EVENTS_QUERY,
+    query: DISPATCHER_EVENTS_QUERY.replace('{timeFilter}', queryLookback),
   });
+  // eslint-disable-next-line no-console
   console.log(
     `${new Date().toISOString()} Dispatcher query for alert events took ${result.took}ms`
   );
@@ -86,13 +115,20 @@ async function runAlertEventDispatcher({ esClient }: AlertDispatcherOpts) {
     }
     return obj;
   });
-  await dispatchAlertEvents(results, esClient);
+  await dispatchEventsAndActions(results, esClient, 'event');
 }
 
-async function runAlertActionDispatcher({ esClient }: AlertDispatcherOpts) {
+async function runAlertActionDispatcher({
+  esClient,
+  queryLookback,
+}: {
+  esClient: ElasticsearchClient;
+  queryLookback: string;
+}) {
   const result = await esClient.esql.query({
-    query: DISPATCHER_ACTIONS_QUERY,
+    query: DISPATCHER_ACTIONS_QUERY.replace('{timeFilter}', queryLookback),
   });
+  // eslint-disable-next-line no-console
   console.log(
     `${new Date().toISOString()} Dispatcher query for alert actions took ${result.took}ms`
   );
@@ -104,80 +140,31 @@ async function runAlertActionDispatcher({ esClient }: AlertDispatcherOpts) {
     }
     return obj;
   });
-  await dispatchAlertActions(results, esClient);
+  await dispatchEventsAndActions(results, esClient, 'action');
 }
 
-async function dispatchAlertEvents(rows: Record<string, unknown>[], esClient: ElasticsearchClient) {
-  if (rows.length === 0) return;
-  const fireActions: Record<string, Record<string, Date>> = {};
-  for (const row of rows) {
-    const ruleId = row['rule.id'] as string;
-    const timestamp = row['@timestamp'] as string;
-    // console.log(`${new Date().toISOString()} Dispatching: ${JSON.stringify(row)}`);
-    if (fireActions[ruleId] === undefined) {
-      fireActions[ruleId] = [];
-    }
-    if (
-      fireActions[ruleId][row.alert_series_id] === undefined ||
-      fireActions[ruleId][row.alert_series_id] < new Date(timestamp)
-    ) {
-      fireActions[ruleId][row.alert_series_id] = new Date(timestamp);
-    }
-  }
-  const bulkRequest = [];
-  for (const ruleId of Object.keys(fireActions)) {
-    for (const alertSeriesId of Object.keys(fireActions[ruleId])) {
-      bulkRequest.push({ index: {} });
-      bulkRequest.push({
-        '@timestamp': fireActions[ruleId][alertSeriesId].toISOString(),
-        rule_id: ruleId,
-        alert_series_id: alertSeriesId,
-        action_type: 'fire-event',
-      });
-    }
-  }
-  await esClient.bulk({
-    index: ALERT_ACTIONS_INDEX,
-    body: bulkRequest,
-  });
-  console.log(`${new Date().toISOString()} Dispatched ${rows.length} alert events`);
-}
-
-async function dispatchAlertActions(
+async function dispatchEventsAndActions(
   rows: Record<string, unknown>[],
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  source: 'event' | 'action'
 ) {
   if (rows.length === 0) return;
-  const fireActions: Record<string, Record<string, Date>> = {};
-  for (const row of rows) {
-    const ruleId = row['rule.id'] as string;
-    const timestamp = row['@timestamp'] as string;
-    // console.log(`${new Date().toISOString()} Dispatching: ${JSON.stringify(row)}`);
-    if (fireActions[ruleId] === undefined) {
-      fireActions[ruleId] = [];
-    }
-    if (
-      fireActions[ruleId][row.alert_series_id] === undefined ||
-      fireActions[ruleId][row.alert_series_id] < new Date(timestamp)
-    ) {
-      fireActions[ruleId][row.alert_series_id] = new Date(timestamp);
-    }
-  }
   const bulkRequest = [];
-  for (const ruleId of Object.keys(fireActions)) {
-    for (const alertSeriesId of Object.keys(fireActions[ruleId])) {
-      bulkRequest.push({ index: {} });
-      bulkRequest.push({
-        '@timestamp': fireActions[ruleId][alertSeriesId].toISOString(),
-        rule_id: ruleId,
-        alert_series_id: alertSeriesId,
-        action_type: 'fire-action',
-      });
-    }
+  const now = new Date().toISOString();
+  for (const row of rows) {
+    bulkRequest.push({ index: {} });
+    bulkRequest.push({
+      '@timestamp': now,
+      rule_id: row['rule.id'],
+      alert_series_id: row.event_alert_series_id,
+      action_type: `fire-${source}`,
+      max_source_timestamp: row[`max_${source}_timestamp`],
+    });
   }
   await esClient.bulk({
     index: ALERT_ACTIONS_INDEX,
     body: bulkRequest,
   });
-  console.log(`${new Date().toISOString()} Dispatched ${rows.length} alert actions`);
+  // eslint-disable-next-line no-console
+  console.log(`${new Date().toISOString()} Dispatched ${rows.length} alert ${source}s`);
 }

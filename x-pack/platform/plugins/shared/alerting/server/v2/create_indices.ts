@@ -74,6 +74,7 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
         reason: { type: 'text' },
         destination_id: { type: 'keyword' },
         tag: { type: 'keyword' },
+        max_source_timestmap: { type: 'date' },
       },
     },
   });
