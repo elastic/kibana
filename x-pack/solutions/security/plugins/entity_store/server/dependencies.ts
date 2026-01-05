@@ -7,11 +7,10 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { ResourcesService } from './domain/resources_service';
-import { EntityStoreLogger } from './infra/logging';
 import type { EntityStoreDependencies } from './domain/dependencies';
 
 export const initDependencies = (ctx: PluginInitializerContext): EntityStoreDependencies => {
-  const logger = new EntityStoreLogger(ctx.logger.get());
+  const logger = ctx.logger.get('v2');
   const resourcesService = new ResourcesService(logger);
 
   return {

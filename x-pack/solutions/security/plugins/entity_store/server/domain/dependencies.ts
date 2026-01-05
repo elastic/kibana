@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EntityStoreLogger } from '../infra/logging';
+import type { Logger } from '@kbn/logging';
 import type { ResourcesService } from './resources_service';
 
 export interface EntityStoreDependencies {
   resourcesService: ResourcesService;
-  logger: EntityStoreLogger;
+  logger: Logger;
 }

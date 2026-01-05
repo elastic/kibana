@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
 import { EntityType } from '../domain/definitions/entity_type';
 import type { ResourcesService } from '../domain/resources_service';
-import type { EntityStoreLogger } from '../infra/logging';
 
 const bodySchema = z.object({
   entityType: z.array(EntityType).optional(),
@@ -20,7 +19,7 @@ const bodySchema = z.object({
 export const registerInstall = (
   router: IRouter,
   resourceService: ResourcesService,
-  logger: EntityStoreLogger
+  logger: Logger
 ) => {
   router.versioned
     .post({
