@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertJsonSchemaToZod } from './temp';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 /**
@@ -32,7 +31,7 @@ export const InputSchema = z.object({
   temperature: z.number().min(0).max(1).optional(),
 });
 
-function getStructuredOutputSchema(contentSchema: z.ZodType) {
+export function getStructuredOutputSchema(contentSchema: z.ZodType) {
   return z.object({
     content: contentSchema,
   });
@@ -67,11 +66,4 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
-  dynamicOutputSchema: (input) => {
-    if (input.outputSchema) {
-      return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
-    }
-
-    return stringOutputSchema;
-  },
 };

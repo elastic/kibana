@@ -9,14 +9,34 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { AiPromptStepCommonDefinition, AiPromptStepTypeId } from '../../../common/steps/ai';
+import { convertJsonSchemaToZod } from './temp';
+import type {
+  AiPromptStepConfigSchema,
+  AiPromptStepInputSchema,
+  AiPromptStepOutputSchema,
+} from '../../../common/steps/ai';
+import {
+  AiPromptStepCommonDefinition,
+  AiPromptStepTypeId,
+  getStructuredOutputSchema,
+  OutputSchema,
+} from '../../../common/steps/ai';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
-export const AiPromptStepDefinition: PublicStepDefinition = {
+export const AiPromptStepDefinition: PublicStepDefinition<
+  AiPromptStepInputSchema,
+  AiPromptStepOutputSchema,
+  AiPromptStepConfigSchema
+> = {
   ...AiPromptStepCommonDefinition,
   // Simple type assertion - assumes the types are compatible
-  dynamicOutputSchema:
-    AiPromptStepCommonDefinition.dynamicOutputSchema as PublicStepDefinition['dynamicOutputSchema'],
+  dynamicOutputSchema: (input) => {
+    if (input.outputSchema) {
+      return getStructuredOutputSchema(convertJsonSchemaToZod(input.outputSchema));
+    }
+
+    return OutputSchema;
+  },
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
       default: icon,
