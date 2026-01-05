@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
@@ -91,6 +91,50 @@ export class WorkflowExecutionRepository {
   }
 
   /**
+   * Bulk updates multiple workflow executions in a single Elasticsearch request.
+   * This is more efficient than individual updates, especially when cancelling multiple executions.
+   *
+   * @param updates - Array of partial workflow execution objects. Each must include the `id` property.
+   * @throws {Error} If any execution ID is missing or if the bulk operation has errors.
+   * @returns A promise that resolves when all updates are complete.
+   */
+  public async bulkUpdateWorkflowExecutions(
+    updates: Array<Partial<EsWorkflowExecution>>
+  ): Promise<void> {
+    if (updates.length === 0) {
+      return;
+    }
+
+    updates.forEach((update) => {
+      if (!update.id) {
+        throw new Error('Workflow execution ID is required for bulk update');
+      }
+    });
+
+    const bulkResponse = await this.esClient.bulk({
+      refresh: true,
+      index: this.indexName,
+      body: updates.flatMap((update) => [{ update: { _id: update.id } }, { doc: update }]),
+    });
+
+    if (bulkResponse.errors) {
+      const erroredDocuments = bulkResponse.items
+        .filter((item) => item.update?.error)
+        .map((item) => ({
+          id: item.update?._id,
+          error: item.update?.error,
+          status: item.update?.status,
+        }));
+
+      throw new Error(
+        `Failed to update ${erroredDocuments.length} workflow executions: ${JSON.stringify(
+          erroredDocuments
+        )}`
+      );
+    }
+  }
+
+  /**
    * Generic method to search workflow executions with a custom query.
    *
    * @param query - The Elasticsearch query object.
@@ -136,13 +180,7 @@ export class WorkflowExecutionRepository {
           must_not: [
             {
               terms: {
-                status: [
-                  ExecutionStatus.COMPLETED,
-                  ExecutionStatus.FAILED,
-                  ExecutionStatus.CANCELLED,
-                  ExecutionStatus.SKIPPED,
-                  ExecutionStatus.TIMED_OUT,
-                ],
+                status: TerminalExecutionStatuses,
               },
             },
           ],
@@ -150,5 +188,61 @@ export class WorkflowExecutionRepository {
       },
       1
     );
+  }
+
+  /**
+   * Retrieves non-terminal workflow execution IDs by concurrency group key.
+   * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
+   * to make room for new executions.
+   *
+   * Only returns execution IDs (not full documents) for efficiency, as we only need IDs for cancellation.
+   * Results are sorted by createdAt ascending (oldest first).
+   *
+   * @param concurrencyGroupKey - The concurrency group key to filter by.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param excludeExecutionId - Optional execution ID to exclude from results (e.g., current execution).
+   * @param size - Optional limit on the number of results to return. Defaults to 5000.
+   * @returns A promise that resolves to an array of execution IDs sorted by createdAt (oldest first).
+   */
+  public async getRunningExecutionsByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    excludeExecutionId?: string,
+    size: number = 5000
+  ): Promise<string[]> {
+    const mustClauses: Array<Record<string, unknown>> = [
+      { term: { concurrencyGroupKey } },
+      { term: { spaceId } },
+    ];
+
+    // Exclude terminal statuses - include PENDING, RUNNING, WAITING, etc.
+    const mustNotClauses: Array<Record<string, unknown>> = [
+      {
+        terms: {
+          status: TerminalExecutionStatuses,
+        },
+      },
+    ];
+
+    if (excludeExecutionId) {
+      mustNotClauses.push({ term: { id: excludeExecutionId } });
+    }
+
+    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
+      index: this.indexName,
+      query: {
+        bool: {
+          must: mustClauses,
+          must_not: mustNotClauses.length > 0 ? mustNotClauses : undefined,
+        },
+      },
+      _source: ['id'], // Only fetch ID field for efficiency
+      sort: [{ createdAt: { order: 'asc' } }], // Oldest first
+      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source?.id ?? hit._id)
+      .filter((id): id is string => id !== undefined);
   }
 }
