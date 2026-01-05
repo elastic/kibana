@@ -164,16 +164,6 @@ const defaultValueComparator =
     return isEqual(a, b);
   };
 
-const sortJsonKeys = (_: string, value: { [key: string]: unknown }) =>
-  value instanceof Object && !(value instanceof Array)
-    ? Object.keys(value)
-        .sort()
-        .reduce((sorted: { [key: string]: unknown }, key: string) => {
-          sorted[key] = value[key];
-          return sorted;
-        }, {})
-    : value;
-
 const fieldComparator = <K extends keyof DiscoverSessionTab>(
   _field: K,
   defaultValue: DiscoverSessionTab[K]
