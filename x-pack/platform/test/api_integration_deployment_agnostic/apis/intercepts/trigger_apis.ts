@@ -15,9 +15,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Intercept Trigger APIs', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/246120
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await kibanaServer.savedObjects.clean({
         types: [interceptTriggerRecordSavedObject.name],

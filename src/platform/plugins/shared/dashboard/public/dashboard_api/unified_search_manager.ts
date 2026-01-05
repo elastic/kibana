@@ -99,7 +99,7 @@ export function initializeUnifiedSearchManager(
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
   function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
-      unifiedSearchFilters$.next(unifiedSearchFilters);
+      unifiedSearchFilters$.next(cleanFiltersForSerialize(unifiedSearchFilters));
     }
   }
 
@@ -191,7 +191,7 @@ export function initializeUnifiedSearchManager(
           query: query$.value ?? dataService.query.queryString.getDefaultQuery(),
         }),
         set: ({ filters: newFilters, query: newQuery }) => {
-          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters));
+          setUnifiedSearchFilters(newFilters);
           setQuery(newQuery);
         },
         state$: combineLatest([query$, unifiedSearchFilters$]).pipe(
@@ -343,7 +343,7 @@ export function initializeUnifiedSearchManager(
           timeRestore$,
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           map(([filters, query, refresh_interval, time_range]) => ({
             filters,
             query,

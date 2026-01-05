@@ -9,7 +9,6 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
-import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
 import type { FeatureClient } from './feature/feature_client';
@@ -24,13 +23,11 @@ export class StreamsService {
 
   async getClientWithRequest({
     request,
-    assetClient,
     attachmentClient,
     queryClient,
     featureClient: featureClient,
   }: {
     request: KibanaRequest;
-    assetClient: AssetClient;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
     featureClient: FeatureClient;
@@ -43,7 +40,6 @@ export class StreamsService {
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
     return new StreamsClient({
-      assetClient,
       attachmentClient,
       queryClient,
       featureClient,

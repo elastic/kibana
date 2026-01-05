@@ -87,9 +87,53 @@ function getJsSourceSync(options) {
   };
 }
 
+/**
+ * Registers a Node require hook for `.peggy` files.
+ * Compiles grammars on-the-fly to CommonJS using `getJsSourceSync` and caches per file path.
+ *
+ * This is the runtime equivalent of:
+ * - @kbn/peggy-loader (webpack)
+ * - @kbn/test/transforms/peggy.js (jest)
+ */
+function requireHook() {
+  // Only register once
+  if (require.extensions['.peggy']) {
+    console.log('.peggy require hook already registered, skipping');
+    return;
+  }
+
+  const cache = new Map();
+
+  require.extensions['.peggy'] = function (module, filename) {
+    let compiled = cache.get(filename);
+    if (!compiled) {
+      const content = Fs.readFileSync(filename, 'utf8');
+      const { source } = getJsSourceSync({
+        path: filename,
+        content,
+        format: 'commonjs',
+        optimize: 'speed',
+        skipConfigSearch: false,
+      });
+      compiled = source;
+      cache.set(filename, compiled);
+    }
+    // @ts-expect-error - _compile is an internal Node.js API
+    if (typeof module._compile !== 'function') {
+      throw new Error(
+        'Unable to compile .peggy file: module._compile is an internal Node.js API. ' +
+          'Make sure you are running this code in a standard Node.js environment'
+      );
+    }
+    // @ts-expect-error - _compile is an internal Node.js API
+    module._compile(compiled, filename);
+  };
+}
+
 module.exports = {
   findConfigFile,
   getJsSource,
   getJsSourceSync,
+  requireHook,
   version: Peggy.VERSION,
 };

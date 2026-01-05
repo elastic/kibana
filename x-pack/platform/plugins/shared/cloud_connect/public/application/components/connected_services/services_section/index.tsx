@@ -109,40 +109,23 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       subscriptionRequired: services.auto_ops?.subscription?.required,
       hasActiveSubscription,
     },
-    // Synthetics Service (hardcoded as coming soon)
-    {
-      serviceKey: 'synthetics',
-      title: i18n.translate('xpack.cloudConnect.services.synthetics.title', {
-        defaultMessage: 'Synthetics',
-      }),
-      enabled: false,
-      badge: i18n.translate('xpack.cloudConnect.services.comingSoon', {
-        defaultMessage: 'COMING SOON',
-      }),
-      description: i18n.translate('xpack.cloudConnect.services.synthetics.description', {
-        defaultMessage:
-          'Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily.',
-      }),
-      isCardDisabled: true,
-    },
   ];
 
-  // Sort service cards: enabled first, then disabled, coming soon always last
-  const enabledCards = allServiceCards.filter((card) => card.enabled && !card.isCardDisabled);
-  const disabledCards = allServiceCards.filter((card) => !card.enabled && !card.isCardDisabled);
-  const comingSoonCards = allServiceCards.filter((card) => card.isCardDisabled);
+  // Sort service cards: enabled first, then disabled
+  const enabledCards = allServiceCards.filter((card) => card.enabled);
+  const disabledCards = allServiceCards.filter((card) => !card.enabled);
 
-  const serviceCards = [...enabledCards, ...disabledCards, ...comingSoonCards];
+  const serviceCards = [...enabledCards, ...disabledCards];
 
   return (
     <>
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="xpack.cloudConnect.connectedServices.services.title"
             defaultMessage="Services"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       {serviceCards.map((service, index) => (

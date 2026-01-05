@@ -15,6 +15,7 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  MathProcessor,
   ProcessorType,
   RemoveByPrefixProcessor,
   RemoveProcessor,
@@ -30,6 +31,7 @@ import {
   isNotCondition,
   isOrCondition,
   isConditionBlock,
+  extractFieldsFromMathExpression,
 } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
@@ -139,6 +141,14 @@ const actionStepValidators: {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
       checkFieldName(step.to);
+    }
+  },
+  math: (step: MathProcessor) => {
+    checkFieldName(step.to);
+    // Also validate field references in the expression
+    const expressionFields = extractFieldsFromMathExpression(step.expression);
+    for (const field of expressionFields) {
+      checkFieldName(field);
     }
   },
   // fields referenced in manual ingest pipelines are not validated here because

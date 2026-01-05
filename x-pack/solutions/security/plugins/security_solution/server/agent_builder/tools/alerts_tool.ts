@@ -6,12 +6,15 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/logging';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 const alertsSchema = z.object({
   query: z
@@ -61,15 +64,24 @@ const enhanceQueryForAlerts = (nlQuery: string, index: string, isCount?: boolean
   return `${nlQuery}${instruction}`;
 };
 
-export const alertsTool = (): BuiltinToolDefinition<typeof alertsSchema> => {
+export const alertsTool = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): BuiltinToolDefinition<typeof alertsSchema> => {
   return {
     id: SECURITY_ALERTS_TOOL_ID,
     type: ToolType.builtin,
     description: `Search and analyze security alerts using full-text or structured queries for finding, counting, aggregating, or summarizing alerts. When the user asks for a count (e.g., "how many alerts", "count alerts", "total number of alerts"), set the isCount parameter to true to optimize the query for count results.`,
     schema: alertsSchema,
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
     handler: async (
       { query: nlQuery, index, isCount },
-      { request, esClient, modelProvider, logger, events }
+      { request, esClient, modelProvider, events }
     ) => {
       // Determine the index to use: either explicitly provided or based on the current space
       const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${getSpaceIdFromRequest(request)}`;
