@@ -1511,7 +1511,7 @@
     "@emotion/jest": "^11.11.0",
     "@fast-check/jest": "^2.1.1",
     "@frsource/cypress-plugin-visual-regression-diff": "^3.3.10",
-    "@hey-api/openapi-ts": "0.89.0",
+    "@hey-api/openapi-ts": "0.89.2",
     "@huggingface/hub": "^2.2.0",
     "@jest/console": "^29.7.0",
     "@jest/reporters": "^29.7.0",
