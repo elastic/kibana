@@ -528,7 +528,32 @@ components:
       example: This list tracks allowlisted values.
       type: string
     ExceptionListHumanId:
-      description: The exception list's human readable string identifier, `endpoint_list`.
+      description: >
+        The exception list's human readable string identifier.
+
+
+        For Endpoint Security artifacts, use one of the following valid
+        `list_id` values:
+
+
+        * `endpoint_list`: [Endpoint Exception
+        List](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+
+        * `endpoint_trusted_apps`: [Endpoint Trusted Apps
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+
+        * `endpoint_trusted_devices`: [Endpoint Trusted Devices
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+
+        * `endpoint_event_filters`: [Endpoint Event Filters
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+
+        * `endpoint_host_isolation_exceptions`: [Endpoint Host isolation
+        exceptions
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+
+        * `endpoint_blocklists`: [Endpoint Blocklists
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
       example: simple_list
       format: nonempty
       minLength: 1

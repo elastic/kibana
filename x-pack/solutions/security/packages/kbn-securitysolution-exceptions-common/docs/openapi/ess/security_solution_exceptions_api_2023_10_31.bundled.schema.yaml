@@ -1757,63 +1757,14 @@ paths:
         content:
           application/json:
             schema:
-              example:
-                description: This is a sample detection type exception item.
-                entries:
-                  - field: actingProcess.file.signer
-                    operator: excluded
-                    type: exists
-                  - field: host.name
-                    operator: included
-                    type: match_any
-                    value:
-                      - saturn
-                      - jupiter
-                item_id: simple_list_item
-                list_id: simple_list
-                name: Sample Exception List Item
-                namespace_type: single
-                os_types:
-                  - linux
-                tags:
-                  - malware
-                type: simple
-              type: object
-              properties:
-                comments:
-                  $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
-                  default: []
-                description:
-                  $ref: '#/components/schemas/ExceptionListItemDescription'
-                entries:
-                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
-                expire_time:
-                  $ref: '#/components/schemas/ExceptionListItemExpireTime'
-                item_id:
-                  $ref: '#/components/schemas/ExceptionListItemHumanId'
-                list_id:
-                  $ref: '#/components/schemas/ExceptionListHumanId'
-                meta:
-                  $ref: '#/components/schemas/ExceptionListItemMeta'
-                name:
-                  $ref: '#/components/schemas/ExceptionListItemName'
-                namespace_type:
-                  $ref: '#/components/schemas/ExceptionNamespaceType'
-                  default: single
-                os_types:
-                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
-                tags:
-                  $ref: '#/components/schemas/ExceptionListItemTags'
-                  default: []
-                type:
-                  $ref: '#/components/schemas/ExceptionListItemType'
-              required:
-                - list_id
-                - type
-                - name
-                - description
-                - entries
+              oneOf:
+                - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+                - $ref: '#/components/schemas/CreateExceptionListItemEndpointList'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedApps'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedDevices'
+                - $ref: '#/components/schemas/CreateExceptionListItemEventFilters'
+                - $ref: '#/components/schemas/CreateExceptionListItemHostIsolation'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklist'
         description: Exception list item's properties
         required: true
       responses:
@@ -2088,64 +2039,15 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              comments: []
-              description: Updated description
-              entries:
-                - field: host.name
-                  operator: included
-                  type: match
-                  value: rock01
-              item_id: simple_list_item
-              name: Updated name
-              namespace_type: single
-              tags: []
-              type: simple
             schema:
-              type: object
-              properties:
-                _version:
-                  description: >-
-                    The version id, normally returned by the API when the item
-                    was retrieved. Use it ensure updates are done against the
-                    latest version.
-                  type: string
-                comments:
-                  $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
-                  default: []
-                description:
-                  $ref: '#/components/schemas/ExceptionListItemDescription'
-                entries:
-                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
-                expire_time:
-                  $ref: '#/components/schemas/ExceptionListItemExpireTime'
-                id:
-                  $ref: '#/components/schemas/ExceptionListItemId'
-                  description: Either `id` or `item_id` must be specified
-                item_id:
-                  $ref: '#/components/schemas/ExceptionListItemHumanId'
-                  description: Either `id` or `item_id` must be specified
-                list_id:
-                  $ref: '#/components/schemas/ExceptionListHumanId'
-                meta:
-                  $ref: '#/components/schemas/ExceptionListItemMeta'
-                name:
-                  $ref: '#/components/schemas/ExceptionListItemName'
-                namespace_type:
-                  $ref: '#/components/schemas/ExceptionNamespaceType'
-                  default: single
-                os_types:
-                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
-                tags:
-                  $ref: '#/components/schemas/ExceptionListItemTags'
-                type:
-                  $ref: '#/components/schemas/ExceptionListItemType'
-              required:
-                - type
-                - name
-                - description
-                - entries
+              oneOf:
+                - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+                - $ref: '#/components/schemas/UpdateExceptionListItemEndpointList'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedApps'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevices'
+                - $ref: '#/components/schemas/UpdateExceptionListItemEventFilters'
+                - $ref: '#/components/schemas/UpdateExceptionListItemHostIsolation'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklist'
         description: Exception list item's properties
         required: true
       responses:
@@ -2743,6 +2645,17 @@ paths:
         - Security Exceptions API
 components:
   schemas:
+    CreateExceptionListItemBlocklist:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+        - description: Add an item to the Endpoint Security Blocklists List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_blocklists
+              example: endpoint_blocklists
+              type: string
     CreateExceptionListItemComment:
       type: object
       properties:
@@ -2754,6 +2667,119 @@ components:
       items:
         $ref: '#/components/schemas/CreateExceptionListItemComment'
       type: array
+    CreateExceptionListItemEndpointList:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+        - description: Add an item to the Endpoint Security Exception List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_list
+              example: endpoint_list
+              type: string
+    CreateExceptionListItemEventFilters:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+        - description: Add an item to the Endpoint Security Event Filters List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_event_filters
+              example: endpoint_event_filters
+              type: string
+    CreateExceptionListItemGeneric:
+      example:
+        description: This is a sample detection type exception item.
+        entries:
+          - field: actingProcess.file.signer
+            operator: excluded
+            type: exists
+          - field: host.name
+            operator: included
+            type: match_any
+            value:
+              - saturn
+              - jupiter
+        item_id: simple_list_item
+        list_id: simple_list
+        name: Sample Exception List Item
+        namespace_type: single
+        os_types:
+          - linux
+        tags:
+          - malware
+        type: simple
+      type: object
+      properties:
+        comments:
+          $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
+          default: []
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
+        expire_time:
+          $ref: '#/components/schemas/ExceptionListItemExpireTime'
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+          default: single
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '#/components/schemas/ExceptionListItemTags'
+          default: []
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+      required:
+        - list_id
+        - type
+        - name
+        - description
+        - entries
+    CreateExceptionListItemHostIsolation:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+        - description: Add an item to the Endpoint Security Host isolation exceptions List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_host_isolation_exceptions
+              example: endpoint_host_isolation_exceptions
+              type: string
+    CreateExceptionListItemTrustedApps:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+        - description: Add an item to the Endpoint Security Trusted Apps List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_trusted_apps
+              example: endpoint_trusted_apps
+              type: string
+    CreateExceptionListItemTrustedDevices:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+        - description: Add an item to the Endpoint Security Trusted Devices List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_trusted_devices
+              example: endpoint_trusted_devices
+              type: string
     CreateRuleExceptionListItemComment:
       type: object
       properties:
@@ -2869,7 +2895,32 @@ components:
       example: This list tracks allowlisted values.
       type: string
     ExceptionListHumanId:
-      description: The exception list's human readable string identifier, `endpoint_list`.
+      description: >
+        The exception list's human readable string identifier.
+
+
+        For Endpoint Security artifacts, use one of the following valid
+        `list_id` values:
+
+
+        * `endpoint_list`: [Endpoint Exception
+        List](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+
+        * `endpoint_trusted_apps`: [Endpoint Trusted Apps
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+
+        * `endpoint_trusted_devices`: [Endpoint Trusted Devices
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+
+        * `endpoint_event_filters`: [Endpoint Event Filters
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+
+        * `endpoint_host_isolation_exceptions`: [Endpoint Host isolation
+        exceptions
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+
+        * `endpoint_blocklists`: [Endpoint Blocklists
+        List](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
       example: simple_list
       format: nonempty
       minLength: 1
@@ -3330,6 +3381,17 @@ components:
       required:
         - status_code
         - message
+    UpdateExceptionListItemBlocklist:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+        - description: Update an item in the Endpoint Security Blocklists List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_blocklists
+              example: endpoint_blocklists
+              type: string
     UpdateExceptionListItemComment:
       type: object
       properties:
@@ -3343,6 +3405,121 @@ components:
       items:
         $ref: '#/components/schemas/UpdateExceptionListItemComment'
       type: array
+    UpdateExceptionListItemEndpointList:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+        - description: Update an item in the Endpoint Security Exception List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_list
+              example: endpoint_list
+              type: string
+    UpdateExceptionListItemEventFilters:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+        - description: Update an item in the Endpoint Security Event Filters List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_event_filters
+              example: endpoint_event_filters
+              type: string
+    UpdateExceptionListItemGeneric:
+      example:
+        comments: []
+        description: Updated description
+        entries:
+          - field: host.name
+            operator: included
+            type: match
+            value: rock01
+        item_id: simple_list_item
+        name: Updated name
+        namespace_type: single
+        tags: []
+        type: simple
+      type: object
+      properties:
+        _version:
+          description: >-
+            The version id, normally returned by the API when the item was
+            retrieved. Use it ensure updates are done against the latest
+            version.
+          type: string
+        comments:
+          $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
+          default: []
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
+        expire_time:
+          $ref: '#/components/schemas/ExceptionListItemExpireTime'
+        id:
+          $ref: '#/components/schemas/ExceptionListItemId'
+          description: Either `id` or `item_id` must be specified
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+          description: Either `id` or `item_id` must be specified
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+          default: single
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+          default: []
+        tags:
+          $ref: '#/components/schemas/ExceptionListItemTags'
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+      required:
+        - type
+        - name
+        - description
+        - entries
+    UpdateExceptionListItemHostIsolation:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+        - description: >-
+            Update an item in the Endpoint Security Host isolation exceptions
+            List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_host_isolation_exceptions
+              example: endpoint_host_isolation_exceptions
+              type: string
+    UpdateExceptionListItemTrustedApps:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+        - description: Update an item in the Endpoint Security Trusted Apps List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_trusted_apps
+              example: endpoint_trusted_apps
+              type: string
+    UpdateExceptionListItemTrustedDevices:
+      allOf:
+        - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+        - description: Update an item in the Endpoint Security Trusted Devices List.
+          type: object
+          properties:
+            list_id:
+              enum:
+                - endpoint_trusted_devices
+              example: endpoint_trusted_devices
+              type: string
     UUID:
       description: A universally unique identifier
       format: uuid
