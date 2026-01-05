@@ -7,7 +7,16 @@
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange, generateLongId, generateShortId } from '@kbn/synthtrace-client';
 import { shuffle, compact } from 'lodash';
-import { ERROR_MESSAGE, PRODUCT_TRANSACTION_NAME } from '../constants';
+import {
+  ERROR_MESSAGE,
+  PRODUCT_TRANSACTION_NAME,
+  SERVICE_OPBEANS_JAVA,
+  SERVICE_OPBEANS_NODE,
+  SERVICE_OPBEANS_RUM,
+  SERVICE_GO,
+  SERVICE_NODE,
+  OPBEANS_JAVA_INSTANCE,
+} from '../constants';
 
 const SERVICE_GO_TRANSACTION_NAMES = ['GET', 'PUT', 'DELETE', 'UPDATE'].flatMap((method) =>
   [
@@ -50,30 +59,30 @@ export function opbeans({
 
   const opbeansJava = apm
     .service({
-      name: 'opbeans-java',
+      name: SERVICE_OPBEANS_JAVA,
       environment: 'production',
       agentName: 'java',
     })
-    .instance('opbeans-java-prod-1')
-    .podId('opbeans-java-prod-1-pod');
+    .instance(OPBEANS_JAVA_INSTANCE)
+    .podId(`${OPBEANS_JAVA_INSTANCE}-pod`);
 
   const opbeansNode = apm
     .service({
-      name: 'opbeans-node',
+      name: SERVICE_OPBEANS_NODE,
       environment: 'production',
       agentName: 'nodejs',
     })
     .instance('opbeans-node-prod-1');
 
   const opbeansRum = apm.browser({
-    serviceName: 'opbeans-rum',
+    serviceName: SERVICE_OPBEANS_RUM,
     environment: 'production',
     userAgent: apm.getChromeUserAgentDefaults(),
   });
 
   const opbeansGo = apm
     .service({
-      name: 'service-go',
+      name: SERVICE_GO,
       environment: 'production',
       agentName: 'go',
     })
@@ -81,7 +90,7 @@ export function opbeans({
 
   const serviceNode = apm
     .service({
-      name: 'service-node',
+      name: SERVICE_NODE,
       environment: 'production',
       agentName: 'nodejs',
     })
