@@ -18,6 +18,7 @@ import { initializeRuleExecutorTaskDefinition } from './rule_executor';
 import { CreateRuleRoute } from './routes/create_rule_route';
 import { UpdateRuleRoute } from './routes/update_rule_route';
 import { registerFeaturePrivileges } from './lib/security/privileges';
+import { RulesClient } from './application/esql_rule/lib/rules_client';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
@@ -27,6 +28,9 @@ export const module = new ContainerModule(({ bind }) => {
   // Register HTTP routes via DI
   bind(Route).toConstantValue(CreateRuleRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
+
+  // Request-scoped rules client
+  bind(RulesClient).toSelf().inRequestScope();
 
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);

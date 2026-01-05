@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { updateEsqlRule } from './update_esql_rule';
 export type { UpdateEsqlRuleData } from './types';
 export { updateEsqlRuleDataSchema } from './schemas';

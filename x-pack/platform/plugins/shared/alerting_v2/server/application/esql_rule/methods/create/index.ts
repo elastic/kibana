@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { createEsqlRule } from './create_esql_rule';
 export type { CreateEsqlRuleData, CreateEsqlRuleParams, EsqlRuleResponse } from './types';
 export { createEsqlRuleDataSchema } from './schemas';

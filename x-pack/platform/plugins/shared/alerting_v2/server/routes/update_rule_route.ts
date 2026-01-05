@@ -7,26 +7,19 @@
 
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import type { HttpServiceStart } from '@kbn/core-http-server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { Logger as KibanaLogger } from '@kbn/logging';
-import { inject, injectable, optional } from 'inversify';
-import { Logger, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request, Response } from '@kbn/core-di-server';
+import { inject, injectable } from 'inversify';
+import { Logger } from '@kbn/core-di';
+import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { DEFAULT_ALERTING_V2_ROUTE_SECURITY } from './constants';
-import { ESQL_RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
-  updateEsqlRule,
   updateEsqlRuleDataSchema,
   type UpdateEsqlRuleData,
 } from '../application/esql_rule/methods/update';
+import { RulesClient } from '../application/esql_rule/lib/rules_client';
 
 const INTERNAL_ESQL_RULE_API_PATH = '/internal/alerting/esql_rule';
 
@@ -56,36 +49,15 @@ export class UpdateRuleRoute {
       UpdateEsqlRuleData
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(CoreStart('http')) private readonly http: HttpServiceStart,
-    @inject(CoreStart('savedObjects')) private readonly savedObjects: SavedObjectsServiceStart,
-    @inject(PluginStart('spaces')) private readonly spaces: SpacesPluginStart,
-    @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
+    @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}
 
   async handle() {
     try {
-      const requestBasePath = this.http.basePath.get(this.request);
-      const space = getSpaceIdFromPath(requestBasePath, this.http.basePath.serverBasePath);
-      const spaceId = space?.spaceId || 'default';
-      const namespace = this.spaces.spacesService.spaceIdToNamespace(spaceId);
-
-      const savedObjectsClient = this.savedObjects.getScopedClient(this.request, {
-        includedHiddenTypes: [ESQL_RULE_SAVED_OBJECT_TYPE],
+      const updated = await this.rulesClient.updateEsqlRule({
+        id: this.request.params.id,
+        data: this.request.body,
       });
-      const updated = await updateEsqlRule(
-        {
-          logger: this.logger as any,
-          request: this.request,
-          taskManager: this.taskManager,
-          savedObjectsClient,
-          spaceId,
-          namespace,
-          getUserName: async () =>
-            this.security?.authc.getCurrentUser(this.request)?.username ?? null,
-        },
-        { id: this.request.params.id, data: this.request.body }
-      );
 
       return this.response.ok({ body: updated });
     } catch (e) {
