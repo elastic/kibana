@@ -399,11 +399,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should include namespace filter in ML anomaly query when filter is configured', async () => {
         // Set UI setting to include only namespace1 and namespace2
-        await supertest
-          .post(`/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`)
-          .set('kbn-xsrf', 'true')
-          .send({ value: ['namespace1', 'namespace2'] })
-          .expect(200);
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
 
         const { logs } = await previewRule({
           supertest,

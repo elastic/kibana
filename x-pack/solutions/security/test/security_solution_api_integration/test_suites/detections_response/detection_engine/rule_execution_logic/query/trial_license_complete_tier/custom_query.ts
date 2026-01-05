@@ -2934,11 +2934,9 @@ export default ({ getService }: FtrProviderContext) => {
         await indexListOfDocuments([docNamespace1, docNamespace2, docNamespace3]);
 
         // Set UI setting to include only namespace1 and namespace2
-        await supertest
-          .post(`/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`)
-          .set('kbn-xsrf', 'true')
-          .send({ value: ['namespace1', 'namespace2'] })
-          .expect(200);
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
 
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['ecs_compliant']),
@@ -3005,11 +3003,9 @@ export default ({ getService }: FtrProviderContext) => {
         await indexListOfDocuments([docNamespace1, docNamespace2, docNamespace3]);
 
         // Ensure UI setting is empty (not configured)
-        await supertest
-          .post(`/internal/kibana/settings/${INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION}`)
-          .set('kbn-xsrf', 'true')
-          .send({ value: [] })
-          .expect(200);
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
 
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['ecs_compliant']),
