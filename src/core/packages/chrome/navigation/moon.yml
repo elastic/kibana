@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-chrome-navigation'
 type: unknown
 owners:
-  defaultOwner: '@elastic/eui-team'
+  defaultOwner: '@elastic/appex-sharedux'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/core-chrome-navigation'
   description: Moon project for @kbn/core-chrome-navigation
   channel: ''
-  owner: '@elastic/eui-team'
+  owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/chrome/navigation
 dependsOn:
