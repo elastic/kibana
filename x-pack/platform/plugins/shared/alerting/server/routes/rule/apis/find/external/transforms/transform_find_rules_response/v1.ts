@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import type { FindRulesResponseV1 } from '../../../../../../../../common/routes/rule/apis/find/external';
 import type {
   RuleResponseV1,
@@ -18,8 +19,11 @@ import {
   transformFlappingV1,
 } from '../../../../../transforms';
 
+type RuleDomainResponse = FindResult<{}>['data'][number];
+type Artifacts = RuleDomainResponse['artifacts'];
+
 export const transformPartialRule = (
-  rule: FindResult<{}>['data'][number],
+  rule: RuleDomainResponse,
   fields?: string[]
 ): FindRulesResponseV1['data'][number] => {
   const ruleResponse = {
@@ -63,7 +67,7 @@ export const transformPartialRule = (
         }
       : {}),
     ...(rule.monitoring ? { monitoring: transformMonitoringV1(rule.monitoring) } : {}),
-    ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
+    ...(!isEmpty(rule.snoozeSchedule) ? { snooze_schedule: rule.snoozeSchedule } : {}),
     ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),
     ...(rule.isSnoozedUntil !== undefined
       ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
@@ -79,7 +83,7 @@ export const transformPartialRule = (
       : {}),
     ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
-    ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
+    ...(areArtifactsEmpty(rule.artifacts) ? { artifacts: rule.artifacts } : {}),
   };
 
   type RuleKeys = keyof RuleResponseV1<RuleParamsV1>;
@@ -101,6 +105,13 @@ export const transformPartialRule = (
   }
 
   return ruleResponse as FindRulesResponseV1['data'][number];
+};
+
+const areArtifactsEmpty = (artifacts?: Artifacts): boolean => {
+  return (
+    isEmpty(artifacts) ||
+    (isEmpty(artifacts?.dashboards) && isEmpty(artifacts?.investigation_guide))
+  );
 };
 
 export const transformFindRulesResponse = (

@@ -11,6 +11,14 @@ import { alertMappings } from '../../../common/saved_objects/rules/mappings';
 
 const astFunctionType = ['is', 'range', 'nested'];
 
+export const getFieldNameAttribute = (fieldName: string, attributesToIgnore: string[]) => {
+  const fieldNameSplit = (fieldName || '')
+    .split('.')
+    .filter((fn: string) => !attributesToIgnore.includes(fn));
+
+  return fieldNameSplit.length > 0 ? fieldNameSplit[0] : '';
+};
+
 export interface IterateActionProps {
   ast: KueryNode;
   index: number;
