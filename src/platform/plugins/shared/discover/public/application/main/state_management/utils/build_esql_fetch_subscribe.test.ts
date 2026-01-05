@@ -29,7 +29,8 @@ async function getTestProps(
   query: AggregateQuery | Query | undefined,
   dataViewsService: DataViewsContract = discoverServiceMock.dataViews,
   appState?: Partial<DiscoverAppState>,
-  defaultFetchStatus: FetchStatus = FetchStatus.PARTIAL
+  defaultFetchStatus: FetchStatus = FetchStatus.PARTIAL,
+  resetTheHook?: boolean
 ) {
   const replaceUrlState = jest
     .spyOn(internalStateActions, 'updateAppStateAndReplaceUrl')
@@ -49,6 +50,11 @@ async function getTestProps(
     query,
   };
   stateContainer.dataState.data$.documents$.next(msgLoading);
+
+  if (resetTheHook) {
+    // resets the state of buildEsqlFetchSubscribe hook so it takes the current app state as the initial one
+    stateContainer.savedSearchState.set(savedSearchMock);
+  }
 
   return {
     dataViews: dataViewsService,
@@ -85,13 +91,15 @@ const getDataViewsService = () => {
 const setupTest = async (
   useDataViewsService: boolean = false,
   appState?: DiscoverAppState,
-  defaultFetchStatus?: FetchStatus
+  defaultFetchStatus?: FetchStatus,
+  resetTheHook?: boolean
 ) => {
   const props = await getTestProps(
     query,
     useDataViewsService ? getDataViewsService() : undefined,
     appState,
-    defaultFetchStatus
+    defaultFetchStatus,
+    resetTheHook
   );
   props.stateContainer.actions.setDataView(dataViewMock);
   return props;
@@ -354,10 +362,48 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  test('should overwrite existing empty columns on initial fetch if transformational query', async () => {
-    const { replaceUrlState, stateContainer } = await setupTest(false, {
-      columns: [],
+  test('should overwrite existing undefined columns on initial fetch if transformational query', async () => {
+    const { replaceUrlState, stateContainer } = await setupTest(
+      false,
+      {
+        columns: undefined,
+      },
+      undefined,
+      true
+    );
+    const documents$ = stateContainer.dataState.data$.documents$;
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | keep field 1' },
     });
+
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        tabId: 'the-saved-search-id-with-timefield',
+        appState: { columns: ['field1'] },
+      });
+    });
+  });
+
+  test('should not overwrite existing empty columns on initial fetch even if transformational query', async () => {
+    const { replaceUrlState, stateContainer } = await setupTest(
+      false,
+      {
+        columns: [],
+      },
+      undefined,
+      true
+    );
     const documents$ = stateContainer.dataState.data$.documents$;
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
@@ -372,14 +418,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
-
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        tabId: 'the-saved-search-id-with-timefield',
-        appState: { columns: ['field1'] },
-      });
-    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
 
   test('it should not overwrite existing state columns on initial fetch and non transformational commands', async () => {

@@ -135,9 +135,10 @@ export const buildEsqlFetchSubscribe = ({
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.allColumns = nextAllColumns;
 
-      const appStateColumns = getCurrentTab().appState.columns ?? [];
-      const shouldTriggerColumnsUpdate =
-        nextDefaultColumns.length > 0 && appStateColumns.length === 0;
+      const appStateColumns = getCurrentTab().appState.columns;
+      const hasNoKnownAppStateColumns = appStateColumns === undefined;
+      const shouldTriggerColumnsUpdate = nextDefaultColumns.length > 0 && hasNoKnownAppStateColumns;
+
       prevEsqlData.defaultColumns = shouldTriggerColumnsUpdate ? [] : nextDefaultColumns;
     }
 
