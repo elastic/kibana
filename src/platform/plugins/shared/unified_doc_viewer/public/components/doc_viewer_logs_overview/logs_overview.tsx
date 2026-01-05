@@ -47,7 +47,6 @@ export type LogsOverviewProps = DocViewRenderProps & {
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   indexes: ObservabilityIndexes;
   showTraceWaterfall?: boolean;
-  disableScrollContainer?: boolean;
 };
 
 export interface LogsOverviewApi {
@@ -70,7 +69,6 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderFlyoutStreamProcessingLink,
       indexes,
       showTraceWaterfall = true,
-      disableScrollContainer = false,
     },
     ref
   ) => {
@@ -114,7 +112,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         <div
           ref={setContainerRef}
           css={
-            !disableScrollContainer && containerHeight
+            containerHeight
               ? css`
                   height: ${containerHeight}px;
                   overflow: auto;

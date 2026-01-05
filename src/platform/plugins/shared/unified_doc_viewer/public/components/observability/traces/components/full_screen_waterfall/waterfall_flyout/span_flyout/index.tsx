@@ -95,7 +95,6 @@ export const SpanFlyout = ({
           showWaterfall={false}
           showActions={false}
           dataView={dataView}
-          disableScrollContainer={true}
         />
       ) : null}
     </WaterfallFlyout>
