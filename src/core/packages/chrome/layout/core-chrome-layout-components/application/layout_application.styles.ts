@@ -9,7 +9,8 @@
 
 import { css } from '@emotion/react';
 import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
-import { euiOverflowScroll } from '@elastic/eui';
+import { euiOverflowScroll, euiShadow } from '@elastic/eui';
+import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
 import type { EmotionFn } from '../types';
 
 const root: EmotionFn = (useEuiTheme) =>
@@ -26,6 +27,11 @@ const root: EmotionFn = (useEuiTheme) =>
     position: relative;
     display: flex;
     flex-direction: column;
+
+    background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
+    border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
+    border: ${getHighContrastBorder(useEuiTheme)};
+    ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 
     &:focus-visible {
       border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};

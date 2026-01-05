@@ -9,13 +9,12 @@
 
 import React from 'react';
 import { css, Global } from '@emotion/react';
-import { euiShadow, logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import {
   APP_FIXED_VIEWPORT_ID,
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
 } from '@kbn/core-chrome-layout-constants';
-import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
 const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
@@ -80,13 +79,6 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
     #kibana-body .euiDataGrid--fullScreen {
       height: calc(100vh - var(--kbnHeaderBannerHeight));
       top: var(--kbnHeaderBannerHeight);
-    }
-
-    .kbnChromeLayoutApplication {
-      background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
-      border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-      border: ${getHighContrastBorder(euiThemeContext)};
-      ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
     }
   `;
 };
