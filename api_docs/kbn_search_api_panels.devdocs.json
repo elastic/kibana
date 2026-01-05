@@ -279,7 +279,7 @@
         "label": "EisUpdateCallout",
         "description": [],
         "signature": [
-          "({ ctaLink, promoId, isCloudEnabled, handleOnClick, direction, hasUpdatePrivileges, addSpacer, }: ",
+          "({ ctaLink, promoId, shouldShowEisUpdateCallout, handleOnClick, direction, hasUpdatePrivileges, addSpacer, }: ",
           {
             "pluginId": "@kbn/search-api-panels",
             "scope": "public",
@@ -298,7 +298,7 @@
             "id": "def-public.EisUpdateCallout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  handleOnClick,\n  direction,\n  hasUpdatePrivileges,\n  addSpacer,\n}",
+            "label": "{\n  ctaLink,\n  promoId,\n  shouldShowEisUpdateCallout,\n  handleOnClick,\n  direction,\n  hasUpdatePrivileges,\n  addSpacer,\n}",
             "description": [],
             "signature": [
               {
@@ -966,9 +966,19 @@
         "parentPluginId": "@kbn/search-api-panels",
         "id": "def-public.EisUpdateCalloutProps",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property",
+          "property"
+        ],
         "label": "EisUpdateCalloutProps",
-        "description": [],
+        "description": [
+          "\nProps for the EisUpdateCallout component.\n"
+        ],
         "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -997,10 +1007,10 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-public.EisUpdateCalloutProps.isCloudEnabled",
+            "id": "def-public.EisUpdateCalloutProps.shouldShowEisUpdateCallout",
             "type": "boolean",
             "tags": [],
-            "label": "isCloudEnabled",
+            "label": "shouldShowEisUpdateCallout",
             "description": [],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
             "deprecated": false,
