@@ -6,7 +6,8 @@ Retrieves log sequences around error events to understand what happened. By defa
 
 ### Find correlated logs for errors in the payment-service
 
-```json
+```jsonc
+POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
@@ -17,7 +18,8 @@ Retrieves log sequences around error events to understand what happened. By defa
 
 ### Find correlated logs for slow requests (non-errors)
 
-```json
+```jsonc
+POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
@@ -29,7 +31,8 @@ Retrieves log sequences around error events to understand what happened. By defa
 
 ### Find correlated logs for a specific log ID
 
-```json
+```jsonc
+POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
@@ -40,7 +43,8 @@ Retrieves log sequences around error events to understand what happened. By defa
 
 ### Use custom correlation fields
 
-```json
+```jsonc
+POST kbn://api/agent_builder/tools/_execute
 {
   "tool_id": "observability.get_correlated_logs",
   "tool_params": {
