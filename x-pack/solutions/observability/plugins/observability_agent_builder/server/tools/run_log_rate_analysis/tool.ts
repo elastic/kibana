@@ -97,22 +97,6 @@ Do NOT use for:
           searchQuery,
         });
 
-        if (items.length === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  analysisType,
-                  items: [],
-                  message:
-                    'No significant factors found for the specified baseline and deviation periods.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {

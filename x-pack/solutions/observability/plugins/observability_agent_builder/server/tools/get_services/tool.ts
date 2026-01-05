@@ -84,21 +84,6 @@ When to use:
           healthStatus,
         });
 
-        if (services.length === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  total: 0,
-                  services: [],
-                  message: 'No services found for the specified time range and filters.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {

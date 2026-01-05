@@ -100,25 +100,6 @@ Do NOT use for:
           terms,
         });
 
-        const highCount = highSeverityCategories?.categories?.length ?? 0;
-        const lowCount = lowSeverityCategories?.categories?.length ?? 0;
-        const total = highCount + lowCount;
-
-        if (total === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  highSeverityCategories: { categories: [] },
-                  lowSeverityCategories: { categories: [] },
-                  message: 'No log categories found for the specified time range.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {

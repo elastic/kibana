@@ -114,22 +114,6 @@ When to use:
           rangeEnd,
         });
 
-        if (mlJobs.length === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  jobs: [],
-                  totalReturned: 0,
-                  message:
-                    'No anomaly detection jobs found for the specified time range and filters.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {

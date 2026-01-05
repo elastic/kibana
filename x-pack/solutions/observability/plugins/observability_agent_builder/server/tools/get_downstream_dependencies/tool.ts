@@ -85,22 +85,6 @@ When to use:
 
         const total = dependencies?.length ?? 0;
 
-        if (total === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  total: 0,
-                  dependencies: [],
-                  message:
-                    'No downstream dependencies found for the specified service and time range.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {

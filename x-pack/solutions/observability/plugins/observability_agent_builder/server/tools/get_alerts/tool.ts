@@ -114,21 +114,6 @@ Supports filtering by status (active/recovered) and KQL queries.`,
           includeRecovered,
         });
 
-        if (total === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  total: 0,
-                  alerts: [],
-                  message: 'No alerts found for the specified time range and filters.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {

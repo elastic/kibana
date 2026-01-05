@@ -115,21 +115,6 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
           kqlFilter,
         });
 
-        if (total === 0) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other as const,
-                data: {
-                  hosts: [],
-                  total: 0,
-                  message: 'No hosts found for the specified time range and filters.',
-                },
-              },
-            ],
-          };
-        }
-
         return {
           results: [
             {
