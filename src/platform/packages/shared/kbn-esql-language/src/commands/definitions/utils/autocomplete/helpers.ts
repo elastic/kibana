@@ -211,7 +211,6 @@ export function getFunctionsSuggestions({
     addComma = false,
     suggestOnlyName = false,
     addSpaceAfterFunction = false,
-    openSuggestions = false,
     constantGeneratingOnly = false,
   } = options;
 
