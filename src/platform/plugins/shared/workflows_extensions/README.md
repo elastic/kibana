@@ -105,6 +105,95 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 };
 ```
 
+#### Advanced Example with Dynamic Output Schema
+
+For steps that need different output schemas based on input parameters, you can use `dynamicOutputSchema`. Here's an example of a data transformation step:
+
+```typescript
+import { z } from '@kbn/zod/v4';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+
+/**
+ * Step type ID for the data transformation step.
+ */
+export const DataTransformStepTypeId = 'myPlugin.dataTransform';
+
+/**
+ * Input schema with operation type that affects output structure.
+ */
+export const InputSchema = z.object({
+  data: z.array(z.record(z.string(), z.any())),
+  operation: z.enum(['aggregate', 'filter', 'count']),
+  field: z.string().optional(),
+  condition: z.string().optional(),
+});
+
+/**
+ * Base output schema - covers all possible outputs.
+ */
+export const OutputSchema = z.union([
+  z.object({
+    operation: z.literal('aggregate'),
+    result: z.record(z.string(), z.number()),
+    count: z.number(),
+  }),
+  z.object({
+    operation: z.literal('filter'),
+    result: z.array(z.record(z.string(), z.any())),
+    count: z.number(),
+  }),
+  z.object({
+    operation: z.literal('count'),
+    result: z.number(),
+    count: z.number(),
+  }),
+]);
+
+export type DataTransformStepInput = z.infer<typeof InputSchema>;
+export type DataTransformStepOutput = z.infer<typeof OutputSchema>;
+
+/**
+ * Common step definition with dynamic output schema based on operation type.
+ */
+export const dataTransformStepCommonDefinition: CommonStepDefinition<
+  typeof InputSchema,
+  typeof OutputSchema
+> = {
+  id: DataTransformStepTypeId,
+  inputSchema: InputSchema,
+  outputSchema: OutputSchema,
+  dynamicOutputSchema: (input) => {
+    const baseOutput = {
+      count: z.number(),
+    };
+
+    switch (input.operation) {
+      case 'aggregate':
+        return z.object({
+          operation: z.literal('aggregate'),
+          result: z.record(z.string(), z.number()),
+          ...baseOutput,
+        });
+      case 'filter':
+        return z.object({
+          operation: z.literal('filter'),
+          result: z.array(z.record(z.string(), z.any())),
+          ...baseOutput,
+        });
+      case 'count':
+        return z.object({
+          operation: z.literal('count'),
+          result: z.number(),
+          ...baseOutput,
+        });
+      default:
+        // Fallback to the full union schema
+        return OutputSchema;
+    }
+  },
+};
+```
+
 ### Step 2: Implement Server-Side Handler
 
 Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
