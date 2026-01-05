@@ -33,7 +33,7 @@ export interface GetAnomalyDetectionJobsToolResult {
   type: ToolResultType.other;
   data: {
     jobs: Awaited<ReturnType<typeof getToolHandler>>;
-    totalReturned: number;
+    total: number;
     message?: string;
   };
 }
@@ -120,7 +120,7 @@ When to use:
               type: ToolResultType.other,
               data: {
                 jobs: mlJobs,
-                totalReturned: mlJobs.length,
+                total: mlJobs.length,
               },
             },
           ],
