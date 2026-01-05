@@ -10,10 +10,14 @@ fi
 
 cd '.buildkite'
 retry 5 15 npm ci --no-audit
-GLOBAL_NODE_MODULES="$(npm root)/.bin"
+BIN_DIR="$(npm root)/.bin"
 cd -
 
-export PATH="$GLOBAL_NODE_MODULES:$PATH"
+mkdir -p "$HOME/.kibana-buildkite/bin"
+ln -sf "$BIN_DIR/yarn" "$HOME/.kibana-buildkite/bin/yarn"
+ln -sf "$BIN_DIR/ts-node" "$HOME/.kibana-buildkite/bin/ts-node"
+
+export PATH="$HOME/.kibana-buildkite/bin:$PATH"
 
 echo "yarn: $(yarn --version)"
 echo "ts-node: $(ts-node --version)"
