@@ -21,7 +21,7 @@ import {
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 
 import { breadcrumbService } from '../../../../../services/breadcrumbs';
-import { AppContextProvider } from '../../../../../app_context';
+import { AppContextProvider, type AppDependencies } from '../../../../../app_context';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
 
@@ -37,11 +37,11 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
 
 // We provide the minimum deps required to make the tests pass
 const appDependencies = {
-  docLinks: {} as any,
+  docLinks: docLinksServiceMock.createStartContract(),
   url: sharePluginMock.createStartContract().url,
-  plugins: { ml: {} as any },
+  plugins: { ml: {} } as unknown as AppDependencies['plugins'],
   history,
-} as any;
+} as unknown as AppDependencies;
 
 export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => {
   const coreMockStart = coreMock.createStart();
@@ -64,7 +64,8 @@ export const setupEnvironment = () => {
 };
 
 export const WithAppDependencies =
-  (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) =>
+  <P extends object>(Comp: React.ComponentType<P>, httpSetup: HttpSetup, coreStart?: CoreStart) =>
+  (props: P) =>
     (
       <AppContextProvider value={appDependencies}>
         <MappingsEditorProvider>
@@ -74,6 +75,5 @@ export const WithAppDependencies =
             </GlobalFlyoutProvider>
           </ComponentTemplatesProvider>
         </MappingsEditorProvider>
-        /
       </AppContextProvider>
     );

@@ -799,15 +799,19 @@ Object {
         "bcc": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
         "cc": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
         "kibanaFooterLink": Object {
@@ -844,8 +848,10 @@ Object {
         "to": Object {
           "default": Array [],
           "items": Object {
+            "maxLength": 512,
             "type": "string",
           },
+          "maxItems": 100,
           "type": "array",
         },
       },
