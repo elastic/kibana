@@ -126,8 +126,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally add some ESQL controls
    */
-  esqlControls?: ControlPanelsState<ESQLControlState & { type: 'esqlControl' }> &
-    SerializableRecord;
+  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -137,8 +136,7 @@ export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
-  esqlControls?: ControlPanelsState<ESQLControlState & { type: 'esqlControl' }> &
-    SerializableRecord;
+  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
   isAlertResults?: boolean;
 }
 

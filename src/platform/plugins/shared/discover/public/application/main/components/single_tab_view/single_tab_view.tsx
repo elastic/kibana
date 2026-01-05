@@ -101,7 +101,7 @@ export const SingleTabView = ({
     }: {
       dataViewSpec?: DataViewSpec | undefined;
       defaultUrlState?: DiscoverAppState;
-      esqlControls?: ControlPanelsState<ESQLControlState & { type: 'esqlControl' }>;
+      esqlControls?: ControlPanelsState<ESQLControlState>;
     } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,

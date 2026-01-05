@@ -40,7 +40,7 @@ export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
   dataViewSpec: DataViewSpec | undefined;
-  esqlControls: ControlPanelsState<ESQLControlState & { type: 'esqlControl' }> | undefined;
+  esqlControls: ControlPanelsState<ESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
