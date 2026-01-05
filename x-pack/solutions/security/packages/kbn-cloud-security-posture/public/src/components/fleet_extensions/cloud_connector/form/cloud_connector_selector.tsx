@@ -29,6 +29,7 @@ import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
 import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
 import { AccountBadge } from '../components/account_badge';
+import { IntegrationCountBadge } from '../components/integration_count_badge';
 
 interface CloudConnectorSelectorProps {
   provider: CloudProviders;
@@ -141,6 +142,12 @@ export const CloudConnectorSelector = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AccountBadge accountType={connector.accountType} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <IntegrationCountBadge
+                cloudConnectorId={connector.id}
+                count={connector.packagePolicyCount ?? 0}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

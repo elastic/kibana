@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ObservabilityAgentBuilderPluginStart,
@@ -77,7 +77,14 @@ export function createGetAlertsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves Observability alerts within a specified time range. Supports filtering by status (active/recovered) and KQL queries to find specific alert instances.`,
+    description: `Retrieves Observability alerts within a specified time range.
+
+When to use:
+- Checking if there are active alerts for a service or host
+- Investigating what triggered during an incident
+- Finding alerts related to specific infrastructure or services
+
+Supports filtering by status (active/recovered) and KQL queries.`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
     availability: {
@@ -86,16 +93,15 @@ export function createGetAlertsTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      {
+    handler: async (toolParams, { request }) => {
+      const {
         start = DEFAULT_TIME_RANGE.start,
         end = DEFAULT_TIME_RANGE.end,
         kqlFilter,
         includeRecovered,
         query,
-      },
-      { request }
-    ) => {
+      } = toolParams;
+
       try {
         const { alerts, selectedFields, total } = await getToolHandler({
           core,
