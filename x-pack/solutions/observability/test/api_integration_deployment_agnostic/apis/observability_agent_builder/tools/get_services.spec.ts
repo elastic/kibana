@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
-import { isOtherResult } from '@kbn/onechat-common/tools';
-import type { ToolResult, OtherResult } from '@kbn/onechat-common';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import { isOtherResult } from '@kbn/agent-builder-common/tools';
+import type { ToolResult, OtherResult } from '@kbn/agent-builder-common';
+import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-builder-plugin/server/agent/register_observability_agent';
 import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
