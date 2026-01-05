@@ -2747,6 +2747,12 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai
 
+# MCP
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/mcp @elastic/workchat-eng
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/mcp @elastic/workchat-eng
+/x-pack/platform/plugins/shared/stack_connectors/common/mcp @elastic/workchat-eng
+/src/platform/packages/shared/kbn-connector-schemas/mcp @elastic/workchat-eng
+
 # Inference API
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
