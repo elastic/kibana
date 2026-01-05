@@ -47,8 +47,10 @@ export function SelectModelAndInstallKnowledgeBase({
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
+  // For new installations, only show `Jina Embeddings v3` as the recommended model
   const modelOptions: ModelOptionsData[] = getModelOptionsForInferenceEndpoints({
     endpoints: inferenceEndpoints,
+    isKnowledgeBaseInstalled: false,
   });
 
   useEffect(() => {

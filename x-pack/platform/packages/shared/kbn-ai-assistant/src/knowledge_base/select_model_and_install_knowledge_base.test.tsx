@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { ModelOptionsData } from '../utils/get_model_options_for_inference_endpoints';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
 
@@ -18,12 +18,21 @@ jest.mock('../hooks/use_inference_endpoints', () => ({
 }));
 
 jest.mock('../utils/get_model_options_for_inference_endpoints', () => ({
-  getModelOptionsForInferenceEndpoints: ({ endpoints }: { endpoints: any[] }): ModelOptionsData[] =>
-    endpoints.map((e, i) => ({
-      key: e.inference_id,
-      label: `Label${i + 1}`,
-      description: `Desc${i + 1}`,
-    })),
+  getModelOptionsForInferenceEndpoints: ({
+    endpoints,
+    isKnowledgeBaseInstalled,
+  }: {
+    endpoints: any[];
+    isKnowledgeBaseInstalled?: boolean;
+  }): ModelOptionsData[] =>
+    // For new installations (isKnowledgeBaseInstalled=false), return single model (simulating Jina-only behavior)
+    isKnowledgeBaseInstalled === false
+      ? [{ key: endpoints[0]?.inference_id ?? 'id1', label: 'Label1', description: 'Desc1' }]
+      : endpoints.map((e, i) => ({
+          key: e.inference_id,
+          label: `Label${i + 1}`,
+          description: `Desc${i + 1}`,
+        })),
 }));
 
 const onInstall = jest.fn();
@@ -54,17 +63,9 @@ describe('SelectModelAndInstallKnowledgeBase', () => {
     expect(onInstall).toHaveBeenCalledWith('id1');
   });
 
-  it('allows changing selection and installing the KB with the inference_id for the new model', async () => {
-    const defaultSelection = screen.getByText('Label1');
-    fireEvent.click(defaultSelection);
-
-    const nextSelection = screen.getByText('Label2');
-    await waitFor(() => nextSelection);
-    fireEvent.click(nextSelection);
-
-    expect(nextSelection).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: /Install Knowledge Base/i }));
-    expect(onInstall).toHaveBeenCalledWith('id2');
+  it('disables the dropdown when there is only one model option (new installations with Jina)', () => {
+    // For new installations, the mock returns only one model option (simulating Jina-only behavior)
+    const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
+    expect(dropdown).toBeDisabled();
   });
 });
