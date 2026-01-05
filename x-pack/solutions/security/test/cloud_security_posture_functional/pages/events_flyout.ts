@@ -12,6 +12,7 @@ import {
   waitForEnrichIndexPopulated,
   waitForEntityDataIndexed,
   enableAssetInventory,
+  executeEnrichPolicy,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -314,95 +315,122 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     describe('ECS fields only', function () {
-      const entitiesIndex = '.entities.v1.latest.security_*';
-      const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
-      const enrichIndexName = `.enrich-${enrichPolicyName}`;
+      const enrichmentConfigs = [
+        {
+          name: 'via ENRICH policy (v1)',
+          archivePath:
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store',
+          entitiesIndex: '.entities.v1.latest.security_*',
+          useEnrichPolicy: true,
+        },
+        {
+          name: 'via LOOKUP JOIN (v2)',
+          archivePath:
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2',
+          entitiesIndex: '.entities.v2.latest.security_*',
+          useEnrichPolicy: false,
+        },
+      ];
 
-      before(async () => {
-        // Clean up any leftover resources from previous runs
-        await cleanupEntityStore({ supertest, logger });
+      enrichmentConfigs.forEach((config) => {
+        describe(config.name, () => {
+          const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
+          const enrichIndexName = `.enrich-${enrichPolicyName}`;
 
-        // Enable asset inventory setting
-        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+          before(async () => {
+            // Clean up any leftover resources from previous runs
+            await cleanupEntityStore({ supertest, logger });
 
-        // CRITICAL: Load entity data BEFORE enabling asset inventory
-        // Otherwise the enrich policy will execute with no data
-        await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-        );
+            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
+            if (config.name === 'via LOOKUP JOIN (v2)') {
+              await esArchiver.unload(
+                'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+              );
+            }
 
-        // Wait for entity data to be fully indexed
-        await waitForEntityDataIndexed({
-          es,
-          logger,
-          retry,
-          entitiesIndex,
-          expectedCount: 12,
-        });
+            // Enable asset inventory setting
+            await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
 
-        // Enable asset inventory which creates the enrich policy
-        await enableAssetInventory({ supertest });
+            // Enable asset inventory which creates the enrich policy
+            await enableAssetInventory({ supertest });
 
-        // Wait for enrich index to be created and populated with data
-        await waitForEnrichIndexPopulated({ es, logger, retry, enrichIndexName });
-      });
+            // Load entity data from the appropriate archive
+            await esArchiver.load(config.archivePath);
 
-      after(async () => {
-        // Clean up entity store resources
-        await cleanupEntityStore({ supertest, logger });
+            // Wait for entity data to be fully indexed
+            await waitForEntityDataIndexed({
+              es,
+              logger,
+              retry,
+              entitiesIndex: config.entitiesIndex,
+              expectedCount: 12,
+            });
 
-        // Disable asset inventory setting
-        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
+            // Only execute enrich policy and wait for enrich index if using ENRICH policy
+            if (config.useEnrichPolicy) {
+              // Execute enrich policy to pick up entity data
+              await executeEnrichPolicy({ es, retry });
+              // Wait for enrich index to be created and populated with data
+              await waitForEnrichIndexPopulated({ es, logger, retry, enrichIndexName });
+            }
+          });
 
-        // Unload the entity store archive
-        try {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-          );
-        } catch (e) {
-          logger.debug(`Error unloading entity store archive: ${e.message}`);
-        }
-      });
+          after(async () => {
+            // Clean up entity store resources
+            await cleanupEntityStore({ supertest, logger });
 
-      it('expanded flyout - entity enrichment for multiple actors and targets', async () => {
-        // Navigate to events page with the multi-actor multi-target event
-        await networkEventsPage.navigateToNetworkEventsPage(
-          `${networkEventsPage.getAbsoluteTimerangeFilter(
-            '2024-09-01T00:00:00.000Z',
-            '2024-09-02T00:00:00.000Z'
-          )}&${networkEventsPage.getFlyoutFilter('MultiActorMultiTargetEvent123')}`
-        );
-        await networkEventsPage.waitForListToHaveEvents();
+            // Disable asset inventory setting
+            await kibanaServer.uiSettings.update({
+              'securitySolution:enableAssetInventory': false,
+            });
 
-        await networkEventsPage.flyout.expandVisualizations();
-        await networkEventsPage.flyout.assertGraphPreviewVisible();
-        // Expected nodes:
-        // - 1 grouped actor node (2 actors: multi-actor-1, multi-actor-2 - same Identity/GCP IAM User)
-        // - 1 grouped storage node (2 buckets: target-bucket-1, target-bucket-2 - same Storage/GCP Storage Bucket)
-        // - 1 grouped service node (2 service accounts: target-multi-service-1, target-multi-service-2 - same Service/GCP Service Account)
-        // - 2 label nodes (actor group -> storage group, actor group -> service group)
-        const expectedNodes = 5;
-        await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
+            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
+            if (config.name === 'via LOOKUP JOIN (v2)') {
+              await esArchiver.unload(config.archivePath);
+            }
+          });
 
-        await expandedFlyoutGraph.expandGraph();
-        await expandedFlyoutGraph.waitGraphIsLoaded();
-        await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
+          it('expanded flyout - entity enrichment for multiple actors and targets', async () => {
+            // Navigate to events page with the multi-actor multi-target event
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter('MultiActorMultiTargetEvent123')}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
 
-        const actorNodeId = '71373527ad0e2cf75e214cd168630ad1';
-        await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
-        await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+            // Expected nodes:
+            // - 1 grouped actor node (2 actors: multi-actor-1, multi-actor-2 - same Identity/GCP IAM User)
+            // - 1 grouped storage node (2 buckets: target-bucket-1, target-bucket-2 - same Storage/GCP Storage Bucket)
+            // - 1 grouped service node (2 service accounts: target-multi-service-1, target-multi-service-2 - same Service/GCP Service Account)
+            // - 2 label nodes (actor group -> storage group, actor group -> service group)
+            const expectedNodes = 5;
+            await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
 
-        const storageBucketNodeId = '8a748ce026512856f76bdc6304573f1c';
-        await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
-        await expandedFlyoutGraph.assertNodeEntityDetails(
-          storageBucketNodeId,
-          'GCP Storage Bucket'
-        );
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
-        const serviceNodeId = '0039c3b5dd064364a5f7edac77c2e158';
-        await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
-        await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');
-      });
-    });
+            const actorNodeId = '71373527ad0e2cf75e214cd168630ad1';
+            await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
+            await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+
+            const storageBucketNodeId = '8a748ce026512856f76bdc6304573f1c';
+            await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              storageBucketNodeId,
+              'GCP Storage Bucket'
+            );
+
+            const serviceNodeId = '0039c3b5dd064364a5f7edac77c2e158';
+            await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
+            await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');
+          });
+        }); // end of describe(config.name)
+      }); // end of enrichmentConfigs.forEach
+    }); // end of describe('ECS fields only')
   });
 }

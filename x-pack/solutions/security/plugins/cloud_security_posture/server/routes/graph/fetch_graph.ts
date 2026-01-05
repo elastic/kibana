@@ -15,7 +15,10 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  getEnrichPolicyId,
+  getEntitiesLatestIndexName,
+} from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
@@ -27,6 +30,7 @@ interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
+  isLookupIndexAvailable: boolean;
   isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
@@ -65,8 +69,12 @@ export const fetchGraph = async ({
     }
   });
 
-  const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
-
+  // Check if the entities lookup index exists and is in lookup mode (preferred)
+  // If not, fall back to checking if the enrich policy exists (deprecated)
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+  const isEnrichPolicyExists = isLookupIndexAvailable
+    ? false
+    : await checkEnrichPolicyExists(esClient, logger, spaceId);
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
@@ -76,6 +84,7 @@ export const fetchGraph = async ({
     indexPatterns,
     originEventIds,
     originAlertIds,
+    isLookupIndexAvailable,
     isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
@@ -167,10 +176,97 @@ const checkEnrichPolicyExists = async (
   }
 };
 
+/**
+ * Checks if the entities latest index exists and is configured in lookup mode.
+ * This is the preferred method for entity enrichment (replaces deprecated ENRICH policy).
+ */
+const checkIfEntitiesIndexLookupMode = async (
+  esClient: IScopedClusterClient,
+  logger: Logger,
+  spaceId: string
+): Promise<boolean> => {
+  const indexName = getEntitiesLatestIndexName(spaceId);
+  try {
+    const response = await esClient.asInternalUser.indices.getSettings({
+      index: indexName,
+    });
+    const indexSettings = response[indexName];
+    if (!indexSettings) {
+      logger.debug(`Entities index ${indexName} not found`);
+      return false;
+    }
+
+    // Check if index is in lookup mode
+    const mode = indexSettings.settings?.index?.mode;
+    const isLookupMode = mode === 'lookup';
+
+    if (!isLookupMode) {
+      logger.debug(`Entities index ${indexName} exists but is not in lookup mode (mode: ${mode})`);
+    }
+
+    return isLookupMode;
+  } catch (error) {
+    if (error.statusCode === 404) {
+      logger.debug(`Entities index ${indexName} does not exist`);
+      return false;
+    }
+    logger.error(`Error checking entities index ${indexName}: ${error.message}`);
+    return false;
+  }
+};
+
+/**
+ * Generates ESQL statements for building entity fields with enrichment data.
+ * This is used when entity store enrichment is available (via LOOKUP JOIN or ENRICH).
+ */
+const buildEnrichedEntityFieldsEsql = (): string => {
+  return `// Construct actor and target entities data
+// Build entity field conditionally - only include fields that have values
+| EVAL actorEntityField = CASE(
+    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      ${concatPropIfExists('name', 'actorEntityName', false)},
+      ${concatPropIfExists('type', 'actorEntityType')},
+      ${concatPropIfExists('sub_type', 'actorEntitySubType')},
+      CASE(
+        actorHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
+        ""
+      ),
+      ",\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+    "}")
+  )
+| EVAL targetEntityField = CASE(
+    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      ${concatPropIfExists('name', 'targetEntityName', false)},
+      ${concatPropIfExists('type', 'targetEntityType')},
+      ${concatPropIfExists('sub_type', 'targetEntitySubType')},
+      CASE(
+        targetHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
+        ""
+      ),
+      ",\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+    "}")
+  )`;
+};
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
+  isLookupIndexAvailable,
   isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
@@ -226,52 +322,36 @@ ${targetFieldHintCases},
     ""
 )
 ${
-  isEnrichPolicyExists
+  isLookupIndexAvailable
     ? `
+| RENAME original_entity_id = entity.id
+| RENAME original_entity_target_id = entity.target.id  
+// rename entity.*fields before next pipeline to avoid name collisions
+| EVAL entity.id = actorEntityId
+| LOOKUP JOIN ${getEntitiesLatestIndexName(spaceId)} ON entity.id
+| RENAME actorEntityName    = entity.name
+| RENAME actorEntityType    = entity.type
+| RENAME actorEntitySubType = entity.sub_type
+| RENAME actorHostIp        = host.ip
+| RENAME actorLookupEntityId = entity.id 
 
+| EVAL entity.id = targetEntityId
+| LOOKUP JOIN ${getEntitiesLatestIndexName(spaceId)} ON entity.id
+| RENAME targetEntityName    = entity.name
+| RENAME targetEntityType    = entity.type
+| RENAME targetEntitySubType = entity.sub_type
+| RENAME targetHostIp        = host.ip
+| RENAME targetLookupEntityId = entity.id
+
+${buildEnrichedEntityFieldsEsql()}
+`
+    : isEnrichPolicyExists
+    ? `
+// Use ENRICH policy for entity enrichment (deprecated fallback)
 | ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
 | ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
 
-// Construct actor and target entities data
-// Build entity field conditionally - only include fields that have values
-| EVAL actorEntityField = CASE(
-    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      ${concatPropIfExists('name', 'actorEntityName', false)},
-      ${concatPropIfExists('type', 'actorEntityType')},
-      ${concatPropIfExists('sub_type', 'actorEntitySubType')},
-      CASE(
-        actorHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
-        ""
-      ),
-      ",\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-    "}")
-  )
-| EVAL targetEntityField = CASE(
-    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      ${concatPropIfExists('name', 'targetEntityName', false)},
-      ${concatPropIfExists('type', 'targetEntityType')},
-      ${concatPropIfExists('sub_type', 'targetEntitySubType')},
-      CASE(
-        targetHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
-        ""
-      ),
-      ",\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-    "}")
-  )
+${buildEnrichedEntityFieldsEsql()}
 `
     : `
 | EVAL actorEntityField = CONCAT(",\\"entity\\":", "{",

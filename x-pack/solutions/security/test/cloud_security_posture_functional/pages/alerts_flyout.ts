@@ -12,6 +12,7 @@ import {
   waitForEnrichIndexPopulated,
   waitForEntityDataIndexed,
   enableAssetInventory,
+  executeEnrichPolicy,
 } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -256,187 +257,216 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/246821
-    describe.skip('ECS fields only', function () {
-      const entitiesIndex = '.entities.v1.latest.security_*';
-      const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
-      const enrichIndexName = `.enrich-${enrichPolicyName}`;
+    describe('ECS fields only', function () {
+      const enrichmentConfigs = [
+        {
+          name: 'via ENRICH policy (v1)',
+          archivePath:
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store',
+          entitiesIndex: '.entities.v1.latest.security_*',
+          useEnrichPolicy: true,
+        },
+        {
+          name: 'via LOOKUP JOIN (v2)',
+          archivePath:
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2',
+          entitiesIndex: '.entities.v2.latest.security_*',
+          useEnrichPolicy: false,
+        },
+      ];
 
-      before(async () => {
-        await es.deleteByQuery({
-          index: '.internal.alerts-*',
-          query: { match_all: {} },
-          conflicts: 'proceed',
-        });
+      enrichmentConfigs.forEach((config) => {
+        describe(config.name, () => {
+          const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
+          const enrichIndexName = `.enrich-${enrichPolicyName}`;
 
-        await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
-        );
+          before(async () => {
+            // Clean up any leftover resources from previous runs
+            await cleanupEntityStore({ supertest, logger });
 
-        // Clean up any leftover resources from previous runs
-        await cleanupEntityStore({ supertest, logger });
+            await es.deleteByQuery({
+              index: '.internal.alerts-*',
+              query: { match_all: {} },
+              conflicts: 'proceed',
+            });
 
-        // Enable asset inventory setting
-        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
+            if (config.name === 'via LOOKUP JOIN (v2)') {
+              await esArchiver.unload(
+                'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
+              );
+            }
 
-        // CRITICAL: Load entity data BEFORE enabling asset inventory
-        // Otherwise the enrich policy will execute with no data
-        await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-        );
+            // Enable asset inventory setting
+            await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
 
-        // Wait for entity data to be fully indexed
-        await waitForEntityDataIndexed({
-          es,
-          logger,
-          retry,
-          entitiesIndex,
-          expectedCount: 12,
-        });
+            // Enable asset inventory which creates the enrich policy
+            await enableAssetInventory({ supertest });
 
-        // Enable asset inventory which creates the enrich policy
-        await enableAssetInventory({ supertest });
+            await esArchiver.load(
+              'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
+            );
 
-        // Wait for enrich index to be created and populated with data
-        await waitForEnrichIndexPopulated({ es, logger, retry, enrichIndexName });
-      });
+            // Load entity data from the appropriate archive
+            await esArchiver.load(config.archivePath);
 
-      after(async () => {
-        // Clean up entity store resources
-        await cleanupEntityStore({ supertest, logger });
+            // Wait for entity data to be fully indexed
+            await waitForEntityDataIndexed({
+              es,
+              logger,
+              retry,
+              entitiesIndex: config.entitiesIndex,
+              expectedCount: 12,
+            });
 
-        // Disable asset inventory setting
-        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
+            // Only execute enrich policy and wait for enrich index if using ENRICH policy
+            if (config.useEnrichPolicy) {
+              // Execute enrich policy to pick up entity data
+              await executeEnrichPolicy({ es, retry });
+              // Wait for enrich index to be created and populated with data
+              await waitForEnrichIndexPopulated({ es, logger, retry, enrichIndexName });
+            }
+          });
 
-        // Unload the entity store archive
-        try {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-          );
-        } catch (e) {
-          logger.debug(`Error unloading entity store archive: ${e.message}`);
-        }
-      });
+          after(async () => {
+            // Clean up entity store resources
+            await cleanupEntityStore({ supertest, logger });
 
-      it('expanded flyout - entity enrichment for multiple generic targets - single target field', async () => {
-        await alertsPage.navigateToAlertsPage(
-          `${alertsPage.getAbsoluteTimerangeFilter(
-            '2024-09-01T00:00:00.000Z',
-            '2024-09-02T00:00:00.000Z'
-          )}&${alertsPage.getFlyoutFilter(
-            'new-schema-alert-789xyz456abc123def789ghi012jkl345mno678pqr901stu234vwx567'
-          )}`
-        );
-        await alertsPage.waitForListToHaveAlerts();
+            // Disable asset inventory setting
+            await kibanaServer.uiSettings.update({
+              'securitySolution:enableAssetInventory': false,
+            });
 
-        await alertsPage.flyout.expandVisualizations();
+            // cleaning up space enrich resources doesn't clean up v2 entities indexes, so we need to clean them up manually
+            if (config.name === 'via LOOKUP JOIN (v2)') {
+              await esArchiver.unload(config.archivePath);
+            }
+          });
 
-        await alertsPage.flyout.assertGraphPreviewVisible();
-        // We expect 5 nodes total in the graph:
-        // 1. Actor node (serviceaccount@example.com - user)
-        // 2. Grouped target node (3 service accounts grouped by same type/subtype)
-        // 3. Entity node (api-service full path)
-        // 4-5. Two label nodes
-        await alertsPage.flyout.assertGraphNodesNumber(5);
+          it('expanded flyout - entity enrichment for multiple generic targets - single target field', async () => {
+            await alertsPage.navigateToAlertsPage(
+              `${alertsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${alertsPage.getFlyoutFilter(
+                'new-schema-alert-789xyz456abc123def789ghi012jkl345mno678pqr901stu234vwx567'
+              )}`
+            );
+            await alertsPage.waitForListToHaveAlerts();
 
-        await expandedFlyoutGraph.expandGraph();
-        await expandedFlyoutGraph.waitGraphIsLoaded();
-        await expandedFlyoutGraph.assertGraphNodesNumber(5);
-        await expandedFlyoutGraph.toggleSearchBar();
+            await alertsPage.flyout.expandVisualizations();
 
-        // Test filter actions - Show actions by entity (user.entity.id)
-        await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
-        await expandedFlyoutGraph.showSearchBar();
-        await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-        await expandedFlyoutGraph.expectFilterTextEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com'
-        );
-        await expandedFlyoutGraph.expectFilterPreviewEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com'
-        );
+            await alertsPage.flyout.assertGraphPreviewVisible();
+            // We expect 5 nodes total in the graph:
+            // 1. Actor node (serviceaccount@example.com - user)
+            // 2. Grouped target node (3 service accounts grouped by same type/subtype)
+            // 3. Entity node (api-service full path)
+            // 4-5. Two label nodes
+            await alertsPage.flyout.assertGraphNodesNumber(5);
 
-        await expandedFlyoutGraph.showEntityDetails('4be3083f01620e3b7ad07ed171640ace');
-        // check the preview panel grouped items rendered correctly
-        await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
-        await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.assertGraphNodesNumber(5);
+            await expandedFlyoutGraph.toggleSearchBar();
 
-        await expandedFlyoutGraph.closePreviewSection();
+            // Test filter actions - Show actions by entity (user.entity.id)
+            await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
+            await expandedFlyoutGraph.showSearchBar();
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+            await expandedFlyoutGraph.expectFilterTextEquals(
+              0,
+              'user.entity.id: serviceaccount@example.com'
+            );
+            await expandedFlyoutGraph.expectFilterPreviewEquals(
+              0,
+              'user.entity.id: serviceaccount@example.com'
+            );
 
-        // Clear filters to reset state
-        await expandedFlyoutGraph.clearAllFilters();
+            await expandedFlyoutGraph.showEntityDetails('4be3083f01620e3b7ad07ed171640ace');
+            // check the preview panel grouped items rendered correctly
+            await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
+            await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
 
-        // Test custom filter in query bar
-        await expandedFlyoutGraph.addFilter({
-          field: 'user.entity.id',
-          operation: 'is',
-          value: 'serviceaccount@example.com',
-        });
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+            await expandedFlyoutGraph.closePreviewSection();
 
-        // Open timeline to verify integration
-        await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-        await timelinePage.ensureTimelineIsOpen();
-        await timelinePage.waitForEvents();
-        await timelinePage.closeTimeline();
+            // Clear filters to reset state
+            await expandedFlyoutGraph.clearAllFilters();
 
-        // Test query bar with KQL
-        await expandedFlyoutGraph.setKqlQuery(
-          'event.action: "google.iam.admin.v1.UpdateServiceAccount"'
-        );
-        await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-        await timelinePage.ensureTimelineIsOpen();
-        await timelinePage.waitForEvents();
-        await timelinePage.closeTimeline();
+            // Test custom filter in query bar
+            await expandedFlyoutGraph.addFilter({
+              field: 'user.entity.id',
+              operation: 'is',
+              value: 'serviceaccount@example.com',
+            });
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-        // Test query bar with non-matching query
-        await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
-        await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-        await timelinePage.ensureTimelineIsOpen();
-        await timelinePage.waitForEvents();
-      });
+            // Open timeline to verify integration
+            await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+            await timelinePage.ensureTimelineIsOpen();
+            await timelinePage.waitForEvents();
+            await timelinePage.closeTimeline();
 
-      it('expanded flyout - entity enrichment for service actor with multiple host targets - single target field', async () => {
-        // Navigate to alerts page with the multi-target alert
-        await alertsPage.navigateToAlertsPage(
-          `${alertsPage.getAbsoluteTimerangeFilter(
-            '2024-09-01T00:00:00.000Z',
-            '2024-09-02T00:00:00.000Z'
-          )}&${alertsPage.getFlyoutFilter(
-            'multi-target-alert-id-xyz123abc456def789ghi012jkl345mno678pqr901stu234'
-          )}`
-        );
-        await alertsPage.waitForListToHaveAlerts();
+            // Test query bar with KQL
+            await expandedFlyoutGraph.setKqlQuery(
+              'event.action: "google.iam.admin.v1.UpdateServiceAccount"'
+            );
+            await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+            await timelinePage.ensureTimelineIsOpen();
+            await timelinePage.waitForEvents();
+            await timelinePage.closeTimeline();
 
-        await alertsPage.flyout.expandVisualizations();
-        await alertsPage.flyout.assertGraphPreviewVisible();
-        // Should have 1 service actor (1 node) + 2 host targets grouped (1 node) + 1 label (1 node) = 3 nodes
-        await alertsPage.flyout.assertGraphNodesNumber(3);
+            // Test query bar with non-matching query
+            await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
+            await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+            await timelinePage.ensureTimelineIsOpen();
+            await timelinePage.waitForEvents();
+          });
 
-        await expandedFlyoutGraph.expandGraph();
-        await expandedFlyoutGraph.waitGraphIsLoaded();
-        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+          it('expanded flyout - entity enrichment for service actor with multiple host targets - single target field', async () => {
+            // Navigate to alerts page with the multi-target alert
+            await alertsPage.navigateToAlertsPage(
+              `${alertsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${alertsPage.getFlyoutFilter(
+                'multi-target-alert-id-xyz123abc456def789ghi012jkl345mno678pqr901stu234'
+              )}`
+            );
+            await alertsPage.waitForListToHaveAlerts();
 
-        // Verify first entity node - Service actor
-        await expandedFlyoutGraph.assertNodeEntityTag(
-          'api-service@your-project-id.iam.gserviceaccount.com',
-          'Service'
-        );
-        await expandedFlyoutGraph.assertNodeEntityDetails(
-          'api-service@your-project-id.iam.gserviceaccount.com',
-          'ApiServiceAccount'
-        );
+            await alertsPage.flyout.expandVisualizations();
+            await alertsPage.flyout.assertGraphPreviewVisible();
+            // Should have 1 service actor (1 node) + 2 host targets grouped (1 node) + 1 label (1 node) = 3 nodes
+            await alertsPage.flyout.assertGraphNodesNumber(3);
 
-        // Verify second entity node - Host target
-        // get Node by md5 hash of host-instance-1 and host-instance-2
-        await expandedFlyoutGraph.assertNodeEntityTag('599353ee39e688c8a37d9d2818d77898', 'Host');
-        await expandedFlyoutGraph.assertNodeEntityDetails(
-          '599353ee39e688c8a37d9d2818d77898',
-          'GCP Compute Instance'
-        );
-      });
-    });
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+            // Verify first entity node - Service actor
+            await expandedFlyoutGraph.assertNodeEntityTag(
+              'api-service@your-project-id.iam.gserviceaccount.com',
+              'Service'
+            );
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              'api-service@your-project-id.iam.gserviceaccount.com',
+              'ApiServiceAccount'
+            );
+
+            // Verify second entity node - Host target
+            // get Node by md5 hash of host-instance-1 and host-instance-2
+            await expandedFlyoutGraph.assertNodeEntityTag(
+              '599353ee39e688c8a37d9d2818d77898',
+              'Host'
+            );
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              '599353ee39e688c8a37d9d2818d77898',
+              'GCP Compute Instance'
+            );
+          });
+        }); // end of describe(config.name)
+      }); // end of enrichmentConfigs.forEach
+    }); // end of describe('ECS fields only')
   });
 }

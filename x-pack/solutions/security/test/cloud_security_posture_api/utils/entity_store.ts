@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type SuperTest from 'supertest';
+import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 
 export interface EntityStoreHelpersDeps {
   es: Client;
@@ -26,7 +27,7 @@ export const cleanupEntityStore = async ({
 }: Pick<EntityStoreHelpersDeps, 'supertest' | 'logger'>) => {
   try {
     await supertest
-      .delete('/api/entity_store/engines/generic?data=true')
+      .delete('/api/entity_store/engines/generic?delete_data=true')
       .set('kbn-xsrf', 'xxxx')
       .expect(200);
     logger.debug('Deleted entity store engine');
@@ -95,4 +96,26 @@ export const enableAssetInventory = async ({
   supertest,
 }: Pick<EntityStoreHelpersDeps, 'supertest'>) => {
   await supertest.post('/api/asset_inventory/enable').set('kbn-xsrf', 'xxxx').send({}).expect(200);
+};
+
+/**
+ * Helper to execute enrich policy with retry logic
+ */
+export const executeEnrichPolicy = async ({
+  es,
+  retry,
+  spaceId,
+}: Pick<EntityStoreHelpersDeps, 'es' | 'retry'> & { spaceId?: string }) => {
+  const spaceIdentifier = spaceId || 'default';
+  await retry.waitFor(`enrich policy to be executed for ${spaceIdentifier} space`, async () => {
+    try {
+      await es.enrich.executePolicy({
+        name: getEnrichPolicyId(spaceId),
+        wait_for_completion: true,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  });
 };

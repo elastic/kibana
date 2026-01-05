@@ -12,5 +12,6 @@ export {
   waitForEnrichIndexPopulated,
   waitForEntityDataIndexed,
   enableAssetInventory,
+  executeEnrichPolicy,
 } from './entity_store';
 export type { EntityStoreHelpersDeps } from './entity_store';
