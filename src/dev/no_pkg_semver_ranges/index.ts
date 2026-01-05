@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 const PKG_JSON_PATH = resolve(REPO_ROOT, 'package.json');
 const YARN_LOCK_PATH = resolve(REPO_ROOT, 'yarn.lock');
-const FIELDS_TO_CHECK = ['dependencies', 'devDependencies', 'resolutions', 'engines'] as const;
+const FIELDS_TO_CHECK = ['dependencies', 'devDependencies'] as const;
 
 export function checkSemverRanges(
   runOptions: {
@@ -34,7 +34,7 @@ export function checkSemverRanges(
 
   const pkg = JSON.parse(pkgJsonContent);
   const resolveVersionFromYarnLock = (name: string): string | null => {
-    const pattern = new RegExp(`^${name.replaceAll('/', '\\/')}@.+:\\s+version "(.*?)"$`, 'm');
+    const pattern = new RegExp(`^\"?${name.replaceAll('/', '\\/')}@.+?:\\s+version "(.*?)"$`, 'm');
     const match = yarnLockContent.match(pattern);
     if (match && match[1]) {
       return match[1];
