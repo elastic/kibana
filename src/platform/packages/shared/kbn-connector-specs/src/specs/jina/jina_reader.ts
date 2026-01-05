@@ -365,42 +365,47 @@ export const JinaReaderConnector: ConnectorSpec = {
             returnFormat?: RETURN_FORMAT;
             options?: Record<string, unknown>;
           };
-          const response = await ctx.client.post(
-            (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
-            {
-              url: innerTypedInput.url,
-              respondWith: mapPluginReturnFormatToReaderReturnFormat(innerTypedInput.returnFormat),
-              ...innerTypedInput.options,
-            },
-            {
-              headers: { Accept: 'application/json' },
-            }
-          );
+          const response = await ctx.client
+            .post(
+              (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL,
+              {
+                url: innerTypedInput.url,
+                respondWith: mapPluginReturnFormatToReaderReturnFormat(
+                  innerTypedInput.returnFormat
+                ),
+                ...innerTypedInput.options,
+              },
+              {
+                headers: { Accept: 'application/json' },
+              }
+            )
+            .catch((err) => {
+              if (err.response.data?.code) {
+                return err.response;
+              }
+              return Promise.reject(err);
+            });
 
           const effectiveData = response.data?.data;
           if (!effectiveData) {
-            throw new Error(response.data?.readableMessage || JSON.stringify(response.data));
-          }
+            if (response.data?.readableMessage) {
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: response.data.readableMessage,
+                  },
+                ],
+                isError: true,
+              };
+            }
 
-          // const urlLike = effectiveData.pageshotUrl || effectiveData.screenshotUrl;
-          // if (urlLike) {
-          //   const imageResponse = await ctx.client.get(urlLike, {
-          //     responseType: 'arraybuffer',
-          //     maxContentLength: 10 * 1024 * 1024,
-          //   });
-          //   const base64Image = Buffer.from(imageResponse.data).toString('base64');
-          //   return {
-          //     content: [
-          //       {
-          //         type: 'image',
-          //         data: base64Image,
-          //         mimeType: imageResponse.headers['content-type'],
-          //       },
-          //     ],
-          //     structuredContent: effectiveData,
-          //     isError: false,
-          //   };
-          // }
+            return {
+              content: [{ type: 'text', text: JSON.stringify(response.data) }],
+              structuredContent: effectiveData,
+              isError: true,
+            };
+          }
 
           const chunks = [
             `Title: ${effectiveData.title || 'N/A'}`,
@@ -422,24 +427,36 @@ export const JinaReaderConnector: ConnectorSpec = {
             returnFormat?: RETURN_FORMAT;
             options?: Record<string, unknown>;
           };
-          const response = await ctx.client.post(
-            (ctx.config?.overrideSearchUrl as string | undefined) || JINA_READER_BROWSE_URL,
-            {
-              q: innerTypedInput.query,
-              respondWith: 'no-content',
-              ...innerTypedInput.options,
-            },
-            {
-              headers: { Accept: 'text/plain' },
-            }
-          );
+          const response = await ctx.client
+            .post(
+              (ctx.config?.overrideSearchUrl as string | undefined) || JINA_READER_BROWSE_URL,
+              {
+                q: innerTypedInput.query,
+                respondWith: 'no-content',
+                ...innerTypedInput.options,
+              },
+              {
+                headers: { Accept: 'text/plain' },
+              }
+            )
+            .catch((err) => {
+              if (err.response.data && typeof err.response.data === 'string') {
+                return err.response;
+              }
+              return Promise.reject(err);
+            });
           const effectiveData = response.data;
           if (typeof effectiveData !== 'string') {
-            throw new Error(response.data?.readableMessage || JSON.stringify(response.data));
+            return {
+              content: [{ type: 'text', text: JSON.stringify(response.data) }],
+              structuredContent: effectiveData,
+              isError: true,
+            };
           }
+
           return {
             content: [{ type: 'text', text: effectiveData.toString() }],
-            isError: false,
+            isError: response.status !== 200,
           };
         }
 

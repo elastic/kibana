@@ -742,6 +742,7 @@ describe('JinaReaderConnector', () => {
 
     it('should call web-search tool', async () => {
       const mockResponse = {
+        status: 200,
         data: 'Search results text',
       };
       mockClient.post.mockResolvedValue(mockResponse);
@@ -783,7 +784,7 @@ describe('JinaReaderConnector', () => {
       ).rejects.toThrow('Unknown tool: unknown-tool');
     });
 
-    it('should handle browse tool error', async () => {
+    it('should handle browse tool error with readableMessage', async () => {
       const mockResponse = {
         data: {
           readableMessage: 'Invalid URL',
@@ -791,32 +792,142 @@ describe('JinaReaderConnector', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      await expect(
-        JinaReaderConnector.actions.callTool.handler(mockContext, {
-          name: 'browse',
-          arguments: {
-            url: 'invalid-url',
-          },
-        })
-      ).rejects.toThrow('Invalid URL');
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'browse',
+        arguments: {
+          url: 'invalid-url',
+        },
+      });
+
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string; text: string }> }).isError
+      ).toBe(true);
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string; text: string }> }).content[0]
+          .text
+      ).toBe('Invalid URL');
+    });
+
+    it('should handle browse tool error without readableMessage', async () => {
+      const mockResponse = {
+        data: {
+          error: 'Some error',
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'browse',
+        arguments: {
+          url: 'invalid-url',
+        },
+      });
+
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string; text: string }> }).isError
+      ).toBe(true);
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string; text: string }> }).content[0]
+          .text
+      ).toContain('Some error');
+    });
+
+    it('should handle browse tool error with code', async () => {
+      const error: HttpError = new Error('API error');
+      error.response = {
+        status: 400,
+        data: {
+          code: 400,
+          message: 'Invalid URL',
+        },
+      };
+      mockClient.post.mockRejectedValue(error);
+
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'browse',
+        arguments: {
+          url: 'invalid-url',
+        },
+      });
+
+      expect((result as { isError: boolean }).isError).toBe(true);
     });
 
     it('should handle search tool error when response is not string', async () => {
       const mockResponse = {
+        status: 200,
         data: {
-          readableMessage: 'Invalid query',
+          error: 'Invalid query',
         },
       };
       mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'web-search',
+        arguments: {
+          query: 'test',
+        },
+      });
+
+      expect((result as { isError: boolean }).isError).toBe(true);
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string; text: string }> }).content[0]
+          .text
+      ).toContain('Invalid query');
+    });
+
+    it('should handle search tool error with non-200 status', async () => {
+      const mockResponse = {
+        status: 400,
+        data: 'Error message',
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'web-search',
+        arguments: {
+          query: 'test',
+        },
+      });
+
+      expect((result as { isError: boolean }).isError).toBe(true);
+    });
+
+    it('should handle search tool error with code', async () => {
+      const error: HttpError = new Error('API error');
+      error.response = {
+        status: 400,
+        data: 'Error response',
+      };
+      mockClient.post.mockRejectedValue(error);
+
+      const result = await JinaReaderConnector.actions.callTool.handler(mockContext, {
+        name: 'web-search',
+        arguments: {
+          query: 'test',
+        },
+      });
+
+      expect((result as { isError: boolean }).isError).toBe(true);
+      expect(
+        (result as { isError: boolean; content: Array<{ type: string; text: string }> }).content[0]
+          .text
+      ).toBe('Error response');
+    });
+
+    it('should handle search tool error without code', async () => {
+      const error: HttpError = new Error('Network error');
+      error.response = { status: 500, data: { message: 'Server error' } };
+      mockClient.post.mockRejectedValue(error);
 
       await expect(
         JinaReaderConnector.actions.callTool.handler(mockContext, {
           name: 'web-search',
           arguments: {
-            query: '',
+            query: 'test',
           },
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow('Network error');
     });
   });
 
