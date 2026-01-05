@@ -431,9 +431,7 @@ describe('ToggleAlertFlyoutButton', () => {
       );
     });
 
-    it('shows status rule not available tooltip even when status rule exists and user has permissions', async () => {
-      // Note: This tests the current behavior where status rule always shows a tooltip
-      // when user has permissions, regardless of whether the rule exists
+    it('does not show tooltip for status rule when user has permissions and status rule exists', async () => {
       mockUseSyntheticsRules.mockReturnValue({
         loading: false,
         EditAlertFlyout: null,
@@ -463,14 +461,18 @@ describe('ToggleAlertFlyoutButton', () => {
       const editStatusRuleButton = await waitFor(() => screen.getByTestId('editDefaultStatusRule'));
       fireEvent.mouseOver(editStatusRuleButton);
 
-      // Wait for tooltip to appear and check content
-      // Note: The tooltip shows "Status rule does not exist" even though the rule exists
-      // This is the current behavior of the component
-      await waitFor(() => {
-        expect(
-          screen.getByText('Status rule does not exist. Create the rule before editing.')
-        ).toBeInTheDocument();
-      });
+      // Wait a bit to ensure tooltip doesn't appear
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByText('Status rule does not exist. Create the rule before editing.')
+          ).not.toBeInTheDocument();
+          expect(
+            screen.queryByText('You do not have sufficient permissions to perform this action.')
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
     });
   });
 });
