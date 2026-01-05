@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {
+  ExceptionListItem,
   ExceptionListItemHumanId,
   ExceptionListHumanId,
   ExceptionListItemType,
@@ -28,7 +29,6 @@ import {
   ExceptionListItemTags,
   ExceptionListItemMeta,
   ExceptionListItemExpireTime,
-  ExceptionListItem,
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
 
@@ -42,8 +42,8 @@ export type CreateExceptionListItemCommentArray = z.infer<
 >;
 export const CreateExceptionListItemCommentArray = z.array(CreateExceptionListItemComment);
 
-export type CreateExceptionListItemRequestBody = z.infer<typeof CreateExceptionListItemRequestBody>;
-export const CreateExceptionListItemRequestBody = z.object({
+export type CreateExceptionListItemGeneric = z.infer<typeof CreateExceptionListItemGeneric>;
+export const CreateExceptionListItemGeneric = z.object({
   item_id: ExceptionListItemHumanId.optional(),
   list_id: ExceptionListHumanId,
   type: ExceptionListItemType,
@@ -57,6 +57,67 @@ export const CreateExceptionListItemRequestBody = z.object({
   expire_time: ExceptionListItemExpireTime.optional(),
   comments: CreateExceptionListItemCommentArray.optional().default([]),
 });
+
+export type CreateExceptionListItemEndpointList = z.infer<
+  typeof CreateExceptionListItemEndpointList
+>;
+export const CreateExceptionListItemEndpointList = CreateExceptionListItemGeneric.merge(
+  z.object({
+    list_id: z.literal('endpoint_list').optional(),
+  })
+);
+
+export type CreateExceptionListItemTrustedApps = z.infer<typeof CreateExceptionListItemTrustedApps>;
+export const CreateExceptionListItemTrustedApps = CreateExceptionListItemGeneric.merge(
+  z.object({
+    list_id: z.literal('endpoint_trusted_apps').optional(),
+  })
+);
+
+export type CreateExceptionListItemTrustedDevices = z.infer<
+  typeof CreateExceptionListItemTrustedDevices
+>;
+export const CreateExceptionListItemTrustedDevices = CreateExceptionListItemGeneric.merge(
+  z.object({
+    list_id: z.literal('endpoint_trusted_devices').optional(),
+  })
+);
+
+export type CreateExceptionListItemEventFilters = z.infer<
+  typeof CreateExceptionListItemEventFilters
+>;
+export const CreateExceptionListItemEventFilters = CreateExceptionListItemGeneric.merge(
+  z.object({
+    list_id: z.literal('endpoint_event_filters').optional(),
+  })
+);
+
+export type CreateExceptionListItemHostIsolation = z.infer<
+  typeof CreateExceptionListItemHostIsolation
+>;
+export const CreateExceptionListItemHostIsolation = CreateExceptionListItemGeneric.merge(
+  z.object({
+    list_id: z.literal('endpoint_host_isolation_exceptions').optional(),
+  })
+);
+
+export type CreateExceptionListItemBlocklist = z.infer<typeof CreateExceptionListItemBlocklist>;
+export const CreateExceptionListItemBlocklist = CreateExceptionListItemGeneric.merge(
+  z.object({
+    list_id: z.literal('endpoint_blocklists').optional(),
+  })
+);
+
+export type CreateExceptionListItemRequestBody = z.infer<typeof CreateExceptionListItemRequestBody>;
+export const CreateExceptionListItemRequestBody = z.union([
+  CreateExceptionListItemGeneric,
+  CreateExceptionListItemEndpointList,
+  CreateExceptionListItemTrustedApps,
+  CreateExceptionListItemTrustedDevices,
+  CreateExceptionListItemEventFilters,
+  CreateExceptionListItemHostIsolation,
+  CreateExceptionListItemBlocklist,
+]);
 export type CreateExceptionListItemRequestBodyInput = z.input<
   typeof CreateExceptionListItemRequestBody
 >;
