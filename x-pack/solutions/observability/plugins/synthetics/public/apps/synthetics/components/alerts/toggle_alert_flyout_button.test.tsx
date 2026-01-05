@@ -474,5 +474,43 @@ describe('ToggleAlertFlyoutButton', () => {
         { timeout: 500 }
       );
     });
+
+    it('shows status rule not available tooltip when user has permissions and status rule does not exist', async () => {
+      mockUseSyntheticsRules.mockReturnValue({
+        loading: false,
+        EditAlertFlyout: null,
+        NewRuleFlyout: null,
+        defaultRules: {
+          statusRule: null,
+          tlsRule: { id: 'tls-rule-1', name: 'TLS Rule' },
+        },
+      });
+
+      const user = userEvent.setup();
+      render(<ToggleAlertFlyoutButton />, {
+        state: baseMockState,
+        core: makeSyntheticsPermissionsCore({ save: true }),
+      });
+
+      // Open the popover
+      const button = screen.getByTestId('syntheticsAlertsRulesButton');
+      await user.click(button);
+      await waitForEuiPopoverOpen();
+
+      // Navigate to status rule panel
+      const statusRuleMenuItem = screen.getByTestId('manageStatusRuleName');
+      await user.click(statusRuleMenuItem);
+
+      // Wait for the panel and hover over the disabled button
+      const editStatusRuleButton = await waitFor(() => screen.getByTestId('editDefaultStatusRule'));
+      fireEvent.mouseOver(editStatusRuleButton);
+
+      // Wait for tooltip to appear and check content
+      await waitFor(() => {
+        expect(
+          screen.getByText('Status rule does not exist. Create the rule before editing.')
+        ).toBeInTheDocument();
+      });
+    });
   });
 });
