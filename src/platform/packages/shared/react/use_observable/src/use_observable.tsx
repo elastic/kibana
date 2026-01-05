@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useSyncExternalStore, useRef, useCallback, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -25,33 +25,35 @@ export function useObservable<T>(observable$: ValueObservable<T>): T;
 export function useObservable<T>(observable$: Observable<T>, initialValue: T): T;
 export function useObservable<T>(observable$: Observable<T>): T | undefined;
 export function useObservable<T>(observable$: Observable<T>, initialValue?: T): T | undefined {
-  const valueRef = useRef<T | undefined>(
-    hasGetValue(observable$) ? observable$.getValue() : initialValue
-  );
-
   if (isDev) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useObservableUnstableRefWarning(observable$);
   }
 
-  const subscribe = useCallback(
-    (notify: () => void) => {
-      const subscription = observable$.subscribe((nextValue) => {
-        if (nextValue !== valueRef.current) {
-          valueRef.current = nextValue;
-          notify();
-        }
-      });
-      return () => subscription.unsubscribe();
-    },
-    [observable$]
-  );
+  const valueRef = useRef<T | undefined>(initialValue);
 
-  const getSnapshot = useCallback(() => {
-    return valueRef.current;
-  }, []);
+  const adapter = useMemo(() => {
+    // For ValueObservable: sync immediately to avoid stale flash
+    // For regular Observable: keep previous value (stale-while-revalidate)
+    if (hasGetValue(observable$)) {
+      valueRef.current = observable$.getValue();
+    }
 
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+    return {
+      subscribe: (notify: () => void) => {
+        const sub = observable$.subscribe((nextValue) => {
+          if (!Object.is(nextValue, valueRef.current)) {
+            valueRef.current = nextValue;
+            notify();
+          }
+        });
+        return () => sub.unsubscribe();
+      },
+      getSnapshot: () => valueRef.current,
+    };
+  }, [observable$]);
+
+  return useSyncExternalStore(adapter.subscribe, adapter.getSnapshot, adapter.getSnapshot);
 }
 
 // Dev only hook to detect changing observable refs
