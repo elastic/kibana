@@ -43,7 +43,7 @@ export async function runDockerGenerator(
   }
 ) {
   let baseImageName = '';
-  if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
+  if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi10-minimal:latest';
   /**
    * Renovate config contains a regex manager to automatically update both Chainguard references
    *

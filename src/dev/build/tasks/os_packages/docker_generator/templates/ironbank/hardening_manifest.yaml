@@ -10,8 +10,8 @@ tags:
   - 'latest'
 # Build args passed to Dockerfile ARGs
 args:
-  BASE_IMAGE: 'redhat/ubi/ubi9'
-  BASE_TAG: "9.7"
+  BASE_IMAGE: 'redhat/ubi/ubi10'
+  BASE_TAG: "10.1"
 # Docker image labels
 labels:
   org.opencontainers.image.title: 'kibana'
