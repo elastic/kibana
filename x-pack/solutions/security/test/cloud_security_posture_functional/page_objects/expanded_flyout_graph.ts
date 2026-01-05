@@ -39,6 +39,9 @@ const {
   GRAPH_NODE_ENTITY_TAG_TEXT_ID,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
+  GROUPED_ITEM_TEST_ID,
+  GROUPED_ITEM_ACTOR_TEST_ID,
+  GROUPED_ITEM_TARGET_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } = testSubjectIds;
@@ -290,5 +293,36 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
 
   async closePreviewSection(): Promise<void> {
     await this.testSubjects.click(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID);
+  }
+
+  async assertGroupedItemActorAndTargetValues(
+    expectedCount: number,
+    actor: string,
+    target: string
+  ): Promise<void> {
+    await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+    const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
+    expect(groupedItems.length).to.be.greaterThan(0);
+
+    // Count how many grouped items have the specified actor and target
+    let matchingCount = 0;
+    for (const groupedItem of groupedItems) {
+      try {
+        const actorElement = await groupedItem.findByTestSubject(GROUPED_ITEM_ACTOR_TEST_ID);
+        const targetElement = await groupedItem.findByTestSubject(GROUPED_ITEM_TARGET_TEST_ID);
+
+        const actorText = await actorElement.getVisibleText();
+        const targetText = await targetElement.getVisibleText();
+
+        if (actorText.includes(actor) && targetText.includes(target)) {
+          matchingCount++;
+        }
+      } catch (e) {
+        // This grouped item might not have actor/target (could be an entity), continue checking others
+        continue;
+      }
+    }
+
+    expect(matchingCount).to.be(expectedCount);
   }
 }
