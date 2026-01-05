@@ -16,7 +16,8 @@ import { createIntegrationsSyncService } from './sync/integrations_sync';
 export const createDataSourcesService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract,
-  maxUsersAllowed: number // TODO: remove this and use a const instead
+  maxUsersAllowed: number //NOTE: This parameter is required for the legacy index sync service. Remove it (and use a const) only when the old sync service and its feature flag are deleted.
+  // related issue: https://github.com/elastic/kibana/pull/243965#discussion_r2642244800
 ) => {
   const newIndexSync =
     dataClient.deps.experimentalFeatures?.privilegedMonitoringNewIndexSyncUpdateDetectionEnabled;
