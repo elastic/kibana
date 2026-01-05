@@ -49,10 +49,15 @@ const fetchCloudConnectorUsage = async (
   });
 };
 
+export interface UseCloudConnectorUsageOptions {
+  staleTime?: number;
+}
+
 export const useCloudConnectorUsage = (
   cloudConnectorId: string,
   page: number = 1,
-  perPage: number = 10
+  perPage: number = 10,
+  options?: UseCloudConnectorUsageOptions
 ) => {
   const CLOUD_CONNECTOR_USAGE_QUERY_KEY = 'cloud-connector-usage';
   const { http } = useKibana().services;
@@ -68,7 +73,7 @@ export const useCloudConnectorUsage = (
     {
       enabled: !!cloudConnectorId,
       keepPreviousData: true, // Keep previous data to avoid flashing when going through pages
-      staleTime: 60000, // Cache for 1 minute
+      staleTime: options?.staleTime ?? 60000, // Default: cache for 1 minute
       refetchOnWindowFocus: false,
     }
   );
