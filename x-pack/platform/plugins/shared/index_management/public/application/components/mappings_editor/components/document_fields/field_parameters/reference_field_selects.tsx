@@ -32,7 +32,7 @@ export const ReferenceFieldSelects = () => {
     .map((field) => ({
       value: field.path.join('.'),
       inputDisplay: field.path.join('.'),
-      'data-test-subj': `select-reference-field-${field.path.join('.')}}`,
+      'data-test-subj': `select-reference-field-${field.path.join('.')}`,
     }));
   const fieldConfigReferenceField = getFieldConfig('reference_field');
   return (

@@ -7,7 +7,6 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
-import { BIGGER_TIMEOUT } from '../constants';
 
 export class TransactionDetailsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -19,7 +18,6 @@ export class TransactionDetailsPage {
     end: string;
   }) {
     const { serviceName, transactionName, start, end } = params;
-
     const urlServiceName = encodeURIComponent(serviceName);
 
     await this.page.goto(
@@ -32,30 +30,6 @@ export class TransactionDetailsPage {
       )}`
     );
     await waitForApmSettingsHeaderLink(this.page);
-  }
-
-  /**
-   * Navigate to transaction details page
-   */
-  async goto(
-    serviceName: string,
-    transactionName: string,
-    timeRange: { rangeFrom: string; rangeTo: string }
-  ) {
-    const urlServiceName = encodeURIComponent(serviceName);
-
-    await this.page.goto(
-      `${this.kbnUrl.app('apm')}/services/${urlServiceName}/transactions/view?${new URLSearchParams(
-        {
-          transactionName,
-          rangeFrom: timeRange.rangeFrom,
-          rangeTo: timeRange.rangeTo,
-        }
-      )}`
-    );
-    await this.page
-      .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   /**
@@ -79,9 +53,7 @@ export class TransactionDetailsPage {
         offset: '1d',
       })}`
     );
-    await this.page
-      .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+    await waitForApmSettingsHeaderLink(this.page);
   }
 
   async reload() {

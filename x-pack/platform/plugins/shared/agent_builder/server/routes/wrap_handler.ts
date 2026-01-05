@@ -41,7 +41,12 @@ export const getHandlerWrapper =
       if (!ignoreLicense) {
         const { license } = await ctx.licensing;
         if (!isValidLicense(license)) {
-          return res.forbidden();
+          return res.forbidden({
+            body: {
+              message:
+                'Invalid license level. Agent Builder APIs require an Enterprise license or higher.',
+            },
+          });
         }
       }
 
