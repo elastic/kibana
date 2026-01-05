@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, map } from 'rxjs';
+import { BehaviorSubject, filter, map, combineLatest, type Subscription } from 'rxjs';
 
 import type {
   ContentManagementPublicSetup,
@@ -135,7 +135,10 @@ export class DashboardPlugin
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
+  private appStateSubscription?: Subscription;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private deepLinksUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private listingViewRegistry: Set<DashboardListingTab> = new Set();
@@ -175,7 +178,7 @@ export class DashboardPlugin
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
       defaultSubUrl: `#${LANDING_PAGE_PATH}`,
       storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
-      navLinkUpdater$: this.appStateUpdater,
+      navLinkUpdater$: this.urlUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
@@ -215,6 +218,15 @@ export class DashboardPlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
+
+    this.appStateSubscription = combineLatest([this.urlUpdater, this.deepLinksUpdater]).subscribe(
+      ([urlUpdater, deepLinksUpdater]) => {
+        this.appStateUpdater.next((app) => ({
+          ...urlUpdater(app),
+          ...deepLinksUpdater(app),
+        }));
+      }
+    );
 
     const app: App = {
       id: DASHBOARD_APP_ID,
@@ -310,17 +322,13 @@ export class DashboardPlugin
           id: tab.id,
           title: tab.deepLink.title,
           path: `#${LANDING_PAGE_PATH}/${tab.id}`,
-          visibleIn: tab.deepLink.visibleIn || ['globalSearch'],
+          visibleIn: tab.deepLink.visibleIn,
         });
       }
     }
 
     if (deepLinks.length > 0) {
-      const currentUpdater = this.appStateUpdater.getValue();
-      this.appStateUpdater.next((app) => ({
-        ...currentUpdater(app),
-        deepLinks,
-      }));
+      this.deepLinksUpdater.next(() => ({ deepLinks }));
     }
 
     return {
@@ -335,5 +343,6 @@ export class DashboardPlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.appStateSubscription?.unsubscribe();
   }
 }

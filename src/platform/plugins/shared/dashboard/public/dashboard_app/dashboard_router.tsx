@@ -119,10 +119,15 @@ export async function mountApp({
     );
   };
 
-  const renderListingPage = (routeProps: RouteComponentProps) => {
+  const renderListingPage = (routeProps: RouteComponentProps<{ activeTab?: string }>) => {
     // clear the dashboard duration start mark set during mounting because we
     // went to the listing page instead of a dashboard view
     performance.clearMarks(DASHBOARD_DURATION_START_MARK);
+
+    const activeTab = routeProps.match.params.activeTab;
+    if (activeTab && activeTab !== 'dashboards') {
+      embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
+    }
 
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);

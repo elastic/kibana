@@ -95,13 +95,12 @@ export const VisualizationTableList = ({
       const path = editApp ? editUrl : `#${editUrl}`;
       const currentApp = await firstValueFrom(core.application.currentAppId$);
 
-      // Use state transfer for proper breadcrumb context when embedded in another app
       if (currentApp && currentApp !== VISUALIZE_APP_NAME) {
         await embeddable.getStateTransfer().navigateToEditor(targetApp, {
           path,
           state: {
             originatingApp: currentApp,
-            originatingPath: window.location.hash.replace(/^#/, ''),
+            originatingPath: window.location.hash,
           },
         });
         return;

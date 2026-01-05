@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs';
+import { filter, map, combineLatest, type Subscription } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
@@ -34,6 +34,7 @@ import type {
   AppMountParameters,
   AppUpdater,
   ScopedHistory,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -266,6 +267,9 @@ export class VisualizationsPlugin
     >
 {
   private readonly types: TypesService = new TypesService();
+  private appStateSubscription?: Subscription;
+  private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private visibilityUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
@@ -296,7 +300,7 @@ export class VisualizationsPlugin
       baseUrl: core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
-      navLinkUpdater$: this.appStateUpdater,
+      navLinkUpdater$: this.urlUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
@@ -329,6 +333,15 @@ export class VisualizationsPlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
+
+    this.appStateSubscription = combineLatest([this.urlUpdater, this.visibilityUpdater]).subscribe(
+      ([urlUpdater, visibilityUpdater]) => {
+        this.appStateUpdater.next((app) => ({
+          ...urlUpdater(app),
+          ...visibilityUpdater(app),
+        }));
+      }
+    );
 
     const start = createStartServicesGetter(core.getStartServices);
     const listingViewRegistry: ListingViewRegistry = new Set();
@@ -567,12 +580,9 @@ export class VisualizationsPlugin
       setSpaces(spaces);
       spaces.getActiveSpace$().subscribe((space) => {
         if (!space) return;
-        const currentUpdater = this.appStateUpdater.getValue();
-        this.appStateUpdater.next((app) => ({
-          ...currentUpdater(app),
-          visibleIn:
-            space.solution && space.solution !== 'classic' ? [] : ['globalSearch', 'sideNav'],
-        }));
+        const visibleIn: AppDeepLinkLocations[] =
+          space.solution && space.solution !== 'classic' ? [] : ['globalSearch', 'sideNav'];
+        this.visibilityUpdater.next(() => ({ visibleIn }));
       });
     }
 
@@ -595,5 +605,6 @@ export class VisualizationsPlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.appStateSubscription?.unsubscribe();
   }
 }
