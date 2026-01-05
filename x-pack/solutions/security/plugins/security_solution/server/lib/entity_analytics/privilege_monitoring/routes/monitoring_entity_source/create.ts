@@ -50,9 +50,9 @@ export const createMonitoringEntitySourceRoute = (
       },
       async (context, request, response): Promise<IKibanaResponse<CreateEntitySourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
-        const source = request.body;
+        const monitoringSource = request.body;
         try {
-          if (source.type !== 'index') {
+          if (monitoringSource.type !== 'index') {
             // currently we own the integration sources so we don't allow creation of other types
             // we might allow this in the future if we have a way to manage the integration sources
             return siemResponse.error({
@@ -64,7 +64,7 @@ export const createMonitoringEntitySourceRoute = (
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
 
-          const body = await client.create(source);
+          const body = await client.create(monitoringSource);
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
           const soClient = privMonDataClient.getScopedSoClient(request, {
             includedHiddenTypes: [
