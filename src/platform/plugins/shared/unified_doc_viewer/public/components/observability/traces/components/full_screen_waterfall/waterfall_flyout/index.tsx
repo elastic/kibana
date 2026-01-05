@@ -116,7 +116,7 @@ export function WaterfallFlyout({
       <EuiFlyoutBody
         css={css`
           & .euiFlyoutBody__overflow {
-            overflow-y: hidden !important;
+            overflow-y: hidden;
           }
         `}
       >
