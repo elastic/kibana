@@ -98,7 +98,7 @@ export const createDataViewSelectedListener = (dependencies: {
 
       logger.debug(
         `Cached data view lookup for id: ${action.payload.id} returned: ${
-          cachedDataViewSpec ?? 'null'
+          cachedDataViewSpec?.title ?? 'null'
         }`
       );
 
