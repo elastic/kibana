@@ -5819,7 +5819,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }>> & ",
+          "<Readonly<{ enhancements?: Record<string, any> | undefined; ignoreParentSettings?: Readonly<{ ignoreFilters?: boolean | undefined; ignoreQuery?: boolean | undefined; ignoreTimerange?: boolean | undefined; ignoreValidations?: boolean | undefined; } & {}> | undefined; } & { controls: Readonly<{ id?: string | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; }>[]; labelPosition: \"oneLine\" | \"twoLine\"; chainingSystem: \"HIERARCHICAL\" | \"NONE\"; autoApplySelections: boolean; }>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6835,6 +6835,22 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
+          ", \"name\">; \"alerts.all.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.all.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
           ", \"name\">; \"alerts.new.count\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
@@ -6860,22 +6876,6 @@
             "text": "ActionVariable"
           },
           ", \"name\">; \"alerts.recovered.data\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
-          ", \"name\">; \"alerts.all.count\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
-          ", \"name\">; \"alerts.all.data\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",

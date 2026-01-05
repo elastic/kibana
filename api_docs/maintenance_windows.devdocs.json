@@ -1,9 +1,331 @@
 {
   "id": "maintenanceWindows",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicPlugin",
+            "text": "MaintenanceWindowsPublicPlugin"
+          },
+          " implements ",
+          "Plugin",
+          "<void, void, ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+            "text": "MaintenanceWindowsPublicSetupDependencies"
+          },
+          ", ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicStartDependencies",
+            "text": "MaintenanceWindowsPublicStartDependencies"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initContext",
+                "description": [],
+                "signature": [
+                  "PluginInitializerContext",
+                  "<object>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              "CoreSetup",
+              "<{}, unknown>, plugins: ",
+              {
+                "pluginId": "maintenanceWindows",
+                "scope": "public",
+                "docId": "kibMaintenanceWindowsPluginApi",
+                "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+                "text": "MaintenanceWindowsPublicSetupDependencies"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<{}, unknown>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maintenanceWindows",
+                    "scope": "public",
+                    "docId": "kibMaintenanceWindowsPluginApi",
+                    "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+                    "text": "MaintenanceWindowsPublicSetupDependencies"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicSetupDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicSetupDependencies.management",
+            "type": "Object",
+            "tags": [],
+            "label": "management",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSetup",
+                "text": "ManagementSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicStartDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "public",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesApi",
+                "text": "SpacesApi"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "serverless",
+                "scope": "public",
+                "docId": "kibServerlessPluginApi",
+                "section": "def-public.ServerlessPluginStart",
+                "text": "ServerlessPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []
@@ -155,7 +477,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; update: (params: Readonly<{} & { id: string; data: Readonly<{ enabled?: boolean | undefined; title?: string | undefined; duration?: number | undefined; rRule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; update: (params: Readonly<{} & { id: string; data: Readonly<{ enabled?: boolean | undefined; title?: string | undefined; duration?: number | undefined; rRule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -171,7 +493,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; get: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; get: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -179,7 +501,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; find: (params?: Readonly<{ search?: string | undefined; page?: number | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; searchFields?: string[] | undefined; status?: (\"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\")[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { page: number; data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; find: (params?: Readonly<{ search?: string | undefined; page?: number | undefined; namespaces?: string[] | undefined; status?: (\"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\")[] | undefined; perPage?: number | undefined; searchFields?: string[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { page: number; data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -187,7 +509,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; perPage: number; total: number; }>>; bulkGet: (params: Readonly<{} & { ids: string[]; }>) => Promise<Readonly<{} & { errors: Readonly<{} & { id: string; error: string; message: string; statusCode: number; }>[]; maintenanceWindows: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; perPage: number; total: number; }>>; bulkGet: (params: Readonly<{} & { ids: string[]; }>) => Promise<Readonly<{} & { errors: Readonly<{} & { id: string; error: string; message: string; statusCode: number; }>[]; maintenanceWindows: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -195,7 +517,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; }>>; archive: (params: Readonly<{} & { id: string; archive: boolean; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; }>>; archive: (params: Readonly<{} & { id: string; archive: boolean; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -203,7 +525,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; finish: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; finish: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -211,7 +533,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; getActiveMaintenanceWindows: (cacheIntervalMs?: number | undefined) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; getActiveMaintenanceWindows: (cacheIntervalMs?: number | undefined) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -219,7 +541,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]>; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/index.ts",
         "deprecated": false,
@@ -280,7 +602,7 @@
           "signature": [
             "(request: ",
             "KibanaRequest",
-            "<unknown, unknown, unknown, any>, excludedExtension?: string[] | undefined) => ",
+            "<unknown, unknown, unknown, any>) => ",
             "MaintenanceWindowClientApi"
           ],
           "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
@@ -302,21 +624,6 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
-            },
-            {
-              "parentPluginId": "maintenanceWindows",
-              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientInternal.$2",
-              "type": "Array",
-              "tags": [],
-              "label": "excludedExtension",
-              "description": [],
-              "signature": [
-                "string[] | undefined"
-              ],
-              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": false
             }
           ],
           "returnComment": []
@@ -341,6 +648,42 @@
             {
               "parentPluginId": "maintenanceWindows",
               "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithAuth.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "maintenanceWindows",
+          "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithoutAuth",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaintenanceWindowClientWithoutAuth",
+          "description": [],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => ",
+            "MaintenanceWindowClientApi"
+          ],
+          "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "maintenanceWindows",
+              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithoutAuth.$1",
               "type": "Object",
               "tags": [],
               "label": "request",
@@ -1005,6 +1348,21 @@
       },
       {
         "parentPluginId": "maintenanceWindows",
+        "id": "def-common.BASE_ALERTING_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_ALERTING_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
         "id": "def-common.BASE_MAINTENANCE_WINDOW_API_PATH",
         "type": "string",
         "tags": [],
@@ -1096,7 +1454,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; events: Readonly<{} & { gte: string; lte: string; }>[]; created_at: string; created_by: string | null; updated_at: string; updated_by: string | null; expiration_date: string; r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; event_start_time: string | null; event_end_time: string | null; }>[]; readonly total: number; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; duration: number; events: Readonly<{} & { gte: string; lte: string; }>[]; created_at: string; created_by: string | null; updated_at: string; updated_by: string | null; expiration_date: string; r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; event_start_time: string | null; event_end_time: string | null; }>[]; readonly total: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/request/find/types/v1.ts",
         "deprecated": false,
@@ -1119,7 +1477,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; readonly perPage: number; readonly total: number; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; readonly perPage: number; readonly total: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/methods/find/types/find_maintenance_window_result.ts",
         "deprecated": false,
@@ -1289,7 +1647,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly createdBy: string | null; readonly updatedBy: string | null; readonly createdAt: string; readonly updatedAt: string; readonly duration: number; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly expirationDate: string; readonly eventStartTime: string | null; readonly eventEndTime: string | null; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly createdBy: string | null; readonly updatedBy: string | null; readonly createdAt: string; readonly updatedAt: string; readonly duration: number; readonly rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly expirationDate: string; readonly eventStartTime: string | null; readonly eventEndTime: string | null; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/types.ts",
         "deprecated": false,
@@ -1367,7 +1725,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly duration: number; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly created_at: string; readonly created_by: string | null; readonly updated_at: string; readonly updated_by: string | null; readonly expiration_date: string; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly event_start_time: string | null; readonly event_end_time: string | null; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly duration: number; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly created_at: string; readonly created_by: string | null; readonly updated_at: string; readonly updated_by: string | null; readonly expiration_date: string; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly event_start_time: string | null; readonly event_end_time: string | null; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/response/types/v1.ts",
         "deprecated": false,
