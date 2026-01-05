@@ -30,7 +30,9 @@ export const attachmentToolIds = [
 /**
  * Creates all attachment tools with the given options.
  */
-export const createAttachmentTools = (options: AttachmentToolsOptions): BuiltinToolDefinition[] => {
+export const createAttachmentTools = (
+  options: AttachmentToolsOptions
+): BuiltinToolDefinition<any>[] => {
   return [
     createAttachmentReadTool(options),
     createAttachmentUpdateTool(options),
