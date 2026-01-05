@@ -222,7 +222,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
       SiemMigrationsRuleEventTypes.TranslatedItemInstall,
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.TranslatedItemInstall],
-        migrationId: 'test-migration-1',
+        migrationId: migrationRule.migration_id,
         vendor: MigrationSource.SPLUNK,
         ruleMigrationId: '1',
         author: 'elastic',
