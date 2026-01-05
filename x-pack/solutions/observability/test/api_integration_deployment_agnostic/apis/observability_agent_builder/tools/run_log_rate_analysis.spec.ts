@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
-import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { ErrorResult } from '@kbn/onechat-common';
-import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/run_log_rate_analysis/run_log_rate_analysis';
+import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ErrorResult } from '@kbn/agent-builder-common';
+import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/run_log_rate_analysis/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import {

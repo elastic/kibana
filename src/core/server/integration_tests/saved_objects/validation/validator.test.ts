@@ -160,12 +160,8 @@ describe.skip('validates saved object types when a schema is provided', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('does nothing when no schema is provided', async () => {
