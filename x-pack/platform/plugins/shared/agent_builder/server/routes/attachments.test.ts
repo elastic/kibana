@@ -12,6 +12,7 @@ import type {
   ConversationRound,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { registerAttachmentRoutes } from './attachments';
@@ -535,6 +536,7 @@ describe('Attachment Routes', () => {
       const attachment = createMockAttachment({ id: 'att-1' });
       const roundWithReference: ConversationRound = {
         id: 'round-1',
+        status: ConversationRoundStatus.completed,
         input: { message: 'test' },
         steps: [
           {

@@ -61,7 +61,7 @@ export function registerAttachmentRoutes({
     .get({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'List conversation attachments',
@@ -120,7 +120,7 @@ export function registerAttachmentRoutes({
     .post({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Create conversation attachment',
@@ -207,7 +207,7 @@ export function registerAttachmentRoutes({
     .put({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Update conversation attachment',
@@ -300,7 +300,7 @@ export function registerAttachmentRoutes({
     .delete({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Delete conversation attachment',
@@ -429,7 +429,7 @@ export function registerAttachmentRoutes({
     .post({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}/_restore`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Restore deleted attachment',
@@ -510,7 +510,7 @@ export function registerAttachmentRoutes({
     .patch({
       path: `${publicApiPath}/conversations/{conversation_id}/attachments/{attachment_id}`,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
       summary: 'Rename attachment',
