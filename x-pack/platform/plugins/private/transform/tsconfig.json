@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json"
@@ -86,6 +87,8 @@
     "@kbn/licensing-types",
     "@kbn/react-query",
     "@kbn/kql"
+    "@kbn/scout",
+    "@kbn/core-http-common"
   ],
   "exclude": ["target/**/*"]
 }

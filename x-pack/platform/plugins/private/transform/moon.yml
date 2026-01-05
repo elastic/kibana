@@ -92,6 +92,8 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/react-query'
   - '@kbn/kql'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -103,6 +105,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - public/**/*.json
     - '!target/**/*'
 tasks:
