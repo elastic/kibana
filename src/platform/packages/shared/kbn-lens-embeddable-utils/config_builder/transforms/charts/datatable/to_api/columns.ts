@@ -121,7 +121,7 @@ export function convertDatatableColumnsToAPI(
       const apiOperation = columnId ? operationFromColumn(columnId, layer) : undefined;
       if (!apiOperation) throw new Error('Column not found');
 
-      if (isMetricColumnNoESQL(column, apiOperation)) {
+      if (isMetricColumnNoESQL(column, layer.columns[columnId])) {
         if (!isAPIColumnOfMetricType(apiOperation))
           throw new Error(
             `Metric column ${columnId} must be a metric operation (got ${apiOperation.operation})`

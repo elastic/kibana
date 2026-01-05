@@ -7,25 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ColumnState, TextBasedLayerColumn } from '@kbn/lens-common';
-import { isAPIColumnOfBucketType } from '../../columns/utils';
-import type { LensApiAllOperations } from '../../../schema';
+import type {
+  ColumnState,
+  GenericIndexPatternColumn,
+  TextBasedLayerColumn,
+} from '@kbn/lens-common';
 import { ACCESSOR } from './constants';
 
 /**
  * Checks if the column is a metric column in a formBased layer
  * - In metric columns the isMetric property is not set in all cases and neither is for rows
- * - Pass apiOperation to distinguish bucket (row) vs metric operations
+ * - Pass layerColumn to check isBucketed property
  */
 export function isMetricColumnNoESQL(
   col: ColumnState,
-  apiOperation: LensApiAllOperations
+  layerColumn: GenericIndexPatternColumn
 ): boolean {
   if (col.isMetric) return true;
-  if (col.isTransposed) return false;
 
-  // If the column is a bucket type, it is a row column
-  if (apiOperation && isAPIColumnOfBucketType(apiOperation)) {
+  // If the column is bucketed, it is a row column (not a metric)
+  if (col.isTransposed || layerColumn.isBucketed) {
     return false;
   }
   return true;
