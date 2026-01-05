@@ -15,6 +15,8 @@ export { WorkflowGraph } from './workflow_graph/workflow_graph';
 
 export type {
   AtomicGraphNode,
+  DataSetGraphNode,
+  DataSetGraphNodeSchema,
   EnterConditionBranchNode,
   EnterConditionBranchNodeSchema,
   EnterForeachNodeConfiguration,
@@ -52,6 +54,7 @@ export type {
 
 export {
   isAtomic,
+  isDataSet,
   isElasticsearch,
   isKibana,
   isHttp,

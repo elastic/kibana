@@ -4,9 +4,9 @@ This plugin provides an observability agent, observability tools and attachments
 
 ## Feature flag
 
-The agent is hidden behind a feature flag. It can be enabled via kibana.yml:
+The agent/tools are hidden behind the shared AI Agents feature flag. It can be enabled via `kibana.yml`:
 
 ```yml
 feature_flags.overrides:
-  observabilityAgent.enabled: true
+  aiAssistant.aiAgents.enabled: true
 ```

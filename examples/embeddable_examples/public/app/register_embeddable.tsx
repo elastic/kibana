@@ -73,7 +73,7 @@ export const RegisterEmbeddable = () => {
       <EuiText>
         <h2>Configure initial dashboard placement (optional)</h2>
         <p>
-          Add an entry to <strong>registerDashboardPanelSettings</strong> provided by the Dashboard
+          Add an entry to <strong>registerPanelPlacementSettings</strong> provided by the Dashboard
           plugin start contract to configure initial dashboard placement and/or restrict the
           possible sizes of the dashboard panel.
         </p>

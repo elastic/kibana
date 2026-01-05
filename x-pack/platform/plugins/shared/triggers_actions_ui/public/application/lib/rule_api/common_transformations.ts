@@ -6,7 +6,7 @@
  */
 import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import type { Rule, RuleUiAction, ResolvedRule, RuleLastRun, RuleTemplate } from '../../../types';
+import type { Rule, RuleUiAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
   const { uuid, id, connector_type_id: actionTypeId, params } = action;
@@ -116,22 +116,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...rest,
 });
 
-export const transformRuleTemplate: RewriteRequestCase<RuleTemplate> = ({
-  rule_type_id: ruleTypeId,
-  alert_delay: alertDelay,
-  flapping,
-  ...rest
-}: any) => ({
-  ruleTypeId,
-  ...(alertDelay ? { alertDelay } : {}),
-  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
-  ...rest,
-});
-
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_target_id,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_purpose,
   outcome,
   ...rest

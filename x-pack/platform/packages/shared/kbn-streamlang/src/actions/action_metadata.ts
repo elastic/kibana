@@ -451,6 +451,50 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  math: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.math.name', {
+      defaultMessage: 'Math',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.math.description', {
+      defaultMessage: 'Evaluate arithmetic and logical expressions to compute derived fields',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.math.usage', {
+      defaultMessage:
+        'Provide an `expression` using field names and operators, and a `to` field for the result. Expressions can use arithmetic operators (+, -, *, /), comparison operators (>, <, ==), the log() function, and comparison functions (eq, neq, gt, lt, gte, lte).',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.math.examples.duration', {
+          defaultMessage: 'Convert milliseconds to seconds',
+        }),
+        yaml: `- action: math
+  expression: "duration_ms / 1000"
+  to: duration_sec`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.math.examples.comparison', {
+          defaultMessage: 'Flag high memory usage',
+        }),
+        yaml: `- action: math
+  expression: "memory_used > memory_limit * 0.9"
+  to: high_memory_flag`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.math.tips.functions', {
+        defaultMessage:
+          'Use arithmetic operators (+, -, *, /), comparison operators (>, <, ==, >=, <=), the log() function for natural logarithm, and comparison functions (eq, neq, gt, lt, gte, lte)',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.math.tips.types', {
+        defaultMessage: 'Results are stored as numbers or booleans depending on the expression',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.math.tips.convert', {
+        defaultMessage:
+          'Use the Convert processor to ensure fields are numeric before math operations',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

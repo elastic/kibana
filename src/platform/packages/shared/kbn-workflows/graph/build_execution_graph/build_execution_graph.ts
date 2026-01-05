@@ -11,6 +11,7 @@ import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import type {
   BaseStep,
+  DataSetStep,
   ElasticsearchStep,
   ForEachStep,
   HttpStep,
@@ -32,6 +33,7 @@ import type {
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
+  DataSetGraphNode,
   ElasticsearchGraphNode,
   EnterConditionBranchNode,
   EnterContinueNode,
@@ -143,6 +145,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitWaitStep(currentStep as WaitStep, context);
   }
 
+  if ((currentStep as DataSetStep).type === 'data.set') {
+    return visitDataSetStep(currentStep as DataSetStep, context);
+  }
+
   if ((currentStep as HttpStep).type === 'http') {
     return visitHttpStep(currentStep as HttpStep, context);
   }
@@ -197,6 +203,26 @@ export function visitWaitStep(
     },
   };
   graph.setNode(waitNode.id, waitNode);
+
+  return graph;
+}
+
+export function visitDataSetStep(
+  currentStep: DataSetStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const dataSetNode: DataSetGraphNode = {
+    id: getStepId(currentStep, context),
+    type: 'data.set',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(dataSetNode.id, dataSetNode);
 
   return graph;
 }

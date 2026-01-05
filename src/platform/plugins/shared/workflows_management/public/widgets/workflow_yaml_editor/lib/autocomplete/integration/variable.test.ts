@@ -86,12 +86,12 @@ steps:
         'event',
         'kibanaUrl',
         'now',
-        'parent',
         'workflow',
         'steps',
         'execution',
         'inputs',
         'output',
+        'variables',
       ].sort()
     );
     expect(suggestions.map((s) => s.insertText).sort()).toEqual(
@@ -106,6 +106,7 @@ steps:
         '"{{ parent$0 }}"',
         '"{{ steps$0 }}"',
         '"{{ output$0 }}"',
+        '"{{ variables$0 }}"',
       ].sort()
     );
   });
@@ -135,6 +136,7 @@ steps:
         '{{ parent$0 }}',
         '{{ steps$0 }}',
         '{{ output$0 }}',
+        '{{ variables$0 }}',
       ].sort()
     );
   });
