@@ -31,8 +31,12 @@ export const getDataStreamNamespaceFilter = async ({
     {
       meta: { negate: false },
       query: {
-        terms: {
-          'data_stream.namespace': includedNamespaces,
+        bool: {
+          filter: {
+            terms: {
+              'data_stream.namespace': includedNamespaces,
+            },
+          },
         },
       },
     },

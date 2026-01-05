@@ -123,6 +123,13 @@
               }
             }
           }
+        },
+        "data_stream": {
+          "properties": {
+            "namespace": {
+              "type": "keyword"
+            }
+          }
         }
       }
     },

@@ -778,19 +778,19 @@ export default ({ getService }: FtrProviderContext) => {
         const docNamespace1 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace1',
+          data_stream: { namespace: 'namespace1' },
           host: { id: 'host-1' },
         };
         const docNamespace2 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace2',
+          data_stream: { namespace: 'namespace2' },
           host: { id: 'host-2' },
         };
         const docNamespace3 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace3',
+          data_stream: { namespace: 'namespace3' },
           host: { id: 'host-3' },
         };
 
@@ -832,7 +832,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Should only get alerts from namespace1 and namespace2, not namespace3
         expect(previewAlerts.length).toEqual(2);
-        const namespaces = previewAlerts.map((alert) => alert._source?.['data_stream.namespace']);
+        // @ts-expect-error namespace does not exist on type
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
         expect(namespaces).toContain('namespace1');
         expect(namespaces).toContain('namespace2');
         expect(namespaces).not.toContain('namespace3');

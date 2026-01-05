@@ -2913,9 +2913,7 @@ export default ({ getService }: FtrProviderContext) => {
         const docNamespace2 = {
           id,
           '@timestamp': timestamp,
-          data_stream: {
-            namespace: 'namespace2',
-          },
+          data_stream: { namespace: 'namespace2' },
           agent: {
             name: 'agent-namespace2',
           },
@@ -2923,9 +2921,7 @@ export default ({ getService }: FtrProviderContext) => {
         const docNamespace3 = {
           id,
           '@timestamp': timestamp,
-          data_stream: {
-            namespace: 'namespace3',
-          },
+          data_stream: { namespace: 'namespace3' },
           agent: {
             name: 'agent-namespace3',
           },
@@ -2953,12 +2949,12 @@ export default ({ getService }: FtrProviderContext) => {
           es,
           previewId,
           size: 10,
-          sort: ['data_stream.namespace'],
         });
 
         // Should only get alerts from namespace1 and namespace2, not namespace3
         expect(previewAlerts.length).toEqual(2);
-        const namespaces = previewAlerts.map((alert) => alert._source?.['data_stream.namespace']);
+        // @ts-expect-error namespace does not exist
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
         expect(namespaces).toContain('namespace1');
         expect(namespaces).toContain('namespace2');
         expect(namespaces).not.toContain('namespace3');
@@ -3027,7 +3023,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Should get alerts from all namespaces when filter is not configured
         expect(previewAlerts.length).toEqual(3);
-        const namespaces = previewAlerts.map((alert) => alert._source?.['data_stream.namespace']);
+        // @ts-expect-error namespace does not exist on type
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
         expect(namespaces).toContain('namespace1');
         expect(namespaces).toContain('namespace2');
         expect(namespaces).toContain('namespace3');

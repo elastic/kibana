@@ -2793,21 +2793,21 @@ export default ({ getService }: FtrProviderContext) => {
         const eventDocNamespace1 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace1',
+          data_stream: { namespace: 'namespace1' },
           user: { name: 'user1' },
           host: { name: 'server' },
         };
         const eventDocNamespace2 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace2',
+          data_stream: { namespace: 'namespace2' },
           user: { name: 'user2' },
           host: { name: 'server' },
         };
         const eventDocNamespace3 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace3',
+          data_stream: { namespace: 'namespace3' },
           user: { name: 'user3' },
           host: { name: 'server' },
         };
@@ -2872,7 +2872,8 @@ export default ({ getService }: FtrProviderContext) => {
         // Should only get alerts from namespace1, not namespace2 or namespace3
         // (namespace1 matches the threat indicator, namespace2 and namespace3 don't)
         expect(previewAlerts.length).toEqual(1);
-        expect(previewAlerts[0]._source?.['data_stream.namespace']).toEqual('namespace1');
+        // @ts-expect-error namespace does not exist on type
+        expect(previewAlerts[0]._source?.data_stream?.namespace).toEqual('namespace1');
       });
     });
   });

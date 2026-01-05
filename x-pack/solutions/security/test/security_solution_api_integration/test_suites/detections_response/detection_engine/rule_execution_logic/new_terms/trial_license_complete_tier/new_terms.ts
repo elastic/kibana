@@ -1512,13 +1512,13 @@ export default ({ getService }: FtrProviderContext) => {
         const historicalDocNamespace1 = {
           id,
           '@timestamp': moment(timestamp).subtract(2, 'days').toISOString(),
-          'data_stream.namespace': 'namespace1',
+          data_stream: { namespace: 'namespace1' },
           host: { name: 'host-historical-1' },
         };
         const historicalDocNamespace2 = {
           id,
           '@timestamp': moment(timestamp).subtract(2, 'days').toISOString(),
-          'data_stream.namespace': 'namespace2',
+          data_stream: { namespace: 'namespace2' },
           host: { name: 'host-historical-2' },
         };
 
@@ -1526,19 +1526,19 @@ export default ({ getService }: FtrProviderContext) => {
         const ruleExecutionDocNamespace1 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace1',
+          data_stream: { namespace: 'namespace1' },
           host: { name: 'host-new-1' },
         };
         const ruleExecutionDocNamespace2 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace2',
+          data_stream: { namespace: 'namespace2' },
           host: { name: 'host-new-2' },
         };
         const ruleExecutionDocNamespace3 = {
           id,
           '@timestamp': timestamp,
-          'data_stream.namespace': 'namespace3',
+          data_stream: { namespace: 'namespace3' },
           host: { name: 'host-new-3' },
         };
 
@@ -1583,7 +1583,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         // Should only get alerts from namespace1 and namespace2, not namespace3
         expect(previewAlerts.length).toEqual(2);
-        const namespaces = previewAlerts.map((alert) => alert._source?.['data_stream.namespace']);
+        // @ts-expect-error namespace does not exist on type
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
         expect(namespaces).toContain('namespace1');
         expect(namespaces).toContain('namespace2');
         expect(namespaces).not.toContain('namespace3');
