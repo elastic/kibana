@@ -156,14 +156,21 @@ describe('MigrationReadyPanel', () => {
   });
 
   it('should show loading spinner when fetching missing resources', () => {
-    mockUseGetMissingResources.mockReturnValue({
-      getMissingResources: mockGetMissingResources,
-      isLoading: true,
-      error: null,
+    mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() => setMissingResources(mockMissingResources));
+      return {
+        getMissingResources: mockGetMissingResources,
+        isLoading: true,
+        error: null,
+      };
     });
 
-    renderTestComponent();
-    expect(screen.getByTestId('centeredLoadingSpinner')).toBeInTheDocument();
+    const { container } = renderTestComponent();
+    expect(
+      container.querySelector(
+        '[data-test-subj="dashboardMigrationMissingResourcesButton"] [role="progressbar"]'
+      )
+    ).toBeVisible();
   });
 
   it('should show start translation button', () => {
