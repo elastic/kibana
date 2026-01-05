@@ -179,7 +179,7 @@ export function useSingleAgentMenuItems({
                   name: (
                     <FormattedMessage
                       id="xpack.fleet.agentList.rollbackOneButton"
-                      defaultMessage="Rollback"
+                      defaultMessage="Roll back"
                     />
                   ),
                   icon: 'clockCounter',

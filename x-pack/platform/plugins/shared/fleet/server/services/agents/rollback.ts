@@ -19,6 +19,7 @@ import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { licenseService } from '../license';
 import { LICENSE_FOR_AGENT_ROLLBACK } from '../../../common/constants';
+import { isAgentUpgrading } from '../../../common/services';
 
 import {
   getAgentPolicyForAgent,
@@ -57,6 +58,14 @@ export async function sendRollbackAgentAction(
   agent: Agent
 ) {
   checkLicense();
+
+  if (agent.unenrollment_started_at || agent.unenrolled_at) {
+    throw new AgentRollbackError('cannot roll back an unenrolling or unenrolled agent');
+  }
+
+  if (isAgentUpgrading(agent)) {
+    throw new AgentRollbackError('cannot roll back an upgrading agent');
+  }
 
   const rollbacks = agent.upgrade?.rollbacks || [];
   if (rollbacks.length === 0) {

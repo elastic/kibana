@@ -102,7 +102,7 @@ export const AgentRollbackModal: React.FunctionComponent<AgentRollbackModalProps
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.rollbackAgents.singleAgentDescription"
-            defaultMessage="This action will roll back the agent running on ''{hostName}'' to version {version}. This action can not be undone. Are you sure you wish to continue?"
+            defaultMessage="You are about to roll back the agent running on ''{hostName}'' to version {version}. This action cannot be undone."
             values={{
               hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
               version: agents[0].upgrade?.rollbacks?.[0]?.version,
@@ -111,7 +111,7 @@ export const AgentRollbackModal: React.FunctionComponent<AgentRollbackModalProps
         ) : (
           <FormattedMessage
             id="xpack.fleet.rollbackAgents.multipleAgentsDescription"
-            defaultMessage="This action will roll back agents to their previous version. This action can not be undone. Are you sure you wish to continue?"
+            defaultMessage="You are about to roll back agents to their previous version. This action can not be undone."
           />
         )}
       </p>

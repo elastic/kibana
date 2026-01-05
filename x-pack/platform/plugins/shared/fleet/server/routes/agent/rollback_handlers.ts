@@ -14,9 +14,7 @@ import type {
   PostBulkAgentRollbackRequestSchema,
 } from '../../types';
 import { getAgentById } from '../../services/agents';
-import { isAgentUpgrading } from '../../../common/services';
 import * as AgentService from '../../services/agents';
-import { AgentRollbackError } from '../../errors';
 
 export const rollbackAgentHandler: RequestHandler<
   TypeOf<typeof PostAgentRollbackRequestSchema.params>,
@@ -27,14 +25,6 @@ export const rollbackAgentHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const agent = await getAgentById(esClient, soClient, request.params.agentId);
-
-  if (agent.unenrollment_started_at || agent.unenrolled_at) {
-    throw new AgentRollbackError('cannot roll back an unenrolling or unenrolled agent');
-  }
-
-  if (isAgentUpgrading(agent)) {
-    throw new AgentRollbackError('cannot roll back an upgrading agent');
-  }
 
   const actionId = await AgentService.sendRollbackAgentAction(soClient, esClient, agent);
 
