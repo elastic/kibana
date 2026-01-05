@@ -44,7 +44,7 @@ export interface CommonStepDefinition<
    * Example: `agent-id` for agent.call step.
    */
   configSchema?: ConfigSchema;
-  
+
   /**
    * Dynamic Zod schema for validating step output based on input.
    * Allows for more flexible output structure based on the specific input provided.
