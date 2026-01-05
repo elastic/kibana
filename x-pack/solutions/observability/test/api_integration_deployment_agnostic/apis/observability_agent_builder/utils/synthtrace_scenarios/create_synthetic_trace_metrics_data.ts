@@ -15,6 +15,7 @@ export interface ServiceConfig {
   environment: string;
   hostName: string;
   containerId?: string;
+  kubernetesPodName?: string;
   transactions: TransactionConfig[];
   /** Custom labels to add to all transactions for this service */
   labels?: Record<string, string>;
@@ -50,13 +51,17 @@ export const createSyntheticTraceMetricsData = async ({
       .rate(10)
       .generator((timestamp) =>
         services.flatMap((serviceConfig) => {
-          // Build overrides object with host.name and optional container.id
+          // Build overrides object with host.name and optional container.id/kubernetes.pod.name
           const overrides: Record<string, string | undefined> = {
             'host.name': serviceConfig.hostName,
           };
 
           if (serviceConfig.containerId) {
             overrides['container.id'] = serviceConfig.containerId;
+          }
+
+          if (serviceConfig.kubernetesPodName) {
+            overrides['kubernetes.pod.name'] = serviceConfig.kubernetesPodName;
           }
 
           // Add service-level labels

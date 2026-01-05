@@ -105,6 +105,21 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
+### Identify problematic Kubernetes pods
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_trace_metrics",
+  "tool_params": {
+    "start": "now-1h",
+    "end": "now",
+    "kqlFilter": "service.name: \"frontend\"",
+    "groupBy": "kubernetes.pod.name"
+  }
+}
+```
+
 ### Analyze by cloud region
 
 ```

@@ -37,12 +37,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
     const testServices: ServiceConfig[] = [
-      // Service 1: payment-service in production on host-01 with container and labels
+      // Service 1: payment-service in production on host-01 with container, k8s pod, and labels
       {
         name: 'payment-service',
         environment: 'production',
         hostName: 'host-01',
         containerId: 'container-payment-001',
+        kubernetesPodName: 'payment-service-pod-abc123',
         labels: { team: 'payments', tier: 'critical' },
         transactions: [
           {
@@ -61,12 +62,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ],
       },
-      // Service 2: user-service in production on host-01 with labels
+      // Service 2: user-service in production on host-01 with k8s pod and labels
       {
         name: 'user-service',
         environment: 'production',
         hostName: 'host-01',
         containerId: 'container-user-001',
+        kubernetesPodName: 'user-service-pod-def456',
         labels: { team: 'identity', tier: 'critical' },
         transactions: [
           {
@@ -83,12 +85,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ],
       },
-      // Service 3: order-service in staging on host-02 with container and labels
+      // Service 3: order-service in staging on host-02 with container, k8s pod, and labels
       {
         name: 'order-service',
         environment: 'staging',
         hostName: 'host-02',
         containerId: 'container-order-001',
+        kubernetesPodName: 'order-service-pod-ghi789',
         labels: { team: 'orders', tier: 'standard' },
         transactions: [
           {
@@ -105,12 +108,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ],
       },
-      // Service 4: notification-service in staging on host-02 with labels
+      // Service 4: notification-service in staging on host-02 with k8s pod and labels
       {
         name: 'notification-service',
         environment: 'staging',
         hostName: 'host-02',
         containerId: 'container-notify-001',
+        kubernetesPodName: 'notification-service-pod-jkl012',
         labels: { team: 'notifications', tier: 'standard' },
         transactions: [
           {
@@ -139,7 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    describe('when fetching RED metrics without filters (default groupBy: service.name)', () => {
+    describe('when fetching trace metrics without filters (default groupBy: service.name)', () => {
       let resultData: GetTraceMetricsToolResult['data'];
 
       before(async () => {
@@ -211,325 +215,608 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('when filtering by service.name', () => {
-      it('returns metrics only for the specified service', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'service.name: "payment-service"',
-          },
+    describe('when fetching trace metrics with filters', () => {
+      describe('when filtering by service.name', () => {
+        it('returns metrics only for the specified service', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'service.name: "payment-service"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('payment-service');
         });
 
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
+        it('returns correct metrics for payment-service', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'service.name: "payment-service"',
+            },
+          });
 
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('payment-service');
+          const { items } = results[0].data;
+          const paymentService = items[0];
+
+          expect(paymentService.throughput).to.be.greaterThan(0);
+          expect(paymentService.latency).to.be.greaterThan(0);
+          // Payment service has two transactions: 10% and 0% failure rates
+          // Combined should be between 0 and 0.1
+          expect(paymentService.failureRate).to.be.within(0, 0.15);
+        });
       });
 
-      it('returns correct metrics for payment-service', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'service.name: "payment-service"',
-          },
+      describe('when filtering by service.environment', () => {
+        it('returns metrics only for services in production environment', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'service.environment: "production"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const groups = items.map((item) => item.group);
+          expect(groups).to.contain('payment-service');
+          expect(groups).to.contain('user-service');
+          expect(groups).not.to.contain('order-service');
+          expect(groups).not.to.contain('notification-service');
         });
 
-        const { items } = results[0].data;
-        const paymentService = items[0];
+        it('returns metrics only for services in staging environment', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'service.environment: "staging"',
+            },
+          });
 
-        expect(paymentService.throughput).to.be.greaterThan(0);
-        expect(paymentService.latency).to.be.greaterThan(0);
-        // Payment service has two transactions: 10% and 0% failure rates
-        // Combined should be between 0 and 0.1
-        expect(paymentService.failureRate).to.be.within(0, 0.15);
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const groups = items.map((item) => item.group);
+          expect(groups).to.contain('order-service');
+          expect(groups).to.contain('notification-service');
+          expect(groups).not.to.contain('payment-service');
+          expect(groups).not.to.contain('user-service');
+        });
+      });
+
+      describe('when filtering by transaction.name', () => {
+        it('returns metrics for specific transaction name', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'transaction.name: "POST /api/payment"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('payment-service');
+          // POST /api/payment has 10% failure rate: 1 failure / 10 total = 0.1
+          expect(items[0].failureRate).to.be(0.1);
+        });
+
+        it('returns metrics for worker-process transaction', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'transaction.name: "worker-process"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('order-service');
+          // worker-process has 15% failure rate
+          expect(items[0].failureRate).to.be.within(0.1, 0.2);
+        });
+      });
+
+      describe('when filtering by transaction.type', () => {
+        it('returns metrics for request transaction type only', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'transaction.type: "request"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          // Should include payment-service, user-service, and order-service
+          // (notification-service only has messaging type)
+          expect(items.length).to.be(3);
+          const groups = items.map((item) => item.group);
+          expect(groups).to.contain('payment-service');
+          expect(groups).to.contain('user-service');
+          expect(groups).to.contain('order-service');
+          expect(groups).not.to.contain('notification-service');
+        });
+
+        it('returns metrics for page-load transaction type only', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'transaction.type: "page-load"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('user-service');
+          // page-load has 2% failure rate: Math.round(10 * 0.02) = 0 failures, so 0% actual
+          expect(items[0].failureRate).to.be(0);
+        });
+
+        it('returns metrics for messaging transaction type only', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'transaction.type: "messaging"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('notification-service');
+          // messaging type has 30% failure rate: 3 failures / 10 total = 0.3
+          expect(items[0].failureRate).to.be(0.3);
+        });
+
+        it('returns metrics for worker transaction type only', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'transaction.type: "worker"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('order-service');
+          // worker type has 15% failure rate
+          expect(items[0].failureRate).to.be.within(0.1, 0.2);
+        });
+      });
+
+      describe('when filtering by high-cardinality fields (labels)', () => {
+        it('returns metrics when filtering by service-level label (team)', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'labels.team: "payments"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('payment-service');
+          expect(items[0].throughput).to.be.greaterThan(0);
+          expect(items[0].latency).to.be.greaterThan(0);
+        });
+
+        it('returns metrics when filtering by tier label', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'labels.tier: "critical"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const groups = items.map((item) => item.group);
+          expect(groups).to.contain('payment-service');
+          expect(groups).to.contain('user-service');
+        });
+
+        it('returns metrics when filtering by standard tier label', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'labels.tier: "standard"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const groups = items.map((item) => item.group);
+          expect(groups).to.contain('order-service');
+          expect(groups).to.contain('notification-service');
+        });
+
+        it('returns metrics when filtering by transaction-level label', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'labels.endpoint: "payment-create"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('payment-service');
+          // POST /api/payment has 10% failure rate
+          expect(items[0].failureRate).to.be(0.1);
+        });
+
+        it('returns empty results when filtering by non-existent label value', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'labels.team: "non-existent-team"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.be.an('array');
+          expect(items).to.have.length(0);
+        });
+
+        it('combines label filter with other filters', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'labels.tier: "critical" AND service.environment: "production"',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const groups = items.map((item) => item.group);
+          expect(groups).to.contain('payment-service');
+          expect(groups).to.contain('user-service');
+        });
+
+        it('filters by label and groups by transaction name', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'labels.team: "payments"',
+              groupBy: 'transaction.name',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const transactionNames = items.map((item) => item.group);
+          expect(transactionNames).to.contain('POST /api/payment');
+          expect(transactionNames).to.contain('GET /api/payment/status');
+        });
       });
     });
 
-    describe('when filtering by service.environment', () => {
-      it('returns metrics only for services in production environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'service.environment: "production"',
-          },
+    describe('when fetching trace metrics with a groupBy', () => {
+      describe('when grouping by host.name', () => {
+        it('returns metrics grouped by host', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'host.name',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const hostNames = items.map((item) => item.group);
+          expect(hostNames).to.contain('host-01');
+          expect(hostNames).to.contain('host-02');
         });
 
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
+        it('returns correct metrics for host-01', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'host.name',
+            },
+          });
 
-        expect(items).to.have.length(2);
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('payment-service');
-        expect(groups).to.contain('user-service');
-        expect(groups).not.to.contain('order-service');
-        expect(groups).not.to.contain('notification-service');
+          const { items } = results[0].data;
+          const host01 = items.find((item) => item.group === 'host-01');
+
+          expect(host01).to.be.ok();
+          expect(host01!.throughput).to.be.greaterThan(0);
+          expect(host01!.latency).to.be.greaterThan(0);
+          // host-01 runs payment-service and user-service with varying failure rates
+          expect(host01!.failureRate).to.be.within(0, 0.15);
+        });
+
+        it('returns correct metrics for host-02', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'host.name',
+            },
+          });
+
+          const { items } = results[0].data;
+          const host02 = items.find((item) => item.group === 'host-02');
+
+          expect(host02).to.be.ok();
+          expect(host02!.throughput).to.be.greaterThan(0);
+          expect(host02!.latency).to.be.greaterThan(0);
+          // host-02 runs order-service (20%, 15%) and notification-service (30%)
+          // Combined should be higher failure rate
+          expect(host02!.failureRate).to.be.within(0.1, 0.35);
+        });
       });
 
-      it('returns metrics only for services in staging environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'service.environment: "staging"',
-          },
+      describe('when grouping by transaction.name', () => {
+        it('returns metrics grouped by transaction name', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'transaction.name',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          // We have 7 unique transaction names across all services
+          expect(items.length).to.be(7);
+
+          const transactionNames = items.map((item) => item.group);
+          expect(transactionNames).to.contain('POST /api/payment');
+          expect(transactionNames).to.contain('GET /api/payment/status');
+          expect(transactionNames).to.contain('GET /api/user');
+          expect(transactionNames).to.contain('page-load');
+          expect(transactionNames).to.contain('POST /api/order');
+          expect(transactionNames).to.contain('worker-process');
+          expect(transactionNames).to.contain('send-notification');
         });
 
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
+        it('returns correct metrics for specific transaction', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'transaction.name',
+            },
+          });
 
-        expect(items).to.have.length(2);
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('order-service');
-        expect(groups).to.contain('notification-service');
-        expect(groups).not.to.contain('payment-service');
-        expect(groups).not.to.contain('user-service');
-      });
-    });
+          const { items } = results[0].data;
 
-    describe('when filtering by transaction.name', () => {
-      it('returns metrics for specific transaction name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'transaction.name: "POST /api/payment"',
-          },
+          // Check send-notification transaction (30% failure rate): 3 failures / 10 total = 0.3
+          const sendNotification = items.find((item) => item.group === 'send-notification');
+          expect(sendNotification).to.be.ok();
+          expect(sendNotification!.failureRate).to.be(0.3);
+
+          // Check GET /api/payment/status (0% failure rate): 0 failures / 10 total = 0
+          const getPaymentStatus = items.find((item) => item.group === 'GET /api/payment/status');
+          expect(getPaymentStatus).to.be.ok();
+          expect(getPaymentStatus!.failureRate).to.be(0);
         });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('payment-service');
-        // POST /api/payment has 10% failure rate: 1 failure / 10 total = 0.1
-        expect(items[0].failureRate).to.be(0.1);
-      });
-
-      it('returns metrics for worker-process transaction', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'transaction.name: "worker-process"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('order-service');
-        // worker-process has 15% failure rate
-        expect(items[0].failureRate).to.be.within(0.1, 0.2);
-      });
-    });
-
-    describe('when filtering by transaction.type', () => {
-      it('returns metrics for request transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'transaction.type: "request"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        // Should include payment-service, user-service, and order-service
-        // (notification-service only has messaging type)
-        expect(items.length).to.be(3);
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('payment-service');
-        expect(groups).to.contain('user-service');
-        expect(groups).to.contain('order-service');
-        expect(groups).not.to.contain('notification-service');
       });
 
-      it('returns metrics for page-load transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'transaction.type: "page-load"',
-          },
+      describe('when grouping by service.environment', () => {
+        it('returns metrics grouped by environment', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'service.environment',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(2);
+          const environments = items.map((item) => item.group);
+          expect(environments).to.contain('production');
+          expect(environments).to.contain('staging');
         });
 
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
+        it('returns higher failure rate for staging environment', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'service.environment',
+            },
+          });
 
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('user-service');
-        // page-load has 2% failure rate: Math.round(10 * 0.02) = 0 failures, so 0% actual
-        expect(items[0].failureRate).to.be(0);
+          const { items } = results[0].data;
+          const production = items.find((item) => item.group === 'production');
+          const staging = items.find((item) => item.group === 'staging');
+
+          expect(production).to.be.ok();
+          expect(staging).to.be.ok();
+
+          // Staging has higher failure rates (order-service: 20%, 15%; notification-service: 30%)
+          // Production has lower failure rates (payment-service: 10%, 0%; user-service: 5%, 2%)
+          expect(staging!.failureRate).to.be.greaterThan(production!.failureRate);
+        });
       });
 
-      it('returns metrics for messaging transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'transaction.type: "messaging"',
-          },
+      describe('when grouping by container.id', () => {
+        it('returns metrics grouped by container', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'container.id',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(4);
+          const containerIds = items.map((item) => item.group);
+          expect(containerIds).to.contain('container-payment-001');
+          expect(containerIds).to.contain('container-user-001');
+          expect(containerIds).to.contain('container-order-001');
+          expect(containerIds).to.contain('container-notify-001');
         });
 
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
+        it('returns correct metrics for a specific container', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'container.id',
+            },
+          });
 
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('notification-service');
-        // messaging type has 30% failure rate: 3 failures / 10 total = 0.3
-        expect(items[0].failureRate).to.be(0.3);
+          const { items } = results[0].data;
+          const paymentContainer = items.find((item) => item.group === 'container-payment-001');
+
+          expect(paymentContainer).to.be.ok();
+          expect(paymentContainer!.throughput).to.be.greaterThan(0);
+          expect(paymentContainer!.latency).to.be.greaterThan(0);
+        });
       });
 
-      it('returns metrics for worker transaction type only', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'transaction.type: "worker"',
-          },
+      describe('when grouping by kubernetes.pod.name', () => {
+        it('returns metrics grouped by Kubernetes pod', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'kubernetes.pod.name',
+            },
+          });
+
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
+
+          expect(items).to.have.length(4);
+          const podNames = items.map((item) => item.group);
+          expect(podNames).to.contain('payment-service-pod-abc123');
+          expect(podNames).to.contain('user-service-pod-def456');
+          expect(podNames).to.contain('order-service-pod-ghi789');
+          expect(podNames).to.contain('notification-service-pod-jkl012');
         });
 
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
+        it('returns correct metrics for a specific pod', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              groupBy: 'kubernetes.pod.name',
+            },
+          });
 
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('order-service');
-        // worker type has 15% failure rate
-        expect(items[0].failureRate).to.be.within(0.1, 0.2);
-      });
-    });
+          const { items } = results[0].data;
+          const paymentPod = items.find((item) => item.group === 'payment-service-pod-abc123');
 
-    describe('when grouping by host.name', () => {
-      it('returns metrics grouped by host', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'host.name',
-          },
+          expect(paymentPod).to.be.ok();
+          expect(paymentPod!.throughput).to.be.greaterThan(0);
+          expect(paymentPod!.latency).to.be.greaterThan(0);
+          // Payment service has two transactions: 10% and 0% failure rates
+          expect(paymentPod!.failureRate).to.be.within(0, 0.15);
         });
 
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
+        it('filters by service and groups by kubernetes pod', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+            id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+            params: {
+              start: 'now-1h',
+              end: 'now',
+              kqlFilter: 'service.name: "payment-service"',
+              groupBy: 'kubernetes.pod.name',
+            },
+          });
 
-        expect(items).to.have.length(2);
-        const hostNames = items.map((item) => item.group);
-        expect(hostNames).to.contain('host-01');
-        expect(hostNames).to.contain('host-02');
-      });
+          expect(results).to.have.length(1);
+          const { items } = results[0].data;
 
-      it('returns correct metrics for host-01', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'host.name',
-          },
+          expect(items).to.have.length(1);
+          expect(items[0].group).to.be('payment-service-pod-abc123');
         });
-
-        const { items } = results[0].data;
-        const host01 = items.find((item) => item.group === 'host-01');
-
-        expect(host01).to.be.ok();
-        expect(host01!.throughput).to.be.greaterThan(0);
-        expect(host01!.latency).to.be.greaterThan(0);
-        // host-01 runs payment-service and user-service with varying failure rates
-        expect(host01!.failureRate).to.be.within(0, 0.15);
-      });
-
-      it('returns correct metrics for host-02', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'host.name',
-          },
-        });
-
-        const { items } = results[0].data;
-        const host02 = items.find((item) => item.group === 'host-02');
-
-        expect(host02).to.be.ok();
-        expect(host02!.throughput).to.be.greaterThan(0);
-        expect(host02!.latency).to.be.greaterThan(0);
-        // host-02 runs order-service (20%, 15%) and notification-service (30%)
-        // Combined should be higher failure rate
-        expect(host02!.failureRate).to.be.within(0.1, 0.35);
-      });
-    });
-
-    describe('when grouping by transaction.name', () => {
-      it('returns metrics grouped by transaction name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'transaction.name',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        // We have 7 unique transaction names across all services
-        expect(items.length).to.be(7);
-
-        const transactionNames = items.map((item) => item.group);
-        expect(transactionNames).to.contain('POST /api/payment');
-        expect(transactionNames).to.contain('GET /api/payment/status');
-        expect(transactionNames).to.contain('GET /api/user');
-        expect(transactionNames).to.contain('page-load');
-        expect(transactionNames).to.contain('POST /api/order');
-        expect(transactionNames).to.contain('worker-process');
-        expect(transactionNames).to.contain('send-notification');
-      });
-
-      it('returns correct metrics for specific transaction', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'transaction.name',
-          },
-        });
-
-        const { items } = results[0].data;
-
-        // Check send-notification transaction (30% failure rate): 3 failures / 10 total = 0.3
-        const sendNotification = items.find((item) => item.group === 'send-notification');
-        expect(sendNotification).to.be.ok();
-        expect(sendNotification!.failureRate).to.be(0.3);
-
-        // Check GET /api/payment/status (0% failure rate): 0 failures / 10 total = 0
-        const getPaymentStatus = items.find((item) => item.group === 'GET /api/payment/status');
-        expect(getPaymentStatus).to.be.ok();
-        expect(getPaymentStatus!.failureRate).to.be(0);
       });
     });
 
-    describe('when using combined filters', () => {
+    describe('when using a combination of filters and groupBy', () => {
       it('filters by service and transaction type', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
@@ -612,49 +899,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('when grouping by service.environment', () => {
-      it('returns metrics grouped by environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'service.environment',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(2);
-        const environments = items.map((item) => item.group);
-        expect(environments).to.contain('production');
-        expect(environments).to.contain('staging');
-      });
-
-      it('returns higher failure rate for staging environment', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'service.environment',
-          },
-        });
-
-        const { items } = results[0].data;
-        const production = items.find((item) => item.group === 'production');
-        const staging = items.find((item) => item.group === 'staging');
-
-        expect(production).to.be.ok();
-        expect(staging).to.be.ok();
-
-        // Staging has higher failure rates (order-service: 20%, 15%; notification-service: 30%)
-        // Production has lower failure rates (payment-service: 10%, 0%; user-service: 5%, 2%)
-        expect(staging!.failureRate).to.be.greaterThan(production!.failureRate);
-      });
-    });
-
     describe('edge cases when filtering and when there is no data', () => {
       it('returns empty items when filter matches no data', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
@@ -687,300 +931,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(items).to.be.an('array');
         expect(items).to.have.length(0);
-      });
-    });
-
-    describe('when grouping by container.id', () => {
-      it('returns metrics grouped by container', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'container.id',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(4);
-        const containerIds = items.map((item) => item.group);
-        expect(containerIds).to.contain('container-payment-001');
-        expect(containerIds).to.contain('container-user-001');
-        expect(containerIds).to.contain('container-order-001');
-        expect(containerIds).to.contain('container-notify-001');
-      });
-
-      it('returns correct metrics for a specific container', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'container.id',
-          },
-        });
-
-        const { items } = results[0].data;
-        const paymentContainer = items.find((item) => item.group === 'container-payment-001');
-
-        expect(paymentContainer).to.be.ok();
-        expect(paymentContainer!.throughput).to.be.greaterThan(0);
-        expect(paymentContainer!.latency).to.be.greaterThan(0);
-      });
-    });
-
-    describe('when filtering by high-cardinality fields (labels)', () => {
-      it('returns metrics when filtering by service-level label (team)', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.team: "payments"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('payment-service');
-      });
-
-      it('returns metrics when filtering by tier label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.tier: "critical"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(2);
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('payment-service');
-        expect(groups).to.contain('user-service');
-      });
-
-      it('returns metrics when filtering by standard tier label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.tier: "standard"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(2);
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('order-service');
-        expect(groups).to.contain('notification-service');
-      });
-
-      it('returns metrics when filtering by transaction-level label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.endpoint: "payment-create"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(1);
-        expect(items[0].group).to.be('payment-service');
-        // POST /api/payment has 10% failure rate
-        expect(items[0].failureRate).to.be(0.1);
-      });
-
-      it('returns empty results when filtering by non-existent label value', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.team: "non-existent-team"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.be.an('array');
-        expect(items).to.have.length(0);
-      });
-
-      it('combines label filter with other filters', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.tier: "critical" AND service.environment: "production"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(2);
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('payment-service');
-        expect(groups).to.contain('user-service');
-      });
-
-      it('filters by label and groups by transaction name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.team: "payments"',
-            groupBy: 'transaction.name',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-
-        expect(items).to.have.length(2);
-        const transactionNames = items.map((item) => item.group);
-        expect(transactionNames).to.contain('POST /api/payment');
-        expect(transactionNames).to.contain('GET /api/payment/status');
-      });
-    });
-
-    describe('when using various groupBy and filter combinations', () => {
-      it('returns all services with default groupBy (service.name)', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-        expect(items.length).to.be(4);
-
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('payment-service');
-        expect(groups).to.contain('user-service');
-        expect(groups).to.contain('order-service');
-        expect(groups).to.contain('notification-service');
-      });
-
-      it('returns all transaction names when grouping by transaction.name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'transaction.name',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-        expect(items.length).to.be(7);
-
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('POST /api/payment');
-        expect(groups).to.contain('GET /api/payment/status');
-        expect(groups).to.contain('GET /api/user');
-        expect(groups).to.contain('page-load');
-        expect(groups).to.contain('POST /api/order');
-        expect(groups).to.contain('worker-process');
-        expect(groups).to.contain('send-notification');
-      });
-
-      it('returns all hosts when grouping by host.name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'host.name',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-        expect(items.length).to.be(2);
-
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('host-01');
-        expect(groups).to.contain('host-02');
-      });
-
-      it('returns all containers when grouping by container.id', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            groupBy: 'container.id',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-        expect(items.length).to.be(4);
-
-        const groups = items.map((item) => item.group);
-        expect(groups).to.contain('container-payment-001');
-        expect(groups).to.contain('container-user-001');
-        expect(groups).to.contain('container-order-001');
-        expect(groups).to.contain('container-notify-001');
-      });
-
-      it('returns correct service when filtering by transaction.name', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'transaction.name: "POST /api/payment"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-        expect(items.length).to.be(1);
-        expect(items[0].group).to.be('payment-service');
-        expect(items[0].failureRate).to.be(0.1);
-      });
-
-      it('returns correct service when filtering by high-cardinality label', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-          id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-          params: {
-            start: 'now-1h',
-            end: 'now',
-            kqlFilter: 'labels.team: "payments"',
-          },
-        });
-
-        expect(results).to.have.length(1);
-        const { items } = results[0].data;
-        expect(items.length).to.be(1);
-        expect(items[0].group).to.be('payment-service');
-        expect(items[0].throughput).to.be.greaterThan(0);
-        expect(items[0].latency).to.be.greaterThan(0);
       });
     });
   });
