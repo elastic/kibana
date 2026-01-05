@@ -19,6 +19,7 @@ import {
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { ALERT_EVALUATION_VALUE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
