@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "__mocks__/**/*",
     "../../../../../typings/emotion.d.ts"
   ],
@@ -95,7 +96,9 @@
     "@kbn/css-utils",
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/licensing-types",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/scout",
+    "@kbn/mock-idp-utils"
   ],
   "exclude": ["target/**/*"]
 }
