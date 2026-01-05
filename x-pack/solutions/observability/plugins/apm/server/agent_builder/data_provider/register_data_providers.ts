@@ -19,7 +19,7 @@ import {
   getExitSpanChangePoints,
   getServiceChangePoints,
 } from '../../routes/assistant_functions/get_changepoints';
-import { getTraceMetrics } from '../../routes/assistant_functions/get_trace_metrics';
+import { getTraceMetrics } from '../tools/get_trace_metrics';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
