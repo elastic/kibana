@@ -36,11 +36,7 @@ import {
   getAgentlessGlobalDataTags,
 } from '../../../common/services/agentless_policy_helper';
 import { agentlessAgentService } from '../agents/agentless_agent';
-import {
-  createAndIntegrateCloudConnector,
-  cleanupCloudConnectorForPolicy,
-  decrementCloudConnectorPackageCount,
-} from '../cloud_connectors';
+import { createAndIntegrateCloudConnector } from '../cloud_connectors';
 
 export interface AgentlessPoliciesService {
   createAgentlessPolicy: (
@@ -250,21 +246,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
                 { error: e }
               );
             });
-        } else {
-          // If we reused an existing cloud connector, decrement its usage count
-          this.logger.debug(
-            `Rolling back: decrementing count for reused cloud connector ${createdCloudConnectorId}`
-          );
-          await decrementCloudConnectorPackageCount(
-            this.soClient,
-            createdCloudConnectorId,
-            this.logger
-          ).catch((e) => {
-            this.logger.error(
-              `Failed to decrement cloud connector package count for ${createdCloudConnectorId}: ${e.message}`,
-              { error: e }
-            );
-          });
         }
       }
 
@@ -302,14 +283,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     if (!agentPolicy?.supports_agentless) {
       throw new Error(`Policy ${policyId} is not an agentless policy`);
     }
-
-    // Cleanup cloud connector if associated with this policy
-    await cleanupCloudConnectorForPolicy(
-      this.soClient,
-      this.packagePolicyService,
-      policyId,
-      this.logger
-    );
 
     // Delete agent policy (this will also delete associated package policies)
     await agentPolicyService.delete(this.soClient, this.esClient, policyId, {

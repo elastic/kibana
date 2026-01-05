@@ -6602,6 +6602,10 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/indices/register_post_index_doc_count.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/templates/register_delete_route.ts"
               },
               {
@@ -15896,6 +15900,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/index.ts"
               },
               {
                 "plugin": "kubernetesSecurity",
