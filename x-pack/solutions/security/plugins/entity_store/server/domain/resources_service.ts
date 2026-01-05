@@ -5,27 +5,14 @@
  * 2.0.
  */
 
-import { EntityType } from './definitions/entity_type';
-import type { EntityStoreLogger } from '../infra/logging';
+import type { Logger } from '@kbn/logging';
+import type { EntityType } from './definitions/entity_type';
+import { ALL_ENTITY_TYPES } from './definitions/entity_type';
 
 export class ResourcesService {
-  logger: EntityStoreLogger;
+  constructor(private logger: Logger) {}
 
-  constructor(logger: EntityStoreLogger) {
-    this.logger = logger;
-  }
-
-  install(types?: EntityType[]) {
-    types = this.getTypesOrDefault(types);
-
+  public install(types: EntityType[] = ALL_ENTITY_TYPES) {
     this.logger.info(`Should initialize entity store for types ${JSON.stringify(types)}`);
-  }
-
-  private getTypesOrDefault(types?: EntityType[]): EntityType[] {
-    if (!types) {
-      return Object.values(EntityType.Values);
-    }
-
-    return types;
   }
 }
