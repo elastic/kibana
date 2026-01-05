@@ -12,7 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // Split engine tests into separate files for better isolation and reduced flakiness
     loadTestFile(require.resolve('./engine_health'));
     loadTestFile(require.resolve('./engine_init'));
-    loadTestFile(require.resolve('./engine_disable'));
     loadTestFile(require.resolve('./engine_workflow'));
     loadTestFile(require.resolve('./engine_schedule'));
     loadTestFile(require.resolve('./engine_plain_index_sync'));

@@ -16,7 +16,6 @@ import { monitoringEntitySourceTypeName } from '@kbn/security-solution-plugin/se
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { entityAnalyticsRouteHelpersFactory } from '../../../utils/entity_analytics';
 import { PrivMonUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -89,7 +88,6 @@ export default ({ getService }: FtrProviderContext) => {
             name: space,
           });
         }
-        await enablePrivmonSetting(kibanaServer, space);
         await PrivMonUtils(getService, space).initPrivMonEngine();
       });
     });
@@ -97,7 +95,6 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await asyncForEach(SPACES, async (space) => {
         await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } }, space);
-        await disablePrivmonSetting(kibanaServer, space);
         if (space !== 'default') {
           await spacesService.delete(space);
         }
