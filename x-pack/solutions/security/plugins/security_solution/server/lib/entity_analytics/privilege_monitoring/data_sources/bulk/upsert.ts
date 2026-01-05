@@ -257,7 +257,7 @@ export const makeOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) => {
     let sourceLabel = 'entity_analytics_integration';
     if (source.type === 'index') {
-      sourceLabel = 'index'; // want to update source label to index_sync. Currently just index.
+      sourceLabel = 'index'; // want to update source label to index_sync. Currently just index. Related Issue: https://github.com/elastic/security-team/issues/14071
     }
     return buildOps({
       users: usersChunk,
