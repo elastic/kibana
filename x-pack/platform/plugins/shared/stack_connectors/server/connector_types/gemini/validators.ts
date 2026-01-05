@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Secrets } from '@kbn/connector-schemas/gemini';
+import type { Secrets } from '../../../common/gemini/types';
 
 export const validateGeminiSecrets = (secrets: Secrets) => {
   if (!secrets.credentialsJson) {

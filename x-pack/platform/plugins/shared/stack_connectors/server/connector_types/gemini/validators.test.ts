@@ -6,7 +6,7 @@
  */
 
 import { validateGeminiSecrets } from './validators';
-import type { Secrets } from '@kbn/connector-schemas/gemini';
+import type { Secrets } from '../../../common/gemini/types';
 
 // Mock i18n
 jest.mock('@kbn/i18n', () => ({
