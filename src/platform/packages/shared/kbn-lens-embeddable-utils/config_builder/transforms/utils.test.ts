@@ -272,6 +272,7 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       textBasedLayer,
+      'layer_0',
       {},
       [],
       [
@@ -280,8 +281,7 @@ describe('buildDatasetState', () => {
           id: 'my-index',
           name: 'indexpattern-datasource-layer-layer_0',
         },
-      ],
-      'layer_0'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -298,7 +298,7 @@ describe('buildDatasetState', () => {
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, {}, [], [], 'layer_0');
+    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "id": "my-dataview-id",
@@ -316,13 +316,14 @@ describe('buildDatasetState', () => {
 
     const result = buildDatasetState(
       formBasedLayer,
+      'layer_1',
       {
         'my-adhoc-dataview-id': {
-          id: 'test-id',
+          index: 'test-id',
           title: 'my-adhoc-dataview-id',
           timeFieldName: '@timestamp',
         },
-      },
+      } as Record<string, unknown>,
       [],
       [
         {
@@ -330,8 +331,7 @@ describe('buildDatasetState', () => {
           id: 'my-adhoc-dataview-id',
           name: 'indexpattern-datasource-layer-layer_1',
         },
-      ],
-      'layer_1'
+      ]
     );
     expect(result).toMatchInlineSnapshot(`
       Object {

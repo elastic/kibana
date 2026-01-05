@@ -363,7 +363,7 @@
           "IconType",
           " | undefined; sortOrder?: number | undefined; toolTipContent?: string | undefined; label: string; exportType: string; disabled?: boolean | undefined; helpText?: React.ReactNode; generateExportButtonLabel?: React.ReactNode; generateAssetExport: (args: ",
           "ExportGenerationOpts",
-          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
+          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; renderTotalHitsSizeWarning?: ((totalHits?: number | undefined) => React.ReactNode) | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
           "ExportGenerationOpts",
           ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; })>; prerequisiteCheck?: ((args: { capabilities: ",
           "Capabilities",
@@ -417,7 +417,7 @@
           },
           " extends { id: string; groupId?: string | undefined; shareType: \"integration\"; config: (ctx: ShareActionConfigArgs) => Promise<{ label: React.FC<{ openFlyout: () => void; }>; toolTipContent?: React.ReactNode; flyoutContent: React.FC<{ closeFlyout: () => void; flyoutRef: React.RefObject<HTMLDivElement>; }>; flyoutSizing?: Pick<",
           "EuiFlyoutProps",
-          "<\"div\">, \"size\" | \"maxWidth\"> | undefined; shouldRender: ({ availableExportItems, }: { availableExportItems: ",
+          "<\"div\" | \"nav\">, \"size\" | \"maxWidth\"> | undefined; shouldRender: ({ availableExportItems, }: { availableExportItems: ",
           {
             "pluginId": "share",
             "scope": "public",
@@ -1607,7 +1607,7 @@
           "IconType",
           " | undefined; sortOrder?: number | undefined; toolTipContent?: string | undefined; label: string; exportType: string; disabled?: boolean | undefined; helpText?: React.ReactNode; generateExportButtonLabel?: React.ReactNode; generateAssetExport: (args: ",
           "ExportGenerationOpts",
-          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
+          ") => Promise<unknown>; renderCopyURIButton?: boolean | undefined; warnings?: { title: string; message: string; }[] | undefined; requiresSavedState?: boolean | undefined; supportedLayoutOptions?: \"print\"[] | undefined; renderLayoutOptionSwitch?: boolean | undefined; renderTotalHitsSizeWarning?: ((totalHits?: number | undefined) => React.ReactNode) | undefined; } & ({ generateAssetComponent?: undefined; copyAssetURIConfig: { headingText: string; helpText?: string | undefined; contentType: string | undefined; generateAssetURIValue: (args: ",
           "ExportGenerationOpts",
           ") => string | undefined; }; } | { generateAssetComponent: React.ReactNode; copyAssetURIConfig?: undefined; } | { generateAssetComponent?: undefined; copyAssetURIConfig?: undefined; }); }"
         ],
@@ -2270,7 +2270,9 @@
                     "section": "def-common.EncryptedSavedObjectsClient",
                     "text": "EncryptedSavedObjectsClient"
                   },
-                  ") => void; }"
+                  ") => void; registerApiKeyInvalidateFn: (fn?: ",
+                  "ApiKeyInvalidationFn",
+                  " | undefined) => void; }"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
                 "deprecated": false,

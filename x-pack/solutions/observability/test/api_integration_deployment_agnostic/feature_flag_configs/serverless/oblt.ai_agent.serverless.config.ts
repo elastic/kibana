@@ -11,13 +11,10 @@ import { services } from '../../services';
 export default createServerlessFeatureFlagTestConfig<typeof services>({
   services,
   serverlessProject: 'oblt',
-  kbnServerArgs: [
-    '--uiSettings.overrides.agentBuilder:enabled=true',
-    '--feature_flags.overrides.observabilityAgent.enabled=true',
-  ],
+  kbnServerArgs: ['--feature_flags.overrides.aiAssistant.aiAgents.enabled=true'],
   testFiles: [require.resolve('./oblt.ai_agent.index.ts')],
   junit: {
     reportName:
-      'Serverless Observability - Deployment-agnostic Feature Flag Observability Agent API Integration Tests',
+      'Serverless Observability - Deployment-agnostic Feature Flag Observability Agent Builder API Integration Tests',
   },
 });

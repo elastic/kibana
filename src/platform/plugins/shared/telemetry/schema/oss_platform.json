@@ -9591,6 +9591,20 @@
     },
     "dashboard": {
       "properties": {
+        "access_mode": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of dashboards that have an applied access mode."
+                  }
+                }
+              }
+            }
+          }
+        },
         "panels": {
           "properties": {
             "total": {
@@ -10354,12 +10368,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "securitySolution:enablePrivilegedUserMonitoring": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "securitySolution:defaultAnomalyScore": {
           "type": "long",
           "_meta": {
@@ -10960,6 +10968,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "agentBuilder:externalMcp": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "dataConnectors:enabled": {
           "type": "boolean",
           "_meta": {
@@ -11177,6 +11191,12 @@
           }
         },
         "aiAssistant:preferredAIAssistantType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "aiAssistant:preferredChatExperience": {
           "type": "keyword",
           "_meta": {
             "description": "Non-default value of setting."

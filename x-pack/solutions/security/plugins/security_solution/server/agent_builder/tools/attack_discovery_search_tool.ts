@@ -6,12 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
-import { executeEsql } from '@kbn/onechat-genai-utils';
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import type { Logger } from '@kbn/logging';
+import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 const attackDiscoverySearchSchema = z.object({
   alertIds: z
@@ -24,7 +26,8 @@ const attackDiscoverySearchSchema = z.object({
 export const SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID = securityTool('attack_discovery_search');
 
 export const attackDiscoverySearchTool = (
-  core: CoreSetup
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
 ): BuiltinToolDefinition<typeof attackDiscoverySearchSchema> => {
   return {
     id: SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
@@ -33,23 +36,27 @@ export const attackDiscoverySearchTool = (
     schema: attackDiscoverySearchSchema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ spaceId }: ToolAvailabilityContext) => {
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
         try {
-          const [coreStart] = await core.getStartServices();
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
-          const index = `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`;
+          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
+          if (availability.status === 'available') {
+            const [coreStart] = await core.getStartServices();
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const index = `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`;
 
-          const indexExists = await esClient.indices.exists({
-            index,
-          });
-          if (indexExists) {
-            return { status: 'available' };
+            const indexExists = await esClient.indices.exists({
+              index,
+            });
+            if (indexExists) {
+              return { status: 'available' };
+            }
+
+            return {
+              status: 'unavailable',
+              reason: 'Attack discovery index does not exist for this space',
+            };
           }
-
-          return {
-            status: 'unavailable',
-            reason: 'Attack discovery index does not exist for this space',
-          };
+          return availability;
         } catch (error) {
           return {
             status: 'unavailable',
@@ -60,7 +67,7 @@ export const attackDiscoverySearchTool = (
         }
       },
     },
-    handler: async ({ alertIds }, { request, esClient, logger }) => {
+    handler: async ({ alertIds }, { request, esClient }) => {
       const spaceId = getSpaceIdFromRequest(request);
 
       logger.debug(

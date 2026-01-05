@@ -12,7 +12,7 @@ import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
+import { getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
 import type {
   OptionsListSearchTechnique,
   OptionsListSelection,
@@ -122,7 +122,10 @@ export function initializeESQLControlSelections(
   const fetchSubscription = controlFetch$
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
-      filter(({ esqlVariables }) => {
+      filter(({ esqlVariables, timeRange }) => {
+        if (hasStartEndParams(esqlQuery$.getValue()) && !timeRange) {
+          return false;
+        }
         const variablesInQuery = getESQLQueryVariables(esqlQuery$.getValue());
         const variablesInParent = esqlVariables || [];
 
