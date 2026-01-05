@@ -10,16 +10,10 @@ import { apiTest, expect } from '@kbn/scout';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe('Create new UIAM session', { tag: ['@svlSecurity'] }, () => {
-  let userSessionCookie: string;
-  apiTest.beforeAll(async ({ samlAuth }) => {
-    userSessionCookie = `sid=${await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope(
-      'viewer'
-    )}`;
-  });
-
-  apiTest('should be able to authenticate as UIAM user', async ({ apiClient }) => {
+  apiTest('should be able to authenticate as UIAM user', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
     const response = await apiClient.get('internal/security/me', {
-      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+      headers: { ...COMMON_HEADERS, ...cookieHeader },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
