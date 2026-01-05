@@ -30,8 +30,6 @@ export interface FlyoutWrapperProps {
   navigateToLensEditor?: () => void;
   isReadOnly?: boolean;
   applyButtonLabel?: string;
-  /** Tooltip message to display when the Apply button is disabled */
-  applyButtonDisabledTooltip?: string;
 }
 
 export interface EditConfigPanelProps {

@@ -6,7 +6,7 @@
  */
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -87,6 +87,7 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
+  const { euiTheme } = useEuiTheme();
   const prevQuery = useRef<AggregateQuery | Query>(attributes?.state.query || { esql: '' });
   const [query, setQuery] = useState<AggregateQuery | Query>(
     attributes?.state.query || { esql: '' }
@@ -232,6 +233,8 @@ export function ESQLEditor({
     return null;
   }
 
+  const isQueryPendingSubmit = !isEqual(query, submittedQuery);
+
   const EditorComponent = (
     <>
       <InnerESQLEditor
@@ -250,6 +253,21 @@ export function ESQLEditor({
         attributes={attributes}
         parentApi={parentApi}
       />
+      {isQueryPendingSubmit && !hasSyntaxErrors && (
+        <EuiText
+          size="xs"
+          color="danger"
+          css={css`
+            padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+          `}
+          role="status"
+          aria-live="polite"
+        >
+          {i18n.translate('xpack.lens.esqlEditor.queryNotRunHelpText', {
+            defaultMessage: 'Run the query to apply changes',
+          })}
+        </EuiText>
+      )}
       {dataGridAttrs ? (
         <ESQLDataGridAccordion
           dataGridAttrs={dataGridAttrs}

@@ -295,30 +295,6 @@ export function LensEditConfigurationFlyout({
     esqlQueryState,
   ]);
 
-  const applyButtonDisabledTooltip = useMemo(() => {
-    if (textBasedMode && esqlQueryState) {
-      // Check syntax errors first (these are for the current query, validated client-side)
-      if (esqlQueryState.hasSyntaxErrors) {
-        return i18n.translate('xpack.lens.config.applyButtonDisabledQueryError', {
-          defaultMessage: 'Fix the ES|QL query errors before applying',
-        });
-      }
-      // Check if query needs to be run (query changed, any previous errors are stale)
-      if (esqlQueryState.isQueryPendingSubmit) {
-        return i18n.translate('xpack.lens.config.applyButtonDisabledQueryNotRun', {
-          defaultMessage: 'Run the ES|QL query before applying',
-        });
-      }
-      // Check runtime errors last (from the last run of the current query)
-      if (esqlQueryState.hasErrors) {
-        return i18n.translate('xpack.lens.config.applyButtonDisabledQueryError', {
-          defaultMessage: 'Fix the ES|QL query errors before applying',
-        });
-      }
-    }
-    return undefined;
-  }, [textBasedMode, esqlQueryState]);
-
   const addLayerButton = useAddLayerButton(
     framePublicAPI,
     coreStart,
@@ -482,7 +458,6 @@ export function LensEditConfigurationFlyout({
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
-          applyButtonDisabledTooltip={applyButtonDisabledTooltip}
           toolbar={toolbar}
           layerTabs={layerTabs}
         >
@@ -523,7 +498,6 @@ export function LensEditConfigurationFlyout({
         isScrollable
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
-        applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
         layerTabs={layerTabs}
       >
