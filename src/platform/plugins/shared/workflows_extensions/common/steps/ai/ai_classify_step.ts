@@ -36,46 +36,15 @@ export const InputSchema = z.object({
  * Output schema for the AI classify step.
  * This is the base schema - the dynamic schema will be created based on input parameters.
  */
-export const OutputSchema = z.union([
-  // Single category response (when allowMultipleCategories is false or undefined)
-  z.object({
-    category: z.string(),
-    rationale: z.string().optional(),
-  }),
-  // Multiple categories response (when allowMultipleCategories is true)
-  z.object({
-    categories: z.array(z.string()),
-    rationale: z.string().optional(),
-  }),
-]);
+export const OutputSchema = z.object({
+  category: z.string().optional(),
+  categories: z.array(z.string()).optional(),
+  rationale: z.string().optional(),
+});
 
 export type AiClassifyStepConfigSchema = typeof ConfigSchema;
 export type AiClassifyStepInputSchema = typeof InputSchema;
 export type AiClassifyStepOutputSchema = typeof OutputSchema;
-
-/**
- * Dynamic output schema generator based on input parameters.
- * Returns a more specific schema based on allowMultipleCategories and includeRationale flags.
- */
-export const dynamicOutputSchema = (
-  input: z.infer<typeof InputSchema>
-): z.ZodType<z.infer<typeof OutputSchema>> => {
-  const { allowMultipleCategories, includeRationale } = input;
-
-  if (allowMultipleCategories) {
-    // Multi-label classification output
-    return z.object({
-      categories: z.array(z.string()),
-      rationale: includeRationale ? z.string() : z.string().optional(),
-    });
-  }
-
-  // Single-label classification output
-  return z.object({
-    category: z.string(),
-    rationale: includeRationale ? z.string() : z.string().optional(),
-  });
-};
 
 /**
  * Common step definition for AI classify step.
@@ -91,5 +60,32 @@ export const AiClassifyStepCommonDefinition: CommonStepDefinition<
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
-  dynamicOutputSchema,
 };
+
+export function buildStructuredOutputSchema(
+  params: z.infer<AiClassifyStepInputSchema>
+): z.ZodObject {
+  const { allowMultipleCategories, includeRationale, categories, fallbackCategory } = params;
+
+  const categorySchema = fallbackCategory
+    ? z.enum(categories.concat([fallbackCategory]))
+    : z.union([z.enum(categories), z.null()]);
+
+  let shape: Record<string, z.ZodType> = {};
+
+  if (allowMultipleCategories) {
+    shape = {
+      categories: z.array(z.string().nullable()),
+    };
+  } else {
+    shape = {
+      category: z.string().nullable(),
+    };
+  }
+
+  if (includeRationale) {
+    shape.rationale = z.string();
+  }
+
+  return z.object(shape);
+}

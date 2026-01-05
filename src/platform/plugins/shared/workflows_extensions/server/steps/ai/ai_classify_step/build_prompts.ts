@@ -14,66 +14,66 @@ export function buildSystemPart(params: {
   allowMultipleCategories: boolean;
   fallbackCategory?: string;
   includeRationale: boolean;
+  jsonSchema: unknown;
 }): MessageFieldWithRole[] {
-  const { categories, allowMultipleCategories, fallbackCategory, includeRationale } = params;
+  const { categories, allowMultipleCategories, fallbackCategory, includeRationale, jsonSchema } =
+    params;
 
   const categoriesList = categories.map((cat) => `- ${cat}`).join('\n');
-  const outputFormat = allowMultipleCategories
-    ? includeRationale
-      ? `{
-  "categories": ["category1", "category2"],
-  "rationale": "explanation of why these categories were chosen"
-}`
-      : `{
-  "categories": ["category1", "category2"]
-}`
-    : includeRationale
-    ? `{
-  "category": "selected_category",
-  "rationale": "explanation of why this category was chosen"
-}`
-    : `{
-  "category": "selected_category"
-}`;
 
-  const fallbackInstruction = fallbackCategory
-    ? `- If the input does not clearly match any defined category, use the fallback category: "${fallbackCategory}"`
-    : '- If the input does not clearly match any defined category, make your best judgment and select the most appropriate category';
+  const classificationRules: string[] = [];
 
-  const multiLabelInstruction = allowMultipleCategories
-    ? '- You may select multiple categories if the input matches more than one category\n- Return all matching categories in the "categories" array'
-    : '- You must select exactly ONE category from the provided list\n- Return the selected category in the "category" field';
+  if (fallbackCategory) {
+    classificationRules.push(
+      `If the input does not clearly match any defined category, use the fallback category: "${fallbackCategory}"`
+    );
+  } else {
+    classificationRules.push(
+      'If the input does not clearly match any defined category, use null JSON value (not "null" string)'
+    );
+  }
 
-  const rationaleInstruction = includeRationale
-    ? '\n- You MUST provide a clear, concise explanation in the "rationale" field explaining why you chose this category/categories'
-    : '\n- Do NOT include a rationale field in your response';
+  if (allowMultipleCategories) {
+    classificationRules.push(
+      'You may select multiple categories if the input matches more than one category'
+    );
+    classificationRules.push('Return all matching categories in the "categories" array');
+  } else {
+    classificationRules.push('You must select exactly ONE category from the provided list');
+    classificationRules.push('Return the selected category in the "category" field');
+  }
+
+  if (includeRationale) {
+    classificationRules.push(
+      'You MUST provide a clear, concise explanation in the "rationale" field explaining why you chose this category/categories'
+    );
+  }
 
   return [
     {
       role: 'system',
       content: `You are a specialized classification engine that categorizes data into predefined categories.
 
-CRITICAL RULES:
-- Output ONLY valid JSON matching the exact format specified below
-- Do NOT include any preambles, introductions, explanations, or markdown formatting
-- Do NOT wrap the JSON in markdown code blocks or any other formatting
-- Do NOT engage in conversation or ask questions
-- Do NOT add any text before or after the JSON object
-- The output must be parseable by JSON.parse()
+EXPECTED OUTPUT SCHEMA:
+\`\`\`json
+${JSON.stringify(jsonSchema)}
+\`\`\`
 
 AVAILABLE CATEGORIES:
 ${categoriesList}
 
 CLASSIFICATION RULES:
-${multiLabelInstruction}
-${fallbackInstruction}
+${classificationRules.map((x) => x.trim()).join('\n-')}
 - Categories are case-sensitive and must match exactly as provided
-- Only use categories from the available categories list${rationaleInstruction}
+- Only use categories from the available categories list
 
-OUTPUT FORMAT (valid JSON only):
-${outputFormat}
-
-Your response must be ONLY the JSON object with no additional content.`,
+CRITICAL RULES:
+- Output ONLY valid JSON matching the exact format specified
+- Your response must be PLAIN JSON with NO formatting, NO code blocks, NO markdown
+- DO NOT wrap your response in \`\`\`json or \`\`\` blocks
+- DO NOT include any text before or after the JSON
+- The output must be a raw JSON string that can be parsed directly
+`,
     },
   ];
 }
@@ -117,7 +117,7 @@ export function buildClassificationRequestPart(): MessageFieldWithRole[] {
   return [
     {
       role: 'user',
-      content: 'Classify the provided data and return ONLY the JSON response:',
+      content: 'Classify the provided data and return ONLY the JSON response',
     },
   ];
 }

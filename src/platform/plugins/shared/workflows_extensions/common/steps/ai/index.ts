@@ -14,4 +14,5 @@ export {
   type AiClassifyStepConfigSchema,
   type AiClassifyStepInputSchema,
   type AiClassifyStepOutputSchema,
+  buildStructuredOutputSchema,
 } from './ai_classify_step';

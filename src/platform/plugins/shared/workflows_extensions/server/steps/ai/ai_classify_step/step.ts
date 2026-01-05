@@ -9,13 +9,17 @@
 
 import type { MessageFieldWithRole } from '@langchain/core/messages';
 import type { CoreSetup } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
 import {
   buildClassificationRequestPart,
   buildDataPart,
   buildInstructionsPart,
   buildSystemPart,
 } from './build_prompts';
-import { AiClassifyStepCommonDefinition } from '../../../../common/steps/ai';
+import {
+  AiClassifyStepCommonDefinition,
+  buildStructuredOutputSchema,
+} from '../../../../common/steps/ai';
 import { createServerStepDefinition } from '../../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
@@ -123,68 +127,31 @@ export const aiClassifyStepDefinition = (
         fallbackCategory,
         includeRationale = false,
       } = context.input;
-
+      const structuredOutputSchema = buildStructuredOutputSchema(context.input);
+      const jsonSchema = z.toJSONSchema(structuredOutputSchema);
       const modelInput: MessageFieldWithRole[] = [
         ...buildSystemPart({
           categories,
           allowMultipleCategories,
           fallbackCategory,
           includeRationale,
+          jsonSchema,
         }),
         ...buildDataPart(input),
         ...buildInstructionsPart(instructions),
         ...buildClassificationRequestPart(),
       ];
 
-      let lastError: Error | undefined;
-      const maxAttempts = 3;
+      const runnable = chatModel;
 
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          const modelResponse = await chatModel.invoke(modelInput, {
-            signal: context.abortSignal,
-          });
+      const modelResponse = await runnable.invoke(modelInput, {
+        signal: context.abortSignal,
+      });
 
-          // Convert content to string if it's an array
-          const content =
-            typeof modelResponse.content === 'string'
-              ? modelResponse.content
-              : modelResponse.content.map((part) => ('text' in part ? part.text : '')).join('');
+      const parsedResponse = parseModelResponse(modelResponse.content as string);
 
-          // Parse and validate the response
-          const parsedResponse = parseModelResponse(content);
-          const validatedResponse = validateClassificationResponse(
-            parsedResponse,
-            categories,
-            allowMultipleCategories,
-            fallbackCategory
-          );
-
-          return {
-            output: validatedResponse,
-          };
-        } catch (error) {
-          lastError = error;
-
-          // If this isn't the last attempt, add a correction prompt
-          if (attempt < maxAttempts) {
-            modelInput.push(
-              {
-                role: 'assistant',
-                content: String(error.message),
-              },
-              {
-                role: 'user',
-                content: `Your previous response was invalid. ${error.message}. Please try again and return ONLY valid JSON matching the exact format specified.`,
-              }
-            );
-          }
-        }
-      }
-
-      // If all retries failed, throw the last error
-      throw new Error(
-        `Failed to classify after ${maxAttempts} attempts: ${lastError?.message || 'Unknown error'}`
-      );
+      return {
+        output: parsedResponse,
+      };
     },
   });

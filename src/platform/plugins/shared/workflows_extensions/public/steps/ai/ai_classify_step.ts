@@ -9,14 +9,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { AiClassifyStepCommonDefinition, AiClassifyStepTypeId } from '../../../common/steps/ai';
+import type {
+  AiClassifyStepConfigSchema,
+  AiClassifyStepInputSchema,
+  AiClassifyStepOutputSchema,
+} from '../../../common/steps/ai';
+import {
+  AiClassifyStepCommonDefinition,
+  AiClassifyStepTypeId,
+  buildStructuredOutputSchema,
+} from '../../../common/steps/ai';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
-export const AiClassifyStepDefinition: PublicStepDefinition = {
+export const AiClassifyStepDefinition: PublicStepDefinition<
+  AiClassifyStepInputSchema,
+  AiClassifyStepOutputSchema,
+  AiClassifyStepConfigSchema
+> = {
   ...AiClassifyStepCommonDefinition,
-  // Simple type assertion - assumes the types are compatible
-  dynamicOutputSchema:
-    AiClassifyStepCommonDefinition.dynamicOutputSchema as PublicStepDefinition['dynamicOutputSchema'],
+  dynamicOutputSchema: (input) => buildStructuredOutputSchema(input),
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/list_add').then(({ icon }) => ({
       default: icon,
