@@ -117,5 +117,6 @@
     "@kbn/deeplinks-management",
     "@kbn/react-query",
     "@kbn/deeplinks-observability",
+    "@kbn/observability-get-padded-alert-time-range-util"
   ]
 }
