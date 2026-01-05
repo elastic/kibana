@@ -67,19 +67,22 @@ export function getConnectorTypeSuggestions(
     // Find display name for this connector type - only for dynamic connectors
     const connector = allConnectors.find((c) => c.type === connectorType);
 
-    // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
-    const isDynamicConnector =
-      !connectorType.startsWith('elasticsearch.') && !connectorType.startsWith('kibana.');
-    const displayName =
-      isDynamicConnector && connector?.description
-        ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
-        : connectorType;
+    const detail = connector?.summary
+      ? connector.summary.replace(' connector', '').replace(' (no instances configured)', '')
+      : connectorType;
 
     const genericDocumentation = connectorType.startsWith('elasticsearch.')
       ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
       : connectorType.startsWith('kibana.')
       ? `Kibana API - ${connectorType.replace('kibana.', '')}`
-      : connector?.description || `Workflow connector - ${connectorType}`;
+      : undefined;
+
+    const description = connector?.description || genericDocumentation;
+
+    const isMarkdown = description && /[\\`*_{}[\]()#+\-.!]/g.test(description);
+    const documentation = isMarkdown
+      ? { value: description, isTrusted: true, supportHtml: true }
+      : description;
 
     return {
       label: connectorType, // Show the actual type as label
@@ -87,8 +90,8 @@ export function getConnectorTypeSuggestions(
       insertText: simpleText, // Still insert the actual actionTypeId
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: extendedRange,
-      detail: displayName, // Show display name for dynamic connectors, technical name for ES/Kibana
-      documentation: connector?.summary || genericDocumentation,
+      detail,
+      documentation,
       filterText: connectorType,
       sortText: `!${connectorType}`, // Priority prefix to sort before default suggestions
       preselect: false,
