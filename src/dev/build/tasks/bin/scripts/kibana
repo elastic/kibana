@@ -24,7 +24,6 @@ test_node() {
   fi
 }
 
-{{#darwin}}
 NODE="${DIR}/node/default/bin/node"
 {{#linux}}
 if ! "$NODE" --version >/dev/null 2>&1; then
