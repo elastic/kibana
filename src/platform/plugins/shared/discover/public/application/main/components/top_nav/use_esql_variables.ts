@@ -78,33 +78,31 @@ export const useESQLVariables = ({
       });
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
-      if (input && input.initialChildControlState) {
-        const controlGroupState =
-          input.initialChildControlState as ControlPanelsState<ESQLControlState>;
-        // drop unused keys for BWC
-        const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
-          return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
-        }, {});
-        stateContainer.savedSearchState.updateControlState({
-          nextControlState: transformedState,
-        });
-        dispatch(
-          setControlGroupState({
-            controlGroupState: transformedState,
-          })
-        );
+      const controlGroupState =
+        input.initialChildControlState as ControlPanelsState<ESQLControlState>;
+      // drop unused keys for BWC
+      const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
+        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
+      }, {});
+      stateContainer.savedSearchState.updateControlState({
+        nextControlState: transformedState,
+      });
+      dispatch(
+        setControlGroupState({
+          controlGroupState: transformedState,
+        })
+      );
 
-        if (pendingQueryUpdate.current) {
-          onUpdateESQLQuery(pendingQueryUpdate.current);
-          pendingQueryUpdate.current = undefined;
-        }
+      if (pendingQueryUpdate.current) {
+        onUpdateESQLQuery(pendingQueryUpdate.current);
+        pendingQueryUpdate.current = undefined;
+      }
 
-        const newVariables = extractEsqlVariables(controlGroupState);
-        if (!isEqual(newVariables, currentEsqlVariables)) {
-          // Update the ESQL variables in the internal state
-          dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-          stateContainer.dataState.fetch();
-        }
+      const newVariables = extractEsqlVariables(controlGroupState);
+      if (!isEqual(newVariables, currentEsqlVariables)) {
+        // Update the ESQL variables in the internal state
+        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
+        stateContainer.dataState.fetch();
       }
     });
 

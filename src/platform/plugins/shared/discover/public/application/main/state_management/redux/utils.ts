@@ -10,7 +10,7 @@
 import { isObject } from 'lodash';
 import { v4 as uuid } from 'uuid';
 
-import type { ControlPanelsState, ControlPanelState } from '@kbn/control-group-renderer';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
@@ -143,34 +143,31 @@ export const extractEsqlVariables = (
   if (!panels || Object.keys(panels).length === 0) {
     return [];
   }
-  const variables = Object.values(panels).reduce(
-    (acc: ESQLControlVariable[], panel: ControlPanelState) => {
-      if (panel.type === ESQL_CONTROL) {
-        const typedPanel = panel as OptionsListESQLControlState;
-        const isSingleSelect = typedPanel.singleSelect ?? true;
-        const selectedValues = typedPanel.selectedOptions || [];
+  const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
+    if (panel.type === ESQL_CONTROL) {
+      const typedPanel = panel as OptionsListESQLControlState;
+      const isSingleSelect = typedPanel.singleSelect ?? true;
+      const selectedValues = typedPanel.selectedOptions || [];
 
-        let value: string | number | (string | number)[];
+      let value: string | number | (string | number)[];
 
-        if (isSingleSelect) {
-          // Single select: return the first selected value, converting to number if possible
-          const singleValue = selectedValues[0];
-          value = isNaN(Number(singleValue)) ? singleValue : Number(singleValue);
-        } else {
-          // Multi select: return array with numbers converted from strings when possible
-          value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
-        }
-
-        acc.push({
-          key: typedPanel.variableName,
-          type: typedPanel.variableType as ESQLVariableType,
-          value,
-        });
+      if (isSingleSelect) {
+        // Single select: return the first selected value, converting to number if possible
+        const singleValue = selectedValues[0];
+        value = isNaN(Number(singleValue)) ? singleValue : Number(singleValue);
+      } else {
+        // Multi select: return array with numbers converted from strings when possible
+        value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
       }
-      return acc;
-    },
-    []
-  );
+
+      acc.push({
+        key: typedPanel.variableName,
+        type: typedPanel.variableType as ESQLVariableType,
+        value,
+      });
+    }
+    return acc;
+  }, []);
 
   return variables;
 };
