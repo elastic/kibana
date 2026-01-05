@@ -38,7 +38,6 @@ export const CASES_FEATURE_ID_V3 = 'securitySolutionCasesV3' as const;
 export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolutionCases' as const;
 export const EXCEPTIONS_SUBFEATURE_ID = 'securitySolutionExceptions' as const;
 export const EXCEPTIONS_SUBFEATURE_ID_ALL = 'securitySolutionExceptionsAll' as const;
-export const EXCEPTIONS_SUBFEATURE_ID_READ = 'securitySolutionExceptionsRead' as const;
 
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;

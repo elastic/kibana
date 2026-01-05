@@ -24,6 +24,7 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_READ,
   APP_ID,
+  EXCEPTIONS_API_READ,
   INITIALIZE_SECURITY_SOLUTION,
   LEGACY_NOTIFICATIONS_ID,
   LISTS_API_ALL,
@@ -110,7 +111,7 @@ export const getRulesV2BaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        read: params.savedObjects,
       },
       alerting: {
         rule: { read: alertingFeatures },
@@ -124,6 +125,7 @@ export const getRulesV2BaseKibanaFeature = (
         RULES_API_READ,
         ALERTS_API_READ,
         LISTS_API_READ,
+        EXCEPTIONS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
         'rac',

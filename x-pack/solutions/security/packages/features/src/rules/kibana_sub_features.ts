@@ -9,11 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import {
-  APP_ID,
   EXCEPTIONS_API_ALL,
   EXCEPTIONS_API_READ,
   EXCEPTIONS_SUBFEATURE_ID_ALL,
-  EXCEPTIONS_SUBFEATURE_ID_READ,
   EXCEPTIONS_UI_CRUD,
   EXCEPTIONS_UI_READ,
   LISTS_API_ALL,
@@ -39,12 +37,12 @@ export const getExceptionsSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.exceptionsSubFeatureName',
     {
-      defaultMessage: 'Exceptions',
+      defaultMessage: 'Manage Exceptions',
     }
   ),
   privilegeGroups: [
     {
-      groupType: 'mutually_exclusive',
+      groupType: 'independent',
       privileges: [
         {
           id: EXCEPTIONS_SUBFEATURE_ID_ALL,
@@ -56,18 +54,6 @@ export const getExceptionsSubFeature = (): SubFeatureConfig => ({
           },
           ui: [EXCEPTIONS_UI_READ, EXCEPTIONS_UI_CRUD],
           api: [EXCEPTIONS_API_READ, EXCEPTIONS_API_ALL, LISTS_API_ALL, LISTS_API_READ],
-        },
-        {
-          id: EXCEPTIONS_SUBFEATURE_ID_READ,
-          includeIn: 'read',
-          name: TRANSLATIONS.read,
-          catalogue: [APP_ID],
-          savedObject: {
-            all: [],
-            read: [EXCEPTION_LIST_NAMESPACE],
-          },
-          ui: [EXCEPTIONS_UI_READ],
-          api: [EXCEPTIONS_API_READ, LISTS_API_READ],
         },
       ],
     },
