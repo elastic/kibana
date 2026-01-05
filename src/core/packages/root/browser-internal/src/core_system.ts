@@ -353,20 +353,21 @@ export class CoreSystem {
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
       });
-      const rendering = this.rendering.start({
-        analytics,
-        executionContext,
-        i18n,
-        theme,
-        userProfile,
-        coreEnv: this.coreContext.env,
-      });
+
+      // circumvent circle dependency rendering -> chrome -> notifications -> rendering
+      // this hack should be removed once notifications and overlays are moved under rendering https://github.com/elastic/kibana/issues/247820
+      const addRenderingContext: RenderingService['addContext'] = (...args) => {
+        if (!rendering) {
+          throw new Error('Rendering service is not started yet');
+        }
+        return rendering.addContext(...args);
+      };
 
       const notifications = this.notifications.start({
         analytics,
         overlays,
         targetDomElement: notificationsTargetDomElement,
-        addRenderingContext: rendering.addContext,
+        addRenderingContext,
       });
 
       const featureFlags = await this.featureFlags.start();
@@ -386,6 +387,16 @@ export class CoreSystem {
         featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
+
+      const rendering = this.rendering.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+        coreEnv: this.coreContext.env,
+        chrome,
+      });
 
       this.coreApp.start({
         application,
