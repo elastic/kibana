@@ -447,6 +447,93 @@ describe('rollback', () => {
       expect(mockGetAgentPolicyForAgent).not.toHaveBeenCalled();
       expect(mockCreateAgentAction).not.toHaveBeenCalled();
     });
+
+    it('should throw AgentRollbackError if agent is unenrolling', async () => {
+      const agent: Agent = {
+        id: mockAgentId,
+        type: 'PERMANENT',
+        active: true,
+        enrolled_at: '2023-01-01T00:00:00Z',
+        local_metadata: {},
+        unenrollment_started_at: '2023-06-01T00:00:00Z',
+        upgrade: {
+          rollbacks: [
+            {
+              version: '8.10.0',
+              valid_until: futureDate.toISOString(),
+            },
+          ],
+        },
+      } as Agent;
+
+      await expect(sendRollbackAgentAction(soClient, esClient, agent)).rejects.toThrow(
+        AgentRollbackError
+      );
+      await expect(sendRollbackAgentAction(soClient, esClient, agent)).rejects.toThrow(
+        'cannot roll back an unenrolling or unenrolled agent'
+      );
+
+      expect(mockGetAgentPolicyForAgent).not.toHaveBeenCalled();
+      expect(mockCreateAgentAction).not.toHaveBeenCalled();
+    });
+
+    it('should throw AgentRollbackError if agent is unenrolled', async () => {
+      const agent: Agent = {
+        id: mockAgentId,
+        type: 'PERMANENT',
+        active: false,
+        enrolled_at: '2023-01-01T00:00:00Z',
+        local_metadata: {},
+        unenrolled_at: '2023-06-01T00:00:00Z',
+        upgrade: {
+          rollbacks: [
+            {
+              version: '8.10.0',
+              valid_until: futureDate.toISOString(),
+            },
+          ],
+        },
+      } as Agent;
+
+      await expect(sendRollbackAgentAction(soClient, esClient, agent)).rejects.toThrow(
+        AgentRollbackError
+      );
+      await expect(sendRollbackAgentAction(soClient, esClient, agent)).rejects.toThrow(
+        'cannot roll back an unenrolling or unenrolled agent'
+      );
+
+      expect(mockGetAgentPolicyForAgent).not.toHaveBeenCalled();
+      expect(mockCreateAgentAction).not.toHaveBeenCalled();
+    });
+
+    it('should throw AgentRollbackError if agent is upgrading', async () => {
+      const agent: Agent = {
+        id: mockAgentId,
+        type: 'PERMANENT',
+        active: true,
+        enrolled_at: '2023-01-01T00:00:00Z',
+        local_metadata: {},
+        upgrade_started_at: '2023-06-01T00:00:00Z',
+        upgrade: {
+          rollbacks: [
+            {
+              version: '8.10.0',
+              valid_until: futureDate.toISOString(),
+            },
+          ],
+        },
+      } as Agent;
+
+      await expect(sendRollbackAgentAction(soClient, esClient, agent)).rejects.toThrow(
+        AgentRollbackError
+      );
+      await expect(sendRollbackAgentAction(soClient, esClient, agent)).rejects.toThrow(
+        'cannot roll back an upgrading agent'
+      );
+
+      expect(mockGetAgentPolicyForAgent).not.toHaveBeenCalled();
+      expect(mockCreateAgentAction).not.toHaveBeenCalled();
+    });
   });
 
   describe('sendRollbackAgentsActions', () => {

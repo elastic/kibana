@@ -17,7 +17,6 @@ import {
 } from '@kbn/core/server/mocks';
 
 import { getAgentById } from '../../services/agents';
-import { isAgentUpgrading } from '../../../common/services';
 import * as AgentService from '../../services/agents';
 import { AgentRollbackError } from '../../errors';
 import type { Agent } from '../../../common/types';
@@ -37,11 +36,6 @@ jest.mock('../../services/agents', () => ({
   getAgentById: jest.fn(),
   sendRollbackAgentAction: jest.fn(),
   sendRollbackAgentsActions: jest.fn(),
-}));
-
-jest.mock('../../../common/services/is_agent_upgradeable', () => ({
-  ...jest.requireActual('../../../common/services/is_agent_upgradeable'),
-  isAgentUpgrading: jest.fn(),
 }));
 
 describe('Rollback handlers', () => {
@@ -88,15 +82,12 @@ describe('Rollback handlers', () => {
         upgraded_at: '2023-01-01T00:00:00Z',
       };
 
-      (isAgentUpgrading as jest.Mock).mockReturnValue(false);
-
       (getAgentById as jest.Mock).mockResolvedValue(mockAgent);
       (AgentService.sendRollbackAgentAction as jest.Mock).mockResolvedValue(mockActionId);
 
       await rollbackAgentHandler(mockContext, mockRequest, mockResponse);
 
       expect(getAgentById).toHaveBeenCalledWith(esClientMock, soClientMock, mockAgentId);
-      expect(isAgentUpgrading).toHaveBeenCalledWith(mockAgent);
       expect(AgentService.sendRollbackAgentAction).toHaveBeenCalledWith(
         soClientMock,
         esClientMock,
@@ -107,64 +98,6 @@ describe('Rollback handlers', () => {
       });
     });
 
-    it('should throw AgentRollbackError if agent is unenrolling', async () => {
-      const mockAgent: Partial<Agent> = {
-        id: mockAgentId,
-        unenrollment_started_at: '2023-01-01T00:00:00Z',
-        unenrolled_at: undefined,
-      };
-
-      (getAgentById as jest.Mock).mockResolvedValue(mockAgent);
-
-      await expect(rollbackAgentHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
-        AgentRollbackError
-      );
-
-      expect(getAgentById).toHaveBeenCalledWith(esClientMock, soClientMock, mockAgentId);
-      expect(isAgentUpgrading).not.toHaveBeenCalled();
-      expect(AgentService.sendRollbackAgentAction).not.toHaveBeenCalled();
-    });
-
-    it('should throw AgentRollbackError if agent is unenrolled', async () => {
-      const mockAgent: Partial<Agent> = {
-        id: mockAgentId,
-        unenrollment_started_at: undefined,
-        unenrolled_at: '2023-01-01T00:00:00Z',
-      };
-
-      (getAgentById as jest.Mock).mockResolvedValue(mockAgent);
-
-      await expect(rollbackAgentHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
-        AgentRollbackError
-      );
-
-      expect(getAgentById).toHaveBeenCalledWith(esClientMock, soClientMock, mockAgentId);
-      expect(isAgentUpgrading).not.toHaveBeenCalled();
-      expect(AgentService.sendRollbackAgentAction).not.toHaveBeenCalled();
-    });
-
-    it('should throw AgentRollbackError if agent is upgrading', async () => {
-      const mockAgent: Partial<Agent> = {
-        id: mockAgentId,
-        unenrollment_started_at: undefined,
-        unenrolled_at: undefined,
-        upgrade_started_at: '2023-01-01T00:00:00Z',
-        upgraded_at: undefined,
-      };
-
-      (isAgentUpgrading as jest.Mock).mockReturnValue(true);
-
-      (getAgentById as jest.Mock).mockResolvedValue(mockAgent);
-
-      await expect(rollbackAgentHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
-        AgentRollbackError
-      );
-
-      expect(getAgentById).toHaveBeenCalledWith(esClientMock, soClientMock, mockAgentId);
-      expect(isAgentUpgrading).toHaveBeenCalledWith(mockAgent);
-      expect(AgentService.sendRollbackAgentAction).not.toHaveBeenCalled();
-    });
-
     it('should propagate errors from sendRollbackAgentAction', async () => {
       const mockAgent: Partial<Agent> = {
         id: mockAgentId,
@@ -172,8 +105,6 @@ describe('Rollback handlers', () => {
         unenrolled_at: undefined,
       };
       const serviceError = new AgentRollbackError('No rollback available');
-
-      (isAgentUpgrading as jest.Mock).mockReturnValue(false);
 
       (getAgentById as jest.Mock).mockResolvedValue(mockAgent);
       (AgentService.sendRollbackAgentAction as jest.Mock).mockRejectedValue(serviceError);
