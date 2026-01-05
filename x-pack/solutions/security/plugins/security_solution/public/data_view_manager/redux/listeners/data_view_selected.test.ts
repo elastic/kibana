@@ -8,10 +8,10 @@
 import { createDataViewSelectedListener } from './data_view_selected';
 import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -186,6 +186,7 @@ describe('createDataViewSelectedListener', () => {
       const analyzerListener = createDataViewSelectedListener({
         dataViews: mockDataViewsService,
         scope: PageScope.analyzer,
+        logger: mockLogger,
         storage: mockStorage,
       });
 
@@ -213,6 +214,7 @@ describe('createDataViewSelectedListener', () => {
       const analyzerListener = createDataViewSelectedListener({
         dataViews: mockDataViewsService,
         scope: PageScope.analyzer,
+        logger: mockLogger,
         storage: mockStorage,
       });
 
