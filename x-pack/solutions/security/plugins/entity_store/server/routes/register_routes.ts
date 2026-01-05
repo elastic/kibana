@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
 import { registerInstall } from './install';
-import type { EntityStoreDependencies } from '../domain/dependencies';
+import type { EntityStorePluginRouter } from '../types';
 
-export function registerRoutes(
-  router: IRouter,
-  { resourcesService, logger }: EntityStoreDependencies
-) {
-  registerInstall(router, resourcesService, logger);
+export function registerRoutes(router: EntityStorePluginRouter) {
+  registerInstall(router);
 }

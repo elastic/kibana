@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import { initDependencies } from './dependencies';
-import type { EntityStoreDependencies } from './domain/dependencies';
+import type { EntityStoreRequestHandlerContext } from './types';
+import { createRequestHandlerContext } from './request_context_factory';
+import { PLUGIN_ID } from '../common';
 
 export class EntityStorePlugin implements Plugin {
-  private readonly dependencies: EntityStoreDependencies;
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.dependencies = initDependencies(initializerContext);
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      (context, request) => createRequestHandlerContext({ context, core, logger: this.logger })
+    );
 
-    registerRoutes(router, this.dependencies);
+    registerRoutes(router);
   }
 
   public start() {
-    this.dependencies.logger.info('Initializing plugin');
+    this.logger.info('Initializing plugin');
   }
 
   public stop() {
-    this.dependencies.logger.info('Stopping plugin');
+    this.logger.info('Stopping plugin');
   }
 }

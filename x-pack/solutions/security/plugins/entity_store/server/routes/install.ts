@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from './constants';
 import { EntityType } from '../domain/definitions/entity_type';
-import type { ResourcesService } from '../domain/resources_service';
+import type { EntityStorePluginRouter } from '../types';
 
 const bodySchema = z.object({
   entityType: z.array(EntityType).optional(),
 });
 
-export function registerInstall(
-  router: IRouter,
-  resourceService: ResourcesService,
-  logger: Logger
-) {
+export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
       path: '/internal/security/entity-store/install',
@@ -39,8 +34,12 @@ export function registerInstall(
         },
       },
       async (ctx, req, res) => {
+        const entityStoreCtx = await ctx.entityStore;
+        const logger = entityStoreCtx.getLogger();
+        const resourcesService = entityStoreCtx.getResourcesService();
+
         logger.debug('Install api called');
-        resourceService.install(req.body.entityType);
+        resourcesService.install(req.body.entityType);
 
         return res.ok({
           body: {
