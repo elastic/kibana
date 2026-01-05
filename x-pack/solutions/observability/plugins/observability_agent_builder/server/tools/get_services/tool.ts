@@ -74,45 +74,28 @@ When to use:
       } = toolParams;
       const { request } = context;
 
-      try {
-        const { services, maxCountExceeded, serviceOverflowCount } = await getToolHandler({
-          request,
-          dataRegistry,
-          start,
-          end,
-          environment,
-          healthStatus,
-        });
+      const { services, maxCountExceeded, serviceOverflowCount } = await getToolHandler({
+        request,
+        dataRegistry,
+        start,
+        end,
+        environment,
+        healthStatus,
+      });
 
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                total: services.length,
-                services,
-                maxCountExceeded,
-                serviceOverflowCount,
-              },
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              total: services.length,
+              services,
+              maxCountExceeded,
+              serviceOverflowCount,
             },
-          ],
-        };
-      } catch (error) {
-        logger.error(`Error getting services: ${error.message}`);
-        logger.debug(error);
-
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message: `Failed to fetch services: ${error.message}`,
-                stack: error.stack,
-              },
-            },
-          ],
-        };
-      }
+          },
+        ],
+      };
     },
   };
 

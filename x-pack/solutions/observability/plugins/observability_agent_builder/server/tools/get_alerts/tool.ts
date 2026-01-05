@@ -102,46 +102,29 @@ Supports filtering by status (active/recovered) and KQL queries.`,
         query,
       } = toolParams;
 
-      try {
-        const { alerts, selectedFields, total } = await getToolHandler({
-          core,
-          request,
-          logger,
-          start,
-          end,
-          query,
-          kqlFilter,
-          includeRecovered,
-        });
+      const { alerts, selectedFields, total } = await getToolHandler({
+        core,
+        request,
+        logger,
+        start,
+        end,
+        query,
+        kqlFilter,
+        includeRecovered,
+      });
 
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                total,
-                alerts,
-                selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,
-              },
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              total,
+              alerts,
+              selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,
             },
-          ],
-        };
-      } catch (error) {
-        logger.error(`Error fetching observability alerts: ${error.message}`);
-        logger.debug(error);
-
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message: `Failed to fetch observability alerts: ${error.message}`,
-                stack: error.stack,
-              },
-            },
-          ],
-        };
-      }
+          },
+        ],
+      };
     },
   };
 
