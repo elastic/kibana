@@ -30,6 +30,7 @@ import type {
   PromptManager,
 } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
@@ -42,7 +43,6 @@ import {
   initPromptManager,
 } from './utils';
 import { createResultStore } from './tool_result_store';
-import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 
