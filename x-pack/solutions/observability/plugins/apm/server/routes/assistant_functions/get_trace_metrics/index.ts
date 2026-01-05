@@ -8,19 +8,8 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type { ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
 import { getPreferredBucketSizeAndDataSource } from '@kbn/apm-data-access-plugin/common';
-import {
-  CLOUD,
-  CONTAINER,
-  HOST,
-  KUBERNETES,
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-  SERVICE_RUNTIME_NAME,
-  SERVICE_VERSION,
-  TRANSACTION_NAME,
-  TRANSACTION_RESULT,
-} from '../../../../common/es_fields/apm';
-import { ApmDocumentType } from '../../../../common/document_type';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import type { ApmDocumentType } from '../../../../common/document_type';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   calculateFailedTransactionRate,
@@ -31,23 +20,6 @@ import { getDurationFieldForTransactions } from '../../../lib/helpers/transactio
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 
 const MAX_NUMBER_OF_GROUPS = 100;
-
-/**
- * Fields that exist in TransactionMetric but NOT in ServiceTransactionMetric.
- * When grouping or filtering by these fields, TransactionMetric (or TransactionEvent) is used.
- */
-const TRANSACTION_METRIC_ONLY_FIELDS = [
-  TRANSACTION_NAME,
-  TRANSACTION_RESULT,
-  `${HOST}.`,
-  `${CONTAINER}.`,
-  `${KUBERNETES}.`,
-  `${CLOUD}.`,
-  'faas.',
-  SERVICE_NODE_NAME,
-  SERVICE_VERSION,
-  SERVICE_RUNTIME_NAME,
-];
 
 export interface TraceMetricsItem {
   group: string;
@@ -61,10 +33,11 @@ export type GetTraceMetricsResponse = TraceMetricsItem[];
 /**
  * Gets the preferred document source based on groupBy, filter, and data availability.
  *
- * Document type preference:
+ * Uses getDocumentSources to determine which document types have data for the given
+ * filter and groupBy field. This automatically handles:
  * - ServiceTransactionMetric: Most efficient, but only has service.name, service.environment, transaction.type
- * - TransactionMetric: Has more dimensions (transaction.*, host.*, container.*, kubernetes.*, cloud.*, faas.*, service.node.name, service.version)
- * - TransactionEvent: Raw transaction docs, fallback when metrics don't have data (needed for high-cardinality fields like labels.*)
+ * - TransactionMetric: Has more dimensions (transaction.*, host.*, container.*, kubernetes.*, cloud.*, faas.*, etc.)
+ * - TransactionEvent: Raw transaction docs, fallback when metrics don't have required fields
  */
 async function getPreferredDocumentSource({
   apmDataAccessServices,
@@ -79,27 +52,18 @@ async function getPreferredDocumentSource({
   groupBy: string;
   kqlFilter?: string;
 }) {
-  const requiresTransactionMetric = TRANSACTION_METRIC_ONLY_FIELDS.some(
-    (field) => groupBy.startsWith(field) || (kqlFilter && kqlFilter.includes(field))
-  );
+  const kueryParts: string[] = [];
+  if (kqlFilter) {
+    kueryParts.push(kqlFilter);
+  }
+  kueryParts.push(`${groupBy}: *`);
+  const kuery = kueryParts.join(' AND ');
 
   const documentSources = await apmDataAccessServices.getDocumentSources({
     start,
     end,
-    kuery: kqlFilter ?? '',
+    kuery,
   });
-
-  const suitableDocumentTypes = requiresTransactionMetric
-    ? [ApmDocumentType.TransactionMetric, ApmDocumentType.TransactionEvent]
-    : [
-        ApmDocumentType.ServiceTransactionMetric,
-        ApmDocumentType.TransactionMetric,
-        ApmDocumentType.TransactionEvent,
-      ];
-
-  const suitableDocumentSources = documentSources.filter((source) =>
-    suitableDocumentTypes.includes(source.documentType)
-  );
 
   const { bucketSize } = getBucketSize({
     start,
@@ -108,7 +72,7 @@ async function getPreferredDocumentSource({
   });
 
   const { source } = getPreferredBucketSizeAndDataSource({
-    sources: suitableDocumentSources,
+    sources: documentSources,
     bucketSizeInSeconds: bucketSize,
   });
 
