@@ -6,13 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
 const attachmentAddSchema = z.object({
+  id: z.string().optional().describe('Optional custom ID for the attachment'),
   type: z.string().describe('Type of attachment (e.g., "text", "json", "code")'),
   data: z.unknown().describe('The attachment data/content'),
   description: z.string().optional().describe('Human-readable description of the attachment'),
@@ -31,8 +31,21 @@ export const createAttachmentAddTool = ({
     'Create a new attachment to store data for later use in the conversation. Attachments persist across conversation rounds and can be read, updated, or deleted.',
   schema: attachmentAddSchema,
   tags: ['attachment'],
-  handler: async ({ type, data, description }, _context) => {
-    const attachment = attachmentManager.add({ type, data, description });
+  handler: async ({ id, type, data, description }, _context) => {
+    // Check for duplicate ID if provided
+    if (id && attachmentManager.get(id)) {
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: `Attachment with ID '${id}' already exists` },
+          },
+        ],
+      };
+    }
+
+    const attachment = attachmentManager.add({ id, type, data, description });
 
     return {
       results: [
@@ -40,12 +53,8 @@ export const createAttachmentAddTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            __attachment_operation__: 'add',
             attachment_id: attachment.id,
             type: attachment.type,
-            description: attachment.description,
-            version: attachment.current_version,
-            estimated_tokens: attachment.versions[0]?.estimated_tokens,
           },
         },
       ],

@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -67,7 +66,6 @@ export const createAttachmentDiffTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            __attachment_operation__: 'diff',
             attachment_id,
             from_version,
             to_version,

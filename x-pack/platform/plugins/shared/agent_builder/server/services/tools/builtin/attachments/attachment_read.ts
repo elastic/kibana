@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -70,16 +69,8 @@ export const createAttachmentReadTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            __attachment_operation__: 'read',
-            attachment_id: attachmentId,
             type: attachment.type,
-            description: attachment.description,
-            version: versionData.version,
-            current_version: attachment.current_version,
-            active: attachment.active !== false,
             data: versionData.data,
-            created_at: versionData.created_at,
-            estimated_tokens: versionData.estimated_tokens,
           },
         },
       ],

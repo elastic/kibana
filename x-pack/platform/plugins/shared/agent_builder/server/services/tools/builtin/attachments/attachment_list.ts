@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -36,17 +35,11 @@ export const createAttachmentListTool = ({
     const attachments = includeDeleted ? attachmentManager.getAll() : attachmentManager.getActive();
 
     const attachmentList = attachments.map((attachment) => {
-      const latestVersion = attachmentManager.getLatest(attachment.id);
       return {
         attachment_id: attachment.id,
         type: attachment.type,
         description: attachment.description,
         current_version: attachment.current_version,
-        total_versions: attachment.versions.length,
-        active: attachment.active !== false,
-        estimated_tokens: latestVersion?.estimated_tokens,
-        created_at: attachment.versions[0]?.created_at,
-        updated_at: latestVersion?.created_at,
       };
     });
 
@@ -56,9 +49,7 @@ export const createAttachmentListTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            __attachment_operation__: 'list',
             count: attachmentList.length,
-            total_tokens: attachmentManager.getTotalTokenEstimate(),
             attachments: attachmentList,
           },
         },

@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -71,22 +70,15 @@ export const createAttachmentUpdateTool = ({
       };
     }
 
-    const latestVersion = attachmentManager.getLatest(attachmentId);
-
     return {
       results: [
         {
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            __attachment_operation__: 'update',
-            attachment_id: attachmentId,
             type: updated.type,
-            description: updated.description,
             version: updated.current_version,
-            previous_version: previousVersion,
             version_created: updated.current_version !== previousVersion,
-            estimated_tokens: latestVersion?.estimated_tokens,
           },
         },
       ],

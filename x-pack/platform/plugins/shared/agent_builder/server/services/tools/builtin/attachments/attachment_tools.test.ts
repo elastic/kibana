@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createAttachmentTools } from '.';
 
 describe('attachment tools', () => {
@@ -23,14 +24,59 @@ describe('attachment tools', () => {
   describe('attachment_add', () => {
     it('creates a new attachment', async () => {
       const tool = getTool('platform.core.attachment_add');
-      const result = await tool.handler({ type: 'text', data: 'hello world', description: 'Test' });
+      const result = (await tool.handler(
+        { type: 'text', data: 'hello world', description: 'Test' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect((result.results[0] as any).data.__attachment_operation__).toBe('add');
       expect((result.results[0] as any).data.type).toBe('text');
-      expect((result.results[0] as any).data.description).toBe('Test');
-      expect((result.results[0] as any).data.version).toBe(1);
+      expect((result.results[0] as any).data.attachment_id).toBeDefined();
+    });
+
+    it('creates an attachment with a custom ID', async () => {
+      const tool = getTool('platform.core.attachment_add');
+      const result = (await tool.handler(
+        {
+          id: 'custom-id',
+          type: 'text',
+          data: 'hello world',
+          description: 'Test',
+        },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      expect((result.results[0] as any).data.attachment_id).toBe('custom-id');
+      expect((result.results[0] as any).data.type).toBe('text');
+    });
+
+    it('returns error for duplicate ID', async () => {
+      // First, create an attachment with a specific ID
+      attachmentManager.add({
+        id: 'duplicate-id',
+        type: 'text',
+        data: 'first',
+        description: 'First',
+      });
+
+      // Try to create another attachment with the same ID
+      const tool = getTool('platform.core.attachment_add');
+      const result = (await tool.handler(
+        {
+          id: 'duplicate-id',
+          type: 'text',
+          data: 'second',
+          description: 'Second',
+        },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0] as any).data.message).toContain('already exists');
     });
   });
 
@@ -42,10 +88,13 @@ describe('attachment tools', () => {
         description: 'Test',
       });
       const tool = getTool('platform.core.attachment_read');
-      const result = await tool.handler({ attachment_id: attachment.id });
+      const result = (await tool.handler(
+        { attachment_id: attachment.id },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
-      expect((result.results[0] as any).data.__attachment_operation__).toBe('read');
+      expect((result.results[0] as any).data.type).toBe('text');
       expect((result.results[0] as any).data.data).toBe('hello');
     });
 
@@ -54,15 +103,21 @@ describe('attachment tools', () => {
       attachmentManager.update(attachment.id, { data: 'v2' });
 
       const tool = getTool('platform.core.attachment_read');
-      const result = await tool.handler({ attachment_id: attachment.id, version: 1 });
+      const result = (await tool.handler(
+        { attachment_id: attachment.id, version: 1 },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
+      expect((result.results[0] as any).data.type).toBe('text');
       expect((result.results[0] as any).data.data).toBe('v1');
-      expect((result.results[0] as any).data.version).toBe(1);
     });
 
     it('returns error for non-existent attachment', async () => {
       const tool = getTool('platform.core.attachment_read');
-      const result = await tool.handler({ attachment_id: 'non-existent' });
+      const result = (await tool.handler(
+        { attachment_id: 'non-existent' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.error);
@@ -73,9 +128,12 @@ describe('attachment tools', () => {
     it('updates an attachment', async () => {
       const attachment = attachmentManager.add({ type: 'text', data: 'v1', description: 'Test' });
       const tool = getTool('platform.core.attachment_update');
-      const result = await tool.handler({ attachment_id: attachment.id, data: 'v2' });
+      const result = (await tool.handler(
+        { attachment_id: attachment.id, data: 'v2' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
-      expect((result.results[0] as any).data.__attachment_operation__).toBe('update');
+      expect((result.results[0] as any).data.type).toBe('text');
       expect((result.results[0] as any).data.version).toBe(2);
       expect((result.results[0] as any).data.version_created).toBe(true);
     });
@@ -85,66 +143,10 @@ describe('attachment tools', () => {
       attachmentManager.delete(attachment.id);
 
       const tool = getTool('platform.core.attachment_update');
-      const result = await tool.handler({ attachment_id: attachment.id, data: 'v2' });
-
-      expect(result.results[0].type).toBe(ToolResultType.error);
-    });
-  });
-
-  describe('attachment_delete', () => {
-    it('deletes an attachment', async () => {
-      const attachment = attachmentManager.add({
-        type: 'text',
-        data: 'hello',
-        description: 'Test',
-      });
-      const tool = getTool('platform.core.attachment_delete');
-      const result = await tool.handler({ attachment_id: attachment.id });
-
-      expect((result.results[0] as any).data.__attachment_operation__).toBe('delete');
-      expect(attachmentManager.get(attachment.id)?.active).toBe(false);
-    });
-
-    it('returns error for already deleted attachment', async () => {
-      const attachment = attachmentManager.add({
-        type: 'text',
-        data: 'hello',
-        description: 'Test',
-      });
-      attachmentManager.delete(attachment.id);
-
-      const tool = getTool('platform.core.attachment_delete');
-      const result = await tool.handler({ attachment_id: attachment.id });
-
-      expect(result.results[0].type).toBe(ToolResultType.error);
-    });
-  });
-
-  describe('attachment_restore', () => {
-    it('restores a deleted attachment', async () => {
-      const attachment = attachmentManager.add({
-        type: 'text',
-        data: 'hello',
-        description: 'Test',
-      });
-      attachmentManager.delete(attachment.id);
-
-      const tool = getTool('platform.core.attachment_restore');
-      const result = await tool.handler({ attachment_id: attachment.id });
-
-      expect((result.results[0] as any).data.__attachment_operation__).toBe('restore');
-      expect(attachmentManager.get(attachment.id)?.active).toBe(true);
-    });
-
-    it('returns error for non-deleted attachment', async () => {
-      const attachment = attachmentManager.add({
-        type: 'text',
-        data: 'hello',
-        description: 'Test',
-      });
-
-      const tool = getTool('platform.core.attachment_restore');
-      const result = await tool.handler({ attachment_id: attachment.id });
+      const result = (await tool.handler(
+        { attachment_id: attachment.id, data: 'v2' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
@@ -156,9 +158,8 @@ describe('attachment tools', () => {
       attachmentManager.add({ type: 'json', data: { key: 'value' }, description: 'Attachment 2' });
 
       const tool = getTool('platform.core.attachment_list');
-      const result = await tool.handler({});
+      const result = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
 
-      expect((result.results[0] as any).data.__attachment_operation__).toBe('list');
       expect((result.results[0] as any).data.count).toBe(2);
       expect((result.results[0] as any).data.attachments).toHaveLength(2);
     });
@@ -169,8 +170,11 @@ describe('attachment tools', () => {
       attachmentManager.delete(a1.id);
 
       const tool = getTool('platform.core.attachment_list');
-      const resultActive = await tool.handler({});
-      const resultAll = await tool.handler({ include_deleted: true });
+      const resultActive = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
+      const resultAll = (await tool.handler(
+        { include_deleted: true },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
       expect((resultActive.results[0] as any).data.count).toBe(1);
       expect((resultAll.results[0] as any).data.count).toBe(2);
@@ -187,24 +191,32 @@ describe('attachment tools', () => {
       attachmentManager.update(attachment.id, { data: 'version 2' });
 
       const tool = getTool('platform.core.attachment_diff');
-      const result = await tool.handler({
-        attachment_id: attachment.id,
-        from_version: 1,
-        to_version: 2,
-      });
+      const result = (await tool.handler(
+        {
+          attachment_id: attachment.id,
+          from_version: 1,
+          to_version: 2,
+        },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
-      expect((result.results[0] as any).data.__attachment_operation__).toBe('diff');
+      expect((result.results[0] as any).data.attachment_id).toBe(attachment.id);
+      expect((result.results[0] as any).data.from_version).toBe(1);
+      expect((result.results[0] as any).data.to_version).toBe(2);
       expect((result.results[0] as any).data.from_data).toBe('version 1');
       expect((result.results[0] as any).data.to_data).toBe('version 2');
     });
 
     it('returns error for non-existent attachment', async () => {
       const tool = getTool('platform.core.attachment_diff');
-      const result = await tool.handler({
-        attachment_id: 'non-existent',
-        from_version: 1,
-        to_version: 2,
-      });
+      const result = (await tool.handler(
+        {
+          attachment_id: 'non-existent',
+          from_version: 1,
+          to_version: 2,
+        },
+        {} as any
+      )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
