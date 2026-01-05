@@ -86,6 +86,7 @@ export const useInitDataViewManager = () => {
       uiSettings: services.uiSettings,
       application: services.application,
       spaces: services.spaces,
+      storage: services.storage,
     });
 
     dispatch(addListener(dataViewsLoadingListener));
@@ -101,6 +102,7 @@ export const useInitDataViewManager = () => {
       createDataViewSelectedListener({
         scope,
         dataViews: services.dataViews,
+        storage: services.storage,
       })
     );
 
@@ -123,6 +125,7 @@ export const useInitDataViewManager = () => {
     services.dataViews,
     services.http,
     services.spaces,
+    services.storage,
     services.uiSettings,
   ]);
 
