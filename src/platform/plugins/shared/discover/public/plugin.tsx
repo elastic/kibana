@@ -432,7 +432,7 @@ export class DiscoverPlugin
         const mightHaveVariables =
           apiPublishesESQLVariables(container) &&
           savedSessionAttributes.controlGroupJson &&
-          Object.keys(savedSessionAttributes.controlGroupJson).length > 0;
+          savedSessionAttributes.controlGroupJson.length > 0;
 
         // pause fetching so that we don't try to build an ES|QL query without necessary variables
         const shouldPauseFetch = mightHaveVariables && apiPublishesEditablePauseFetch(container);
