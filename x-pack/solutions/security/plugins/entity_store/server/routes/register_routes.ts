@@ -9,9 +9,9 @@ import type { IRouter } from '@kbn/core/server';
 import { registerInstall } from './install';
 import type { EntityStoreDependencies } from '../domain/dependencies';
 
-export const registerRoutes = (
+export function registerRoutes(
   router: IRouter,
   { resourcesService, logger }: EntityStoreDependencies
-) => {
+) {
   registerInstall(router, resourcesService, logger);
-};
+}
