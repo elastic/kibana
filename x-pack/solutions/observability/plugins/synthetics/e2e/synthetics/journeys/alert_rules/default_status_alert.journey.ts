@@ -56,7 +56,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await syntheticsApp.navigateToOverview(true, 15);
   });
 
-  step('should edit default status alert', async () => {
+  step('should wait for and edit default status alert', async () => {
     // Wait for the default alert to be created asynchronously after monitor creation
     await page.getByTestId('syntheticsAlertsRulesButton').click();
 
