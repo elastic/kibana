@@ -10,7 +10,7 @@
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsMetadata, FieldMap } from './types';
 
-const EXCLUDED_TYPES = ['constant_keyword'];
+const EXCLUDED_TYPES = ['constant_keyword', 'nested', 'flattened'];
 
 // ECS fields that have reached Stage 2 in the RFC process
 // are included in the generated Yaml but are still considered
@@ -48,10 +48,22 @@ const EXPERIMENTAL_FIELDS = [
   'process.io.bytes',
 ];
 
+const EXCLUDED_PARENT_PATHS = Object.entries(EcsFlat)
+  .filter(([_, value]) => EXCLUDED_TYPES.includes(value.type))
+  .map(([key]) => key + '.');
+
+// Check if a field is a child of an excluded parent
+const isChildOfExcludedParent = (fieldKey: string): boolean => {
+  return EXCLUDED_PARENT_PATHS.some((parentPath) => fieldKey.startsWith(parentPath));
+};
+
 export const ecsFieldMap: FieldMap = Object.fromEntries(
   Object.entries(EcsFlat)
     .filter(
-      ([key, value]) => !EXCLUDED_TYPES.includes(value.type) && !EXPERIMENTAL_FIELDS.includes(key)
+      ([key, value]) =>
+        !EXCLUDED_TYPES.includes(value.type) &&
+        !EXPERIMENTAL_FIELDS.includes(key) &&
+        !isChildOfExcludedParent(key)
     )
     .map(([key, _]) => {
       const value: EcsMetadata = EcsFlat[key as keyof typeof EcsFlat];
