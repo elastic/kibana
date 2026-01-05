@@ -23,7 +23,7 @@ export const addControlsFromSavedSession = async (
 
   // Only add controls whose variableName does not exist in current esqlVariables
   for (const panel of Object.values(controlsState)) {
-    const variableName = (panel as ESQLControlState).variableName;
+    const variableName = panel.variableName;
     const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
     if (!variableExists) {
       await container.addNewPanel(
