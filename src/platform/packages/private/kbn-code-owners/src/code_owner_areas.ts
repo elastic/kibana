@@ -49,6 +49,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/platform-docs',
     'elastic/response-ops',
     'elastic/stack-monitoring',
+    'elastic/workflows-eng',
   ],
   search: ['elastic/search-design', 'elastic/search-kibana'],
   observability: [
@@ -57,9 +58,11 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-cloudnative-monitoring',
     'elastic/obs-docs',
     'elastic/obs-entities',
+    'elastic/obs-exploration-team',
     'elastic/obs-knowledge-team',
-    'elastic/obs-presentation-team',
     'elastic/obs-onboarding-team',
+    'elastic/obs-presentation-team',
+    'elastic/obs-ui-devex-team',
     'elastic/obs-ux-management-team',
     'elastic/observability-design',
     'elastic/observability-ui',
@@ -68,7 +71,10 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   ],
   security: [
     'elastic/contextual-security-apps',
+    'elastic/core-analysis',
     'elastic/integration-experience',
+    'elastic/kibana-cases',
+    'elastic/kibana-cloud-security-posture',
     'elastic/security-data-analytics',
     'elastic/security-defend-workflows',
     'elastic/security-design',
@@ -83,7 +89,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-threat-hunting',
     'elastic/security-threat-hunting-investigations',
   ],
-  workplaceai: ['elastic/search-kibana'],
+  workplaceai: ['elastic/search-kibana', 'elastic/workchat-eng'],
 };
 
 /**
