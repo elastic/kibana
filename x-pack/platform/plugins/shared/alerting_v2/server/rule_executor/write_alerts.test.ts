@@ -52,7 +52,7 @@ describe('writeEsqlAlerts', () => {
             ['host-b', 5],
           ],
         } as any,
-        taskRunKey: '2024-12-31T23:59:00.000Z',
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       },
     });
 

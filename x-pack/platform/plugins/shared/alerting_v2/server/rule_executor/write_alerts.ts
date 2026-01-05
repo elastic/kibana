@@ -64,13 +64,13 @@ export interface WriteEsqlAlertsOpts {
     /**
      * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
      */
-    taskRunKey: string;
+    scheduledTimestamp: string;
   };
 }
 
 export async function writeEsqlAlerts({
   services: { logger, esClient, dataStreamName },
-  input: { ruleId, spaceId, ruleAttributes, esqlResponse, taskRunKey },
+  input: { ruleId, spaceId, ruleAttributes, esqlResponse, scheduledTimestamp },
 }: WriteEsqlAlertsOpts) {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
@@ -81,12 +81,10 @@ export async function writeEsqlAlerts({
 
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
-  const executionUuid = sha256(`${ruleId}|${spaceId}|${taskRunKey}`);
+  const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}`);
 
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
-  // Timestamp when the rule was scheduled to run (stable for a given scheduled execution).
-  const scheduledTimestamp = taskRunKey;
   const operations: Array<Record<string, unknown>> = values.flatMap((valueRow, i) => {
     const row = valueRow;
     const rowDoc = rowToDocument(columns, row);

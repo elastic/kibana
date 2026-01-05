@@ -110,7 +110,7 @@ export function createRuleExecutorTaskRunner({
         });
 
         const scheduledAt = taskInstance.scheduledAt;
-        const taskRunKey =
+        const scheduledTimestamp =
           (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
           (taskInstance.startedAt instanceof Date
             ? taskInstance.startedAt.toISOString()
@@ -124,7 +124,7 @@ export function createRuleExecutorTaskRunner({
             spaceId: params.spaceId,
             ruleAttributes,
             esqlResponse,
-            taskRunKey,
+            scheduledTimestamp,
           },
         });
 
