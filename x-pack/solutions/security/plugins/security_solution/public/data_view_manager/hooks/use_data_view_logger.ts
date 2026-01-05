@@ -6,7 +6,7 @@
  */
 import { useKibana } from '../../common/lib/kibana';
 
-export const DATA_VIEW_LOGGER_NAME = 'dataViewManager';
+export const DATA_VIEW_LOGGER_NAME = '[SecuritySolution][DataViewManager]';
 
 export const useDataViewManagerLogger = (...childContextPaths: string[]) => {
   const services = useKibana().services;

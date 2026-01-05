@@ -69,7 +69,7 @@ export const useInitDataViewManager = () => {
           isOutdated: !!signalIndexMappingOutdated,
         })
       );
-      logger.debug('signal index set');
+      logger.debug(`signal index set: ${signalIndexName}`);
     }
   }, [dispatch, loadingSignalIndex, logger, signalIndexMappingOutdated, signalIndexName]);
 
@@ -160,7 +160,9 @@ export const useInitDataViewManager = () => {
 
   return useCallback(
     (initialSelection: SelectDataViewAsyncPayload[]) => {
-      logger.debug('Initializing Data View Manager with initial selection');
+      logger.debug(
+        `Initializing Data View Manager with initial selection: ${JSON.stringify(initialSelection)}`
+      );
       dispatch(sharedDataViewManagerSlice.actions.init(initialSelection));
     },
     [dispatch, logger]
