@@ -17,6 +17,7 @@ import type { SideNavLogo } from '../../../types';
 import { MenuItem } from '../menu_item';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { useTooltip } from '../../hooks/use_tooltip';
+import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
   id: string;
@@ -34,7 +35,7 @@ export const Logo = ({
   ...props
 }: LogoProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
-  const { euiTheme, highContrastMode } = euiThemeContext;
+  const { euiTheme } = euiThemeContext;
   const { tooltipRef, handleMouseOut } = useTooltip();
 
   /**
@@ -53,21 +54,7 @@ export const Logo = ({
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
     padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
 
-    ${highContrastMode
-      ? `border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};`
-      : `
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: ${euiTheme.size.xl};
-      margin: 0 auto;
-      height: ${euiTheme.border.width.thin};
-      background-color: ${euiTheme.colors.borderBaseSubdued};
-    }
-    `}
+    ${getHighContrastSeparator(euiThemeContext)}
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};

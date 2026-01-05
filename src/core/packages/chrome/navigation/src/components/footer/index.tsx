@@ -18,7 +18,6 @@ import {
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
   type UseEuiTheme,
-  type EuiThemeHighContrastMode,
 } from '@elastic/eui';
 
 import { FooterItem } from './item';
@@ -26,58 +25,30 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
 
-const getFooterWrapperStyles = (
-  theme: UseEuiTheme['euiTheme'],
-  isCollapsed: boolean,
-  highContrastMode: EuiThemeHighContrastMode
-) => ({
-  root: css`
-    align-items: center;
-    display: flex;
-    position: relative;
-    flex-direction: column;
-    gap: ${theme.size.xs};
-    justify-content: center;
-    padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
+const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boolean) => {
+  const { euiTheme: theme } = euiThemeContext;
+  return {
+    root: css`
+      align-items: center;
+      display: flex;
+      position: relative;
+      flex-direction: column;
+      gap: ${theme.size.xs};
+      justify-content: center;
+      padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
 
-    ${highContrastMode
-      ? `border-top: ${theme.border.width.thin} solid ${theme.border.color};`
-      : `
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      width: ${theme.size.xl};
-      margin: 0 auto;
-      height: ${theme.border.width.thin};
-      background-color: ${theme.colors.borderBaseSubdued};
-    }
-    `}
-  `,
-  collapseDivider: css`
-    position: relative;
-    background-color: transparent;
+      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
+    `,
+    collapseDivider: css`
+      position: relative;
+      background-color: transparent;
 
-    ${highContrastMode
-      ? `border-top: ${theme.border.width.thin} solid ${theme.border.color};`
-      : `
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      width: ${theme.size.xl};
-      margin: 0 auto;
-      height: ${theme.border.width.thin};
-      background-color: ${theme.colors.borderBaseSubdued};
-    }
-    `}
-  `,
-});
+      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
+    `,
+  };
+};
 
 export interface FooterIds {
   footerNavigationInstructionsId: string;
@@ -99,7 +70,6 @@ interface FooterComponent
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
   ({ children, isCollapsed, collapseButton }, ref) => {
     const euiThemeContext = useEuiTheme();
-    const { euiTheme, highContrastMode } = euiThemeContext;
     const isSmall = useIsWithinBreakpoints(['xs', 's']);
     const footerNavigationInstructionsId = useGeneratedHtmlId({
       prefix: 'footer-navigation-instructions',
@@ -119,8 +89,8 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
     };
 
     const wrapperStyles = useMemo(
-      () => getFooterWrapperStyles(euiTheme, isCollapsed, highContrastMode),
-      [euiTheme, isCollapsed, highContrastMode]
+      () => getFooterWrapperStyles(euiThemeContext, isCollapsed),
+      [euiThemeContext, isCollapsed]
     );
 
     const renderChildren = () => {

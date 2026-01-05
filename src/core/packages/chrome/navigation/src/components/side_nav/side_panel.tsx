@@ -15,7 +15,6 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   type UseEuiTheme,
-  type EuiThemeHighContrastMode,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -28,11 +27,9 @@ import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { getHighContrastBorder } from '../../hooks/use_high_contrast_mode_styles';
 
-const getSidePanelWrapperStyles = (
-  euiThemeContext: UseEuiTheme,
-  highContrastMode: EuiThemeHighContrastMode
-) => css`
+const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   box-sizing: border-box;
   position: relative;
   display: flex;
@@ -41,11 +38,7 @@ const getSidePanelWrapperStyles = (
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
   border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-  border: ${highContrastMode
-    ? `${euiThemeContext.euiTheme.border.width.thin} solid ${euiThemeContext.euiTheme.border.color}`
-    : euiThemeContext.colorMode === 'DARK'
-    ? euiThemeContext.euiTheme.border.thin
-    : 'none'};
+  border: ${getHighContrastBorder(euiThemeContext)};
   ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
 `;
 
@@ -67,11 +60,10 @@ export interface SidePanelProps {
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
-  const { highContrastMode } = euiThemeContext;
   const scrollStyles = useScroll();
   const wrapperStyles = useMemo(
-    () => getSidePanelWrapperStyles(euiThemeContext, highContrastMode),
-    [euiThemeContext, highContrastMode]
+    () => getSidePanelWrapperStyles(euiThemeContext),
+    [euiThemeContext]
   );
   const secondaryNavigationInstructionsId = useGeneratedHtmlId({
     prefix: 'secondary-navigation-instructions',

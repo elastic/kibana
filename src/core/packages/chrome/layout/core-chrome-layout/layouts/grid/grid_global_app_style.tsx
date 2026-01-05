@@ -15,10 +15,10 @@ import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
 } from '@kbn/core-chrome-layout-constants';
+import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
 const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
-  const { highContrastMode } = euiThemeContext;
   return css`
     :root {
       // TODO: these variables are legacy and we keep them for backward compatibility
@@ -85,11 +85,7 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
     .kbnChromeLayoutApplication {
       background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-      border: ${highContrastMode
-        ? `${euiThemeContext.euiTheme.border.width.thin} solid ${euiThemeContext.euiTheme.border.color}`
-        : euiThemeContext.colorMode === 'DARK'
-        ? euiThemeContext.euiTheme.border.thin
-        : 'none'};
+      border: ${getHighContrastBorder(euiThemeContext)};
       ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
     }
   `;
@@ -97,7 +93,7 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
 
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
-const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
+const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
   // adjust position of the classic/project side-navigation
   .kbnBody .euiFlyout.euiCollapsibleNav {
     ${logicalCSS('top', layoutVar('application.top', '0px'))};
