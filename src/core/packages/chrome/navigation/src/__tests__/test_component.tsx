@@ -22,13 +22,13 @@ interface TestComponentProps {
 }
 
 export const TestComponent = ({
-  isCollapsed = false,
+  isCollapsed: isCollapsedProp = false,
   initialActiveItemId,
   items,
   logo,
 }: TestComponentProps) => {
   const [activeItemId, setActiveItemId] = useState(initialActiveItemId);
-  const [collapsed, setCollapsed] = useState(isCollapsed);
+  const [isCollapsed, setIsCollapsed] = useState(isCollapsedProp);
 
   const handleItemClick = (item: SideNavLogo | MenuItem | SecondaryMenuItem) => {
     setActiveItemId(item.id);
@@ -40,11 +40,11 @@ export const TestComponent = ({
     <I18nProvider>
       <Navigation
         activeItemId={activeItemId}
-        isCollapsed={collapsed}
+        isCollapsed={isCollapsed}
         items={items}
         logo={logo}
         onItemClick={handleItemClick}
-        onToggleCollapsed={setCollapsed}
+        onToggleCollapsed={setIsCollapsed}
         setWidth={() => {}}
       />
     </I18nProvider>
